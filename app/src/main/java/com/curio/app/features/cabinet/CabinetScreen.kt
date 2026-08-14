@@ -1,13 +1,16 @@
 package com.curio.app.features.cabinet
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -489,7 +492,18 @@ fun CabinetScreen(navController: NavController) {
         // searching OR when the Category pill is open; v42 — the Category
         // pill moved INSIDE the hero, so the bar sits directly under the
         // banner again.
-        if (chipsVisible) {
+        // v52b — the category/search chip bar animates in/out (slides down
+        // with a fade) instead of popping instantly when the Category pill
+        // opens or search starts.
+        AnimatedVisibility(
+            visible = chipsVisible,
+            enter = expandVertically(
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(220)),
+            exit = shrinkVertically(
+                animationSpec = tween(260, easing = FastOutSlowInEasing)
+            ) + fadeOut(animationSpec = tween(160))
+        ) {
             CabinetStickyChipBar(
                 gridState = gridState,
                 barTop = heroTotal,

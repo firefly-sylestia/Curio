@@ -198,20 +198,26 @@ fun CurioEntryCard(
                 if (progressTarget != null && progressTarget > 0) {
                     val current = TopicProgressStore.get(entry.topic.id)
                     val fraction = (current.toFloat() / progressTarget).coerceIn(0f, 1f)
-                    if (current > 0) {
-                        val fillInk = cat.onAccent()
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .height(4.dp)
-                                .background(fillInk.copy(alpha = 0.22f))
-                        ) {
+                    // v52b — the ACCENT fills the line, not `onAccent()`:
+                    // onAccent resolves near-white on light heroes, so the
+                    // old line was white-on-cream (invisible). The faint
+                    // track always shows while the target exists, so the
+                    // progress line is visible even before any pages are
+                    // read; the accent fill grows with progress.
+                    val fillColor = cat.themedAccent()
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .background(fillColor.copy(alpha = 0.18f))
+                    ) {
+                        if (current > 0) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth(fraction)
                                     .fillMaxHeight()
-                                    .background(fillInk)
+                                    .background(fillColor)
                             )
                         }
                     }

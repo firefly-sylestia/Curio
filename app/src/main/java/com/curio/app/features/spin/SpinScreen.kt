@@ -2032,7 +2032,12 @@ private fun CompactChip(
     // in AMOLED) so the chips carry a color of their own instead of plain
     // cream, and the pills are BIGGER (roomier padding + 15sp labels) to
     // fill the sheet instead of leaving a dead band above Apply.
-    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
+    // v52b — LIGHT mode inactive chips are now visibly DARKER (the 0.82
+    // near-cream lift read same-y against the pale wash; 0.5 keeps the
+    // rose tint but lands a solid mid-tone that clearly separates from
+    // the sheet), each chip carries a small glyph, and the pills grew
+    // again (16sp label + 16/11 padding).
+    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.5f)
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else inactiveFill,
@@ -2045,21 +2050,101 @@ private fun CompactChip(
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
     ) {
+        Row(
+            modifier = Modifier
+                .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
+                .padding(horizontal = 16.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CurioIcon(
+                name = filterChipIcon(label),
+                contentDescription = null,
+                tint = if (selected) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 17.dp
+            )
+            Spacer(Modifier.width(7.dp))
             Text(
                 text = label,
                 // v44 — bigger: 15sp label + roomier padding so the pills
                 // stand taller and fill the sheet's width.
+                // v52b — bigger still: 16sp.
                 style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 15.sp,
+                    fontSize = 16.sp,
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                 ),
                 color = if (selected) ink else MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
+                overflow = TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+/**
+ * v52b — a glyph for each filter chip, matched by keyword so the chip
+ * carries a hint of what it is (music, film, book, era, place…). Anything
+ * unmapped gets the sparkle logomark. All glyphs are verified members of
+ * the bundled Material Symbols subset.
+ */
+private fun filterChipIcon(label: String): String {
+    val s = label.lowercase()
+    return when {
+        s.contains("horror") || s.contains("thriller") || s.contains("mystery") ||
+            s.contains("crime") || s.contains("detective") || s.contains("suspense") ||
+            s.contains("true crime") -> CurioIcons.MoodCurious
+        s.contains("documentary") || s.contains("biograph") || s.contains("history") ||
+            s.contains("classic") || s.contains("vintage") || s.contains("golden") ||
+            s.contains("medieval") || s.contains("ancient") || s.contains("prehistoric") ||
+            s.contains("century") || s.contains("decade") || s.contains("era") -> CurioIcons.History
+        s.contains("comedy") || s.contains("funny") || s.contains("humor") ||
+            s.contains("feel-good") || s.contains("whimsical") || s.contains("satire") -> CurioIcons.MoodHappy
+        s.contains("music") || s.contains("song") || s.contains("album") || s.contains("singer") ||
+            s.contains("band") || s.contains("jazz") || s.contains("rock") || s.contains("pop") ||
+            s.contains("hip") || s.contains("rap") || s.contains("country") || s.contains("blues") ||
+            s.contains("reggae") || s.contains("electronic") || s.contains("soundtrack") ||
+            s.contains("instrumental") || s.contains("opera") || s.contains("soundtrack") -> CurioIcons.MusicNote
+        s.contains("book") || s.contains("novel") || s.contains("fiction") || s.contains("fantasy") ||
+            s.contains("sci-fi") || s.contains("scifi") || s.contains("manga") || s.contains("comic") ||
+            s.contains("graphic novel") || s.contains("poetry") || s.contains("literature") ||
+            s.contains("essay") || s.contains("short story") -> CurioIcons.Books
+        s.contains("film") || s.contains("movie") || s.contains("cinema") || s.contains("drama") ||
+            s.contains("director") || s.contains("blockbuster") || s.contains("indie") ||
+            s.contains("silent") -> CurioIcons.Movie
+        s.contains("art") || s.contains("paint") || s.contains("sculpt") || s.contains("design") ||
+            s.contains("museum") || s.contains("abstract") || s.contains("impression") ||
+            s.contains("renaissance") -> CurioIcons.VisualArt
+        s.contains("sport") || s.contains("game") || s.contains("soccer") || s.contains("football") ||
+            s.contains("basketball") || s.contains("tennis") || s.contains("cricket") ||
+            s.contains("baseball") || s.contains("olympic") || s.contains("racing") ||
+            s.contains("chess") || s.contains("board game") || s.contains("video game") ||
+            s.contains("esports") -> CurioIcons.EmojiEvents
+        s.contains("science") || s.contains("space") || s.contains("tech") || s.contains("robot") ||
+            s.contains("physics") || s.contains("chemist") || s.contains("biology") ||
+            s.contains("astronomy") || s.contains("math") || s.contains("psychology") ||
+            s.contains("medicine") || s.contains("geology") || s.contains("ocean") ||
+            s.contains("animal") || s.contains("plant") || s.contains("nature") -> CurioIcons.Science
+        s.contains("food") || s.contains("cook") || s.contains("recipe") || s.contains("cuisine") ||
+            s.contains("baking") || s.contains("dessert") || s.contains("chef") -> CurioIcons.LocalCafe
+        s.contains("american") || s.contains("british") || s.contains("french") || s.contains("japanese") ||
+            s.contains("korean") || s.contains("chinese") || s.contains("indian") || s.contains("italian") ||
+            s.contains("german") || s.contains("russian") || s.contains("spanish") || s.contains("europe") ||
+            s.contains("asia") || s.contains("africa") || s.contains("latin") || s.contains("middle east") ||
+            s.contains("scandinav") || s.contains("australia") || s.contains("canada") -> CurioIcons.TravelExplore
+        s.contains("war") || s.contains("military") || s.contains("battle") || s.contains("revolution") ->
+            CurioIcons.Flag
+        s.contains("animation") || s.contains("anime") || s.contains("cartoon") -> CurioIcons.AutoAwesome
+        s.contains("action") || s.contains("adventure") || s.contains("western") -> CurioIcons.LocalFire
+        s.contains("romance") || s.contains("love") -> CurioIcons.Star
+        s.contains("pet") || s.contains("cat") || s.contains("dog") || s.contains("horse") -> CurioIcons.Pets
+        s.contains("podcast") || s.contains("radio") || s.contains("talk") || s.contains("interview") ->
+            CurioIcons.Mic
+        s.contains("1920") || s.contains("1930") || s.contains("1940") || s.contains("1950") ||
+            s.contains("1960") || s.contains("1970") || s.contains("1980") || s.contains("1990") ||
+            s.contains("2000") || s.contains("2010") || s.contains("2020") -> CurioIcons.CalendarToday
+        else -> CurioIcons.AutoAwesome
+    }
 }
 
 /**
@@ -2084,7 +2169,9 @@ private fun FilterGroupPill(
     // both states carry a 3dp elevation.
     // v44 — same COLOR-TINTED glass as the chips ([curioPillTintLift]) and
     // a matching size bump so the group pills and chips read as one family.
-    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
+    // v52b — same darker light-mode closed fill as the chips (0.82 → 0.5)
+    // so the group pills and chips read as one family off the pale sheet.
+    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.5f)
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),

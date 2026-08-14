@@ -4,7 +4,12 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 /**
  * v19 — the search engines Explore can open in the browser. The "Explore
@@ -99,6 +104,51 @@ fun buildMusicServiceSearchUrl(
         // link: it hands off into the installed app or opens the web player.
         MusicService.SPOTIFY -> "https://open.spotify.com/search/$q"
     }
+}
+
+/**
+ * v52b — resolves the topic to a REAL Apple Music catalog item via the
+ * public iTunes Search API and returns its native deep link
+ * (`music://music.apple.com/{cc}/album|song|artist/{id}`). The Android
+ * Apple Music app only handles ITEM pages natively — search links
+ * (`music.apple.com/search`) render in an in-app browser with an "Open in
+ * browser" banner — so a search URL can never land on the native result.
+ * Returns null when nothing is found or the network fails; the caller
+ * falls back to [buildMusicServiceSearchUrl]'s search link.
+ */
+suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(Dispatchers.IO) {
+    val entity = when {
+        topic.subtype.equals("Album", ignoreCase = true) -> "album"
+        topic.subtype.equals("Artist", ignoreCase = true) -> "musicArtist"
+        else -> "song"
+    }
+    val storefront = Locale.getDefault().country
+        .takeIf { it.length == 2 }
+        ?.lowercase(Locale.ROOT)
+        ?: "us"
+    runCatching {
+        val query = Uri.encode(buildExploreQuery(topic))
+        val conn = URL("https://itunes.apple.com/search?term=$query&media=music&entity=$entity&limit=1")
+            .openConnection() as HttpURLConnection
+        conn.connectTimeout = 8000
+        conn.readTimeout = 8000
+        try {
+            if (conn.responseCode != HttpURLConnection.HTTP_OK) return@runCatching null
+            val raw = conn.inputStream.bufferedReader().use { it.readText() }
+            val first = JSONObject(raw).optJSONArray("results")?.optJSONObject(0)
+                ?: return@runCatching null
+            val id = when (entity) {
+                "album" -> first.optLong("collectionId", -1L)
+                "song" -> first.optLong("trackId", -1L)
+                else -> first.optLong("artistId", -1L)
+            }
+            if (id <= 0L) return@runCatching null
+            val kind = when (entity) { "album" -> "album"; "song" -> "song"; else -> "artist" }
+            "music://music.apple.com/$storefront/$kind/$id"
+        } finally {
+            conn.disconnect()
+        }
+    }.getOrNull()
 }
 
 /**

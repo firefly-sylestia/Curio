@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CaptureEntity::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -79,6 +79,21 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v6 → v7 (v52b): per-topic progress metadata. Adds the nullable
+         * `pageCount` / `episodeCount` columns (NULL = no progress tracking)
+         * so saved Books/Anime entries can reconstruct their progress target
+         * even before the topic catalog cache is loaded — the Cabinet thin
+         * progress line and the detail progress pill read them. The entity's
+         * Kotlin defaults match (null); existing rows read as no-progress.
+         */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE captures ADD COLUMN pageCount INTEGER")
+                db.execSQL("ALTER TABLE captures ADD COLUMN episodeCount INTEGER")
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -93,7 +108,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

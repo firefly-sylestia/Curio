@@ -54,6 +54,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -77,6 +78,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -105,6 +107,7 @@ import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
 import com.curio.app.data.isMusicTopic
 import com.curio.app.data.openSearchUrl
+import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -129,6 +132,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -233,6 +237,8 @@ fun TopicRevealScreen(
     // category) get more weight, disliked get less — never fully blocked.
     // Reads the REACTIVE sentiment state so the buttons toggle instantly.
     val sentiment = resolved?.let { AppPreferences.topicSentiment(cat.id, it.id) }
+    // v52b — async Apple Music item lookup (the reveal's Watch-in tap).
+    val revealScope = rememberCoroutineScope()
 
     // v8.5 — Category passport: opening a reveal counts as a "peek" for the
     // lane's stamp and refreshes its last-explored date (spec §6.1). Fires
@@ -819,7 +825,9 @@ fun TopicRevealScreen(
                     .height(RevealBottomBarHeight + navInset)
                     // v49 — nudged up (24 → 14dp inset) so the like/dislike
                     // row below has room INSIDE the same strip height.
-                    .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = navInset + 8.dp),
+                    // v52b — raised further (14 → 10dp) so the tag chips
+                    // clear the like/dislike row with no overlap.
+                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = navInset + 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.Top
             ) {
@@ -1130,11 +1138,26 @@ fun TopicRevealScreen(
                             }
                             // v27s — music topics open the chosen music
                             // service; everything else searches YouTube.
-                            startExploreSession(
-                                topic,
-                                if (musicTopic) buildMusicServiceSearchUrl(topic, watchService)
-                                else buildYouTubeSearchUrl(topic)
-                            )
+                            // v52b — Apple Music only opens ITEM pages
+                            // natively (search links show an in-app browser
+                            // banner), so resolve the topic to a real
+                            // catalog item first and fall back to the search
+                            // link when the lookup fails.
+                            if (musicTopic && watchService == MusicService.APPLE_MUSIC) {
+                                revealScope.launch {
+                                    startExploreSession(
+                                        topic,
+                                        resolveAppleMusicItemUrl(topic)
+                                            ?: buildMusicServiceSearchUrl(topic, watchService)
+                                    )
+                                }
+                            } else {
+                                startExploreSession(
+                                    topic,
+                                    if (musicTopic) buildMusicServiceSearchUrl(topic, watchService)
+                                    else buildYouTubeSearchUrl(topic)
+                                )
+                            }
                         },
                         colors = curioDialogActionButtonColors(containerColor = pillFill),
                         shape = RoundedCornerShape(50),
@@ -2117,25 +2140,28 @@ private fun SentimentButton(
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = if (active) accent else MaterialTheme.colorScheme.surfaceVariant,
+        // v52b — theme-aware inactive fill: the color-tinted glass
+        // (rose-kissed in light, white in dark, grey glass on AMOLED)
+        // instead of the generic surfaceVariant.
+        color = if (active) accent else curioPillTintLift(),
         // v27q — flat 2dp: selection reads through the solid accent fill.
         shadowElevation = 2.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             CurioIcon(
                 name = icon,
                 contentDescription = label,
-                tint = if (active) ink else MaterialTheme.colorScheme.onSurface,
-                size = 16.dp
+                tint = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 15.dp
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (active) ink else MaterialTheme.colorScheme.onSurface
+                color = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

@@ -44,6 +44,14 @@ data class CaptureEntity(
     // v6 — the session's shared note (TEXT, nullable — null = no note). Room
     // migration v5→v6 adds the column with no default; existing rows read null.
     val sessionNote: String? = null,
+    // v7 — per-topic progress metadata: the book's page count / series'
+    // episode count at save time (NULL for topics without progress). Room
+    // migration v6→v7 adds both columns (nullable, no default) so existing
+    // rows read as no-progress; the reconstructed topic uses them when the
+    // catalog cache isn't loaded, so saved Books/Anime entries keep their
+    // progress line + pill everywhere.
+    val pageCount: Int? = null,
+    val episodeCount: Int? = null,
     // v6 — session screenshots as a Gson JSON array string ("[\"a\",\"b\"]").
     // Room migration v5→v6 adds the column with DEFAULT '[]' so existing rows
     // read as no screenshots; backup restore normalizes defensively.
@@ -154,7 +162,9 @@ fun CurioEntry.toEntity(): CaptureEntity = CaptureEntity(
     isLegacy = isLegacy,
     sessionTimeMillis = sessionTimeMillis,
     sessionNote = sessionNote,
-    sessionScreenshotsJson = Gson().toJson(sessionScreenshots)
+    sessionScreenshotsJson = Gson().toJson(sessionScreenshots),
+    pageCount = topic.pageCount,
+    episodeCount = topic.episodeCount
 )
 
 /**
@@ -205,7 +215,12 @@ fun CaptureEntity.toEntry(): CurioEntry {
             instruction = "Revisit this saved topic: $topicName"
         ),
         tags = emptyList(),
-        tier = 1
+        tier = 1,
+        // v7 — restore the progress metadata saved with the capture so the
+        // entry's topic carries pageCount/episodeCount even before the
+        // catalog cache is loaded (the progress line + pill depend on it).
+        pageCount = pageCount,
+        episodeCount = episodeCount
     )
     
     val captureData = try {

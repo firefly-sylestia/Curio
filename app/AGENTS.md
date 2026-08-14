@@ -351,6 +351,41 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v53 — Apple Music resolves to a real catalog item + saved progress restored + filter chips/icons + chip-bar animations.**
+  (1) **Apple Music "Watch in" resolves the topic to an actual catalog
+  item** (`resolveAppleMusicItemUrl` in ExploreSearch.kt): the reveal's
+  Watch-in for APPLE_MUSIC now calls the public iTunes Search API
+  (entity = album / song / musicArtist by subtype) off the main thread
+  and starts the session with the item's native deep link
+  (`music://music.apple.com/{cc}/album|song|artist/{id}`) — the Android
+  app only handles ITEM pages natively, so search links (music://…/search)
+  still showed the in-app "Open in browser" banner. Falls back to the
+  search link when the lookup fails (offline / no result); plain
+  HttpURLConnection like UpdateChecker, 8s timeouts, org.json parse.
+  (2) **Saved progress restored** — the real bug behind "progress isn't
+  showing in cabinet/detail": `CaptureEntity.toEntry()`'s fallback topic
+  (used until the catalog lane cache loads) dropped `pageCount`/
+  `episodeCount`, so `progressTarget` was null on saved entries. New
+  nullable `pageCount`/`episodeCount` columns (Room v6→v7
+  `MIGRATION_6_7`), persisted in `toEntity()`, restored in the fallback
+  (backup export already round-trips them via `gson.toJson(entity)`).
+  Also: the Cabinet card line was drawn with `cat.onAccent()` — white on
+  light heroes, invisible — now `themedAccent()` fill with a faint track
+  that always shows while the target exists. Detail pill stays anchored
+  BottomEnd (12dp) on the hero. (3) **Reveal strip**: tag chips raised
+  14 → 10dp top inset so they clear the Like/Dislike row; SentimentButton
+  slimmed (10/5 padding, 15dp icon) and its inactive fill now uses
+  `curioPillTintLift()` (theme-aware) instead of `surfaceVariant`.
+  (4) **Chip-bar animations**: the Cabinet + Topic Browser sticky
+  category/search chip bars wrapped in `AnimatedVisibility`
+  (expandVertically + fadeIn / shrinkVertically + fadeOut) — no pop.
+  (5) **Filter sheet chips**: `CompactChip` gained a per-chip keyword-
+  mapped icon (`filterChipIcon`, verified glyphs, AutoAwesome default),
+  bigger (16sp label, 16/11 padding), and light-mode inactive fill
+  darkened 0.82 → 0.5 lerp toward `curioPillTintLift` (same for the
+  closed `FilterGroupPill`) so chips read as solid mid-tones off the
+  pale sheet. Sort-pill dimensions unchanged — user asked for them and
+  will dictate the decrease.
 - **v52 — Apple Music deep link opens native search + backup-restore compile fix.**
   (1) **`buildMusicServiceSearchUrl` for Apple Music now uses the native
   `music://` scheme** (`music://music.apple.com/{cc}/search?term=…`)

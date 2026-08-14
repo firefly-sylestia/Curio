@@ -1,6 +1,77 @@
 # Prompt.md — Request log
 
-## Current request — Apple Music deep link opens native search + backup-restore CI fix (v52)
+## Current request — Apple Music item resolution + saved-progress fix + filter chips + chip-bar animation (v53)
+
+### What was asked
+1. "The Apple Music link still opens up the browser after opening Apple
+   Music" (the v52 music:// search link still hit the in-app browser
+   banner).
+2. Topic Reveal bottom strip: tags overlap the Like/Dislike row — move
+the tags a little above; give Like/Dislike a theme-aware color.
+3. "The progress isn't showing in cabinet (thin line) neither in detail
+view" — and place the detail progress at the right bottom corner.
+4. Sort date/title chip pill shape still wrong — report its dimensions
+(user will say how much to decrease).
+5. Animate the categories row appearing (Cabinet + Topic Browser).
+6. Filter chips: give each an icon, make them even bigger, darker chip
+color in light mode.
+
+### What was done
+1. **Apple Music — resolve to a real item.** Root cause: the Android
+Apple Music app only handles ITEM pages natively; BOTH https:// and
+music:// search URLs render the web search page in an in-app browser
+with the "Open in browser" banner. New `resolveAppleMusicItemUrl(topic)`
+(ExploreSearch.kt): public iTunes Search API (entity album / song /
+musicArtist by subtype, media=music, limit=1, 8s timeouts, org.json,
+plain HttpURLConnection like UpdateChecker), returns
+`music://music.apple.com/{cc}/album|song|artist/{id}`; the reveal's
+Watch-in button for APPLE_MUSIC now launches it in a coroutine
+(`revealScope`) and starts the session with the resolved URL, falling
+back to the music:// search link on failure. INTERNET permission +
+coroutines already present.
+2. **Reveal strip**: tag chips top inset 14 → 10dp; SentimentButton
+slimmed (12/6 → 10/5 padding, 16 → 15dp icon, onSurfaceVariant ink) and
+inactive fill switched from `surfaceVariant` to `curioPillTintLift()`
+(theme-aware tinted glass).
+3. **Progress (root cause found):** `CaptureEntity.toEntry()`'s fallback
+topic (built until the catalog lane cache loads) omitted
+`pageCount`/`episodeCount` → `progressTarget` null → no progress UI on
+saved entries. Added nullable `pageCount`/`episodeCount` to the entity,
+persisted in `toEntity()`, restored in the fallback, Room v6→v7
+(`MIGRATION_6_7`); backup export already round-trips them (gson.toJson
+of the entity). Cabinet line was ALSO white-on-light
+(`cat.onAccent()`) — now `themedAccent()` fill + always-visible faint
+track. Detail pill stays anchored at the hero BottomEnd (12dp).
+4. **Sort pill dims REPORTED to the user** (no code change — awaiting
+their decrease number): 50dp full capsule, 42dp min height, label-zone
+padding 14/10/10/10, labelLarge Bold 14sp, 18dp chevron, 22dp direction
+arrow zone (8dp horizontal padding, min 40dp), 3dp elevation.
+5. **Chip-bar animation**: Cabinet + Topic Browser sticky chip bars now
+`AnimatedVisibility` (expandVertically + fadeIn / shrinkVertically +
+fadeOut, 300/220/260/160ms, FastOutSlowIn) instead of popping. Both
+bars are BoxScope extensions — they resolve through the outer Box
+receiver inside the AnimatedVisibility lambda (legal).
+6. **Filter chips**: `CompactChip` gained a keyword-mapped per-chip icon
+(`filterChipIcon`: horror→psychology, history/era→history, music→
+music_note, books→menu_book, film→movie, art→palette, sports→trophy,
+science→science, food→local_cafe, origin→globe, war→flag, decade→
+calendar, pets→pets, podcast→mic, default→auto_awesome — all verified
+in the bundled subset); chips grew (16sp label, 16/11 padding, 17dp
+icon); light-mode inactive fill darkened 0.82 → 0.5 lerp toward
+`curioPillTintLift` (also on closed FilterGroupPill) so chips read as
+solid mid-tones off the pale sheet.
+
+### Validation
+Brace/paren balance on all 8 edited files (reveal keeps its pre-existing
++1 comment imbalance), braces balanced, `git diff --check` clean;
+imports verified (resolveAppleMusicItemUrl + curioPillTintLift in the
+reveal, expandVertically/shrinkVertically + AnimatedVisibility in the
+screens, HttpURLConnection/URL/JSONObject/Dispatchers/withContext in
+ExploreSearch); INTERNET permission present; entity + migration + backup
+round-trip consistent. No Gradle locally (env rule) — CI on push is the
+gate.
+
+## Prior — Apple Music deep link opens native search + backup-restore CI fix (v52)
 
 ### What was asked
 1. CI compile failure on the v48 streaming-restore push: `Cannot infer
