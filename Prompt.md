@@ -1,39 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — progress UI: reveal dialog fix + cabinet visual-only line + detail corner (v46)
+## Current request — dark mode: deep high-contrast background tints + blackish picker idle cards (v47)
 
 ### What was asked
-1. Topic Reveal: opening the progress editor shows a bugged dialog — a
-   colored thin line of progress, no text. Only from the reveal screen.
-2. Detail page: place the progress bar at the bottom corner.
-3. Cabinet: don't show the tappable progress pill to edit — just the
-   visual. Remove the weird rising-fill progress; add a thin progress
-   line between the topic card's hero and the title box below, without
-   making the card's shape bigger.
+1. In dark mode the mixed-colors background tint and some normal color
+   background tints are too whitish with no contrast — fix it, give it
+   a sleek look with high dark-contrast background tint.
+2. In dark mode the category picker's inactive-state cards should be
+   blackish; keep the active state as it is.
 
 ### What was done
-1. **Reveal dialog blank bug** (`CurioProgressPill` + reveal call): the
-   reveal passed `ink = cat.accent`; the editor dialog used that same
-   color for its content ON the accent container — labels were
-   accent-on-accent (invisible), leaving only the alpha-blended arc
-   track (the "thin line"). `CurioProgressPill` gained `dialogContentColor`
-   (defaults to `ink` — detail/Cabinet callers unchanged); the reveal
-   passes `cat.onAccent()` so the dialog's title, %, steppers and slider
-   all read on the accent container.
-2. **Detail corner**: the progress pill was already at the hero's
-   bottom-right; anchored it tighter (12dp) so it reads as sitting on
-   the corner.
-3. **Cabinet card** (`CurioEntryCard`): removed the rising
-   `fillMaxHeight(fraction)` fill + the tappable `CurioProgressPill`.
-   Progress is now a VISUAL-ONLY thin 4dp on-accent line with a faint
-   track along the hero's bottom edge — between the hero and the title
-   box below — same TopicProgressStore read, no editor, no shape change.
-   Dropped the now-unused `lerp` import.
+1. **Dark wash retuned** (`CategoryInk.kt`): `DEFAULT_DARK_WASH` was
+   `(0.5, 0.15)` — every un-tuned family's mid-tone lerped 50% toward
+   its LIGHT twin, so dark pages washed out pale over midnight. Now
+   `(0.16, 0.22)`: the mid-tone hugs the deep accent with a slightly
+   stronger blend. The two families that previously fell to that
+   default — **Music** (indigo) and **Visual Art** (teal) — got
+   `DARK_WASH_TUNING` entries (deep indigo `0xFF312E81` / deep
+   teal-forest `0xFF134E4A`), so every family now has a deep jewel wash.
+   (`categorySurface` inherits the darker mid-tones too, so cards,
+   chips and sheets get the contrast as well.)
+2. **Mixed-deck page wash deepened** (`CurioColors.mixedDeckWash`):
+   dark now blackens the blend 50% (was 35%) at a 42% blend (was 45%);
+   pastel-dark drops 55% → 42%. Mixed pages read sleek and dark, with
+   white ink and paper cards popping on them.
+3. **Picker idle cards blackish** (`CurioCategoryCard`): the Curio-style
+   dark idle surface is `surfaceContainerLow` lerped 55% toward black —
+   near-black idle tiles (edge shine + glyph still carry the lane). The
+   SELECTED tile keeps its vivid full-accent gradient unchanged.
 
 ### Validation
 No Gradle locally (env rule). Brace/paren balance + `git diff --check`
-clean. CI on push is the gate. Changelog + `app/AGENTS.md` v46 bullet
+clean. CI on push is the gate. Changelog + `app/AGENTS.md` v47 bullet
 updated.
+
+## Prior — progress UI: reveal dialog fix + cabinet visual-only line + detail corner (v46)
 
 ## Prior — streaming backup export (OOM fix) + picker draft persistence (v45)
 

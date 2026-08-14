@@ -481,7 +481,12 @@ private class DarkWashTuning(
     }
 }
 
-private val DEFAULT_DARK_WASH = DarkWashTuning(0.5f, 0.15f)
+// v46 — the default is DARK and contrasty now: the old 50% midpoint pulled
+// every un-tuned family's mid-tone toward its LIGHT twin, so dark pages
+// washed out pale/whitish over midnight. The default now hugs the deep
+// accent (16% toward the light twin) and blends a touch stronger, so any
+// family without explicit tuning still reads as a deep, sleek tint.
+private val DEFAULT_DARK_WASH = DarkWashTuning(0.16f, 0.22f)
 
 private val DARK_WASH_TUNING: Map<CategoryFamily, DarkWashTuning> = mapOf(
     // Rose (movies, red) read whitewashed over midnight — hug the deep
@@ -517,5 +522,13 @@ private val DARK_WASH_TUNING: Map<CategoryFamily, DarkWashTuning> = mapOf(
     CategoryFamily.FOOD to DarkWashTuning(0.12f, 0.22f, darken = 0.35f, deepTwin = Color(0xFF7F1D1D)),
     // Blue (internet culture) — deepen toward a dark navy so the wash is a
     // midnight indigo instead of a pale azure float.
-    CategoryFamily.INTERNET to DarkWashTuning(0.12f, 0.20f, darken = 0.30f, deepTwin = Color(0xFF1E3A8A))
+    CategoryFamily.INTERNET to DarkWashTuning(0.12f, 0.20f, darken = 0.30f, deepTwin = Color(0xFF1E3A8A)),
+    // v46 — Music (artists/albums/songs, indigo) — deepen toward a dark
+    // indigo so the wash is a midnight violet-indigo instead of a pale
+    // periwinkle float (it previously fell to the washed-out default).
+    CategoryFamily.MUSIC to DarkWashTuning(0.12f, 0.20f, darken = 0.35f, deepTwin = Color(0xFF312E81)),
+    // v46 — Visual Art (painters/artworks, teal) — deepen toward a dark
+    // teal-forest so the wash reads deep and sleek instead of a pale mint
+    // (it previously fell to the washed-out default).
+    CategoryFamily.VISUAL_ART to DarkWashTuning(0.12f, 0.20f, darken = 0.35f, deepTwin = Color(0xFF134E4A))
 )

@@ -351,6 +351,21 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v47 — dark mode: deep high-contrast background tints + blackish picker idle cards.**
+  (1) **Dark wash retuned** (`CategoryInk.kt`): `DEFAULT_DARK_WASH` no
+  longer pulls un-tuned families' mid-tone 50% toward their LIGHT twin
+  (the whitish wash) — it now hugs the deep accent (0.16 factor) with a
+  slightly stronger 0.22 blend. Music (indigo) and Visual Art (teal) —
+  the two families that previously fell to the default — got their own
+  `DARK_WASH_TUNING` entries (deep indigo / deep teal-forest twins).
+  (2) **Mixed-deck page wash deepened** (`CurioColors.mixedDeckWash`):
+  dark mode now blackens the blend harder (50%) at a 42% blend (was
+  35%/45%), and pastel-dark drops to 42% (was 55%) — mixed pages read
+  sleek and dark with high contrast for white ink/paper cards. (3)
+  **Picker idle cards blackish** (`CurioCategoryCard`): the Curio-style
+  dark idle surface is now `surfaceContainerLow` pushed 55% toward black
+  — near-black idle tiles; the SELECTED tile keeps its vivid full-accent
+  gradient unchanged (idle-vs-active contrast is now the whole story).
 - **v46 — progress UI: reveal dialog fix + cabinet visual-only line + detail corner.**
   (1) **Reveal dialog blank bug** (`CurioProgressPill`): the reveal hero
   passed `ink = cat.accent`, which the editor dialog used as its content

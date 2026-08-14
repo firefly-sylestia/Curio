@@ -655,15 +655,17 @@ object CurioMixedDeck {
                 // Pastel mode: the blend is already a muted deep pastel — a
                 // moderate-strength wash over midnight keeps the soft hue on
                 // the page instead of deepening it toward a jewel tone.
-                lerp(background, blend, 0.55f)
+                // v46 — a touch deeper (42% instead of 55%) so pastel-dark
+                // pages stay sleek and dark with real contrast.
+                lerp(background, blend, 0.42f)
             } else {
-                // A deep, muted jewel tone: the blend darkened toward black
-                // (~35%) and mixed at a moderate strength (~45%) over midnight.
-                // The old 70% PURE blend rendered as a loud, saturated banner
-                // (e.g. a vivid purple page) in dark mode; this keeps each mix's
-                // hue clearly distinguishable while reading as a tasteful dark
-                // background the white ink and paper cards can sit on.
-                lerp(background, lerp(blend, Color.Black, 0.35f), 0.45f)
+                // v46 — a deep, muted jewel tone: the blend is blackened hard
+                // (50%) and mixed at a moderate strength (42%) over midnight,
+                // so every mix's hue stays distinguishable while the page
+                // reads as a sleek high-contrast dark background for the
+                // white ink and paper cards (the old 35%/45% still floated
+                // lighter than the single-category pages).
+                lerp(background, lerp(blend, Color.Black, 0.50f), 0.42f)
             }
         } else {
             if (AppPreferences.pastelColorsState) {

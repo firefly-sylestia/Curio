@@ -134,7 +134,16 @@ fun CurioCategoryCard(
                 lerp(MaterialTheme.colorScheme.surfaceContainerHigh, category.themedAccent(), 0.14f)
             }
         }
-        else -> category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+        else -> if (isCurioDarkTheme()) {
+            // v46 — BLACKISH idle tiles in dark mode: the categorySurface
+            // mid-tone still read lighter than the page (low contrast).
+            // Idle tiles now hug the midnight surface, pushed further
+            // toward black — the SELECTED tile keeps its vivid full-accent
+            // gradient unchanged, so idle-vs-active contrast is the story.
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, Color.Black, 0.55f)
+        } else {
+            category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+        }
     }
     val idleInk = category.categoryInk()
     // v27q — elevation is a flat 2dp in both states: the selected tile
