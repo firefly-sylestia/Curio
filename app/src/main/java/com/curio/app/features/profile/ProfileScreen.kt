@@ -180,13 +180,12 @@ fun ProfileScreen(navController: NavController) {
     var nameInput by remember(displayName) { mutableStateOf(displayName) }
     // v53 — the hero tagline is user-editable: tap it to set a custom line
     // (or restore the automatic streak-based one). The revision bump
-    // re-reads the pref so the hero updates instantly after saving.
+    // re-reads the pref so the hero updates instantly after saving. The
+    // automatic line derives from the DISPLAY streak, so this lives below
+    // its declaration.
     var showTaglineDialog by remember { mutableStateOf(false) }
     var taglineInput by remember { mutableStateOf("") }
     var taglineRevision by remember { mutableIntStateOf(0) }
-    val heroTagline = remember(taglineRevision, displayStreak) {
-        AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
-    }
     var crashCount by remember { mutableIntStateOf(0) }
     var totalSaved by remember { mutableIntStateOf(0) }
     var categoryCounts by remember { mutableStateOf<Map<CategoryId, Int>>(emptyMap()) }
@@ -239,6 +238,11 @@ fun ProfileScreen(navController: NavController) {
     val displayXp = if (promoOn) PromoMode.DEMO_XP else CurioQuests.xpState
     val level = CurioQuests.levelForXp(displayXp)
     val progress = CurioQuests.xpProgress(displayXp)
+    // v53 — the hero tagline (custom pref or the streak-based automatic
+    // line). Reads the DISPLAY streak so promo mode shows its demo line.
+    val heroTagline = remember(taglineRevision, displayStreak) {
+        AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
+    }
 
     // The hero wears the Home quest family's rose torn banner — the LAST
     // explored category personalizes the page (v7.101): its family's
