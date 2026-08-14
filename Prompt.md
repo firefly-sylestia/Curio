@@ -1,5 +1,44 @@
 # Prompt.md — Request log
 
+## Current request — restore Spin BoxWithConstraints import
+
+### What was asked
+Fix CI compilation failures caused by the previous Spin lint cleanup.
+
+### What was found
+The outer Spin layout still uses `BoxWithConstraints` for `maxHeight` and `maxWidth`; only its import had been removed. This caused the unresolved reference and all cascading scope/composable errors.
+
+### What was done
+Restored the `BoxWithConstraints` import. The compact filter grid remains a plain `Box`, so the original unused-scope lint fix is preserved.
+
+### Validation
+No Gradle commands were run locally per repository instructions. Verify with CI and `git diff --check`.
+
+## Prior — Apple Music Explore, YouTube preference, and CI lint fix
+
+### What was asked
+Fix Apple Music Explore URL handling without forcing `/us`, add plain YouTube alongside YouTube Music for music preferences with YouTube as the default, and resolve the SpinScreen CI lint failure.
+
+### What was done
+- Apple Music URL generation now derives a two-letter storefront from the device locale and uses a locale-free fallback instead of hardcoding `/us`.
+- Added plain YouTube to the music-service picker and made it the default for new and unset preferences.
+- Replaced the unused `BoxWithConstraints` around the fixed Spin grid with `Box` and removed its import.
+
+### Validation
+No Gradle compile/build/lint/test commands were run locally per repository instructions. Use source audits, `git diff --check`, and CI as the build gate.
+
+## Prior — font-scale icon alignment audit
+
+### What was asked
+Fix misaligned top-corner/menu/profile icons at high system font scale, audit the app for similar icon issues, and correct all affected shared controls.
+
+### What was done
+- `ui/theme/CurioIcons.kt`: made bundled Material Symbols render at a stable dp-equivalent size by compensating their text `sp` size for `LocalDensity.current.fontScale`; all shared icons now remain centered and do not grow out of their slots when accessibility text is enlarged.
+- `ui/components/CurioSortDropdown.kt`: changed fixed control heights to `heightIn(min = ...)` so text can accommodate font scaling without displacing or clipping the sort icons.
+
+### Validation
+Source audit completed across shared UI components. No Gradle compile/build/lint/test commands may be run locally; use `git diff --check` and CI as the build gate.
+
 ## Current request — app theme, filters, Cabinet controls, and desktop artifact collection
 
 ### What was asked
@@ -1032,7 +1071,7 @@ CI fix pushed earlier this turn: 28122f2 (Cabinet LazyGridItemInfo.offset.y — 
 - v20: navigateToTab now treats a pushed tab-route instance (Cabinet opened from Profile, stack HOME→PROFILE→CABINET) like any pushed screen — pops back to HOME first so the popUpTo+singleTop navigate can no longer self-cancel into a dead Home tap; genuine tab instances (entry directly on HOME) keep save/restore tab-state behavior. Committed + pushed (PR #17 auto-updates).
 - v20b: light-mode wash-out fix — new theme-aware ink helpers curioRoseInk/curioGoldInk/curioSageInk (deep CoralInk/GoldInk/SageInk on light cream, pastels on dark/AMOLED) applied to every pastel-as-ink spot: Profile XP card, shared card headers, Home drawer, onboarding permissions, topic-history bookmark, quests (trophy/progress/chips/badges/stamps/dailies), support status+links+download progress, promo card, topic-db explored chips, crash screen, badge overflows; bonusGold dedupes to curioGoldInk. Committed + pushed (PR #17 auto-updates).
 - v27b: paper experiments reworked to the intended placement — PaperTitleLines (2 short lines) under the title text in all 5 hero families (settings hub, cabinet, profile, home, entry detail) gated by Title cut lines; hero-edge accents (corner strokes/ticks/left holes) removed (PaperHeaderAccents.kt deleted); Stamped pin holes now punch SEE-THROUGH EvenOdd holes into the Home Streak·Cabinet·Topics paper card (Surface transparent when holes on, pressed-rim rings, border+shadow kept); experiment labels updated. Committed + pushed (PR #17 auto-updates).
-- v26c: Topic Browser scroll rework — CurioScrollIndicator now maps knob travel 1:1 onto the whole list (scrollable/travel ratio + 1..2x ramp) and drains accumulated deltas once per frame (LaunchedEffect + withFrameNanos) instead of a coroutine per drag event (fixes lag + slow scroll); gesture rewritten on awaitEachGesture/awaitVerticalTouchSlopOrCancellation so a pure tap toggles the A–Z rail (drag gestures never fire onDragEnd for a tap, so it could never open); back-to-top arrow centered on the screen with the glyph centered in the circle (M3 Surface has no contentAlignment). Committed + pushed (PR #17 auto-updates).
+- v26c: Topic Browser scroll rework — CurioScrollIndicator now maps knob travel 1:1 onto the whole list (scrollable/travel ratio + 1..2x ramp) and drains accumulated deltas once per frame (LaunchedEffect + withFrameNanos) instead of a coroutine per drag event (fixes lag + slow scroll); gesture rewritten on awaitEachGesture/awaitVerticalTouchSlopOrCancellation so a pure tap toggles the A��Z rail (drag gestures never fire onDragEnd for a tap, so it could never open); back-to-top arrow centered on the screen with the glyph centered in the circle (M3 Surface has no contentAlignment). Committed + pushed (PR #17 auto-updates).
 - v27: hero ink-glass pills deepened — SettingsHeroActionPill, CabinetHeroActionPill and CurioSortDropdown fills went from 18%/42% (55% destructive) to 30%/55% (65% destructive) alpha with the border raised 28%→42%, and the sort dropdown gained its missing border; fixes search/sort/select pills being nearly invisible on the rose banner in Cabinet and Topic Browser (and consistently across the settings-family heroes). Committed + pushed (PR #17 auto-updates).
 - v27: explore-session attachments — ExploreSession gained shared note + screenshotPaths (JSON-persisted); pending-write package now carries note+screenshots and survives session clear (append/remove/set + peek accessors, hasPendingWriteFor); CurioEntry/CaptureEntity gained sessionNote + sessionScreenshots (Room v6 migration 5→6); new SessionShots (app-private PNG store), ScreenFrameCapturer (single-frame MediaProjection → PNG), ScreenCaptureRequestActivity (transparent consent host), DeviceScreenshotWatcher (MediaStore ContentObserver auto-attach, permission-gated) registered from MainActivity; ExploreSessionService: captureConsent static + ACTION_CAPTURE + captureScreenshot with Android-14 mediaProjection FGS promotion, FLAG_SECURE on the bubble window (timer never appears in shots), finishToWritePage via ACTION_STOP, note-focus window flag flip; bubble reworked — NO morph animation (instant swap + one resize burst), icon-only pause/hide, note field (local draft → setSessionNote), screenshot button with count badge, Finish & write it down; ExploreReminderReceiver ACTION_STOP hands off note+screenshots; reveal flow asks READ_MEDIA_IMAGES once; SaveCaptureScreen — floating note button + live-reactive screenshots section (add via PickVisualMedia, remove with X) + attach on save; EntryDetail shows note + lightbox-tappable thumbnails; manifest: READ_MEDIA_IMAGES/READ_EXTERNAL_STORAGE/mMediaProjection FGS permission, service type specialUse|mediaProjection, ScreenCaptureRequestActivity registered. Committed + pushed (PR #17 auto-updates).
 - v27c: backup/restore v5 — session screenshots join the in-app backup: export bundles filesDir/session-shots bytes keyed by original path (deduped across shared entries) into a new BackupPayload.sessionShots map; restore rewrites each capture sessionScreenshotsJson to restored paths via a whole-restore shared index (one original path -> one restored file, preserving one-session-shared shots) using hardened SessionShots.restore(key, bytes) (path-traversal guarded like ImageStorageManager); CaptureEntity.deserializeStringList made internal for reuse; validatedCaptures now normalizes sessionScreenshotsJson to "[]" for pre-v6 backups (NOT NULL column, Gson Unsafe skips defaults — restores of old backups no longer crash); data_extraction_rules comment notes session-shots live in the excluded files/ domain like audio. Committed + pushed (PR #17 auto-updates).

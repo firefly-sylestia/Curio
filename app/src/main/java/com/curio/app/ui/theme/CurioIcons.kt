@@ -13,6 +13,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
@@ -277,6 +278,11 @@ fun CurioIcon(
     size: Dp = 24.dp,
     weight: FontWeight = FontWeight.Normal
 ) {
+    // Icon geometry is specified in dp and must remain visually stable when
+    // the system font scale grows. Text-based Material Symbols otherwise
+    // inherit accessibility scaling and outgrow their centered icon slot.
+    val iconSp = (size.value / LocalDensity.current.fontScale.coerceAtLeast(1f)).sp
+
     Box(
         modifier = modifier
             .size(size)
@@ -292,7 +298,7 @@ fun CurioIcon(
             text = name,
             fontFamily = MaterialSymbolsFontFamily,
             fontWeight = weight,
-            fontSize = size.value.sp,
+            fontSize = iconSp,
             color = tint,
             textAlign = TextAlign.Center,
             maxLines = 1,
@@ -306,7 +312,7 @@ fun CurioIcon(
                 translationY = -MaterialSymbolsOpticalLift.toPx()
             },
             style = TextStyle(
-                lineHeight = size.value.sp,
+                lineHeight = iconSp,
                 // Material Symbols are font glyphs, not vector Icons. Remove
                 // the platform font padding and center the line box so their
                 // visible ink sits in the same vertical center as adjacent
@@ -342,6 +348,7 @@ fun SearchEngine.brandTile(): Pair<Color, String> = when (this) {
  * glyph + color instead).
  */
 fun MusicService.brandTile(): Pair<Color, String> = when (this) {
+    MusicService.YOUTUBE -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
     MusicService.YOUTUBE_MUSIC -> Color(0xFFFF0000) to CurioIcons.YouTubeActivity
     MusicService.APPLE_MUSIC -> Color(0xFFFA2D48) to CurioIcons.MusicNote
     MusicService.SPOTIFY -> Color(0xFF1DB954) to CurioIcons.PlayCircle

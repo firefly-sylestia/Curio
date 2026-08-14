@@ -1,6 +1,7 @@
 package com.curio.app.data
 
 import android.net.Uri
+import java.util.Locale
 
 /**
  * v19 — the search engines Explore can open in the browser. The "Explore
@@ -27,10 +28,10 @@ enum class SearchEngine(val id: String, val displayName: String, val description
 /**
  * v27s — the music services the "Watch in" explore action can open for
  * Album / Artist / Song topics. Chosen in Settings next to the search
- * engine; YouTube Music stays the default so the pre-setting behavior
- * (YouTube search for music) is unchanged until the user switches.
+ * engine; YouTube is the default for new and unset preferences.
  */
 enum class MusicService(val id: String, val displayName: String, val description: String) {
+    YOUTUBE("youtube", "YouTube", "The main YouTube video platform"),
     YOUTUBE_MUSIC("youtube_music", "YouTube Music", "The music side of YouTube"),
     APPLE_MUSIC("apple_music", "Apple Music", "Apple's streaming catalog"),
     SPOTIFY("spotify", "Spotify", "The big green streaming app");
@@ -71,12 +72,18 @@ fun buildMusicServiceSearchUrl(
 ): String {
     val q = Uri.encode(buildExploreQuery(topic))
     return when (service) {
+        MusicService.YOUTUBE -> "https://www.youtube.com/results?search_query=$q"
         MusicService.YOUTUBE_MUSIC -> "https://music.youtube.com/search?q=$q"
-        // v29 — the storefront segment ("us") is REQUIRED: without it Apple's
-        // server redirects and the Apple Music app never recognizes the link,
-        // so "in-app" opens never hand off. music.apple.com/{cc}/search?term=
-        // is the canonical web-search URL the app understands.
-        MusicService.APPLE_MUSIC -> "https://music.apple.com/us/search?term=$q"
+        // Apple Music's storefront is derived from the device locale instead of
+        // hardcoding /us. When no country is available, use Apple's locale-free
+        // search route so the URL does not force a US storefront.
+        MusicService.APPLE_MUSIC -> {
+            val storefront = Locale.getDefault().country
+                .takeIf { it.length == 2 }
+                ?.lowercase(Locale.ROOT)
+            val path = storefront?.let { "/$it/search" } ?: "/search"
+            "https://music.apple.com$path?term=$q"
+        }
         // Spotify's web search path (/search/{query}) is the correct deep
         // link: it hands off into the installed app or opens the web player.
         MusicService.SPOTIFY -> "https://open.spotify.com/search/$q"
