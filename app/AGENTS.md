@@ -351,6 +351,18 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v44 — Spin filter sheet: bigger color-tinted chips + flow Type group.**
+  (1) **Bigger chips**: `CompactChip` labels bump to 15sp with roomier
+  padding (14/9dp; the `FilterGroupPill`s match at 16/12/9dp) so the
+  sheet fills instead of leaving empty space above the Apply button.
+  (2) **Different color**: inactive fills swap `curioPillLift()` for
+  `curioPillTintLift()` (rose-kissed glass in light, white in dark, grey
+  glass in AMOLED) — the chips carry a color of their own instead of
+  plain cream; selected chips keep the category accent. (3) **TYPE group
+  is a flow now**: the fixed 2-column `LazyVerticalGrid` became a
+  `FlowRow` of content-sized chips (`fillMaxWidth = false`) — a long
+  subtype takes its own full line and the next chip wraps below it.
+  Removed the now-unused `heightIn` + `curioPillLift` imports.
 - **v43 — Topic Reveal hero pills + action labels + quick-fact voice.**
   (1) **Hero pill glass retuned** (`HeroCard` `pillGlass`): pastel light
   now lerps only 80% toward white (was 92% — the pills read as stark

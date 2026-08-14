@@ -1,38 +1,34 @@
 # Prompt.md — Request log
 
-## Current request — Topic Reveal hero pills + action labels + quick-fact voice (v43)
+## Current request — Spin filter sheet: bigger color-tinted chips + flow Type group (v44)
 
 ### What was asked
-1. Topic Reveal: the hero's action pill (Watch / Look at…) and the
-   author + subtype pills turned WHITE in the hero — make them theme
-   aware, non-transparent, with a good shade.
-2. "Express yourself" and "Start exploring" — make them bold and a
-   little larger (not too much).
-3. Quick fact + instruction below: use one beautiful, readable font for
-   both (they currently mix sans + serif).
-4. The quick fact has too many words — suggestions wanted.
+1. The Spin page filter sheet has too much empty bottom space — make
+   the filter text pills even bigger.
+2. Don't follow the grid: if a filter label is long it can take the
+   whole line and the next chip goes below it.
+3. Give the filter chips a different color.
 
 ### What was done
-1. **Hero pill glass retuned** (`HeroCard.pillGlass`): pastel light now
-   lerps only 80% toward white (was 92% — pills read as stark white
-   blobs), the deep non-pastel banner gets a 50% frosted-accent glass,
-   dark keeps a 55% lift toward `curioPillLift()`. All three are opaque
-   fills that carry the accent hue — theme aware, never flat white.
-2. **Action labels bumped**: `revealDockMetrics.textSp` raised +1.5sp
-   per tier (14.5 / 15.5 / 17.5sp) — both buttons stay ExtraBold on one
-   line.
-3. **Quick-fact voice**: the quick fact moves from the plain Material
-   `bodyLarge` back to `CurioEditorialBody` (Lora) — the SAME font as the
-   action-card instruction, so the reveal's long-form copy is one
-   readable serif.
-4. **Too-many-words fix — REJECTED by user, reverted**: the 4-line
-   "Read more / Read less" clamp was removed at the user's request — the
-   quick fact stays UNCLAMPED, shown in full.
+1. **Bigger chips** (`CompactChip` + `FilterGroupPill`): labels bump to
+   15sp with roomier padding (chips 14/9dp, group pills 16/12/9dp) — the
+   pills fill the sheet instead of leaving a dead band above Apply.
+2. **Flow Type group**: the fixed 2-column `LazyVerticalGrid` for the
+   TYPE group became a `FlowRow` of content-sized chips
+   (`fillMaxWidth = false`) — a long subtype takes a full line and the
+   next chip wraps below it. The other groups already flowed.
+3. **Different color**: inactive chip fills swap `curioPillLift()` for
+   `curioPillTintLift()` (rose-kissed glass in light, white in dark,
+   grey glass in AMOLED) — no more plain cream; selected chips keep the
+   category accent. Removed the now-unused `heightIn` + `curioPillLift`
+   imports.
 
 ### Validation
-No Gradle locally (env rule). Brace/paren balance (delta matches the HEAD
-baseline) + `git diff --check` clean. CI on push is the gate. Changelog +
-`app/AGENTS.md` v43 bullet updated.
+No Gradle locally (env rule). Brace/paren balance + `git diff --check`
+clean. CI on push is the gate. Changelog + `app/AGENTS.md` v44 bullet
+updated.
+
+## Prior — Topic Reveal hero pills + action labels + quick-fact voice (v43)
 
 ## Prior — mood-board editor fixes + tinted-glass styling + azure default (v42)
 - Shelf ordering: **Merged + labeled sections** — one medal per chain,

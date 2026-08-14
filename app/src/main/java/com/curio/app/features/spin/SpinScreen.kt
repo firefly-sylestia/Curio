@@ -45,7 +45,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -144,7 +143,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -1866,30 +1865,27 @@ private fun FilterSheet(
                                 val isSubtypeGroup = key == FilterGroupKey.TYPE
                                 Column(Modifier.fillMaxWidth()) {
                                     SectionLabel(key.label, Modifier.padding(bottom = 4.dp))
-                                    // v37 — the TYPE group renders as a compact
-                                    // 2-column grid (the wildcard surprise deck
-                                    // carries up to 8 universal subtypes; a
-                                    // full-width flow row would stack them into
-                                    // a tall wall). The other groups keep the
-                                    // single-row flow.
+                                    // v44 — the TYPE group is a FLOW row now,
+                                    // not a fixed 2-column grid: a long subtype
+                                    // takes its own full line and the next chip
+                                    // wraps below it (chips are content-sized —
+                                    // no forced half-width slots that cramped
+                                    // long labels and left ragged empty space
+                                    // under short lists).
                                     if (isSubtypeGroup) {
-                                        LazyVerticalGrid(
-                                            columns = GridCells.Fixed(2),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .heightIn(max = 160.dp),
+                                        FlowRow(
+                                            modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                            userScrollEnabled = false
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            items(filteredGroups.chipsFor(key)) { chip ->
+                                            filteredGroups.chipsFor(key).forEach { chip ->
                                                 CompactChip(
                                                     label = chip,
                                                     selected = chip in draftSubtypes,
                                                     accent = cat.themedAccent(),
                                                     ink = cat.onAccent(),
                                                     chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                                    fillMaxWidth = true,
+                                                    fillMaxWidth = false,
                                                     onClick = {
                                                         draftSubtypes = if (chip in draftSubtypes) draftSubtypes - chip else draftSubtypes + chip
                                                     }
@@ -2031,7 +2027,12 @@ private fun CompactChip(
     // chips go neutral cream and clearly separate from the category-tinted
     // sheet); dark keeps its subtle lift. BOTH states now carry a 3dp
     // elevation so the pills read raised off the sheet.
-    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
+    // v44 — the inactive fill lifts toward the COLOR-TINTED glass
+    // ([curioPillTintLift]: rose-kissed in light, white in dark, grey glass
+    // in AMOLED) so the chips carry a color of their own instead of plain
+    // cream, and the pills are BIGGER (roomier padding + 15sp labels) to
+    // fill the sheet instead of leaving a dead band above Apply.
+    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else inactiveFill,
@@ -2046,14 +2047,17 @@ private fun CompactChip(
     ) {
             Text(
                 text = label,
+                // v44 — bigger: 15sp label + roomier padding so the pills
+                // stand taller and fill the sheet's width.
                 style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 15.sp,
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                 ),
                 color = if (selected) ink else MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
             )
         }
 }
@@ -2078,7 +2082,9 @@ private fun FilterGroupPill(
     // v38 — same contrast + elevation language as the filter chips: closed
     // pills lift almost fully toward the page background in light mode and
     // both states carry a 3dp elevation.
-    val inactiveFill = lerp(chipSurface, curioPillLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
+    // v44 — same COLOR-TINTED glass as the chips ([curioPillTintLift]) and
+    // a matching size bump so the group pills and chips read as one family.
+    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.82f)
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),
@@ -2094,13 +2100,14 @@ private fun FilterGroupPill(
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(start = 14.dp, end = 10.dp, top = 7.dp, bottom = 7.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 9.dp, bottom = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 15.sp,
                     fontWeight = if (open) FontWeight.ExtraBold else FontWeight.Bold
                 ),
                 color = if (open) ink else MaterialTheme.colorScheme.onSurface
