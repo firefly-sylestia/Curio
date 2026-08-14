@@ -351,6 +351,21 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v43 — Topic Reveal hero pills + action labels + quick-fact voice.**
+  (1) **Hero pill glass retuned** (`HeroCard` `pillGlass`): pastel light
+  now lerps only 80% toward white (was 92% — the pills read as stark
+  white blobs on the pale heroes), the deep non-pastel banner gets a 50%
+  frosted-accent glass, and dark keeps a 55% lift toward
+  `curioPillLift()`; all three are OPAQUE fills that carry the accent
+  hue — theme aware, never transparent, never flat white. (2) **Action
+  labels bumped**: `revealDockMetrics` `textSp` raised +1.5sp per tier
+  (14.5 / 15.5 / 17.5sp) so Start exploring + Express yourself read a
+  little larger (both stay ExtraBold, single-line). (3) **Quick-fact
+  voice**: the `TeaserCard` quick fact moves from the plain Material
+  `bodyLarge` back to `CurioEditorialBody` (Lora) — the SAME font as the
+  `ActionPromptCard` instruction, so the reveal's long-form copy is one
+  readable serif. The fact stays UNCLAMPED and shown in full — no
+  read-more folding (user rejected the 4-line clamp).
 - **v42 — mood-board editor stability + resizable quotes + tinted-glass styling.**
   (1) **Mood-board glitches fixed** (`GalleryWallFormat`): the inline
   board's crop extent is seeded ONCE per session (`stableBoardMaxX/Y` —

@@ -1,53 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — mood-board editor fixes + tinted-glass styling + azure default (v42)
+## Current request — Topic Reveal hero pills + action labels + quick-fact voice (v43)
 
 ### What was asked
-1. Fix the inline mood-board editing — it's glitchy.
-2. Make quote boxes resizable inside the mood board.
-3. Add an expand control for photos that are too small to pinch.
-4. Give Settings + sub-pages + Profile buttons a new look instead of
-   creamy (suggestions wanted).
-5. AMOLED: some items should stay colorful / greyed instead of pitch
-   black with thin borders.
-6. (from the prior round, still in this change set) Category pill beside
-   the hero title below sort/search; sort pill radius + dropdown size;
-   re-enable Azure hero and make it default.
-
-### User decisions (ask_user)
-- Disk was 100% full (ENOSPC mid-write): approved clearing the
-  regenerable Gradle caches (~2.6G freed).
-- Button look: **Color-tinted glass** — controls lift toward a whisper
-  of the brand rose; icon chips carry accent color.
-- AMOLED: **Mixed (colored + grey)** — interactive controls colorful,
-  containers grey-tinted instead of pitch black.
-- Mood board glitch symptoms: **tiles snap/jump while dragging** + **the
-  board re-sizes mid-edit**. Quote resize: **drag handle on the card**.
-  Photo expand: **grow the tile in place** (custom answer).
+1. Topic Reveal: the hero's action pill (Watch / Look at…) and the
+   author + subtype pills turned WHITE in the hero — make them theme
+   aware, non-transparent, with a good shade.
+2. "Express yourself" and "Start exploring" — make them bold and a
+   little larger (not too much).
+3. Quick fact + instruction below: use one beautiful, readable font for
+   both (they currently mix sans + serif).
+4. The quick fact has too many words — suggestions wanted.
 
 ### What was done
-1. **Mood board**: the inline board's crop extent is seeded ONCE per
-   session and never re-grows — adding a photo no longer re-fits the
-   whole board, and drags follow the finger 1:1 (the two reported
-   glitches). Quote boxes are resizable via an editor-only bottom-end
-   grip (`QuotePos.w` + parallel widths list, persisted). Photo tiles
-   gained a grow-in-place button (×1.45 around center).
-2. **Cabinet + Topic Database**: Category pill moved INSIDE the hero
-   beside the title via a new `titleTrailing` slot on both heroes;
-   below-hero pill rows + reservations removed. Sort pill corners
-   50dp→18dp; dropdown widened (minWidth 236dp) with taller rows.
-3. **Azure hero**: grey-out + migrate-back removed; `heroBlueState`
-   defaults ON (azure is the default hero).
-4. **Color-tinted glass**: `curioPillTintLift()` (rose-tinted lift in
-   light, white in dark, `#2A2A2A` grey glass in AMOLED) swapped into the
-   hero pills, sort dropdown, `CurioSettingsCard`, `CurioSettingsRow`
-   (coral icon chips), Profile quest plate + hero pills; header chips
-   keep coral in AMOLED; AMOLED switches light up coral when ON.
+1. **Hero pill glass retuned** (`HeroCard.pillGlass`): pastel light now
+   lerps only 80% toward white (was 92% — pills read as stark white
+   blobs), the deep non-pastel banner gets a 50% frosted-accent glass,
+   dark keeps a 55% lift toward `curioPillLift()`. All three are opaque
+   fills that carry the accent hue — theme aware, never flat white.
+2. **Action labels bumped**: `revealDockMetrics.textSp` raised +1.5sp
+   per tier (14.5 / 15.5 / 17.5sp) — both buttons stay ExtraBold on one
+   line.
+3. **Quick-fact voice**: the quick fact moves from the plain Material
+   `bodyLarge` back to `CurioEditorialBody` (Lora) — the SAME font as the
+   action-card instruction, so the reveal's long-form copy is one
+   readable serif.
+4. **Too-many-words fix — REJECTED by user, reverted**: the 4-line
+   "Read more / Read less" clamp was removed at the user's request — the
+   quick fact stays UNCLAMPED, shown in full.
 
 ### Validation
-No Gradle locally (env rule). Brace/paren balance + `git diff --check`
-clean across all 14 edited files. CI on push is the gate. Changelog +
-`app/AGENTS.md` v42 bullet updated.
+No Gradle locally (env rule). Brace/paren balance (delta matches the HEAD
+baseline) + `git diff --check` clean. CI on push is the gate. Changelog +
+`app/AGENTS.md` v43 bullet updated.
+
+## Prior — mood-board editor fixes + tinted-glass styling + azure default (v42)
 - Shelf ordering: **Merged + labeled sections** — one medal per chain,
   earned first by rarity, with Earned / Locked section labels.
 - Badge tap: **Badge detail dialog** (name, tier, description, progress).

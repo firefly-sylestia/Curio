@@ -1258,7 +1258,9 @@ private fun revealDockMetrics(tier: RevealDockTier, tight: Boolean): RevealDockM
         startPadH = if (narrow) 8.dp else if (compact) 10.dp else 20.dp,
         startPadV = vPad,
         icon = if (narrow) 16.dp else if (compact) 18.dp else 20.dp,
-        textSp = if (narrow) 13.sp else if (compact) 14.sp else 16.sp,
+        // v43 — bumped a notch (+1.5sp per tier) so the pair's labels read
+        // bolder and more prominent without growing off their single lines.
+        textSp = if (narrow) 14.5.sp else if (compact) 15.5.sp else 17.5.sp,
         gap = if (narrow) 6.dp else 8.dp,
         shadow = if (tier == RevealDockTier.STANDARD) 12.dp else 8.dp
     )
@@ -1566,18 +1568,23 @@ private fun HeroCard(
     // the same card expanding: pastel → pastelFillInk, else → onAccent.
     val ink = if (AppPreferences.pastelColorsState) pastelFillInk(accent) else cat.onAccent()
 
-    // v37 — the hero pill glass (action badge, byline, subtype). The old
-    // `ink.copy(alpha = 0.18f)` read washed on the pale pastel heroes (the
-    // pill dissolved into the gradient) and drab on the deep non-pastel
-    // ones. Now a proper frosted glass off the hero accent: a strong white
-    // lift on the airy pastel-light heroes (deep-ink labels pop), a
-    // brighter glass on the deep non-pastel banners, and the page-ink lift
-    // on dark so the pill stays a visible brighter glass on the deep card.
-    val pillGlass = lerp(
-        accent,
-        if (!dark && AppPreferences.pastelColorsState) Color.White else curioPillLift(),
-        if (!dark && AppPreferences.pastelColorsState) 0.92f else 0.42f
-    )
+    // v37 — the hero pill glass (action badge, byline, subtype): a frosted
+    // glass off the hero accent instead of the old washed `ink.copy(alpha)`
+    // tint, so the pills stay crisp on any hero gradient.
+    // v43 — retuned so the pills never read as stark white blobs: PASTEL
+    // white blobs: PASTEL light keeps a strong accent-kiss (only 80% toward
+    // white instead of the old 92% — the lane's tint shows through the
+    // frost), the deep non-pastel banner gets a 50% frosted accent glass,
+    // and dark keeps a bright lift off the deep hero (55% toward the page-
+    // ink lift). All three are OPAQUE fills that carry the accent hue —
+    // theme aware, never transparent, never flat white.
+    val pillGlass = if (dark) {
+        lerp(accent, curioPillLift(), 0.55f)
+    } else if (AppPreferences.pastelColorsState) {
+        lerp(accent, Color.White, 0.80f)
+    } else {
+        lerp(accent, Color.White, 0.50f)
+    }
 
     // ── Gradient brush — match the Spin ticket's formula so the card
     //    reads as the same surface during the morph. When heroGradientOn
@@ -1936,12 +1943,14 @@ private fun TeaserCard(
                 )
             }
             Spacer(Modifier.height(10.dp))
-            // v37 — the quick fact is back on the plain Material bodyLarge
-            // (the Lora serif experiment read too "editorial" for the fact;
-            // the kicker above keeps the hierarchy).
+            // v43 — the quick fact reads in the Lora editorial serif so it
+            // matches the instruction paragraph below (ONE readable font for
+            // the reveal's long-form copy instead of the old sans/serif mix).
+            // The fact is shown IN FULL — no line clamp, no read-more folding
+            // (the user asked to keep the whole text visible).
             Text(
                 text = teaser ?: "Loading topic…",
-                style = MaterialTheme.typography.bodyLarge,
+                style = CurioEditorialBody,
                 color = MaterialTheme.colorScheme.onSurface,
                 softWrap = true,
                 overflow = TextOverflow.Ellipsis
