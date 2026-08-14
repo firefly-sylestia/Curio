@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.room.withTransaction
 import com.google.gson.Gson
-import com.google.gson.JsonWriter
 import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonWriter
 import org.json.JSONObject
 import java.io.File
 import java.io.OutputStreamWriter
