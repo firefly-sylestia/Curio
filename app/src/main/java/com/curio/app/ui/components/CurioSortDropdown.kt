@@ -52,12 +52,14 @@ data class CurioSortOption(
  * that read too dark in light and pastel themes — full-ink glyphs on top
  * stay readable in every mode.
  *
- * v31 — the pill slims down: 16dp corner radius instead of the fully-
- * rounded 50dp capsule (the wide Date/Default pill read as a fat rounded
- * blob next to the compact action pills), tighter horizontal padding, and
- * the frosted fill now lifts toward the PAGE BACKGROUND in light mode
- * (via [curioPillLift]) so the pill carries a small tint of the
- * background shade instead of stark cream.
+ * v31 — the pill slims down: tighter horizontal padding and the frosted
+ * fill now lifts toward the PAGE BACKGROUND in light mode (via
+ * [curioPillLift]) so the pill carries a small tint of the background
+ * shade instead of stark cream. v33 — the corner radius is back to the
+ * fully-rounded 50dp capsule so the sort pill matches the other action
+ * pills exactly (the v31 16dp corners read rectangular next to the
+ * capsule search/select pills); the 42dp height + tight padding keep it
+ * slim, so it never reads fat.
  *
  * v30 — the menu itself now runs through [CurioDropdownMenu]: an opaque
  * surface tinted toward the page's CATEGORY ACCENT, with the selected row
@@ -92,9 +94,10 @@ fun CurioSortDropdown(
     // of sinking into a dark mauve pill (the v27r 0.35/0.55 ink-lean fills
     // were too dark in light + pastel).
     val fill = lerp(backdrop, curioPillLift(), if (emphasized) 0.24f else 0.38f)
-    // v31 — 16dp corners (was the fully-rounded 50dp capsule): the wide
-    // sort pill reads as a slim control, not a fat rounded blob.
-    val pillShape = RoundedCornerShape(16.dp)
+    // v33 — fully-rounded capsule (50dp) to match the action pills beside
+    // it (search/select/category); the v31 16dp corners read rectangular
+    // next to them. The 42dp height + tight padding keep it slim.
+    val pillShape = RoundedCornerShape(50)
 
     Box(modifier = modifier) {
         Surface(

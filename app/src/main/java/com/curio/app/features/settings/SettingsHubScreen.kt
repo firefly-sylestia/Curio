@@ -160,7 +160,11 @@ fun SettingsHeroHeader(
     onSearchQueryChange: (String) -> Unit = {},
     onCloseSearch: () -> Unit = {},
     searchFocus: FocusRequester? = null,
-    searchPlaceholder: String = "Search…"
+    searchPlaceholder: String = "Search…",
+    // v33 — pin the title block to the TOP of the banner instead of just
+    // above the tear (screens whose action pills moved below the hero — the
+    // Topic Database — read as a clean title header with controls beneath).
+    titleAtTop: Boolean = false
 ) {
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
@@ -275,8 +279,11 @@ fun SettingsHeroHeader(
                             }
                         }
                     }
-                    // Flex spacer — pins the title/search block just above the tear.
-                    Spacer(Modifier.weight(1f))
+                    // Flex spacer — pins the title/search block just above
+                    // the tear (skipped with [titleAtTop], where the title
+                    // sits at the top of the banner).
+                    if (!titleAtTop) Spacer(Modifier.weight(1f))
+
                     // ── Title + subtitle OR the morph-open search field —
                     //    the search bar scales in from the pill's position
                     //    when opened, and the title fades back in when

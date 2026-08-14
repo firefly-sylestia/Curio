@@ -1,67 +1,61 @@
 # Prompt.md — Request log
 
-## Current request — picker pills, filter accordion, pastel-dark lane hero (v33)
+## Current request — Cabinet/Topic Browser hero tidy-up + version bump (v34)
 
 ### What was asked
-1. Category picker: the Original / New tabs and the preset chips are too
-thin — make proper pills, theme-aware, NOT matching the background.
-2. The filter chips in the Spin filter page still blend too much with the
-background in pastel light mode — give them a different shade.
-3. In the filter page, the Type / Genres / Era / Origin etc. headers
-should become filter pills: tap to expand that group's chips; tap the
-open one again to collapse it KEEPING the selections; tap another to
-swap (this one collapses, that one opens) — with a beautiful smooth
-animation.
-4. The filter page background is too bright — it takes the category main
-hero color instead of the background tint like other pages.
-5. Pastel dark: the shared hero cards are too bright for dark mode — make
-them a little darker.
-6. "Again for clarification ask me" before building.
+1. The Cabinet and Topic Browser sort button shape still doesn't match the
+other pills.
+2. Why is the category below the hero — it was asked to be placed below
+the sorting and search pill.
+3. Remove that back pill that appears; move the header hero to the top.
+4. Remove the Select button (hold-to-select exists); only the Clear /
+Delete pills should appear while selected.
+5. Bump the version number by 0.1 and push.
 
-### User decisions (ask_user)
-- Pastel-dark shared hero: darken **only the lane-colored hero** (the
-Adaptive Hero banner); the plain rose hero keeps its deep dark twin.
-Also: **rename the "Sky azure hero" option to "Azure hero"** but don't
-change its behavior (stays greyed out / unselectable).
-- Filter chips: **raised neutral pills** (lift clearly toward cream/white
-so they stand off the pastel sheet).
-- Accordion: yes — one group open at a time, selections survive collapse,
-smooth animated expansion.
+### Interpretation (no ask_user — the request was a direct instruction list)
+- The pills leave the hero: the Sort + Search pills move into a controls
+row BELOW the hero, and the Category pill rides the row UNDER them
+(category below search/sort, as asked). The hero becomes a clean title
+header with the title at the TOP ("move the header hero to the top").
+- The Cabinet's conditional back pill is removed (it only appeared when a
+filter/legacy view was active); the Topic Database KEEPS its back pill
+because it's a pushed sub-screen (its pill doesn't "appear" — it's
+always there and is the only way back).
+- The Cabinet's Select pill is removed — long-press enters selection
+(already existed). While selecting, ONLY the Clear/Select-all + Delete
+pills show (no cancel pill, no category pill).
+- Sort dropdown corners back to the fully-rounded 50dp capsule so it
+matches the other pills (42dp height + tight padding keep it slim).
 
 ### What was done
-1. **Picker proper pills:** `PickerPageTab` (Original / New) and
-   `PickerPresetChip` (DeckPresets.kt, shared with the Spin sheet) grow
-   4dp → 8dp vertical padding (~34dp pills), and the unselected fill now
-   lifts toward `curioPillLift()` (cream in light, lighter glass in
-   dark) so they stand off the category wash instead of the old
-   `surfaceVariant`/`surfaceContainerHigh` blend.
-2. **Filter chips raised neutral:** `CompactChip` light-mode inactive
-   fill now lerps toward `curioPillLift()` at 0.55 (was White at 0.32)
-   — unselected chips read as neutral raised pills off the pastel sheet;
-   gained a `fillMaxWidth` param (false in the accordion FlowRow so
-   chips wrap at natural pill width).
-3. **Filter accordion:** `FilterGroupKey` enum + `FilterGroups.chipsFor`;
-   Type · Genres · Era · Origin · Franchise are `FilterGroupPill`s
-   (open = accent fill, rotating chevron, per-group selected-count
-   badge). One group open at a time; tapping the open pill collapses it
-   (`openGroup = null` stays collapsed — selections survive); tapping
-   another swaps; a search-emptied group falls back to the first
-   available. Chips slide in via `expandVertically` + `fadeIn`
-   (FastOutSlowIn tweens) inside an `animateContentSize` column. The
-   old LazyVerticalGrid + GridItemSpan section grid is gone.
-4. **Filter sheet background:** container now wears
-   `categoryBackgroundWash()` (the soft page tint) instead of the
-   stronger card-level `categorySurface` that read as the raw hero
-   color; Material keeps its device surface.
-5. **Pastel-dark lane hero:** `headerAccent()` deepens pastel-dark
-   banners (lightness x0.80, floor 0.30), toggle-independent.
-6. **Hero picker rename:** "Sky azure hero" → "Azure hero" (option
-   label + disabled hint); behavior unchanged.
+1. **Sort pill capsule:** `CurioSortDropdown` pillShape 16dp → 50dp.
+2. **Controls row below the hero (both screens):** Sort dropdown + Search
+   pill moved OUT of the hero into a page-level row at
+   `heroTotal + 4.dp` (`onSurface` ink over `surfaceContainerHigh`
+   glass; Cabinet sort accent = active filter's `themedAccent` else
+   theme primary). Hidden while searching (hero morphs to the search
+   field + Cancel pill, matching the old hero-pill behavior). New
+   `CabinetControlsRowHeight`/`DatabaseControlsRowHeight` = 52dp;
+   `contentTop`, chip-bar `barTop`/rest/pinned tops, back-to-top padding
+   all add the row.
+3. **Category pill below them:** offset now `heroTotal +
+   ControlsRowHeight + 4.dp` in both screens; Cabinet hides it while
+   selecting.
+4. **Clean title hero:** `CabinetHeroHeader` dropped `backVisible`/
+   `onBack`/`trailing`; the back pill + action-pill row are gone and the
+   title sits at the TOP (flex spacer removed). `SettingsHeroHeader`
+   gained `titleAtTop: Boolean = false` (default keeps the other 12
+   callers unchanged); the Topic Database passes `titleAtTop = true`.
+5. **No Select pill; selection = Clear + Delete only:** the Cabinet
+   controls row shows just Clear/Select-all + Delete(N) while selecting
+   (the old cancel pill is gone).
+6. **Version:** `app/build.gradle.kts` versionName default 1.0.0 →
+   **1.0.1** (release tags still override via env; versionCode stays
+   date-based 20260919).
 
 ### Validation
-No Gradle locally (env rule). Brace balance (correct while-loop parser)
-+ `git diff --check` clean; CI on push is the gate. Changelog +
-`app/AGENTS.md` v33 bullet updated.
+No Gradle locally (env rule). Brace balance + `git diff --check` clean;
+CI on push is the gate. Changelog + `app/AGENTS.md` v34 bullet updated.
 
 ## Prior — hero/category-chip/cream-tint fixes + faster Home (v31)
 

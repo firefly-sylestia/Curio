@@ -68,7 +68,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.0.0"` (default; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
+- `versionName = "1.0.1"` (default, bumped by 0.1 in v34 per user request; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
@@ -351,6 +351,34 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v34 — Cabinet/Topic Browser hero tidy-up + version bump.**
+  (1) **Sort pill matches the other pills again:** `CurioSortDropdown`
+  corners are back to the fully-rounded 50dp capsule (the v31 16dp
+  corners read rectangular next to the capsule search/select pills);
+  the 42dp height + tight padding keep it slim. (2) **Category pill
+  below search+sort:** the Sort dropdown and Search pill moved OUT of
+  the hero into a controls row below the banner, and the Category pill
+  rides the row BELOW them (both `CabinetScreen` and
+  `TopicDatabaseScreen`; new `CabinetControlsRowHeight` /
+  `DatabaseControlsRowHeight` constants + updated `contentTop`,
+  chip-bar tops and back-to-top padding). The controls row hides while
+  searching (the hero morphs into the search field + Cancel pill, the
+  old hero-pill behavior). (3) **Hero = clean title header:**
+  `CabinetHeroHeader` dropped its `backVisible`/`onBack`/`trailing`
+  params — the conditional back pill and all action pills are gone from
+  the banner — and the title block sits at the TOP (no flex spacer).
+  `SettingsHeroHeader` gained `titleAtTop: Boolean = false` (default
+  keeps all 12 other callers exactly as before; the Topic Database
+  passes true and keeps its back pill since it's a pushed screen).
+  (4) **Select button removed:** the Cabinet's Select pill is gone —
+  long-press enters selection (already existed); the pills in the
+  controls row are page-level now (`onSurface` ink over
+  `surfaceContainerHigh` glass, sort accent = active filter's
+  `themedAccent` or theme primary). (5) **Selection shows only
+  Clear + Delete:** while selecting, the controls row shows just
+  Clear/Select-all + Delete(N) — no cancel, no category pill.
+  (6) **Version:** `versionName` default 1.0.0 → **1.0.1**
+  (`app/build.gradle.kts`; release tags still override via env).
 - **v33 — picker pills, filter-sheet accordion, pastel-dark lane hero.**
   (1) **Category picker proper pills:** the Original / New page tabs
   (`PickerPageTab`) and the quick-mix preset chips (`PickerPresetChip`)
