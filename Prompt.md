@@ -1,61 +1,51 @@
 # Prompt.md — Request log
 
-## Current request — Cabinet/Topic Browser hero tidy-up + version bump (v34)
+## Current request — typography pass: Lora serif + reveal hierarchy + icons (v35)
 
 ### What was asked
-1. The Cabinet and Topic Browser sort button shape still doesn't match the
-other pills.
-2. Why is the category below the hero — it was asked to be placed below
-the sorting and search pill.
-3. Remove that back pill that appears; move the header hero to the top.
-4. Remove the Select button (hold-to-select exists); only the Clear /
-Delete pills should appear while selected.
-5. Bump the version number by 0.1 and push.
+"Typography hierarchy and sizing of the font, new fonts, making the app
+more beautiful — focus on the Topic Reveal screen using bold etc. for a
+better look. New icons inside Topic Reveal and other places too. Suggest
+me." (plus: "suggest some in intro screen too")
 
-### Interpretation (no ask_user — the request was a direct instruction list)
-- The pills leave the hero: the Sort + Search pills move into a controls
-row BELOW the hero, and the Category pill rides the row UNDER them
-(category below search/sort, as asked). The hero becomes a clean title
-header with the title at the TOP ("move the header hero to the top").
-- The Cabinet's conditional back pill is removed (it only appeared when a
-filter/legacy view was active); the Topic Database KEEPS its back pill
-because it's a pushed sub-screen (its pill doesn't "appear" — it's
-always there and is the only way back).
-- The Cabinet's Select pill is removed — long-press enters selection
-(already existed). While selecting, ONLY the Clear/Select-all + Delete
-pills show (no cancel pill, no category pill).
-- Sort dropdown corners back to the fully-rounded 50dp capsule so it
-matches the other pills (42dp height + tight padding keep it slim).
+### User decisions (ask_user — "suggest me")
+Picked ALL proposed items: reveal type hierarchy, new serif font, reveal
+icon upgrades, global type polish, category chip on the reveal top bar,
+and the intro (onboarding) screen too.
 
 ### What was done
-1. **Sort pill capsule:** `CurioSortDropdown` pillShape 16dp → 50dp.
-2. **Controls row below the hero (both screens):** Sort dropdown + Search
-   pill moved OUT of the hero into a page-level row at
-   `heroTotal + 4.dp` (`onSurface` ink over `surfaceContainerHigh`
-   glass; Cabinet sort accent = active filter's `themedAccent` else
-   theme primary). Hidden while searching (hero morphs to the search
-   field + Cancel pill, matching the old hero-pill behavior). New
-   `CabinetControlsRowHeight`/`DatabaseControlsRowHeight` = 52dp;
-   `contentTop`, chip-bar `barTop`/rest/pinned tops, back-to-top padding
-   all add the row.
-3. **Category pill below them:** offset now `heroTotal +
-   ControlsRowHeight + 4.dp` in both screens; Cabinet hides it while
-   selecting.
-4. **Clean title hero:** `CabinetHeroHeader` dropped `backVisible`/
-   `onBack`/`trailing`; the back pill + action-pill row are gone and the
-   title sits at the TOP (flex spacer removed). `SettingsHeroHeader`
-   gained `titleAtTop: Boolean = false` (default keeps the other 12
-   callers unchanged); the Topic Database passes `titleAtTop = true`.
-5. **No Select pill; selection = Clear + Delete only:** the Cabinet
-   controls row shows just Clear/Select-all + Delete(N) while selecting
-   (the old cancel pill is gone).
-6. **Version:** `app/build.gradle.kts` versionName default 1.0.0 →
-   **1.0.1** (release tags still override via env; versionCode stays
-   date-based 20260919).
+1. **New font — Lora (OFL):** downloaded the Lora variable TTF
+   (wght 400–700, ~212KB) into `app/src/main/res/font/lora.ttf`;
+   `LoraFontFamily` (multi-entry variable pattern like geom) + top-level
+   `CurioEditorialBody` (17/27sp) and `CurioEditorialLead` (18/29sp
+   SemiBold) in CurioTypography.kt. Used for long-form reading text:
+   the reveal teaser/quick-fact, the ActionPromptCard instruction
+   (15/23sp), and the onboarding intro subtext (18/27sp on the rose
+   hero). Handwriting/journal fields keep Patrick Hand.
+2. **Global type polish:** `bodyLarge` letter-spacing 0.5 → 0.3sp;
+   `titleLarge` SemiBold → Bold.
+3. **Reveal hero hierarchy:** small-caps category eyebrow pill above the
+   34sp ExtraBold title (labelSmall ExtraBold, 1.5sp tracking); the
+   action badge's plain 8dp dot replaced by the verb's own icon
+   (`verbIcon(action.verb)`).
+4. **Reveal top bar:** frosted category chip (iconGlyph + caps
+   displayName, `weight(1f, fill=false)` keeps the pin/close group
+   end-aligned).
+5. **TeaserCard:** inverted hierarchy fixed — the titleSmall label
+   became a small-caps kicker (1.2sp tracking, category ink) and the
+   fact body reads in Lora; the flat AutoAwesome sparkle is now
+   `CurioIcons.Lightbulb` (new constant) in an accent-tinted circular
+   tile.
+6. **ActionPromptCard:** trailing `arrow_forward` affordance + serif
+   instruction.
+7. **Onboarding (intro):** the welcome/permissions/theme/search-engine
+   paragraphs read in Lora (18/27sp), matching the reveal's editorial
+   voice.
 
 ### Validation
 No Gradle locally (env rule). Brace balance + `git diff --check` clean;
-CI on push is the gate. Changelog + `app/AGENTS.md` v34 bullet updated.
+font file verified as TrueType (`00 01 00 00`). CI on push is the gate.
+Changelog + `app/AGENTS.md` v35 bullet updated.
 
 ## Prior — hero/category-chip/cream-tint fixes + faster Home (v31)
 

@@ -60,6 +60,44 @@ val PatrickHandFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * Lora — the editorial serif voice (OFL). A variable font (wght 400–700)
+ * bundled at `res/font/lora.ttf` (v35). Used for long-form reading text —
+ * the Topic Reveal teaser/quick-fact, action-card instructions, and intro
+ * copy — so Curio's UI pairs the geometric geom titles with a warm,
+ * curated-magazine body. Same multi-entry pattern as [GeomFontFamily]: the
+ * file is variable, so each weight entry resolves via the wght axis.
+ */
+val LoraFontFamily: FontFamily = FontFamily(
+    Font(R.font.lora, FontWeight.Normal),
+    Font(R.font.lora, FontWeight.Medium),
+    Font(R.font.lora, FontWeight.SemiBold),
+    Font(R.font.lora, FontWeight.Bold)
+)
+
+/**
+ * The editorial body voice — Lora at a relaxed reading size/leading, for
+ * quick-facts, instructions and long intro copy (v35). Slightly larger
+ * than bodyLarge with zero tracking for the serif's natural rhythm.
+ */
+val CurioEditorialBody: TextStyle = TextStyle(
+    fontFamily = LoraFontFamily,
+    fontWeight = FontWeight.Normal,
+    fontSize = 17.sp,
+    lineHeight = 27.sp,
+    letterSpacing = 0.sp
+)
+
+/** The editorial LEAD — a bolder serif line for the first sentence of a
+ *  fact or a highlighted takeaway (v35). */
+val CurioEditorialLead: TextStyle = TextStyle(
+    fontFamily = LoraFontFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 18.sp,
+    lineHeight = 29.sp,
+    letterSpacing = 0.sp
+)
+
+/**
  * Curio typography set — Material 3 defaults overridden with geom where appropriate.
  *
  * Display family uses geom (700+ weight). Body family uses M3 default sans.
@@ -105,9 +143,10 @@ val CurioTypography: Typography = Typography(
         lineHeight = 32.sp
     ),
     // Title — section headers, card titles, dialog titles
+    // v35 — stepped up to Bold for stronger section-title hierarchy.
     titleLarge = TextStyle(
         fontFamily = GeomFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 28.sp
     ),
@@ -131,7 +170,8 @@ val CurioTypography: Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        // v35 — tightened 0.5 → 0.3sp for a calmer, more modern read.
+        letterSpacing = 0.3.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,

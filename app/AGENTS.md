@@ -71,7 +71,7 @@ app/src/main/java/com/curio/app/
 - `versionName = "1.0.1"` (default, bumped by 0.1 in v34 per user request; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
-- Bundles `material_symbols_outlined.ttf` + `geom.ttf` directly in `app/src/main/res/font/`; neither depends on another module or source tree
+- Bundles `material_symbols_outlined.ttf` + `geom.ttf` + `lora.ttf` (v35 — the Lora editorial serif, OFL, variable wght 400–700, ~212KB) directly in `app/src/main/res/font/`; none depend on another module or source tree
 
 ### Curio Database (separate from FieldMind)
 - Curio installs as a separate app under `applicationId = "com.curio.app"` — its data directory is `/data/data/com.curio.app/databases/` (DB name TBD when persistence lands).
@@ -351,6 +351,30 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v35 — typography pass: Lora serif + reveal hierarchy + icons.**
+  (1) **New font:** `app/src/main/res/font/lora.ttf` (Lora variable,
+  OFL) bundled; `LoraFontFamily` (multi-entry variable pattern like
+  geom) + `CurioEditorialBody` (17/27sp) and `CurioEditorialLead`
+  (18/29sp SemiBold) top-level styles in CurioTypography.kt. Long-form
+  reading text now uses the serif: the reveal teaser/quick-fact body,
+  the ActionPromptCard instruction (15/23sp), and the onboarding intro
+  subtext (18/27sp on the rose hero). Handwriting/journal fields keep
+  Patrick Hand. (2) **Global type polish:** `bodyLarge` letter-spacing
+  0.5 → 0.3sp, `titleLarge` SemiBold → Bold. (3) **Reveal hero
+  hierarchy:** a small-caps category eyebrow pill (`displayName` caps,
+  labelSmall ExtraBold, 1.5sp tracking) sits above the 34sp title, and
+  the action badge's plain dot is replaced by the verb's own icon
+  (`verbIcon(action.verb)` — headphones/play/book/restaurant…).
+  (4) **Reveal top bar:** a frosted category chip (glyph + caps name,
+  `weight(1f, fill=false)` keeps the pin/close group end-aligned).
+  (5) **TeaserCard:** the inverted hierarchy is fixed — the
+  titleSmall label became a small-caps kicker (labelSmall ExtraBold,
+  1.2sp tracking, category ink) and the fact body reads in
+  `CurioEditorialBody`; the flat sparkle is now a lightbulb
+  (`CurioIcons.Lightbulb`, new constant) in an accent-tinted circular
+  tile. (6) **ActionPromptCard:** trailing `arrow_forward` affordance
+  + serif instruction. (7) **Onboarding:** intro paragraphs (welcome,
+  permissions, theme, search-engine slides) read in Lora.
 - **v34 — Cabinet/Topic Browser hero tidy-up + version bump.**
   (1) **Sort pill matches the other pills again:** `CurioSortDropdown`
   corners are back to the fully-rounded 50dp capsule (the v31 16dp
