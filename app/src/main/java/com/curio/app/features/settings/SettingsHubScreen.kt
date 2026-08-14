@@ -95,7 +95,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioDialogActionColor
-import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
@@ -164,7 +164,11 @@ fun SettingsHeroHeader(
     // v33 — pin the title block to the TOP of the banner instead of just
     // above the tear (screens whose action pills moved below the hero — the
     // Topic Database — read as a clean title header with controls beneath).
-    titleAtTop: Boolean = false
+    titleAtTop: Boolean = false,
+    // v42 — an optional control that rides INSIDE the banner beside the
+    // title (directly under the trailing pills): the Topic Database's
+    // Category pill. Screens that don't pass it render the plain title.
+    titleTrailing: (@Composable (ink: Color) -> Unit)? = null
 ) {
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
@@ -370,28 +374,40 @@ fun SettingsHeroHeader(
                                     )
                             )
                         } else {
-                            Column {
-                                Text(
-                                    title,
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = ink,
-                                    maxLines = 1
-                                )
-                                // v27 — experimental paper-title underline (two
-                                // short lines under the title text; OFF by default).
-                                if (AppPreferences.paperHeaderCutsState) {
-                                    PaperTitleLines(
-                                        ink = ink,
-                                        title = title,
-                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                            // v42 — the optional control (Topic Database's
+                            // Category pill) rides beside the title, directly
+                            // under the trailing pills.
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        title,
+                                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = ink,
+                                        maxLines = 1
+                                    )
+                                    // v27 — experimental paper-title underline (two
+                                    // short lines under the title text; OFF by default).
+                                    if (AppPreferences.paperHeaderCutsState) {
+                                        PaperTitleLines(
+                                            ink = ink,
+                                            title = title,
+                                            fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                                        )
+                                    }
+                                    Text(
+                                        subtitle,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = ink.copy(alpha = 0.82f),
+                                        maxLines = 1
                                     )
                                 }
-                                Text(
-                                    subtitle,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = ink.copy(alpha = 0.82f),
-                                    maxLines = 1
-                                )
+                                if (titleTrailing != null) {
+                                    titleTrailing(ink)
+                                }
                             }
                         }
                     }
@@ -437,11 +453,12 @@ fun SettingsHeroActionPill(
     // in every mode — creamy in light/pastel, brighter glass on the deep
     // dark banner. The glyph stays 20dp.
     val backdrop = backdropOverride ?: settingsRoseAccent()
-    // v31 — the glass lifts toward the PAGE BACKGROUND in light mode
-    // ([curioPillLift]) instead of stark white: the pill carries a small
-    // tint of the background shade, not a cream block. Dark keeps the
+    // v42 — the glass lifts toward the COLOR-TINTED page background
+    // ([curioPillTintLift] — a whisper of the brand rose instead of plain
+    // cream) so settings/profile buttons stop reading as flat cream blocks;
+    // AMOLED gets a soft grey glass instead of pitch black. Dark keeps the
     // white lift so the pill stays a brighter glass on the deep banner.
-    val fill = lerp(backdrop, curioPillLift(), if (emphasized) 0.24f else 0.38f)
+    val fill = lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),

@@ -136,9 +136,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // the (taller) hero.
     val chipsVisible = categoryFilterOpen || searchActive
     // v36 — the Sort/Search pills live back INSIDE the hero (their top
-    // row), so content reserves only the single Category pill row below
-    // the banner (and the chip bar only when the chips are open).
-    val contentTop = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight +
+    // row). v42 — the Category pill moved INSIDE the hero too (beside the
+    // title), so content reserves only the chip bar when the chips are
+    // open — no separate pill row below the banner.
+    val contentTop = DatabaseHeroTotalHeight +
         (if (chipsVisible) DatabaseChipBarHeight else 0.dp) + 12.dp
     val searchFocus = remember { FocusRequester() }
     LaunchedEffect(searchActive) {
@@ -604,7 +605,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // Floating just below the pinned chip bar, centered over the
                 // list — clear of the scroll-indicator strip on the right.
                 .align(Alignment.TopCenter)
-                .padding(top = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight + 74.dp)
+                .padding(top = DatabaseHeroTotalHeight + 74.dp)
         ) {
             Surface(
                 onClick = {
@@ -634,39 +635,12 @@ fun TopicDatabaseScreen(navController: NavController) {
             }
         }
 
-        // ── Category filter pill — v36: the Sort/Search pills live back
-        // inside the hero, so this pill rides its own fixed row just below
-        // the banner (the v31 position). Tapping it toggles the sticky
-        // category chips below (the same chips search shows). Page-level
-        // control — on-surface ink over a surface-high glass.
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .fillMaxWidth()
-                .offset(y = DatabaseHeroTotalHeight + 4.dp)
-                .padding(horizontal = 16.dp)
-        ) {
-            SettingsHeroActionPill(
-                onClick = { categoryFilterOpen = !categoryFilterOpen },
-                glyph = CurioIcons.Tune,
-                label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
-                ink = MaterialTheme.colorScheme.onSurface,
-                backdropOverride = MaterialTheme.colorScheme.surfaceContainerHigh,
-                // v30 — chevron flips with the chips: ▾ when closed, ▴ when open.
-                trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
-                    else CurioIcons.KeyboardArrowDown,
-                trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
-                    else "Show category chips",
-                emphasized = categoryFilterOpen
-            )
-        }
-
         // ── Floating category filter bar (v26) — the Cabinet's sticky chip
-        // bar language: rests just below the hero + Category pill row, then
-        // lifts, pops (0.97 → 1.0) and frosts in as the list scrolls,
-        // pinning just below the ragged tear while the topic rows pass
-        // underneath it. v30 — hidden by default; the Category pill or
-        // search reveal it, matching the Cabinet.
+        // bar language: rests just below the hero, then lifts, pops
+        // (0.97 → 1.0) and frosts in as the list scrolls, pinning just
+        // below the ragged tear while the topic rows pass underneath it.
+        // v30 — hidden by default; the Category pill (now INSIDE the hero,
+        // beside the title) or search reveal it, matching the Cabinet.
         if (chipsVisible) {
             DatabaseStickyChipBar(
                 listState = listState,
@@ -695,6 +669,22 @@ fun TopicDatabaseScreen(navController: NavController) {
             searchFocus = searchFocus,
             searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
             titleAtTop = true,
+            // v42 — the Category pill lives INSIDE the hero beside the
+            // title, directly under the Sort/Search pills.
+            titleTrailing = { ink ->
+                SettingsHeroActionPill(
+                    onClick = { categoryFilterOpen = !categoryFilterOpen },
+                    glyph = CurioIcons.Tune,
+                    label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
+                    ink = ink,
+                    // v30 — chevron flips with the chips: ▾ closed, ▴ open.
+                    trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
+                        else CurioIcons.KeyboardArrowDown,
+                    trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
+                        else "Show category chips",
+                    emphasized = categoryFilterOpen
+                )
+            },
             // Passed as a NAMED argument (not trailing-lambda syntax): the
             // @Composable slot isn't the last parameter, and the trailing
             // form fails to bind under K2.
@@ -807,15 +797,11 @@ private fun DatabaseFilterChip(
 // hero (not in a second hero row), so the hero keeps the shared settings
 // height and the header text never moves down.
 private val DatabaseHeroTotalHeight = SettingsHeroTotalHeight
-/** The Category pill row height below the hero — a 42dp pill + breathing
- *  room. v31 — the row lives OUTSIDE the hero so the banner height (and
- *  the header text) never change. v36 — the Sort/Search pills moved back
- *  INTO the hero, so this is the only row below the banner again. */
-private val DatabaseCategoryPillRowHeight = 52.dp
-/** Where the chip bar rests below the hero + Category pill row. */
-private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight + 4.dp
-/** Where the chip bar pins when scrolled — just below the Category row. */
-private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + DatabaseCategoryPillRowHeight + 2.dp
+/** Where the chip bar rests below the hero (v42 — the Category pill is
+ *  inside the banner now, so the bar sits directly under it). */
+private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + 4.dp
+/** Where the chip bar pins when scrolled — just below the hero. */
+private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + 2.dp
 /** Scroll distance (dp) before the chip bar fully pins (Cabinet pill style). */
 private val DatabaseChipStickyThreshold = 56.dp
 /** The chip bar's layout height — scroll content starts below it. */

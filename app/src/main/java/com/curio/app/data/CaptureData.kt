@@ -326,8 +326,10 @@ sealed class CaptureData {
      *  top-left corner in the EDITOR board pixel space (same space as
      *  [TileLayout] offsets; the saved view scales it with the collage).
      *  (-1,-1) = never dragged — renderers fall back to the deterministic
-     *  slot for that card index. */
-    data class QuotePos(val x: Float, val y: Float)
+     *  slot for that card index. v42 — [w] is the card's custom WIDTH in
+     *  the same raw board pixels (-1 = default slot width); legacy entries
+     *  and cards never resized keep the default via Gson's default value. */
+    data class QuotePos(val x: Float, val y: Float, val w: Float = -1f)
 
     /** Gallery Wall (§8.4): moodboard collage with caption and tile positions. */
     data class GalleryWall(

@@ -62,6 +62,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -178,14 +179,8 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
 @Composable
 private fun AppearanceSection(highlightKey: String? = null) {
     val context = LocalContext.current
-    // v31 — sky azure is greyed out (unavailable); if it was previously
-    // enabled, migrate the hero back to rose so the greyed option never
-    // stays in a selected-but-disabled state.
-    LaunchedEffect(Unit) {
-        if (AppPreferences.heroBlueState) {
-            AppPreferences.setHeroBlueEnabled(context, false)
-        }
-    }
+    // v42 — sky azure is fully back: selectable and the DEFAULT hero (the
+    // v31 grey-out + the migrate-back-to-rose effect are gone).
     val themeStyles = listOf(AppPreferences.THEME_STYLE_DEFAULT, AppPreferences.THEME_STYLE_AMOLED, AppPreferences.THEME_STYLE_MATERIAL)
     val themes = listOf(AppPreferences.THEME_LIGHT, AppPreferences.THEME_DARK, AppPreferences.THEME_SYSTEM)
     val themeStyle = AppPreferences.themeStyleState
@@ -225,19 +220,16 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        // v31 — the hero picker is a two-option control (Rose hero / Azure
-        // hero; v33 — "Sky azure" shortened to "Azure"). Azure stays
-        // VISIBLE but greyed out (can't be picked — the "Material · coming
-        // soon" pattern), and the whole control greys out while Adaptive
-        // Hero (below) is active, since the lane then owns the hero color.
+        // v42 — the hero picker is a two-option control (Rose hero / Azure
+        // hero), both fully selectable — azure is back and now the DEFAULT.
+        // The whole control greys out while Adaptive Hero (below) is active,
+        // since the lane then owns the hero color.
         SettingsRowPulse(highlightKey == "appearance-hero") {
             CompactSegmentedRow(
                 "Hero",
                 listOf("Rose hero", "Azure hero"),
                 if (AppPreferences.heroBlueState) 1 else 0,
-                enabled = !AppPreferences.heroFollowLaneState,
-                disabledIndices = setOf(1),
-                disabledHint = "Azure hero · unavailable for now"
+                enabled = !AppPreferences.heroFollowLaneState
             ) { index ->
                 AppPreferences.setHeroBlueEnabled(context, index == 1)
             }
@@ -667,9 +659,10 @@ private fun CompactSegmentedRow(
 
 @Composable
 private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
-    // AMOLED: the scheme primary is the coral brand color, so the ON
-    // track lit pink. Pitch-black glass instead (black track, white knob,
-    // hairline white rim) — the app's AMOLED control language.
+    // v42 — AMOLED: the ON state stays COLORFUL (the coral track + white
+    // knob read as an active control on black; the old pitch-black track
+    // with a hairline rim looked like a dead slab). OFF keeps the grey
+    // glass track so the two states read clearly.
     val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(modifier = Modifier.weight(1f)) {
@@ -682,9 +675,12 @@ private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, 
             onCheckedChange = onCheckedChange,
             colors = if (isAmoled) {
                 SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onSurface,
-                    checkedTrackColor = Color.Black,
-                    checkedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = CurioColors.CoralBlush,
+                    checkedBorderColor = Color.Transparent,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                    uncheckedTrackColor = Color(0xFF2A2A2A),
+                    uncheckedBorderColor = Color(0xFF2A2A2A)
                 )
             } else {
                 SwitchDefaults.colors()

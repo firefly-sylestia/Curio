@@ -1,5 +1,6 @@
 package com.curio.app.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioIcon
 
@@ -55,11 +58,19 @@ fun CurioSettingsCard(
         // whisper of the background so Profile/Settings cards melt into the
         // page. The step stays large enough that text (onSurface roles)
         // keeps its contrast in light, dark, pastel and AMOLED.
-        color = lerp(
-            MaterialTheme.colorScheme.surfaceContainerLow,
-            MaterialTheme.colorScheme.background,
-            0.30f
-        ),
+        // v42 — the background tint is COLOR-TINTED now: light/pastel cards
+        // carry a whisper of the brand rose ([curioPillTintLift]) instead of
+        // flat cream, and AMOLED cards lift to a soft GREY GLASS instead of
+        // pure black (raised grey plates, not black slabs).
+        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color(0xFF2A2A2A), 0.55f)
+        } else {
+            lerp(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                curioPillTintLift(),
+                0.30f
+            )
+        },
         // AMOLED: tonalElevation overlays the scheme's primary (the coral
         // brand color) onto the container, which washed the pitch-black cards
         // with a faint rose tint. The black-glass shine edge keeps them
@@ -80,19 +91,21 @@ fun CurioSettingsCard(
 @Composable
 fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        // v15 — AMOLED: the brand coral reads as a weird red accent on pure
-        // black, so the header chip becomes a sleek neutral glass plate.
+        // v42 — the header chip is COLOR-TINTED in every theme now: light
+        // keeps the soft coral wash, and AMOLED keeps a muted coral glass
+        // plate with coral ink instead of a neutral grey chip — the
+        // settings/profile cards keep their color identity on black.
         val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = if (isAmoled) MaterialTheme.colorScheme.surfaceVariant
+            color = if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
                     else CurioColors.CoralBlush.copy(alpha = 0.16f),
             modifier = Modifier.size(38.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 CurioIcon(
                     icon, null,
-                    tint = if (isAmoled) MaterialTheme.colorScheme.onSurface else curioRoseInk(),
+                    tint = curioRoseInk(),
                     size = 20.dp
                 )
             }
@@ -104,12 +117,27 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
     }
 }
 
-/** Navigable setting row — icon + label/subtitle + forward arrow. */
+/** Navigable setting row — accent-tinted icon chip + label/subtitle + forward
+ *  arrow. v42 — the icon sits in a soft coral-tinted chip (matching the
+ *  card-header language) instead of a plain grey glyph, so every row reads
+ *  as a tappable colored control rather than a flat cream line. */
 @Composable
 fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) {
+    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            CurioIcon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 21.dp)
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
+                        else CurioColors.CoralBlush.copy(alpha = 0.14f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(icon, null, tint = curioRoseInk(), size = 20.dp)
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.bodyLarge)
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.DropdownMenu
@@ -20,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.isCurioDarkTheme
 
@@ -46,6 +48,9 @@ fun CurioDropdownMenu(
     modifier: Modifier = Modifier,
     accent: Color = MaterialTheme.colorScheme.primary,
     shape: Shape = RoundedCornerShape(20.dp),
+    // v42 — menus default WIDER than the anchor pill (the old menu hugged
+    // the pill's narrow width and read thin); callers can override.
+    minWidth: Dp = 236.dp,
     header: (@Composable () -> Unit)? = null,
     content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit
 ) {
@@ -60,7 +65,7 @@ fun CurioDropdownMenu(
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = modifier,
+        modifier = modifier.widthIn(min = minWidth),
         containerColor = container,
         shape = shape,
         tonalElevation = 3.dp,
@@ -107,7 +112,9 @@ fun CurioDropdownItem(
                 .fillMaxWidth()
                 .clickable(enabled = enabled, onClick = onClick)
                 .background(rowFill)
-                .padding(horizontal = 14.dp, vertical = 12.dp)
+                // v42 — taller rows: 14dp vertical gives the menu presence
+                // (was 12dp — the old menu read thin and cramped).
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
             if (leadingIcon != null) {
                 leadingIcon()

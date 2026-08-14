@@ -6,6 +6,7 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -693,6 +695,9 @@ fun MoodBoardFloatingCards(
     offsetY: Float = 0f,
     onEditCard: ((Int) -> Unit)? = null,
     onMoveCard: ((index: Int, x: Float, y: Float) -> Unit)? = null,
+    // v42 — commits a resized card's new width (RAW board px — the caller
+    // divides the render-space width by the board scale, mirroring onMove).
+    onResizeCard: ((index: Int, w: Float) -> Unit)? = null,
     // v7.22 — parallel per-card flag: false = the card renders BELOW the
     // board, so it must NOT float on the collage. Legacy entries lack the
     // list → null → every card floats (the v7.19 look).
@@ -715,6 +720,9 @@ fun MoodBoardFloatingCards(
         val saved = positions.getOrElse(i) { CaptureData.QuotePos(-1f, -1f) }
         val placed = if (saved.x >= 0f && saved.y >= 0f) saved
             else CaptureData.QuotePos(slot.x, slot.y)
+        // v42 — a resized card (saved.w >= 0) keeps its custom WIDTH; cards
+        // never resized use the deterministic slot width as before.
+        val cardW = if (saved.w >= 0f) saved.w else slot.w
         MoodBoardFloatingCard(
             text = quote,
             style = styles.getOrElse(i) { NotePaperStyle.RULED },
@@ -722,7 +730,7 @@ fun MoodBoardFloatingCards(
             rotation = tilts.getOrElse(i) { (i * 4.2f % 8f) - 4f },
             x = placed.x * scale + offsetX,
             y = placed.y * scale + offsetY,
-            w = slot.w * scale,
+            w = cardW * scale,
             h = slot.h * scale,
             boardW = canvasWPx * scale,
             boardH = canvasHPx * scale,
@@ -730,6 +738,9 @@ fun MoodBoardFloatingCards(
             onEdit = onEditCard?.let { edit -> { edit(i) } },
             onMove = onMoveCard?.let { move ->
                 { rx, ry -> move(i, (rx - offsetX) / scale, (ry - offsetY) / scale) }
+            },
+            onResize = onResizeCard?.let { resize ->
+                { rw -> resize(i, rw / scale) }
             }
         )
     }
@@ -758,11 +769,17 @@ private fun MoodBoardFloatingCard(
     // [MoodBoardFloatingCards.seed]).
     seed: Int? = null,
     onEdit: (() -> Unit)? = null,
-    onMove: ((Float, Float) -> Unit)? = null
+    onMove: ((Float, Float) -> Unit)? = null,
+    // v42 — commit a resized card's new width (render-space px; the caller
+    // divides by the board scale to store raw board px).
+    onResize: ((Float) -> Unit)? = null
 ) {
     val density = LocalDensity.current
     var dragDelta by remember { mutableStateOf(Offset.Zero) }
     var dragging by remember { mutableStateOf(false) }
+    // v42 — the live resize preview (render-space px delta on the width).
+    var resizeDelta by remember { mutableStateOf(0f) }
+    var resizing by remember { mutableStateOf(false) }
     // The editing preview is capped at two visual lines, so a card's
     // measured height can only exceed the slot by one extra line. Keeping
     // drag bounds tied to its measured height (rather than the slot height)
@@ -779,15 +796,25 @@ private fun MoodBoardFloatingCard(
     val currentBoardH by rememberUpdatedState(boardH)
     val currentOnEdit by rememberUpdatedState(onEdit)
     val currentOnMove by rememberUpdatedState(onMove)
+    val currentOnResize by rememberUpdatedState(onResize)
 
     val renderX = (x + dragDelta.x).coerceIn(0f, (boardW - w).coerceAtLeast(0f))
     val renderY = (y + dragDelta.y).coerceIn(0f, (boardH - currentCardH).coerceAtLeast(0f))
+    // v42 — width clamps: never smaller than half the slot (taps still hit
+    // it), never larger than the board itself. Captured via
+    // rememberUpdatedState so the never-restarting grip gesture reads the
+    // LATEST clamps (a dragged/resized card moves them).
+    val minW = (w * 0.5f).coerceAtLeast(60f)
+    val maxW = (boardW - x).coerceAtLeast(minW)
+    val currentMinW by rememberUpdatedState(minW)
+    val currentMaxW by rememberUpdatedState(maxW)
+    val renderW = (w + resizeDelta).coerceIn(currentMinW, currentMaxW)
 
     Box(
         modifier = Modifier
             .offset { IntOffset(renderX.roundToInt(), renderY.roundToInt()) }
-            .zIndex(if (dragging) 55f else 50f)
-            .width(with(density) { w.toDp() })
+            .zIndex(if (dragging || resizing) 55f else 50f)
+            .width(with(density) { renderW.toDp() })
             .then(
                 if (currentOnEdit != null) {
                     // Editor cards keep the board slot's minimum height, but
@@ -884,6 +911,54 @@ private fun MoodBoardFloatingCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+        // v42 — resize grip, EDITOR ONLY: a small bottom-end handle that
+        // drags the card's width. Commits the width in render px via
+        // [currentOnResize] on release; the parent divides by the board
+        // scale to store raw board px. The grip's own pointerInput sits
+        // AFTER the card's drag/click so a touch on the grip never moves
+        // the card (the grip consumes the gesture).
+        if (currentOnResize != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(4.dp)
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.30f))
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { resizing = true },
+                            onDragEnd = {
+                                resizing = false
+                                // Commit the LIVE width (render px).
+                                val commitW = (currentW + resizeDelta)
+                                    .coerceIn(currentMinW, currentMaxW)
+                                currentOnResize?.invoke(commitW)
+                                resizeDelta = 0f
+                            },
+                            onDragCancel = {
+                                resizing = false
+                                resizeDelta = 0f
+                            },
+                            onDrag = { change, amount ->
+                                change.consume()
+                                // Only the width changes (a horizontal drag).
+                                val nw = (currentW + resizeDelta + amount.x)
+                                    .coerceIn(currentMinW, currentMaxW)
+                                resizeDelta = nw - currentW
+                            }
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = CurioIcons.PhotoSizeSelectLarge,
+                    contentDescription = "Resize quote",
+                    tint = Color.White,
+                    size = 12.dp
+                )
+            }
         }
     }
 }

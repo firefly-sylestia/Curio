@@ -210,8 +210,9 @@ object AppPreferences {
 
     // Sky-azure hero variant (v27l) — when ON, the shared torn hero
     // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
-    // azure instead of the rose-wood. Default OFF (rose stays).
-    var heroBlueState by mutableStateOf(false)
+    // azure instead of the rose-wood. v42 — azure is back AND the DEFAULT
+    // (the v31 grey-out is gone); rose is now the opt-out.
+    var heroBlueState by mutableStateOf(true)
         private set
 
     // v30 — "Hero follows Spin lane" (Appearance): when ON and the Spin
@@ -611,9 +612,9 @@ object AppPreferences {
     }
 
     // ── Sky-azure hero (v27l) ─────────────────────────────────────────
-    /** Whether the shared torn hero wears the airy pastel azure (default off). */
+    /** Whether the shared torn hero wears the airy pastel azure (v42: default ON). */
     fun isHeroBlueEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HERO_BLUE, false)
+        prefs(context).getBoolean(KEY_HERO_BLUE, true)
 
     fun setHeroBlueEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_BLUE, enabled).apply()

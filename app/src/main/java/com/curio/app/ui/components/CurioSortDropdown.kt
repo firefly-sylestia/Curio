@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.curioPillTintLift
 
 /** One selectable sort field for [CurioSortDropdown]. */
 data class CurioSortOption(
@@ -93,11 +93,15 @@ fun CurioSortDropdown(
     // pastel it reads creamy — either way the full-ink glyphs pop instead
     // of sinking into a dark mauve pill (the v27r 0.35/0.55 ink-lean fills
     // were too dark in light + pastel).
-    val fill = lerp(backdrop, curioPillLift(), if (emphasized) 0.24f else 0.38f)
-    // v33 — fully-rounded capsule (50dp) to match the action pills beside
-    // it (search/select/category); the v31 16dp corners read rectangular
-    // next to them. The 42dp height + tight padding keep it slim.
-    val pillShape = RoundedCornerShape(50)
+    // v42 — the fill lifts toward the COLOR-TINTED glass ([curioPillTintLift]
+    // — a whisper of the brand rose instead of plain cream) so the sort pill
+    // matches the hero pills' new tinted look; AMOLED gets grey glass.
+    val fill = lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
+    // v42 — less-rounded 18dp corners: the v33 50dp capsule read as a
+    // bulbous pill next to the other controls (the user's "radius is too
+    // much" report); 18dp reads as a proper raised button while still
+    // matching the pill family. The 42dp height + tight padding stay.
+    val pillShape = RoundedCornerShape(18.dp)
 
     Box(modifier = modifier) {
         Surface(

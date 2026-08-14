@@ -118,6 +118,7 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.pet.PetLandmark
@@ -873,12 +874,13 @@ private fun ProfileHeroAction(
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    // v42 — OPAQUE lifted-glass fill, the stat pane's construction: a solid
-    // lerp toward white (dark twin on AMOLED) so the pill never dissolves
-    // into the banner and the elevation shadow stays clean behind it.
+    // v42 — OPAQUE COLOR-TINTED glass, the stat pane's construction: a solid
+    // lerp toward the brand-tinted lift ([curioPillTintLift] — a whisper of
+    // the rose instead of plain white, so pastel azure/rose heroes keep
+    // their color and never wash to cream); AMOLED keeps the rose twin.
     val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     val pillColor = if (amoled) lerp(fill, CurioColors.HomeRosewood, 0.30f)
-                    else lerp(fill, Color.White, 0.18f)
+                    else lerp(fill, curioPillTintLift(), 0.18f)
     Surface(
         onClick = onClick ?: {},
         enabled = onClick != null,
@@ -1116,8 +1118,11 @@ private fun ProgressAndAchievementsCard(
         )
         Surface(
             onClick = onOpenQuests,
-            color = if (amoled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
-                    else CurioColors.CoralBlush.copy(alpha = 0.09f),
+            // v42 — the quest plate is COLOR-TINTED glass: light/pastel get
+            // the brand-tinted lift (a coral whisper, not flat cream), and
+            // AMOLED gets a soft grey glass instead of a faint black slab.
+            color = if (amoled) Color(0xFF2A2A2A)
+                    else lerp(CurioColors.CoralBlush, curioPillTintLift(), 0.55f),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {

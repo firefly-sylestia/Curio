@@ -428,6 +428,29 @@ fun curioPillLift(): Color =
     if (isCurioDarkTheme()) Color.White else MaterialTheme.colorScheme.background
 
 /**
+ * v42 — the COLOR-TINTED glass lift for settings/profile-family controls:
+ * the shared buttons/cards lift toward a whisper of the brand rose instead
+ * of plain cream, so they stop reading as flat cream blocks. LIGHT returns
+ * the background rose-tinted ~8% (the "small tint of the background shade"
+ * language from [curioPillLift], now with color); DARK keeps the white
+ * lift; AMOLED returns a soft GREY GLASS (a faint container step) instead
+ * of pure black, so AMOLED controls read as raised grey plates rather
+ * than pitch-black slabs with hairline borders.
+ */
+@Composable
+fun curioPillTintLift(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return Color(0xFF2A2A2A)
+    }
+    if (isCurioDarkTheme()) return Color.White
+    return lerp(
+        MaterialTheme.colorScheme.background,
+        curioRoseInk(),
+        0.08f
+    )
+}
+
+/**
  * Readable dialog ACTION ink. In light mode the scheme primary is the pale
  * coral-pink brand color that washes out on a light dialog, so actions flip
  * to a deep same-hue rose for real contrast; dark and Material keep the

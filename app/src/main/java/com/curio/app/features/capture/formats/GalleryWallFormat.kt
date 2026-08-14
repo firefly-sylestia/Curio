@@ -464,20 +464,32 @@ private fun MoodBoardCanvas(
     // margins (displayed outside the visible board — the "inaccurate" small-
     // view dragging). boardMaxX/Y = the collage's raw extent (full canvas in
     // the full-screen editor and on empty boards).
-    // Seed/grow the crop extent only when the tile count changes (initial
-    // load, add, or remove). A drag changes tile coordinates but does not
-    // change the viewport geometry. Removing a tile deliberately does not
-    // shrink the extent, so the crop remains stable for the editing session.
+    // Seed the crop extent ONCE per editing session and never re-grow it:
+    // a fresh board seeds to the full canvas (1:1 — new tiles land inside
+    // and the viewport never moves), while an edit-mode board seeds to the
+    // saved collage's extent so the fit matches the saved look. The extent
+    // stays FROZEN afterward — adding a tile must not re-fit (re-scale) the
+    // whole board, because that made every existing tile visibly jump and
+    // the board appear to "re-size mid-edit". Dragging never changes the
+    // extent either, so the scale/offset stay constant during a drag and
+    // the tile follows the finger 1:1 (no snaps). Removing a tile keeps the
+    // extent so the crop remains stable for the session.
     LaunchedEffect(tiles.size, canvasWPx, canvasHPx) {
-        if (!fullScreen && tiles.isNotEmpty()) {
-            val extentX = tiles.maxOfOrNull {
-                finiteOr(it.offsetXPx) + positiveFiniteOr(it.widthPx, 0f)
-            }?.takeIf { it.isFinite() } ?: 0f
-            val extentY = tiles.maxOfOrNull {
-                finiteOr(it.offsetYPx) + positiveFiniteOr(it.heightPx, 0f)
-            }?.takeIf { it.isFinite() } ?: 0f
-            stableBoardMaxX = maxOf(stableBoardMaxX, extentX)
-            stableBoardMaxY = maxOf(stableBoardMaxY, extentY)
+        if (!fullScreen && stableBoardMaxX <= 0f) {
+            if (tiles.isNotEmpty()) {
+                val extentX = tiles.maxOfOrNull {
+                    finiteOr(it.offsetXPx) + positiveFiniteOr(it.widthPx, 0f)
+                }?.takeIf { it.isFinite() } ?: 0f
+                val extentY = tiles.maxOfOrNull {
+                    finiteOr(it.offsetYPx) + positiveFiniteOr(it.heightPx, 0f)
+                }?.takeIf { it.isFinite() } ?: 0f
+                stableBoardMaxX = extentX
+                stableBoardMaxY = extentY
+            } else if (canvasWPx > 0f && canvasHPx > 0f) {
+                // Fresh board: the visible canvas IS the board (1:1).
+                stableBoardMaxX = canvasWPx
+                stableBoardMaxY = canvasHPx
+            }
         }
     }
     val liveExtentX = tiles.maxOfOrNull {
@@ -671,6 +683,37 @@ private fun MoodBoardCanvas(
                                 // a real image, so route through the dialog.
                                 pendingRemoveTileId = id
                             },
+                            // v42 — grow-in-place: a photo that came out too
+                            // small to pinch (two fingers can't fit on the
+                            // tile) gets a tap-to-enlarge control that scales
+                            // the tile up on the board, keeping its center.
+                            onGrow = { id ->
+                                val idx = tiles.indexOfFirst { it.id == id }
+                                if (idx >= 0) {
+                                    val t = tiles[idx]
+                                    val factor = 1.45f
+                                    val growW = (positiveFiniteOr(t.widthPx, minTilePx) * factor)
+                                        .coerceIn(minTilePx, boardMaxX.coerceAtLeast(minTilePx))
+                                    val growH = (positiveFiniteOr(t.heightPx, minTilePx) * factor)
+                                        .coerceIn(minTilePx, boardMaxY.coerceAtLeast(minTilePx))
+                                    val newW = positiveFiniteOr(growW, minTilePx)
+                                    val newH = positiveFiniteOr(growH, minTilePx)
+                                    val cw = positiveFiniteOr(boardMaxX, canvasWPx)
+                                    val ch = positiveFiniteOr(boardMaxY, canvasHPx)
+                                    // Keep the CENTER fixed so the growth feels
+                                    // anchored, then clamp into the board.
+                                    val newX = (finiteOr(t.offsetXPx) + (t.widthPx - newW) / 2f)
+                                        .coerceIn(0f, (cw - newW).coerceAtLeast(0f))
+                                    val newY = (finiteOr(t.offsetYPx) + (t.heightPx - newH) / 2f)
+                                        .coerceIn(0f, (ch - newH).coerceAtLeast(0f))
+                                    tiles[idx] = t.copy(
+                                        offsetXPx = newX,
+                                        offsetYPx = newY,
+                                        widthPx = newW,
+                                        heightPx = newH
+                                    )
+                                }
+                            },
                             onZoomIn = { uri, tx, ty, tw, th, vw, vh ->
                                 zoomState.zoomIn(
                                     uri,
@@ -774,7 +817,10 @@ private fun MoodBoardCanvas(
                         offsetX = boardOffsetX,
                         offsetY = boardOffsetY,
                         onEditCard = onEditQuote,
-                        onMoveCard = { i, x, y -> quoteState.setPosition(i, x, y) }
+                        onMoveCard = { i, x, y -> quoteState.setPosition(i, x, y) },
+                        // v42 — a drag on the card's resize grip commits the
+                        // card's new width (raw board px) to the entry.
+                        onResizeCard = { i, w -> quoteState.setWidth(i, w) }
                     )
                 }
 
@@ -1041,6 +1087,9 @@ private fun MoodBoardEditorTile(
     minTilePx: Float,
     onBringToFront: (Int) -> Unit,
     onRemove: (Int) -> Unit,
+    // v42 — grow a too-small tile in place (tap-to-enlarge for the pinch
+    // that two fingers can't reach).
+    onGrow: (Int) -> Unit,
     // v7.24 — (uri, tileX, tileY, widthPx, heightPx, viewW, viewH) in
     // VIEWPORT px so the single-image zoom glides from the tile's spot.
     onZoomIn: (String, Float, Float, Float, Float, Float, Float) -> Unit,
@@ -1260,6 +1309,28 @@ private fun MoodBoardEditorTile(
                 CurioIcon(
                     name = CurioIcons.Search,
                     contentDescription = "Zoom image",
+                    tint = Color.White,
+                    size = 16.dp
+                )
+            }
+        }
+
+        // ── Grow-in-place button (bottom-start) — v42: enlarges a too-small
+        // photo on the board (two fingers can't pinch a tiny tile). Mirrors
+        // the × on the opposite corner.
+        Surface(
+            onClick = { onGrow(tile.id) },
+            shape = CircleShape,
+            color = Color.Black.copy(alpha = 0.48f),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(6.dp)
+                .size(32.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                CurioIcon(
+                    name = CurioIcons.PhotoSizeSelectLarge,
+                    contentDescription = "Enlarge image",
                     tint = Color.White,
                     size = 16.dp
                 )

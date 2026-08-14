@@ -351,6 +351,38 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v42 — mood-board editor stability + resizable quotes + tinted-glass styling.**
+  (1) **Mood-board glitches fixed** (`GalleryWallFormat`): the inline
+  board's crop extent is seeded ONCE per session (`stableBoardMaxX/Y` —
+  fresh boards seed to the full canvas 1:1, edit-mode boards to the saved
+  collage) and never re-grows, so adding a photo no longer re-fits and
+  re-scales the whole board ("board re-sizes mid-edit") and drags follow
+  the finger 1:1 (no snaps). (2) **Resizable quote boxes**: `QuotePos`
+  gained `w` (raw board px, -1 = default slot width); `QuoteCardsState`
+  gained a parallel `widths` list + `setWidth`; `MoodBoardFloatingCards`
+  takes `onResizeCard` and `MoodBoardFloatingCard` renders an editor-only
+  bottom-end grip (drag to widen, clamped to half-slot..board width,
+  committed via the live callback). (3) **Grow-in-place tiles**: each
+  photo tile has a bottom-start enlarge button that scales the tile ×1.45
+  around its center (for photos too small to pinch). (4) **Category pill
+  inside the hero**: the Cabinet (`CabinetHeroHeader` `titleTrailing`
+  slot) and Topic Database (`SettingsHeroHeader` `titleTrailing`) now
+  render the Category pill beside the title, directly under the sort/search
+  pills; the below-hero pill rows + their height reservations are gone
+  (chip bars sit directly under the banner). (5) **Sort pill**: corner
+  radius 50dp → 18dp (the capsule read bulbous), and `CurioDropdownMenu`
+  gained `minWidth` (236dp default) + taller 14dp rows. (6) **Azure hero
+  re-enabled + default**: the grey-out and the migrate-back-to-rose effect
+  are gone; `heroBlueState`/`isHeroBlueEnabled` default ON. (7)
+  **Color-tinted glass** (the "creamy" fix): new `curioPillTintLift()`
+  (light = background rose-tinted 8%, dark = white, AMOLED = `#2A2A2A`
+  grey glass) replaces `curioPillLift()` in `SettingsHeroActionPill`,
+  `CabinetHeroActionPill`, `CurioSortDropdown`, `CurioSettingsCard`
+  (AMOLED: `surfaceContainerHigh`→grey lerp), `CurioSettingsRow` (icon
+  now sits in a coral chip), and Profile's quest plate + hero pills.
+  `CurioCardHeader`'s chip keeps a muted coral plate in AMOLED (was
+  neutral grey), and AMOLED switches light up coral when ON (grey glass
+  track when OFF).
 - **v42 — merged badge shelf + quest-paths card grid + profile polish.**
   (1) **Merged badge shelf:** `CurioBadges.kt` gains `MergedChainBadge`
   + `mergedChainBadges()` — ONE medal per quest CHAIN (category) showing

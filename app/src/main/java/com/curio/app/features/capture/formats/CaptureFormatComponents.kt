@@ -533,6 +533,10 @@ class QuoteCardsState(
     initialPositions: List<CaptureData.QuotePos> = emptyList(),
     initialOnBoard: List<Boolean> = emptyList()
 ) {
+    // v42 — per-card width (raw board px; -1 = default slot width). Kept as
+    // a parallel list like the other card properties so the parallel-list
+    // discipline holds and legacy entries stay on the default slot width.
+    private val initialWidths = initialPositions.map { it.w }
     private val limitedInitial = initialQuotes.mapIndexed { index, quote ->
         limitQuoteContent(quote, initialSpans.getOrNull(index).orEmpty())
     }
@@ -570,6 +574,11 @@ class QuoteCardsState(
         addAll(initialPositions)
         while (size < quotes.size) add(CaptureData.QuotePos(-1f, -1f))
     }
+    // v42 — per-card WIDTH in raw board px (-1 = default slot width).
+    val widths = mutableStateListOf<Float>().apply {
+        addAll(initialWidths)
+        while (size < quotes.size) add(-1f)
+    }
     // v7.22 — per-card placement flag: true = floats ON the board (added via
     // the board's Quote chip), false = renders BELOW the board (added via
     // the bottom Add-quote button). Parallel to quotes; legacy entries lack
@@ -591,6 +600,7 @@ class QuoteCardsState(
         colors.add(color)
         // A fresh card starts at the deterministic slot until dragged.
         positions.add(CaptureData.QuotePos(-1f, -1f))
+        widths.add(-1f)
         this.onBoard.add(onBoard)
     }
 
@@ -602,13 +612,23 @@ class QuoteCardsState(
         if (index < styles.size) styles.removeAt(index)
         if (index < colors.size) colors.removeAt(index)
         if (index < positions.size) positions.removeAt(index)
+        if (index < widths.size) widths.removeAt(index)
         if (index < onBoard.size) onBoard.removeAt(index)
     }
 
     /** v7.20 — the mood board commits a dragged card's new top-left here. */
     fun setPosition(index: Int, x: Float, y: Float) {
         if (index !in positions.indices) return
-        positions[index] = CaptureData.QuotePos(x, y)
+        // v42 — preserve the card's custom width when the position moves.
+        positions[index] = CaptureData.QuotePos(x, y, widths.getOrElse(index) { -1f })
+    }
+
+    /** v42 — the mood board commits a resized card's new width (raw px). */
+    fun setWidth(index: Int, w: Float) {
+        if (index !in widths.indices) return
+        widths[index] = w
+        val p = positions.getOrElse(index) { CaptureData.QuotePos(-1f, -1f) }
+        positions[index] = CaptureData.QuotePos(p.x, p.y, w)
     }
 
     fun setText(index: Int, text: String, cardSpans: List<TextSpan>) {
