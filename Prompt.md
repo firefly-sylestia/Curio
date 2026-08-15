@@ -1,6 +1,26 @@
 # Prompt.md — Request log
 
-## Current request — the sort pill finally fixed properly (v85)
+## Current request — Profile quests button dark treatment (v86)
+
+### What was asked
+"the quest button in profile didnt get the dark treatment just the quests
+button in profile"
+
+### What was done
+Profile's quest plate (`ProgressAndAchievementsCard`) was missed by the v81
+pass: it kept the pale `CoralBlush` glass (`lerp(CoralBlush, curioPillTintLift(),
+0.55)`) and the `cardGradient(CoralBlush)` icon box, which glare on the
+black page. Both now flip in dark:
+- Plate fill → deep rose glass (`lerp(HomeRosewoodDark, Black, 0.30)`) with
+  the `curioGlassEdge` raised read.
+- Icon box gradient → `cardGradient(HomeRosewoodDark)` so the white trophy
+  stays readable.
+Light mode unchanged. Title/subtitle/arrow were already theme-ink.
+
+### Validation
+Balance OK, `git diff --check` clean. No Gradle locally — CI on push.
+
+## Prior — the sort pill finally fixed properly (v85)
 
 ### What was asked
 "okay from the last many commits we have been trying to fix the sort pill in

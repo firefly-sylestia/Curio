@@ -401,6 +401,14 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v86 — Profile quests button gets its dark treatment.** The quest
+  plate in `ProgressAndAchievementsCard` was missed by v81: it kept the
+  pale `CoralBlush` glass (`lerp(CoralBlush, curioPillTintLift(), 0.55)`)
+  + `cardGradient(CoralBlush)` icon box, which glare on black. Dark now
+  flips the plate to deep rose glass (`lerp(HomeRosewoodDark, Black,
+  0.30)`) + `curioGlassEdge`, and the icon box to
+  `cardGradient(HomeRosewoodDark)` so the white trophy reads. Light
+  unchanged.
 - **v85 — the sort pill is finally a true sibling of the search pill.**
   Root cause was TWO problems: (1) the sort pill carried glyph + label +
   chevron + divider + arrow (~135dp) next to the icon-only Search pill

@@ -89,6 +89,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
@@ -1185,9 +1186,19 @@ private fun ProgressAndAchievementsCard(
             onClick = onOpenQuests,
             // v42 — the quest plate is COLOR-TINTED glass: the brand-tinted
             // lift (a coral whisper, not flat cream).
-            color = lerp(CurioColors.CoralBlush, curioPillTintLift(), 0.55f),
+            // v85 — dark: the pale coral glass would glare on the black
+            // page, so the plate flips to a DEEP rose glass (the reversed
+            // light-in-dark contract) with the glass edge for the raised
+            // read.
+            color = if (isCurioDarkTheme()) {
+                lerp(CurioColors.HomeRosewoodDark, Color.Black, 0.30f)
+            } else {
+                lerp(CurioColors.CoralBlush, curioPillTintLift(), 0.55f)
+            },
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .curioGlassEdge(RoundedCornerShape(16.dp))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
@@ -1199,7 +1210,12 @@ private fun ProgressAndAchievementsCard(
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(
-                            Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))
+                            // v85 — dark: the deep rose gradient keeps the
+                            // white trophy readable (the pale coral top
+                            // washed it out on the black page).
+                            Brush.verticalGradient(CurioGradients.cardGradient(
+                                if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush
+                            ))
                         ),
                     contentAlignment = Alignment.Center
                 ) {
