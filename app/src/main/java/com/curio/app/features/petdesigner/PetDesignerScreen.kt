@@ -372,6 +372,24 @@ fun PetDesignerScreen(navController: NavController) {
                     )
                     )
             )
+            // v102 — the added bob must actually PLAY: nothing else
+            // references the "happy" animation on its own (the animation
+            // gallery is hidden from the Pet Studio UI and the Pet Life
+            // routines never pick that id), so register an IDLE custom
+            // action — the floating pet then performs the bob whenever
+            // it's been untouched for a few seconds. The filter makes
+            // re-imports idempotent (the same id replaces the old action).
+            auto = auto.copy(
+                customActions = auto.customActions.filter { it.id != "auto_bob" } +
+                    CustomPetAction(
+                        id = "auto_bob",
+                        name = "Auto bob",
+                        trigger = PetActionTrigger(PetActionTrigger.IDLE, 8),
+                        animationId = "happy",
+                        dialogueLines = emptyList(),
+                        enabled = true
+                    )
+            )
             pushUndo()
             design = auto
             AppPreferences.setPetDesign(context, auto.toText())

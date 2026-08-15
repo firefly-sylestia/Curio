@@ -401,6 +401,18 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v102 — auto-import bob actually plays.** The v64 auto-import added a
+  "happy" bob animation to `design.animations` and saved it, but NOTHING
+  played it — the animation editor is hidden from the Pet Studio (only
+  PETS/EDITOR/SETTINGS pages) and the Pet Life routines never pick
+  animationId "happy" (glance/wave/stretch/sidepeek/stumble/look_up/
+  backturn/victory/inspect only) — so "auto animate on import" was inert.
+  Fix: the auto-import now ALSO registers an IDLE-triggered
+  `CustomPetAction` ("auto_bob", idle/8s, animationId "happy", no lines)
+  on the built design; the floating pet's existing idle custom-action loop
+  (CurioFloatingPet) then performs the bob whenever untouched for 8s (60s
+  rest between fires). Re-imports are idempotent (the filter replaces the
+  same id).
 - **v101 — subtle top-only pill glow, as an option.** (1) AppPreferences:
   new `pillGlowSubtleState` (DEFAULT ON) + `KEY_PILL_GLOW_SUBTLE` +
   `isPillGlowSubtleEnabled` / `setPillGlowSubtleEnabled`, seeded in

@@ -1,6 +1,34 @@
 # Prompt.md — Request log
 
-## Current request — subtle top-only pill glow, as an option (v101)
+## Current request — auto-import bob actually plays (v102)
+
+### What was asked
+"now the auto animate on import doesnt work, so fix that in pet animation."
+
+### Root cause
+The auto-import (v64) adds a "happy" bob animation to `design.animations`
+and saves it — but NOTHING ever plays it: the Pet Studio's animation
+editor is hidden from the UI (only PETS/EDITOR/SETTINGS pages exist), and
+the floating pet's Pet Life routines never reference animationId "happy"
+(they use glance/wave/stretch/sidepeek/stumble/look_up/backturn/victory/
+inspect). The added bob was inert — the pet never performed it, so "auto
+animate on import" visibly did nothing.
+
+### What was done
+PetDesignerScreen auto-import now ALSO registers an IDLE-triggered
+`CustomPetAction` ("auto_bob", idle/8s, animationId "happy", no lines) on
+the built design. The floating pet's existing idle custom-action loop
+(CurioFloatingPet) plays `design.animations["happy"]` whenever the pet has
+been untouched for 8s (then rests 60s) — the imported pet finally performs
+the bob. Re-imports are idempotent (the filter replaces the same id).
+
+### Validation
+`git diff --check` clean; CustomPetAction/PetActionTrigger/PetAnimation
+already imported; the action serializes via toText (`customAction=` line)
+and parses back via toParsedOr (empty `lines=` → no speech). No Gradle
+locally (env rule) — CI on push.
+
+## Prior — subtle top-only pill glow, as an option (v101)
 
 ### What was asked
 1. "decrease that white glow in pills and keep it top only" — the dark-mode
