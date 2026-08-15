@@ -38,12 +38,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -93,6 +88,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioNavTint
+import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioSortDropdown
 import com.curio.app.ui.components.CurioSortOption
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
@@ -864,50 +860,16 @@ private fun CabinetHeroHeader(
                         label = "searchExpand"
                     ) { active ->
                         if (active) {
-                            OutlinedTextField(
-                                value = searchQuery,
-                                onValueChange = onSearchQueryChange,
-                                placeholder = { Text("Search captures…") },
-                                leadingIcon = {
-                                    CurioIcon(CurioIcons.Search, null, tint = ink, size = 20.dp)
-                                },
-                                trailingIcon = {
-                                    if (searchQuery.isNotEmpty()) {
-                                        IconButton(onClick = { onSearchQueryChange("") }) {
-                                            CurioIcon(
-                                                CurioIcons.Close,
-                                                "Clear search",
-                                                tint = ink.copy(alpha = 0.85f),
-                                                size = 20.dp
-                                            )
-                                        }
-                                    }
-                                },
-                                singleLine = true,
-                                shape = RoundedCornerShape(50),
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = ink),
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                keyboardActions = KeyboardActions(onSearch = {}),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    // v29 — frosted-glass container (banner
-                                    // lifted toward white) + full-ink borders:
-                                    // the old ink-at-16% container + dark
-                                    // border mix read too dark in light and
-                                    // pastel.
-                                    focusedContainerColor = lerp(fill, Color.White, 0.30f),
-                                    unfocusedContainerColor = lerp(fill, Color.White, 0.30f),
-                                    focusedBorderColor = ink.copy(alpha = 0.65f),
-                                    unfocusedBorderColor = ink.copy(alpha = 0.40f),
-                                    cursorColor = ink,
-                                    focusedTextColor = ink,
-                                    unfocusedTextColor = ink,
-                                    focusedPlaceholderColor = ink.copy(alpha = 0.72f),
-                                    unfocusedPlaceholderColor = ink.copy(alpha = 0.72f),
-                                    focusedLeadingIconColor = ink,
-                                    unfocusedLeadingIconColor = ink,
-                                    focusedTrailingIconColor = ink.copy(alpha = 0.85f),
-                                    unfocusedTrailingIconColor = ink.copy(alpha = 0.85f)
-                                ),
+                            // v90 — unified One UI search bar: banner ink +
+                            // frosted category glass through the shared
+                            // CurioSearchField (same 46dp height + hairline
+                            // as every other search bar in the app).
+                            CurioSearchField(
+                                query = searchQuery,
+                                onQueryChange = onSearchQueryChange,
+                                placeholder = "Search captures…",
+                                ink = ink,
+                                fill = lerp(fill, Color.White, 0.30f),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(searchFocus)

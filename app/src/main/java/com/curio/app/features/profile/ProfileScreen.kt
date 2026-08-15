@@ -1190,11 +1190,12 @@ private fun ProgressAndAchievementsCard(
             // page, so the plate flips to a DEEP rose glass (the reversed
             // light-in-dark contract) with the glass edge for the raised
             // read.
-            color = if (isCurioDarkTheme()) {
-                lerp(CurioColors.HomeRosewoodDark, Color.Black, 0.30f)
-            } else {
-                lerp(CurioColors.CoralBlush, curioPillTintLift(), 0.55f)
-            },
+            // v90 — DYNAMIC like the rest of the profile options: the plate
+            // wears the shared profile-family frosted glass (curioPillTintLift
+            // — cream-rose in light, the near-white rose glass on black in
+            // dark) instead of the fixed coral/rose fills that read as a
+            // different color next to the other options.
+            color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, curioPillTintLift(), 0.55f),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()

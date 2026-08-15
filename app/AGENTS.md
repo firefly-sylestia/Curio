@@ -401,6 +401,31 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v91 — dynamic pills sweep + unified One UI search bars.** (1) Profile
+  quest plate: the fixed solid coral (light) / deep rose (dark) fills are
+  gone — the plate wears the shared profile-family frosted glass
+  (`lerp(surfaceContainerHigh, curioPillTintLift(), 0.55)`, cream-rose in
+  light / near-white rose glass on black) like the other profile options;
+  the rose icon box stays (colored-icon-block pattern). (2) Quests
+  "In progress" button: solid rose is only for the actionable "Start ·
+  +XP" CTA; the informational state is a tinted surface glass with
+  theme-aware rose ink + `curioGlassEdge` in dark. (3) Category picker
+  shadow leak ROOT CAUSE: the tear's idle tab/preset fills were
+  TRANSLUCENT (`pickerHeroInk.copy(alpha = 0.16f)`) so the 3dp elevation
+  shadow bled through the pill — now OPAQUE ink-glass
+  (`lerp(pickerHeroFill, pickerHeroInk, 0.16f)`); preset chips fuller
+  (12dp vertical, glyph 16); tear height 184 → 208dp (the two-line title +
+  tabs + presets were squished); full-screen picker preset row spacing
+  4/1 → 8/2 and tabs 1/4 → 2/6; "Manage categories" link flipped from the
+  pale scheme primary to theme-aware `onSurface`. (4) `CurioSearchField`
+  is now THE One UI search component — fixed 46dp height (the hero pill
+  size), 50dp capsule, ink hairline border, frosted fill + glass edge in
+  dark, with new `ink`/`fill` params for heroes (banner ink + frosted
+  category glass). The three duplicated hero `OutlinedTextField` searches
+  (Cabinet hero, Settings/Topic-DB hero header, Spin filter sheet) now
+  route through it — every search bar in the app is one size + style,
+  dark-correct via resolved ink/fill. Dead OutlinedTextField/IconButton/
+  KeyboardOptions imports removed from the swapped files.
 - **v90 — sort pill rebuilt as a category-style labeled pill.** The v85
   compact icon-only blob (glyph + divider + arrow, ~55dp) hid the sort
   label in the menu header and read as a lone glyph chip next to the

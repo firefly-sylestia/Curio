@@ -322,9 +322,10 @@ fun CategoryPickerScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                // v28 — the preset row hugs the Original/New tabs (the old
-                // 6dp vertical padding made the two rows read far apart).
-                .padding(top = 4.dp, bottom = 1.dp),
+                // v28 — the preset row hugs the Original/New tabs.
+                // v90 — unhugged a touch (4/1 → 8/2) so the fuller preset
+                // chips aren't squished against the tabs.
+                .padding(top = 8.dp, bottom = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             deckPresets.forEach { preset ->
@@ -365,7 +366,9 @@ fun CategoryPickerScreen(navController: NavController) {
 
         // ── v27i — page tabs: Original vs the new lanes ─────────────
         Row(
-            modifier = Modifier.padding(top = 1.dp, bottom = 4.dp),
+            // v90 — a touch more room under the tabs (1/4 → 2/6) so the
+            // two rows breathe.
+            modifier = Modifier.padding(top = 2.dp, bottom = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

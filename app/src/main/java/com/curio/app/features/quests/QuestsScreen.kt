@@ -104,6 +104,7 @@ import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.pet.CurioPetHeroCard
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.PetLandmark
@@ -574,18 +575,26 @@ private fun CurrentQuestCard(
         Spacer(Modifier.height(8.dp))
         val done = CurioQuests.stageProgress(stage)
         val chain = CurioQuests.Chains.firstOrNull { it.stages.any { s -> s.id == stage.id } }
+        // v90 — the actionable CTA stays the solid brand rose; the
+        // informational "In progress" state flips to a DYNAMIC tinted glass
+        // (theme-aware rose ink on the surface glass, glass edge in dark) —
+        // no more solid pink block for a non-action.
+        val actionable = stage.navRoute != null
         Surface(
             onClick = { stage.navRoute?.let(onNavigate) },
             shape = RoundedCornerShape(50),
-            color = curioRoseInk(),
-            enabled = stage.navRoute != null,
-            modifier = Modifier.fillMaxWidth()
+            color = if (actionable) curioRoseInk()
+                    else lerp(MaterialTheme.colorScheme.surfaceContainerHigh, curioRoseInk(), 0.12f),
+            enabled = actionable,
+            modifier = Modifier
+                .fillMaxWidth()
+                .curioGlassEdge(RoundedCornerShape(50))
         ) {
             Text(
-                if (stage.navRoute != null) "Start · +${stage.xpReward} XP"
-                else "In progress · ${done.coerceAtMost(stage.target)}/${stage.target}",
+                text = if (actionable) "Start · +${stage.xpReward} XP"
+                       else "In progress · ${done.coerceAtMost(stage.target)}/${stage.target}",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
+                color = if (actionable) Color.White else curioRoseInk(),
                 modifier = Modifier.padding(vertical = 9.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )

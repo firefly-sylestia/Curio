@@ -139,14 +139,17 @@ fun PickerPresetChip(
             .categoryEdgeShine(shape, accent = accent)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            // v90 — fuller pill: 10 → 12dp vertical padding and the glyph
+            // 14 → 16dp so the chips stop reading thin (the old slim chips
+            // let the 3dp elevation shadow show around them).
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CurioIcon(
                 name = glyph,
                 contentDescription = null,
-                size = 14.dp,
+                size = 16.dp,
                 tint = if (selected) accentInk else idleInk
             )
             Text(

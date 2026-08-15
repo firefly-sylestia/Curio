@@ -49,8 +49,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,10 +62,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -104,7 +99,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -145,6 +139,7 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
+import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioColors
@@ -1833,45 +1828,15 @@ private fun FilterSheet(
             //    frosted glass at night).
             val searchGlass = lerp(filterHeroFill, Color.White, 0.30f)
             val searchInk = cat.categoryInk()
-            OutlinedTextField(
-                value = filterQuery,
-                onValueChange = { filterQuery = it },
-                placeholder = {
-                    Text(
-                        "Search filters",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                        color = searchInk.copy(alpha = 0.7f)
-                    )
-                },
-                leadingIcon = {
-                    CurioIcon(CurioIcons.Search, null, tint = searchInk, size = 20.dp)
-                },
-                trailingIcon = {
-                    if (filterQuery.isNotEmpty()) {
-                        IconButton(onClick = { filterQuery = "" }) {
-                            CurioIcon(
-                                CurioIcons.Close,
-                                "Clear search",
-                                tint = searchInk.copy(alpha = 0.85f),
-                                size = 20.dp
-                            )
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(50),
-                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, color = searchInk),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {}),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = searchGlass,
-                    unfocusedContainerColor = searchGlass,
-                    focusedBorderColor = searchInk.copy(alpha = 0.65f),
-                    unfocusedBorderColor = searchInk.copy(alpha = 0.40f),
-                    cursorColor = searchInk,
-                    focusedTextColor = searchInk,
-                    unfocusedTextColor = searchInk
-                ),
+            // v90 — unified One UI search bar: the frosted category glass +
+            // dynamic category ink through the shared CurioSearchField (the
+            // old 18sp big-type text dropped for the uniform size).
+            CurioSearchField(
+                query = filterQuery,
+                onQueryChange = { filterQuery = it },
+                placeholder = "Search filters",
+                ink = searchInk,
+                fill = searchGlass,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 10.dp)
@@ -4166,7 +4131,10 @@ private fun CategoryPickerSheet(
     // v83 — the tear GREW (~184dp) to hold the Original/New tabs + the
     // quick-mix presets inside the banner, so the deck controls ride the
     // hero instead of sitting as a plain row on the wash below it.
-    val pickerHeroHeight = 184.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // v90 — the tear grew again (184 → 208dp): the two-line 28sp title +
+    // status chip + Original/New tabs + preset row all ride the banner, and
+    // the old 184dp crushed the preset chips into a squished, thin row.
+    val pickerHeroHeight = 208.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -4319,7 +4287,10 @@ private fun CategoryPickerSheet(
                                 accent = pickerHeroInk,
                                 accentInk = pickerHeroFill,
                                 idleInk = pickerHeroInk,
-                                idleFill = pickerHeroInk.copy(alpha = 0.16f)
+                                // v90 — OPAQUE idle glass (the old 16% alpha
+                                // let the 3dp elevation shadow bleed through
+                                // the pill — "shadow leaking from above").
+                                idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f)
                             )
                             PickerPageTab(
                                 label = "New",
@@ -4329,7 +4300,8 @@ private fun CategoryPickerSheet(
                                 accent = pickerHeroInk,
                                 accentInk = pickerHeroFill,
                                 idleInk = pickerHeroInk,
-                                idleFill = pickerHeroInk.copy(alpha = 0.16f)
+                                // v90 — OPAQUE idle glass (shadow-leak fix).
+                                idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f)
                             )
                         }
                         Spacer(Modifier.height(8.dp))
@@ -4355,7 +4327,10 @@ private fun CategoryPickerSheet(
                                     accent = pickerHeroInk,
                                     accentInk = pickerHeroFill,
                                     idleInk = pickerHeroInk,
-                                    idleFill = pickerHeroInk.copy(alpha = 0.16f),
+                                    // v90 — OPAQUE idle glass (shadow-leak
+                                    // fix — the thin translucent chips showed
+                                    // the shadow behind them).
+                                    idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f),
                                     onClick = {
                                         if (preset.clearAll) {
                                             multiSelectMode = true
@@ -4553,13 +4528,15 @@ private fun CategoryPickerSheet(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                         ) {
-                            CurioIcon(CurioIcons.DragHandle, null, tint = MaterialTheme.colorScheme.primary, size = 18.dp)
+                            CurioIcon(CurioIcons.DragHandle, null, tint = MaterialTheme.colorScheme.onSurface, size = 18.dp)
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 // v26 — renamed; now opens Manage Categories.
+                                // v90 — theme-aware neutral ink (the old scheme
+                                // primary read as a pale pink link on the sheet).
                                 text = "Manage categories",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }

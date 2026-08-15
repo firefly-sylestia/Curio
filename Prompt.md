@@ -1,6 +1,59 @@
 # Prompt.md — Request log
 
-## Current request — sort pill rebuilt as a category-style labeled pill (v90)
+## Current request — dynamic pills sweep + unified One UI search bars (v91)
+
+### What was asked
+"make the quests and achievement pill be dynamic like the rest of the
+profile options it looks odd with a differnt color. also the in progress
+button inside quest its too pink and not dynamic. and in category selector
+page. the original and new pill the shadow below its leaking from above.
+and the presets pill row chips they are squished and also so thin that the
+shadow behind them is visible and manage category tet color is too pink.
+and the search bar it needs a proper theme match too in dark mode. make all
+the search bar the same size with a unified one ui style design."
+
+### What was done
+1. **Profile quest plate → dynamic frosted glass** — the plate was fixed
+   solid coral (light) / deep rose (dark); now it wears the shared
+   profile-family frosted glass `lerp(surfaceContainerHigh,
+   curioPillTintLift(), 0.55)` — cream-rose in light, the near-white rose
+   glass on black in dark — matching the other profile options. The rose
+   icon box stays (colored icon-block pattern, like SettingsNavCard's
+   DustyBlue block).
+2. **Quests "In progress" button → dynamic** — the solid rose block is
+   only for the actionable "Start · +XP" CTA; the informational
+   "In progress · n/target" state is now a tinted surface glass with
+   theme-aware rose ink + `curioGlassEdge` in dark (no more pink block
+   for a non-action).
+3. **Category picker (Original/New + presets)**:
+   - Shadow leak root cause: the tear's idle fills were TRANSLUCENT
+     (`pickerHeroInk.copy(alpha = 0.16f)`) — the 3dp elevation shadow
+     bled through the pill ("leaking from above" / "shadow behind
+     visible"). Now OPAQUE ink-glass (`lerp(pickerHeroFill,
+     pickerHeroInk, 0.16f)`).
+   - Preset chips fuller: vertical padding 10 → 12dp, glyph 14 → 16dp.
+   - Tear height 184 → 208dp so the two-line title + tabs + presets stop
+     being squished; full-screen picker preset row spacing 4/1 → 8/2 and
+     tabs 1/4 → 2/6.
+   - "Manage categories" link: scheme primary (pale pink) → theme-aware
+     `onSurface`.
+4. **Unified One UI search bar** — `CurioSearchField` is now THE search
+   component (v90): fixed 46dp height (same as the hero pills), 50dp
+   capsule, ink hairline border, frosted fill, glass edge in dark, with
+   new `ink`/`fill` params so heroes pass banner ink + frosted category
+   glass. The three duplicated hero `OutlinedTextField` searches (Cabinet
+   hero, Settings/Topic-DB hero header, Spin filter sheet) now route
+   through it — every search bar in the app is one size and one style,
+   dark-correct via the resolved ink/fill. Removed the dead
+   OutlinedTextField/KeyboardOptions/IconButton imports from the three
+   files.
+
+### Validation
+All 8 touched files balanced, `git diff --check` clean, no dangling
+KeyboardOptions/IconButton/OutlinedTextField refs, `TextOverflow` still
+used in Settings. No Gradle locally — CI on push.
+
+## Prior — sort pill rebuilt as a category-style labeled pill (v90)
 
 ### What was asked
 "whats the proble bruh you can sclearly see one pill is soo wrong and thits
