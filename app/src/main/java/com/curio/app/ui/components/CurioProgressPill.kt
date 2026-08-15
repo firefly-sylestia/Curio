@@ -45,7 +45,6 @@ import com.curio.app.data.TopicProgressStore
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogContainerColor
-import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlin.math.roundToInt
 
 /**
@@ -119,10 +118,9 @@ fun CurioProgressPill(
             if (showBar) {
                 // v66 — visible in pastel light mode: [accent] resolves to a
                 // light pastel twin that washes out against the tinted pill,
-                // so the bar fill uses the deep category ink in light mode
-                // (hue-preserving, readable) and the accent in dark mode.
-                // The track lifts to a clearly visible alpha too.
-                val barFill = if (isCurioDarkTheme()) accent else ink
+                // so the bar fill uses the deep category ink (hue-preserving,
+                // readable). v78 — light only (the dark accent fill is gone).
+                val barFill = ink
                 // Slim progress bar — the category accent fills on the pill.
                 Box(
                     modifier = Modifier

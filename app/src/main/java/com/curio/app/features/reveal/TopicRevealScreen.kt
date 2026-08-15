@@ -138,7 +138,6 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.lightAccentTint
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
@@ -588,8 +587,8 @@ fun TopicRevealScreen(
             // glance next to the pin/close buttons (weight leaves the
             // end-aligned group in place).
             // v36 — theme-aware treatment: the chip wears the category's
-            // tinted card surface (resolves light/dark/pastel/AMOLED),
-            // matching the page cards instead of the flat surfaceVariant.
+            // tinted card surface, matching the page cards instead of the
+            // flat surfaceVariant.
             Surface(
                 shape = RoundedCornerShape(50),
                 color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
@@ -769,13 +768,8 @@ fun TopicRevealScreen(
         // read as a separate white/creamy slab at the bottom — most visible
         // during the open fade, right behind the tags). With the band
         // matching the page, the reveal reads as one continuous surface and
-        // only the tags chips stand out. Material keeps its device surface,
-        // and AMOLED stays pure black.
-        val bandPaper = when (AppPreferences.themeStyleState) {
-            AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surface
-            AppPreferences.THEME_STYLE_MATERIAL -> MaterialTheme.colorScheme.surfaceContainer
-            else -> cat.categoryBackgroundWash()
-        }
+        // only the tags chips stand out.
+        val bandPaper = cat.categoryBackgroundWash()
         val bandInk = MaterialTheme.colorScheme.onSurface
         // v9.x — NavHost reserves the missing navbar footprint for Reveal
         // without drawing the actual bar. This band is painted down into
@@ -1426,14 +1420,7 @@ private fun RevealStartButton(
     // v10 — fixed height matches the paired "Express yourself" button so
     // the two actions read as a unified row instead of mismatched siblings.
     val startShape = RoundedCornerShape(50)
-    // v32 — pastel dark: the muted pastel fill washed the label out; the
-    // fill is deepened via [themedButtonFill] and the label flips to the
-    // bright cream-white the heroes use.
-    val contentInk = if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
-        pastelFillInk(cat.themedButtonFill())
-    } else {
-        cat.themedButtonInk()
-    }
+    val contentInk = cat.themedButtonInk()
     Button(
         onClick = onClick,
         enabled = enabled,
@@ -1500,11 +1487,7 @@ private fun RevealAlreadyButton(
     // categorySurface falls back to the device surface so it stays a proper
     // Material control.
     val surface = cat.categorySurface()
-    // v32 — pastel dark: the Express yourself label flips to the bright
-    // cream-white so it reads crisply on the tinted dark surface.
-    val ink = if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
-        pastelFillInk(surface)
-    } else if (enabled) {
+    val ink = if (enabled) {
         cat.categoryInk()
     } else {
         cat.categoryInk().copy(alpha = 0.40f)
@@ -1580,7 +1563,6 @@ private fun HeroCard(
     val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
 
     val action = resolved?.exploreAction
-    val dark = isCurioDarkTheme()
     // v28 — the reveal hero uses the SAME accent source as the Spin ticket
     // (themedAccent, NOT the headerAccent() deepen): the hero morphs out of
     // the ticket, so its gradient must read pixel-identical. The old
@@ -1593,7 +1575,7 @@ private fun HeroCard(
     // cardGradient-only recipe diverged from the ticket in pastel light
     // (the ticket's second stop IS the tint, cardGradient's is only 30%
     // toward it) — the morph visibly shifted color on light pastel pages.
-    val heroGradient = if (AppPreferences.pastelColorsState && !dark) {
+    val heroGradient = if (AppPreferences.pastelColorsState) {
         listOf(
             lerp(accent, Color.Black, 0.05f),
             lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
@@ -1616,9 +1598,7 @@ private fun HeroCard(
     // v51 — light mode still read whitish: pastel light now leans only 60%
     // toward white (a real accent-kiss — the lane's tint clearly shows
     // through the frost) and non-pastel light deepens to 42%.
-    val pillGlass = if (dark) {
-        lerp(accent, curioPillLift(), 0.55f)
-    } else if (AppPreferences.pastelColorsState) {
+    val pillGlass = if (AppPreferences.pastelColorsState) {
         lerp(accent, Color.White, 0.60f)
     } else {
         lerp(accent, Color.White, 0.42f)
@@ -1628,7 +1608,7 @@ private fun HeroCard(
     //    reads as the same surface during the morph. When heroGradientOn
     //    is enabled, the hero gets the same top-lit diagonal sweep as the
     //    deck's front ticket; otherwise a plain vertical gradient.
-    val pastelLightHero = AppPreferences.pastelColorsState && !dark
+    val pastelLightHero = AppPreferences.pastelColorsState
     // v25 — the Enhanced main gradient experiment PASSED: always ON, so its
     // toggle was removed from Experiments and the read is hardcoded here.
     val heroGradientOn = true
@@ -1702,38 +1682,21 @@ private fun HeroCard(
             val density = LocalDensity.current
             val wPx = with(density) { maxWidth.toPx() }
             val hPx = with(density) { maxHeight.toPx() }
-            // v15 — AMOLED mirror of the Spin ticket's black glass, so the
-            // shared-element morph stays pixel-identical (the ticket carries
-            // the accent glow; the reveal hero must match it exactly).
-            val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+            // v15 — the hero brush mirrors the Spin ticket exactly so the
+            // shared-element morph stays pixel-identical.
             val heroBrush = if (heroBlendOn) {
                 // v10 — dual-accent blend: category accent meets a warm
-                // golden companion in a multi-stop vertical gradient
-                // (works across all theme styles).
+                // golden companion in a multi-stop vertical gradient.
                 Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
             } else if (heroGradientOn) {
-                val stops = if (isAmoled) {
-                    listOf(
-                        lerp(Color.Black, accent, 0.30f),
-                        lerp(Color.Black, accent, 0.10f),
-                        Color.Black
-                    )
+                val crown = lerp(heroGradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+                val base = lerp(heroGradient.last(), Color.Black, 0.06f)
+                val stops = if (heroGradient.size > 2) {
+                    listOf(crown) + heroGradient.drop(1).dropLast(1) + listOf(base)
                 } else {
-                    val crown = lerp(heroGradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
-                    val base = lerp(heroGradient.last(), Color.Black, 0.06f)
-                    if (heroGradient.size > 2) {
-                        listOf(crown) + heroGradient.drop(1).dropLast(1) + listOf(base)
-                    } else {
-                        CurioGradients.hslGradientStops(crown, base, 3)
-                    }
+                    CurioGradients.hslGradientStops(crown, base, 3)
                 }
                 Brush.linearGradient(stops, start = Offset(0f, 0f), end = Offset(wPx, hPx))
-            } else if (isAmoled) {
-                Brush.verticalGradient(
-                    0f to lerp(Color.Black, accent, 0.24f),
-                    0.55f to lerp(Color.Black, accent, 0.08f),
-                    1f to Color.Black
-                )
             } else {
                 Brush.verticalGradient(heroGradient)
             }
@@ -2138,8 +2101,7 @@ private fun SentimentButton(
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        // v52b — theme-aware inactive fill: the color-tinted glass
-        // (rose-kissed in light, white in dark, grey glass on AMOLED)
+        // v52b — theme-aware inactive fill: the color-tinted rose glass
         // instead of the generic surfaceVariant.
         color = if (active) accent else curioPillTintLift(),
         // v27q — flat 2dp: selection reads through the solid accent fill.

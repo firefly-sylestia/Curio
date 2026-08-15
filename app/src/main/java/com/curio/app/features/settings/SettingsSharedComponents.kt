@@ -31,13 +31,11 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 
 /**
  * v27q — content ink that reads on the SOLID [curioDialogActionColor]
- * selected-row fill: white on the rose/primary rows everywhere except
- * AMOLED, where the action color IS the white onSurface, so the content
- * flips to black.
+ * selected-row fill. v78 — light Curio only: white on the rose/primary
+ * rows (the AMOLED black flip is gone with dark mode).
  */
 @Composable
-private fun dialogRowSelectedInk(): Color =
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black else Color.White
+private fun dialogRowSelectedInk(): Color = Color.White
 
 @Composable
 fun AudioQualityDialog(

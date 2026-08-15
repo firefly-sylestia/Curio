@@ -101,7 +101,6 @@ import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.readableLightInk
 import com.curio.app.ui.theme.themedAccent
@@ -212,11 +211,9 @@ fun SettingsHeroHeader(
                     .offset(y = bannerHeight - 18.dp)                    .clip(sheetShape)                    .background(
                     // v68 — the paper under the tear picks up a whisper of
                     // the hero's own color instead of a flat cream, so the
-                    // lip always reads tinted with the banner. AMOLED keeps
-                    // the rose twin (black-on-black would hide the seam).
-                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                        CurioColors.HomeRosewood.copy(alpha = 0.45f)
-                    else lerp(Color(0xFFFDFCF9), fill, 0.10f)
+                    // lip always reads tinted with the banner. v78 — light
+                    // only (the AMOLED rose twin is gone with dark mode).
+                    lerp(Color(0xFFFDFCF9), fill, 0.10f)
                 )
 
         )
@@ -584,34 +581,19 @@ fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): C
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
-    // Material and AMOLED headers use the active scheme's semantic roles
-    // instead of the legacy rose fill. This keeps hero headers coherent with
-    // dynamic wallpaper colors and preserves a restrained dark AMOLED surface.
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-        return MaterialTheme.colorScheme.primary
-    }
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        // Pure black — no grey/primary tint: on OLED the banner is a true
-        // black plate and the rose accent comes through the watermark
-        // collage + back pill instead of a tinted fill.
-        return Color.Black
-    }
+    // v78 — light Curio only (the Material/AMOLED scheme-role branches and
+    // the dark rose-wood twin are gone with dark mode).
     // v30 — "Hero follows Spin lane": the shared hero wears the Spin
     // lane's category accent (the Cabinet's filtered-hero language) instead
-    // of the rose/azure, in the Curio style only (Material/AMOLED keep
-    // their scheme roles above).
+    // of the rose/azure.
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
-        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
-        else CurioColors.HomeAzure
+        return CurioColors.HomeAzure
     }
     val base = toHsl(CurioColors.HomeRosewood)
-    return if (isCurioDarkTheme()) {
-        // Shared dark hero companion used by Settings, Cabinet, and Onboarding.
-        CurioColors.HomeRosewoodDark
-    } else if (AppPreferences.pastelColorsState) {
+    return if (AppPreferences.pastelColorsState) {
         val pinkHue = (base.h - 15f + 360f) % 360f
         // v26 — pastel headers get a touch more saturation (about +5%) so
         // the rose banners pop a little without leaving the airy family.
@@ -631,15 +613,10 @@ fun settingsReadableInk(fill: Color): Color {
     // lane banner in non-pastel). The lane branch resolves like every
     // category hero ([heroHeaderInk]); the plain rose keeps the old ink.
     heroLaneCategory()?.let { return it.heroHeaderInk() }
-    return when {
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
-            MaterialTheme.colorScheme.onPrimary
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
-            MaterialTheme.colorScheme.onSurface
-        !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
-            MaterialTheme.colorScheme.onSurface
-        else -> pastelFillInk(fill)
-    }
+    // v78 — light Curio only (the Material/AMOLED scheme-role branches are
+    // gone with those styles).
+    return if (!AppPreferences.pastelColorsState) MaterialTheme.colorScheme.onSurface
+    else pastelFillInk(fill)
 }
 
 /**
@@ -653,17 +630,13 @@ fun settingsReadableInk(fill: Color): Color {
  */
 @Composable
 fun settingsCardAccentInk(): Color {
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ||
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return curioRoseInk()
-    }
+    // v78 — light Curio only (the Material/AMOLED rose fallback is gone
+    // with those styles).
     heroLaneCategory()?.let { return it.categoryInk() }
     if (AppPreferences.heroBlueState) {
-        // Light mode pins a deep azure twin of the airy pastel azure so the
-        // glyphs read on the cream card; dark mode uses the pale azure as
-        // ink exactly like the rose family ([curioRoseInk]).
-        return if (isCurioDarkTheme()) CurioColors.HomeAzure
-        else readableLightInk(CurioColors.HomeAzure)
+        // A deep azure twin of the airy pastel azure so the glyphs read on
+        // the cream card.
+        return readableLightInk(CurioColors.HomeAzure)
     }
     return curioRoseInk()
 }
@@ -677,11 +650,9 @@ fun settingsCardAccentInk(): Color {
  */
 @Composable
 fun settingsCardChipTint(): Color {
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ||
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return CurioColors.CoralBlush
-    }
-    heroLaneCategory()?.let { return if (isCurioDarkTheme()) it.lightAccent else it.themedAccent() }
+    // v78 — light Curio only (the Material/AMOLED coral fallback is gone
+    // with those styles).
+    heroLaneCategory()?.let { return it.themedAccent() }
     if (AppPreferences.heroBlueState) return CurioColors.HomeAzure
     return CurioColors.CoralBlush
 }
@@ -694,10 +665,8 @@ fun settingsCardChipTint(): Color {
  */
 @Composable
 fun settingsCardTintLift(): Color {
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return Color(0xFF2A2A2A)
-    }
-    if (isCurioDarkTheme()) return Color.White
+    // v78 — light only (the AMOLED grey glass + dark white lift are gone
+    // with dark mode): a whisper of the page background in the hero hue.
     return lerp(
         MaterialTheme.colorScheme.background,
         settingsCardAccentInk(),

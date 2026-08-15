@@ -179,37 +179,11 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
 @Composable
 private fun AppearanceSection(highlightKey: String? = null) {
     val context = LocalContext.current
-    // v42 — sky azure is fully back: selectable and the DEFAULT hero (the
-    // v31 grey-out + the migrate-back-to-rose effect are gone).
-    val themeStyles = listOf(AppPreferences.THEME_STYLE_DEFAULT, AppPreferences.THEME_STYLE_AMOLED, AppPreferences.THEME_STYLE_MATERIAL)
-    val themes = listOf(AppPreferences.THEME_LIGHT, AppPreferences.THEME_DARK, AppPreferences.THEME_SYSTEM)
-    val themeStyle = AppPreferences.themeStyleState
-    val themeMode = AppPreferences.themeModeState
-    val styleIndex = themeStyles.indexOf(themeStyle).coerceAtLeast(0)
-    val themeIndex = themes.indexOf(themeMode).coerceAtLeast(0)
+    // v78 — the Theme style (Curio / AMOLED / Material) and Theme (Light /
+    // Dark / System) pickers are GONE: the app is Curio-light only.
     Column(modifier = Modifier.fillMaxWidth()) {
-        SettingsRowPulse(highlightKey == "appearance-style") {
-            // The Material style stays greyed out until it ships — the option
-            // is visible so users know it's coming, but can't be selected.
-            CompactSegmentedRow(
-                "Theme style",
-                listOf("Curio", "AMOLED", "Material"),
-                styleIndex,
-                disabledIndices = setOf(2),
-                disabledHint = "Material theme · coming soon"
-            ) { index ->
-                AppPreferences.setThemeStyle(context, themeStyles[index])
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "appearance-theme") {
-            CompactSegmentedRow("Theme", listOf("Light", "Dark", "System"), themeIndex, enabled = themeStyle != AppPreferences.THEME_STYLE_AMOLED) { index ->
-                AppPreferences.setThemeMode(context, themes[index])
-            }
-        }
-        CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "appearance-tint") {
-            CompactSwitchRow("Category tint", "Colorful page backgrounds", AppPreferences.tintWashEffective(), themeStyle == AppPreferences.THEME_STYLE_DEFAULT) {
+            CompactSwitchRow("Category tint", "Colorful page backgrounds", AppPreferences.tintWashEffective()) {
                 AppPreferences.setTintWashEnabled(context, it)
             }
         }
@@ -505,23 +479,18 @@ private fun PreferencesSection(highlightKey: String? = null) {
                     // AMOLED: the selected chip swaps to pitch-black glass
                     // (white text + hairline rim) to match the switches and
                     // the app's AMOLED control language.
-                    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+                    // v78 — light only (the AMOLED pitch-black chip is gone
+                    // with dark mode).
                     Surface(
                         onClick = {
                             reminderHour = hour
                             AppPreferences.setReminderHour(context, hour)
                         },
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                        color = when {
-                            selected && isAmoled -> Color.Black
-                            selected -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.surfaceContainerHighest
-                        },
-                        contentColor = when {
-                            selected && isAmoled -> MaterialTheme.colorScheme.onSurface
-                            selected -> MaterialTheme.colorScheme.onPrimary
-                            else -> MaterialTheme.colorScheme.onSurface
-                        },
+                        color = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurface,
                         // v27q — flat 2dp: selection reads through the solid
                         // primary/black fill, not a raise.
                         shadowElevation = 2.dp,
@@ -659,11 +628,8 @@ private fun CompactSegmentedRow(
 
 @Composable
 private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
-    // v42 — AMOLED: the ON state stays COLORFUL (the coral track + white
-    // knob read as an active control on black; the old pitch-black track
-    // with a hairline rim looked like a dead slab). OFF keeps the grey
-    // glass track so the two states read clearly.
-    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+    // v78 — light only (the AMOLED switch color override is gone with dark
+    // mode): the scheme's default switch colors.
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
@@ -673,18 +639,7 @@ private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, 
             checked = checked,
             enabled = enabled,
             onCheckedChange = onCheckedChange,
-            colors = if (isAmoled) {
-                SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = CurioColors.CoralBlush,
-                    checkedBorderColor = Color.Transparent,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
-                    uncheckedTrackColor = Color(0xFF2A2A2A),
-                    uncheckedBorderColor = Color(0xFF2A2A2A)
-                )
-            } else {
-                SwitchDefaults.colors()
-            }
+            colors = SwitchDefaults.colors()
         )
     }
 }

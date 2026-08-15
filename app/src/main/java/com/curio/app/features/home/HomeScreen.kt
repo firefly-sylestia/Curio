@@ -137,7 +137,6 @@ import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.pastelAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -600,14 +599,11 @@ fun HomeScreen(navController: NavController) {
                                             // The opaque blends resolve to the
                                             // same perceived tints over the
                                             // banner while keeping the shadow
-                                            // clean, with an AMOLED rose-wood
-                                            // step (theme-aware like Profile).
+                                            // clean (theme-aware like Profile).
                                             Brush.verticalGradient(
                                                 listOf(
                                                     lerp(statGlass, Color.White, 0.06f),
-                                                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                                                        lerp(statGlass, CurioColors.HomeRosewood, 0.30f)
-                                                    else lerp(statGlass, Color.White, 0.26f)
+                                                    lerp(statGlass, Color.White, 0.26f)
                                                 )
                                             ),
                                             RoundedCornerShape(20.dp)
@@ -1060,7 +1056,6 @@ fun HomeScreen(navController: NavController) {
             // keeping it perfectly scrubable with the user's finger.
             val frostShift = FastOutSlowInEasing.transform(stickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
-            val stickyDark = isCurioDarkTheme()
             // v27v — the resting pills follow the HERO TINT (hoisted at the
             // top of the screen): when "Hero tint too" is on, the menu +
             // profile pills wear the tinted accent + on-accent ink.
@@ -1070,9 +1065,9 @@ fun HomeScreen(navController: NavController) {
             // Both morph endpoints are fully opaque. The old hero endpoint
             // used a translucent ink wash, which let the banner show through
             // the pills and made them read like circular visual artifacts.
-            val frostBg = if (stickyDark) Color(0xFF23242C) else Color.White
-            val frostRim = if (stickyDark) Color.White else Color(0xFFD9DEE6)
-            val frostIcon = if (stickyDark) Color.White else homeReadableInk(frostBg)
+            val frostBg = Color.White
+            val frostRim = Color(0xFFD9DEE6)
+            val frostIcon = homeReadableInk(frostBg)
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
             // another geometric transition or ripple-like flash.
@@ -1579,44 +1574,22 @@ private fun homeReadableInk(fill: Color): Color {
     // banner in non-pastel). The lane branch resolves like every category
     // hero ([heroHeaderInk]); the plain rose keeps the old ink.
     heroLaneCategory()?.let { return it.heroHeaderInk() }
-    return when {
-    // v9.x — mirror Settings' ink so Material/AMOLED hero text stays
-    // readable on the scheme-driven hero fills.
-    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
-        MaterialTheme.colorScheme.onPrimary
-    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
-        MaterialTheme.colorScheme.onSurface
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
-        MaterialTheme.colorScheme.onSurface
-    else -> pastelFillInk(fill)
-    }
+    return if (!AppPreferences.pastelColorsState) MaterialTheme.colorScheme.onSurface
+           else pastelFillInk(fill)
 }
 
 @Composable
 private fun homeRoseAccent(): Color {
-    // v9.x — hero headers stay coherent with Settings: Material and AMOLED
-    // use the active scheme's semantic roles instead of the legacy rose.
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-        return MaterialTheme.colorScheme.primary
-    }
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.16f)
-    }
     // v30 — "Hero follows Spin lane": Home's shared hero wears the Spin
     // lane's accent too (the drawer + hero share this resolver).
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
-        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
-        else CurioColors.HomeAzure
+        return CurioColors.HomeAzure
     }
     val base = toHsl(CurioColors.HomeRosewood)
-    return if (isCurioDarkTheme()) {
-        // One shared deep companion keeps this hero family atmospheric in
-        // dark mode, including when pastel mode is enabled.
-        CurioColors.HomeRosewoodDark
-    } else if (AppPreferences.pastelColorsState) {
+    return if (AppPreferences.pastelColorsState) {
         // Home keeps its own softer rose treatment: nudge the rosewood hue
         // toward pink and lift it slightly so the pastel reads clean and airy,
         // not brown or terracotta. The small saturation lift keeps the pastel
@@ -1878,11 +1851,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     DrawerNavItem(
                         icon = CurioIcons.Replay,
                         label = "Replay intro",
-                        iconTint = if (isCurioDarkTheme()) {
-                            CurioColors.HomeRosewoodDark
-                        } else {
-                            CurioColors.HomeRosewood
-                        }
+                        iconTint = CurioColors.HomeRosewood
                     ) {
                         // Re-show the welcome screens: reset the completed
                         // flag, then open onboarding like Settings' replay.

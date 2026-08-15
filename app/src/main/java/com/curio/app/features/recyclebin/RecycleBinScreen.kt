@@ -366,13 +366,10 @@ fun RecycleBinScreen(navController: NavController) {
 /** "Keep forever" / "7 days" label for the recycle-bin expiry window. */
 /**
  * v27q — content ink that reads on the SOLID [curioDialogActionColor]
- * selected-row fill: white on the rose/primary rows everywhere except
- * AMOLED, where the action color IS the white onSurface, so the content
- * flips to black.
+ * selected-row fill: white on the rose/primary rows.
  */
 @Composable
-private fun recycleRowSelectedInk(): Color =
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black else Color.White
+private fun recycleRowSelectedInk(): Color = Color.White
 
 private fun expiryLabel(days: Int): String =
     if (days <= 0) "Keep forever" else "$days days"

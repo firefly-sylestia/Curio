@@ -110,7 +110,6 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk

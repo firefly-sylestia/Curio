@@ -394,6 +394,24 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v78 — light-only: Dark / AMOLED / Material removed, Curio light
+  stays.** The entire theme-style + theme-mode machinery is gone:
+  `AppPreferences` lost `themeStyleState`/`themeModeState` (prefs,
+  constants, getters, setters); `CurioTheme` lost the dark/AMOLED
+  ColorSchemes and the Material dynamic palette; Settings → Appearance
+  dropped the Theme style + Theme pickers (keeps Category tint, Pastel
+  colors, Hero, Adaptive Hero); the onboarding theme step is now a single
+  pastel toggle (`ThemeModeChip` deleted). Every `isCurioDarkTheme()` /
+  `THEME_STYLE_*` branch across Profile, Home, Spin (deck gradients,
+  ticket brush, shuffle plate, deck controls, sheets), Detail (hero
+  start, frosts, waveform inks, mood board), Reveal (band paper, hero
+  brush, pill glass), Category Picker, DeckPresets, PetDesigner dialog,
+  CaptureFormatComponents, RecycleBin and the shared components was
+  collapsed to its light path; unused imports removed (incl. Detail's
+  dead `contrastRatio`). **Seam kept for the future dark system:**
+  `isCurioDarkTheme()` / `isCurioDarkThemeForContext()` return `false`
+  and the watermark / session-service plumbing that feeds them stays.
+  Committed locally, NOT pushed (per user).
 - **v77 — hero back buttons are OPAQUE theme-aware pills.** The settings-
   family heroes' back pills were the last translucent holdout
   (`symbolTint.copy(alpha = 0.18f)` in `SettingsHeroHeader` — Settings hub

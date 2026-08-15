@@ -66,21 +66,14 @@ fun CurioSettingsCard(
         // ([settingsCardTintLift]): the lane accent when the shared hero
         // follows a Spin lane, the azure twin when the sky-azure hero is on,
         // the rose otherwise — same strength as before, matching hue.
-        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color(0xFF2A2A2A), 0.55f)
-        } else {
-            lerp(
-                MaterialTheme.colorScheme.surfaceContainerLow,
-                settingsCardTintLift(),
-                0.30f
-            )
-        },
-        // AMOLED: tonalElevation overlays the scheme's primary (the coral
-        // brand color) onto the container, which washed the pitch-black cards
-        // with a faint rose tint. The black-glass shine edge keeps them
-        // defined, so drop the tonal lift in AMOLED only — shadowElevation
-        // stays so the card reads as raised.
-        tonalElevation = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) 0.dp else 3.dp,
+        // v78 — light Curio only (the AMOLED grey-glass step + tonal-lift
+        // drop are gone with dark mode).
+        color = lerp(
+            MaterialTheme.colorScheme.surfaceContainerLow,
+            settingsCardTintLift(),
+            0.30f
+        ),
+        tonalElevation = 3.dp,
         shadowElevation = shadowElevation,
         modifier = modifier
             .fillMaxWidth()
@@ -103,12 +96,10 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
         // ([settingsCardChipTint] / [settingsCardAccentInk]): lane accent
         // under Adaptive Hero, the azure twin when the sky-azure hero is on,
         // the rose otherwise — never a mismatched fixed coral.
-        val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
         val chipTint = settingsCardChipTint()
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = if (isAmoled) chipTint.copy(alpha = 0.22f)
-                    else chipTint.copy(alpha = 0.16f),
+            color = chipTint.copy(alpha = 0.16f),
             modifier = Modifier.size(38.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -132,7 +123,6 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
  *  as a tappable colored control rather than a flat cream line. */
 @Composable
 fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) {
-    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     val chipTint = settingsCardChipTint()
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -140,10 +130,7 @@ fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () 
                 modifier = Modifier
                     .size(38.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (isAmoled) chipTint.copy(alpha = 0.22f)
-                        else chipTint.copy(alpha = 0.14f)
-                    ),
+                    .background(chipTint.copy(alpha = 0.14f)),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(icon, null, tint = settingsCardAccentInk(), size = 20.dp)

@@ -15,7 +15,7 @@ ADD
 - Pet Designer: a new Pet size option grows the whole custom pet (Small / Medium / Large) everywhere it appears.
 - Quests: daily and journey quests, path chains, medals and a badge shelf.
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
-- Settings: themes (Curio / AMOLED / Material), pastel colors, Adaptive Hero, notifications, recording and lane management.
+- Settings: pastel colors, Adaptive Hero, notifications, recording and lane management.
 - Update checker: in-app update card with release notes, tappable in-app toast, once-per-version notification, direct APK download and install.
 - Onboarding tour with a search-engine picker (Google, DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
 - In-app toast system for background announcements.
@@ -51,3 +51,6 @@ FIX
 - Cabinet and Topic Browser category chips slide in smoothly from under the hero instead of popping in late.
 - Category-colored text is readable in light and pastel mode.
 - Home button always works, even after opening Cabinet from Profile.
+
+REMOVE
+- Dark, AMOLED and Material themes: Curio is light-only now (a new dark-mode system returns later).

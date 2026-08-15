@@ -120,7 +120,6 @@ import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioSageInk
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.pastelFillInk
@@ -429,16 +428,15 @@ fun ProfileScreen(navController: NavController) {
         }
         val frostShift = FastOutSlowInEasing.transform(stickyProgress)
         val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
-        val stickyDark = isCurioDarkTheme()
         // Resting state = SOLID hero-card-color pills — the banner's own
         // fill at full opacity with a rim blended toward the readable ink,
         // so the back + settings pills read as part of the hero (Home's
         // exact construction); scrolled state = solid frosted pills.
         val restPillBg = heroFill
         val restPillRim = lerp(heroFill, heroInk, 0.42f)
-        val frostPillBg = if (stickyDark) Color(0xFF23242C) else Color.White
-        val frostPillRim = if (stickyDark) Color.White else Color(0xFFD9DEE6)
-        val frostPillIcon = if (stickyDark) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+        val frostPillBg = Color.White
+        val frostPillRim = Color(0xFFD9DEE6)
+        val frostPillIcon = MaterialTheme.colorScheme.onSurfaceVariant
         // Resolve solid target colors from scroll, then animate the paint.
         val targetPillBg = lerp(restPillBg, frostPillBg, frostShift)
         val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
@@ -642,8 +640,6 @@ private fun ProfileHero(
     val sheetShape = remember(PROFILE_TEAR_SEED) {
         SoftTornSheetShape(PROFILE_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
     }
-    // v12 — AMOLED: the pure-black banner carries the rose accent through the
-    // watermark collage (the black-glass language); content stays white.
     // v68 — theme-aware: the symbols ride the hero's READABLE ink (which
     // already resolves per-theme and per spin-lane) instead of forcing the
     // rose, so a lane-colored hero never wears mismatched rose icons.
@@ -653,11 +649,9 @@ private fun ProfileHero(
             .fillMaxWidth()
             .height(ProfileHeroTotalHeight)
     ) {
-        // ── Under-sheet — the shared white paper layer. The hero can stay
-        // dark in dark mode, but the paper beneath the tear remains bright.
-        // AMOLED: the sheet turns a soft rose so the torn edge keeps reading
-        // through the up-bites of the pure-black banner, carrying the accent
-        // of the color instead of a bright white punch.
+        // ── Under-sheet — the shared white paper layer: the paper beneath
+        // the tear remains bright so the torn edge keeps reading through the
+        // up-bites of the banner, carrying the accent of the color.
         // Same seeded torn top as the banner,
         // hidden behind it except through the up-bites.
         Box(
@@ -669,11 +663,8 @@ private fun ProfileHero(
                 .background(
                     // v68 — the paper under the tear picks up a whisper of
                     // the hero's own color instead of a flat cream, so the
-                    // lip always reads tinted with the banner. AMOLED keeps
-                    // the rose twin (black-on-black would hide the seam).
-                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                        CurioColors.HomeRosewood.copy(alpha = 0.45f)
-                    else lerp(CurioColors.CreamWhite, fill, 0.10f)
+                    // lip always reads tinted with the banner.
+                    lerp(CurioColors.CreamWhite, fill, 0.10f)
                 )
         )
         // ── Torn-edge shadow — hairline dark rim under the seam so the
@@ -896,9 +887,7 @@ private fun ProfileHero(
                                     Brush.verticalGradient(
                                         listOf(
                                             lerp(fill, Color.White, 0.06f),
-                                            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                                                lerp(fill, CurioColors.HomeRosewood, 0.30f)
-                                            else lerp(fill, Color.White, 0.26f)
+                                            lerp(fill, Color.White, 0.26f)
                                         )
                                     ),
                                     RoundedCornerShape(20.dp)
@@ -964,10 +953,8 @@ private fun ProfileHeroAction(
     // v42 — OPAQUE COLOR-TINTED glass, the stat pane's construction: a solid
     // lerp toward the brand-tinted lift ([curioPillTintLift] — a whisper of
     // the rose instead of plain white, so pastel azure/rose heroes keep
-    // their color and never wash to cream); AMOLED keeps the rose twin.
-    val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
-    val pillColor = if (amoled) lerp(fill, CurioColors.HomeRosewood, 0.30f)
-                    else lerp(fill, curioPillTintLift(), 0.18f)
+    // their color and never wash to cream).
+    val pillColor = lerp(fill, curioPillTintLift(), 0.18f)
     Surface(
         onClick = onClick ?: {},
         enabled = onClick != null,
@@ -1070,34 +1057,17 @@ private fun BoxScope.ProfileHeroSymbol(
  */
 @Composable
 private fun profileRoseAccent(): Color {
-    // v9.x — hero headers stay coherent with Settings: Material and AMOLED
-    // use the active scheme's semantic roles instead of the legacy rose.
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-        return MaterialTheme.colorScheme.primary
-    }
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        // Pure black — no grey/primary tint: on OLED the banner is a true
-        // black plate and the rose accent comes through the watermark
-        // collage + the sticky pills instead of a tinted fill.
-        return Color.Black
-    }
     // v31 — "Adaptive Hero" (v30's "Hero follows Spin lane"): Profile's
-    // hero must follow the spin lane like Home/Settings do — it was the
-    // only shared hero missing this check. In the Curio style the hero
-    // wears the last-picked lane's accent; Material/AMOLED keep their
-    // scheme roles above.
+    // hero must follow the spin lane like Home/Settings do. The hero wears
+    // the last-picked lane's accent.
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
-        return if (isCurioDarkTheme()) CurioColors.HomeAzureDark
-        else CurioColors.HomeAzure
+        return CurioColors.HomeAzure
     }
     val base = toHsl(CurioColors.HomeRosewood)
-    return if (isCurioDarkTheme()) {
-        // Keep Profile's hero aligned with the shared Home/Settings dark shade.
-        CurioColors.HomeRosewoodDark
-    } else if (AppPreferences.pastelColorsState) {
+    return if (AppPreferences.pastelColorsState) {
         val pinkHue = (base.h - 15f + 360f) % 360f
         // v26 — pastel headers get a touch more saturation (about +5%) so
         // the rose banners pop a little without leaving the airy family.
@@ -1116,17 +1086,8 @@ private fun profileReadableInk(fill: Color): Color {
     // banner in non-pastel). The lane branch resolves like every category
     // hero ([heroHeaderInk]); the plain rose keeps the old ink.
     heroLaneCategory()?.let { return it.heroHeaderInk() }
-    return when {
-    // v9.x — mirror Settings' ink so Material/AMOLED hero text stays
-    // readable on the scheme-driven hero fills.
-    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
-        MaterialTheme.colorScheme.onPrimary
-    AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
-        MaterialTheme.colorScheme.onSurface
-    !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
-        MaterialTheme.colorScheme.onSurface
-    else -> pastelFillInk(fill)
-    }
+    return if (!AppPreferences.pastelColorsState) MaterialTheme.colorScheme.onSurface
+           else pastelFillInk(fill)
 }
 
 /**
@@ -1182,18 +1143,14 @@ private fun ProgressAndAchievementsCard(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        // v15 — AMOLED: the coral progress bar and quest plate read as a
-        // weird red accent on pure black; they swap to clean white glass.
-        val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
         LinearProgressIndicator(
             progress = { progress.coerceIn(0f, 1f) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(50)),
-            color = if (amoled) MaterialTheme.colorScheme.onSurface else curioRoseInk(),
-            trackColor = if (amoled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                         else curioRoseInk().copy(alpha = 0.14f)
+            color = curioRoseInk(),
+            trackColor = curioRoseInk().copy(alpha = 0.14f)
         )
         Text(
             text = if (isMaxLevel) "Maximum level reached. Keep exploring for more XP."
@@ -1205,11 +1162,9 @@ private fun ProgressAndAchievementsCard(
         )
         Surface(
             onClick = onOpenQuests,
-            // v42 — the quest plate is COLOR-TINTED glass: light/pastel get
-            // the brand-tinted lift (a coral whisper, not flat cream), and
-            // AMOLED gets a soft grey glass instead of a faint black slab.
-            color = if (amoled) Color(0xFF2A2A2A)
-                    else lerp(CurioColors.CoralBlush, curioPillTintLift(), 0.55f),
+            // v42 — the quest plate is COLOR-TINTED glass: the brand-tinted
+            // lift (a coral whisper, not flat cream).
+            color = lerp(CurioColors.CoralBlush, curioPillTintLift(), 0.55f),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -1223,8 +1178,7 @@ private fun ProgressAndAchievementsCard(
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(
-                            if (amoled) Brush.verticalGradient(listOf(Color(0xFF232323), Color(0xFF141414)))
-                            else Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))
+                            Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))
                         ),
                     contentAlignment = Alignment.Center
                 ) {

@@ -170,7 +170,6 @@ import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.glyph
 import com.curio.app.ui.theme.notePaperHighlight
 import com.curio.app.ui.theme.notePaperInk
@@ -179,7 +178,6 @@ import com.curio.app.ui.theme.PatrickHandFontFamily
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -267,12 +265,9 @@ fun EntryDetailScreen(
     // v28 — dark mode hero title text is always white/creamish (never the
     // tinted light twin) so the banner headline stays crisp light-on-deep.
     val heroInk = cat.heroHeaderInk()
-    val darkNonPastel = isCurioDarkTheme() && !AppPreferences.pastelColorsState
-    // Dark non-pastel hero cards use a quiet midnight frost instead of the
-    // former bright-white glass. Light and pastel modes retain the established
-    // readable slate-on-white treatment.
-    val heroCardInk = if (darkNonPastel) Color(0xFFE9E0EA) else Color(0xFF232A35)
-    val heroSheetColor = if (darkNonPastel) Color(0xFF17131D) else Color(0xFFFDFCF9)
+    // The established readable slate-on-white treatment for the hero cards.
+    val heroCardInk = Color(0xFF232A35)
+    val heroSheetColor = Color(0xFFFDFCF9)
     // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
     // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,
     // see the meta card below), so the old translucent frost has no consumer.
@@ -336,23 +331,10 @@ fun EntryDetailScreen(
         // gaps show through the teeth. The tear is seeded from the entry id,
         // so every detail page gets its own stable texture that never changes
         // when reopened.
-        // v9.x — the blend experiment concluded: the Material style always
-        // uses the device-palette card blend here.
-        val blendActive = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL &&
-            !(isCurioDarkTheme() && !AppPreferences.pastelColorsState)
         // v27j — header fill depth: the hero wears a slightly darker painter
         // accent by default (toggle in Experiments → Paper & headers).
         val heroAccent = cat.headerAccent()
-        val heroStart = if (blendActive) {
-            val blendStart = CurioGradients.cardGradient(heroAccent).first()
-            // Keep the frosted-glass ink legible: if the blend's first stop
-            // is too pale against [heroInk] (the white/onAccent content),
-            // fall back to the deep category hold instead.
-            if (contrastRatio(blendStart, heroInk) >= 3.0f) blendStart
-            else CurioGradients.categoryCardFill(heroAccent, isCurioDarkTheme())
-        } else {
-            CurioGradients.categoryCardFill(heroAccent, isCurioDarkTheme())
-        }
+        val heroStart = CurioGradients.categoryCardFill(heroAccent)
         // v7.28 — the hero is a SOLID category color, no gradient. The depth
         // comes from the torn-paper seam: the solid banner is clipped by a
         // seeded soft tear, ONE white sheet sits just behind it, and the
@@ -424,14 +406,9 @@ fun EntryDetailScreen(
                     .offset(y = 1.dp)
                     .clip(heroTornShape)
                     .background(
-                if (darkNonPastel) {
-                    // The seam is paper, not a shadow: keep the up-bites
-                    // visibly warm even when the hero/sheet uses midnight
-                    // surfaces in dark mode.
-                    CurioColors.CreamWhite.copy(alpha = 0.94f)
-                } else {
-                    heroSheetColor.copy(alpha = 0.72f)
-                }
+                // The seam is paper, not a shadow: keep the up-bites visibly
+                // warm against the bright sheet below the banner.
+                heroSheetColor.copy(alpha = 0.72f)
             )
             )
 
@@ -627,9 +604,8 @@ fun EntryDetailScreen(
                                 // opaque blend keeps the same perceived
                                 // category bloom over the THEME-AWARE sheet
                                 // color ([heroSheetColor] resolves near-
-                                // white in light, midnight in dark/AMOLED)
-                                // while the elevation shadow renders clean
-                                // behind it.
+                                // white) while the elevation shadow renders
+                                // clean behind it.
                                 Box(
                                     modifier = Modifier
                                         .matchParentSize()
@@ -1063,11 +1039,7 @@ private fun BoxScope.DetailStickyBar(
     }
     val frostShift = FastOutSlowInEasing.transform(stickyProgress)
     val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
-    val stickyFrostBrush = if (isCurioDarkTheme() && !AppPreferences.pastelColorsState) {
-        Brush.verticalGradient(listOf(Color(0xFF292231), Color(0xFF17131D)))
-    } else {
-        Brush.verticalGradient(0f to Color.White, 1f to Color.White.copy(alpha = 0.97f))
-    }
+    val stickyFrostBrush = Brush.verticalGradient(0f to Color.White, 1f to Color.White.copy(alpha = 0.97f))
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time
     // graphicsLayer translation — the more-menu's popup anchors to the
     // button's layout position, so a draw-time translate would leave the
@@ -1458,10 +1430,9 @@ private fun FormatBody(
  * v7.38 — BACKGROUNDLESS: the card fill and border are gone — the quick
  * fact sits directly on the page wash, which is already the entry's tinted
  * background. The ink is the category's theme-aware [categoryInk]: deep
- * accent in light / pastel-light (reads on the airy pastel washes), light
- * twin in dark / AMOLED (reads on the deep washes) and in Material the
- * category accent keeps its researched hue — so the text stays readable in
- * every color mode. Collapsed to 2 lines with a "…more" toggle (only shown
+ * accent in light / pastel-light (reads on the airy pastel washes), so the
+ * text stays readable in every color mode. Collapsed to 2 lines with a
+ * "…more" toggle (only shown
  * when the teaser actually overflows); tapping "…less" folds it back.
  *
  * v7.38 — SECONDARY HIERARCHY: the whole block is deliberately SMALLER
@@ -1479,17 +1450,10 @@ private fun QuickFactCard(
     var hasOverflow by remember { mutableStateOf(false) }
     val ink = cat.categoryInk()
     // v20 — a soft frosted plate behind the description text so it reads
-    // clearly over the page's glyph watermark. Theme-aware and deliberately
-    // LIGHTER than the hero's frost: translucent, so the category wash still
-    // glows through (deep slate glass in dark/AMOLED, device surface in
-    // Material, a whisper of milk glass in light/pastel).
-    val paneFill = when {
-        isCurioDarkTheme() && !AppPreferences.pastelColorsState ->
-            Color(0xFF17131D).copy(alpha = 0.55f)
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ->
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
-        else -> Color.White.copy(alpha = 0.38f)
-    }
+    // clearly over the page's glyph watermark. Deliberately LIGHTER than the
+    // hero's frost: translucent, so the category wash still glows through (a
+    // whisper of milk glass in light/pastel).
+    val paneFill = Color.White.copy(alpha = 0.38f)
     val paneShape = RoundedCornerShape(16.dp)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -1792,17 +1756,12 @@ private fun SoundBiteRender(
                 AudioPlayerBar(
                     audioFilePath = data.audioFilePath,
                     accent = category.themedAccent(),
-                    // Played waveform bars: keep the SAME hue family as the
-                    // unplayed ones in dark mode (pastel twin, differing only
-                    // by alpha) so the progress split reads consistently — a
-                    // deep accent would be darker than the unplayed pastel and
-                    // invert the readout on dark surfaces.
-                    playedAccent = if (isCurioDarkTheme()) category.categoryInk() else category.themedAccent(),
+                    // Played waveform bars: deep accent, the unplayed ones
+                    // ride the 20% tint wash — the progress split reads
+                    // consistently on the light page.
+                    playedAccent = category.themedAccent(),
                     ink = category.categoryInk(),
-                    // Unplayed waveform bars: the 20% tint wash is a light-
-                    // mode-only color (murky, near-invisible on dark); in dark
-                    // mode use the pastel ink twin so the capsule bars read.
-                    tint = if (isCurioDarkTheme()) category.categoryInk() else category.tint,
+                    tint = category.tint,
                     surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
                 )
             }
@@ -2257,19 +2216,6 @@ private fun formatFileSize(bytes: Long): String {
     }
 }
 
-/** WCAG contrast ratio of [a] against [b] — used to keep the hero's frosted
- *  glass legible when the blend's first stop comes from the pale non-dynamic
- *  fallback palette. */
-private fun contrastRatio(a: Color, b: Color): Float {
-    fun linear(c: Float): Float =
-        if (c <= 0.03928f) c / 12.92f else ((c + 0.055f) / 1.055f).pow(2.4f)
-    fun luminance(c: Color): Float =
-        0.2126f * linear(c.red) + 0.7152f * linear(c.green) + 0.0722f * linear(c.blue)
-    val la = luminance(a)
-    val lb = luminance(b)
-    return (maxOf(la, lb) + 0.05f) / (minOf(la, lb) + 0.05f)
-}
-
 @Composable
 private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
     val data = entry.captureData as? CaptureData.ReelNotes
@@ -2312,15 +2258,9 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 // Soft pastel card that matches the app's palette — a light,
-                // barely-there whisper of the category in light mode (lighter
-                // and less saturated than the other cards on the page), and
-                // the palette-matched mid-tone in dark/AMOLED where a pale
-                // tint would be near-invisible.
-                color = if (isCurioDarkTheme()) {
-                    category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-                } else {
-                    lightAccentTint(category.accent, saturation = 0.18f, lightness = 0.93f)
-                },
+                // barely-there whisper of the category, lighter and less
+                // saturated than the other cards on the page.
+                color = lightAccentTint(category.accent, saturation = 0.18f, lightness = 0.93f),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -2520,11 +2460,11 @@ private fun MarginaliaRender(entry: CurioEntry, category: CurioCategory, navCont
             AudioPlayerBar(
                 audioFilePath = data.audioFilePath,
                 accent = category.themedAccent(),
-                // Same theme-aware played/unplayed split as the SoundBite
-                // section (pastel pair in dark, deep-accent pair in light).
-                playedAccent = if (isCurioDarkTheme()) category.categoryInk() else category.themedAccent(),
+                // Same played/unplayed split as the SoundBite section: deep
+                // accent played, 20% tint wash unplayed.
+                playedAccent = category.themedAccent(),
                 ink = category.categoryInk(),
-                tint = if (isCurioDarkTheme()) category.categoryInk() else category.tint,
+                tint = category.tint,
                 surface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
             )
         }
@@ -3180,13 +3120,11 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
             shape = RoundedCornerShape(28.dp),
         // The saved board wears an OPAQUE category-tinted card surface
         // ([categorySurfaceMoodBoard] — the same card language as the rest
-        // of the page, honoring the manual Settings tint toggle but NOT the
-        // AMOLED theme style, so the board keeps its tint on pure black).
-        // The old 20%-alpha [CurioCategory.tint] let the page-level
-        // watermark glyphs bleed through and collide with the board's own
-        // seeded glyph pattern (two overlapping watermarks); an opaque
-        // surface hides the page watermark so only the board's
-        // [CurioMoodBoardBackdrop] shows.
+        // of the page, honoring the manual Settings tint toggle). The old
+        // 20%-alpha [CurioCategory.tint] let the page-level watermark glyphs
+        // bleed through and collide with the board's own seeded glyph pattern
+        // (two overlapping watermarks); an opaque surface hides the page
+        // watermark so only the board's [CurioMoodBoardBackdrop] shows.
         color = category.categorySurfaceMoodBoard(),
             // The saved board sits on the tinted page — the elevation lift
             // keeps it from blending into the wash.
@@ -3471,10 +3409,8 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
                 data = data,
                 seed = boardSeed,
                 accent = category.themedAccent(),
-                // The expanded board rests on the SAME AMOLED-immune tinted
-                // surface as the inline card — never the page wash (which
-                // blacks out in AMOLED and makes the full-screen board look
-                // pitch dark without its tint).
+                // The expanded board rests on the SAME tinted surface as the
+                // inline card — never the page wash.
                 boardSurface = category.categorySurfaceMoodBoard(),
                 onDismiss = { boardExpanded = false },
                 onEdit = {
@@ -3490,8 +3426,8 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
  * screen, centers it, and keeps per-tile tap → Lightbox. Close button
  * top-right; back/outside tap dismisses. Rests on the same theme-aware
  * watermark backdrop as the inline board (seeded from the entry id) and on
- * the same AMOLED-immune tinted surface ([categorySurfaceMoodBoard]) so the
- * full-screen board keeps its category tint even in AMOLED.
+ * the same tinted surface ([categorySurfaceMoodBoard]) so the full-screen
+ * board keeps its category tint.
  */
 @Composable
 private fun ExpandedMoodBoardDialog(

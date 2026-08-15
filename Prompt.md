@@ -1,6 +1,56 @@
 # Prompt.md — Request log
 
-## Current request — back buttons: opaque theme-aware pills (v77)
+## Current request — light-only: dark/AMOLED/Material removed (v78)
+
+### What was asked
+"remove the dark mode and amoled mode entirely. just light mode, no dark
+or amoled mode. and dont push this just commit and sk me if to commit"
+
+User confirmed via ask_user: **Curio light only**; **full code clean up**
+but keep a clean seam for the future dark system (no scattered hardcoding);
+**commit locally, no push**.
+
+### What was done
+28 files, −1494 / +375 lines. The entire dark/AMOLED/Material machinery is
+gone; `isCurioDarkTheme()` / `isCurioDarkThemeForContext()` remain as
+documented `false` seams for the future dark system.
+
+1. **AppPreferences** — `themeStyleState` + `themeModeState` prefs,
+   constants, getters and setters deleted (Theme style / Theme rows already
+   removed from Settings → Appearance, which now keeps only Category tint,
+   Pastel colors, Hero picker and Adaptive Hero).
+2. **CurioTheme** — dark/AMOLED ColorSchemes + Material dynamic palette
+   deleted; `curioTheme()` collapses to the Curio light scheme; the two
+   seam helpers return `false`; the few remaining `if (isCurioDarkTheme())`
+   sites (pill lifts, background ink) keep resolving to the light path as
+   the future switch points.
+3. **CategoryInk** — Material/AMOLED/dark branches stripped from the ink,
+   accent and button-fill resolvers; dark-wash tuning table deleted;
+   `categoryInkFor`/`themedAccentFor`/`pastelAccent` keep their `dark`
+   params, fed by the `false` seam (watermark backdrop, session service).
+4. **CurioColors** — dark branches removed; `categoryCardFill` loses its
+   `dark` arg; dead dark constants kept minimal. `PaperPalette` collapsed.
+5. **Screens** — every `isCurioDarkTheme` / `THEME_STYLE_*` branch in
+   Profile, Home, Spin (deck gradients, ticket brush, shuffle plate, deck
+   controls, sheets), Detail (hero start, frosts, waveform inks, mood
+   board), Reveal (band paper, hero brush, pills), Onboarding (theme step
+   is now a single pastel toggle; `ThemeModeChip` deleted), Category
+   Picker, DeckPresets, PetDesigner dialog, CaptureFormatComponents,
+   RecycleBin and the shared components collapsed to their light paths;
+   unused imports cleaned (incl. the dead private `contrastRatio` +
+   `kotlin.math.pow` in Detail).
+6. **Seam kept** — `isCurioDarkTheme()`/`isCurioDarkThemeForContext()`
+   stay as the future dark-mode switch points; watermark + session-service
+   plumbing (which passes the seam through) is untouched by design.
+
+### Validation
+Brace/paren deltas vs HEAD = 0 on all 32 touched files, `git diff --check`
+clean, zero references left to `themeStyleState`/`themeModeState`/
+`THEME_STYLE_*`/`THEME_MODE_*`/`setThemeMode`/`setThemeStyle`, no code-level
+AMOLED branches remain (comments only). No Gradle locally (env rule).
+**Committed locally — NOT pushed** (per user).
+
+## Prior — back buttons: opaque theme-aware pills (v77)
 
 ### What was asked
 "the back button in settings and its sub pages and in many page are

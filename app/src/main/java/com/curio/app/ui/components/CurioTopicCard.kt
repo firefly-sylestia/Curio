@@ -50,7 +50,6 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -115,14 +114,9 @@ fun CurioEntryCard(
             .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
             .categoryEdgeShine(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
-        // v9.x — AMOLED cards are proper pitch black now: the old grey
-        // surfaceContainerHigh lift is replaced by the black-glass shine
-        // edge, so the cards read as boxes without sacrificing OLED black.
-        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            MaterialTheme.colorScheme.surfaceContainerLow
-        } else {
-            cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-        },
+        // v78 — light Curio only (the AMOLED pitch-black card is gone with
+        // dark mode): the category-tinted surface.
+        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
         // v27q — elevation is a flat 2dp in both states: selection reads
         // through the check badge in the header corner, not a raise (the old
         // 8/3 raise smeared the card while it animated).
@@ -212,7 +206,8 @@ fun CurioEntryCard(
                     // (hue-preserving, readable) and the accent in dark; the
                     // track lifts to a clearly visible alpha and the line
                     // gains a dp of presence.
-                    val fillColor = if (isCurioDarkTheme()) cat.themedAccent() else cat.categoryInk()
+                    // v78 — light only (the dark accent fill is gone).
+                    val fillColor = cat.categoryInk()
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)

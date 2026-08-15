@@ -42,71 +42,15 @@ fun Modifier.categoryEdgeShine(
     intensity: Float = 1f,
     amoledHairline: Boolean = false,
 ): Modifier {
-    val style = AppPreferences.themeStyleState
-    if (style != AppPreferences.THEME_STYLE_AMOLED && style != AppPreferences.THEME_STYLE_MATERIAL) return this
-    val amoled = style == AppPreferences.THEME_STYLE_AMOLED
-    val effective = intensity.coerceIn(0f, 1f)
-    return this.drawWithCache {
-        // The draw scope itself implements Density — `density` alone would
-        // resolve to the scale factor (Float), which createOutline rejects.
-        val outline = shape.createOutline(size, layoutDirection, this)
-        val path = when (outline) {
-            is Outline.Generic -> outline.path
-            is Outline.Rectangle -> Path().apply { addRect(outline.rect) }
-            is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
-        }
-        val shine = accent ?: Color.White
-        // v28 — AMOLED is BORDER-FREE app-wide (the full border-removal
-        // audit): the full-edge hairline RING is gone on AMOLED — white
-        // rings around every pill/card read as clunky "borders" on pure
-        // black. The raised look on AMOLED comes from the TOP-LIT GLASS
-        // shine (strengthened — it's the sole edge cue) + the v28 soft glow
-        // shadow. The main Spin deck card opts back in via amoledHairline so
-        // the hero card keeps a readable edge on pure black. Material keeps
-        // its accent rim (that's the Material identity); the default Curio
-        // style stays border-free as always.
-        val hairlineAlpha = if (amoled && !amoledHairline) 0f
-            else (if (accent != null) 0.30f else 0.14f) * effective
-        val topAlpha = (if (accent != null) 0.52f else 0.30f) * effective
-        val hairlineW = 1.dp.toPx()
-        val shineW = 1.4.dp.toPx()
-        val shineBand = 18.dp.toPx()
-        onDrawWithContent {
-            // Draw the surface content first, then the edge shine on top so
-            // the highlight never hides behind an opaque fill.
-            drawContent()
-            // 1. Faint hairline around the whole edge (skipped on AMOLED).
-            if (hairlineAlpha > 0f) {
-                drawPath(
-                    path,
-                    color = shine.copy(alpha = hairlineAlpha),
-                    style = Stroke(width = hairlineW)
-                )
-            }
-            // 2. Brighter top-edge shine, fading out over the top band.
-            clipRect(top = 0f, bottom = shineBand) {
-                drawPath(
-                    path,
-                    brush = Brush.verticalGradient(
-                        0f to shine.copy(alpha = topAlpha),
-                        1f to shine.copy(alpha = 0f),
-                        startY = 0f,
-                        endY = shineBand
-                    ),
-                    style = Stroke(width = shineW)
-                )
-            }
-        }
-    }
+    // v78 — the AMOLED/Material edge-shine is gone with those styles: the
+    // Curio style is border-free, so the modifier is a no-op (parameters
+    // kept for call-site compatibility).
+    return this
 }
 
 /**
- * v9.x — theme-style button colors:
- *  - AMOLED: buttons go PITCH BLACK with their light content kept readable
- *    (the edge shine is applied separately via [Modifier.categoryEdgeShine],
- *    tinted with the button's accent).
- *  - Otherwise the caller's colors pass through untouched (Material callers
- *    pass the device primary via [com.curio.app.ui.theme.CurioCategory.themedButtonFill]).
+ * Theme-aware button colors — v78: the AMOLED pitch-black override is gone
+ * with dark mode, so the caller's colors pass through untouched.
  */
 @Composable
 fun curioButtonColors(
@@ -114,12 +58,10 @@ fun curioButtonColors(
     contentColor: Color,
     disabledContainerColor: Color = containerColor.copy(alpha = 0.35f),
     disabledContentColor: Color = contentColor.copy(alpha = 0.45f),
-): ButtonColors {
-    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
-    return ButtonDefaults.buttonColors(
-        containerColor = if (isAmoled) Color.Black else containerColor,
+): ButtonColors =
+    ButtonDefaults.buttonColors(
+        containerColor = containerColor,
         contentColor = contentColor,
-        disabledContainerColor = if (isAmoled) Color.Black.copy(alpha = 0.55f) else disabledContainerColor,
+        disabledContainerColor = disabledContainerColor,
         disabledContentColor = disabledContentColor
     )
-}

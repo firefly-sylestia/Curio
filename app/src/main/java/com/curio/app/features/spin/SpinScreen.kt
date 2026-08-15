@@ -153,7 +153,6 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -641,12 +640,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     val deckAccents = activeCatIds.map { CurioCategories.byId(it).themedAccent() }
     // v7.5 — pastel mode: the curated pair/triple blends are deep, so the
     // resolved deck accent softens to its theme-aware pastel twin (airy in
-    // light, muted deep pastel in dark). `dark` is resolved here (the
-    // remember block is not a @Composable context).
+    // light). `pastel` is resolved here (the remember block is not a
+    // @Composable context).
     val pastelMode = AppPreferences.pastelColorsState
-    val darkMode = isCurioDarkTheme()
-    val deckAccent = remember(deckAccents, pastelMode, darkMode) {
-        CurioMixedDeck.mixedDeckAccent(deckAccents, pastel = pastelMode, dark = darkMode)
+    val deckAccent = remember(deckAccents, pastelMode) {
+        CurioMixedDeck.mixedDeckAccent(deckAccents, pastel = pastelMode)
     }
 
     // ── Mixed-deck identity (v5.13) ───────────────────────────────────────
@@ -679,10 +677,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // as the peek cards and the pastel spin button. v7.8.1 — the peeks
     // behind it now sit a step DEEPER (black-lerp near 0.16 / far 0.28)
     // so the hero's crown reads as the brightest card of the deck. Mixed
-    // decks already carry pure pastel stops + pastel seams; dark mode and
-    // non-pastel keep the classic card gradient (the muted pastel twins
-    // already match the dark peeks).
-    val deckGradient = if (pastelMode && !darkMode && !isMixedDeck) {
+    // decks already carry pure pastel stops + pastel seams; non-pastel
+    // keeps the classic card gradient.
+    val deckGradient = if (pastelMode && !isMixedDeck) {
         // v25 — Pastel crown depth PASSED: always ON — the top stop carries
         // a subtle 5% black deepen for a gentle darker crown (the old 4%
         // white-lift fallback is gone; its toggle was removed from
@@ -1449,16 +1446,8 @@ private fun ColumnScope.SpinDeckSection(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            // v10 — the Material style's shuffle button blends the device
-            // primary with the category accent (65/35) so the button carries
-            // visible category identity instead of looking like a plain
-            // dynamic-color control in both light and dark mode.
             SpinButton(
-                tint = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-                    lerp(MaterialTheme.colorScheme.primary, deckAccent, 0.35f)
-                } else {
-                    deckAccent
-                },
+                tint = deckAccent,
                 shineAccent = deckAccent,
                 isShuffling = shuffling,
                 landedTopic = landedTopic,
@@ -1661,17 +1650,11 @@ private fun FilterSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        // v11 — the Material style wears the device surface container (no
-        // foreign category tint on the device palette); Curio/AMOLED wear
-        // the category wash. v33 — the sheet uses the SOFT page wash (the
-        // same background tint as the Spin page behind it), not the
-        // stronger card-level categorySurface that read as the raw hero
-        // color and glared against the washed page.
-        containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-            MaterialTheme.colorScheme.surfaceContainerLow
-        } else {
-            cat.categoryBackgroundWash()
-        },
+        // v33 — the sheet uses the SOFT page wash (the same background tint
+        // as the Spin page behind it), not the stronger card-level
+        // categorySurface that read as the raw hero color and glared
+        // against the washed page.
+        containerColor = cat.categoryBackgroundWash(),
         // v70 — the tear hero runs up BEHIND the status bar like every other
         // page hero: flush top corners (no rounded cap), no floating drag
         // handle, and only the bottom + IME insets consumed so the banner
@@ -2084,7 +2067,7 @@ private fun CompactChip(
     // rose tint but lands a solid mid-tone that clearly separates from
     // the sheet), each chip carries a small glyph, and the pills grew
     // again (16sp label + 16/11 padding).
-    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.5f)
+    val inactiveFill = lerp(chipSurface, curioPillTintLift(), 0.5f)
     Surface(
         shape = RoundedCornerShape(50),
         color = if (selected) accent else inactiveFill,
@@ -2224,7 +2207,7 @@ private fun FilterGroupPill(
     // a matching size bump so the group pills and chips read as one family.
     // v52b — same darker light-mode closed fill as the chips (0.82 → 0.5)
     // so the group pills and chips read as one family off the pale sheet.
-    val inactiveFill = lerp(chipSurface, curioPillTintLift(), if (isCurioDarkTheme()) 0.04f else 0.5f)
+    val inactiveFill = lerp(chipSurface, curioPillTintLift(), 0.5f)
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),
@@ -2701,61 +2684,28 @@ private fun HeroTicketCard(
     // two-stop fallback gains an HSL-smooth midpoint so the light→base
     // glide never bands through muddy grey. Pastel light mode softens the
     // crown so the pale fill doesn't wash to white.
-    val dark = isCurioDarkTheme()
-    val pastelLightHero = AppPreferences.pastelColorsState && !dark
-    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+    val pastelLightHero = AppPreferences.pastelColorsState
     val ticketBrush = if (isMixed) {
-        // v15 — AMOLED mixed deck: each vivid accent stop darkens into a
-        // quiet multi-hue glass, capped with pure OLED black — the mix
-        // identity stays readable but the card reads as dark glass.
-        if (isAmoled) {
-            val glass = gradient.mapIndexed { i, stop ->
-                lerp(stop, Color.Black, if (i == 0) 0.62f else 0.76f)
-            }
-            Brush.verticalGradient(glass + Color.Black)
-        } else {
-            CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
-        }
+        CurioMixedDeck.mixedDeckHeroBrush(gradient, wPx, hPx, mixSeed)
     } else if (heroBlendOn) {
         // v10 — dual-accent blend: category accent meets a warm golden
-        // companion in a multi-stop vertical gradient (works across all
-        // theme styles — Curio, Material, AMOLED; its AMOLED branches keep
-        // the warm-gold black glass when the user opts into the blend).
+        // companion in a multi-stop vertical gradient.
         Brush.verticalGradient(CurioGradients.heroBlendGradient(accent))
     } else if (heroGradientOn) {
-        // v15 — the enhanced diagonal sweep keeps working in AMOLED: it
-        // runs on dark-glass stops (a soft accent crown → OLED black) so
-        // the toggle still visibly upgrades the card while staying sleek.
-        val stops = if (isAmoled) {
-            listOf(
-                lerp(Color.Black, accent, 0.30f),
-                lerp(Color.Black, accent, 0.10f),
-                Color.Black
-            )
+        // v15 — the enhanced diagonal sweep: a bright crown at the
+        // top-left catches light, the card's own stops run through the
+        // middle, and a deepened base at the bottom-right grounds it.
+        val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+        val base = lerp(gradient.last(), Color.Black, 0.06f)
+        val stops = if (gradient.size > 2) {
+            listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
         } else {
-            val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
-            val base = lerp(gradient.last(), Color.Black, 0.06f)
-            if (gradient.size > 2) {
-                listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
-            } else {
-                CurioGradients.hslGradientStops(crown, base, 3)
-            }
+            CurioGradients.hslGradientStops(crown, base, 3)
         }
         Brush.linearGradient(
             stops,
             start = Offset(0f, 0f),
             end = Offset(wPx, hPx)
-        )
-    } else if (isAmoled) {
-        // v15 — AMOLED: sleek vertical black glass. The deck's category
-        // color glows softly in from the top edge and melts to pure OLED
-        // black at the base, so the main card clearly wears its accent
-        // while the lower card stays true black (the old 8–18% trace read
-        // as plain black on device).
-        Brush.verticalGradient(
-            0f to lerp(Color.Black, accent, 0.24f),
-            0.55f to lerp(Color.Black, accent, 0.08f),
-            1f to Color.Black
         )
     } else {
         Brush.verticalGradient(gradient)
@@ -3218,7 +3168,6 @@ private fun PeekCard(
     // v7.15 — pastel depth now steps via HSL lightness drop (below), not
     // black-lerp, so the airy pastels stay in family.
     val pastelMode = AppPreferences.pastelColorsState
-    val darkMode = isCurioDarkTheme()
     // v7.14 — peek cards wear the SAME card-gradient family as the hero
     // (the Material card blend when active, the classic category gradient
     // otherwise), stepped a level DARKER so the deck keeps its hierarchy
@@ -3235,11 +3184,11 @@ private fun PeekCard(
     //  - non-pastel: black-lerp deepened (near 0.40 / far 0.52, was
     //    0.28/0.42) plus an HSL saturation pull (~0.80x, capped at 0.50)
     //    to kill the vividness of the saturated device/category stops.
-    //  - pastel: a heavier lightness drop (light near 0.12 / far 0.18,
-    //    dark 0.11/0.16 — was 0.06/0.10 and 0.09/0.14) with the same
-    //    gentle saturation pull, so pale peeks stay in family but read a
-    //    clear step below the hero instead of glowing beside it.
-    val cardStops = remember(blendStops, far, pastelMode, darkMode) {
+    //  - pastel: a heavier lightness drop (near 0.12 / far 0.18 — was
+    //    0.06/0.10) with the same gentle saturation pull, so pale peeks
+    //    stay in family but read a clear step below the hero instead of
+    //    glowing beside it.
+    val cardStops = remember(blendStops, far, pastelMode) {
         if (pastelMode) {
             // Pastel peeks stay IN FAMILY: step the depth by dropping
             // LIGHTNESS (HSL) instead of black-lerping, which greyed the
@@ -3247,11 +3196,7 @@ private fun PeekCard(
             // pulled down slightly so the peeks read calm, not glowing.
             blendStops.map { stop ->
                 val h = toHsl(stop)
-                val drop = if (far) {
-                    if (darkMode) 0.16f else 0.18f
-                } else {
-                    if (darkMode) 0.11f else 0.12f
-                }
+                val drop = if (far) 0.18f else 0.12f
                 fromHsl(
                     h.h,
                     // v7.18 — 5% less saturated: pull eased 0.85x → 0.80x.
@@ -3260,17 +3205,13 @@ private fun PeekCard(
                 )
             }
         } else {
-            // v32 — non-pastel peeks step like the pastel ones: an HSL
-            // lightness drop (hue kept, saturation pulled) instead of the
-            // old black-lerp slabs (0.40/0.52) that read as near-black
-            // cards in light mode. The deck keeps its hierarchy — hero
-            // brightest, near a step down, far a step further — while the
-            // peeks stay in the accent family with a visible gradient.
-            val drop = if (darkMode) {
-                if (far) 0.16f else 0.11f
-            } else {
-                if (far) 0.20f else 0.14f
-            }
+            // v32 — non-pastel peeks step via an HSL lightness drop (hue
+            // kept, saturation pulled) instead of the old black-lerp slabs
+            // (0.40/0.52) that read as near-black cards. The deck keeps its
+            // hierarchy — hero brightest, near a step down, far a step
+            // further — while the peeks stay in the accent family with a
+            // visible gradient.
+            val drop = if (far) 0.20f else 0.14f
             blendStops.map { stop ->
                 val h = toHsl(stop)
                 fromHsl(
@@ -3311,13 +3252,13 @@ private fun PeekCard(
     // peek catches light and whispers "next up" on the reel. The base is
     // always the level-darkened blend; the gradient toggle layers the
     // crown lighten on top.
-    val fillBrush = remember(cardStops, far, pastelMode, darkMode, gradientOn) {
+    val fillBrush = remember(cardStops, far, pastelMode, gradientOn) {
         val base = Brush.verticalGradient(cardStops)
         if (!gradientOn) return@remember base
         // v7.17 — the top-lit crown is now a WHISPER (was 0.10-0.14
         // white-lerp) so the gradient keeps its light feel without adding
         // brightness to the already-deepened, desaturated peek fills.
-        val crown = if (pastelMode && !darkMode) lerp(cardStops.first(), Color.White, 0.05f)
+        val crown = if (pastelMode) lerp(cardStops.first(), Color.White, 0.05f)
                     else lerp(cardStops.first(), Color.White, if (far) 0.04f else 0.06f)
         Brush.verticalGradient(listOf(crown) + cardStops.drop(1))
     }
@@ -3327,7 +3268,7 @@ private fun PeekCard(
     // light mode the fills are pale, so the deep accent ink carries the
     // edge instead (a deep-on-deep hairline would vanish — reviewer catch).
     val hairline = if (hairlineOn) {
-        if (pastelMode && !darkMode) {
+        if (pastelMode) {
             cat.categoryInk().copy(alpha = if (far) 0.22f else 0.30f)
         } else {
             cat.lightAccent.copy(alpha = if (far) 0.28f else 0.40f)
@@ -3547,20 +3488,11 @@ private fun SpinButton(
     // shrinks WITH the deck (the orbit ring too), floored at 0.75 so the
     // CTA never gets tiny.
     val sizeScale = fitScale.coerceIn(0.75f, 1f)
-    // v12 — AMOLED: the shuffle plate is pitch-black glass; the category
-    // accent moves to the orbit ring, the rim shine and the 3D sheen instead
-    // of a bright accent fill. The dice stays white for readability.
-    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
-    val plateTint = if (isAmoled) Color.Black else tint
-    val orbitColor = if (isAmoled) shineAccent else tint
-    // v11 — Material keeps the device onPrimary as the glyph ink so the dice
-    // stays readable on the (possibly light) primary-based fill in dark mode;
-    // Curio/AMOLED keep the pastel-aware ink.
-    val glyphInk = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && isCurioDarkTheme()) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        pastelFillInk(tint)
-    }
+    val plateTint = tint
+    val orbitColor = shineAccent
+    // The dice glyph rides the pastel-aware ink so it stays readable on
+    // the accent fill.
+    val glyphInk = pastelFillInk(tint)
     // Keep the animated orbit/dots at the same radius while making the
     // actual circular button plate a little tighter and more elegant.
     val buttonSize = (if (compact) {
@@ -3602,15 +3534,8 @@ private fun SpinButton(
                             // it to a soft 12% in pastel light mode so the
                             // sphere keeps a hint of shine without washing
                             // out, while darker fills keep their stronger cap.
-                            val pastelLight = AppPreferences.pastelColorsState && !isCurioDarkTheme()
-                            // v12 — AMOLED: the black plate gets a faint
-                            // accent-tinted sheen at the top instead of a
-                            // white cap, so the accent reads on the glass.
-                            val highlight = if (isAmoled) {
-                                lerp(plateTint, shineAccent, 0.24f)
-                            } else {
-                                lerp(plateTint, Color.White, if (pastelLight) 0.12f else 0.22f)
-                            }
+                            val pastelLight = AppPreferences.pastelColorsState
+                            val highlight = lerp(plateTint, Color.White, if (pastelLight) 0.12f else 0.22f)
                             Modifier.background(
                                 Brush.radialGradient(
                                     listOf(highlight, plateTint, lerp(plateTint, Color.Black, 0.07f)),
@@ -3698,24 +3623,12 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
     // in pastel light mode and a light tint in pastel dark mode, so the
     // orbiting dots stay readable on every background. Non-pastel keeps
     // the classic accent-colored dots.
-    // v11 — Material LIGHT wears the device onSurface so the orbiting dots
-    // stay visible on the light tinted page (white dots vanished on the wash).
-    // v13 — NON-pastel LIGHT was the one gap: pastelFillInk returns WHITE off
-    // pastel mode, so the orbit dots lit up as a bright white necklace on the
-    // cream page (and the bloom made it read even whiter). Deepen to a deep
-    // same-hue ink so the dots carry the category color and read on the light
-    // surface in every mode.
+    // v13 — NON-pastel light: pastelFillInk returns WHITE off pastel mode,
+    // so the orbit dots lit up as a bright white necklace on the cream page
+    // (and the bloom made it read even whiter). Deepen to a deep same-hue
+    // ink so the dots carry the category color and read on the light surface.
     val dotColor = when {
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL && !isCurioDarkTheme() ->
-            MaterialTheme.colorScheme.onSurface
-        !AppPreferences.pastelColorsState && !isCurioDarkTheme() ->
-            deepHueInk(color)
-        // v32 — pastel DARK: the old pastelFillInk resolution lerped 85%
-        // toward white, so the orbiting dots read as a white necklace with
-        // no color. Pull only ~60% so they stay light on midnight while
-        // clearly carrying the pastel hue.
-        AppPreferences.pastelColorsState && isCurioDarkTheme() ->
-            lerp(color, Color.White, 0.60f)
+        !AppPreferences.pastelColorsState -> deepHueInk(color)
         else -> pastelFillInk(color)
     }
     AnimatedVisibility(
@@ -3972,38 +3885,20 @@ private fun BottomCta(
 }
 
 /**
- * v32 — label/icon ink for the Categories/Filter deck controls. In pastel
- * DARK mode the muted pastel fills sit close to the page wash, so the ink
- * flips to the bright cream-white ([pastelFillInk]) the heroes use — crisp
- * on the deepened pastel fill instead of a washed tint. Other modes keep
- * the accent-aware ink exactly as before.
+ * v32 — label/icon ink for the Categories/Filter deck controls: the
+ * accent-aware ink on the tinted category fills.
  */
 @Composable
-private fun deckControlInk(cat: CurioCategory, selected: Boolean): Color {
-    if (AppPreferences.pastelColorsState && isCurioDarkTheme()) {
-        val fill = if (selected) cat.themedButtonFill() else deckControlSurface(cat)
-        return pastelFillInk(fill)
-    }
-    return if (selected) cat.themedButtonInk() else cat.categoryInk()
-}
+private fun deckControlInk(cat: CurioCategory, selected: Boolean): Color =
+    if (selected) cat.themedButtonInk() else cat.categoryInk()
 
 /**
- * Unselected deck-control fill — the device surface container in the
- * Material style (nothing foreign on the device palette), the tinted
- * category surface otherwise (the page wash's stronger sibling).
+ * Unselected deck-control fill — the tinted category surface (the page
+ * wash's stronger sibling).
  */
 @Composable
 private fun deckControlSurface(cat: CurioCategory): Color =
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    } else if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        // v13 — AMOLED unselected controls are PITCH BLACK like the selected
-        // ones (the dark-grey surfaceContainerHigh plate is gone); the accent
-        // the edge shine keeps them defined on the pure black page.
-        Color.Black
-    } else {
-        cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-    }
+    cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
 
 
 /**
@@ -4024,12 +3919,9 @@ private fun VerticalDeckButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        // v12 — AMOLED: selected deck controls are pitch-black glass with the
-        // category accent rim — the bright accent fill is a Curio-style look.
-        color = if (selected) {
-            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
-            else cat.themedButtonFill()
-        } else deckControlSurface(cat),
+        // Selected controls wear the bright accent fill; unselected get the
+        // tinted surface.
+        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
         // v27q — flat 2dp: selection reads through the solid accent fill.
         shadowElevation = 2.dp,
         modifier = modifier
@@ -4081,12 +3973,9 @@ private fun DeckControlButton(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        // v12 — AMOLED: selected deck controls are pitch-black glass with the
-        // category accent rim — the bright accent fill is a Curio-style look.
-        color = if (selected) {
-            if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) Color.Black
-            else cat.themedButtonFill()
-        } else deckControlSurface(cat),
+        // Selected controls wear the bright accent fill; unselected get the
+        // tinted surface.
+        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
         // v27q — flat 2dp: selection reads through the solid accent fill.
         shadowElevation = 2.dp,
         modifier = modifier
@@ -4203,14 +4092,7 @@ private fun CategoryPickerSheet(
         // v6.6 — the full-screen category selection page wears the
         // same category tint wash as the Spin page it sits on, so
         // the picker never flashes a foreign plain background.
-        // v11 — the Material style wears the device surface container
-        // instead of the category wash (nothing foreign on the device
-        // palette); Curio/AMOLED keep the wash.
-        containerColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL) {
-            MaterialTheme.colorScheme.surfaceContainerLow
-        } else {
-            currentCat.categoryBackgroundWash()
-        },
+        containerColor = currentCat.categoryBackgroundWash(),
         // v73 — tear hero to the status bar, the same treatment as the
         // filter sheet: only the bottom + IME insets consumed (the banner
         // draws its own status-bar spacing). Swipe-down, scrim tap and the

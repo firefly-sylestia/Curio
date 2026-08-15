@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v30 — the ONE dropdown language for the whole app. Every menu (sort
@@ -55,12 +54,12 @@ fun CurioDropdownMenu(
     content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit
 ) {
     if (!expanded) return
-    // Opaque accent-tinted surface — stronger pull in dark so the menu
-    // still reads as a raised, colored sheet over the near-black surface.
+    // Opaque accent-tinted surface — v78: light only (the stronger dark
+    // pull is gone with dark mode).
     val container = lerp(
         MaterialTheme.colorScheme.surface,
         accent,
-        if (isCurioDarkTheme()) 0.10f else 0.06f
+        0.06f
     )
     DropdownMenu(
         expanded = expanded,
@@ -101,7 +100,8 @@ fun CurioDropdownItem(
         else -> MaterialTheme.colorScheme.onSurface
     }
     val rowFill = if (selected) {
-        accent.copy(alpha = if (isCurioDarkTheme()) 0.22f else 0.13f)
+        // v78 — light only (the stronger dark wash is gone with dark mode).
+        accent.copy(alpha = 0.13f)
     } else {
         Color.Transparent
     }

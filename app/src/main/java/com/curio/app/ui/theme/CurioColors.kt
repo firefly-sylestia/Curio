@@ -178,14 +178,10 @@ object CurioColors {
      * hero fill.
      */
     val HomeRosewood     = Color(0xFFCF8B94)
-    /** Dark-mode companion for the shared Home/Profile/Settings hero family. */
-    val HomeRosewoodDark  = Color(0xFF713849)
     // v27l — the optional sky-azure hero variant: a brighter, fresher azure
     // (the Science/Sky hue at sky-300-ish saturation, held a touch softer
-    // than neon) for light, and a deep muted azure companion for dark mode
-    // (same L/S as HomeRosewoodDark).
+    // than neon).
     val HomeAzure        = Color(0xFF9ED2EF)
-    val HomeAzureDark    = Color(0xFF385C71)
 
     /** Tinted (20% alpha) versions of the legacy accents for backgrounds. */
     val LilacTint     = Lilac.copy(alpha = 0.20f)
@@ -334,19 +330,12 @@ object CurioGradients {
      * pastel deck read dimmer than it should (especially the shuffle main
      * card). The pastel accent is already soft enough for white-free ink.
      */
-    fun categoryCardFill(accent: Color, dark: Boolean = false): Color = when {
-        // AMOLED cards are intentionally near-black. The category identity is
-        // carried by a restrained accent trace, not a bright jewel-tone fill.
-        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED ->
-            lerp(Color.Black, accent, 0.12f)
+    fun categoryCardFill(accent: Color): Color = when {
+        // v78 — light only (AMOLED/dark treatment gone with dark mode): the
+        // pastel accent stays pure; the plain accent gets a gentle 10%
+        // black deepen for jewel-tone depth.
         AppPreferences.pastelColorsState -> accent
-        else -> {
-            // Non-pastel dark heroes need a true jewel-tone depth; the old
-            // 10% deepen left coral/sky/amber fills too close to bright raw
-            // accents on the midnight surface. Light mode keeps its existing
-            // treatment; callers opt into the dark value explicitly.
-            lerp(accent, Color.Black, if (dark) 0.28f else 0.10f)
-        }
+        else -> lerp(accent, Color.Black, 0.10f)
     }
 
     /**
@@ -398,31 +387,23 @@ object CurioGradients {
         // (was the surfaceContainerHigh grey) with only a quiet category-
         // color bloom, and the card edge carries the black-glass shine (see
         // Modifier.categoryEdgeShine). Power-friendly and coherent everywhere.
-        if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            val base = Color.Black
-            val accentTrace = lerp(base, accent, 0.18f)
-            return listOf(
-                lerp(base, accent, 0.08f),
-                accentTrace
-            )
-        }
-        // End on the ACTIVE theme's background so cards always echo the
-        // surface behind them — cream in light, midnight in dark, pure
-        // black in AMOLED, the device's dynamic background in Material.
-        // v25 — Pastel crown depth PASSED: always ON, so its toggle was
-        // removed from Experiments and the pastel crown read is fixed.
+        // v78 — the AMOLED early-return is gone with dark mode. End on the
+        // active theme's background so cards always echo the surface behind
+        // them (cream). v25 — Pastel crown depth PASSED: always ON, so its
+        // toggle was removed from Experiments and the pastel crown read is
+        // fixed.
         val start = if (AppPreferences.pastelColorsState) {
             // v7.12 — subtle 5% black deepen at the very top of pastel
             // gradients so every pastel card reads with a gentle darker
             // crown instead of a uniform pastel from edge to edge.
-            lerp(categoryCardFill(accent, isCurioDarkTheme()), Color.Black, 0.05f)
+            lerp(categoryCardFill(accent), Color.Black, 0.05f)
         } else {
-            categoryCardFill(accent, isCurioDarkTheme())
+            categoryCardFill(accent)
         }
         // v7.8 — on tint-washed Curio pages the card melts into the washed
         // background on the category's OWN hue (same recipe as the page
         // wash), not the raw cream that dragged cool accents off-family.
-        val end = if (AppPreferences.tintWashEffective() && !isCurioDarkTheme()) {
+        val end = if (AppPreferences.tintWashEffective()) {
             if (AppPreferences.pastelColorsState) lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
             else lightAccentTint(accent)
         } else {
@@ -447,45 +428,25 @@ object CurioGradients {
      */
     @Composable
     fun heroBlendGradient(accent: Color): List<Color> {
-        val dark = isCurioDarkTheme()
+        // v78 — light only (the dark/AMOLED branches are gone with dark
+        // mode): the golden companion softens to butter in pastel mode.
         val pastel = AppPreferences.pastelColorsState
-        val amoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
 
-        // The warm golden companion — a rich amber-gold that pairs with
-        // every category accent. In pastel mode it softens to a butter
-        // cream; in dark/AMOLED it deepens to a burnished bronze.
-        val companionBase = when {
-            amoled -> lerp(Color.Black, CurioColors.GoldInk, 0.28f)
-            pastel && !dark -> CurioColors.ButterYellow
-            dark -> lerp(CurioColors.GoldInk, Color.Black, 0.35f)
-            else -> CurioColors.GoldInk
-        }
+        val companionBase = if (pastel) CurioColors.ButterYellow
+        else CurioColors.GoldInk
 
         // Top crown — a whisper of light at the very top for a premium
-        // lit-surface feel (muted in dark/AMOLED, crisp in light).
-        val crown = when {
-            amoled -> lerp(Color.Black, accent, 0.10f)
-            dark -> lerp(accent, Color.White, 0.06f)
-            pastel -> lerp(accent, Color.White, 0.10f)
-            else -> lerp(accent, Color.White, 0.16f)
-        }
+        // lit-surface feel (crisp in light).
+        val crown = if (pastel) lerp(accent, Color.White, 0.10f)
+        else lerp(accent, Color.White, 0.16f)
 
-        // The accent stop — the card fill (theme-aware), which is already
-        // pastel in pastel mode and black-tinted in AMOLED.
-        val accentStop = when {
-            amoled -> lerp(Color.Black, accent, 0.12f)
-            pastel && AppPreferences.pastelCrownDepthState ->
-                lerp(categoryCardFill(accent, dark), Color.Black, 0.05f)
-            else -> categoryCardFill(accent, dark)
-        }
+        // The accent stop — the card fill (theme-aware), already pastel in
+        // pastel mode.
+        val accentStop = if (pastel && AppPreferences.pastelCrownDepthState)
+            lerp(categoryCardFill(accent), Color.Black, 0.05f)
+        else categoryCardFill(accent)
 
-        // The golden companion stop — the warm accent at the bottom.
-        val companionStop = when {
-            amoled -> lerp(Color.Black, companionBase, 0.10f)
-            else -> companionBase
-        }
-
-        return listOf(crown, accentStop, companionStop)
+        return listOf(crown, accentStop, companionBase)
     }
 }
 
@@ -615,7 +576,6 @@ object CurioMixedDeck {
         if (distinct.size <= 1) {
             return CurioGradients.cardGradient(mixedDeckAccent(distinct))
         }
-        val dark = isCurioDarkTheme()
         val pastel = AppPreferences.pastelColorsState
         val stops = mutableListOf<Color>()
         distinct.take(4).forEachIndexed { i, accent ->
@@ -627,7 +587,7 @@ object CurioMixedDeck {
             // (the accent stops arrive already pastel via themedAccent()).
             if (i < 3 && i < distinct.size - 1) {
                 var seam = mixedDeckAccent(listOf(accent, distinct[i + 1]))
-                if (pastel) seam = pastelAccent(seam, dark)
+                if (pastel) seam = pastelAccent(seam, false)
                 stops.add(seam)
             }
         }
@@ -650,37 +610,13 @@ object CurioMixedDeck {
     fun mixedDeckWash(blend: Color): Color {
         val background = MaterialTheme.colorScheme.background
         if (!AppPreferences.tintWashEffective()) return background
-        return if (isCurioDarkTheme()) {
-            if (AppPreferences.pastelColorsState) {
-                // Pastel mode: the blend is already a muted deep pastel — a
-                // moderate-strength wash over midnight keeps the soft hue on
-                // the page instead of deepening it toward a jewel tone.
-                // v46 — a touch deeper (42% instead of 55%) so pastel-dark
-                // pages stay sleek and dark with real contrast.
-                lerp(background, blend, 0.42f)
-            } else {
-                // v46 — a deep, muted jewel tone: the blend is blackened hard
-                // (50%) and mixed at a moderate strength (42%) over midnight,
-                // so every mix's hue stays distinguishable while the page
-                // reads as a sleek high-contrast dark background for the
-                // white ink and paper cards (the old 35%/45% still floated
-                // lighter than the single-category pages).
-                lerp(background, lerp(blend, Color.Black, 0.50f), 0.42f)
-            }
-        } else {
-            if (AppPreferences.pastelColorsState) {
-                // Pastel mode: the blend is already an airy pastel — a
-                // moderate wash over cream keeps the pastel hue clearly on
-                // the page without glowing (v7.36 — 72% instead of 80% so
-                // green-heavy mixes don't flood the screen with bright mint).
-                lerp(background, blend, 0.72f)
-            } else {
-                // A pastel twin of the blend over cream at high strength — the
-                // hue is unmistakable per mix while staying light enough for the
-                // dark maroon ink on top.
-                lerp(background, lerp(blend, Color.White, 0.40f), 0.85f)
-            }
-        }
+        // v78 — light only (the dark midnight wash is gone with dark mode):
+        // a pastel twin of the blend over cream at high strength — the hue
+        // is unmistakable per mix while staying light enough for the deep
+        // maroon ink on top (pastel mode: a moderate wash over cream so
+        // green-heavy mixes don't flood the screen with bright mint).
+        return if (AppPreferences.pastelColorsState) lerp(background, blend, 0.72f)
+        else lerp(background, lerp(blend, Color.White, 0.40f), 0.85f)
     }
 
     /**

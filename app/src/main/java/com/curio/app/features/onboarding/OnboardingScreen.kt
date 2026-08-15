@@ -288,7 +288,7 @@ fun OnboardingScreen(navController: NavController) {
                     ) { pageIndex ->
                         when (pageIndex) {
                             OnboardingSlides.size -> {
-                                // Theme step: light / dark / system + pastel toggle.
+                                // Theme step: the pastel toggle (light-only since v78).
                                 MorphEntrance {
                                     ThemeSlide()
                                 }
@@ -942,14 +942,12 @@ private val OnboardingSlides = listOf(
     )
 )
 
-/** The theme step — a simple Light / Dark / System picker and one pastel
- *  toggle, nothing else (v7.100). Applies instantly via the reactive
- *  [AppPreferences] theme state, so picking Dark flips the whole app while
- *  you look. */
+/** The theme step — v78: Curio is light-only (dark/AMOLED removed), so
+ *  the step is a single pastel toggle, nothing else (v7.100 heritage).
+ *  Applies instantly via the reactive [AppPreferences] state. */
 @Composable
 private fun ThemeSlide() {
     val context = LocalContext.current
-    val mode = AppPreferences.themeModeState
     val pastel = AppPreferences.pastelColorsState
     val fill = settingsRoseAccent()
     val ink = settingsReadableInk(fill)
@@ -991,7 +989,7 @@ private fun ThemeSlide() {
             Spacer(Modifier.height(if (compact) 8.dp else 12.dp))
 
             Text(
-                text = "Light, dark, or follow your phone, and keep Curio's soft pastel colors?",
+                text = "Curio wears a warm light look, with soft pastel colors you can keep on or off.",
                 style = CurioEditorialBody.copy(
                     fontSize = 18.sp,
                     lineHeight = 27.sp
@@ -1001,39 +999,6 @@ private fun ThemeSlide() {
             )
 
             Spacer(Modifier.height(if (compact) 16.dp else 22.dp))
-
-            // ── Mode chips — Light / Dark / System (and nothing else) ──
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ThemeModeChip(
-                    label = "Light",
-                    glyph = CurioIcons.LightMode,
-                    selected = mode == AppPreferences.THEME_LIGHT,
-                    fill = fill,
-                    ink = ink,
-                    onClick = { AppPreferences.setThemeMode(context, AppPreferences.THEME_LIGHT) }
-                )
-                ThemeModeChip(
-                    label = "Dark",
-                    glyph = CurioIcons.DarkMode,
-                    selected = mode == AppPreferences.THEME_DARK,
-                    fill = fill,
-                    ink = ink,
-                    onClick = { AppPreferences.setThemeMode(context, AppPreferences.THEME_DARK) }
-                )
-                ThemeModeChip(
-                    label = "System",
-                    glyph = CurioIcons.Contrast,
-                    selected = mode == AppPreferences.THEME_SYSTEM,
-                    fill = fill,
-                    ink = ink,
-                    onClick = { AppPreferences.setThemeMode(context, AppPreferences.THEME_SYSTEM) }
-                )
-            }
-
-            Spacer(Modifier.height(if (compact) 12.dp else 16.dp))
 
             // ── Pastel toggle — borderless box, the setup-card language ──
             CurioSettingsCard(shadowElevation = 0.dp) {
@@ -1066,47 +1031,6 @@ private fun ThemeSlide() {
                     )
                 }
             }
-        }
-    }
-}
-
-/** One mode chip in the theme picker — sits ON the rose banner: selected
- *  fills with the banner's ink (text flips to the rose fill), unselected is
- *  a translucent ink glass pill with a hairline ink rim. */
-@Composable
-private fun ThemeModeChip(
-    label: String,
-    glyph: String,
-    selected: Boolean,
-    fill: Color,
-    ink: Color,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        // v27n — the unselected pill fill is OPAQUE (was ink at 14% alpha,
-        // which let the elevation shadow bleed through).
-        color = if (selected) ink else lerp(MaterialTheme.colorScheme.surface, ink, 0.14f),
-        // v27q — flat 2dp: selection reads through the solid ink fill.
-        shadowElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            CurioIcon(
-                name = glyph,
-                contentDescription = null,
-                tint = if (selected) fill else ink.copy(alpha = 0.9f),
-                size = 16.dp
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (selected) fill else ink
-            )
         }
     }
 }

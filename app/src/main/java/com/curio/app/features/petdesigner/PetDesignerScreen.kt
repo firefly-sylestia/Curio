@@ -2054,13 +2054,7 @@ private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) 
         // Consume taps inside the card so they don't dismiss the dialog.
         Surface(
             shape = RoundedCornerShape(24.dp),
-            // v15 — AMOLED: the custom dialog container joins the sleek
-            // pure-black glass (the #181818 container read grey next to
-            // the app's true-black cards and AlertDialogs).
-            color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                Color.Black
-            else
-                MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
             modifier = Modifier
                 .padding(20.dp)
                 .fillMaxWidth()

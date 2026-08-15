@@ -69,7 +69,6 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.glyph
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.readableLightInk
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.notePaperInk
@@ -227,14 +226,10 @@ fun categoryTintFill(accent: Color): Color =
  * Ink that reads on a [categoryTintFill] tile in EVERY theme — those tiles
  * are only a 16% accent wash, so raw pastel/light accents wash out on them
  * (the attach icons + labels were invisible in pastel light mode). Light
- * mode resolves the deep same-hue twin (the categoryInk rule);
- * dark mode lifts the accent toward its light twin so deep accents don't
- * sink into the dark tile.
+ * mode resolves the deep same-hue twin (the categoryInk rule).
  */
 @Composable
-internal fun tintedTileInk(accent: Color): Color =
-    if (isCurioDarkTheme()) lerp(accent, Color.White, 0.45f)
-    else readableLightInk(accent)
+internal fun tintedTileInk(accent: Color): Color = readableLightInk(accent)
 
 /**
  * Small image placeholder thumbnail — 80dp square with rounded corners.

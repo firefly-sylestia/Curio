@@ -68,7 +68,6 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioPillLift
-import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlinx.coroutines.launch
 
 /**
@@ -510,13 +509,7 @@ fun CategoryPickerScreen(navController: NavController) {
                     shape = mixShape,
                     colors = curioButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        // v12 — AMOLED: curioButtonColors forces the plate to
-                        // pitch black, so the scheme's onPrimary (a deep
-                        // maroon) would vanish on it — the content flips to
-                        // white on the black glass.
-                        contentColor = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-                            MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onPrimary
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -584,11 +577,11 @@ fun PickerPageTab(
                 else lerp(
                     MaterialTheme.colorScheme.surfaceContainerHigh,
                     curioPillLift(),
-                    if (isCurioDarkTheme()) 0.18f else 0.82f
+                    0.82f
                 ),
         shadowElevation = 3.dp,
         modifier = Modifier
-            // v28 — dark mode: soft glow + top-lit shine, no border rings.
+            // v28 — soft glow + top-lit shine.
             .curioDarkGlow(3.dp, shape)
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {

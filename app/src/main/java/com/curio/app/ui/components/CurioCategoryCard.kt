@@ -43,7 +43,6 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -110,41 +109,15 @@ fun CurioCategoryCard(
     )
     // Selected content reads WHITE on the saturated crown (the pastel-aware
     // cardContentInk is a deep ink designed for the airy pastel fills).
-    val selectedInk = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
-        MaterialTheme.colorScheme.onSurface else Color.White
-    val cardColor = CurioGradients.categoryCardFill(
-        category.themedAccent(),
-        isCurioDarkTheme()
-    )
+    // v78 — light only (the AMOLED onSurface swap is gone with dark mode).
+    val selectedInk = Color.White
+    val cardColor = CurioGradients.categoryCardFill(category.themedAccent())
     // Idle cards wear the category's tinted surface — the page wash, but a
     // touch stronger — so unselected tiles sit on the washed page as soft
     // tints of their own color instead of shouting in full brightness.
-    // v27n — AMOLED idle tiles wear the scheme's faint container step as
-    // their elevation (the old pitch-black tile + hairline outline read flat;
-    // the container step + accent-tinted edge shine keep the tile defined).
-    val idleSurface = when (AppPreferences.themeStyleState) {
-        AppPreferences.THEME_STYLE_AMOLED -> MaterialTheme.colorScheme.surfaceContainerLow
-        // v12 — Material: a soft category-tinted tile on the hue-neutral
-        // page — the old plain device-grey tile read dull and disconnected
-        // from the deck's category colors.
-        AppPreferences.THEME_STYLE_MATERIAL -> {
-            if (isCurioDarkTheme()) {
-                lerp(MaterialTheme.colorScheme.surfaceContainerHigh, category.themedAccent(), 0.12f)
-            } else {
-                lerp(MaterialTheme.colorScheme.surfaceContainerHigh, category.themedAccent(), 0.14f)
-            }
-        }
-        else -> if (isCurioDarkTheme()) {
-            // v46 — BLACKISH idle tiles in dark mode: the categorySurface
-            // mid-tone still read lighter than the page (low contrast).
-            // Idle tiles now hug the midnight surface, pushed further
-            // toward black — the SELECTED tile keeps its vivid full-accent
-            // gradient unchanged, so idle-vs-active contrast is the story.
-            lerp(MaterialTheme.colorScheme.surfaceContainerLow, Color.Black, 0.55f)
-        } else {
-            category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
-        }
-    }
+    // v78 — light only (the AMOLED/Material/dark idle surfaces are gone
+    // with dark mode).
+    val idleSurface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
     val idleInk = category.categoryInk()
     // v27q — elevation is a flat 2dp in both states: the selected tile
     // already wears the full solid-accent gradient, so it never needs to

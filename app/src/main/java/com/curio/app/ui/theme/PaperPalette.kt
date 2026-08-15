@@ -39,15 +39,13 @@ fun paperHighlight(): Color = Color(0x99FFC933)
 fun paperAccent(): Color = Color(0xFF9A7B2F)
 
 /**
- * Theme-aware paper control accent. The paper slips themselves stay the same
- * warm cream in BOTH themes (a note reads as a physical slip), but the
- * toolbar + cursor + style chips that sit OUTSIDE the slip on the page
- * background need a brighter amber in dark/AMOLED — the warm 0xFF9A7B2F
- * brown vanished against midnight and the icons looked bad.
+ * Theme-aware paper control accent — v78: light only (the brighter dark/
+ * AMOLED amber is gone with dark mode). The paper slips themselves stay the
+ * same warm cream (a note reads as a physical slip); the toolbar + cursor +
+ * style chips sit on the cream page and wear the standard amber.
  */
 @Composable
-fun paperControlAccent(): Color =
-    if (isCurioDarkTheme()) Color(0xFFE3B84F) else paperAccent()
+fun paperControlAccent(): Color = paperAccent()
 
 /** Hairline edge so paper cards read as distinct notecards — a warm tan
  *  with real contrast against the cream surface (the older near-cream edge

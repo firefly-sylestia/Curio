@@ -20,7 +20,6 @@ import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.curioPillLift
-import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * One quick-mix preset: label, glyph, and the lanes it ticks.
@@ -115,11 +114,11 @@ fun PickerPresetChip(
                 else lerp(
                     MaterialTheme.colorScheme.surfaceContainerHigh,
                     curioPillLift(),
-                    if (isCurioDarkTheme()) 0.18f else 0.82f
+                    0.82f
                 ),
         shadowElevation = 3.dp,
         modifier = Modifier
-            // v28 — dark mode: soft glow + top-lit shine, no border rings.
+            // v28 — soft glow + top-lit shine.
             .curioDarkGlow(3.dp, shape)
             .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
     ) {

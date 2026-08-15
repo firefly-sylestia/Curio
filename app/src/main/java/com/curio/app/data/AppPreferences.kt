@@ -31,24 +31,6 @@ enum class SmartDensityMode { OFF, COMPACT, EXTRA_COMPACT }
 
 object AppPreferences {
 
-    /** Theme mode constants used across ProfileScreen, SettingsScreen, CurioTheme. */
-    const val THEME_LIGHT = "light"
-    const val THEME_DARK = "dark"
-    const val THEME_SYSTEM = "system"
-
-    /**
-     * Theme style constants — the visual identity Curio wears:
-     *  - [THEME_STYLE_DEFAULT] — Curio's warm cream palette + category tints.
-     *  - [THEME_STYLE_AMOLED] — forced dark, pure-black surfaces, tints off.
-     *  - [THEME_STYLE_MATERIAL] — the device's Material dynamic colors for
-     *    surfaces/backgrounds/controls; category accents stay the true
-     *    researched colors (the old ~40% blend toward the dynamic primary
-     *    made reds turn purple and teals turn olive — dropped), tints off.
-     */
-    const val THEME_STYLE_DEFAULT = "default"
-    const val THEME_STYLE_AMOLED = "amoled"
-    const val THEME_STYLE_MATERIAL = "material"
-
     /** Topic sentiment constants — like/dislike from Topic Reveal feeds the
      *  Spin shuffle weighting (liked topics + their category get more weight,
      *  disliked get less — never fully blocked). [SENTIMENT_NONE] clears. */
@@ -60,8 +42,6 @@ object AppPreferences {
     private const val KEY_DISPLAY_NAME = "display_name"
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
-    private const val KEY_THEME_MODE = "theme_mode"        // "light", "dark", "system"
-    private const val KEY_THEME_STYLE = "theme_style"      // "default", "amoled", "material"
     private const val KEY_PET_CHATTER = "pet_chatter"     // "talkative", "cozy", "quiet"
     private const val KEY_PET_GAME_FREQUENCY = "pet_game_frequency" // "relaxed", "normal", "eager"
     private const val KEY_PET_BIRTHDAY = "pet_birthday_epoch_day"
@@ -204,21 +184,10 @@ object AppPreferences {
     fun setLastNotifiedUpdateVersion(context: Context, version: String) =
         prefs(context).edit().putString(KEY_LAST_NOTIFIED_UPDATE, version).apply()
 
-    /**
-     * Reactive theme mode state — updated by [setThemeMode] so [CurioTheme]
-     * recomposes instantly when the user toggles the theme in settings.
-     * Call [initThemeMode] once at app startup to seed it from prefs.
-     */
-    var themeModeState by mutableStateOf(THEME_SYSTEM)
-        private set
-
-    /**
-     * Reactive theme-style state — updated by [setThemeStyle] so [CurioTheme]
-     * (and every theme-aware helper) recomposes instantly when the user picks
-     * a style in Settings. Seeded from prefs in [initThemeMode].
-     */
-    var themeStyleState by mutableStateOf(THEME_STYLE_DEFAULT)
-        private set
+    // v78 — theme mode + style state are GONE: the app is Curio-light only
+    // (dark mode, AMOLED and Material styles removed). The future dark
+    // system will re-introduce its own reactive state; the light/dark seam
+    // lives in [com.curio.app.ui.theme.isCurioDarkTheme].
 
     // Pastel color mode (v7.5) — a user toggle that softens every category
     // accent (fills become pastel with deep-matching ink in light mode,
@@ -533,8 +502,6 @@ object AppPreferences {
         private set
 
     fun initThemeMode(context: Context) {
-        themeModeState = getThemeMode(context)
-        themeStyleState = getThemeStyle(context)
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
@@ -595,25 +562,7 @@ object AppPreferences {
         petPartTransformsState = isPetPartTransformsEnabled(context)
     }
 
-    // ── Theme ────────────────────────────────────────────────────────
-    fun getThemeMode(context: Context): String =
-        prefs(context).getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
-
-    fun setThemeMode(context: Context, mode: String) {
-        prefs(context).edit().putString(KEY_THEME_MODE, mode).apply()
-        themeModeState = mode
-    }
-
-    // ── Theme style ──────────────────────────────────────────────────
-    fun getThemeStyle(context: Context): String =
-        prefs(context).getString(KEY_THEME_STYLE, THEME_STYLE_DEFAULT) ?: THEME_STYLE_DEFAULT
-
-    fun setThemeStyle(context: Context, style: String) {
-        prefs(context).edit().putString(KEY_THEME_STYLE, style).apply()
-        themeStyleState = style
-    }
-
-    // ── Pastel color mode ──────────────���──────────────────────────────
+    // ── Pastel color mode ───────────────────────────────────────────
     /** Whether the pastel color mode is on (default on). */
     fun isPastelColorsEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_PASTEL_COLORS_ENABLED, true)
@@ -955,14 +904,12 @@ object AppPreferences {
         prefs(context).getBoolean(KEY_TINT_WASH_ENABLED, true)
 
     /**
-     * Whether category-tinted backgrounds are EFFECTIVELY on: the user
-     * toggle AND the theme style must both allow them. The AMOLED and
-     * Material styles force the tint off (pure black / device colors)
-     * regardless of the toggle, so [CurioTheme] and the wash helpers read
-     * this instead of the raw toggle.
+     * Whether category-tinted backgrounds are on. v78 — the theme-style
+     * gate is gone (AMOLED/Material styles removed); the raw user toggle
+     * is the only condition now.
      */
     fun tintWashEffective(): Boolean =
-        tintWashEnabledState && themeStyleState == THEME_STYLE_DEFAULT
+        tintWashEnabledState
 
     fun setTintWashEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_TINT_WASH_ENABLED, enabled).apply()
