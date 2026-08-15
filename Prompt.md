@@ -1,6 +1,74 @@
 # Prompt.md — Request log
 
-## Current request — dark-mode audit: everything left light-only (v82)
+## Current request — color-mix research for dark mode (v83)
+
+### What was asked
+"doo the color mix research" — the "mixed color shades" research from the
+v81 dark-mode spec (main card shades + mixed color shades).
+
+### What the app does today
+- Mixing is HSL-space: `hslBlend` (midpoint blend, +0.05 sat boost),
+  `hslCentroid` (circular hue mean + sat boost + WCAG 4.5:1-vs-white
+  lightness steering), `hslGradientStops` (HSL interp with achromatic
+  anchoring), all via local `toHsl`/`fromHsl` (no Compose color accessors
+  in the BOM — conversions are hand-rolled).
+- `CurioMixedDeck.PairBlends`/`TripleBlends` — hand-curated premium blends
+  for the six research accents, steered off the olive dead zone.
+- Dark mode: singles resolve `darkAccent` (×0.80 sat, L≈0.44 — matches
+  the ~20% desaturation consensus); pastel-dark pairs/triples soften via
+  `pastelAccent(blend, dark=true)`; NON-pastel dark pairs/triples reuse
+  the light-designed curated deep blends as-is; gradients end on black.
+
+### What the research says (sources below)
+1. **OKLab is the interpolation gold standard** — perceptually uniform
+   lightness + hue-linear: no gray banding (RGB), no purple tints
+   (CIELAB blue paths), no non-perceptual lightness (HSL yellow-vs-blue).
+   CSS Color 4 ships `in oklab`/`color-mix` on it; Tailwind moved to it;
+   matplotlib viridis descends from it. Conversion is cheap: gamma → 3×3
+   (LMS) → cube root → 3×3. Cartesian OKLab for interpolation/gradients;
+   cylindrical OKLCH for building palette steps; when one endpoint is
+   achromatic (black/white/gray) interpolate in OKLab, not OKLCH.
+2. **Dark-mode mixing**: desaturate accents 15–25% (~20 pts consensus),
+   never 100%-saturated accents on black, elevation via luminance not
+   shadows, keep WCAG AA on fills.
+3. **Dead zones**: RGB/HSL cross muddy midtones (amber↔teal olive);
+   OKLab interpolation natively avoids them — the curated tables exist
+   because HSL still isn't perceptual enough.
+
+### Gap analysis
+- HSL is already better than RGB, but blends average lightness NUMERICALLY
+  not perceptually; unmapped pairs + 4+ mixes swing hue where the curated
+  tables don't cover; the tables are designed for LIGHT.
+- Dark-specific gap: non-pastel dark pairs/triples don't get the same
+  ~20% desat treatment as singles.
+
+### Recommendations (mapped to code)
+1. Add local `oklab*` conversions (~50 lines pure math, same version-proof
+   pattern as `toHsl`/`fromHsl`, no deps).
+2. `oklabBlend` replaces `hslBlend` fallback; `oklabCentroid` replaces
+   `hslCentroid` (perceptual mean over hue-circle mean) for 4+/unmapped.
+3. `oklabGradientStops` for `cardGradient`/`mixedDeckGradient`/
+   `heroBlendGradient` (achromatic endpoint → OKLab cartesian).
+4. Keep curated Pair/Triple tables as premium overrides.
+5. Dark non-pastel: apply the `darkAccent` recipe to blends so mixed
+   shades get the same new-shade-of-the-same-spectrum treatment as
+   singles; keep 4.5:1-vs-white steering for light fills.
+6. Optional: steer lightness in OKLCH (chroma-preserving) instead of HSL.
+
+### Sources
+- Evil Martians — OKLCH in CSS: why we moved from RGB and HSL.
+- Chris Coyier — "Two Things Not Great About OKLCH" (Oklab for gradients).
+- Tailwind Labs issue #14955 (uniform OKLab for interpolation).
+- pavelp.cz — RGB vs CIE LCH vs OKLCH gradients (blue-purple tint demo,
+  achromatic fallback rule).
+- Eleken / ColorArchive / Nate Balcom / paletacolorpro — dark palettes:
+  15–25% desaturation, no full-sat accents, elevation via luminance.
+
+### Status
+Research delivered (v83). Awaiting user decision on implementing the
+OKLab swap + dark blend treatment (not yet coded).
+
+## Prior — dark-mode audit: everything left light-only (v82)
 
 ### What was asked
 "continue audit the app for anything thats left in dark mode."
