@@ -135,6 +135,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.SoftTornBottomShape
+import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
@@ -154,6 +155,7 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.oklabGradientStops
 import com.curio.app.ui.theme.onAccent
@@ -1712,16 +1714,39 @@ private fun FilterSheet(
             //    / Profile heroes, so the filter page reads as part of the
             //    app instead of a plain form sheet.
             val filterHeroSeed = 0x51F1E7 // deterministic — never re-rolls
-            val filterHeroFill = cat.themedAccent()
+            // v91 — the hero SHADE family: the calm/deep header accent the
+            // Home/Detail banners wear (the raw themedAccent read brighter
+            // than the app's hero shade).
+            val filterHeroFill = cat.headerAccent()
             val filterHeroInk = cat.onAccent()
             val filterHeroTorn = remember(filterHeroSeed) {
                 SoftTornBottomShape(filterHeroSeed, bold = true)
             }
+            // v91 — Home's white under-sheet (same seed → pixel-aligned):
+            // a clean paper lip below the tear instead of the sheet dropping
+            // straight into the wash.
+            val filterHeroSheet = remember(filterHeroSeed) {
+                SoftTornSheetShape(filterHeroSeed, lip = 10.dp, baseline = 14.dp, bold = true)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(filterHeroHeight)
+                    .height(filterHeroHeight + 24.dp)
             ) {
+                // ── White under-sheet — the Home hero construction: the
+                //    sheet's torn top hides behind the banner; the uneven lip
+                //    reads white below the tear, and the wash starts after.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .offset(y = filterHeroHeight - 18.dp)
+                        .clip(filterHeroSheet)
+                        .background(
+                            if (isCurioDarkTheme()) lerp(filterHeroFill, Color.White, 0.10f)
+                            else Color(0xFFFDFCF9)
+                        )
+                )
                 // ── Torn-edge hairline shadow (the hero construction) ──
                 Box(
                     modifier = Modifier
@@ -4162,16 +4187,39 @@ private fun CategoryPickerSheet(
             //    banner. The close button is gone — swipe-down / scrim tap
             //    / Mix-Cancel dismiss instead.
             val pickerHeroSeed = 0xC4A71E // deterministic — never re-rolls
-            val pickerHeroFill = currentCat.themedAccent()
+            // v91 — the hero SHADE family: the calm/deep header accent the
+            // Home/Detail banners wear (the raw themedAccent read brighter
+            // than the app's hero shade).
+            val pickerHeroFill = currentCat.headerAccent()
             val pickerHeroInk = currentCat.onAccent()
             val pickerHeroTorn = remember(pickerHeroSeed) {
                 SoftTornBottomShape(pickerHeroSeed, bold = true)
             }
+            // v91 — Home's white under-sheet (same seed → pixel-aligned):
+            // a clean paper lip below the tear instead of the sheet dropping
+            // straight into the wash.
+            val pickerHeroSheet = remember(pickerHeroSeed) {
+                SoftTornSheetShape(pickerHeroSeed, lip = 10.dp, baseline = 14.dp, bold = true)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(pickerHeroHeight)
+                    .height(pickerHeroHeight + 24.dp)
             ) {
+                // ── White under-sheet — the Home hero construction: the
+                //    sheet's torn top hides behind the banner; the uneven lip
+                //    reads white below the tear, and the wash starts after.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .offset(y = pickerHeroHeight - 18.dp)
+                        .clip(pickerHeroSheet)
+                        .background(
+                            if (isCurioDarkTheme()) lerp(pickerHeroFill, Color.White, 0.10f)
+                            else Color(0xFFFDFCF9)
+                        )
+                )
                 // ── Torn-edge hairline shadow (the hero construction) ──
                 Box(
                     modifier = Modifier

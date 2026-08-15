@@ -372,26 +372,35 @@ fun EntryDetailScreen(
             // survive recompositions (built fresh in the modifier chain, the
             // caches would never hit).
             val heroTornShape = remember(tearSeed) {
-                SoftTornBottomShape(tearSeed, detail = true)
+                SoftTornBottomShape(tearSeed, bold = true, detail = true)
             }
             val sheetShape = remember(tearSeed) {
                 SoftTornSheetShape(
                     tearSeed,
-                    lip = 3.dp,
-                    baseline = 7.dp,
+                    lip = 10.dp,
+                    baseline = 14.dp,
+                    bold = true,
                     detail = true
                 )
             }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(16.dp)
-                    // Keep the paper lip intentionally narrow: the category
-                    // label now begins below this seam instead of being tucked
-                    // into the tear.
-                    .offset(y = EntryDetailHeroHeight - 5.dp)
+                    .height(42.dp)
+                    // v91 — Home's clean tear construction: the sheet's torn
+                    // top hides behind the banner and the wide 10dp lip reads
+                    // as real paper below the seam (the old 3dp lip + the
+                    // near-black dark sheet made the detail tear read as a
+                    // straight line at night).
+                    .offset(y = EntryDetailHeroHeight - 18.dp)
                     .clip(sheetShape)
-                    .background(heroSheetColor)
+                    .background(
+                        // v91 — dark: a visible paper lip (Home's recipe —
+                        // the hero's hue lifted toward white) instead of the
+                        // near-black sheet that vanished on the black page.
+                        if (isCurioDarkTheme()) lerp(heroStart, Color.White, 0.10f)
+                        else heroSheetColor
+                    )
             )
 
             // ── Torn-edge shadow — a hairline dark rim just below the
@@ -894,7 +903,9 @@ private fun DetailContentEntrance(content: @Composable () -> Unit) {
 // the category and entry text while preserving one stable transition target.
 private val EntryDetailHeroHeight = 400.dp
 /** Extra layout space reserved for the white sheet below the clipped hero. */
-private val EntryDetailSheetExtent = 16.dp
+// v91 — 16 → 24dp: matches Home's under-sheet geometry so the detail tear
+// carries the same clean paper lip below the seam.
+private val EntryDetailSheetExtent = 24.dp
 
 /** Hero height + a small gap — the watermark's top clearance on this page
  *  (keeps the backdrop glyphs clear of the narrow white under-sheet lip

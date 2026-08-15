@@ -401,6 +401,24 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v92 — Home-clean tear heroes + hero shade family + cbrt fix.** (1)
+  `kotlin.math.cbrt` (used by the v88 OKLab `toOklab`) was missing its
+  import — added. (2) Detail hero tear: the old `detail = true`-only tear
+  with a 3dp lip / 7dp baseline / 16dp sheet — plus a near-black
+  (#121316) dark sheet — read as a straight cut on the black page. Now
+  `bold = true, detail = true` (keeps the flat-seam salt), Home's exact
+  geometry (`lip = 10, baseline = 14`, 42dp sheet at `HeroHeight − 18`,
+  extent 16 → 24dp) and a visible dark lip (`lerp(heroStart, White,
+  0.10)`). (3) Filter + category-picker sheet tears: both had only the
+  torn banner + black hairline with NO white under-sheet, so the hero
+  dropped straight into the wash — both now carry Home's full
+  construction (`SoftTornSheetShape(same seed, lip = 10, baseline = 14,
+  bold = true)`, 42dp at hero − 18, hero box + 24dp, dark lip =
+  `lerp(heroFill, White, 0.10)`). (4) Hero SHADE family: the filter +
+  picker heroes resolved from raw `themedAccent()` (uncalmed, brighter)
+  while Home/Detail use `headerAccent()` (calmed/deepened banner shade) —
+  both heroes now use `cat.headerAccent()` so every torn hero wears the
+  same shade.
 - **v91 — dynamic pills sweep + unified One UI search bars.** (1) Profile
   quest plate: the fixed solid coral (light) / deep rose (dark) fills are
   gone — the plate wears the shared profile-family frosted glass

@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import com.curio.app.data.AppPreferences
+import kotlin.math.cbrt
 import kotlin.math.pow
 
 /**

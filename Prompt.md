@@ -1,6 +1,45 @@
 # Prompt.md — Request log
 
-## Current request — dynamic pills sweep + unified One UI search bars (v91)
+## Current request — cbrt CI fix + Home-clean tear heroes + hero shade family (v92)
+
+### What was asked
+1. Fix the CI compile error (Unresolved reference 'cbrt').
+2. "fix the tear style in detail veiw like why the tear cant be like home
+   screen clean with no straigth line" — Detail view tear should be clean
+   like Home's (no straight line).
+3. Same issue in the filters page and the category page tears.
+4. "its hero color doesnt match the hero shades of home screen" — the
+   filter/category hero colors feel different from Home.
+
+### What was done
+1. **cbrt fix** — `kotlin.math.cbrt` was used in `toOklab` (the v88 OKLab
+   machinery) without an import. Added `import kotlin.math.cbrt`.
+2. **Detail hero tear → Home construction.** The detail tear used
+   `detail = true` WITHOUT `bold`, a 3dp lip / 7dp baseline and a 16dp
+   sheet — plus a NEAR-BLACK sheet in dark (#121316) that vanished on the
+   black page, so the seam read as a straight cut. Now: `bold = true` +
+   `detail = true` (keeps the flat-seam salt), `lip = 10.dp` /
+   `baseline = 14.dp`, 42dp sheet at `HeroHeight - 18` (Home's exact
+   geometry), `EntryDetailSheetExtent` 16 → 24dp, and the dark lip is a
+   visible paper tone (`lerp(heroStart, White, 0.10)` — Home's recipe).
+3. **Filter sheet + category-picker sheet tears** — both previously had
+   ONLY the torn banner + black hairline (no white under-sheet), so the
+   hero dropped straight into the wash. Both now use Home's full
+   construction: `SoftTornSheetShape(same seed, lip = 10, baseline = 14,
+   bold = true)` white under-sheet (42dp at HeroHeight − 18), hero box
+   grown by 24dp, dark lip = `lerp(heroFill, White, 0.10)`.
+4. **Hero shade family** — the filter + picker heroes resolved their fill
+   from the RAW `themedAccent()` (full-saturation, uncalmed — brighter
+   than the app's banner shade); Home + Detail use `headerAccent()` (the
+   calmed/deepened hero accent). Both heroes now use `cat.headerAccent()`
+   so every torn hero wears the same shade family.
+
+### Validation
+Balanced, `git diff --check` clean, `cbrt` imported, `themedAccent` still
+used in SpinScreen (5 sites, import kept), `headerAccent` imported. No
+Gradle locally — CI on push.
+
+## Prior — dynamic pills sweep + unified One UI search bars (v91)
 
 ### What was asked
 "make the quests and achievement pill be dynamic like the rest of the
