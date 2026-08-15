@@ -1734,10 +1734,10 @@ private fun FilterSheet(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = cat.displayName,
-                                // v68 — the header text steps up (26sp) so
+                                // v68 — the header text steps up (30sp) so
                                 // the category name leads the page.
                                 style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = 26.sp,
+                                    fontSize = 30.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 ),
                                 color = filterHeroInk,
