@@ -401,6 +401,25 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v97 — Paper stat card on by default + Profile quests paper card + merged
+  Edit profile.** (1) The "Paper stat card" experiment PASSED — default is now
+  ON app-wide (`paperStatCardsState` true, `KEY_PAPER_STAT_CARDS` default
+  true; the Experiments toggles stay for comparison), so the Home stat bar,
+  the Profile stat pane, and the Detail meta card wear the paper card by
+  default. (2) The Profile quests & achievements block now wears the shared
+  paper card too (same construction as the hero's Level · Saved · Lanes pane:
+  `paperStatCardFill` on `paperStatCardColor(settingsCardTintLift())`, 28dp
+  base shape, `TornStatPaperShape(0x6B4E3E)` under the tear toggle, holes /
+  rings following the paper toggles, 3dp elevation + `curioDarkGlow`;
+  falls back to `CurioSettingsCard` when the experiment is off). (3) The
+  "Quests & achievements" plate lost its glowing look: `curioGlassEdge` +
+  the frosted `curioPillTintLift` lift are gone (calm flat
+  `lerp(surfaceContainerHigh, curioRoseInk, 0.08)` fill) and the gradient
+  icon box is now a flat rose-tinted chip with rose-ink trophy (the
+  `CurioCardHeader` icon-chip language). (4) "Edit profile" now edits BOTH
+  the name and the tagline (the line under the name) in ONE dialog — the
+  separate tagline dialog is removed; tapping the tagline opens the same
+  Edit profile dialog, and Save persists both prefs.
 - **v96 — detail-page fixes.** (1) CI: `tornSeamLight` (v94) used
   `1.5.dp.toPx()` without importing `androidx.compose.ui.unit.dp` — added.
   (2) Detail back + more buttons: the frost plate was HARDCODED white

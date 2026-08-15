@@ -292,7 +292,9 @@ object AppPreferences {
     var paperHoleRingsState by mutableStateOf(false)
     /** v27v — which 3D ring style the pin holes wear ("coil" | "split" | "oblique"). */
     var paperHoleRingStyleState by mutableStateOf("coil")
-    var paperStatCardsState by mutableStateOf(false)
+    // v97 — the Paper stat card experiment PASSED: on by default app-wide
+    // (the Experiments toggles stay for comparison).
+    var paperStatCardsState by mutableStateOf(true)
     var paperStatTearState by mutableStateOf(false)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
@@ -888,9 +890,9 @@ object AppPreferences {
         homeTintCategoryIdState = id.name
     }
 
-    /** Whether the Home Streak · Cabinet · Topics bar wears a solid paper card (experimental, default off). */
+    /** Whether the stat panes + Profile quests wear a solid paper card (experimental, v97: default ON). */
     fun isPaperStatCardsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PAPER_STAT_CARDS, false)
+        prefs(context).getBoolean(KEY_PAPER_STAT_CARDS, true)
 
     fun setPaperStatCardsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_STAT_CARDS, enabled).apply()

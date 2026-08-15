@@ -1,4 +1,6 @@
 ADD
+- Paper stat cards are on by default: the Home and Profile stat panes, the detail meta card and the Profile quests block now wear the paper card look.
+- Edit profile now edits your name and the line under it in one dialog (no separate tagline popup).
 - Dark mode reimagined: pitch-black pages, dark same-hue heroes, reversed buttons and One UI-style inner glow on pills.
 - Light / Dark / System theme picker back in Settings and onboarding.
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.

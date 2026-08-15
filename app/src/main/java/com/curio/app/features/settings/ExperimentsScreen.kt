@@ -160,7 +160,7 @@ fun ExperimentsScreen(navController: NavController) {
                         }
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Paper stat card", "Soft rose paper card on the stat panes (Home + Profile)", AppPreferences.paperStatCardsState) {
+                    ExperimentSwitchRow("Paper stat card", "Soft rose paper card on the stat panes and the Profile quests block (on by default)", AppPreferences.paperStatCardsState) {
                         AppPreferences.setPaperStatCardsEnabled(context, it)
                     }
                     CurioSettingsDivider()

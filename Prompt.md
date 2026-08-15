@@ -1,22 +1,47 @@
 # Prompt.md — Request log
 
-## Current request — fix detail screen CI compile error
+## Current request — Profile: paper card default + deglow quests + merged edit dialog (v97)
 
 ### What was asked
-Fix the CI failure in `EntryDetailScreen.kt`:
-`DetailStickyBar` passes `heroStart`, but the symbol was declared inside the
-scrolling content `Column` and was out of scope at the overlay call site.
+1. In the Profile screen, remove the glowing gradient treatment for the
+   quests & achievements block and apply the paper card by default.
+2. "Edit profile" should also edit the line below the name (the tagline) —
+   no separate dialog.
+3. Follow-up: remove the glowing look from the "Quests & achievements"
+   bar button in Profile.
+
+### Decisions
+- Asked the user about the paper-card scope; they chose **"Flip the Paper
+  stat card experiment ON app-wide"** — default ON everywhere (Home stat
+  bar, Profile stat pane + quests card, Detail meta card), keeping the
+  Experiments toggles for comparison.
 
 ### What was done
-Hoisted the existing `heroStart` calculation to the enclosing
-`EntryDetailScreen` scope and removed the now-duplicate inner declaration.
-This preserves the intended hero fill and makes it available to both the
-hero content and `DetailStickyBar`.
+1. **AppPreferences** — `paperStatCardsState` default flipped to `true`
+   (both the in-memory state and `KEY_PAPER_STAT_CARDS` read default).
+2. **Profile quests block → paper card** — the `CurioSettingsCard` wrapper
+   is replaced by the shared paper-card construction (same as the hero's
+   Level · Saved · Lanes pane): `paperStatCardFill` on
+   `paperStatCardColor(settingsCardTintLift())`, 28dp base shape,
+   `TornStatPaperShape(0x6B4E3E)` when the tear toggle is on, holes/rings
+   following the paper toggles, 3dp elevation + `curioDarkGlow`; falls
+   back to `CurioSettingsCard` when the experiment is off.
+3. **"Quests & achievements" plate deglow** — `curioGlassEdge` + the
+   frosted `curioPillTintLift` lift removed (calm flat
+   `lerp(surfaceContainerHigh, curioRoseInk, 0.08)` fill); the gradient
+   icon box is now a flat rose-tinted chip (`curioRoseInk @ 12%`) with a
+   rose-ink trophy (the `CurioCardHeader` icon-chip language).
+4. **Merged Edit profile dialog** — one dialog with Display name + Tagline
+   fields (both saved on Save; "Use automatic tagline" clears the field).
+   The separate tagline dialog and its state are gone; tapping the hero
+   tagline opens the same Edit profile dialog.
+5. Experiments copy + store changelog updated; app/AGENTS.md v97 entry added.
 
 ### Validation
-`git diff --check` passes. Gradle compilation was not run locally per the
-repository rule; CI should rerun `compileDebugKotlin` and
-`compileReleaseKotlin`.
+`git diff --check` clean; unused `curioGlassEdge` import removed, no dangling
+refs to the old dialog params; verified `paperStatCardFill`/
+`paperStatCardColor`/`TornStatPaperShape`/`settingsCardTintLift` signatures
+against their definitions. No Gradle locally (env rule) — CI on push.
 
 
 ## Prior — light warm catch on the unified tears (v95)

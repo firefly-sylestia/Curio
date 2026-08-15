@@ -74,6 +74,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -89,7 +90,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
-import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
@@ -179,12 +179,10 @@ fun ProfileScreen(navController: NavController) {
     var displayName by remember { mutableStateOf(AppPreferences.getDisplayName(context)) }
     var showNameDialog by remember { mutableStateOf(false) }
     var nameInput by remember(displayName) { mutableStateOf(displayName) }
-    // v53 — the hero tagline is user-editable: tap it to set a custom line
-    // (or restore the automatic streak-based one). The revision bump
-    // re-reads the pref so the hero updates instantly after saving. The
-    // automatic line derives from the DISPLAY streak, so this lives below
-    // its declaration.
-    var showTaglineDialog by remember { mutableStateOf(false) }
+    // v97 — the tagline (the line under the name) is edited in the SAME
+    // "Edit profile" dialog as the name — no separate tagline dialog. The
+    // revision bump re-reads the pref so the hero updates instantly after
+    // saving. The automatic line derives from the DISPLAY streak.
     var taglineInput by remember { mutableStateOf("") }
     var taglineRevision by remember { mutableIntStateOf(0) }
     var crashCount by remember { mutableIntStateOf(0) }
@@ -261,28 +259,23 @@ fun ProfileScreen(navController: NavController) {
     val heroInk = profileReadableInk(heroFill)
 
     ProfileDialogs(
-        showNameDialog = showNameDialog,
+        showEditDialog = showNameDialog,
         nameInput = nameInput,
         onNameInputChange = { nameInput = it },
-        onDismissName = { showNameDialog = false },
-        onSaveName = {
-            displayName = nameInput.trim().ifBlank { "Curious Explorer" }
-            AppPreferences.setDisplayName(context, displayName)
-            showNameDialog = false
-        },
-        showTaglineDialog = showTaglineDialog,
         taglineInput = taglineInput,
         onTaglineInputChange = { taglineInput = it },
-        onDismissTagline = { showTaglineDialog = false },
-        onSaveTagline = {
+        onResetTagline = {
+            // Clears the tagline field — Save persists the automatic line.
+            taglineInput = ""
+        },
+        onDismiss = { showNameDialog = false },
+        onSave = {
+            displayName = nameInput.trim().ifBlank { "Curious Explorer" }
+            AppPreferences.setDisplayName(context, displayName)
+            // v97 — the tagline saves with the same Edit profile dialog.
             AppPreferences.setCustomStreakTagline(context, taglineInput)
             taglineRevision++
-            showTaglineDialog = false
-        },
-        onResetTagline = {
-            AppPreferences.setCustomStreakTagline(context, "")
-            taglineRevision++
-            showTaglineDialog = false
+            showNameDialog = false
         }
     )
 
@@ -333,11 +326,10 @@ fun ProfileScreen(navController: NavController) {
                     ink = heroInk,
                     onEditName = {
                         nameInput = displayName
-                        showNameDialog = true
-                    },
-                    onEditTagline = {
+                        // v97 — the tagline field rides the same Edit profile
+                        // dialog now (no separate tagline dialog).
                         taglineInput = AppPreferences.getCustomStreakTagline(context)
-                        showTaglineDialog = true
+                        showNameDialog = true
                     }
                 )
             }
@@ -348,7 +340,21 @@ fun ProfileScreen(navController: NavController) {
                     // Keep the whole gamification story together: XP explains
                     // the current level, the quest row opens the full journey,
                     // and the badge preview shows the immediate payoff.
-                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    // v97 — the quests block wears the shared PAPER card when
+                    // the "Paper stat card" experiment is on (now the default):
+                    // the same construction as the hero's Level · Saved · Lanes
+                    // pane (paper fill + torn edges + holes/rings toggles).
+                    // The plate inside lost its glowing gradient look too.
+                    val questsPaperOn = AppPreferences.paperStatCardsState
+                    val questsPaperBg = paperStatCardColor(settingsCardTintLift())
+                    val questsTearOn = questsPaperOn && AppPreferences.paperStatTearState
+                    val questsShape: Shape = remember(questsTearOn) {
+                        if (questsTearOn) TornStatPaperShape(0x6B4E3E) else RoundedCornerShape(28.dp)
+                    }
+                    val questsHolesOn = questsPaperOn && AppPreferences.paperHeaderHolesState
+                    val questsRingsOn = questsHolesOn && AppPreferences.paperHoleRingsState
+                    val questsRingStyle = AppPreferences.paperHoleRingStyleState
+                    val questsContent: @Composable () -> Unit = {
                         ProgressAndAchievementsCard(
                             xp = displayXp,
                             progress = progress.first,
@@ -358,6 +364,34 @@ fun ProfileScreen(navController: NavController) {
                                 navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
                             }
                         )
+                    }
+                    if (questsPaperOn) {
+                        Surface(
+                            shape = questsShape,
+                            color = Color.Transparent,
+                            shadowElevation = 3.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .curioDarkGlow(3.dp, questsShape)
+                        ) {
+                            Box(
+                                modifier = Modifier.paperStatCardFill(
+                                    shape = questsShape,
+                                    fill = questsPaperBg,
+                                    holesOn = questsHolesOn,
+                                    ringsOn = questsRingsOn,
+                                    ringStyle = questsRingStyle,
+                                    ink = MaterialTheme.colorScheme.onSurface,
+                                    dark = isCurioDarkTheme()
+                                )
+                            ) {
+                                Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+                                    questsContent()
+                                }
+                            }
+                        }
+                    } else {
+                        CurioSettingsCard(shadowElevation = 0.dp) { questsContent() }
                     }
                 }
             }
@@ -534,65 +568,49 @@ private fun ProfileSearchPill(
 
 @Composable
 private fun ProfileDialogs(
-    showNameDialog: Boolean,
+    showEditDialog: Boolean,
     nameInput: String,
     onNameInputChange: (String) -> Unit,
-    onDismissName: () -> Unit,
-    onSaveName: () -> Unit,
-    // v53 — the tagline editor: tap the hero tagline, type your own line,
-    // or restore the automatic streak-based one.
-    showTaglineDialog: Boolean,
+    // v97 — the tagline (the line under the name) edits in the SAME
+    // "Edit profile" dialog — the separate tagline dialog is gone.
     taglineInput: String,
     onTaglineInputChange: (String) -> Unit,
-    onDismissTagline: () -> Unit,
-    onSaveTagline: () -> Unit,
-    onResetTagline: () -> Unit
+    onResetTagline: () -> Unit,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit
 ) {
-    if (showNameDialog) {
+    if (showEditDialog) {
         AlertDialog(
             containerColor = curioDialogContainerColor(),
             shape = CurioDialogShape,
-            onDismissRequest = onDismissName,
-            title = { Text("Display name", fontWeight = FontWeight.ExtraBold) },
+            onDismissRequest = onDismiss,
+            title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("This is how Curio greets you.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Your name and the line under it.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     OutlinedTextField(
                         value = nameInput,
                         onValueChange = onNameInputChange,
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp),
+                        label = { Text("Display name") },
                         modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onSaveName, colors = curioDialogActionButtonColors()) { Text("Save", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissName, colors = curioDialogActionButtonColors()) { Text("Cancel") }
-            }
-        )
-    }
-    if (showTaglineDialog) {
-        AlertDialog(
-            containerColor = curioDialogContainerColor(),
-            shape = CurioDialogShape,
-            onDismissRequest = onDismissTagline,
-            title = { Text("Tagline", fontWeight = FontWeight.ExtraBold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        "Your own line under your name. Leave it empty to use the automatic streak one.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     OutlinedTextField(
                         value = taglineInput,
                         onValueChange = onTaglineInputChange,
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp),
+                        label = { Text("Tagline") },
                         placeholder = { Text("Keep the spark going today.") },
                         modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        "Leave the tagline empty to use the automatic streak one.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     TextButton(
                         onClick = onResetTagline,
@@ -603,10 +621,10 @@ private fun ProfileDialogs(
                 }
             },
             confirmButton = {
-                TextButton(onClick = onSaveTagline, colors = curioDialogActionButtonColors()) { Text("Save", fontWeight = FontWeight.Bold) }
+                TextButton(onClick = onSave, colors = curioDialogActionButtonColors()) { Text("Save", fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
-                TextButton(onClick = onDismissTagline, colors = curioDialogActionButtonColors()) { Text("Cancel") }
+                TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Cancel") }
             }
         )
     }
@@ -636,9 +654,7 @@ private fun ProfileHero(
     family: CategoryFamily,
     fill: Color,
     ink: Color,
-    onEditName: () -> Unit,
-    // v53 — tap the tagline to set a custom one (or restore automatic).
-    onEditTagline: () -> Unit
+    onEditName: () -> Unit
 ) {
     val initial = name.firstOrNull()?.uppercase().orEmpty()
     val heroTornShape = remember(PROFILE_TEAR_SEED) { SoftTornBottomShape(PROFILE_TEAR_SEED, bold = true) }
@@ -798,8 +814,9 @@ private fun ProfileHero(
                                 color = ink.copy(alpha = 0.78f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                // v53 — editable: tap to open the tagline editor.
-                                modifier = Modifier.clickable(onClick = onEditTagline)
+                                // v97 — editable: tap opens the Edit profile
+                                // dialog (name + tagline in one place).
+                                modifier = Modifier.clickable(onClick = onEditName)
                             )
                         }
                     }
@@ -1184,22 +1201,11 @@ private fun ProgressAndAchievementsCard(
         )
         Surface(
             onClick = onOpenQuests,
-            // v42 — the quest plate is COLOR-TINTED glass: the brand-tinted
-            // lift (a coral whisper, not flat cream).
-            // v85 — dark: the pale coral glass would glare on the black
-            // page, so the plate flips to a DEEP rose glass (the reversed
-            // light-in-dark contract) with the glass edge for the raised
-            // read.
-            // v90 — DYNAMIC like the rest of the profile options: the plate
-            // wears the shared profile-family frosted glass (curioPillTintLift
-            // — cream-rose in light, the near-white rose glass on black in
-            // dark) instead of the fixed coral/rose fills that read as a
-            // different color next to the other options.
-            color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, curioPillTintLift(), 0.55f),
+            // v97 — the glowing frosted-glass + glass-edge treatment is GONE:
+            // the plate is a calm flat tinted surface (no glow, no gradient).
+            color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, curioRoseInk(), 0.08f),
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .curioGlassEdge(RoundedCornerShape(16.dp))
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
@@ -1210,17 +1216,12 @@ private fun ProgressAndAchievementsCard(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            // v85 — dark: the deep rose gradient keeps the
-                            // white trophy readable (the pale coral top
-                            // washed it out on the black page).
-                            Brush.verticalGradient(CurioGradients.cardGradient(
-                                if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush
-                            ))
-                        ),
+                        // v97 — flat rose-tinted chip, the CurioCardHeader
+                        // icon-chip language (the gradient block is gone).
+                        .background(curioRoseInk().copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    CurioIcon(CurioIcons.EmojiEvents, null, tint = Color.White, size = 20.dp)
+                    CurioIcon(CurioIcons.EmojiEvents, null, tint = curioRoseInk(), size = 20.dp)
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
