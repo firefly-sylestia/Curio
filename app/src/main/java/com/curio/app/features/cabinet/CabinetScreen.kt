@@ -99,6 +99,7 @@ import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioGlassGlow
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.pet.PetLandmark
@@ -636,7 +637,10 @@ fun CabinetScreen(navController: NavController) {
                         glyph = CurioIcons.Search,
                         contentDescription = "Search captures",
                         ink = ink,
-                        backdrop = backdrop
+                        backdrop = backdrop,
+                        // v85 — same emphasized fill as the sort pill beside
+                        // it, so the two render as identical siblings.
+                        emphasized = true
                     )
                 }
             }
@@ -1204,8 +1208,12 @@ private fun CabinetHeroActionPill(
         color = fill,
         shadowElevation = 3.dp,
         // v28 — dark mode elevation visibility (glow + hairline).
+        // v85 — same One UI glass glow as the sort dropdown, so the search /
+        // select / cancel pills render as the sort pill's identical sibling
+        // in dark (before, the sort pill glowed and these stayed flat).
         modifier = Modifier
             .curioDarkGlow(3.dp, RoundedCornerShape(50))
+            .curioGlassGlow(RoundedCornerShape(50), ink)
     ) {
         Row(
             // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero

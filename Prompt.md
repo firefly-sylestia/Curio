@@ -1,6 +1,42 @@
 # Prompt.md — Request log
 
-## Current request — filter sheet polish + category picker tear (v84)
+## Current request — the sort pill finally fixed properly (v85)
+
+### What was asked
+"okay from the last many commits we have been trying to fix the sort pill in
+cabinet and topic browser screen, whats the proble bruh you can clearly see
+one pill is soo wrong and its size too. give me a proper solution."
+
+### Root cause (two problems, not one)
+1. **Width** — the sort pill carried glyph + label + chevron + divider +
+   direction arrow (~135dp wide) next to the icon-only Search pill (~48dp):
+   nearly 3× the width. Every prior "fix" (v58/v62/v68/v79) only shaved
+   paddings, never removed the label — so the pill stayed huge.
+2. **Visual mismatch in dark** — the sort pill wore the v81 One UI glass
+   glow (`curioGlassGlow`) while the sibling hero action pills only had
+   the retired no-op `curioDarkGlow` — so in dark the sort pill GLOWED
+   and the search pill stayed flat: they looked like different components.
+
+### The proper fix
+1. **Compact the sort pill to the same icon-pill language as search** —
+   the label + chevron are gone from the pill; it's now [sort-type glyph →
+   menu] [1dp divider] [direction arrow → toggle], same 46dp height, slim
+   padding → ~55dp wide (vs search ~48dp — a true sibling). The sort label
+   moved into the dropdown header ("Sort by" + current field subtitle), so
+   the active field stays visible.
+2. **Same glass treatment on the hero action pills** — `CabinetHeroActionPill`
+   + `SettingsHeroActionPill` (search/select/cancel family) now wear the
+   same `curioGlassGlow` in dark, so sort + search render identically.
+3. **Same emphasized fill** — the sort pill was always `emphasized = true`
+   (deeper frosted fill) while its search sibling was default; the Cabinet
+   + Topic Database search pills now pass `emphasized = true` too.
+
+### Validation
+All four files brace/paren-balanced, `git diff --check` clean, unused
+imports removed (`Arrangement`, `widthIn`, `height`), `Column` added for the
+menu header. No Gradle locally (env rule) — CI on push.
+
+## Prior — filter sheet polish + category picker tear (v84)
 
 ### What was asked
 "in filters the group pills below it says again which pill is active remove

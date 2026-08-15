@@ -761,7 +761,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                         glyph = CurioIcons.Search,
                         contentDescription = "Search topics",
                         ink = ink,
-                        modifier = lm
+                        modifier = lm,
+                        // v85 — same emphasized fill as the sort pill beside
+                        // it, so the two render as identical siblings.
+                        emphasized = true
                     )
                 }
             }

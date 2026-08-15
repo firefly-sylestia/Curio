@@ -84,6 +84,7 @@ import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioGlassGlow
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -484,7 +485,11 @@ fun SettingsHeroActionPill(
         shadowElevation = 3.dp,
         modifier = modifier
             // v28 — dark mode elevation visibility (glow).
+            // v85 — same One UI glass glow as the sort dropdown, so the
+            // search / select / cancel pills render as its identical sibling
+            // in dark (before, the sort pill glowed and these stayed flat).
             .curioDarkGlow(3.dp, RoundedCornerShape(50))
+            .curioGlassGlow(RoundedCornerShape(50), ink)
     ) {
         Row(
             // v29 — bigger hit areas (was 11/8dp + 20dp glyph) so the hero

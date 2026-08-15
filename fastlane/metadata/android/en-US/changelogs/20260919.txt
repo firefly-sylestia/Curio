@@ -2,6 +2,7 @@ ADD
 - Dark mode reimagined: pitch-black pages, dark same-hue heroes, reversed buttons and One UI-style inner glow on pills.
 - Light / Dark / System theme picker back in Settings and onboarding.
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
+- Cabinet + Topic Browser: the sort pill is now a compact icon pill that matches the search pill's size and look.
 FIX
 - Dark mode: paper stat cards, streak pill, hero card, empty-state and quest claim pills now render with dark-aware fills and ink.
 - Category page: no more elevation flash on open; filter groups and chips stay raised in dark mode.

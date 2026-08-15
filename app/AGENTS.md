@@ -401,6 +401,20 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v85 — the sort pill is finally a true sibling of the search pill.**
+  Root cause was TWO problems: (1) the sort pill carried glyph + label +
+  chevron + divider + arrow (~135dp) next to the icon-only Search pill
+  (~48dp — ~3×, and every earlier padding pass never removed the label);
+  (2) in dark the sort pill wore the One UI glass glow while the hero
+  action pills only had the retired no-op `curioDarkGlow`, so it glowed
+  and the search pill stayed flat. Fix: `CurioSortDropdown` is now the
+  same compact two-zone icon pill as search — glyph opens the menu (label
+  moved to the menu header), divider, direction arrow; same 46dp height,
+  ~55dp wide. `CabinetHeroActionPill` + `SettingsHeroActionPill` gained
+  `curioGlassGlow` (same dark glass as the sort pill), and the Cabinet /
+  Topic Database search pills pass `emphasized = true` to match the sort
+  pill's fill. Unused imports cleaned (`Arrangement`/`widthIn`/`height`),
+  `Column` added for the menu header.
 - **v84 — filter sheet polish + category picker tear.** Filter sheet
   search is now a Cabinet-hero-style `OutlinedTextField`: frosted
   category-glass container + ink-tinted icon/border/text/cursor, colors
