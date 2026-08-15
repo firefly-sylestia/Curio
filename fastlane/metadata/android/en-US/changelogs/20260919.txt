@@ -2,7 +2,7 @@ ADD
 - Dark mode reimagined: pitch-black pages, dark same-hue heroes, reversed buttons and One UI-style inner glow on pills.
 - Light / Dark / System theme picker back in Settings and onboarding.
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
-- Cabinet + Topic Browser: the sort pill is now a compact icon pill that matches the search pill's size and look.
+- Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
 - Dark mode: Home's recently-explored topic rows now wear the same glass-edge glow as the filter pills.
 - Dark mode: mixed-deck colors now blend the curated category mixes properly — no more muddy/olive mixed accents on black.

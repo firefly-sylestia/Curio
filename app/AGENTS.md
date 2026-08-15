@@ -401,6 +401,18 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v90 — sort pill rebuilt as a category-style labeled pill.** The v85
+  compact icon-only blob (glyph + divider + arrow, ~55dp) hid the sort
+  label in the menu header and read as a lone glyph chip next to the
+  LABELED Category pill ("Category · All"). `CurioSortDropdown`'s pill now
+  speaks the Category pill's exact language (CabinetHeroActionPill /
+  SettingsHeroActionPill): sort-type glyph 20dp + field label
+  (`labelLarge` Bold ink) + 1dp divider + direction arrow 20dp, same 46dp
+  height, 14dp edge padding, 13/13 zone padding (46dp tap height), the
+  same frosted fill + dark glass glow. Glyph+label = one tap zone opening
+  the dropdown; the arrow zone still toggles asc/desc. The label is back
+  on the pill ("Date"/"Title"/"Category"/"Default"/"Name"/"Year"). One
+  shared component covers both call sites (Cabinet + Topic Database).
 - **v89 — Home recents rows get the dark pill style.** `ExploreTopicRow`
   (recently explored / unexplored) and its compact sibling `RecentEntryRow`
   still chained the RETIRED no-op `curioDarkGlow` (identity, draws

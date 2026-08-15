@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — recents pills get the dark pill style (v89)
+## Current request — sort pill rebuilt as a category-style labeled pill (v90)
+
+### What was asked
+"whats the proble bruh you can sclearly see one pill is soo wrong and thits
+size too. give me a proper solution. how about remove it and add a new one
+similiar to the category pill" — the sort pill in Cabinet + Topic Browser
+is still wrong; remove the current one and build it like the Category pill.
+
+### What was done
+`CurioSortDropdown`'s pill body was the v85 compact icon-only two-zone
+blob (sort-type glyph + 1dp divider + direction arrow, ~55dp) — it hid the
+sort field label in the menu header and read as a random glyph chip next
+to the LABELED Category pill ("Category · All"). Rebuilt in the Category
+pill's exact language (CabinetHeroActionPill / SettingsHeroActionPill):
+
+- `[sort-type glyph 20dp] [field label (labelLarge Bold ink)] [1dp divider]
+  [direction arrow 20dp]` — same 46dp height, 14dp edge padding, 13/13
+  zone padding (46dp tap height), frosted glass fill + dark glass glow
+  (unchanged).
+- Glyph + label = one tap zone opening the dropdown; the arrow zone still
+  toggles ascending/descending. The label is back on the pill ("Date" /
+  "Title" / "Category" / "Default" / "Name" / "Year").
+- Menu unchanged ("Sort by" header + accent-lit rows); header comment
+  updated to v89.
+
+Both call sites (Cabinet hero + Topic Database hero) share the one
+component, so one fix covers both screens.
+
+### Validation
+Balanced, `git diff --check` clean, imports added (Arrangement,
+TextOverflow) — no Gradle locally, CI on push.
+
+## Prior — recents pills get the dark pill style (v89)
 
 ### What was asked
 "apply that same pill style in dark mode to the recent topics pills" — the

@@ -1,6 +1,7 @@
 package com.curio.app.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.theme.CurioIcon
@@ -66,6 +68,13 @@ data class CurioSortOption(
  * v30 — the menu itself now runs through [CurioDropdownMenu]: an opaque
  * surface tinted toward the page's CATEGORY ACCENT, with the selected row
  * lit in that accent (the old stock menu never carried the page color).
+ *
+ * v89 — the pill is rebuilt as a LABELED pill in the hero Category pill's
+ * exact language (see [CabinetHeroActionPill]/[SettingsHeroActionPill]):
+ * sort-type glyph + field label open the menu, a 1dp divider separates the
+ * direction arrow that toggles ascending/descending — same 46dp height,
+ * 14dp edge padding, labelLarge Bold ink label and 20dp glyphs, so the
+ * sort pill reads as the Category pill's sibling instead of a lone icon.
  *
  * @param ink the tint for the pill glass + glyphs — hero callers pass their
  *   hero ink; plain screens pass the theme primary.
@@ -118,49 +127,42 @@ fun CurioSortDropdown(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                // v30 — uniform hero-pill height: 42dp like the action pills
-                // (was 44dp — the sort pill read too thick next to them).
-                // v58 — slimmer: tighter label/arrow padding trims the pill's
-                // wideness to sit closer to the icon-only Search pill, a
-                // widthIn floor keeps it from collapsing too small, and NO
-                // maxWidth caps how far a long label ("Category · All") can
-                // stretch it.
-                // v62 — slimmer still: label padding 10/8 → 8/6, chevron
-                // 18 → 16dp, arrow-zone padding 6 → 4 and the direction
-                // arrow 22 → 20dp, min-width floor 96 → 88dp — the pill
-                // hugs its label so it stops reading too wide next to the
-                // icon-only Search pill.
-                // v68 — the pill shows the SORT-TYPE icon ([selected.glyph])
-                // before the label.
-                // v79 — middle-size unification: height 52 → 46dp so the
-                // sort pill matches the icon-only Search pill (42 → 46dp),
-                // and the sort-type glyph 16 → 20dp to match the 20dp
-                // glyphs on the hero action pills.
-                // v85 — PROPER sibling fix: the old pill carried glyph +
-                // label + chevron + divider + direction arrow (~135dp wide)
-                // next to the icon-only Search pill (~48dp) — nearly 3× the
-                // width, so it always read wrong no matter how many padding
-                // slimming passes it got. The pill is now the SAME compact
-                // two-zone icon pill as the search pill: the sort-type
-                // glyph opens the menu (the label lives in the menu header
-                // now), the divider splits it from the direction arrow. Same
-                // 46dp height, ~55dp wide — a true sibling.
+                // v89 — REBUILT as the category pill's TRUE sibling. The
+                // v85 icon-only two-zone blob (glyph + divider + arrow,
+                // ~55dp) hid the sort field in the menu header and read as
+                // a random glyph chip next to the LABELED Category pill
+                // ("Category · All"). The pill now speaks the same labeled
+                // language as the hero Category pill (CabinetHeroActionPill /
+                // SettingsHeroActionPill): the sort-type glyph + the field
+                // LABEL open the menu, the divider separates the direction
+                // arrow that toggles ascending/descending. Same 46dp height,
+                // labelLarge Bold ink label, 20dp glyphs and 14dp edge
+                // padding — the sort pill reads as the Category pill's
+                // sibling, not a lone icon chip.
                 modifier = Modifier
                     .heightIn(min = 46.dp)
             ) {
-                // ── Glyph zone — opens the dropdown ──
-                Box(
-                    contentAlignment = Alignment.Center,
+                // ── Glyph + label zone — opens the dropdown ──
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
                         .clip(pillShape)
                         .clickable { expanded = true }
-                        .padding(start = 6.dp, end = 4.dp, top = 13.dp, bottom = 13.dp)
+                        .padding(start = 14.dp, end = 8.dp, top = 13.dp, bottom = 13.dp)
                 ) {
                     CurioIcon(
                         name = selected?.glyph ?: CurioIcons.Tune,
                         contentDescription = "Choose sort field",
                         tint = ink,
                         size = 20.dp
+                    )
+                    Text(
+                        text = selected?.label ?: "Sort",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 // ── Divider between the two zones ──
@@ -176,7 +178,7 @@ fun CurioSortDropdown(
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable(onClick = onToggleDirection)
-                        .padding(horizontal = 4.dp)
+                        .padding(start = 8.dp, end = 14.dp)
                         .heightIn(min = 46.dp)
                 ) {
                     CurioIcon(
@@ -199,8 +201,9 @@ fun CurioSortDropdown(
             onDismissRequest = { expanded = false },
             accent = accent,
             header = {
-                // v85 — the sort LABEL moved into the menu header (the pill
-                // is icon-only now), so the current field stays visible.
+                // v89 — the pill shows the sort label again (the category-pill
+                // rebuild); the header keeps the field for context + the
+                // "Sort by" affordance.
                 Column(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
