@@ -48,7 +48,10 @@ fun Modifier.categoryEdgeShine(
     // top-lit gradient INSIDE the shape (the user's "1% whitish edge, not a
     // border"), scaled by [intensity] like the old shine.
     return this.drawWithCache {
-        val outline = shape.createOutline(size, layoutDirection, density)
+        // `this` (the CacheDrawScope) is the Density — the `density`
+        // property in this scope resolves to a Float on the resolved
+        // Compose BOM.
+        val outline = shape.createOutline(size, layoutDirection, this)
         val path = outline.toPath()
         onDrawBehind {
             clipPath(path) {
