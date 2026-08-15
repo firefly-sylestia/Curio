@@ -42,6 +42,7 @@ FIX
 - Spin filter sheet: the Type · Genres · Era · Origin · Franchise group pills now lead with the same per-group icons as their labels.
 - Spin category picker: the tear hero now runs up to the status bar, the close button is gone (swipe down to dismiss), and the deck hint reads "Tap a deck to spin it. Hold to pick several."
 - Home stat card (Streak · Cabinet · Topics) is now an opaque, theme-aware pane like Profile's instead of a transparent wash.
+- The saved-entry detail page's Date · Mood · Session · Type card is an opaque theme-aware pane too, with proper elevation.
 - Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
 - Mood board images import through the universal Android photo picker.
 - The mood board editor now shows exactly what the saved entry shows — no more resizing or layout jumps between editing and the detail view.

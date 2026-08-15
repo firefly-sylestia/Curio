@@ -1,6 +1,35 @@
 # Prompt.md — Request log
 
-## Current request — Home stat card: opaque theme-aware pane like Profile (v75)
+## Current request — detail page Date · Mood · Session · Type card: opaque theme-aware pane (v76)
+
+### What was asked
+"do the same with the detail page date type that stat card"
+
+### What was done (EntryDetailScreen.kt — the hero's Date · Mood · Session ·
+Type meta card)
+1. **Default fill is now OPAQUE and theme-aware** — the old frosted-glass
+   default (a translucent `heroStart` bloom at 30/16% alpha + a white or
+   midnight `heroFrostBrush` glass) is replaced by a single opaque vertical
+   gradient: `lerp(heroSheetColor, heroStart, 0.30f)` → `lerp(heroSheetColor,
+   heroStart, 0.16f)`. `heroSheetColor` is the page's theme-aware sheet
+   (near-white light / midnight dark + AMOLED), so the pane keeps the same
+   perceived category bloom while the elevation shadow renders clean behind
+   it — the same language as Profile's stat pane / Home's Streak card. The
+   hero's ink (`heroCardInk`) contrast is preserved (the pane luminance
+   doesn't change — unlike Home/Profile, the detail hero is a deep category
+   color, so the lerp is off the light/dark sheet, not the banner fill).
+2. **Elevation + dark glow always on** — `shadowElevation` 3dp and
+   `curioDarkGlow(3.dp, metaShape)` now always apply (they were 0dp/flat
+   for the frosted default), mirroring Home/Profile.
+3. `heroFrostBrush` removed (no consumer left); `curioDarkGlow` imported.
+4. The "Paper stat card" experiment branch is untouched.
+
+### Validation
+Brace/paren balance clean (519/519, 1935/1935), `git diff --check` clean,
+`lerp`/`Color`/`Brush` imports already present. No Gradle locally (env
+rule) — CI on push.
+
+## Prior — Home stat card: opaque theme-aware pane like Profile (v75)
 
 ### What was asked
 "the home screen stat card you see how its transparent, make it be similar

@@ -394,6 +394,20 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v76 — detail page Date · Mood · Session · Type card wears an opaque
+  theme-aware pane.** `EntryDetailScreen`'s hero meta card (Date · Mood ·
+  Session · Type grid) default fill was FROSTED glass (a translucent
+  `heroStart` bloom at 30/16% alpha + a white/midnight `heroFrostBrush`)
+  that read transparent and kept the pane flat. It's now a single OPAQUE
+  vertical gradient `lerp(heroSheetColor, heroStart, 0.30f)` →
+  `lerp(heroSheetColor, heroStart, 0.16f)` — `heroSheetColor` is the page's
+  theme-aware sheet (near-white light / midnight dark + AMOLED), so the
+  same perceived category bloom stays while the shadow renders clean
+  (Profile/Home stat-pane language; ink contrast preserved — the detail
+  hero is a deep category color, so the lerp is off the sheet, not the
+  banner fill). `shadowElevation` 3dp + `curioDarkGlow` always apply now
+  (were flat for the frost); `heroFrostBrush` deleted, `curioDarkGlow`
+  imported. The paper-card experiment branch is untouched.
 - **v75 — Home stat card wears an opaque theme-aware pane like Profile's.**
   The Home Streak · Cabinet · Topics pane's DEFAULT fill (off the "Paper
   stat card" experiment) was a transparent rose glass (12% → 55% alpha)

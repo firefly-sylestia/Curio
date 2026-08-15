@@ -143,6 +143,7 @@ import com.curio.app.ui.components.MoodBoardFloatingCards
 import com.curio.app.ui.components.MoodBoardTiles
 import com.curio.app.ui.components.MoodBoardZoomOverlay
 import com.curio.app.ui.components.QuoteLimits
+import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
 import com.curio.app.ui.components.rememberMoodBoardZoomState
@@ -272,17 +273,9 @@ fun EntryDetailScreen(
     // readable slate-on-white treatment.
     val heroCardInk = if (darkNonPastel) Color(0xFFE9E0EA) else Color(0xFF232A35)
     val heroSheetColor = if (darkNonPastel) Color(0xFF17131D) else Color(0xFFFDFCF9)
-    val heroFrostBrush = if (darkNonPastel) {
-        Brush.verticalGradient(
-            listOf(Color(0xFF292231), Color(0xFF17131D))
-        )
-    } else {
-        Brush.verticalGradient(
-            0f to Color.White.copy(alpha = 0.95f),
-            0.55f to Color.White.copy(alpha = 0.84f),
-            1f to Color.White.copy(alpha = 0.68f)
-        )
-    }
+    // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
+    // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,
+    // see the meta card below), so the old translucent frost has no consumer.
     // v5.8 — saveable so rotation doesn't close the menu/dialog unexpectedly.
     var deleteDialogVisible by rememberSaveable { mutableStateOf(false) }
     var heroControlsVisible by remember(resolvedEntry.id) { mutableStateOf(false) }
@@ -595,8 +588,14 @@ fun EntryDetailScreen(
                         // translucent frost can't hold an elevation shadow
                         // (it bleeds through), so the frosted pane stays
                         // flat; the opaque paper card can lift like Home's.
+                        // v75 — the default pane is OPAQUE now (the same
+                        // language as Profile's stat pane + Home's Streak
+                        // card), so it always carries the elevation + dark
+                        // glow like those panes.
                         color = Color.Transparent,
-                        shadowElevation = if (metaPaperOn) 3.dp else 0.dp
+                        shadowElevation = 3.dp,
+                        modifier = Modifier
+                            .curioDarkGlow(3.dp, metaShape)
                     ) {
                         // The card's content Box: the Row below defines the
                         // height, and the paper fill / frosted pane + glass
@@ -621,40 +620,28 @@ fun EntryDetailScreen(
                                         )
                                 )
                             } else {
-                                // ── Frosted pane — a blurred bloom of the
-                                // hero's color behind the glass, clipped to
-                                // the card and sitting BEHIND the crisp
-                                // segments. Strong enough that the card
-                                // visibly glows with its banner's color
-                                // (RenderEffect on API 31+; software blur
-                                // below).
+                                // ── Opaque theme-aware pane (v75) — the
+                                // same construction language as Profile's
+                                // stat pane (and Home's Streak card): the
+                                // old frosted glass read transparent; the
+                                // opaque blend keeps the same perceived
+                                // category bloom over the THEME-AWARE sheet
+                                // color ([heroSheetColor] resolves near-
+                                // white in light, midnight in dark/AMOLED)
+                                // while the elevation shadow renders clean
+                                // behind it.
                                 Box(
-                                    // The frosted pane is a STATIC vertical
-                                    // glow instead of a per-frame 18dp
-                                    // RenderEffect blur: over a flat color
-                                    // the blur was a visual no-op but cost
-                                    // GPU time on every scroll frame (the
-                                    // laggy detail scrolling).
                                     modifier = Modifier
                                         .matchParentSize()
                                         .background(
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    heroStart.copy(alpha = 0.30f),
-                                                    heroStart.copy(alpha = 0.16f)
+                                                    lerp(heroSheetColor, heroStart, 0.30f),
+                                                    lerp(heroSheetColor, heroStart, 0.16f)
                                                 )
                                             )
                                         )
                                         .clip(RoundedCornerShape(18.dp))
-                                )
-                                // Theme-aware frost: dark non-pastel gets a
-                                // restrained midnight surface; light and
-                                // pastel retain the bright paper-glass
-                                // treatment.
-                                Box(
-                                    modifier = Modifier
-                                        .matchParentSize()
-                                        .background(heroFrostBrush)
                                 )
                             }
                             Row(
