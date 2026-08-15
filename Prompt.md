@@ -1,6 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — filter sheet tear-to-status-bar + watermark + group-label icons (v70)
+## Current request — pet designer: eye-size presets fixed + whole-pet size option (v71)
+
+### What was asked
+"the eye size in pet designer doesnt work, and also we can scale up the
+pet right, so give an option to scale up the custom pet as well."
+
+### What was done
+1. **Eye-size fix (root cause found).** The presets scaled each eye's
+   pixels AROUND the eye center and snapped to integer cells
+   (`(center + (cell - center) * scaleF).roundToInt()`). The default
+   eyes are only 2px wide (OPEN/BLINK/CLOSED/WIDE = ±0.5 cells from the
+   center; STAR/DIZZY = ±1.5), so the 0.85/1.2 factors shifted every
+   pixel by < 0.5 cells and rounded RIGHT BACK to the authored cells —
+   Small/Medium/Large were pixel-identical, i.e. the buttons did
+   nothing. `CurioPetSprite` now scales the eye art in DRAW space around
+   each eye's center (the detail-layer transform trick: `DrawScope.scale`
+   per eye at pivot 4.5/7 and 10.5/7) with stronger factors
+   (0.72 / 1.0 / 1.35), so every eye style visibly shrinks/grows, and
+   the placement offset applies unscaled after the scale.
+2. **Whole-pet size option.** New `PetDesign.petScale` preset
+   (0 small / 1 medium / 2 large), serialized as `petscale=` and parsed
+   tolerantly (legacy designs → 1). `CurioPetSprite` multiplies its
+   sprite box by the preset (0.8 / 1.0 / 1.3) on top of the caller's
+   stage `sizeScale`, so the custom pet scales up EVERYWHERE it renders
+   (floating pet, flower bed, quests, all designer previews). The Pet
+   Designer Settings page gained a **"Pet size"** card (before the Eyes
+   card) with a live preview + Small/Medium/Large + Reset size, writing
+   `design.copy(petScale = ...)` with undo — same pattern as the Eyes
+   section.
+
+### Validation
+Brace/paren balance: CurioPetSprite 127/127 + 508/508, PetDesign
+234/234 + 1040/1040, PetDesignerScreen matches its HEAD baseline (+4/+4
+braces, +7/+7 parens — the +4 brace skew is pre-existing HEAD noise from
+comment/string content, not my edits). `git diff --check` clean. No
+Gradle locally (env rule) — CI on push.
+
+## Prior — filter sheet tear-to-status-bar + watermark + group-label icons (v70)
 
 ### What was asked
 "v68 — the header text steps up (30sp)... in here increase the category

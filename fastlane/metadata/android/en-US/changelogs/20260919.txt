@@ -12,6 +12,7 @@ ADD
 - Profile: streak, XP, levels, badges, tagline and lane shortcuts.
 - Curie pet: evolving companion with moods, games, three voices, 150+ reactions and a full Pet Designer.
 - Pet Designer: auto-import builds a full pet from an image (colors → body → bob animation → auto-saved), brush size with a live on-canvas indicator, fill-with-transparency Clear tool, selected-color chip in the tool tray, and eye size presets + arrow placement adjuster with a live preview.
+- Pet Designer: a new Pet size option grows the whole custom pet (Small / Medium / Large) everywhere it appears.
 - Quests: daily and journey quests, path chains, medals and a badge shelf.
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 - Settings: themes (Curio / AMOLED / Material), pastel colors, Adaptive Hero, notifications, recording and lane management.
@@ -31,6 +32,7 @@ FIX
 - Cabinet progress lines and the detail-view progress pill are clearly visible in light and pastel mode; the detail pill moved to the screen's bottom corner.
 - The reading/watching progress editor dialog is properly category-colored and readable in every theme, including the topic reveal page.
 - Pet Designer auto-import, brush size and eye tools compile and run correctly.
+- Pet Designer eye size presets now visibly change the eyes (the old presets rounded back onto the same pixels and did nothing).
 - Settings and Profile hero icons follow the hero color in every theme, and the paper under the hero tear picks up its tint.
 - Search bars are pill-shaped across Settings, the Spin filter sheet and Topic History.
 - Spin filter sheet wears the app's tear-hero banner with a bigger category name and cleaner group margins.

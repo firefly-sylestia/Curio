@@ -1033,6 +1033,26 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
+            // ── Pet size (Settings page, v71) — whole-pet scale ─────
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Pet size",
+                    "Grow the whole pet — the preset multiplies its size everywhere it appears"
+                ) {
+                    PetSizeControls(
+                        design = design,
+                        onPetScale = { scale ->
+                            pushUndo()
+                            design = design.copy(petScale = scale)
+                        },
+                        onReset = {
+                            pushUndo()
+                            design = design.copy(petScale = 1)
+                        }
+                    )
+                }
+            }
+
             // ── Eyes (Settings page, v64) — size presets + placement ─
             item {
                 if (page == PetDesignerPage.SETTINGS) SectionCard(
@@ -3715,6 +3735,78 @@ private fun GridTab(label: String, selected: Boolean, onClick: () -> Unit) {
             color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
+    }
+}
+
+/**
+ * v71 — whole-pet size presets (Small / Medium / Large) with a live
+ * preview. Writes petScale into the design; the sprite multiplies its
+ * size by the preset everywhere it renders (floating pet, flower bed,
+ * quests, this preview).
+ */
+@Composable
+private fun PetSizeControls(
+    design: PetDesign,
+    onPetScale: (Int) -> Unit,
+    onReset: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                .padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CurioPetSprite(
+                stage = CurioPet.currentStage(),
+                mood = CurioPet.Mood.HAPPY,
+                spriteSize = 84.dp,
+                design = design
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Size",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                0 to "Small",
+                1 to "Medium",
+                2 to "Large"
+            ).forEach { (scale, label) ->
+                val selected = design.petScale == scale
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                    onClick = { onPetScale(scale) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+                        ),
+                        color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 9.dp)
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        SmallAction("Reset size", enabled = design.petScale != 1) {
+            onReset()
+        }
     }
 }
 

@@ -50,7 +50,6 @@ import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
@@ -316,6 +315,15 @@ fun CurioPetSprite(
     val activeDesign = remember(savedText, design, stage) {
         val base = design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
         base ?: PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
+    }
+    // v71 — the design's whole-pet size preset scales the sprite box on top
+    // of the caller's spriteSize (which already carries the stage growth),
+    // so a custom pet set to Large reads bigger everywhere — floating pet,
+    // flower bed, quests and every designer preview.
+    val spriteBoxSize = spriteSize * when (activeDesign.petScale) {
+        0 -> 0.8f
+        2 -> 1.3f
+        else -> 1f
     }
     // v8.8 — fixed one-look palette: warm cream + ink on every theme.
     // v8.10 — the scarf/aura accent is hardcoded to the Curio light-theme
@@ -618,7 +626,7 @@ fun CurioPetSprite(
     val desc = contentDescription
     Box(
         modifier = modifier
-            .size(spriteSize)
+            .size(spriteBoxSize)
             .onGloballyPositioned {
                 spriteCenter = it.positionInWindow() +
                     Offset(it.size.width / 2f, it.size.height / 2f)
@@ -630,7 +638,7 @@ fun CurioPetSprite(
         // + squish scales so the pixel art moves as one clean silhouette.
         Box(
             modifier = Modifier
-                .size(spriteSize * 0.92f)
+                .size(spriteBoxSize * 0.92f)
                 .graphicsLayer {
                     translationY = with(density) { bobDp.dp.toPx() } +
                         with(density) { hopJump.toPx() } +
@@ -851,30 +859,54 @@ fun CurioPetSprite(
                                     }
                                 }
                             } else {
-                                // v64 — procedural eye size preset + placement:
-                                // scale each eye around its own center (left eye
-                                // center col 4.5, right 10.5, row 7 in the same
-                                // 16-space the eyes are authored in), then apply
-                                // the user's offset. The designer's Eyes section
+                                // v71 — procedural eye size preset + placement.
+                                // Each eye's art scales in DRAW space around its
+                                // own center (left eye center col 4.5, right
+                                // 10.5, row 7 in the same 16-space the eyes are
+                                // authored in), then the user's placement offset
+                                // applies unscaled. The designer's Eyes section
                                 // writes these fields; the sprite reads them so
                                 // the live pet and every preview stay in sync.
+                                // v71 FIX — the old per-cell roundToInt scaling
+                                // collapsed every preset back onto the authored
+                                // cells (a 2px eye is only ±0.5 cells from its
+                                // center, so 0.85/1.2 rounded right back) — the
+                                // size buttons did nothing. Scaling the drawn
+                                // art (the detail-layer transform trick) makes
+                                // Small/Medium/Large visibly different on every
+                                // eye style.
                                 val scaleF = when (activeDesign.eyeScale) {
-                                    0 -> 0.85f
-                                    2 -> 1.2f
+                                    0 -> 0.72f
+                                    2 -> 1.35f
                                     else -> 1f
                                 }
                                 val offX = activeDesign.eyeOffsetX
                                 val offY = activeDesign.eyeOffsetY
-                                EYE_STYLE_PIXELS[eyes]?.forEach { (c, r, slot) ->
-                                    val color = when (slot) {
-                                        "white" -> white
-                                        "star" -> starEye
-                                        else -> ink
+                                val eyePixels = EYE_STYLE_PIXELS[eyes]
+                                fun eyeColor(slot: String): Color = when (slot) {
+                                    "white" -> white
+                                    "star" -> starEye
+                                    else -> ink
+                                }
+                                translate(left = offX * opx, top = offY * opx) {
+                                    scale(
+                                        scaleX = scaleF,
+                                        scaleY = scaleF,
+                                        pivot = Offset(4.5f * opx, 7f * opx)
+                                    ) {
+                                        eyePixels?.filter { it.first < 8 }?.forEach { (c, r, slot) ->
+                                            drawPx(c, r, eyeColor(slot))
+                                        }
                                     }
-                                    val centerC = if (c < 8) 4.5f else 10.5f
-                                    val nc = ((centerC + (c - centerC) * scaleF) + offX).roundToInt()
-                                    val nr = ((7f + (r - 7f) * scaleF) + offY).roundToInt()
-                                    drawPx(nc, nr, color)
+                                    scale(
+                                        scaleX = scaleF,
+                                        scaleY = scaleF,
+                                        pivot = Offset(10.5f * opx, 7f * opx)
+                                    ) {
+                                        eyePixels?.filter { it.first >= 8 }?.forEach { (c, r, slot) ->
+                                            drawPx(c, r, eyeColor(slot))
+                                        }
+                                    }
                                 }
                             }
                         }

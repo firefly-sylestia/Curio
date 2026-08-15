@@ -374,6 +374,26 @@ app/src/main/java/com/curio/app/
   `movie`, all verified in the bundled font) tinted with the category
   accent, stepped 16 → 17sp, with cleaner 10/8 margins; the accordion's
   top margin also tightened 14 → 6dp now that the divider is gone.
+- **v71 — pet designer: eye-size presets FIXED + whole-pet size option.**
+  (1) **Eye presets were a no-op (root cause):** `CurioPetSprite` scaled
+  each procedural eye's pixels around its center and snapped to integer
+  cells (`roundToInt`). The default eyes are only 2px wide (±0.5 cells
+  from the center; STAR/DIZZY ±1.5), so the 0.85/1.2 factors shifted
+  every pixel < 0.5 cells and rounded right back onto the authored
+  cells — Small/Medium/Large were pixel-identical. The sprite now
+  scales the eye art in DRAW space per eye (`DrawScope.scale` around
+  each center at 4.5/7 and 10.5/7, the detail-layer transform trick)
+  with stronger factors (0.72 / 1.0 / 1.35); the placement offset then
+  applies unscaled — every eye style visibly shrinks/grows. (2) **New
+  whole-pet size option:** `PetDesign.petScale` preset (0 small / 1
+  medium / 2 large), serialized `petscale=` + tolerant parse (legacy →
+  1). `CurioPetSprite` multiplies its sprite box by the preset
+  (0.8 / 1.0 / 1.3) on top of the caller's stage `sizeScale`, so the
+  custom pet scales up EVERYWHERE it renders (floating pet, flower bed,
+  quests, every designer preview). The Pet Designer Settings page gained
+  a **"Pet size"** card (before the Eyes card): live preview +
+  Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
+  with undo — the Eyes-section pattern.
 - **v69 — universal mood-board import, editor/saved fit consistency,
   mood collapse-on-pick, chip-bar slide animation.** (1) **Mood-board
   import is now the ANDROID PHOTO PICKER** (`PickMultipleVisualMedia` +

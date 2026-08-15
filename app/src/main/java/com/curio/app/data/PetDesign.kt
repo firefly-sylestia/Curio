@@ -98,7 +98,14 @@ data class PetDesign(
     /** v64 — procedural eye placement shift (16-space cells, X axis). */
     val eyeOffsetX: Int = 0,
     /** v64 — procedural eye placement shift (16-space cells, Y axis). */
-    val eyeOffsetY: Int = 0
+    val eyeOffsetY: Int = 0,
+    /**
+     * v71 — whole-pet size preset: 0 = small, 1 = medium, 2 = large.
+     * Scales the sprite everywhere it renders (floating pet, flower bed,
+     * quests, designer previews) on top of the stage growth. Old designs
+     * without this field stay medium.
+     */
+    val petScale: Int = 1
 ) {
     /** The palette keys a design may recolor. */
     companion object {
@@ -553,6 +560,8 @@ data class PetDesign(
         appendLine("eyesize=${eyeScale.coerceIn(0, 2)}")
         appendLine("eyeoffx=${eyeOffsetX.coerceIn(-6, 6)}")
         appendLine("eyeoffy=${eyeOffsetY.coerceIn(-6, 6)}")
+        // v71 — whole-pet size preset (multiplies the sprite everywhere).
+        appendLine("petscale=${petScale.coerceIn(0, 2)}")
         // v8.53 — custom actions (Phase 7): the whole config is URL-encoded
         // after `customAction=` so names/lines can safely carry any
         // characters (old parsers skip the line as an unknown key).
@@ -638,6 +647,8 @@ data class PetDesign(
         var eyeScale = 1
         var eyeOffsetX = 0
         var eyeOffsetY = 0
+        // v71 — whole-pet size preset.
+        var petScale = 1
         text.lineSequence().forEach { raw ->
             val line = raw.trim()
             if (line.isEmpty()) return@forEach
@@ -768,6 +779,9 @@ data class PetDesign(
                 }
                 line.startsWith("eyeoffy=") && eq == 7 -> {
                     eyeOffsetY = line.substring(8).trim().toIntOrNull()?.coerceIn(-6, 6) ?: 0
+                }
+                line.startsWith("petscale=") && eq == 8 -> {
+                    petScale = line.substring(9).trim().toIntOrNull()?.coerceIn(0, 2) ?: 1
                 }
                 line.startsWith("anim=") && eq == 4 -> {
                     currentAnimId = line.substring(5).trim().lowercase().takeIf { it.isNotBlank() }
@@ -924,7 +938,8 @@ data class PetDesign(
             customActions = customActions,
             eyeScale = eyeScale,
             eyeOffsetX = eyeOffsetX,
-            eyeOffsetY = eyeOffsetY
+            eyeOffsetY = eyeOffsetY,
+            petScale = petScale
         )
     }
 
