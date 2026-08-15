@@ -1,6 +1,53 @@
 # Prompt.md — Request log
 
-## Current request — Profile quests button dark treatment (v86)
+## Current request — missed dark-mode spots sweep (v87)
+
+### What was asked
+"spots that missed dark mode revamp" — the filter chips + group pills text,
+spin category/filter option text, picker Original/New inactive state + "What
+are we exploring?" header, filter page text, reveal category text, the too-
+slim progress pill (glow bleeds), Original/New + preset chips pill shape,
+and Save Your Take text / record-voice-note / Quote 1-2 colors.
+
+### What was done
+1. **Filter chips + group pills (Spin filter sheet)** — the v83 glass-edge
+   pass kept `inactiveFill = lerp(chipSurface, curioPillTintLift(), 0.5f)`;
+   in dark that lifts toward the near-white rose glass → mid-tone chips
+   with washed light text. Both now keep a dark near-black tinted fill in
+   dark (`lerp(chipSurface, Black, 0.15f)`) so the light onSurface label
+   reads crisp; light unchanged. (The chips/group pills text themselves
+   were already theme-ink; the FILL was the bug.)
+2. **PickerPageTab + PickerPresetChip (Original/New + presets)** — the
+   default idle fill lifted toward `curioPillLift()` which is WHITE in
+   dark → near-white idle pills with light-grey text on the black sheet.
+   Default now stays a dark raised glass in dark; light cream lift
+   unchanged. Padding bumped (14/8 → 16/10 and 12/8 → 14/10) so both are
+   fuller pills.
+3. **CurioProgressPill (reveal + detail)** — 12/7dp padding made the pill
+   (esp. the count-only reveal badge) a slim strip, so the v81 inner glow's
+   radial (radius = width) washed over the whole sliver → glow bled past
+   the pill. Padding 14/11dp gives it a proper pill body the glow lives in.
+4. **Reveal SentimentButton inactive** — near-white `curioPillTintLift`
+   fill with light-grey onSurfaceVariant text washed out on the black
+   band → dark raised glass (`lerp(surfaceContainerHigh, accent, 0.25)`)
+   in dark.
+5. **tintedTileInk (Save Your Take)** — the attach icons/labels + journal
+   "Record a voice note" row used `readableLightInk` (DEEP) unconditionally
+   → dark ink on the dark 16% tinted tile was invisible at night. Dark now
+   resolves the light twin (`lerp(accent, White, 0.85)`).
+6. **QuoteCardEditor "Quote N" header** — header row renders ABOVE the
+   paper slip, on the theme page; warm-dark paperInk was invisible on the
+   black page. Dark flips to the bright butter control twin
+   (`paperControlAccent`).
+7. **DictateFieldButton mic chip** — raw deep accent on the dark tinted
+   chip was dark-on-dark; dark flips to the light twin.
+
+### Validation
+All touched files paren/brace-balanced (Reveal keeps its pre-existing
+string-literal 1-off, present in HEAD), no duplicate imports, `git diff
+--check` clean. No Gradle locally — CI on push.
+
+## Prior — Profile quests button dark treatment (v86)
 
 ### What was asked
 "the quest button in profile didnt get the dark treatment just the quests

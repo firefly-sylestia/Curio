@@ -401,6 +401,27 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v87 — missed dark-mode spots sweep.** (1) Spin filter sheet chips +
+  group pills: `inactiveFill` stayed `lerp(chipSurface,
+  curioPillTintLift(), 0.5f)` — in dark that lifts toward the near-white
+  rose glass → mid-tone chips with washed light text; both now keep a
+  dark near-black tinted fill in dark (`lerp(chipSurface, Black, 0.15f)`)
+  so the light label reads crisp. (2) `PickerPageTab`/`PickerPresetChip`
+  default idle fill lifted toward `curioPillLift()` (WHITE in dark) →
+  near-white Original/New idle pills with light-grey text; default now
+  stays a dark raised glass in dark, padding bumped to fuller pills
+  (16/10, 14/10). (3) `CurioProgressPill` 12/7dp padding made the reveal
+  badge a slim strip so the v81 inner glow (radius = width) bled past it
+  → 14/11dp proper pill body. (4) Reveal `SentimentButton` inactive:
+  near-white `curioPillTintLift` + light-grey text washed on black →
+  dark raised glass (`lerp(surfaceContainerHigh, accent, 0.25)`). (5)
+  `tintedTileInk` (capture attach icons + journal "Record a voice note"
+  row) returned the DEEP light-mode ink unconditionally → invisible on
+  dark tinted tiles; dark now resolves the light twin. (6) Quote card
+  header "Quote N" renders ABOVE the paper slip on the theme page → dark
+  flips to the bright butter control twin (`paperControlAccent`). (7)
+  `DictateFieldButton` mic chip: raw deep accent on the dark tinted chip
+  was dark-on-dark → light twin in dark.
 - **v86 — Profile quests button gets its dark treatment.** The quest
   plate in `ProgressAndAchievementsCard` was missed by v81: it kept the
   pale `CoralBlush` glass (`lerp(CoralBlush, curioPillTintLift(), 0.55)`)

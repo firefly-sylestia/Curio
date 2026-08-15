@@ -69,11 +69,13 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.glyph
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.readableLightInk
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.notePaperInk
 import com.curio.app.ui.theme.paperAccent
 import com.curio.app.ui.theme.paperBorder
+import com.curio.app.ui.theme.paperControlAccent
 import com.curio.app.ui.theme.paperInk
 import com.curio.app.ui.theme.paperSurface
 import com.curio.app.ui.theme.PatrickHandFontFamily
@@ -226,10 +228,14 @@ fun categoryTintFill(accent: Color): Color =
  * Ink that reads on a [categoryTintFill] tile in EVERY theme — those tiles
  * are only a 16% accent wash, so raw pastel/light accents wash out on them
  * (the attach icons + labels were invisible in pastel light mode). Light
- * mode resolves the deep same-hue twin (the categoryInk rule).
+ * mode resolves the deep same-hue twin (the categoryInk rule); v86 — DARK
+ * mode flips to the light twin (the same reversal), because the deep light-
+ * mode ink on the dark 16% tinted tile was invisible at night (the
+ * "Record a voice note" row + image attach chips).
  */
 @Composable
-internal fun tintedTileInk(accent: Color): Color = readableLightInk(accent)
+internal fun tintedTileInk(accent: Color): Color =
+    if (isCurioDarkTheme()) lerp(accent, Color.White, 0.85f) else readableLightInk(accent)
 
 /**
  * Small image placeholder thumbnail — 80dp square with rounded corners.
@@ -846,6 +852,11 @@ fun QuoteCardEditor(
             .rotate(rotation)
     ) {
         // ── Card header — quote mark + number, Remove on the right ──
+        // v86 — the header row renders ABOVE the paper slip, on the THEME
+        // page — in dark mode the warm-dark paperInk was invisible on the
+        // black page. The label/icon flip to the bright butter control twin
+        // at night (the paper slip itself stays theme-agnostic below).
+        val quoteHeaderInk = if (isCurioDarkTheme()) paperControlAccent() else paperInk()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -855,7 +866,7 @@ fun QuoteCardEditor(
             CurioIcon(
                 name = CurioIcons.FormatQuote,
                 contentDescription = null,
-                tint = paperInk().copy(alpha = 0.55f),
+                tint = quoteHeaderInk.copy(alpha = 0.55f),
                 size = 16.dp
             )
             Spacer(Modifier.width(6.dp))
@@ -864,7 +875,7 @@ fun QuoteCardEditor(
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = paperInk().copy(alpha = 0.7f),
+                color = quoteHeaderInk.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             )
             if (showRemove) {

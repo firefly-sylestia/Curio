@@ -109,8 +109,13 @@ fun CurioProgressPill(
             // (dark mode only).
             .curioInnerGlow(RoundedCornerShape(50), accent, strength = 0.14f)
     ) {
+        // v86 — fuller pill: the 7dp vertical padding made the pill a slim
+        // strip (especially the reveal's count-only badge), so the v81 inner
+        // glow's radial (radius = width) washed over the whole sliver and
+        // read as a glow bleeding past the pill. 11dp vertical + 14dp
+        // horizontal gives it a proper pill body the glow can live inside.
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

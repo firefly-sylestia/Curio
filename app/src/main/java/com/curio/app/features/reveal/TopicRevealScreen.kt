@@ -2118,7 +2118,16 @@ private fun SentimentButton(
         shape = CircleShape,
         // v52b — theme-aware inactive fill: the color-tinted rose glass
         // instead of the generic surfaceVariant.
-        color = if (active) accent else curioPillTintLift(),
+        // v86 — DARK: the near-white rose lift + light-grey onSurfaceVariant
+        // text washed out on the black band, so inactive flips to a dark
+        // raised glass with the light text crisp on it.
+        color = if (active) accent
+                else if (isCurioDarkTheme()) lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    accent,
+                    0.25f
+                )
+                else curioPillTintLift(),
         // v27q — flat 2dp: selection reads through the solid accent fill.
         shadowElevation = 2.dp,
         modifier = Modifier

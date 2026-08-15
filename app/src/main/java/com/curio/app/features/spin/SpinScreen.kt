@@ -2100,7 +2100,12 @@ private fun CompactChip(
     // rose tint but lands a solid mid-tone that clearly separates from
     // the sheet), each chip carries a small glyph, and the pills grew
     // again (16sp label + 16/11 padding).
-    val inactiveFill = lerp(chipSurface, curioPillTintLift(), 0.5f)
+    // v86 — DARK mode keeps the inactive chip DARK (near-black tinted
+    // surface, never the near-white rose lift) so the light onSurface
+    // label reads crisp — the old 0.5 lift toward the near-white glass
+    // landed a mid-tone that washed the light text out.
+    val inactiveFill = if (isCurioDarkTheme()) lerp(chipSurface, Color.Black, 0.15f)
+    else lerp(chipSurface, curioPillTintLift(), 0.5f)
     val chipShape = RoundedCornerShape(50)
     Surface(
         shape = chipShape,
@@ -2245,7 +2250,12 @@ private fun FilterGroupPill(
     // a matching size bump so the group pills and chips read as one family.
     // v52b — same darker light-mode closed fill as the chips (0.82 → 0.5)
     // so the group pills and chips read as one family off the pale sheet.
-    val inactiveFill = lerp(chipSurface, curioPillTintLift(), 0.5f)
+    // v86 — DARK mode keeps the closed pill DARK (near-black tinted
+    // surface, never the near-white rose lift) so the light onSurface
+    // label reads crisp on the black sheet — the glass edge + inner glow
+    // carry the raised look.
+    val inactiveFill = if (isCurioDarkTheme()) lerp(chipSurface, Color.Black, 0.15f)
+    else lerp(chipSurface, curioPillTintLift(), 0.5f)
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),

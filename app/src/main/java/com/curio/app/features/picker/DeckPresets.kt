@@ -21,6 +21,7 @@ import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * One quick-mix preset: label, glyph, and the lanes it ticks.
@@ -110,9 +111,13 @@ fun PickerPresetChip(
     idleFill: Color? = null
 ) {
     val shape = RoundedCornerShape(50)
+    // v86 — DARK-aware default idle fill (same fix as PickerPageTab): the
+    // old default lifted toward curioPillLift() (WHITE in dark) → near-
+    // white idle chips with light-grey text on the black sheet. Dark now
+    // stays a dark raised glass; light keeps the cream lift.
     val resolvedIdleFill = idleFill ?: lerp(
         MaterialTheme.colorScheme.surfaceContainerHigh,
-        curioPillLift(),
+        if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
         0.82f
     )
     Surface(
@@ -134,7 +139,7 @@ fun PickerPresetChip(
             .categoryEdgeShine(shape, accent = accent)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

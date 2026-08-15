@@ -68,6 +68,7 @@ import com.curio.app.ui.components.LiveWaveform
 import com.curio.app.ui.components.TrimWaveform
 import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.components.formatRecordingTime
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.rememberPulseScale
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -960,8 +961,12 @@ private fun DictateFieldButton(
         CurioIcon(
             name = CurioIcons.Mic,
             contentDescription = contentDescription,
-            tint = if (enabled) accent
-                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            // v86 — dark mode: the raw accent is a deep jewel tone on a
+            // dark tinted chip → dark-on-dark. Flips to the bright light
+            // twin so the mic reads on the dark surface.
+            tint = if (enabled) {
+                if (isCurioDarkTheme()) lerp(accent, Color.White, 0.85f) else accent
+            } else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             size = 16.dp,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
         )

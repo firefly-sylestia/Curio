@@ -69,6 +69,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.themedButtonFill
@@ -592,9 +593,13 @@ fun PickerPageTab(
     idleFill: Color? = null
 ) {
     val shape = RoundedCornerShape(50)
+    // v86 — DARK-aware default idle fill: the old default lifted toward
+    // curioPillLift() (WHITE in dark) → near-white idle tabs with light-
+    // grey text on the black sheet (washed out). Dark now stays a dark
+    // raised glass; light keeps the cream lift exactly as before.
     val resolvedIdleFill = idleFill ?: lerp(
         MaterialTheme.colorScheme.surfaceContainerHigh,
-        curioPillLift(),
+        if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
         0.82f
     )
     Surface(
@@ -616,7 +621,7 @@ fun PickerPageTab(
             .categoryEdgeShine(shape, accent = accent)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
