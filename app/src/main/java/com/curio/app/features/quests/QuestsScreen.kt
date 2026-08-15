@@ -996,8 +996,9 @@ private fun ShelfSectionLabel(text: String) {
 }
 
 /** v42 — one MERGED medal tile: the chain's best-earned tier stands in for
- *  the whole chain; an "upgraded" chip shows when earlier rarities were
- *  earned too. Locked chains preview their highest-rarity silhouette.
+ *  the whole chain. v98 — minimal: earned tiles are just the badge + the
+ *  name (no tier label); locked chains preview progress + their
+ *  highest-rarity silhouette.
  */
 @Composable
 private fun MergedBadgeTile(
@@ -1038,57 +1039,38 @@ private fun MergedBadgeTile(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(3.dp))
-            if (m.earned) {
-                // Best earned rarity; an "upgraded" chip when earlier tiers
-                // were earned too (bronze → silver shows silver + upgraded).
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
+            // v98 — minimal: earned tiles show just the badge + the name —
+            // the BRONZE/SILVER tier label (and its "· upgraded" chip) are
+            // gone; the medal already carries the tier. Locked tiles keep
+            // their progress read + "Secret · hidden" for the mystery ones.
+            if (!m.earned) {
+                Spacer(Modifier.height(3.dp))
+                if (secretLocked) {
                     Text(
-                        tier.displayName.uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.6.sp
-                        ),
-                        color = accent,
+                        "Secret · hidden",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
-                    if (m.earnedTiers.size > 1) {
-                        Text(
-                            "· upgraded",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = curioSageInk(),
-                            maxLines = 1
-                        )
-                    }
+                } else {
+                    val progress = CurioQuests.stageProgress(m.displayStage)
+                    Text(
+                        "$progress / ${m.displayStage.target}",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.height(5.dp))
+                    LinearProgressIndicator(
+                        progress = { (progress.toFloat() / m.displayStage.target.coerceAtLeast(1)).coerceIn(0f, 1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(50)),
+                        color = accent,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 }
-            } else if (secretLocked) {
-                Text(
-                    "Secret · hidden",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-            } else {
-                val progress = CurioQuests.stageProgress(m.displayStage)
-                Text(
-                    "$progress / ${m.displayStage.target}",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-                Spacer(Modifier.height(5.dp))
-                LinearProgressIndicator(
-                    progress = { (progress.toFloat() / m.displayStage.target.coerceAtLeast(1)).coerceIn(0f, 1f) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(50)),
-                    color = accent,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
             }
         }
     }

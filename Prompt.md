@@ -43,7 +43,11 @@
    carries the tier); (c) the "In progress · n/target" pill in
    `CurrentQuestCard` is a FULLER pill: padding 9dp vertical → 12dp
    vertical + 14dp horizontal (user picked "too thin/slim" — kept the
-   glass-edge glow).
+   glass-edge glow). (d) Follow-up: the badge SHELF dialog tiles
+   (`MergedBadgeTile`) get the same minimal treatment — earned tiles are
+   just the badge + the name (the BRONZE/SILVER label AND its "· upgraded"
+   chip are gone); locked tiles keep their progress read + "Secret ·
+   hidden" for the mystery badges.
 
 ### Validation
 `git diff --check` clean; paren/brace deltas vs HEAD = 0 on all five

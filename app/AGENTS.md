@@ -420,8 +420,12 @@ app/src/main/java/com/curio/app/
   `chain.subtitle` task hint (it only appears in the open path dialog) and
   the BRONZE/SILVER tier label (just the medal badge + the chain name —
   the medal already carries the tier); the "In progress · n/target" pill
-  in `CurrentQuestCard` is a FULLER pill (9dp vertical → 12dp vertical +
-  14dp horizontal — user confirmed it read too thin, the glow stays).
+  in  `CurrentQuestCard` is a FULLER pill (9dp vertical → 12dp vertical +
+  14dp horizontal — user confirmed it read too thin, the glow stays);
+  the badge SHELF dialog tiles (`MergedBadgeTile`) are minimal too —
+  earned tiles are just the badge + the name (BRONZE/SILVER label + its
+  "· upgraded" chip are gone; locked tiles keep progress + "Secret ·
+  hidden").
 - **v97 — Paper stat card on by default + Profile quests paper card + merged
   Edit profile.** (1) The "Paper stat card" experiment PASSED — default is now
   ON app-wide (`paperStatCardsState` true, `KEY_PAPER_STAT_CARDS` default
