@@ -351,6 +351,29 @@ app/src/main/java/com/curio/app/
   count is now cached in memory (`TopicJsonLoader.countCanonicalTopics`
   parsed the whole ~14k-topic catalog on EVERY return to Home; one
   parse per process now).
+- **v70 — filter sheet: tear hero to the status bar + watermark backdrop,
+  active-filters strip removed, group-label icons.** (`FilterSheet` in
+  SpinScreen) (1) **The tear hero now runs up BEHIND the status bar** —
+  the sheet dropped its 28dp rounded top corners and floating drag
+  handle (`shape = RectangleShape`, `dragHandle = null`) and consumes
+  only bottom + IME insets (`contentWindowInsets = navigationBars ∪ ime`),
+  so the banner fills the very top edge like every page hero; the banner
+  height grows with the status-bar inset (`118.dp + statusBar` via
+  `WindowInsets.statusBars.asPaddingValues().calculateTopPadding()`) and
+  its title/Clear-all row applies `statusBarsPadding()`. (2) **Category
+  name steps up 30 → 34sp.** (3) **The sheet body now wears the page
+  watermark backdrop** (`CurioWatermarkBackdrop` at `alphaScale = 0.5f`,
+  kept in the band below the hero via `topClearance = filterHeroHeight`)
+  — the filter page finally shares the collage language of every other
+  screen. (4) **The "Active filters" summary strip and its divider are
+  REMOVED** — the selected chips were redundant (selections already read
+  on the group pills + open group); the now-dead `ActiveFilterChip`
+  composable was deleted with it. (5) **Group section labels (Type ·
+  Genres · Era · Origin · Franchise) gained a per-group Material Symbol**
+  (`FilterGroupKey.glyph`: `category` / `style` / `history` / `public` /
+  `movie`, all verified in the bundled font) tinted with the category
+  accent, stepped 16 → 17sp, with cleaner 10/8 margins; the accordion's
+  top margin also tightened 14 → 6dp now that the divider is gone.
 - **v69 — universal mood-board import, editor/saved fit consistency,
   mood collapse-on-pick, chip-bar slide animation.** (1) **Mood-board
   import is now the ANDROID PHOTO PICKER** (`PickMultipleVisualMedia` +

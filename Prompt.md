@@ -1,6 +1,44 @@
 # Prompt.md — Request log
 
-## Current request — mood board editor fixes + chip-bar animation (v69)
+## Current request — filter sheet tear-to-status-bar + watermark + group-label icons (v70)
+
+### What was asked
+"v68 — the header text steps up (30sp)... in here increase the category
+text size and make the hero tear go all the way up to the status bar (spin
+screen filter page). remove the active filters extra thing and also its
+divider. the text below the groups (Type · Genres · Era · Origin ·
+Franchise) — make it a little better, fix its margin, and give each group
+an icon as well. similar to other backgrounds, give the filter page
+background a watermark style too."
+
+### What was done (all in SpinScreen.kt `FilterSheet`)
+1. **Tear hero to the status bar** — the sheet dropped its 28dp rounded
+   top corners + floating drag handle (`shape = RectangleShape`,
+   `dragHandle = null`) and consumes only bottom + IME insets
+   (`contentWindowInsets = { WindowInsets.navigationBars.union(WindowInsets.ime) }`),
+   so the category banner fills the very top edge behind the status bar
+   like every page hero. Banner height grows with the status-bar inset
+   (`118.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()`)
+   and the title/Clear-all row applies `statusBarsPadding()`.
+2. **Category name 30 → 34sp** in the tear hero.
+3. **Active-filters strip + divider removed** — the selected-chip summary
+   was redundant; the dead `ActiveFilterChip` composable was deleted with it.
+4. **Group section labels upgraded** — `FilterGroupKey` gained a per-group
+   glyph (`category`/`style`/`history`/`public`/`movie`, all verified
+   present in the bundled Material Symbols font via the post-table glyph
+   names); `SectionLabel` renders an accent-tinted glyph + 17sp ExtraBold
+   text with cleaner 10/8 margins; the accordion top margin tightened
+   14 → 6dp (divider gone).
+5. **Watermark backdrop** — the sheet body now wears
+   `CurioWatermarkBackdrop` (`alphaScale = 0.5f`, `topClearance` = hero
+   height), matching the muted category-glyph collage of other pages.
+
+### Validation
+Brace/paren balance OK (SpinScreen 534/534, 1653/1653); `git diff --check`
+clean; no `ActiveFilterChip` references remain; five group glyphs verified
+in the bundled font. No Gradle locally (env rule) — CI on push.
+
+## Prior — mood board editor fixes + chip-bar animation (v69)
 
 ### What was asked
 "in moodboard make the import be universal. and fix the inline editor

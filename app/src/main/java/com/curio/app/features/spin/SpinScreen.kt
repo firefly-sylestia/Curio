@@ -41,6 +41,14 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateTopPadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -83,6 +91,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -1487,8 +1496,12 @@ private data class FilterGroups(
  * group's chips, tapping the open pill again collapses it (selections
  * survive), and tapping a different pill swaps — one group open at a time.
  */
-private enum class FilterGroupKey(val label: String) {
-    TYPE("Type"), GENRES("Genres"), ERA("Era"), ORIGIN("Origin"), FRANCHISE("Franchise")
+private enum class FilterGroupKey(val label: String, val glyph: String) {
+    TYPE("Type", "category"),
+    GENRES("Genres", "style"),
+    ERA("Era", "history"),
+    ORIGIN("Origin", "public"),
+    FRANCHISE("Franchise", "movie")
 }
 
 /** The chips of a group from the (possibly search-narrowed) groups. */
@@ -1638,6 +1651,10 @@ private fun FilterSheet(
         )
     }
     val activeCount = draftFilters.size + draftSubtypes.size
+    // v70 — the tear hero's height grows with the status-bar inset so the
+    // banner fills the very top edge behind the status bar (the banner
+    // content draws its own status-bar spacing).
+    val filterHeroHeight = 118.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     // v8.21 — tell the pet a drawer is up so it comes over to peek.
     LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
     DisposableEffect(Unit) {
@@ -1658,14 +1675,29 @@ private fun FilterSheet(
         } else {
             cat.categoryBackgroundWash()
         },
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        // v70 — the tear hero runs up BEHIND the status bar like every other
+        // page hero: flush top corners (no rounded cap), no floating drag
+        // handle, and only the bottom + IME insets consumed so the banner
+        // can fill the very top edge (it draws its own status-bar spacing).
+        // Swipe-down, scrim tap and the Apply/Clear actions still dismiss.
+        contentWindowInsets = { WindowInsets.navigationBars.union(WindowInsets.ime) },
+        shape = RectangleShape,
+        dragHandle = null
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // ── Watermark backdrop (v70) — the sheet body wears the same
+            //    muted category-glyph collage as every other page, kept in
+            //    the band below the hero.
+            CurioWatermarkBackdrop(
+                activeCat = cat,
+                topClearance = filterHeroHeight,
+                alphaScale = 0.5f
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 20.dp)
+            ) {
             // ── Torn-hero header (v68) — the sheet wears the app's tear
             //    hero language: a category-colored banner with a soft torn
             //    bottom edge, watermark glyphs and the category name in the
@@ -1681,13 +1713,13 @@ private fun FilterSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(118.dp)
+                    .height(filterHeroHeight)
             ) {
                 // ── Torn-edge hairline shadow (the hero construction) ──
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(118.dp)
+                        .height(filterHeroHeight)
                         .offset(y = 1.dp)
                         .clip(filterHeroTorn)
                         .background(Color.Black.copy(alpha = 0.20f))
@@ -1696,7 +1728,7 @@ private fun FilterSheet(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(118.dp)
+                        .height(filterHeroHeight)
                         .clip(filterHeroTorn)
                         .background(
                             Brush.verticalGradient(
@@ -1728,16 +1760,20 @@ private fun FilterSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(start = 20.dp, end = 14.dp, top = 16.dp, bottom = 18.dp),
+                            // v70 — the banner itself runs behind the status
+                            // bar; the title + Clear-all clear it.
+                            .statusBarsPadding()
+                            .padding(start = 20.dp, end = 14.dp, top = 10.dp, bottom = 18.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = cat.displayName,
-                                // v68 — the header text steps up (30sp) so
-                                // the category name leads the page.
+                                // v70 — the header text steps up again (34sp)
+                                // so the category name leads the page from the
+                                // full-height tear hero.
                                 style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = 30.sp,
+                                    fontSize = 34.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 ),
                                 color = filterHeroInk,
@@ -1786,48 +1822,6 @@ private fun FilterSheet(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 10.dp)
             )
 
-            // ── Active filter summary chips — this is what was missing ─
-            if (activeCount > 0) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                ) {
-                    Text(
-                        text = "Active filters",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 6.dp)
-                    )
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        draftSubtypes.forEach { st ->
-                            ActiveFilterChip(
-                                label = st,
-                                accent = cat.themedAccent(),
-                                ink = cat.onAccent(),
-                                onRemove = { draftSubtypes = draftSubtypes - st }
-                            )
-                        }
-                        draftFilters.forEach { tag ->
-                            ActiveFilterChip(
-                                label = tag,
-                                accent = cat.themedAccent(),
-                                ink = cat.onAccent(),
-                                onRemove = { draftFilters = draftFilters - tag }
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(14.dp))
-            }
-
             val hasAny = filteredGroups.types.size > 1 ||
                 filteredGroups.genres.isNotEmpty() ||
                 filteredGroups.eras.isNotEmpty() ||
@@ -1845,14 +1839,6 @@ private fun FilterSheet(
                         .padding(vertical = 32.dp)
                 )
             } else {
-                // ── Divider line ──────────────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                )
 
                 // ── v33 — accordion filter groups: Type · Genres · Era ·
                 //    Origin · Franchise are tappable PILLS now. Tapping a
@@ -1884,9 +1870,9 @@ private fun FilterSheet(
                         .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
-                        // v68 — proper margins: 14dp under the tear/divider
-                        // so the accordion never crowds the header.
-                        .padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 4.dp),
+                        // v70 — tight top margin: the divider is gone, so the
+                        // accordion sits right under the search field.
+                        .padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // ── Group pills row ───────────────────────────────
@@ -1936,10 +1922,14 @@ private fun FilterSheet(
                             effectiveGroup?.let { key ->
                                 val isSubtypeGroup = key == FilterGroupKey.TYPE
                                 Column(Modifier.fillMaxWidth()) {
-                                    // v68 — the section label clears the pill
+                                    // v70 — the section label clears the pill
                                     // row above with its own top margin so the
                                     // open group never reads cramped/offset.
-                                    SectionLabel(key.label, Modifier.padding(top = 6.dp, bottom = 6.dp))
+                                    SectionLabel(
+                                        key,
+                                        cat.themedAccent(),
+                                        Modifier.padding(top = 10.dp, bottom = 8.dp)
+                                    )
                                     // v44 — the TYPE group is a FLOW row now,
                                     // not a fixed 2-column grid: a long subtype
                                     // takes its own full line and the next chip
@@ -2021,62 +2011,40 @@ private fun FilterSheet(
                 )
             }
         }
-    }
-}
-
-/** Chip showing an active filter with ✕ to remove. */
-@Composable
-private fun ActiveFilterChip(
-    label: String,
-    accent: Color,
-    ink: Color = Color.White,
-    onRemove: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = accent,
-        shadowElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 14.dp, end = 7.dp, top = 7.dp, bottom = 7.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = ink
-            )
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.clickable(onClick = onRemove)
-            ) {
-                CurioIcon(
-                    CurioIcons.Close, null,
-                    tint = CurioColors.DeepPlum,
-                    size = 16.dp,
-                    modifier = Modifier.padding(2.dp)
-                )
-            }
         }
     }
 }
 
+/**
+ * v70 — the open group's section label: a category-accent glyph + the
+ * group name, sized to lead its chips below.
+ */
 @Composable
-private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        // v61 — bigger section headers: 16sp ExtraBold with wider tracking
-        // so each group's label clearly outranks its chips below.
-        style = MaterialTheme.typography.titleSmall.copy(
-            fontSize = 16.sp,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 0.3.sp
-        ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
-    )
+private fun SectionLabel(key: FilterGroupKey, accent: Color, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        CurioIcon(
+            name = key.glyph,
+            contentDescription = null,
+            tint = accent,
+            size = 20.dp
+        )
+        Text(
+            text = key.label,
+            // v61 — bigger section headers: 16sp ExtraBold with wider
+            // tracking so each group's label clearly outranks its chips.
+            // v70 — 17sp so the label reads alongside its new glyph.
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.3.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
