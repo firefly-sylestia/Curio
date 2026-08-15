@@ -401,6 +401,21 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v103 — profile avatar photo + drawer.** (1) AppPreferences:
+  `KEY_PROFILE_AVATAR` path pref + `getProfileAvatarPath` /
+  `setProfileAvatarPath` ("" = none); the photo is copied into filesDir
+  as `profile_avatar_<timestamp>.png` (a fresh name each pick so
+  remember(path) bitmap caches re-key; old avatar files deleted). (2) New
+  shared `ui/components/ProfileAvatar.kt`: `rememberProfileAvatar(path)`
+  (ImageDecoder 28+ at 512px target, BitmapFactory 26-27, cached per
+  path) + `ProfileAvatarImage` (fills the caller's circle-clipped box;
+  nothing when unset → initial fallback). (3) ProfileScreen: the Edit
+  profile dialog gains a 64dp circle preview (photo or name initial) +
+  Add/Change photo + Remove (GetContent picker); the Profile hero's 72dp
+  avatar circle shows the photo instead of the initial when set. (4) Home
+  drawer (`HomeDrawerContent`): the bottom greeting row leads with a 48dp
+  avatar circle (photo or initial) beside CURIO · Hi name · tagline.
+  User confirmed (ask_user): always-on, no toggle.
 - **v102 — auto-import bob actually plays.** The v64 auto-import added a
   "happy" bob animation to `design.animations` and saved it, but NOTHING
   played it — the animation editor is hidden from the Pet Studio (only

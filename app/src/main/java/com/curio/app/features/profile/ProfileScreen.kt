@@ -31,6 +31,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -73,6 +75,8 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.ui.components.ProfileAvatarImage
+import java.io.File
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.features.settings.settingsRoseAccent
@@ -185,6 +189,34 @@ fun ProfileScreen(navController: NavController) {
     // saving. The automatic line derives from the DISPLAY streak.
     var taglineInput by remember { mutableStateOf("") }
     var taglineRevision by remember { mutableIntStateOf(0) }
+    // v103 — profile avatar: a user-picked photo copied into the app's
+    // private files dir. Each pick gets a fresh filename so the
+    // remember(path) bitmap caches reload; the path pref is also read by
+    // the Home drawer hero.
+    var avatarPath by remember { mutableStateOf(AppPreferences.getProfileAvatarPath(context)) }
+    val avatarPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        // Replace any previous avatar file (the new timestamped name keeps
+        // the path unique so caches re-key).
+        context.filesDir.listFiles()
+            ?.filter { it.name.startsWith("profile_avatar_") }
+            ?.forEach { it.delete() }
+        val file = File(context.filesDir, "profile_avatar_${System.currentTimeMillis()}.png")
+        runCatching {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { out -> input.copyTo(out) }
+            }
+        }
+        avatarPath = if (file.exists() && file.length() > 0L) file.absolutePath else ""
+        AppPreferences.setProfileAvatarPath(context, avatarPath)
+    }
+    fun removeAvatar() {
+        avatarPath.takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
+        avatarPath = ""
+        AppPreferences.setProfileAvatarPath(context, "")
+    }
     var crashCount by remember { mutableIntStateOf(0) }
     var totalSaved by remember { mutableIntStateOf(0) }
     var categoryCounts by remember { mutableStateOf<Map<CategoryId, Int>>(emptyMap()) }
@@ -260,8 +292,12 @@ fun ProfileScreen(navController: NavController) {
 
     ProfileDialogs(
         showEditDialog = showNameDialog,
+        // v103 — the avatar photo applies immediately when picked.
+        avatarPath = avatarPath,
         nameInput = nameInput,
         onNameInputChange = { nameInput = it },
+        onPickAvatar = { avatarPicker.launch("image/*") },
+        onRemoveAvatar = { removeAvatar() },
         taglineInput = taglineInput,
         onTaglineInputChange = { taglineInput = it },
         onResetTagline = {
@@ -316,6 +352,7 @@ fun ProfileScreen(navController: NavController) {
             item {
                 ProfileHero(
                     name = displayName,
+                    avatarPath = avatarPath,
                     tagline = heroTagline,
                     displayStreak = displayStreak,
                     level = level,
@@ -569,8 +606,12 @@ private fun ProfileSearchPill(
 @Composable
 private fun ProfileDialogs(
     showEditDialog: Boolean,
+    // v103 — the profile avatar photo path ("" = none).
+    avatarPath: String,
     nameInput: String,
     onNameInputChange: (String) -> Unit,
+    onPickAvatar: () -> Unit,
+    onRemoveAvatar: () -> Unit,
     // v97 — the tagline (the line under the name) edits in the SAME
     // "Edit profile" dialog — the separate tagline dialog is gone.
     taglineInput: String,
@@ -587,6 +628,54 @@ private fun ProfileDialogs(
             title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // v103 — avatar photo: circle preview + pick/remove.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (avatarPath.isNotBlank()) {
+                                ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                            } else {
+                                Text(
+                                    nameInput.firstOrNull()?.uppercase().orEmpty(),
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Profile photo",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                            )
+                            Text(
+                                if (avatarPath.isNotBlank()) "Tap to change your avatar."
+                                else "Pick an image to show as your avatar.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = onPickAvatar, colors = curioDialogActionButtonColors()) {
+                            Text(
+                                if (avatarPath.isNotBlank()) "Change photo" else "Add photo",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        if (avatarPath.isNotBlank()) {
+                            TextButton(onClick = onRemoveAvatar) {
+                                Text("Remove", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
                     Text(
                         "Your name and the line under it.",
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -646,6 +735,8 @@ private fun ProfileDialogs(
 @OptIn(ExperimentalLayoutApi::class)
 private fun ProfileHero(
     name: String,
+    // v103 — the profile avatar photo path ("" = none → the initial).
+    avatarPath: String? = null,
     tagline: String,
     displayStreak: Int,
     level: Int,
@@ -784,11 +875,17 @@ private fun ProfileHero(
                                     .background(fill),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    initial,
-                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = ink
-                                )
+                                // v103 — the avatar photo (circle-clipped by
+                                // the Box) replaces the name initial when set.
+                                if (avatarPath.isNotBlank()) {
+                                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                                } else {
+                                    Text(
+                                        initial,
+                                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = ink
+                                    )
+                                }
                             }
                         }
                         Column(modifier = Modifier.weight(1f)) {

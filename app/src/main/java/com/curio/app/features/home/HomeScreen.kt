@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -118,6 +119,7 @@ import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
+import com.curio.app.ui.components.ProfileAvatarImage
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.pet.CurioPetHome
@@ -1957,37 +1959,62 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     .graphicsLayer { rotationZ = pair.rotation }
                             )
                         }
-                        // Brand + greeting pinned just above the tear.
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        // Brand + greeting (with the profile avatar) pinned
+                        // just above the tear. v103 — the avatar photo (or the
+                        // name initial) shows here too, matching the Profile
+                        // hero; a fresh pref read keeps it in sync.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
                                 .padding(start = 24.dp, end = 24.dp, bottom = 28.dp)
                         ) {
-                            Text(
-                                "CURIO",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 2.sp
-                                ),
-                                color = drawerInk.copy(alpha = 0.85f)
-                            )
-                            Text(
-                                "Hi $displayName",
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = drawerInk,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                "Spin it. Explore it. Capture it.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = drawerInk.copy(alpha = 0.78f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            val avatarPath = AppPreferences.getProfileAvatarPath(context)
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .shadow(2.dp, CircleShape)
+                                    .clip(CircleShape)
+                                    .background(heroFill),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (avatarPath.isNotBlank()) {
+                                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                                } else {
+                                    Text(
+                                        displayName.firstOrNull()?.uppercase().orEmpty(),
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = drawerInk
+                                    )
+                                }
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    "CURIO",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 2.sp
+                                    ),
+                                    color = drawerInk.copy(alpha = 0.85f)
+                                )
+                                Text(
+                                    "Hi $displayName",
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold
+                                    ),
+                                    color = drawerInk,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Spin it. Explore it. Capture it.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = drawerInk.copy(alpha = 0.78f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }

@@ -1,6 +1,41 @@
 # Prompt.md — Request log
 
-## Current request — auto-import bob actually plays (v102)
+## Current request — profile avatar photo (Edit profile) + drawer (v103)
+
+### What was asked
+1. "add avatar image add in edit profile" — the Edit profile dialog gets
+   an avatar image picker.
+2. "show the avatar profile icon in drawer too" — the Home drawer hero
+   shows the avatar next to the greeting.
+User confirmed (ask_user): always-on, no toggle.
+
+### What was done
+1. **AppPreferences** — `KEY_PROFILE_AVATAR` path pref +
+   `getProfileAvatarPath` / `setProfileAvatarPath` ("" = none). The photo
+   lives in filesDir as `profile_avatar_<timestamp>.png`.
+2. **New shared component** `ui/components/ProfileAvatar.kt` —
+   `rememberProfileAvatar(path)` (ImageDecoder 28+ with 512px target size,
+   BitmapFactory 26-27, cached per path) + `ProfileAvatarImage` (fills the
+   caller's circle-clipped box; renders nothing when unset so the initial
+   fallback stays).
+3. **ProfileScreen** — `avatarPath` state + `GetContent()` picker that
+   copies the picked image into filesDir (fresh timestamped name so
+   remember(path) caches re-key; old avatar files deleted), plus
+   `removeAvatar()`; the Edit profile dialog gains a 64dp circle preview
+   (photo or name initial) with "Add/Change photo" + "Remove" buttons;
+   the Profile hero's 72dp avatar circle shows the photo instead of the
+   initial when set.
+4. **Home drawer** (HomeScreen `HomeDrawerContent`) — the bottom greeting
+   row now leads with a 48dp avatar circle (photo or initial) beside
+   "CURIO · Hi name · tagline".
+
+### Validation
+`git diff --check` clean; launcher imports match the pet designer's
+pattern; `BitmapFactory.decodeFile` safe-called (nullable); ProfileHero's
+new `avatarPath` param has a default so no other caller breaks. No Gradle
+locally (env rule) — CI on push.
+
+## Prior — auto-import bob actually plays (v102)
 
 ### What was asked
 "now the auto animate on import doesnt work, so fix that in pet animation."

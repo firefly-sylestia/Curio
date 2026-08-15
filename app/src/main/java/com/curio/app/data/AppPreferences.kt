@@ -182,6 +182,17 @@ object AppPreferences {
     fun setCustomStreakTagline(context: Context, tagline: String) =
         prefs(context).edit().putString(KEY_CUSTOM_TAGLINE, tagline.trim()).apply()
 
+    // ── Profile avatar (v103) ────────────────────────────────────────
+    // The saved profile photo's absolute path inside the app's private
+    // files dir ("" = none). The image itself lives in filesDir as
+    // profile_avatar_<timestamp>.png; only the path is stored here.
+    private const val KEY_PROFILE_AVATAR = "profile_avatar"
+    fun getProfileAvatarPath(context: Context): String =
+        prefs(context).getString(KEY_PROFILE_AVATAR, "").orEmpty()
+
+    fun setProfileAvatarPath(context: Context, path: String) =
+        prefs(context).edit().putString(KEY_PROFILE_AVATAR, path).apply()
+
     // ── Update-notification dedupe (v53) ─────────────────────────────
     // The version tag of the newest update that has ALREADY been announced
     // with a notification — the updater only notifies once per new release
