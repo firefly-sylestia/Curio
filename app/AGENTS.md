@@ -401,6 +401,16 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v95 — light warm catch on the unified tears.** New
+  `Modifier.curioLightCatch(shape, strength = 0.10f)`
+  (CurioGlassEffects.kt): a soft warm-white top-edge gradient fading down
+  ~45% — the LIGHT-mode "lit from above" catch, the light twin of the dark
+  `curioGlassEdge` + `tornSeamLight`. Light only, no-op in dark. Applied
+  to the four unified tears: Home quest banner, Detail hero, Spin filter
+  sheet hero, Spin category-picker hero. (Skipped: icon-only tab bar — 3
+  short labels; nav content fade — the scaffold pads content above the
+  bar so there is no overlap; card mid-tone gradients — already shipped
+  via the default-on tint wash.)
 - **v94 — torn-edge light catch.** New `Modifier.tornSeamLight(shape,
   strength = 0.10f)` (CurioGlassEffects.kt): a faint 1.5px white stroke
   tracing the hero's torn outline — dark only, no-op in light — so the

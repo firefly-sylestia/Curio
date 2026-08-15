@@ -84,6 +84,32 @@ fun Modifier.curioGlassGlow(shape: Shape, accent: Color, strength: Float = 0.16f
     this.curioGlassEdge(shape).curioInnerGlow(shape, accent, strength)
 
 /**
+ * v94 — the LIGHT-mode "lit from above" catch on the torn heroes (the
+ * light twin of the dark [curioGlassEdge] + [tornSeamLight]): a soft warm-
+ * white gradient along the banner's top edge fading down ~45% — the banner
+ * reads as catching warm light instead of a flat paint fill. Light mode
+ * only (a no-op in dark, where the shiny edge + seam light own the look).
+ */
+fun Modifier.curioLightCatch(shape: Shape, strength: Float = 0.10f): Modifier = composed {
+    val layoutDirection = LocalLayoutDirection.current
+    if (isCurioDarkTheme()) return@composed this
+    this.drawWithContent {
+        drawContent()
+        val path = shape.createOutline(size, layoutDirection, this).toPath()
+        clipPath(path) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    0f to Color(0xFFFFF8F0).copy(alpha = strength),
+                    0.28f to Color(0xFFFFF8F0).copy(alpha = strength * 0.35f),
+                    0.45f to Color.Transparent
+                ),
+                size = size
+            )
+        }
+    }
+}
+
+/**
  * v93 — the One UI torn-edge light catch: a faint light rim tracing the
  * hero's torn outline (the same [shape], stroked ~1.5px in a whisper of
  * white) so the ragged paper seam reads as catching light — the shiny-edge

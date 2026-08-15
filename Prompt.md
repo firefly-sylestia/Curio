@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — torn-edge light catch on the unified tears (v94)
+## Current request — light warm catch on the unified tears (v95)
+
+### What was asked
+"continue" — keep going with the One UI 9.5 improvement list.
+
+### What was done
+New `Modifier.curioLightCatch(shape, strength = 0.10f)` in
+CurioGlassEffects.kt: a soft warm-white gradient along the banner's top
+edge fading down ~45% — the LIGHT-mode "lit from above" catch (the light
+twin of the dark `curioGlassEdge` + `tornSeamLight`). Light only, no-op in
+dark. Applied to the four unified tears: Home quest banner, Detail hero,
+Spin filter sheet hero, Spin category-picker hero — each banner now reads
+as catching warm light in light mode and the shiny edge + seam light at
+night.
+
+Skipped after investigation: icon-only tab bar (3 short labels — nothing
+to gain), nav content-fade "blurple" (the scaffold pads content above the
+bar — no overlap to fade; would need a scaffold restructure), soft accent
+card gradients (already shipped — tint wash is on by default, so light
+cards already end on the accent-tinted tone).
+
+### Validation
+Balanced, `git diff --check` clean, imports added. No Gradle locally — CI
+on push (committed but NOT pushed per the standing user instruction).
+
+## Prior — torn-edge light catch on the unified tears (v94)
 
 ### What was asked
 "continue" — keep going with the One UI 9.5 improvement list.
