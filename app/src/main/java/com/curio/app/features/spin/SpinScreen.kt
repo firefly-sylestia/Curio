@@ -160,6 +160,7 @@ import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.lightAccentTint
+import com.curio.app.ui.theme.oklabGradientStops
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
@@ -645,7 +646,14 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // hero ticket takes a multi-accent gradient (Spotify-style).
     // Resolved in the composable body (NOT remember) so the Material style's
     // device-color blend of each accent updates when the theme style changes.
-    val deckAccents = activeCatIds.map { CurioCategories.byId(it).themedAccent() }
+    // v87 — the accents are passed RAW (not theme-resolved) so
+    // mixedDeckAccent/mixedDeckGradient can hit the curated pair/triple
+    // tables — keyed on the raw researched accents — in every theme, then
+    // resolve the blend per theme inside. The old pre-resolved accents made
+    // every dark-mix table lookup miss, silently falling back to the HSL
+    // midpoint (muddy foreign-hue blends — the "dark mixed colors are bad"
+    // bug).
+    val deckAccents = activeCatIds.map { CurioCategories.byId(it).accent }
     // v7.5 — pastel mode: the curated pair/triple blends are deep, so the
     // resolved deck accent softens to its theme-aware pastel twin (airy in
     // light). `pastel` is resolved here (the remember block is not a
@@ -2759,7 +2767,10 @@ private fun HeroTicketCard(
         val stops = if (gradient.size > 2) {
             listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
         } else {
-            CurioGradients.hslGradientStops(crown, base, 3)
+            // v87 — OKLab interpolation: perceptually even lightness + hue
+            // along the crown→base fade (HSL's numeric lightness steps swing
+            // through muddy bands). Same stops on the Reveal morph.
+            oklabGradientStops(crown, base, 3)
         }
         Brush.linearGradient(
             stops,

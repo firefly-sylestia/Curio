@@ -248,6 +248,120 @@ internal fun fromHsl(h: Float, s: Float, l: Float): Color {
 }
 
 /**
+ * OKLab coordinates (Björn Ottosson) — a perceptually uniform L*a*b-style
+ * space. Used for gradient / blend interpolation: RGB and HSL interpolation
+ * pass through muddy foreign-hue bands (grey for RGB, the olive dead zone
+ * for amber↔teal in HSL), while OKLab's cube-root-nonlinearity keeps hue
+ * and lightness perceptually even along the whole path. v87 — the dark-mode
+ * mixed-deck gradient research (OKLab is the interpolation gold standard:
+ * Photoshop's default for gradients, CSS Color 4 `color-mix(in oklab)`, the
+ * Tailwind migration issue) landed this local implementation.
+ */
+internal data class Oklab(val l: Float, val a: Float, val b: Float)
+
+/** sRGB (gamma) → OKLab, via the canonical Ottosson matrices. */
+internal fun toOklab(color: Color): Oklab {
+    val r = srgbToLinear(color.red)
+    val g = srgbToLinear(color.green)
+    val b = srgbToLinear(color.blue)
+    // Linear sRGB → LMS (M1)
+    val l = 0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b
+    val m = 0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b
+    val s = 0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b
+    // Cube-root non-linearity
+    val l1 = cbrt(l)
+    val m1 = cbrt(m)
+    val s1 = cbrt(s)
+    // LMS → OKLab (M2)
+    return Oklab(
+        0.2104542553f * l1 + 0.7936177850f * m1 - 0.0040720468f * s1,
+        1.9779984951f * l1 - 2.4285922050f * m1 + 0.4505937099f * s1,
+        0.0259040371f * l1 + 0.7827717662f * m1 - 0.8086757660f * s1
+    )
+}
+
+/** OKLab → sRGB (gamma), clamped to the displayable gamut. */
+internal fun fromOklab(lab: Oklab): Color {
+    // OKLab → LMS'
+    val l1 = lab.l + 0.3963377774f * lab.a + 0.2158037573f * lab.b
+    val m1 = lab.l - 0.1055613458f * lab.a - 0.0638541728f * lab.b
+    val s1 = lab.l - 0.0894841775f * lab.a - 1.2914855480f * lab.b
+    // Cube
+    val l = l1 * l1 * l1
+    val m = m1 * m1 * m1
+    val s = s1 * s1 * s1
+    // LMS → linear sRGB (M1⁻¹)
+    val r = +4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s
+    val g = -1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s
+    val b = -0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s
+    return Color(
+        linearToSrgb(r).coerceIn(0f, 1f),
+        linearToSrgb(g).coerceIn(0f, 1f),
+        linearToSrgb(b).coerceIn(0f, 1f)
+    )
+}
+
+/** sRGB gamma channel → linear light. */
+private fun srgbToLinear(c: Float): Float =
+    if (c <= 0.04045f) c / 12.92f else ((c + 0.055f) / 1.055f).pow(2.4f)
+
+/** Linear light → sRGB gamma channel. */
+private fun linearToSrgb(c: Float): Float =
+    if (c <= 0.0031308f) c * 12.92f else 1.055f * c.pow(1f / 2.4f) - 0.055f
+
+/**
+ * Perceptual midpoint of two colors in OKLab — the premium blend fallback
+ * for unmapped mixed-deck pairs (replaces the HSL midpoint, which could
+ * swing through foreign hues).
+ */
+internal fun oklabBlend(a: Color, b: Color): Color {
+    val oa = toOklab(a)
+    val ob = toOklab(b)
+    return fromOklab(Oklab((oa.l + ob.l) / 2f, (oa.a + ob.a) / 2f, (oa.b + ob.b) / 2f))
+}
+
+/**
+ * Order-independent perceptual mean of several colors in OKLab — the
+ * premium 4+ accent blend (replaces the HSL circular-hue mean, whose
+ * lightness averaging was non-perceptual).
+ */
+internal fun oklabCentroid(colors: List<Color>): Color {
+    val oks = colors.map { toOklab(it) }
+    val n = oks.size.toFloat()
+    return fromOklab(
+        Oklab(
+            oks.sumOf { it.l.toDouble() }.toFloat() / n,
+            oks.sumOf { it.a.toDouble() }.toFloat() / n,
+            oks.sumOf { it.b.toDouble() }.toFloat() / n
+        )
+    )
+}
+
+/**
+ * Evenly-spaced gradient stops between [from] and [to] interpolated in OKLab
+ * (including both endpoints) — the perceptually-smooth replacement for
+ * [CurioGradients.hslGradientStops]. RGB/HSL interpolation between a deep
+ * accent and black/white passes through muddy grey or swings hue; OKLab
+ * keeps lightness + hue even along the whole path, so dark-mode fades to
+ * black hold their hue instead of banding.
+ */
+internal fun oklabGradientStops(from: Color, to: Color, steps: Int = 9): List<Color> {
+    require(steps >= 2)
+    val a = toOklab(from)
+    val b = toOklab(to)
+    return List(steps) { i ->
+        val t = i / (steps - 1).toFloat()
+        fromOklab(
+            Oklab(
+                a.l + (b.l - a.l) * t,
+                a.a + (b.a - a.a) * t,
+                a.b + (b.b - a.b) * t
+            )
+        )
+    }
+}
+
+/**
  * Hue-preserving light tint of a category accent, for LIGHT-mode page washes
  * and tinted surfaces.
  *
@@ -489,7 +603,9 @@ object CurioGradients {
  * HSL centroid of the three accents. Every blend clears WCAG AA (4.5:1)
  * against white — any that fell short were deepened to the brightest shade
  * that still clears it, keeping mixes vivid with crisp white labels. Four+
- * accents use the runtime [hslCentroid] with the same 4.5:1 steering.
+ * accents use the runtime [oklabCentroid] — the perceptually-uniform mean
+ * (v87 — replaces the old HSL circular-hue centroid, whose numeric lightness
+ * averaging swung through foreign hues).
  */
 object CurioMixedDeck {
 
@@ -545,32 +661,41 @@ object CurioMixedDeck {
 
     /**
      * The single blend color a mixed deck wears on peeks, the spin button and
-     * confetti. A single distinct accent returns itself unchanged; pairs and
-     * triples use the curated tables; four+ use the order-independent
-     * [hslCentroid] (circular hue mean), so every mix stays vivid, white-label
-     * safe, and never depends on selection order.
+     * confetti. Takes the RAW category accents (not theme-resolved) so the
+     * curated pair/triple tables — keyed on the raw researched accents — hit
+     * in every theme. A single distinct accent resolves to its theme-aware
+     * shade; pairs and triples use the curated tables (perceptual OKLab
+     * fallback); four+ use the order-independent [oklabCentroid], so every
+     * mix stays vivid, white-label safe, and never depends on selection order.
+     *
+     * v87 — dark-mode mixed colors: the OLD code had the caller pre-resolve
+     * every accent to its dark shade, so the table keys never matched and
+     * every dark mix silently fell back to the HSL midpoint (foreign-hue
+     * swings, muddy olive midpoints). Now the blend is computed from the RAW
+     * accents (table hits restored) and then re-shaded per theme — dark
+     * blends wear the same [darkAccent] "new shade of the same spectrum"
+     * recipe as the single accents, so every stop of a dark mixed deck reads
+     * as one family instead of riding light-designed deep blends.
      *
      * Pastel color mode (v7.5): pass `pastel = true` + the active dark state
      * so the DEEP curated pair/triple blends soften to the theme-aware pastel
      * twin ([pastelAccent]) — airy pastels in light mode, muted deep pastels
-     * in dark. Single accents arrive already pastel (callers resolve them via
-     * [com.curio.app.ui.theme.CurioCategory.themedAccent]) and the 4+ path
-     * ([hslCentroid]) keeps pastel inputs at their mean lightness, so neither
-     * is re-softened here.
+     * in dark.
      */
     fun mixedDeckAccent(accents: List<Color>, pastel: Boolean = false, dark: Boolean = false): Color {
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
         val distinct = accents.distinct()
-        val blend = when (distinct.size) {
+        val raw = when (distinct.size) {
             0 -> CurioColors.CategoryCoral
             1 -> distinct.first()
-            2 -> PairBlends[distinct.toSet()] ?: hslBlend(distinct[0], distinct[1])
-            3 -> TripleBlends[distinct.toSet()] ?: hslCentroid(distinct, pastel)
-            else -> hslCentroid(distinct, pastel)
+            2 -> PairBlends[distinct.toSet()] ?: oklabBlend(distinct[0], distinct[1])
+            3 -> TripleBlends[distinct.toSet()] ?: oklabCentroid(distinct)
+            else -> oklabCentroid(distinct)
         }
-        if (pastel && distinct.size in 2..3) return pastelAccent(blend, dark)
-        return blend
+        // v87 — resolve the blend per theme (the old code re-softened only
+        // pairs/triples in pastel and left dark blends completely untouched).
+        return if (!pastel) (if (dark) darkAccent(raw) else raw) else pastelAccent(raw, dark)
     }
 
     /**
@@ -579,33 +704,41 @@ object CurioMixedDeck {
      * sweep: each accent followed by the curated pair blend with its
      * neighbor, so the gradient glides through premium blended hues instead
      * of banding through muddy RGB midpoints (the old raw-stop version —
-     * teal↔amber and sky↔amber cross the olive dead zone). Leaner than the
-     * original (no redundant HSL intermediates on either side of each
-     * blend), so the sweep reads as a duotone glide instead of a
-     * stop-heavy rainbow ribbon. Supports up to four accents — beyond that
-     * a single sweep slides into rainbow regardless of interpolation.
+     * teal↔amber and sky↔amber cross the olive dead zone). Takes the RAW
+     * category accents and resolves every stop per theme inside. Leaner than
+     * the original (no redundant HSL intermediates on either side of each
+     * blend), so the sweep reads as a duotone glide instead of a stop-heavy
+     * rainbow ribbon. Supports up to four accents — beyond that a single
+     * sweep slides into rainbow regardless of interpolation.
+     *
+     * v87 — dark-mode mixed gradients: the OLD code re-softened only the
+     * SEAMS to the LIGHT pastel (hardcoded `pastelAccent(seam, false)`), so
+     * dark pastel cards carried airy light seams, and dark non-pastel decks
+     * rode light-designed deep blends that clashed with the dark-tuned
+     * single-accent stops. Now every stop wears the theme shade ([darkAccent]
+     * at night, [pastelAccent] in pastel mode) and every seam is the
+     * theme-resolved curated pair blend — one coherent color family per deck.
      */
     @Composable
     fun mixedDeckGradient(accents: List<Color>): List<Color> {
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
         val distinct = accents.distinct()
-        if (distinct.size <= 1) {
-            return CurioGradients.cardGradient(mixedDeckAccent(distinct))
-        }
         val pastel = AppPreferences.pastelColorsState
+        val dark = isCurioDarkTheme()
+        if (distinct.size <= 1) {
+            return CurioGradients.cardGradient(mixedDeckAccent(distinct, pastel = pastel, dark = dark))
+        }
         val stops = mutableListOf<Color>()
         distinct.take(4).forEachIndexed { i, accent ->
-            stops.add(accent)
+            // Theme shade of the RAW accent — the same recipe as the deck's
+            // single-accent resolution (themedAccentFor).
+            stops.add(if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark))
             // Seam through the curated pair blend (saturation-boosted,
             // dead-zone steered) so the transition stays vivid rather than
-            // graying out. v7.5 — pastel mode softens the DEEP seam blends
-            // to their pastel twin so the whole sweep reads pastel end-to-end
-            // (the accent stops arrive already pastel via themedAccent()).
+            // graying out — already theme-resolved by mixedDeckAccent.
             if (i < 3 && i < distinct.size - 1) {
-                var seam = mixedDeckAccent(listOf(accent, distinct[i + 1]))
-                if (pastel) seam = pastelAccent(seam, false)
-                stops.add(seam)
+                stops.add(mixedDeckAccent(listOf(accent, distinct[i + 1]), pastel = pastel, dark = dark))
             }
         }
         return stops
@@ -674,80 +807,5 @@ object CurioMixedDeck {
             )
         }
     }
-
-    /**
-     * HSL midpoint blend along the shortest hue path with a small saturation
-     * boost — the premium way to mix two deep accents without a muddy middle.
-     *
-     * Uses local HSL conversion ([toHsl], [fromHsl]) built only on the bedrock
-     * RGBA channels of [Color], so the blend stays version-proof across the
-     * Compose BOM this project resolves (no hue/saturation/lightness
-     * accessors, which aren't part of that API surface).
-     */
-    private fun hslBlend(a: Color, b: Color): Color {
-        val ha = toHsl(a)
-        val hb = toHsl(b)
-        var dh = hb.h - ha.h
-        if (dh > 180f) dh -= 360f
-        if (dh < -180f) dh += 360f
-        val hue = ((ha.h + dh / 2f) + 360f) % 360f
-        // Boosted midpoint saturation keeps the blend vivid (naive averaging
-        // can drift toward gray when the endpoints differ in lightness).
-        val sat = ((ha.s + hb.s) / 2f + 0.05f).coerceIn(0f, 1f)
-        val light = (ha.l + hb.l) / 2f
-        return fromHsl(hue, sat, light)
-    }
-
-    /**
-     * Order-independent blend for 4+ accents (and the fallback for any
-     * unmapped pair/triple): circular mean of the hues, mean saturation with
-     * a small boost, then lightness steered to the brightest shade that still
-     * clears WCAG AA (4.5:1) against white — matching the curated tables.
-     *
-     * Pastel mode keeps the inputs' mean lightness (the accents are already
-     * pastel / muted pastel) instead of steering toward a deep shade that
-     * clears 4.5:1 against white — the white-label steering only applies to
-     * the deep accents.
-     */
-    private fun hslCentroid(colors: List<Color>, pastel: Boolean = false): Color {
-        val hs = colors.map { toHsl(it) }
-        val n = hs.size.toFloat()
-        var sx = 0f
-        var sy = 0f
-        var lightnessSum = 0f
-        for (h in hs) {
-            val rad = h.h * (kotlin.math.PI.toFloat() / 180f)
-            sx += kotlin.math.cos(rad)
-            sy += kotlin.math.sin(rad)
-            lightnessSum += h.l
-        }
-        val hue = (kotlin.math.atan2(sy, sx) * (180f / kotlin.math.PI.toFloat()) + 360f) % 360f
-        val sat = (hs.sumOf { it.s.toDouble() }.toFloat() / n + 0.05f).coerceIn(0f, 1f)
-        if (pastel) {
-            return fromHsl(hue, sat.coerceIn(0f, 1f), (lightnessSum / n).coerceIn(0f, 1f))
-        }
-        return steerLightness(hue, sat, 4.5f)
-    }
-
-    /** Brightest shade of (hue, sat) that still clears [target] contrast vs white. */
-    private fun steerLightness(hue: Float, sat: Float, target: Float): Color {
-        var lo = 0f
-        var hi = 1f
-        repeat(32) {
-            val mid = (lo + hi) / 2f
-            if (contrastVsWhite(fromHsl(hue, sat, mid)) >= target) lo = mid else hi = mid
-        }
-        return fromHsl(hue, sat, lo)
-    }
-
-    /** WCAG contrast ratio of [color] against white. */
-    private fun contrastVsWhite(color: Color): Float {
-        val l = 0.2126f * toLinear(color.red) + 0.7152f * toLinear(color.green) + 0.0722f * toLinear(color.blue)
-        return 1.05f / (l + 0.05f)
-    }
-
-    /** sRGB channel → linear light (WCAG relative luminance). */
-    private fun toLinear(c: Float): Float =
-        if (c <= 0.03928f) c / 12.92f else ((c + 0.055f) / 1.055f).pow(2.4f)
 
 }

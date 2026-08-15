@@ -401,6 +401,30 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v88 — dark-mode mixed colors fixed at the root (the "mixed colors are
+  bad" bug).** The curated `PairBlends`/`TripleBlends` tables are keyed on
+  the RAW researched accents, but the Spin caller pre-resolved every
+  accent to its theme shade (`themedAccent()`) — so in dark mode every
+  table lookup missed and mixes silently fell back to the HSL midpoint /
+  circular-hue centroid (foreign-hue swings, muddy olive midpoints).
+  `mixedDeckAccent`/`mixedDeckGradient` now take the RAW accents
+  (`CurioCategory.accent`) and resolve per theme inside: dark blends wear
+  the same `darkAccent` "new shade of the same spectrum" recipe as the
+  singles; dark-pastel seams resolve to the MUTED deep pastel (the old
+  hardcoded `pastelAccent(seam, false)` left airy LIGHT seams on dark
+  pastel decks). New local OKLab machinery (`toOklab`/`fromOklab`,
+  `oklabBlend`, `oklabCentroid`, `oklabGradientStops` — canonical
+  Ottosson matrices, version-proof like `toHsl`) replaces the HSL blend /
+  centroid fallbacks (perceptual mean) and the Spin + Reveal ticket
+  crown→base stops (perceptual interpolation; both screens stay
+  pixel-identical for the morph). `darkAccent` research-tuned:
+  near-grey neutrals (s<0.22) keep identity (no ×0.80 grey-out); the
+  saturation cap scales with source saturation (0.48+s·0.16, ceiling
+  0.62) so vivid families hold chroma at depth; the lime/yellow-green
+  band (55°–95°) remaps onto emerald (95°→150°) so dark limes read as
+  deep greens, never olive. Dead private HSL helpers removed
+  (`hslBlend`/`hslCentroid`/`steerLightness`/`contrastVsWhite`/
+  `toLinear`); `hslGradientStops` kept as documented public API.
 - **v87 — missed dark-mode spots sweep.** (1) Spin filter sheet chips +
   group pills: `inactiveFill` stayed `lerp(chipSurface,
   curioPillTintLift(), 0.5f)` — in dark that lifts toward the near-white

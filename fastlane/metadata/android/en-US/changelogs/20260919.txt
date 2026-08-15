@@ -4,6 +4,7 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a compact icon pill that matches the search pill's size and look.
 FIX
+- Dark mode: mixed-deck colors now blend the curated category mixes properly — no more muddy/olive mixed accents on black.
 - Dark mode: filter chips, picker tabs/presets, reveal like/dislike pills, progress pill and Save-your-take voice-note/quote rows now render dark-aware (readable text, proper pill shapes).
 - Dark mode: paper stat cards, streak pill, hero card, empty-state and quest claim pills now render with dark-aware fills and ink.
 - Category page: no more elevation flash on open; filter groups and chips stay raised in dark mode.

@@ -420,7 +420,30 @@ private fun lightSurfaceTint(accent: Color): Color =
  */
 internal fun darkAccent(color: Color): Color {
     val a = toHsl(color)
-    return fromHsl(a.h, (a.s * 0.80f).coerceAtMost(0.52f), 0.44f)
+    val s = a.s
+    // v87 — research-tuned dark shade (the dark-mode color-mix research):
+    //  - Near-grey neutrals (zinc/slate/stone, s < 0.22) keep their identity:
+    //    no further desaturation (they're already achromatic — the old ×0.80
+    //    just made them muddier) and a slightly deeper lightness so they read
+    //    as readable dark jewels on the black page.
+    //  - Vivid families hold richer chroma at depth: the flat 0.52 cap greyed
+    //    indigo/fuchsia/rose at L=0.44 — the cap now scales with the source
+    //    saturation (research: hold chroma at depth; only mid-saturation and
+    //    the yellow-green family need heavy desaturation). The 0.62 ceiling
+    //    still keeps everything under the "no neon on black" line.
+    //  - The yellow-green family (lime ~86°) is steered OFF the olive dead
+    //    zone: at dark lightness a desaturated lime reads olive/mud, so its
+    //    hue is pulled toward emerald and chroma held higher.
+    if (s < 0.22f) return fromHsl(a.h, s, 0.40f)
+    var hue = a.h
+    var sat = (s * 0.80f).coerceAtMost(0.48f + s * 0.16f)
+    if (hue in 55f..95f) {
+        // Remap the lime/yellow-green band onto emerald territory (95°→150°)
+        // so dark limes read as deep greens, never olive.
+        hue = 95f + (150f - 95f) * ((hue - 55f) / 40f)
+        sat = (sat * 1.10f).coerceAtMost(0.48f + s * 0.16f)
+    }
+    return fromHsl(hue, sat, 0.44f)
 }
 
 /** v81 — dark-mode CARD surface: the accent's hue at near-black lightness

@@ -138,6 +138,7 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.lightAccentTint
+import com.curio.app.ui.theme.oklabGradientStops
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -1708,7 +1709,9 @@ private fun HeroCard(
                 val stops = if (heroGradient.size > 2) {
                     listOf(crown) + heroGradient.drop(1).dropLast(1) + listOf(base)
                 } else {
-                    CurioGradients.hslGradientStops(crown, base, 3)
+                    // v87 — OKLab interpolation (same stops as the Spin ticket
+                    // so the shared-element morph stays pixel-identical).
+                    oklabGradientStops(crown, base, 3)
                 }
                 Brush.linearGradient(stops, start = Offset(0f, 0f), end = Offset(wPx, hPx))
             } else {

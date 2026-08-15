@@ -1,6 +1,68 @@
 # Prompt.md — Request log
 
-## Current request — missed dark-mode spots sweep (v87)
+## Current request — dark-mode mixed-color rework + One UI research (v88)
+
+### What was asked
+"the dark mode mixed colors they are bad like so much bad" — research how
+mixed/gradient colors should look in dark mode, adjust category shades per
+that research if needed, and suggest more Samsung One UI 9.5 style
+improvements.
+
+### Research (recorded in commit 9f887e5)
+- **OKLab is the interpolation gold standard** — perceptually uniform
+  lightness + hue-linear space (CSS Color 4 `color-mix(in oklab)`, Tailwind
+  migration #14955, Photoshop default). RGB lerp grays; HSL numeric
+  lightness swings hue; OKLab cube-root nonlinearity keeps both even.
+- **Dark-mode mixing numbers** — desaturate ~20 points, never run
+  100%-saturated accents on black, hold chroma richer at depth, keep WCAG
+  AA on fills, communicate elevation via luminance.
+- **Olive dead zone** (amber↔teal, sky↔amber) is a symptom of non-
+  perceptual interpolation — OKLab avoids it natively.
+
+### What was done
+1. **OKLab machinery in CurioColors.kt** — local `toOklab`/`fromOklab`
+   (canonical Ottosson matrices, version-proof like toHsl),
+   `oklabBlend` (perceptual pair midpoint), `oklabCentroid` (perceptual
+   mean), `oklabGradientStops` (perceptual gradient interpolation).
+2. **Root cause found: the curated tables never hit in dark.** The Spin
+   caller pre-resolved every accent to its dark shade
+   (`themedAccent()`), so the `PairBlends`/`TripleBlends` keys — the RAW
+   researched accents — always missed at night, silently falling back to
+   the HSL midpoint/centroid (foreign-hue swings, muddy olive midpoints).
+   `mixedDeckAccent`/`mixedDeckGradient` now take the RAW accents
+   (`CurioCategory.accent`) and resolve per theme inside: dark blends wear
+   the same `darkAccent` "new shade of the same spectrum" recipe as
+   singles; pastel pairs/triples keep `pastelAccent(blend, dark)`; the
+   4+ fallback is now `oklabCentroid` (perceptual) instead of the HSL
+   circular-hue mean.
+3. **Dark-pastel seam bug fixed** — the old gradient hardcoded
+   `pastelAccent(seam, false)` (LIGHT pastel) for pastel seams, so dark
+   pastel decks carried airy light seams; every stop + seam now resolves
+   per theme (muted deep pastel at night).
+4. **`darkAccent` research-tuned** (CategoryInk.kt) — near-grey neutrals
+   (zinc/slate/stone, s<0.22) keep their identity (no ×0.80 grey-out);
+   the flat 0.52 saturation cap now scales with source saturation
+   (0.48+s·0.16, ceiling 0.62) so indigo/fuchsia/rose hold richer chroma
+   at depth; the lime/yellow-green band (55°–95°) is remapped onto
+   emerald territory (95°→150°) so dark limes read as deep greens, never
+   olive.
+5. **Ticket + Reveal crown→base stops** now interpolate in OKLab
+   (`oklabGradientStops`, SpinScreen:2773 + TopicRevealScreen:1714,
+   pixel-identical to each other so the shared-element morph holds).
+6. **Dead HSL helpers removed** — `hslBlend`/`hslCentroid`/
+   `steerLightness`/`contrastVsWhite`/`toLinear` (private, now unused).
+   `hslGradientStops` kept as documented public API.
+
+### Validation
+All touched files balanced (Reveal keeps its pre-existing string-literal
+1-off, present in HEAD), no dangling `hslBlend`/`hslCentroid` refs,
+`git diff --check` clean. No Gradle locally — CI on push.
+
+### One UI 9.5 improvement suggestions (delivered in chat)
+See the closing message of this request — glass-edge treatment, blurple
+scheme, icon-only nav language, etc.
+
+## Prior — missed dark-mode spots sweep (v87)
 
 ### What was asked
 "spots that missed dark mode revamp" — the filter chips + group pills text,
