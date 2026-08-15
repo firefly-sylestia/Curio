@@ -129,13 +129,14 @@ fun PickerPresetChip(
         // (cream in light, a lighter glass in dark) instead of the old
         // surfaceVariant blend that melted into the tinted picker.
         // v38 — the light lift rises to 0.82 (neutral cream) so the pills
-        // separate from the pale pastel wash, and BOTH states carry a 3dp
-        // elevation.
+        // separate from the pale pastel wash.
+        // v98 — elevation flattened 3 → 2dp (the v27q selectable-chip
+        // standard) so the halo no longer reads as a shadow above the pill.
         color = if (selected) accent else resolvedIdleFill,
-        shadowElevation = 3.dp,
+        shadowElevation = 2.dp,
         modifier = Modifier
             // v28 — soft glow + top-lit shine.
-            .curioDarkGlow(3.dp, shape)
+            .curioDarkGlow(2.dp, shape)
             .categoryEdgeShine(shape, accent = accent)
     ) {
         Row(

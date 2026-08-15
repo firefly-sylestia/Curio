@@ -99,7 +99,6 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
-import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
@@ -1514,7 +1513,6 @@ private fun PinnedTopicRow(
 private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
     val cat = CurioCategories.byId(entry.topic.categoryId)
     // Solid category-tinted card — matches the recents topic rows.
-    val accent = cat.themedAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
@@ -1523,11 +1521,10 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
         shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // v88 — same dark pill style as the filter chips: glass edge +
-            // inner glow (curioDarkGlow is a retired no-op, so these rows
-            // read flat on the black page at night).
+            // v98 — dark pill: keep the previous colored fill + the pill
+            // shape; the white catch stays at the TOP EDGE only
+            // (curioGlassEdge) — the full-pill inner glow is gone.
             .curioGlassEdge(RoundedCornerShape(20.dp))
-            .curioInnerGlow(RoundedCornerShape(20.dp), accent, strength = 0.12f)
     ) {
         Row(
             modifier = Modifier
@@ -2109,11 +2106,10 @@ private fun ExploreTopicRow(
         shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // v88 — same dark pill style as the filter chips: glass edge +
-            // inner glow (curioDarkGlow is a retired no-op, so these rows
-            // read flat on the black page at night).
+            // v98 — dark pill: previous color + pill shape kept; the white
+            // catch stays at the TOP EDGE only (curioGlassEdge) — the
+            // full-pill inner glow is gone.
             .curioGlassEdge(rowShape)
-            .curioInnerGlow(rowShape, accent, strength = 0.12f)
     ) {
         Row(
             modifier = Modifier

@@ -401,6 +401,21 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v98 — tear-catch revert + dark pill polish.** (1) REVERTED the v94/v95
+  tear-hero light catches: `curioLightCatch` (light warm catch) +
+  `tornSeamLight` (dark torn-edge stroke) are removed from CurioGlassEffects
+  and the four hero call sites (Home quest banner, Detail hero, Spin filter
+  + category-picker sheets); the stale v94/v95 doc/changelog entries are
+  gone with them. (2) Home recents pills in dark: the FULL-PILL inner glow
+  is gone — `ExploreTopicRow` / `RecentEntryRow` keep the colored pill +
+  the `curioGlassEdge` top-edge white catch only (white no longer fills the
+  whole pill). (3) Category picker Original/New tabs + preset chips:
+  elevation flattened 3 → 2dp (the v27q selectable-chip standard) so the
+  shadow no longer reads as a halo above the pill (`PickerPageTab` +
+  `PickerPresetChip`; covers the full-screen picker AND the Spin sheet).
+  (4) `CurioProgressPill` (Topic Reveal + Detail + Cabinet) is WIDER:
+  horizontal padding 14 → 18dp so it reads as a proper pill instead of a
+  slim strip with the glow/shadow around it.
 - **v97 — Paper stat card on by default + Profile quests paper card + merged
   Edit profile.** (1) The "Paper stat card" experiment PASSED — default is now
   ON app-wide (`paperStatCardsState` true, `KEY_PAPER_STAT_CARDS` default

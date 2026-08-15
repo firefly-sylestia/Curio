@@ -12,6 +12,32 @@
 4. Progress pill (Topic Reveal + Detail): same shadow-visible issue and
    it needs to be a WIDER pill.
 
+### What was done
+1. **Reverts (3a4d6ff)** — both tear-hero catch commits reverted:
+   `curioLightCatch` (light warm catch) + `tornSeamLight` (dark torn-edge
+   stroke) removed from CurioGlassEffects.kt and the four hero call sites
+   (Home quest banner, Detail hero, Spin filter + category-picker sheets);
+   the stale v94/v95 entries were dropped from Prompt.md, app/AGENTS.md
+   and the store changelog (both reverts applied via `git revert`, docs
+   conflicts resolved by hand).
+2. **Home recents pills (dark)** — `curioInnerGlow` (the full-pill
+   white/accent fill) removed from `RecentEntryRow` + `ExploreTopicRow`;
+   they keep the colored fill + pill shape + `curioGlassEdge` (the 1%
+   whitish TOP-EDGE catch) only. Unused import + local removed.
+3. **Category picker tabs/presets** — `PickerPageTab` + `PickerPresetChip`
+   elevation flattened 3 → 2dp (the v27q selectable-chip standard) so the
+   ambient halo no longer reads as a shadow above the pill (both the
+   full-screen picker and the Spin sheet share these components).
+4. **Progress pill wider** — `CurioProgressPill` horizontal padding
+   14 → 18dp (Reveal badge + Detail + Cabinet share the component), so it
+   reads as a proper pill instead of a slim strip.
+
+### Validation
+`git diff --check` clean; paren/brace deltas vs HEAD = 0 on all four
+files; no dangling `curioInnerGlow` refs in HomeScreen, no 3dp elevation
+left in the pickers, `curioLightCatch`/`tornSeamLight` fully gone from the
+app code. No Gradle locally (env rule) — CI on push.
+
 ## Prior — Profile: paper card default + deglow quests + merged edit dialog (v97)
 
 ### What was asked
