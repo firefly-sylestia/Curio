@@ -273,6 +273,7 @@ fun EntryDetailScreen(
     // (the exact light-mode reversal).
     val heroCardInk = if (isCurioDarkTheme()) Color(0xFFEDE7DC) else Color(0xFF232A35)
     val heroSheetColor = if (isCurioDarkTheme()) Color(0xFF121316) else Color(0xFFFDFCF9)
+    val heroStart = CurioGradients.categoryCardFill(cat.headerAccent())
     // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
     // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,
     // see the meta card below), so the old translucent frost has no consumer.
@@ -339,7 +340,6 @@ fun EntryDetailScreen(
         // v27j — header fill depth: the hero wears a slightly darker painter
         // accent by default (toggle in Experiments → Paper & headers).
         val heroAccent = cat.headerAccent()
-        val heroStart = CurioGradients.categoryCardFill(heroAccent)
         // v7.28 — the hero is a SOLID category color, no gradient. The depth
         // comes from the torn-paper seam: the solid banner is clipped by a
         // seeded soft tear, ONE white sheet sits just behind it, and the

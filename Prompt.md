@@ -1,35 +1,23 @@
 # Prompt.md — Request log
 
-## Current request — detail fixes: dp CI error, theme-aware back/more, stat-card pane (v96)
+## Current request — fix detail screen CI compile error
 
 ### What was asked
-1. Fix the CI compile error (`Unresolved reference 'dp'` at
-   CurioGlassEffects.kt:130 — the v94 `tornSeamLight` used `1.5.dp.toPx()`
-   without importing `androidx.compose.ui.unit.dp`).
-2. "the 3 dot and back button in detail page is still white and not
-   matching the dark theme and light theme" — the back + more buttons sit
-   on a hardcoded WHITE frost plate (cream ink on white = washed out;
-   glaring on the black page).
-3. "its date type stat card doesnt match the style of the stat card from
-   home screen or profile" — the Date · Mood · Type meta card.
+Fix the CI failure in `EntryDetailScreen.kt`:
+`DetailStickyBar` passes `heroStart`, but the symbol was declared inside the
+scrolling content `Column` and was out of scope at the overlay call site.
 
 ### What was done
-1. Added `import androidx.compose.ui.unit.dp` to CurioGlassEffects.kt.
-2. `DetailStickyBar`'s frost plate is now THEME-AWARE: light = the hero
-   fill lifted toward the frosted glass (`lerp(heroFill, curioPillTintLift,
-   0.38)`, dark slate ink reads crisp); dark = a DARK hero-tinted glass
-   (`lerp(heroFill, Black, 0.30)`) so the light cream ink actually reads
-   (the reversed light-in-dark contract). Added a `heroFill` param passed
-   from the caller (`heroStart`) + the `curioPillTintLift` import.
-3. The meta card's default (non-paper) pane now uses the PROFILE stat-pane
-   recipe (user's choice): the hero fill lifted toward white 6→26%
-   (`lerp(heroStart, White, 0.06/0.26)`) instead of the old near-white
-   `heroSheetColor` blend that washed the card out; corner radius 18 → 20dp
-   to match Home/Profile. The paper-stat-card experiment path is untouched.
+Hoisted the existing `heroStart` calculation to the enclosing
+`EntryDetailScreen` scope and removed the now-duplicate inner declaration.
+This preserves the intended hero fill and makes it available to both the
+hero content and `DetailStickyBar`.
 
 ### Validation
-Balanced, `git diff --check` clean, `heroSheetColor` still referenced (6
-sites). No Gradle locally — CI on push.
+`git diff --check` passes. Gradle compilation was not run locally per the
+repository rule; CI should rerun `compileDebugKotlin` and
+`compileReleaseKotlin`.
+
 
 ## Prior — light warm catch on the unified tears (v95)
 
