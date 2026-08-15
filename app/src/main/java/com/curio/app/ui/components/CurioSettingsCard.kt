@@ -26,9 +26,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
-import com.curio.app.ui.theme.CurioColors
-import com.curio.app.ui.theme.curioPillTintLift
-import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.features.settings.settingsCardAccentInk
+import com.curio.app.features.settings.settingsCardChipTint
+import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.ui.theme.CurioIcon
 
 /**
@@ -59,15 +59,19 @@ fun CurioSettingsCard(
         // page. The step stays large enough that text (onSurface roles)
         // keeps its contrast in light, dark, pastel and AMOLED.
         // v42 — the background tint is COLOR-TINTED now: light/pastel cards
-        // carry a whisper of the brand rose ([curioPillTintLift]) instead of
-        // flat cream, and AMOLED cards lift to a soft GREY GLASS instead of
-        // pure black (raised grey plates, not black slabs).
+        // carry a whisper of the brand rose instead of flat cream, and AMOLED
+        // cards lift to a soft GREY GLASS instead of pure black (raised grey
+        // plates, not black slabs).
+        // v72 — the tint HUE follows the hero the page wears
+        // ([settingsCardTintLift]): the lane accent when the shared hero
+        // follows a Spin lane, the azure twin when the sky-azure hero is on,
+        // the rose otherwise — same strength as before, matching hue.
         color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
             lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color(0xFF2A2A2A), 0.55f)
         } else {
             lerp(
                 MaterialTheme.colorScheme.surfaceContainerLow,
-                curioPillTintLift(),
+                settingsCardTintLift(),
                 0.30f
             )
         },
@@ -95,17 +99,22 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
         // keeps the soft coral wash, and AMOLED keeps a muted coral glass
         // plate with coral ink instead of a neutral grey chip — the
         // settings/profile cards keep their color identity on black.
+        // v72 — the chip + glyph follow the hero the page wears
+        // ([settingsCardChipTint] / [settingsCardAccentInk]): lane accent
+        // under Adaptive Hero, the azure twin when the sky-azure hero is on,
+        // the rose otherwise — never a mismatched fixed coral.
         val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+        val chipTint = settingsCardChipTint()
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
-                    else CurioColors.CoralBlush.copy(alpha = 0.16f),
+            color = if (isAmoled) chipTint.copy(alpha = 0.22f)
+                    else chipTint.copy(alpha = 0.16f),
             modifier = Modifier.size(38.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 CurioIcon(
                     icon, null,
-                    tint = curioRoseInk(),
+                    tint = settingsCardAccentInk(),
                     size = 20.dp
                 )
             }
@@ -124,6 +133,7 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
 @Composable
 fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) {
     val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
+    val chipTint = settingsCardChipTint()
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(
@@ -131,12 +141,12 @@ fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () 
                     .size(38.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
-                        else CurioColors.CoralBlush.copy(alpha = 0.14f)
+                        if (isAmoled) chipTint.copy(alpha = 0.22f)
+                        else chipTint.copy(alpha = 0.14f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                CurioIcon(icon, null, tint = curioRoseInk(), size = 20.dp)
+                CurioIcon(icon, null, tint = settingsCardAccentInk(), size = 20.dp)
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.bodyLarge)

@@ -94,13 +94,17 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
+import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioPillTintLift
+import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
+import com.curio.app.ui.theme.readableLightInk
+import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.toHsl
 
 /** Fixed tear seed — every settings header tears in the SAME bold pattern
@@ -628,6 +632,69 @@ fun settingsReadableInk(fill: Color): Color {
             MaterialTheme.colorScheme.onSurface
         else -> pastelFillInk(fill)
     }
+}
+
+/**
+ * v72 — the option-card ACCENT INK for Profile/Settings icon glyphs,
+ * matched to the hero the page wears: when the shared hero follows a Spin
+ * lane (Adaptive Hero) this resolves the lane's readable category ink;
+ * when the sky-azure hero is on, an azure twin; otherwise the brand rose —
+ * so the option cards' icons always match the banner above them instead of
+ * staying fixed coral. Material/AMOLED keep the rose (their banners wear
+ * scheme roles, and the option cards' coral identity stays as today).
+ */
+@Composable
+fun settingsCardAccentInk(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ||
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return curioRoseInk()
+    }
+    heroLaneCategory()?.let { return it.categoryInk() }
+    if (AppPreferences.heroBlueState) {
+        // Light mode pins a deep azure twin of the airy pastel azure so the
+        // glyphs read on the cream card; dark mode uses the pale azure as
+        // ink exactly like the rose family ([curioRoseInk]).
+        return if (isCurioDarkTheme()) CurioColors.HomeAzure
+        else readableLightInk(CurioColors.HomeAzure)
+    }
+    return curioRoseInk()
+}
+
+/**
+ * v72 — the option-card CHIP hue (the icon-chip fill + card-tint family),
+ * matched to the hero the page wears (lane accent / sky-azure / brand
+ * coral). Dark mode resolves the lane's light twin so chips stay visible
+ * pale glass on midnight, mirroring how [CurioColors.CoralBlush] is used in
+ * dark today. The fill twin of [settingsCardAccentInk].
+ */
+@Composable
+fun settingsCardChipTint(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_MATERIAL ||
+        AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return CurioColors.CoralBlush
+    }
+    heroLaneCategory()?.let { return if (isCurioDarkTheme()) it.lightAccent else it.themedAccent() }
+    if (AppPreferences.heroBlueState) return CurioColors.HomeAzure
+    return CurioColors.CoralBlush
+}
+
+/**
+ * v72 — hero-aware twin of [curioPillTintLift] for the option cards: same
+ * construction and strength (AMOLED grey glass, dark white lift, light a
+ * whisper of the page background) but the tint resolves the HERO's accent
+ * ink instead of the fixed rose, so the card fill follows the banner hue.
+ */
+@Composable
+fun settingsCardTintLift(): Color {
+    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+        return Color(0xFF2A2A2A)
+    }
+    if (isCurioDarkTheme()) return Color.White
+    return lerp(
+        MaterialTheme.colorScheme.background,
+        settingsCardAccentInk(),
+        0.08f
+    )
 }
 
 /** Compact hub for the redesigned settings experience — the Profile-style

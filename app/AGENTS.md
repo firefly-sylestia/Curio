@@ -394,6 +394,25 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v72 — Settings/Profile option cards + icons follow the hero's color.**
+  The shared option-card primitives (`CurioSettingsCard` fill,
+  `CurioCardHeader` + `CurioSettingsRow` icon chips + glyphs) were
+  hardcoded ROSE (`curioPillTintLift` / `CoralBlush` chips /
+  `curioRoseInk` glyphs) while the hero wears the Spin lane's accent
+  (Adaptive Hero) or the sky-azure — so Profile/Settings option cards
+  never matched the banner. Three new hero-aware resolvers in
+  `SettingsHubScreen.kt` (next to the shared hero-family helpers):
+  `settingsCardAccentInk()` (glyph ink: lane → `categoryInk()`, azure →
+  deep azure twin in light / pale azure in dark, else rose),
+  `settingsCardChipTint()` (chip hue: lane → `themedAccent()` light /
+  `lightAccent` dark, azure, else coral — dark keeps the pale-glass
+  chip look), and `settingsCardTintLift()` (card-fill twin of
+  `curioPillTintLift`: same construction/strength, hue follows the
+  hero). `CurioSettingsCard.kt` now resolves all three through the
+  hero's hue, so Profile + Settings (and every screen sharing the
+  primitives — Support, Backup, Experiments, Quests) match the banner
+  in every theme. Material/AMOLED keep the rose (their banners wear
+  scheme roles — same gating as `settingsRoseAccent()`).
 - **v69 — universal mood-board import, editor/saved fit consistency,
   mood collapse-on-pick, chip-bar slide animation.** (1) **Mood-board
   import is now the ANDROID PHOTO PICKER** (`PickMultipleVisualMedia` +

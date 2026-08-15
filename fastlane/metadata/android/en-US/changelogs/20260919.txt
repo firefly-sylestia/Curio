@@ -34,6 +34,7 @@ FIX
 - Pet Designer auto-import, brush size and eye tools compile and run correctly.
 - Pet Designer eye size presets now visibly change the eyes (the old presets rounded back onto the same pixels and did nothing).
 - Settings and Profile hero icons follow the hero color in every theme, and the paper under the hero tear picks up its tint.
+- Settings and Profile option cards, their icon chips and glyphs now follow the hero's color too (Spin lane accent / sky-azure / rose) instead of staying fixed coral.
 - Search bars are pill-shaped across Settings, the Spin filter sheet and Topic History.
 - Spin filter sheet wears the app's tear-hero banner with a bigger category name and cleaner group margins.
 - Spin filter sheet: the tear hero now runs up to the status bar, the body wears the page watermark backdrop, and the category name reads even bigger.

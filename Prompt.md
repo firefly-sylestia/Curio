@@ -1,6 +1,44 @@
 # Prompt.md — Request log
 
-## Current request — pet designer: eye-size presets fixed + whole-pet size option (v71)
+## Current request — Settings/Profile option cards + icons follow the hero color (v72)
+
+### What was asked
+"in profile screen and setting screen, the background of the options not
+the main background, the background card the options sit on and the icons
+they have. well they don't match the hero color, it's always rose color...
+give me proper options so that i can point out you're correct and then
+you can continue your work"
+
+User chose: **Full match — cards + icons take the lane color; Always
+follow the hero's color.**
+
+### What was done
+1. **Root cause:** the shared option-card primitives
+   (`CurioSettingsCard` fill, `CurioCardHeader` + `CurioSettingsRow`
+   icon chips + glyphs) were hardcoded rose — `curioPillTintLift()` for
+   the card fill, `CoralBlush` chips with `curioRoseInk()` glyphs —
+   while the hero banner wears the Spin lane's accent (Adaptive Hero) or
+   the sky-azure, so the option cards never matched the hero.
+2. **Three new hero-aware resolvers in SettingsHubScreen.kt** (next to
+   the other shared hero-family helpers): `settingsCardAccentInk()`
+   (glyph ink: lane → `categoryInk()`, azure → deep azure twin in light /
+   pale azure in dark, else rose), `settingsCardChipTint()` (chip hue:
+   lane → `themedAccent()` light / `lightAccent` dark, azure, else coral
+   — dark keeps the pale-glass chip look), and `settingsCardTintLift()`
+   (card-fill twin of `curioPillTintLift`: identical construction and
+   strength, hue follows the hero). Material/AMOLED keep the rose — their
+   banners wear scheme roles, same gating as `settingsRoseAccent()`.
+3. **CurioSettingsCard.kt:** the card fill, header chip + glyph, and row
+   chip + glyph now resolve the hero's hue, so Profile + Settings (and
+   every screen sharing these primitives — Support, Backup, Experiments,
+   Quests) match the banner in every theme mode.
+
+### Validation
+Brace/paren balance on both edited files, `git diff --check` clean, no
+unused imports (CurioColors / curioRoseInk / curioPillTintLift removed
+from CurioSettingsCard.kt). No Gradle locally (env rule) — CI on push.
+
+## Prior — pet designer: eye-size presets fixed + whole-pet size option (v71)
 
 ### What was asked
 "the eye size in pet designer doesnt work, and also we can scale up the
