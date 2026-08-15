@@ -74,9 +74,15 @@ fun ScreenEntrance(content: @Composable () -> Unit) {
  * Dramatic screen entrance — scale up from 0.85 + fade in, with an elastic
  * spring for that premium "morph into view" feel. Use for hero screens:
  * Topic Reveal, Spin landing, Splash → Home.
+ *
+ * [bouncy] = false swaps the elastic (underdamped, ~5% overshoot) spring for
+ * a critically-damped one: dense GRID screens (the category pickers) use
+ * this so the cards + their shadows never visibly overshoot — the overshoot
+ * read as a brief "more elevated" shadow flash before settling.
  */
 @Composable
 fun MorphEntrance(
+    bouncy: Boolean = true,
     content: @Composable () -> Unit
 ) {
     // v7.94 — same first-frame fix as ScreenEntrance: start the morph on
@@ -91,7 +97,8 @@ fun MorphEntrance(
             )
         ) + scaleIn(
             initialScale = 0.85f,
-            animationSpec = CurioMotion.Springs.Elastic
+            animationSpec = if (bouncy) CurioMotion.Springs.Elastic
+                else CurioMotion.Springs.Deliberate
         ),
         content = { content() }
     )

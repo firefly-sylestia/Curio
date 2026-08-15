@@ -88,21 +88,36 @@ val deckPresets = listOf(
     DeckPreset("Clear", "close", emptyList(), clearAll = true)
 )
 
-/** Small pill chip for a quick-mix preset. */
+/**
+ * Small pill chip for a quick-mix preset.
+ *
+ * v83 — theme-aware + DYNAMIC colors like [com.curio.app.features.picker.PickerPageTab]:
+ * callers pass the selected fill / content inks from their context (banner
+ * ink on a tear hero, category accent on the wash). The preset glyph rides
+ * the same ink, so the icon color follows the selection state too.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickerPresetChip(
     label: String,
     glyph: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    accentInk: Color = MaterialTheme.colorScheme.onPrimary,
+    idleInk: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    idleFill: Color? = null
 ) {
     val shape = RoundedCornerShape(50)
+    val resolvedIdleFill = idleFill ?: lerp(
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        curioPillLift(),
+        0.82f
+    )
     Surface(
         onClick = onClick,
         shape = shape,
-        // v27q — selection reads as a SOLID primary fill with onPrimary
-        // content.
+        // v27q — selection reads as a SOLID accent fill with its content ink.
         // v33 — the UNselected pill is a proper raised pill that stands off
         // the category wash: it lifts clearly toward the page background
         // (cream in light, a lighter glass in dark) instead of the old
@@ -110,17 +125,12 @@ fun PickerPresetChip(
         // v38 — the light lift rises to 0.82 (neutral cream) so the pills
         // separate from the pale pastel wash, and BOTH states carry a 3dp
         // elevation.
-        color = if (selected) MaterialTheme.colorScheme.primary
-                else lerp(
-                    MaterialTheme.colorScheme.surfaceContainerHigh,
-                    curioPillLift(),
-                    0.82f
-                ),
+        color = if (selected) accent else resolvedIdleFill,
         shadowElevation = 3.dp,
         modifier = Modifier
             // v28 — soft glow + top-lit shine.
             .curioDarkGlow(3.dp, shape)
-            .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
+            .categoryEdgeShine(shape, accent = accent)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -131,14 +141,12 @@ fun PickerPresetChip(
                 name = glyph,
                 contentDescription = null,
                 size = 14.dp,
-                tint = if (selected) MaterialTheme.colorScheme.onPrimary
-                       else MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (selected) accentInk else idleInk
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = if (selected) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (selected) accentInk else idleInk
             )
         }
     }

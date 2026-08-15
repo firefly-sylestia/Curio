@@ -49,6 +49,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -62,7 +64,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -99,6 +104,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -139,7 +145,7 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
-import com.curio.app.ui.components.CurioSearchField
+import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -1166,8 +1172,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         modifier = Modifier.padding(vertical = 6.dp)
                     )
                     VerticalDeckButton(
+                        // v83 — the badge shows the total TOPICS matching the
+                        // selected filters (the filtered pool size), not how
+                        // many filter chips are ticked.
                         label = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
-                            "Filter · ${activeFilters.size + activeSubtypes.size}" else "Filter",
+                            "Filter · ${filteredPool.size}" else "Filter",
                         icon = CurioIcons.Search,
                         cat = deckCat,
                         selected = activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty(),
@@ -1280,7 +1289,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         BottomCta(
             cat = deckCat,
             mixedCount = if (isMixedDeck) mixedTopicCount else 1,
-            filterActiveCount = activeFilters.size + activeSubtypes.size,
+            // v83 — the total topics matching the selected filters.
+            filterActiveCount = filteredPool.size,
             vertical = extraCompact,
             onCategories = { showCategoryPicker = true },
             onFilter = { showFilters = true }
@@ -1807,13 +1817,56 @@ private fun FilterSheet(
                 }
             }
 
-            // ── v28 — filter search: narrow the chips live ──────────
-            CurioSearchField(
-                query = filterQuery,
-                onQueryChange = { filterQuery = it },
-                placeholder = "Search filters",
-                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 10.dp)
+            // ── v28 — filter search: narrow the chips live. v83 — matches
+            //    the Cabinet hero's search bar: a frosted category-glass pill
+            //    with ink-tinted icon / border / text / cursor, the colors
+            //    resolving DYNAMICALLY from the category (deep ink on the
+            //    frosted accent glass in light, light twin on the dark
+            //    frosted glass at night).
+            val searchGlass = lerp(filterHeroFill, Color.White, 0.30f)
+            val searchInk = cat.categoryInk()
+            OutlinedTextField(
+                value = filterQuery,
+                onValueChange = { filterQuery = it },
+                placeholder = {
+                    Text(
+                        "Search filters",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        color = searchInk.copy(alpha = 0.7f)
+                    )
+                },
+                leadingIcon = {
+                    CurioIcon(CurioIcons.Search, null, tint = searchInk, size = 20.dp)
+                },
+                trailingIcon = {
+                    if (filterQuery.isNotEmpty()) {
+                        IconButton(onClick = { filterQuery = "" }) {
+                            CurioIcon(
+                                CurioIcons.Close,
+                                "Clear search",
+                                tint = searchInk.copy(alpha = 0.85f),
+                                size = 20.dp
+                            )
+                        }
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(50),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, color = searchInk),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {}),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = searchGlass,
+                    unfocusedContainerColor = searchGlass,
+                    focusedBorderColor = searchInk.copy(alpha = 0.65f),
+                    unfocusedBorderColor = searchInk.copy(alpha = 0.40f),
+                    cursorColor = searchInk,
+                    focusedTextColor = searchInk,
+                    unfocusedTextColor = searchInk
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 10.dp)
             )
 
             val hasAny = filteredGroups.types.size > 1 ||
@@ -1917,14 +1970,12 @@ private fun FilterSheet(
                             effectiveGroup?.let { key ->
                                 val isSubtypeGroup = key == FilterGroupKey.TYPE
                                 Column(Modifier.fillMaxWidth()) {
-                                    // v70 — the section label clears the pill
-                                    // row above with its own top margin so the
-                                    // open group never reads cramped/offset.
-                                    SectionLabel(
-                                        key,
-                                        cat.themedAccent(),
-                                        Modifier.padding(top = 10.dp, bottom = 8.dp)
-                                    )
+                                    // v83 — the duplicate section label is
+                                    // GONE (the open pill already says which
+                                    // group is active); a small top spacer
+                                    // keeps the chips from cramming the pill
+                                    // row above.
+                                    Spacer(Modifier.height(10.dp))
                                     // v44 — the TYPE group is a FLOW row now,
                                     // not a fixed 2-column grid: a long subtype
                                     // takes its own full line and the next chip
@@ -2010,38 +2061,6 @@ private fun FilterSheet(
     }
 }
 
-/**
- * v70 — the open group's section label: a category-accent glyph + the
- * group name, sized to lead its chips below.
- */
-@Composable
-private fun SectionLabel(key: FilterGroupKey, accent: Color, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp)
-    ) {
-        CurioIcon(
-            name = key.glyph,
-            contentDescription = null,
-            tint = accent,
-            size = 20.dp
-        )
-        Text(
-            text = key.label,
-            // v61 — bigger section headers: 16sp ExtraBold with wider
-            // tracking so each group's label clearly outranks its chips.
-            // v70 — 17sp so the label reads alongside its new glyph.
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontSize = 17.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 0.3.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
 @Composable
 private fun CompactChip(
     label: String,
@@ -2082,16 +2101,21 @@ private fun CompactChip(
     // the sheet), each chip carries a small glyph, and the pills grew
     // again (16sp label + 16/11 padding).
     val inactiveFill = lerp(chipSurface, curioPillTintLift(), 0.5f)
+    val chipShape = RoundedCornerShape(50)
     Surface(
-        shape = RoundedCornerShape(50),
+        shape = chipShape,
         color = if (selected) accent else inactiveFill,
         // v38 — a visible 3dp lift in BOTH states (inactive included) so
         // the unselected chips read as raised pills, not flat tiles.
         shadowElevation = 3.dp,
         modifier = Modifier
             .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
-            .curioDarkGlow(3.dp, RoundedCornerShape(50))
-            .clip(RoundedCornerShape(50))
+            // v83 — dark elevation: the One UI glass edge (+ inner glow on
+            // the selected accent chip) reads the pill off the black sheet.
+            .curioDarkGlow(3.dp, chipShape)
+            .curioGlassEdge(chipShape)
+            .curioInnerGlow(chipShape, accent, strength = 0.12f)
+            .clip(chipShape)
             .clickable(onClick = onClick)
     ) {
         Row(
@@ -2227,13 +2251,19 @@ private fun FilterGroupPill(
         animationSpec = tween(280, easing = FastOutSlowInEasing),
         label = "filterGroupChevron"
     )
+    val pillShape = RoundedCornerShape(50)
     Surface(
-        shape = RoundedCornerShape(50),
+        shape = pillShape,
         color = if (open) accent else inactiveFill,
         shadowElevation = 3.dp,
         modifier = Modifier
-            .curioDarkGlow(3.dp, RoundedCornerShape(50))
-            .clip(RoundedCornerShape(50))
+            // v83 — dark elevation: black shadows are invisible on the black
+            // sheet, so the pill wears the One UI glass edge (+ inner glow
+            // on the accent-filled open state) to read raised off the page.
+            .curioDarkGlow(3.dp, pillShape)
+            .curioGlassEdge(pillShape)
+            .curioInnerGlow(pillShape, accent, strength = 0.12f)
+            .clip(pillShape)
             .clickable(onClick = onClick)
     ) {
         Row(
@@ -4112,7 +4142,10 @@ private fun CategoryPickerSheet(
     // v73 — the tear hero's height grows with the status-bar inset so the
     // banner fills the very top edge behind the status bar (the banner
     // content draws its own status-bar spacing).
-    val pickerHeroHeight = 118.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // v83 — the tear GREW (~184dp) to hold the Original/New tabs + the
+    // quick-mix presets inside the banner, so the deck controls ride the
+    // hero instead of sitting as a plain row on the wash below it.
+    val pickerHeroHeight = 184.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -4191,54 +4224,135 @@ private fun CategoryPickerSheet(
                             .align(Alignment.TopStart)
                             .padding(start = 14.dp, top = 10.dp)
                     )
-                    // Title + deck status chip, riding the banner (it
-                    // clears the status bar like every hero). v79 — the
-                    // title steps down to 28sp and wraps onto two lines
-                    // ("What are we / Exploring?"), and the mode-hint
-                    // subtitle is gone.
-                    Row(
+                    // Title + deck status chip + Original/New tabs + quick-mix
+                    // presets, ALL riding the banner (v83 — the tear grew to
+                    // hold them). v79 — the title steps down to 28sp and wraps
+                    // onto two lines ("What are we / Exploring?"), and the
+                    // mode-hint subtitle is gone.
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .statusBarsPadding()
-                            .padding(start = 20.dp, end = 14.dp, top = 10.dp, bottom = 18.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(start = 20.dp, end = 14.dp, top = 10.dp, bottom = 16.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "What are we\nExploring?",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = 28.sp,
-                                    lineHeight = 34.sp,
-                                    fontWeight = FontWeight.ExtraBold
-                                ),
-                                color = pickerHeroInk
-                            )
-                        }
-                        // Current category indicator — or selection count in
-                        // multi-select mode (hero glass pill).
-                        if (multiSelectMode) {
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = pickerHeroInk.copy(alpha = 0.16f)
-                            ) {
+                        // ── Title row: two-line title + status chip. ──
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (selectedSlugs.isEmpty()) "Select decks"
-                                    else "${selectedSlugs.size} selected",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = pickerHeroInk,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                    text = "What are we\nExploring?",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontSize = 28.sp,
+                                        lineHeight = 34.sp,
+                                        fontWeight = FontWeight.ExtraBold
+                                    ),
+                                    color = pickerHeroInk
                                 )
                             }
-                        } else {
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = pickerHeroInk.copy(alpha = 0.16f)
-                            ) {
-                                Text(
-                                    text = currentCat.displayName,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = pickerHeroInk,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                            // Current category indicator — or selection count
+                            // in multi-select mode (hero glass pill).
+                            if (multiSelectMode) {
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = pickerHeroInk.copy(alpha = 0.16f)
+                                ) {
+                                    Text(
+                                        text = if (selectedSlugs.isEmpty()) "Select decks"
+                                        else "${selectedSlugs.size} selected",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = pickerHeroInk,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                    )
+                                }
+                            } else {
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = pickerHeroInk.copy(alpha = 0.16f)
+                                ) {
+                                    Text(
+                                        text = currentCat.displayName,
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = pickerHeroInk,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        // ── Original / New page tabs on the banner (v83): the
+                        //    selected tab is a SOLID hero-ink pill with the
+                        //    banner's category color as its content; idle tabs
+                        //    are hero-glass — both dynamic to the category.
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            PickerPageTab(
+                                label = "Original",
+                                count = originalLanes.size,
+                                selected = pagerState.currentPage == 0,
+                                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
+                                accent = pickerHeroInk,
+                                accentInk = pickerHeroFill,
+                                idleInk = pickerHeroInk,
+                                idleFill = pickerHeroInk.copy(alpha = 0.16f)
+                            )
+                            PickerPageTab(
+                                label = "New",
+                                count = newLanes.size,
+                                selected = pagerState.currentPage == 1,
+                                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
+                                accent = pickerHeroInk,
+                                accentInk = pickerHeroFill,
+                                idleInk = pickerHeroInk,
+                                idleFill = pickerHeroInk.copy(alpha = 0.16f)
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        // ── Quick-mix preset chips on the banner (v83) — same
+                        //    ink-glass language; the preset glyph rides the ink.
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            deckPresets.forEach { preset ->
+                                val active = if (preset.clearAll) {
+                                    multiSelectMode && selectedSlugs.isEmpty()
+                                } else {
+                                    multiSelectMode &&
+                                        preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
+                                }
+                                PickerPresetChip(
+                                    label = preset.label,
+                                    glyph = preset.glyph,
+                                    selected = active,
+                                    accent = pickerHeroInk,
+                                    accentInk = pickerHeroFill,
+                                    idleInk = pickerHeroInk,
+                                    idleFill = pickerHeroInk.copy(alpha = 0.16f),
+                                    onClick = {
+                                        if (preset.clearAll) {
+                                            multiSelectMode = true
+                                            selectedSlugs = emptySet()
+                                        } else {
+                                            val lanes = preset.lanes(categories)
+                                            if (lanes.isNotEmpty()) {
+                                                val laneSlugs = lanes.map { it.id.routeSlug }.toSet()
+                                                multiSelectMode = true
+                                                // v27t — presets toggle: tapping
+                                                // the active preset again UNDOES
+                                                // it; a different preset replaces
+                                                // the whole selection.
+                                                selectedSlugs =
+                                                    if (active) selectedSlugs - laneSlugs else laneSlugs
+                                            }
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -4264,73 +4378,6 @@ private fun CategoryPickerSheet(
                     .widthIn(max = CurioContentMaxWidth)
             ) {
 
-                    // ── v27k — page tabs: Original lanes vs the New lanes ─
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        PickerPageTab(
-                            label = "Original",
-                            count = originalLanes.size,
-                            selected = pagerState.currentPage == 0,
-                            onClick = { scope.launch { pagerState.animateScrollToPage(0) } }
-                        )
-                        PickerPageTab(
-                            label = "New",
-                            count = newLanes.size,
-                            selected = pagerState.currentPage == 1,
-                            onClick = { scope.launch { pagerState.animateScrollToPage(1) } }
-                        )
-                        Spacer(Modifier.weight(1f))
-                    }
-
-                    // ── v27i — quick-mix preset chips (same row as the
-                    //    full-screen picker): tap to enter multi-select with
-                    //    exactly those lanes ticked, so the mix can be seen
-                    //    and adjusted before Mix — it never silently launches
-                    //    a deck you can't see.
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        deckPresets.forEach { preset ->
-                            val active = if (preset.clearAll) {
-                                multiSelectMode && selectedSlugs.isEmpty()
-                            } else {
-                                multiSelectMode &&
-                                    preset.lanes(categories).all { it.id.routeSlug in selectedSlugs }
-                            }
-                            PickerPresetChip(
-                                label = preset.label,
-                                glyph = preset.glyph,
-                                selected = active,
-                                onClick = {
-                                    if (preset.clearAll) {
-                                        multiSelectMode = true
-                                        selectedSlugs = emptySet()
-                                    } else {
-                                        val lanes = preset.lanes(categories)
-                                        if (lanes.isNotEmpty()) {
-                                            val laneSlugs = lanes.map { it.id.routeSlug }.toSet()
-                                            multiSelectMode = true
-                                            // v27t — presets toggle: tapping
-                                            // the active preset again UNDOES
-                                            // it (deselects its lanes); a
-                                            // different preset replaces the
-                                            // whole selection.
-                                            selectedSlugs =
-                                                if (active) selectedSlugs - laneSlugs else laneSlugs
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    }
-
                     // ── Tile grid filling the screen ────────────────
                     // v7.4 — the grid sits inside a WEIGHTED Box that is a
                     // DIRECT child of the sheet Column. Weight inside the
@@ -4345,7 +4392,10 @@ private fun CategoryPickerSheet(
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        MorphEntrance {
+                        // v83 — no-overshoot entrance: the elastic spring's
+                        // ~5% overshoot read as a brief "more elevated" card
+                        // shadow flash before settling.
+                        MorphEntrance(bouncy = false) {
                             HorizontalPager(
                                 state = pagerState,
                                 modifier = Modifier.fillMaxSize()
@@ -4446,8 +4496,11 @@ private fun CategoryPickerSheet(
                                 enabled = selectedSlugs.isNotEmpty(),
                                 shape = RoundedCornerShape(24.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                    // v83 — theme-aware: the Mix CTA wears the
+                                    // category's fill + ink (deep same-hue in
+                                    // dark, never pale rose + near-black ink).
+                                    containerColor = currentCat.themedButtonFill(),
+                                    contentColor = currentCat.themedButtonInk()
                                 ),
                                 modifier = Modifier.weight(1f)
                             ) {

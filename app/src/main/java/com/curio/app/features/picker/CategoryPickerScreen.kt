@@ -68,6 +68,10 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.curioPillLift
+import com.curio.app.ui.theme.onAccent
+import com.curio.app.ui.theme.themedAccent
+import com.curio.app.ui.theme.themedButtonFill
+import com.curio.app.ui.theme.themedButtonInk
 import kotlinx.coroutines.launch
 
 /**
@@ -332,6 +336,9 @@ fun CategoryPickerScreen(navController: NavController) {
                     label = preset.label,
                     glyph = preset.glyph,
                     selected = active,
+                    // v83 — dynamic category accent + ink (icon rides it).
+                    accent = washCat.themedAccent(),
+                    accentInk = washCat.onAccent(),
                     onClick = {
                         if (preset.clearAll) {
                             multiSelectMode = true
@@ -364,13 +371,19 @@ fun CategoryPickerScreen(navController: NavController) {
                 label = "Original",
                 count = originalLanes.size,
                 selected = pagerState.currentPage == 0,
-                onClick = { scope.launch { pagerState.animateScrollToPage(0) } }
+                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
+                // v83 — dynamic: the selected tab wears the wash category's
+                // accent (deep same-hue in dark, never the pale rose).
+                accent = washCat.themedAccent(),
+                accentInk = washCat.onAccent()
             )
             PickerPageTab(
                 label = "New",
                 count = newLanes.size,
                 selected = pagerState.currentPage == 1,
-                onClick = { scope.launch { pagerState.animateScrollToPage(1) } }
+                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
+                accent = washCat.themedAccent(),
+                accentInk = washCat.onAccent()
             )
             Spacer(Modifier.weight(1f))
             // v27i — the tap/hold hint moved here so the preset chips could
@@ -397,7 +410,10 @@ fun CategoryPickerScreen(navController: NavController) {
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            MorphEntrance {
+            // v83 — no-overshoot entrance: the elastic spring's ~5%
+            // overshoot read as a brief "more elevated" card shadow flash
+            // before settling on the category page.
+            MorphEntrance(bouncy = false) {
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
@@ -508,8 +524,11 @@ fun CategoryPickerScreen(navController: NavController) {
                     enabled = selectedSlugs.isNotEmpty(),
                     shape = mixShape,
                     colors = curioButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        // v83 — the Mix CTA wears the wash category's
+                        // theme-aware fill + ink (deep in dark, never the
+                        // pale rose with near-black content).
+                        containerColor = washCat.themedButtonFill(),
+                        contentColor = washCat.themedButtonInk()
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -551,21 +570,36 @@ fun CategoryPickerScreen(navController: NavController) {
  * full-screen picker and the Spin page's inline sheet share the same mixes.
  */
 
-/** Small page-tab pill for the Original / New pager. */
+/**
+ * Small page-tab pill for the Original / New pager.
+ *
+ * v83 — theme-aware + DYNAMIC colors: callers drive the selected fill and
+ * content inks from their context — the category banner's ink/fill when the
+ * tabs ride a tear hero, the category accent when they sit on the wash —
+ * instead of the fixed rose primary (which glared pale in dark mode).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickerPageTab(
     label: String,
     count: Int,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    accent: Color = MaterialTheme.colorScheme.primary,
+    accentInk: Color = MaterialTheme.colorScheme.onPrimary,
+    idleInk: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    idleFill: Color? = null
 ) {
     val shape = RoundedCornerShape(50)
+    val resolvedIdleFill = idleFill ?: lerp(
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        curioPillLift(),
+        0.82f
+    )
     Surface(
         onClick = onClick,
         shape = shape,
-        // v27q — selection reads as a SOLID primary fill with onPrimary
-        // content.
+        // v27q — selection reads as a SOLID accent fill with its content ink.
         // v33 — the UNselected tab is a proper raised pill that stands off
         // the category wash: it lifts clearly toward the page background
         // (cream in light, a lighter glass in dark) instead of the flat
@@ -573,17 +607,12 @@ fun PickerPageTab(
         // v38 — the light lift rises to 0.82 (neutral cream) so the tabs
         // separate from the pale pastel wash, and BOTH states carry a 3dp
         // elevation.
-        color = if (selected) MaterialTheme.colorScheme.primary
-                else lerp(
-                    MaterialTheme.colorScheme.surfaceContainerHigh,
-                    curioPillLift(),
-                    0.82f
-                ),
+        color = if (selected) accent else resolvedIdleFill,
         shadowElevation = 3.dp,
         modifier = Modifier
             // v28 — soft glow + top-lit shine.
             .curioDarkGlow(3.dp, shape)
-            .categoryEdgeShine(shape, accent = MaterialTheme.colorScheme.primary)
+            .categoryEdgeShine(shape, accent = accent)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -593,14 +622,13 @@ fun PickerPageTab(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (selected) accentInk else idleInk
             )
             Text(
                 text = "$count",
                 style = MaterialTheme.typography.labelMedium,
-                color = if (selected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                color = if (selected) accentInk.copy(alpha = 0.8f)
+                        else idleInk.copy(alpha = 0.7f)
             )
         }
     }

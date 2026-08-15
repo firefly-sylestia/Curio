@@ -1,6 +1,61 @@
 # Prompt.md — Request log
 
-## Current request — color-mix research for dark mode (v83)
+## Current request — filter sheet polish + category picker tear (v84)
+
+### What was asked
+"in filters the group pills below it says again which pill is active remove
+that text and keep proper spacing, and make the search bar match the one in
+cabinet screen with dynamic" + follow-up: "cabinet style frosted glass in
+place, and also if i select filter then in spin page instead of the total
+count of the no. of filters show the total number of topics with the
+selected filter, also in filters page give the groups and filters a
+elevation. and also in category page when i open the page for a moment the
+categories elevation or shadow like a more elevated one shows... fix that
+as well. and make the original and new and its preset be inside the tear by
+expanding the tear and also make those buttons theme aware. dynamic. and
+keep in mind about the icon color too."
+
+### What was done
+1. **Filter sheet search** — replaced the neutral `CurioSearchField` with a
+   Cabinet-hero-style `OutlinedTextField`: frosted category-glass container
+   (`lerp(filterHeroFill, White, 0.30)`), ink-tinted icon / border / text /
+   cursor / trailing clear, colors resolving DYNAMICALLY from the category
+   (`cat.categoryInk()` — deep in light, light twin in dark).
+2. **Duplicate group label removed** — the `SectionLabel` (glyph + group
+   name) under the open group pill was deleted; a 10dp top spacer keeps the
+   chips off the pill row.
+3. **Filter sheet elevation** — the group pills + filter chips already had
+   3dp shadows but black shadows are invisible on the black sheet in dark
+   (`curioDarkGlow` is a retired no-op): both now wear the One UI glass
+   edge + a soft inner glow on the accent-filled state, so they read
+   raised in dark.
+4. **Spin filter badge → topics count** — the Filter pill + BottomCta badge
+   now show `filteredPool.size` (total topics matching the selected
+   filters) instead of the number of ticked filter chips.
+5. **Category-page elevation flash** — `MorphEntrance`'s elastic spring
+   (damping 0.45) overshoots ~5%, so the cards + shadows briefly read
+   bigger/more elevated then settle. `MorphEntrance` gained a `bouncy =
+   false` option (critically-damped `Deliberate` spring); both category
+   pickers pass it.
+6. **Original/New tabs + presets inside the tear** (Spin picker sheet) —
+   the tear grew 118dp → 184dp (+ status bar) and now holds the title row,
+   the Original/New tabs and the quick-mix preset chips.
+7. **Theme-aware + dynamic buttons** — `PickerPageTab` + `PickerPresetChip`
+   gained `accent`/`accentInk`/`idleInk`/`idleFill` params. On the tear
+   they ride the banner ink/fill (selected = solid hero-ink pill with the
+   category color as content, idle = ink glass; the preset glyph rides the
+   ink too). The full-screen picker drives them from the wash category
+   (`washCat.themedAccent()`/`onAccent()`). Both Mix buttons now use
+   `themedButtonFill()`/`themedButtonInk()` instead of the pale rose
+   primary + near-black onPrimary (which glared in dark).
+
+### Validation
+All four touched files brace/paren-balanced, `git diff --check` clean, no
+duplicate imports, no dangling `SectionLabel`/`CurioSearchField` refs,
+other `MorphEntrance` callers compile (trailing lambda + default param).
+No Gradle locally (env rule) — CI on push.
+
+## Prior — color-mix research for dark mode (v83)
 
 ### What was asked
 "doo the color mix research" — the "mixed color shades" research from the

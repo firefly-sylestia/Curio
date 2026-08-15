@@ -401,6 +401,24 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v84 — filter sheet polish + category picker tear.** Filter sheet
+  search is now a Cabinet-hero-style `OutlinedTextField`: frosted
+  category-glass container + ink-tinted icon/border/text/cursor, colors
+  DYNAMIC per category (`cat.categoryInk()`); the duplicate `SectionLabel`
+  (glyph + group name) under the open group pill is gone (10dp spacer
+  keeps spacing); group pills + filter chips wear the One UI glass edge +
+  inner glow in dark (their 3dp shadows are invisible on the black sheet
+  — `curioDarkGlow` is a retired no-op); the Spin Filter pill + BottomCta
+  badge show `filteredPool.size` (total topics matching the selected
+  filters) instead of the ticked-chip count. `MorphEntrance` gained
+  `bouncy = false` (the elastic spring's ~5% overshoot read as a brief
+  "more elevated" shadow flash — both category pickers pass it). The Spin
+  picker sheet's tear GREW (118 → 184dp + status bar) to hold the
+  Original/New tabs + quick-mix presets inside the banner; `PickerPageTab`
+  + `PickerPresetChip` gained `accent`/`accentInk`/`idleInk`/`idleFill`
+  params so they ride the banner ink/fill (or the wash category in the
+  full-screen picker) — theme-aware + dynamic, preset glyphs included;
+  both Mix buttons use `themedButtonFill()`/`themedButtonInk()`.
 - **v82 — dark-mode audit: everything left light-only fixed.** Paper
   stat cards (`paperStatCardColor` → deep near-black paper in dark;
   `paperStatCardFill` gained a `dark` flag so the steel-ring back arcs /
