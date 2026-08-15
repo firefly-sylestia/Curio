@@ -1,6 +1,25 @@
 # Prompt.md — Request log
 
-## Current request — Settings/Profile option cards + icons follow the hero color (v72)
+## Current request — filter-sheet group pills carry their group icons (v73)
+
+### What was asked
+"Give the Spin filter sheet group pills (Type/Genres/Era/Origin/Franchise)
+the same per-group icons as their labels"
+
+### What was done
+The v70 section labels already wore a per-group glyph (`FilterGroupKey.glyph`:
+category / style / history / public / movie), but the accordion PILLS
+(`FilterGroupPill`) were label + badge + chevron only. The pill now leads
+with the same glyph (accent-tinted when closed — the SectionLabel's icon
+look — content `ink` when open on the accent fill), and the row's start
+padding trimmed 20 → 18dp so the icon sits comfortably. Call site passes
+`glyph = key.glyph`.
+
+### Validation
+Brace/paren balance clean (541/541, 2002/2002), `git diff --check` clean.
+No Gradle locally (env rule) — CI on push.
+
+## Prior — Settings/Profile option cards + icons follow the hero color (v72)
 
 ### What was asked
 "in profile screen and setting screen, the background of the options not

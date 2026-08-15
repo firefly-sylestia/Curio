@@ -39,6 +39,7 @@ FIX
 - Spin filter sheet wears the app's tear-hero banner with a bigger category name and cleaner group margins.
 - Spin filter sheet: the tear hero now runs up to the status bar, the body wears the page watermark backdrop, and the category name reads even bigger.
 - Spin filter sheet: group labels (Type · Genres · Era · Origin · Franchise) carry their own icons with cleaner margins, and the redundant active-filters strip is removed.
+- Spin filter sheet: the Type · Genres · Era · Origin · Franchise group pills now lead with the same per-group icons as their labels.
 - Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
 - Mood board images import through the universal Android photo picker.
 - The mood board editor now shows exactly what the saved entry shows — no more resizing or layout jumps between editing and the detail view.

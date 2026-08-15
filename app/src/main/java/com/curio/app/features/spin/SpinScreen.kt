@@ -1889,6 +1889,7 @@ private fun FilterSheet(
                             }
                             FilterGroupPill(
                                 label = key.label,
+                                glyph = key.glyph,
                                 open = effectiveGroup == key,
                                 selectedCount = selectedCount,
                                 accent = cat.themedAccent(),
@@ -2199,15 +2200,18 @@ private fun filterChipIcon(label: String): String {
 }
 
 /**
- * v33 — accordion group pill for the filter sheet: the group name, a badge
- * with how many selections live inside, and a chevron that flips as the
- * group expands/collapses. Open groups wear the category accent; closed
- * pills are the same raised neutral as the filter chips, so the pill row
- * stands off the wash in every theme.
+ * v33 — accordion group pill for the filter sheet: the group's glyph, the
+ * group name, a badge with how many selections live inside, and a chevron
+ * that flips as the group expands/collapses. Open groups wear the category
+ * accent; closed pills are the same raised neutral as the filter chips, so
+ * the pill row stands off the wash in every theme. v72 — the pill leads
+ * with the group's own glyph (same one its section label wears): accent-
+ * tinted when closed, content ink when open.
  */
 @Composable
 private fun FilterGroupPill(
     label: String,
+    glyph: String,
     open: Boolean,
     selectedCount: Int,
     accent: Color,
@@ -2238,10 +2242,16 @@ private fun FilterGroupPill(
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(start = 20.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
+            modifier = Modifier.padding(start = 18.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(7.dp)
         ) {
+            CurioIcon(
+                glyph,
+                null,
+                tint = if (open) ink else accent,
+                size = 20.dp
+            )
             Text(
                 text = label,
                 // v61 — group pills grow with the chips: 17sp label, roomier

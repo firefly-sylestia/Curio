@@ -394,6 +394,13 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v73 — filter-sheet group pills wear their group glyphs.** The
+  accordion pills in Spin's `FilterSheet` (`FilterGroupPill` — Type /
+  Genres / Era / Origin / Franchise) now lead with the same per-group
+  glyph their section labels wear (`FilterGroupKey.glyph`: category /
+  style / history / public / movie — accent-tinted when closed, content
+  `ink` when open), with the row start padding trimmed 20 → 18dp to sit
+  the icon comfortably.
 - **v72 — Settings/Profile option cards + icons follow the hero's color.**
   The shared option-card primitives (`CurioSettingsCard` fill,
   `CurioCardHeader` + `CurioSettingsRow` icon chips + glyphs) were
