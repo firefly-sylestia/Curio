@@ -394,6 +394,19 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v77 — hero back buttons are OPAQUE theme-aware pills.** The settings-
+  family heroes' back pills were the last translucent holdout
+  (`symbolTint.copy(alpha = 0.18f)` in `SettingsHeroHeader` — Settings hub
+  + every sub page — and `ink.copy(alpha = 0.18f)` in Topic History),
+  while the hero ACTION pills had already been converted to an opaque
+  fill in v27n (`lerp(backdrop, curioPillTintLift(), 0.38f)`). Both back
+  buttons now use that exact construction: `containerColor =
+  lerp(fill, curioPillTintLift(), 0.38f)` (theme-aware: rose-kissed page
+  lift in light, white in dark, grey glass in AMOLED) +
+  `shadowElevation = 3.dp`, glyph keeps the hero's readable ink. The
+  default `surfaceVariant` pill (BugReport / Category Picker / FieldMind /
+  SaveCapture), Profile's solid hero-fill pill and the detail page's
+  near-opaque frosted sticky plate are untouched.
 - **v76 — detail page Date · Mood · Session · Type card wears an opaque
   theme-aware pane.** `EntryDetailScreen`'s hero meta card (Date · Mood ·
   Session · Type grid) default fill was FROSTED glass (a translucent

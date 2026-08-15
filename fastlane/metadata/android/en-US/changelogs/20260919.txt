@@ -43,6 +43,7 @@ FIX
 - Spin category picker: the tear hero now runs up to the status bar, the close button is gone (swipe down to dismiss), and the deck hint reads "Tap a deck to spin it. Hold to pick several."
 - Home stat card (Streak · Cabinet · Topics) is now an opaque, theme-aware pane like Profile's instead of a transparent wash.
 - The saved-entry detail page's Date · Mood · Session · Type card is an opaque theme-aware pane too, with proper elevation.
+- Settings, its sub pages and Topic History back buttons are now opaque theme-aware pills (no more see-through glass).
 - Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
 - Mood board images import through the universal Android photo picker.
 - The mood board editor now shows exactly what the saved entry shows — no more resizing or layout jumps between editing and the detail view.

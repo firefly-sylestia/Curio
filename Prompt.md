@@ -1,6 +1,32 @@
 # Prompt.md — Request log
 
-## Current request — detail page Date · Mood · Session · Type card: opaque theme-aware pane (v76)
+## Current request — back buttons: opaque theme-aware pills (v77)
+
+### What was asked
+"the back button in settings and its sub pages and in many page are
+transparent so fix that by using the same non transparent theme aware type"
+
+### What was done
+1. **Root cause:** the settings-family heroes' back pills were the last
+   translucent holdout — `symbolTint.copy(alpha = 0.18f)` (Settings hub +
+   every sub page via `SettingsHeroHeader`) and `ink.copy(alpha = 0.18f)`
+   (Topic History) — while the hero ACTION pills were already converted to
+   an OPAQUE fill in v27n (`lerp(backdrop, curioPillTintLift(), 0.38f)`).
+2. **Fix:** both back buttons now use the action-pill construction
+   exactly: `containerColor = lerp(fill, curioPillTintLift(), 0.38f)`
+   (theme-aware: rose-kissed page lift in light, white lift in dark, grey
+   glass in AMOLED) + `shadowElevation = 3.dp` so they read raised like
+   the pills beside them. Glyph keeps the hero's readable ink.
+3. Unchanged: the default `surfaceVariant` pill (BugReport / Category
+   Picker / FieldMind / SaveCapture), Profile's solid hero-fill pill, and
+   the detail page's near-opaque frosted sticky plate (deliberate design).
+
+### Validation
+Brace/paren balance clean (SettingsHub 172/172 + 547/547, TopicHistory
+148/148 + 355/355), no `copy(alpha = 0.18f)` left, `git diff --check`
+clean. No Gradle locally (env rule) — CI on push.
+
+## Prior — detail page Date · Mood · Session · Type card: opaque theme-aware pane (v76)
 
 ### What was asked
 "do the same with the detail page date type that stat card"

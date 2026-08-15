@@ -271,8 +271,16 @@ fun SettingsHeroHeader(
                     ) {
                         CurioBackButton(
                             onClick = onBack,
-                            containerColor = symbolTint.copy(alpha = 0.18f),
+                            // v76 — OPAQUE theme-aware pill, the same fill the
+                            // hero action pills wear ([SettingsHeroActionPill]'s
+                            // v27n opaque conversion): the old 18% ink glass
+                            // read transparent on the banner; the opaque lerp
+                            // of the banner fill toward the theme-aware lift
+                            // resolves to the same perceived tint with a clean
+                            // elevation shadow.
+                            containerColor = lerp(fill, curioPillTintLift(), 0.38f),
                             contentColor = symbolTint,
+                            shadowElevation = 3.dp,
                             disableRipple = true
                         )
                         if (searchActive) {

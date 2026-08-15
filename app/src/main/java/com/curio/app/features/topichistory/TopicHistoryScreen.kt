@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -71,6 +72,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
@@ -526,8 +528,14 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
                     ) {
                         CurioBackButton(
                             onClick = onBack,
-                            containerColor = ink.copy(alpha = 0.18f),
+                            // v76 — OPAQUE theme-aware pill, the same fill the
+                            // settings-family hero pills wear: the old 18% ink
+                            // glass read transparent; the opaque lerp of the
+                            // banner fill toward the theme-aware lift keeps
+                            // the same perceived tint with a clean shadow.
+                            containerColor = lerp(fill, curioPillTintLift(), 0.38f),
                             contentColor = ink,
+                            shadowElevation = 3.dp,
                             disableRipple = true
                         )
                     }
