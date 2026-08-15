@@ -1,6 +1,30 @@
 # Prompt.md — Request log
 
-## Current request — dark-mode mixed-color rework + One UI research (v88)
+## Current request — recents pills get the dark pill style (v89)
+
+### What was asked
+"apply that same pill style in dark mode to the recent topics pills" — the
+Home recently-explored topic rows should wear the same dark-mode glass-edge
++ inner-glow treatment as the filter chips / progress pills.
+
+### What was done
+`ExploreTopicRow` (recently explored / unexplored) and `RecentEntryRow` (the
+compact recent-entry sibling, same design family) still used the RETIRED
+no-op `curioDarkGlow` — so at night they rendered flat on the black page
+(only the invisible black Surface shadow). Both now wear the same dark pill
+recipe as the filter chips: `curioGlassEdge` (the 1% whitish top-edge
+catch) + `curioInnerGlow` at strength 0.12 (the accent's light twin pushed
+in from the top-left, clipped to the 20dp shape), with the themed accent
+as the glow hue. Light mode untouched (both modifiers are dark-only
+no-ops). Other `curioDarkGlow` sites (stat cards, session card, stop
+button, tag chips) intentionally left — not the recents pill family.
+
+### Validation
+Balanced, `themedAccent` already imported, `curioDarkGlow` import still
+needed (5 call sites remain), `git diff --check` clean. No Gradle locally
+— CI on push.
+
+## Prior — dark-mode mixed-color rework + One UI research (v88)
 
 ### What was asked
 "the dark mode mixed colors they are bad like so much bad" — research how

@@ -98,6 +98,8 @@ import com.curio.app.data.TourController
 import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioGlassEdge
+import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.formatSessionShort
@@ -1512,6 +1514,7 @@ private fun PinnedTopicRow(
 private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
     val cat = CurioCategories.byId(entry.topic.categoryId)
     // Solid category-tinted card — matches the recents topic rows.
+    val accent = cat.themedAccent()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
@@ -1520,8 +1523,11 @@ private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
         shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // v28 — dark mode elevation visibility (glow + hairline).
-            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
+            // v88 — same dark pill style as the filter chips: glass edge +
+            // inner glow (curioDarkGlow is a retired no-op, so these rows
+            // read flat on the black page at night).
+            .curioGlassEdge(RoundedCornerShape(20.dp))
+            .curioInnerGlow(RoundedCornerShape(20.dp), accent, strength = 0.12f)
     ) {
         Row(
             modifier = Modifier
@@ -2094,16 +2100,20 @@ private fun ExploreTopicRow(
     // Solid category-tinted card — the recents topics wear a solid
     // background in their category's color family (matching the gradient
     // identity), instead of a backgroundless row.
+    val rowShape = RoundedCornerShape(20.dp)
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
+        shape = rowShape,
         color = category.categorySurface(),
         // v27u — recents rows sit on a soft 2dp lift.
         shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // v28 — dark mode elevation visibility (glow + hairline).
-            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
+            // v88 — same dark pill style as the filter chips: glass edge +
+            // inner glow (curioDarkGlow is a retired no-op, so these rows
+            // read flat on the black page at night).
+            .curioGlassEdge(rowShape)
+            .curioInnerGlow(rowShape, accent, strength = 0.12f)
     ) {
         Row(
             modifier = Modifier

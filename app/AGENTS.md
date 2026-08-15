@@ -401,6 +401,18 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v89 — Home recents rows get the dark pill style.** `ExploreTopicRow`
+  (recently explored / unexplored) and its compact sibling `RecentEntryRow`
+  still chained the RETIRED no-op `curioDarkGlow` (identity, draws
+  nothing) — so on the pitch-black page the only shadow was the Surface's
+  black `shadowElevation` (invisible) and the rows read flat. Both now
+  wear the same dark pill recipe as the filter chips:
+  `curioGlassEdge(shape)` (the 1% whitish top-edge catch) +
+  `curioInnerGlow(shape, themedAccent, strength = 0.12f)` (the accent's
+  light twin pushed in from the top-left, clipped to the 20dp shape),
+  dark-only no-ops in light. Other `curioDarkGlow` sites (stat cards,
+  session card, stop button, tag chips) left as-is — not the recents pill
+  family.
 - **v88 — dark-mode mixed colors fixed at the root (the "mixed colors are
   bad" bug).** The curated `PairBlends`/`TripleBlends` tables are keyed on
   the RAW researched accents, but the Spin caller pre-resolved every
