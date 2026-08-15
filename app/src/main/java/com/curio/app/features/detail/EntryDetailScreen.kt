@@ -144,8 +144,6 @@ import com.curio.app.ui.components.MoodBoardTiles
 import com.curio.app.ui.components.MoodBoardZoomOverlay
 import com.curio.app.ui.components.QuoteLimits
 import com.curio.app.ui.components.curioDarkGlow
-import com.curio.app.ui.components.curioLightCatch
-import com.curio.app.ui.components.tornSeamLight
 import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.limitQuoteContent
 import com.curio.app.ui.components.rememberMoodBoardZoomState
@@ -443,10 +441,6 @@ fun EntryDetailScreen(
                     .height(EntryDetailHeroHeight)
                     .clip(heroTornShape)
                     .background(heroStart)
-                    // v94 — the LIGHT warm catch (lit-from-above).
-                    .curioLightCatch(heroTornShape)
-                    // v93 — the One UI torn-edge light catch (dark only).
-                    .tornSeamLight(heroTornShape)
             ) {
                 // ── Hero watermark — a scatter of the entry's category-family
                 //     symbols (instruments for Music, camera kit for Movies,

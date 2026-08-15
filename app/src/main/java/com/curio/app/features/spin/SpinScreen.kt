@@ -142,8 +142,6 @@ import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioGlassEdge
-import com.curio.app.ui.components.curioLightCatch
-import com.curio.app.ui.components.tornSeamLight
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
@@ -1769,10 +1767,6 @@ private fun FilterSheet(
                                 listOf(filterHeroFill, lerp(filterHeroFill, Color.Black, 0.08f))
                             )
                         )
-                        // v94 — the LIGHT warm catch (lit-from-above).
-                        .curioLightCatch(filterHeroTorn)
-                        // v93 — the One UI torn-edge light catch (dark only).
-                        .tornSeamLight(filterHeroTorn)
                 ) {
                     // Watermark glyphs — a large category symbol peeking
                     // from the corner + a small twin, both in the hero ink.
@@ -4251,10 +4245,6 @@ private fun CategoryPickerSheet(
                                 listOf(pickerHeroFill, lerp(pickerHeroFill, Color.Black, 0.08f))
                             )
                         )
-                        // v94 — the LIGHT warm catch (lit-from-above).
-                        .curioLightCatch(pickerHeroTorn)
-                        // v93 — the One UI torn-edge light catch (dark only).
-                        .tornSeamLight(pickerHeroTorn)
                 ) {
                     // Watermark glyphs — a large category symbol peeking
                     // from the corner + a small twin, both in the hero ink.

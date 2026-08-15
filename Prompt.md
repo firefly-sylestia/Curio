@@ -1,6 +1,18 @@
 # Prompt.md — Request log
 
-## Current request — Profile: paper card default + deglow quests + merged edit dialog (v97)
+## Current request — revert tear catches + dark pill polish (v98)
+
+### What was asked
+1. Revert 023d21b (light warm catch on the tears) and 37531ae (torn-edge
+   light catch on the tears).
+2. Home recents pill in dark mode: keep the pill shape + previous color,
+   white only at the TOP EDGE (a little catch), not inside the whole pill.
+3. Category picker Original/New + presets: the shadow shows too much at
+   the top, visible behind them — fix.
+4. Progress pill (Topic Reveal + Detail): same shadow-visible issue and
+   it needs to be a WIDER pill.
+
+## Prior — Profile: paper card default + deglow quests + merged edit dialog (v97)
 
 ### What was asked
 1. In the Profile screen, remove the glowing gradient treatment for the
@@ -43,56 +55,6 @@ refs to the old dialog params; verified `paperStatCardFill`/
 `paperStatCardColor`/`TornStatPaperShape`/`settingsCardTintLift` signatures
 against their definitions. No Gradle locally (env rule) — CI on push.
 
-
-## Prior — light warm catch on the unified tears (v95)
-
-### What was asked
-"continue" — keep going with the One UI 9.5 improvement list.
-
-### What was done
-New `Modifier.curioLightCatch(shape, strength = 0.10f)` in
-CurioGlassEffects.kt: a soft warm-white gradient along the banner's top
-edge fading down ~45% — the LIGHT-mode "lit from above" catch (the light
-twin of the dark `curioGlassEdge` + `tornSeamLight`). Light only, no-op in
-dark. Applied to the four unified tears: Home quest banner, Detail hero,
-Spin filter sheet hero, Spin category-picker hero — each banner now reads
-as catching warm light in light mode and the shiny edge + seam light at
-night.
-
-Skipped after investigation: icon-only tab bar (3 short labels — nothing
-to gain), nav content-fade "blurple" (the scaffold pads content above the
-bar — no overlap to fade; would need a scaffold restructure), soft accent
-card gradients (already shipped — tint wash is on by default, so light
-cards already end on the accent-tinted tone).
-
-### Validation
-Balanced, `git diff --check` clean, imports added. No Gradle locally — CI
-on push (committed but NOT pushed per the standing user instruction).
-
-## Prior — torn-edge light catch on the unified tears (v94)
-
-### What was asked
-"continue" — keep going with the One UI 9.5 improvement list.
-
-### What was done
-New `Modifier.tornSeamLight(shape, strength = 0.10f)` in
-CurioGlassEffects.kt: a faint 1.5px white stroke tracing the hero's torn
-outline (dark only, no-op in light) — the "shiny edge" language on the
-ragged seam, not a border. The stroke follows the closed outline; on the
-full-bleed tear heroes the top/side strokes hide under the status bar /
-screen edges, so the visible catch is the torn bottom edge. Applied to all
-four unified tears: Home quest banner, Detail hero, Spin filter sheet hero,
-Spin category-picker hero.
-
-Skipped: spin-button inner glow (already present since v81), active lane
-chip glow (the Spin lane chip bar no longer exists — Categories/Filter
-pills replaced it), rounded-square sheets (intentionally flush so the tear
-hero fills the top edge — would conflict).
-
-### Validation
-Balanced, `git diff --check` clean, imports added in the three screens.
-No Gradle locally — CI on push (this change is committed but NOT pushed
-per the standing user instruction).
 
 ## Prior — One UI light glass + shiny ticket edge + tinted shadows (v93)
 

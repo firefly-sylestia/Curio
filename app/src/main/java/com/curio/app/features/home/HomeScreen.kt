@@ -99,8 +99,6 @@ import com.curio.app.data.formatElapsed
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
-import com.curio.app.ui.components.curioLightCatch
-import com.curio.app.ui.components.tornSeamLight
 import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
@@ -434,11 +432,6 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(HomeQuestHeroHeight)
-                        // v94 — the LIGHT warm catch (lit-from-above).
-                        .curioLightCatch(heroTornShape)
-                        // v93 — the One UI torn-edge light catch: a faint
-                        // light rim tracing the ragged seam (dark only).
-                        .tornSeamLight(heroTornShape)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         // v27 — experimental paper accents (OFF by default;

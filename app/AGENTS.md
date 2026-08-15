@@ -433,26 +433,6 @@ app/src/main/java/com/curio/app/
   `lerp(heroStart, White, 0.06/0.26)` instead of the near-white
   `heroSheetColor` blend; corner 18 → 20dp. Paper experiment path
   untouched.
-- **v95 — light warm catch on the unified tears.** New
-  `Modifier.curioLightCatch(shape, strength = 0.10f)`
-  (CurioGlassEffects.kt): a soft warm-white top-edge gradient fading down
-  ~45% — the LIGHT-mode "lit from above" catch, the light twin of the dark
-  `curioGlassEdge` + `tornSeamLight`. Light only, no-op in dark. Applied
-  to the four unified tears: Home quest banner, Detail hero, Spin filter
-  sheet hero, Spin category-picker hero. (Skipped: icon-only tab bar — 3
-  short labels; nav content fade — the scaffold pads content above the
-  bar so there is no overlap; card mid-tone gradients — already shipped
-  via the default-on tint wash.)
-- **v94 — torn-edge light catch.** New `Modifier.tornSeamLight(shape,
-  strength = 0.10f)` (CurioGlassEffects.kt): a faint 1.5px white stroke
-  tracing the hero's torn outline — dark only, no-op in light — so the
-  ragged seam reads as catching light (the shiny-edge language on the
-  tear, not a border). Applied to all four unified tears: Home quest
-  banner, Detail hero, Spin filter sheet hero, Spin category-picker hero.
-  On the full-bleed heroes the top/side strokes hide under the status bar
-  / screen edges, so the visible catch is the torn bottom edge. (Spin
-  button glow was already present; the lane chip bar no longer exists;
-  sheets stay intentionally flush for the tear heroes.)
 - **v93 — One UI light glass + shiny ticket edge + tinted shadows.** (1)
   `curioPillTintLift()` LIGHT value: was `lerp(background, curioRoseInk(),
   0.08)` (cream) — now `lerp(Color.White, curioRoseInk(), 0.10)` (rose-
