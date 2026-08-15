@@ -37,6 +37,7 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 
@@ -64,9 +65,9 @@ fun CurioHeroShuffleCard(
 ) {
     var pressed by remember { mutableStateOf(false) }
     val isWildcard = wildcardSelected || selectedCategory?.id == CategoryId.WILDCARD
-    // v78 — light Curio only (the Material/AMOLED scheme-primary accent is
-    // gone with those styles).
-    val themeAccent = CurioColors.CoralBlush
+    // v81 — the wildcard hero fill: the pale coral in light, its deep
+    // same-hue dark twin on the pitch-black page (never the light shade).
+    val themeAccent = if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush
     val activeAccent: Color = when {
         isWildcard -> themeAccent
         selectedCategory != null -> selectedCategory.themedAccent()
@@ -78,6 +79,9 @@ fun CurioHeroShuffleCard(
     // styles).
     val contentInk: Color = when {
         selectedCategory != null -> selectedCategory.onAccent()
+        // v81 — dark: the deep wildcard hero needs the BRIGHT light twin
+        // ink (deep plum would vanish on the dark rose).
+        isCurioDarkTheme() -> CurioColors.CoralBlush
         AppPreferences.pastelColorsState -> CurioColors.DeepPlum
         else -> MaterialTheme.colorScheme.onPrimary
     }

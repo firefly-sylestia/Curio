@@ -1577,10 +1577,19 @@ private fun HeroCard(
     // (the ticket's second stop IS the tint, cardGradient's is only 30%
     // toward it) — the morph visibly shifted color on light pastel pages.
     val heroGradient = if (AppPreferences.pastelColorsState) {
-        listOf(
-            lerp(accent, Color.Black, 0.05f),
-            lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
-        )
+        if (isCurioDarkTheme()) {
+            // v81 — dark: the muted DEEP pastel twin over black (never the
+            // airy light pastel, which would glare on the pitch-black page).
+            listOf(
+                lerp(accent, Color.Black, 0.05f),
+                lerp(accent, Color.Black, 0.28f)
+            )
+        } else {
+            listOf(
+                lerp(accent, Color.Black, 0.05f),
+                lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
+            )
+        }
     } else {
         CurioGradients.cardGradient(accent)
     }

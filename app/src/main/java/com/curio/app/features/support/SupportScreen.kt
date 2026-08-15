@@ -66,6 +66,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -457,8 +458,10 @@ private fun UpdateResultCard(
                                 Surface(
                                     onClick = onDownloadUpdate,
                                     shape = RoundedCornerShape(50),
-                                    color = CurioColors.CoralBlush,
-                                    contentColor = CurioColors.DeepPlum
+                                    // v81 — dark: deep rose fill + bright twin
+                                    // ink (pale coral would glare on black).
+                                    color = if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush,
+                                    contentColor = if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.DeepPlum
                                 ) {
                                     Text(
                                         "Update now",

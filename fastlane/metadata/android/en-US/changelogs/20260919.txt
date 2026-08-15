@@ -1,6 +1,8 @@
 ADD
 - Dark mode reimagined: pitch-black pages, dark same-hue heroes, reversed buttons and One UI-style inner glow on pills.
 - Light / Dark / System theme picker back in Settings and onboarding.
+FIX
+- Dark mode: paper stat cards, streak pill, hero card, empty-state and quest claim pills now render with dark-aware fills and ink.
 - Spin: weighted shuffle deck (tiered picks, liked topics 2×, disliked 0.25×, anti-repeat of the last 20, saved entries leave the deck), peek cards, 3D shuffle, category mixes and quick presets.
 - 30+ category lanes and 16,000+ hand-curated topics with quick facts, tags and explore actions.
 - Topic Reveal: hero ticket, quick fact, tag chips, pin, Like/Dislike and reading/watching progress.

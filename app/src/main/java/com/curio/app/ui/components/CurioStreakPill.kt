@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * Small streak counter pill shown on the Home screen — see Curio Home contract.
@@ -39,6 +40,10 @@ fun CurioStreakPill(
 ) {
     if (days <= 0) return
 
+    // v81 — dark: the pill sits on the pitch-black page, so the ink flips to
+    // the BRIGHT butter twin (the deep plum would vanish on the darkened
+    // butter wash over black); the fill stays the translucent butter.
+    val ink = if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.DeepPlum
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
@@ -53,13 +58,13 @@ fun CurioStreakPill(
             CurioIcon(
                 name = "local_fire_department",
                 contentDescription = null,
-                tint = CurioColors.DeepPlum,
+                tint = ink,
                 size = 18.dp
             )
             Text(
                 text = "$days-day streak",
                 style = MaterialTheme.typography.labelMedium,
-                color = CurioColors.DeepPlum
+                color = ink
             )
         }
     }

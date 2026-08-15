@@ -881,7 +881,9 @@ private fun ProfileHero(
                                     holesOn = statHolesOn,
                                     ringsOn = statRingsOn,
                                     ringStyle = statRingStyle,
-                                    ink = ink
+                                    ink = ink,
+                                    // v81 — dark: light metal ring tones.
+                                    dark = isCurioDarkTheme()
                                 )
                                 else -> Modifier.background(
                                     // v27n — OPAQUE pane gradient: the old

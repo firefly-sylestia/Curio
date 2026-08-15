@@ -21,7 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * Curio's universal empty-state skeleton — see Curio empty-state contract.
@@ -94,8 +96,10 @@ fun CurioEmptyState(
                     onClick = onCtaClick,
                     shape = RoundedCornerShape(24.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        // v81 — dark: the deep rose fill + bright twin ink
+                        // (the pale coral fill would glare on the black page).
+                        containerColor = if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else MaterialTheme.colorScheme.primary,
+                        contentColor = if (isCurioDarkTheme()) CurioColors.CoralBlush else MaterialTheme.colorScheme.onPrimary
                     ),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {

@@ -26,6 +26,7 @@ import com.curio.app.BuildConfig
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * Curio bug report screen — simple, clean form for sending feedback.
@@ -160,8 +161,10 @@ fun BugReportScreen(navController: NavController) {
                 enabled = title.isNotBlank(),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CurioColors.CoralBlush,
-                    contentColor = CurioColors.DeepPlum
+                    // v81 — dark: the deep rose fill + bright light twin ink
+                    // (the pale coral fill would glare on the black page).
+                    containerColor = if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush,
+                    contentColor = if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.DeepPlum
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = 16.dp)

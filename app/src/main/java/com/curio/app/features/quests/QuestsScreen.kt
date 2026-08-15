@@ -116,6 +116,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
@@ -531,7 +532,9 @@ private fun CurrentQuestCard(
                 modifier = Modifier
                     .size(22.dp)
                     .clip(CircleShape)
-                    .background(CurioColors.CoralBlush),
+                    // v81 — dark: the deep rose fill keeps the white check
+                    // readable (pale coral + white washes out on black).
+                    .background(if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
@@ -767,7 +770,11 @@ private fun PathCard(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(11.dp))
-                        .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.CoralBlush))),
+                        // v81 — dark: the deep rose chip keeps the white glyph
+                        // readable (the pale coral gradient washes white out).
+                        .background(Brush.verticalGradient(CurioGradients.cardGradient(
+                            if (isCurioDarkTheme()) CurioColors.HomeRosewoodDark else CurioColors.CoralBlush
+                        ))),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
@@ -1392,6 +1399,10 @@ private fun WeeklyQuestRow(
     )
     val claimable = !done && progress >= quest.target
     val accent = CurioColors.Teal
+    // v81 — the Claim pill is a FILL: white text needs a deep enough teal in
+    // BOTH modes (the soft legacy teal washes white out); icons, progress
+    // and the +XP text keep the soft teal identity.
+    val claimFill = CurioColors.CategoryTeal
     // Claimed goals animate OUT (scale + fade) instead of vanishing.
     AnimatedVisibility(
         visible = !done,
@@ -1455,7 +1466,7 @@ private fun WeeklyQuestRow(
                 Surface(
                     onClick = onClaim,
                     shape = RoundedCornerShape(50),
-                    color = accent
+                    color = claimFill
                 ) {
                     Text(
                         "Claim +${quest.xpReward} XP",
@@ -1582,6 +1593,11 @@ private fun DailyQuestRow(
     // light mode (ButterYellow vanishes on the pale background), bright
     // butter in dark mode where it pops.
     val accent = if (quest.bonus) bonusGold() else curioRoseInk()
+    // v81 — the Claim pill is a FILL: white text needs the DEEP ink twin in
+    // both modes (in dark the bright CoralBlush / ButterYellow twins would
+    // wash the white out); icons, progress and the +XP text keep the
+    // bright accent.
+    val claimFill = if (quest.bonus) CurioColors.GoldInk else CurioColors.CoralInk
     val pulseAlpha = if (claimable) {
         val pulse = rememberInfiniteTransition(label = "claimPulse")
         pulse.animateFloat(
@@ -1668,7 +1684,7 @@ private fun DailyQuestRow(
                 Surface(
                     onClick = { onClaim(quest.id) },
                     shape = RoundedCornerShape(50),
-                    color = accent,
+                    color = claimFill,
                     modifier = Modifier.graphicsLayer { alpha = pulseAlpha }
                 ) {
                     Text(

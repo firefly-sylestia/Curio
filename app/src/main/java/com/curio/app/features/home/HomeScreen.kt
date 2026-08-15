@@ -594,7 +594,9 @@ fun HomeScreen(navController: NavController) {
                                             holesOn = holesOn,
                                             ringsOn = ringsOn,
                                             ringStyle = ringStyle,
-                                            ink = questInk
+                                            ink = questInk,
+                                            // v81 — dark: light metal ring tones.
+                                            dark = isCurioDarkTheme()
                                         )
                                         else -> Modifier.background(
                                             // v74 — OPAQUE theme-aware pane, the
@@ -1681,7 +1683,9 @@ private fun FirstTimeEmpty(
                         CurioIcon(
                             CurioIcons.Casino,
                             null,
-                            tint = CurioColors.DeepPlum,
+                            // v81 — dark: the deep rose pill needs the bright
+                            // light twin ink (deep plum would vanish).
+                            tint = if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.DeepPlum,
                             size = 16.dp,
                             // Match the shared icon lift plus the casino
                             // glyph's half-dp extra correction.
@@ -1690,7 +1694,7 @@ private fun FirstTimeEmpty(
                         Text(
                             "Surprise me",
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            color = CurioColors.DeepPlum
+                            color = if (isCurioDarkTheme()) CurioColors.CoralBlush else CurioColors.DeepPlum
                         )
                     }
                 }

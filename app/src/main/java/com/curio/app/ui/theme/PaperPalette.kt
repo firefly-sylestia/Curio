@@ -3,6 +3,7 @@ package com.curio.app.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.curio.app.data.NotePaperColor
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * Paper palette for the quotes entry (Marginalia journal + quote cards) and
@@ -39,13 +40,15 @@ fun paperHighlight(): Color = Color(0x99FFC933)
 fun paperAccent(): Color = Color(0xFF9A7B2F)
 
 /**
- * Theme-aware paper control accent — v78: light only (the brighter dark/
- * AMOLED amber is gone with dark mode). The paper slips themselves stay the
- * same warm cream (a note reads as a physical slip); the toolbar + cursor +
- * style chips sit on the cream page and wear the standard amber.
+ * Theme-aware paper control accent. The paper slips themselves stay the
+ * same warm cream (a note reads as a physical slip — theme-agnostic by
+ * design); the toolbar + cursor + style chips sit on the THEME page, so
+ * dark mode (v81) swaps the warm amber for the bright butter twin (the
+ * dark amber would vanish on the pitch-black page).
  */
 @Composable
-fun paperControlAccent(): Color = paperAccent()
+fun paperControlAccent(): Color =
+    if (isCurioDarkTheme()) CurioColors.ButterYellow else paperAccent()
 
 /** Hairline edge so paper cards read as distinct notecards — a warm tan
  *  with real contrast against the cream surface (the older near-cream edge

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.toHsl
 
 /**
@@ -52,7 +53,10 @@ fun Modifier.paperStatCardFill(
     holesOn: Boolean,
     ringsOn: Boolean,
     ringStyle: String = "coil",
-    ink: Color
+    ink: Color,
+    // v81 — dark mode: the wire's DARK metal tones would vanish on the
+    // near-black paper, so they flip to light metal (the reversal).
+    dark: Boolean = false
 ): Modifier = if (!holesOn) {
     background(fill, shape)
 } else {
@@ -84,9 +88,9 @@ fun Modifier.paperStatCardFill(
                 val center = Offset(holeX, cy)
                 if (ringsOn) {
                     when (ringStyle) {
-                        "split" -> drawSplitRing(center, holeR, ink)
-                        "oblique" -> drawObliqueCoil(center, holeR, ink, index = i)
-                        else -> drawCoilRing(center, holeR, ink)
+                        "split" -> drawSplitRing(center, holeR, ink, dark)
+                        "oblique" -> drawObliqueCoil(center, holeR, ink, dark, index = i)
+                        else -> drawCoilRing(center, holeR, ink, dark)
                     }
                 } else {
                     drawPressedRim(center, holeR, ink)
@@ -97,16 +101,22 @@ fun Modifier.paperStatCardFill(
 }
 
 /**
- * The paper card's warm cream — v78: light only (the hue-matched deep
- * paper for dark mode is gone with dark mode). The warm cream is built
- * from the [base] (the hero/fill it sits on), so the Home rose, a Profile
- * hero or a detail page's category color each get a cream of their own
- * shade — theme- and color-aware. A whisper of warm brown keeps it
- * reading as paper, not paint.
+ * The paper card's fill. LIGHT: the warm cream, built from the [base]
+ * (the hero/fill it sits on), so the Home rose, a Profile hero or a
+ * detail page's category color each get a cream of their own shade —
+ * theme- and color-aware; a whisper of warm brown keeps it reading as
+ * paper, not paint. DARK (v81): a deep near-black warm tint of the base
+ * hue so the paper reads as dark paper on the pitch-black page instead
+ * of a glaring cream block (elevation via lightness, not brightness).
  */
 @Composable
-fun paperStatCardColor(base: Color): Color =
-    lerp(base, Color(0xFFFFF6EB), 0.62f)
+fun paperStatCardColor(base: Color): Color {
+    if (isCurioDarkTheme()) {
+        val a = toHsl(base)
+        return fromHsl(a.h, (a.s * 0.35f).coerceAtMost(0.28f), 0.20f)
+    }
+    return lerp(base, Color(0xFFFFF6EB), 0.62f)
+}
 
 /** The pressed two-tone rim around a punch hole (light top-left, shadow bottom-right). */
 private fun DrawScope.drawPressedRim(center: Offset, holeR: Float, ink: Color) {
@@ -201,7 +211,7 @@ private fun DrawScope.drawHoleInterior(center: Offset, holeR: Float, ink: Color)
  * the hole and a specular on top. Reads as a wire passing through, not a
  * ring drawn around the hole.
  */
-private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
+private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color, dark: Boolean) {
     val frontR = holeR * 1.02f  // front wire rides the hole rim
     val backR = holeR * 0.72f   // back wire — visibly INSIDE the hole
     val metalW = 3.0.dp.toPx()
@@ -215,7 +225,7 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
     // ── Back arc — the wire BEHIND the paper, seen through the hole. ───
     drawArc(
         brush = Brush.linearGradient(
-            colors = listOf(Color(0xFF5A554C), Color(0xFF332F29)),
+            colors = if (dark) CoilBackDark else listOf(Color(0xFF5A554C), Color(0xFF332F29)),
             start = Offset(center.x, center.y - backR),
             end = Offset(center.x, center.y + backR)
         ),
@@ -243,8 +253,9 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
     )
 
     // Darkened dives where the front wire sinks back INTO the hole.
+    val dive = if (dark) DiveMetalDark else Color(0xFF3A362F)
     drawArc(
-        color = Color(0xFF3A362F).copy(alpha = 0.55f),
+        color = dive.copy(alpha = 0.55f),
         startAngle = 145f,
         sweepAngle = 26f,
         useCenter = false,
@@ -253,7 +264,7 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
         style = Stroke(width = metalW, cap = StrokeCap.Round)
     )
     drawArc(
-        color = Color(0xFF3A362F).copy(alpha = 0.55f),
+        color = dive.copy(alpha = 0.55f),
         startAngle = 9f,
         sweepAngle = 26f,
         useCenter = false,
@@ -283,7 +294,7 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color) {
  * shaded hole, with the classic split gap near the top and a glint on the
  * upper-left curve.
  */
-private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color) {
+private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color, dark: Boolean) {
     val frontR = holeR * 1.05f
     val backR = holeR * 0.82f
     val metalW = 3.2.dp.toPx()
@@ -297,7 +308,7 @@ private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color) {
     // ── Back half — inside the hole, behind the paper. ──────────────────
     drawArc(
         brush = Brush.linearGradient(
-            colors = listOf(Color(0xFF575249), Color(0xFF322E28)),
+            colors = if (dark) SplitBackDark else listOf(Color(0xFF575249), Color(0xFF322E28)),
             start = Offset(center.x, center.y - backR),
             end = Offset(center.x, center.y + backR)
         ),
@@ -335,7 +346,7 @@ private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color) {
     )
     // The split: a tiny dark gap near the top where the ring opens.
     drawArc(
-        color = Color(0xFF3A362F),
+        color = if (dark) DiveMetalDark else Color(0xFF3A362F),
         startAngle = 260f,
         sweepAngle = 13f,
         useCenter = false,
@@ -364,7 +375,7 @@ private fun DrawScope.drawSplitRing(center: Offset, holeR: Float, ink: Color) {
  * arc recedes darkly inside the shaded hole — the most pronounced
  * "through the hole" read of the three.
  */
-private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, index: Int) {
+private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, dark: Boolean, index: Int) {
     // Per-ring phase shift so the three holes don't all tilt identically.
     val phase = index * 30f
     val frontR = holeR * 1.35f  // front bulge — clearly past the hole rim
@@ -381,7 +392,7 @@ private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, 
     // ── Back arc — inside the hole, behind the paper. ───────────────────
     drawArc(
         brush = Brush.linearGradient(
-            colors = listOf(Color(0xFF575249), Color(0xFF322E28)),
+            colors = if (dark) SplitBackDark else listOf(Color(0xFF575249), Color(0xFF322E28)),
             start = Offset(center.x, center.y - backR),
             end = Offset(center.x, center.y + backR)
         ),
@@ -409,8 +420,9 @@ private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, 
             style = Stroke(width = metalW, cap = StrokeCap.Round)
         )
         // Dives where the front wire sinks back into the hole.
+        val dive = if (dark) DiveMetalDark else Color(0xFF3A362F)
         drawArc(
-            color = Color(0xFF3A362F).copy(alpha = 0.55f),
+            color = dive.copy(alpha = 0.55f),
             startAngle = 150f,
             sweepAngle = 26f,
             useCenter = false,
@@ -419,7 +431,7 @@ private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, 
             style = Stroke(width = metalW, cap = StrokeCap.Round)
         )
         drawArc(
-            color = Color(0xFF3A362F).copy(alpha = 0.55f),
+            color = dive.copy(alpha = 0.55f),
             startAngle = 364f,
             sweepAngle = 26f,
             useCenter = false,
@@ -441,6 +453,14 @@ private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, 
 
     drawRingContactShadow(center, holeR, ink)
 }
+
+// v81 — dark-mode METAL tones for the ring shading: on the near-black
+// paper the dark wire tones would vanish, so they flip to light greys
+// (the wire catches light on the dark sheet). Light mode keeps the
+// original dark metals unchanged.
+private val CoilBackDark = listOf(Color(0xFF9A948A), Color(0xFF6E6A61))
+private val SplitBackDark = listOf(Color(0xFF958F85), Color(0xFF69655C))
+private val DiveMetalDark = Color(0xFF76726A)
 
 private val PAPER_HOLE_RADIUS = 5.5f
 private val PAPER_HOLE_X = 14f

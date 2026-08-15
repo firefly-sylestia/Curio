@@ -595,7 +595,9 @@ fun EntryDetailScreen(
                                             holesOn = metaHolesOn,
                                             ringsOn = metaRingsOn,
                                             ringStyle = metaRingStyle,
-                                            ink = heroCardInk
+                                            ink = heroCardInk,
+                                            // v81 — dark: light metal ring tones.
+                                            dark = isCurioDarkTheme()
                                         )
                                 )
                             } else {

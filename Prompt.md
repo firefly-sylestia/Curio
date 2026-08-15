@@ -1,6 +1,56 @@
 # Prompt.md — Request log
 
-## Current request — reimagined dark mode: pitch black + Samsung One UI 9.5 glow (v81)
+## Current request — dark-mode audit: everything left light-only (v82)
+
+### What was asked
+"continue audit the app for anything thats left in dark mode."
+
+### What was found + fixed
+Systematic sweep of every screen/component for light-only fills, ink and
+surfaces:
+1. **PaperStatCard** — the paper fill was warm cream in dark (glared on
+   black): `paperStatCardColor` now resolves a deep near-black warm tint of
+   the base hue in dark. The steel-ring shading used hardcoded dark greys
+   that vanished on the dark paper: threaded a `dark` flag through
+   `paperStatCardFill` → all three ring styles, flipping the back arcs /
+   dives / split gap to LIGHT metal tones in dark (Home + Detail + Profile
+   callers pass `isCurioDarkTheme()`).
+2. **Streak pill** — DeepPlum text on translucent butter vanished on black:
+   ink flips to bright ButterYellow in dark.
+3. **CurioHeroShuffleCard** — the wildcard hero kept the pale CoralBlush
+   fill in dark: now wears `HomeRosewoodDark`; pastel content ink flips to
+   the bright twin.
+4. **Home empty-state "Surprise me"** — DeepPlum icon/text on the deep rose
+   pill → bright twin in dark.
+5. **BugReport + Support CTAs** — pale CoralBlush fill + DeepPlum content
+   glared on black: deep rose fill + bright twin ink.
+6. **Reveal pastel hero gradient** — the pastel-light stops rendered as a
+   bright pastel on black (missed in v81): now the muted deep-pastel twin.
+7. **Paper control accent** — the v78 removal deleted its dark branch, so
+   the rich-text toolbar/cursor/chips sat on the dark page in dark amber:
+   `paperControlAccent` flips to bright ButterYellow in dark. (The note
+   PAPER sheets themselves stay theme-agnostic by design — documented
+   contract: a note reads as a physical slip.)
+8. **Quests** — the Claim pills used the bright accent twins as fills in
+   dark (white text washed out): now deep `CoralInk` / `GoldInk` /
+   `CategoryTeal` fills (light behavior unchanged); the weekly teal pill
+   gets a deep fill in both modes (the soft legacy teal never carried
+   white); two small coral icon chips flipped to deep rose in dark.
+9. **CurioEmptyState CTA** — pale CoralBlush fill + near-white content in
+   dark: deep rose fill + bright twin.
+
+Checked-and-clear: badge metals / brand colors / category ink twins / pet
+sprite + flower-bed (has its own night palette) / keyboard illustration /
+promo export poster (self-contained asset) are intrinsic; dropdowns, search
+field, sort pill, top bar, toast, bubble, session service, Topic Database,
+RecycleBin all resolve through the dark scheme or the theme-aware helpers.
+
+### Validation
+All touched files brace/paren-balanced (Reveal keeps its pre-existing
+string-literal 1-off, unchanged by these edits), `git diff --check` clean,
+no duplicate imports. No Gradle locally (env rule) — CI on push.
+
+## Prior — reimagined dark mode: pitch black + Samsung One UI 9.5 glow (v81)
 
 ### What was asked
 "now lets reimagine the dark mode… background pitch black, torn header a NEW

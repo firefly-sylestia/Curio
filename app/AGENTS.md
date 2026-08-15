@@ -401,6 +401,21 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v82 — dark-mode audit: everything left light-only fixed.** Paper
+  stat cards (`paperStatCardColor` → deep near-black paper in dark;
+  `paperStatCardFill` gained a `dark` flag so the steel-ring back arcs /
+  dives / split gaps flip to LIGHT metal on the dark paper — Home, Detail,
+  Profile pass `isCurioDarkTheme()`). Streak pill ink → bright butter in
+  dark. `CurioHeroShuffleCard` wildcard hero wears `HomeRosewoodDark` +
+  bright content ink in dark. Home "Surprise me" pill ink → bright twin.
+  BugReport + Support + empty-state CTAs: deep rose fill + bright twin ink
+  in dark (pale CoralBlush fills glared). Reveal's pastel hero gradient
+  got its dark deep-pastel stops (missed in v81). `paperControlAccent`
+  (rich-text toolbar/cursor/chips) flips to bright butter in dark — the
+  note PAPER sheets stay theme-agnostic BY DESIGN (documented contract).
+  Quests Claim pills use deep `CoralInk`/`GoldInk`/`CategoryTeal` fills in
+  both modes (the bright twins + soft legacy teal washed white out); coral
+  icon chips flip to deep rose in dark.
 - **v81 — the reimagined dark mode: pitch black + Samsung One UI 9.5
   glow.** `themeModeState` (Light/Dark/System) is back in AppPreferences
   and `isCurioDarkTheme()`/`ForContext` read it (System follows the
