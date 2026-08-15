@@ -113,8 +113,10 @@ fun CurioSortDropdown(
             color = fill,
             shadowElevation = 3.dp,
             // v28 — dark mode elevation visibility (glow + hairline).
+            // v81 — dark: the One UI inner glow + shiny edge on the sort pill.
             modifier = Modifier
                 .curioDarkGlow(3.dp, pillShape)
+                .curioGlassGlow(pillShape, accent)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

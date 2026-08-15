@@ -2,11 +2,14 @@ package com.curio.app.ui.theme
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -16,6 +19,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.curio.app.data.AppPreferences
 
 /**
  * Curio's M3 theme wrapper.
@@ -62,13 +66,61 @@ private val CurioLightColorScheme = lightColorScheme(
 )
 
 /**
- * App-theme-aware dark check. v78 — dark mode is REMOVED (light only):
- * this is the single seam the future dark system will drive. Returns
- * false today; keep every call site reading this function so the new
- * system only flips this one check.
+ * v81 — the reimagined dark scheme. The PAGE is PITCH BLACK (OLED);
+ * surfaces step up through near-black greys so elevation reads via
+ * lightness (the dark-mode best practice — surfaces get lighter the
+ * higher they sit). Accent roles stay BRIGHT (the pale coral / butter /
+ * mint — Samsung-style bright accents on black) with dark ink on them.
+ */
+private val CurioDarkColorScheme = darkColorScheme(
+    primary           = CurioColors.CoralBlush,
+    onPrimary         = CurioColors.DeepPlum,
+    primaryContainer  = CurioColors.CoralBlush.copy(alpha = 0.16f),
+    onPrimaryContainer = CurioColors.CoralBlush,
+
+    secondary           = CurioColors.ButterYellow,
+    onSecondary         = Color(0xFF3A2E0A),
+    secondaryContainer  = CurioColors.ButterYellow.copy(alpha = 0.16f),
+    onSecondaryContainer = CurioColors.ButterYellow,
+
+    tertiary           = CurioColors.SkyMint,
+    onTertiary         = Color(0xFF0C2A2A),
+    tertiaryContainer  = CurioColors.SkyMint.copy(alpha = 0.16f),
+    onTertiaryContainer = CurioColors.SkyMint,
+
+    background = Color.Black,
+    onBackground = Color(0xFFEDE7DC),
+
+    surface                  = Color(0xFF0D0D0D),
+    onSurface                = Color(0xFFEDE7DC),
+    surfaceVariant           = Color(0xFF1C1C1E),
+    onSurfaceVariant         = Color(0xFFB8B2A8),
+    surfaceContainerLowest   = Color.Black,
+    surfaceContainerLow      = Color(0xFF101010),
+    surfaceContainer         = Color(0xFF161616),
+    surfaceContainerHigh     = Color(0xFF1D1D1D),
+    surfaceContainerHighest  = Color(0xFF252525),
+
+    error             = Color(0xFFE0706A),
+    onError           = Color(0xFF2A0A08),
+
+    outline           = Color(0xFFEDE7DC).copy(alpha = 0.18f),
+    outlineVariant    = Color(0xFFEDE7DC).copy(alpha = 0.10f)
+)
+
+/**
+ * App-theme-aware dark check. Reads the theme mode reactively from
+ * [AppPreferences.themeModeState] so toggling Light/Dark/System in
+ * settings takes effect immediately without restarting the app. v81 —
+ * the reimagined dark mode: pitch-black pages, dark same-hue hero
+ * shades and the Samsung-style inner glow (no AMOLED/Material styles).
  */
 @Composable
-fun isCurioDarkTheme(): Boolean = false
+fun isCurioDarkTheme(): Boolean = when (AppPreferences.themeModeState) {
+    AppPreferences.THEME_DARK -> true
+    AppPreferences.THEME_SYSTEM -> isSystemInDarkTheme()
+    else -> false
+}
 
 /**
  * v20 — the brand coral as INK, theme-aware: bright CoralBlush on dark
@@ -100,19 +152,28 @@ fun curioSageInk(): Color =
 
 /**
  * Non-composable dark check for services/workers — mirrors
- * [isCurioDarkTheme]. v78 — light only, the same seam as the UI check
- * (the [context] parameter is kept for API compatibility).
+ * [isCurioDarkTheme] but reads the system night flag from [Context]
+ * instead of the @Composable [isSystemInDarkTheme], so plain functions
+ * (e.g. notification tinting in [ExploreSessionService]) resolve the
+ * same dark/light state the UI uses.
  */
-fun isCurioDarkThemeForContext(context: Context): Boolean = false
+fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences.themeModeState) {
+    AppPreferences.THEME_DARK -> true
+    AppPreferences.THEME_SYSTEM -> (context.resources.configuration.uiMode and
+        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    else -> false
+}
 
 /**
- * The [ColorScheme] the app wears — v78: Curio LIGHT only (dark mode,
- * AMOLED and Material styles removed). Shared by [CurioTheme] and the
- * floating explore bubble, which renders outside an Activity window and
- * therefore can't use the [CurioTheme] window SideEffect.
+ * The [ColorScheme] the app wears — v81: Curio Light or the reimagined
+ * Dark (pitch-black pages, dark surfaces, bright accent roles). Shared
+ * by [CurioTheme] and the floating explore bubble, which renders outside
+ * an Activity window and therefore can't use the [CurioTheme] window
+ * SideEffect.
  */
 @Composable
-fun curioColorScheme(): ColorScheme = CurioLightColorScheme
+fun curioColorScheme(): ColorScheme =
+    if (isCurioDarkTheme()) CurioDarkColorScheme else CurioLightColorScheme
 
 @Composable
 fun CurioTheme(
@@ -158,13 +219,21 @@ fun CurioTheme(
 val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
 
 /**
- * Theme-aware AlertDialog container — v78: Curio LIGHT mode (pastel and
- * plain) blends the surface container toward the soft cream background so
- * the dialog melts into the tinted page instead of floating a deeper
- * yellow-cream panel.
+ * Theme-aware AlertDialog container — blends the surface container toward
+ * the page background so the dialog melts into the tinted page instead of
+ * floating a separate panel. LIGHT: toward the soft cream. DARK (v81):
+ * toward the pitch-black background, so dialogs read as near-black glass
+ * on the black page (with the hero pill edge-glow on top).
  */
 @Composable
 fun curioDialogContainerColor(): Color {
+    if (isCurioDarkTheme()) {
+        return lerp(
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            MaterialTheme.colorScheme.background,
+            0.55f
+        )
+    }
     // v11 — light: a soft near-background sheet that matches the page wash
     // family (the cream background) instead of the deeper #E4D7BF container.
     // v31 — pulled a touch further toward the background (0.60 → 0.72) so
@@ -190,24 +259,26 @@ fun curioPillLift(): Color =
 /**
  * v42 — the COLOR-TINTED glass lift for settings/profile-family controls:
  * the shared buttons/cards lift toward a whisper of the brand rose instead
- * of plain cream, so they stop reading as flat cream blocks. v78 — light
- * only: the background rose-tinted ~8% (the "small tint of the background
- * shade" language from [curioPillLift], now with color).
+ * of plain cream, so they stop reading as flat cream blocks. LIGHT: the
+ * background rose-tinted ~8%. DARK (v81): a near-white rose-kissed glass
+ * (the frosted-glass lift on black), so pills and cards read as bright
+ * glass against the pitch-black page.
  */
 @Composable
-fun curioPillTintLift(): Color = lerp(
-    MaterialTheme.colorScheme.background,
-    curioRoseInk(),
-    0.08f
-)
+fun curioPillTintLift(): Color =
+    if (isCurioDarkTheme()) lerp(Color.White, curioRoseInk(), 0.12f)
+    else lerp(MaterialTheme.colorScheme.background, curioRoseInk(), 0.08f)
 
 /**
- * Readable dialog ACTION ink — v78: light mode always. The scheme primary
- * is the pale coral-pink brand color that washes out on a light dialog, so
- * actions flip to a deep same-hue rose for real contrast.
+ * Readable dialog ACTION ink. LIGHT: the scheme primary is the pale
+ * coral-pink brand color that washes out on a light dialog, so actions
+ * flip to a deep same-hue rose for real contrast. DARK (v81): the bright
+ * pale coral reads crisp on the near-black dialog, so actions use it
+ * directly.
  */
 @Composable
 fun curioDialogActionColor(): Color {
+    if (isCurioDarkTheme()) return MaterialTheme.colorScheme.primary
     val a = toHsl(MaterialTheme.colorScheme.primary)
     return fromHsl(a.h, a.s.coerceIn(0.35f, 0.60f), 0.36f)
 }

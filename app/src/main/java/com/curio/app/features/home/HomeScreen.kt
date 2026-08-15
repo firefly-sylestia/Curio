@@ -128,6 +128,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
@@ -397,7 +398,12 @@ fun HomeScreen(navController: NavController) {
                         .height(42.dp)
                         .offset(y = HomeQuestHeroHeight - 18.dp)
                         .clip(sheetShape)
-                        .background(Color(0xFFFDFCF9))
+                        // v81 — dark: a subtle lighter lip under the tear so
+                        // the paper seam still reads on the dark banner.
+                        .background(
+                            if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
+                            else Color(0xFFFDFCF9)
+                        )
                 )
                 // ── Torn-edge shadow — a hairline dark rim just below the
                 // hero's torn seam (the SAME seeded torn shape, nudged down
@@ -1065,9 +1071,12 @@ fun HomeScreen(navController: NavController) {
             // Both morph endpoints are fully opaque. The old hero endpoint
             // used a translucent ink wash, which let the banner show through
             // the pills and made them read like circular visual artifacts.
-            val frostBg = Color.White
-            val frostRim = Color(0xFFD9DEE6)
-            val frostIcon = homeReadableInk(frostBg)
+            // v81 — dark: the scrolled frosted pills become dark glass with
+            // a light rim + light icon (the exact light-mode reversal).
+            val frostBg = if (isCurioDarkTheme()) Color(0xFF1B1B1D) else Color.White
+            val frostRim = if (isCurioDarkTheme()) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
+            val frostIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
+                            else homeReadableInk(frostBg)
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
             // another geometric transition or ripple-like flash.
@@ -1574,6 +1583,8 @@ private fun homeReadableInk(fill: Color): Color {
     // banner in non-pastel). The lane branch resolves like every category
     // hero ([heroHeaderInk]); the plain rose keeps the old ink.
     heroLaneCategory()?.let { return it.heroHeaderInk() }
+    // v81 — dark mode: crisp light ink on the dark rose banner.
+    if (isCurioDarkTheme()) return MaterialTheme.colorScheme.onBackground
     return if (!AppPreferences.pastelColorsState) MaterialTheme.colorScheme.onSurface
            else pastelFillInk(fill)
 }
@@ -1583,6 +1594,17 @@ private fun homeRoseAccent(): Color {
     // v30 — "Hero follows Spin lane": Home's shared hero wears the Spin
     // lane's accent too (the drawer + hero share this resolver).
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
+    // v81 — dark mode: the torn hero wears a NEW SHADE of the same spectrum
+    // — the deep rose/azure twins (never the light shade).
+    if (isCurioDarkTheme()) {
+        if (AppPreferences.heroBlueState) return CurioColors.HomeAzureDark
+        val base = toHsl(CurioColors.HomeRosewood)
+        if (AppPreferences.pastelColorsState) {
+            val pinkHue = (base.h - 15f + 360f) % 360f
+            return fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.40f)
+        }
+        return CurioColors.HomeRosewoodDark
+    }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
@@ -1867,14 +1889,19 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     .fillMaxWidth()
                     .height(HomeDrawerHeroHeight + HomeDrawerSheetExtent)
             ) {
-                // White paper under-sheet (same seed -> pixel-aligned seam).
+                // Paper under-sheet (same seed -> pixel-aligned seam). v81 —
+                // dark: a subtle lighter lip so the seam reads on the dark
+                // banner.
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(42.dp)
                         .offset(y = HomeDrawerHeroHeight - 18.dp)
                         .clip(sheetShape)
-                        .background(CurioColors.CreamWhite)
+                        .background(
+                            if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
+                            else CurioColors.CreamWhite
+                        )
                 )
                 // Torn-edge shadow - hairline rim under the ragged seam.
                 Box(

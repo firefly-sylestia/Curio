@@ -179,9 +179,30 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
 @Composable
 private fun AppearanceSection(highlightKey: String? = null) {
     val context = LocalContext.current
-    // v78 — the Theme style (Curio / AMOLED / Material) and Theme (Light /
-    // Dark / System) pickers are GONE: the app is Curio-light only.
+    // v81 — the Theme picker (Light / Dark / System) is back: dark mode is
+    // the reimagined pitch-black + glow design (no AMOLED/Material styles).
     Column(modifier = Modifier.fillMaxWidth()) {
+        SettingsRowPulse(highlightKey == "appearance-theme") {
+            CompactSegmentedRow(
+                "Theme",
+                listOf("Light", "Dark", "System"),
+                when (AppPreferences.themeModeState) {
+                    AppPreferences.THEME_DARK -> 1
+                    AppPreferences.THEME_SYSTEM -> 2
+                    else -> 0
+                }
+            ) { index ->
+                AppPreferences.setThemeMode(
+                    context,
+                    when (index) {
+                        1 -> AppPreferences.THEME_DARK
+                        2 -> AppPreferences.THEME_SYSTEM
+                        else -> AppPreferences.THEME_LIGHT
+                    }
+                )
+            }
+        }
+        CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "appearance-tint") {
             CompactSwitchRow("Category tint", "Colorful page backgrounds", AppPreferences.tintWashEffective()) {
                 AppPreferences.setTintWashEnabled(context, it)

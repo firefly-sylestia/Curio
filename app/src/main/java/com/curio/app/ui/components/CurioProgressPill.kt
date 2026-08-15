@@ -45,6 +45,7 @@ import com.curio.app.data.TopicProgressStore
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.components.curioInnerGlow
 import kotlin.math.roundToInt
 
 /**
@@ -103,6 +104,10 @@ fun CurioProgressPill(
         // v29 — dark mode elevation visibility (glow).
         modifier = modifier
             .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            // v81 — One UI 9.5: the colorful pill carries a soft radial
+            // glow of the accent's light twin, reflected inside the pill
+            // (dark mode only).
+            .curioInnerGlow(RoundedCornerShape(50), accent, strength = 0.14f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),

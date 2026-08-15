@@ -161,6 +161,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
@@ -265,9 +266,10 @@ fun EntryDetailScreen(
     // v28 — dark mode hero title text is always white/creamish (never the
     // tinted light twin) so the banner headline stays crisp light-on-deep.
     val heroInk = cat.heroHeaderInk()
-    // The established readable slate-on-white treatment for the hero cards.
-    val heroCardInk = Color(0xFF232A35)
-    val heroSheetColor = Color(0xFFFDFCF9)
+    // v81 — dark: the hero cards flip to light ink on a near-black sheet
+    // (the exact light-mode reversal).
+    val heroCardInk = if (isCurioDarkTheme()) Color(0xFFEDE7DC) else Color(0xFF232A35)
+    val heroSheetColor = if (isCurioDarkTheme()) Color(0xFF121316) else Color(0xFFFDFCF9)
     // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
     // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,
     // see the meta card below), so the old translucent frost has no consumer.
@@ -2259,8 +2261,13 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
                 shape = RoundedCornerShape(16.dp),
                 // Soft pastel card that matches the app's palette — a light,
                 // barely-there whisper of the category, lighter and less
-                // saturated than the other cards on the page.
-                color = lightAccentTint(category.accent, saturation = 0.18f, lightness = 0.93f),
+                // saturated than the other cards on the page. v81 — dark:
+                // the dark category surface instead.
+                color = if (isCurioDarkTheme()) {
+                    category.categorySurface()
+                } else {
+                    lightAccentTint(category.accent, saturation = 0.18f, lightness = 0.93f)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -2773,11 +2780,10 @@ private fun MoodBoardExportActions(
     // the small saved card shows) or the full-screen layout (what the expanded
     // dialog shows) — the two views are saved separately on the entry now.
     var exportLayout by remember { mutableStateOf(MoodBoardExport.MoodBoardLayout.INLINE) }
-    // v7.26 — Save/Share wear the same WHITE FROSTED-GLASS look as the hero's
-    // Date · Mood · Type grid card: a translucent pane (the page wash blurred)
-    // under a white 0.78 glass tint, a hairline slate rim, and deep-slate ink
-    // that reads on white in every theme.
-    val frostInk = Color(0xFF232A35)
+    // v7.26 — Save/Share wear the frosted-glass look as the hero's Date ·
+    // Mood · Type grid card: a translucent pane under a glass tint, a
+    // hairline rim, and ink that reads in every theme. v81 — dark: light ink.
+    val frostInk = if (isCurioDarkTheme()) Color(0xFFEDE7DC) else Color(0xFF232A35)
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)

@@ -138,6 +138,7 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.lightAccentTint
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
@@ -1598,7 +1599,11 @@ private fun HeroCard(
     // v51 — light mode still read whitish: pastel light now leans only 60%
     // toward white (a real accent-kiss — the lane's tint clearly shows
     // through the frost) and non-pastel light deepens to 42%.
-    val pillGlass = if (AppPreferences.pastelColorsState) {
+    val pillGlass = if (isCurioDarkTheme()) {
+        // v81 — reversed: a dark same-hue jewel glass so the light twin /
+        // white ink reads on it (never the light frost on the black page).
+        lerp(accent, Color.Black, 0.45f)
+    } else if (AppPreferences.pastelColorsState) {
         lerp(accent, Color.White, 0.60f)
     } else {
         lerp(accent, Color.White, 0.42f)
@@ -1885,7 +1890,8 @@ private fun HeroCard(
                     // in both modes instead of the raw accent going
                     // dark-on-dark.
                     ink = cat.accent,
-                    background = lerp(cat.accent, Color.White, 0.85f),
+                    background = if (isCurioDarkTheme()) lerp(cat.accent, Color.Black, 0.55f)
+                    else lerp(cat.accent, Color.White, 0.85f),
                     showBar = false,
                     dialogContentColor = cat.categoryInk(),
                     modifier = Modifier

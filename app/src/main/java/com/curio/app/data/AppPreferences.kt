@@ -2,6 +2,7 @@ package com.curio.app.data
 
 import android.app.AppOpsManager
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
@@ -38,8 +39,16 @@ object AppPreferences {
     const val SENTIMENT_DISLIKE = "dislike"
     const val SENTIMENT_NONE = "none"
 
+    /** Theme mode constants (v81 — the reimagined dark mode): "light"
+     *  (default, the v78 shipped behavior), "dark" (pitch-black + glow),
+     *  or "system" (follows the device night flag). */
+    const val THEME_LIGHT = "light"
+    const val THEME_DARK = "dark"
+    const val THEME_SYSTEM = "system"
+
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
+    private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
     private const val KEY_PET_CHATTER = "pet_chatter"     // "talkative", "cozy", "quiet"
@@ -184,10 +193,13 @@ object AppPreferences {
     fun setLastNotifiedUpdateVersion(context: Context, version: String) =
         prefs(context).edit().putString(KEY_LAST_NOTIFIED_UPDATE, version).apply()
 
-    // v78 — theme mode + style state are GONE: the app is Curio-light only
-    // (dark mode, AMOLED and Material styles removed). The future dark
-    // system will re-introduce its own reactive state; the light/dark seam
-    // lives in [com.curio.app.ui.theme.isCurioDarkTheme].
+    // Theme mode (v81) — "light" / "dark" / "system". v78 removed the
+    // theme system; the reimagined dark mode (pitch-black pages, dark
+    // same-hue hero shades, Samsung-style inner glow) returns here as a
+    // single mode (no AMOLED/Material styles). Default LIGHT — the v78
+    // shipped behavior. Seeded from prefs in [initThemeMode].
+    var themeModeState by mutableStateOf(THEME_LIGHT)
+        private set
 
     // Pastel color mode (v7.5) — a user toggle that softens every category
     // accent (fills become pastel with deep-matching ink in light mode,
@@ -502,6 +514,7 @@ object AppPreferences {
         private set
 
     fun initThemeMode(context: Context) {
+        themeModeState = getThemeMode(context)
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
@@ -560,6 +573,25 @@ object AppPreferences {
         bedDesignRowsState = getBedDesignRows(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
+    }
+
+    // ── Theme mode (v81) ────────────────────────────────────────────
+    /** The stored theme mode — "light" (default), "dark", or "system". */
+    fun getThemeMode(context: Context): String =
+        prefs(context).getString(KEY_THEME_MODE, THEME_LIGHT) ?: THEME_LIGHT
+
+    fun setThemeMode(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_THEME_MODE, mode).apply()
+        themeModeState = mode
+    }
+
+    /** Whether the app renders dark right now — resolves "system" via the
+     *  device night flag (non-composable twin of [isCurioDarkTheme]). */
+    fun isDarkTheme(context: Context): Boolean = when (getThemeMode(context)) {
+        THEME_DARK -> true
+        THEME_SYSTEM -> (context.resources.configuration.uiMode and
+            Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        else -> false
     }
 
     // ── Pastel color mode ───────────────────────────────────────────

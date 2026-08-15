@@ -159,6 +159,8 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.themedButtonFill
 import com.curio.app.ui.theme.themedButtonInk
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.toHsl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -643,8 +645,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // light). `pastel` is resolved here (the remember block is not a
     // @Composable context).
     val pastelMode = AppPreferences.pastelColorsState
-    val deckAccent = remember(deckAccents, pastelMode) {
-        CurioMixedDeck.mixedDeckAccent(deckAccents, pastel = pastelMode)
+    // v81 — dark: the deck accent resolves its dark mixed shade (resolved
+    // outside the remember — it's not a @Composable context).
+    val darkMode = isCurioDarkTheme()
+    val deckAccent = remember(deckAccents, pastelMode, darkMode) {
+        CurioMixedDeck.mixedDeckAccent(deckAccents, pastel = pastelMode, dark = darkMode)
     }
 
     // ── Mixed-deck identity (v5.13) ───────────────────────────────────────
@@ -679,16 +684,25 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // so the hero's crown reads as the brightest card of the deck. Mixed
     // decks already carry pure pastel stops + pastel seams; non-pastel
     // keeps the classic card gradient.
+    // v81 — dark mode: the pastel deck rides the muted DEEP pastel accent
+    // over black (the dark pastel twin), never the airy light pastel.
     val deckGradient = if (pastelMode && !isMixedDeck) {
-        // v25 — Pastel crown depth PASSED: always ON — the top stop carries
-        // a subtle 5% black deepen for a gentle darker crown (the old 4%
-        // white-lift fallback is gone; its toggle was removed from
-        // Experiments).
-        val topCrown = lerp(deckAccent, Color.Black, 0.05f)
-        listOf(
-            topCrown,
-            lightAccentTint(deckAccent, saturation = 0.22f, lightness = 0.80f)
-        )
+        if (isCurioDarkTheme()) {
+            listOf(
+                lerp(deckAccent, Color.Black, 0.05f),
+                lerp(deckAccent, Color.Black, 0.25f)
+            )
+        } else {
+            // v25 — Pastel crown depth PASSED: always ON — the top stop
+            // carries a subtle 5% black deepen for a gentle darker crown
+            // (the old 4% white-lift fallback is gone; its toggle was
+            // removed from Experiments).
+            val topCrown = lerp(deckAccent, Color.Black, 0.05f)
+            listOf(
+                topCrown,
+                lightAccentTint(deckAccent, saturation = 0.22f, lightness = 0.80f)
+            )
+        }
     } else {
         CurioMixedDeck.mixedDeckGradient(deckAccents)
     }
@@ -2695,7 +2709,12 @@ private fun HeroTicketCard(
         // v15 — the enhanced diagonal sweep: a bright crown at the
         // top-left catches light, the card's own stops run through the
         // middle, and a deepened base at the bottom-right grounds it.
-        val crown = lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+        // v81 — dark: a softer white whisper so the dark crown never washes.
+        val crown = if (isCurioDarkTheme()) {
+            lerp(gradient.first(), Color.White, 0.06f)
+        } else {
+            lerp(gradient.first(), Color.White, if (pastelLightHero) 0.08f else 0.16f)
+        }
         val base = lerp(gradient.last(), Color.Black, 0.06f)
         val stops = if (gradient.size > 2) {
             listOf(crown) + gradient.drop(1).dropLast(1) + listOf(base)
@@ -3522,6 +3541,10 @@ private fun SpinButton(
                 .scale(pulseScale.coerceIn(0.9f, 1.10f))
                 // v9.x — the theme-style accent rim on the shuffle button.
                 .categoryEdgeShine(CircleShape, accent = shineAccent)
+                // v81 — One UI 9.5 floating-pill language: a soft radial
+                // inner glow of the accent's light twin pushed in from the
+                // top-left, clipped inside the plate (dark mode only).
+                .curioInnerGlow(CircleShape, accent = shineAccent)
         ) {
             Box(
                 modifier = Modifier
@@ -3628,6 +3651,10 @@ private fun OrbitRing(active: Boolean, color: Color, modifier: Modifier = Modifi
     // (and the bloom made it read even whiter). Deepen to a deep same-hue
     // ink so the dots carry the category color and read on the light surface.
     val dotColor = when {
+        // v81 — dark: the pitch-black page needs the accent's LIGHT twin
+        // (a same-hue near-white) so the orbiting dots read as glowing
+        // living light instead of vanishing deep dots on black.
+        isCurioDarkTheme() -> lerp(color, Color.White, 0.72f)
         !AppPreferences.pastelColorsState -> deepHueInk(color)
         else -> pastelFillInk(color)
     }

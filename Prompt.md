@@ -1,6 +1,61 @@
 # Prompt.md — Request log
 
-## Current request — category picker: smaller two-line title, hint removed (v80)
+## Current request — reimagined dark mode: pitch black + Samsung One UI 9.5 glow (v81)
+
+### What was asked
+"now lets reimagine the dark mode… background pitch black, torn header a NEW
+SHADE of the same color spectrum, buttons/texts reversed (light ink on dark
+fills), proper dark-mode color research for shades, no background tint in
+dark (watermarks carry identity), colorful things glow reflected INSIDE the
+pill (One UI 9.5 language), 1% whitish gradient pill edges (not a border),
+and a Samsung-style formula for the spin shuffle page. Consider every
+screen."
+
+### Research done
+- **One UI 9.5 visual depth** (Samsung developer docs + Aug 2026 coverage):
+  floating pills with a gradient INNER glow, a soft radial highlight, frosted
+  "lens" glass, shiny glass edges — no border outlines. Mapped 1:1 to the
+  ask: `curioInnerGlow` (radial accent-light pushed in from top-left, clipped
+  inside the shape) + `curioGlassEdge` (1% whitish top-lit gradient, not a
+  border), dark-only no-ops.
+- **Dark-mode color science**: desaturate accents ~20 points (saturated
+  colors vibrate on black); communicate elevation by stepping surface
+  lightness UP; never invert light colors — build dark-specific shades.
+
+### What was done (user chose: Light/Dark/System picker AND everything in one pass)
+1. **Pref** — `themeModeState` (Light/Dark/System) re-added to AppPreferences
+   + `initThemeMode` seeding.
+2. **Seam** — `isCurioDarkTheme()`/`isCurioDarkThemeForContext()` now read
+   the pref (System follows device).
+3. **Dark scheme** — `CurioDarkColorScheme`: pitch-black background, surfaces
+   step up through near-black greys (elevation via lightness), bright accent
+   roles.
+4. **CategoryInk** — dark branches everywhere: `categoryInk`/`readableAccentInk`
+   → the LIGHT 300 twin (the reversal); `themedAccent` → `darkAccent` (same
+   hue, L≈0.44, ~20% desat); `headerAccent` → same-hue dark hero shade
+   (L≈0.34); `categoryBackgroundWash` → pure black (no background tint in
+   dark); surfaces → `darkSurfaceTint`/`darkChipTint` (hue at near-black
+   lightness).
+5. **CurioColors** — dark branches for card gradients + the dark hero twins.
+6. **New modifiers** (`CurioGlassEffects.kt`) — `curioGlassEdge` (1% whitish
+   edge) + `curioInnerGlow` (Samsung radial glow), dark-only. Wired into the
+   shared edge shine (`categoryEdgeShine` draws the whitish edge in dark),
+   the search field, sort pill, settings card and progress pill; SpinButton
+   wears the inner glow (Samsung shuffle formula) and the orbit dots flip to
+   the accent's light twin so they glow on black.
+7. **Pickers** — Settings → Appearance and onboarding theme step re-gain the
+   Light/Dark/System choice.
+8. **Screens** — Home, Profile, Settings family, Cabinet, TopicHistory,
+   Onboarding, Pet designer canvas, Detail and Reveal got dark branches for
+   every hardcoded light fill (sticky pills, hero paper, frosted glass,
+   progress dialog).
+
+### Validation
+Brace/paren deltas vs HEAD are additions of balanced blocks (all open==close
+per file), `git diff --check` clean, no duplicate imports, watermark already
+carries its dark alphas. No Gradle locally (env rule) — CI on push.
+
+## Prior — category picker: smaller two-line title, hint removed (v80)
 
 ### What was asked
 "the theme removal got pushed? and also decrease the text size in category

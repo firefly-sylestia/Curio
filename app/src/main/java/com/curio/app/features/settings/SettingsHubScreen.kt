@@ -98,6 +98,7 @@ import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
@@ -211,9 +212,10 @@ fun SettingsHeroHeader(
                     .offset(y = bannerHeight - 18.dp)                    .clip(sheetShape)                    .background(
                     // v68 — the paper under the tear picks up a whisper of
                     // the hero's own color instead of a flat cream, so the
-                    // lip always reads tinted with the banner. v78 — light
-                    // only (the AMOLED rose twin is gone with dark mode).
-                    lerp(Color(0xFFFDFCF9), fill, 0.10f)
+                    // lip always reads tinted with the banner. v81 — dark:
+                    // a subtle lighter lip off the dark hero.
+                    if (isCurioDarkTheme()) lerp(fill, Color.White, 0.10f)
+                    else lerp(Color(0xFFFDFCF9), fill, 0.10f)
                 )
 
         )
@@ -584,12 +586,21 @@ fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): C
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
-    // v78 — light Curio only (the Material/AMOLED scheme-role branches and
-    // the dark rose-wood twin are gone with dark mode).
     // v30 — "Hero follows Spin lane": the shared hero wears the Spin
     // lane's category accent (the Cabinet's filtered-hero language) instead
     // of the rose/azure.
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
+    // v81 — dark mode: the torn hero wears a NEW SHADE of the same spectrum
+    // — the deep rose/azure twins (never the light shade).
+    if (isCurioDarkTheme()) {
+        if (AppPreferences.heroBlueState) return CurioColors.HomeAzureDark
+        val base = toHsl(CurioColors.HomeRosewood)
+        if (AppPreferences.pastelColorsState) {
+            val pinkHue = (base.h - 15f + 360f) % 360f
+            return fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.40f)
+        }
+        return CurioColors.HomeRosewoodDark
+    }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
@@ -616,8 +627,9 @@ fun settingsReadableInk(fill: Color): Color {
     // lane banner in non-pastel). The lane branch resolves like every
     // category hero ([heroHeaderInk]); the plain rose keeps the old ink.
     heroLaneCategory()?.let { return it.heroHeaderInk() }
-    // v78 — light Curio only (the Material/AMOLED scheme-role branches are
-    // gone with those styles).
+    // v81 — dark mode: crisp light ink on the dark rose banner (the scheme's
+    // soft cream-white — never pure white, per the dark-mode research).
+    if (isCurioDarkTheme()) return MaterialTheme.colorScheme.onBackground
     return if (!AppPreferences.pastelColorsState) MaterialTheme.colorScheme.onSurface
     else pastelFillInk(fill)
 }
@@ -637,8 +649,10 @@ fun settingsCardAccentInk(): Color {
     // with those styles).
     heroLaneCategory()?.let { return it.categoryInk() }
     if (AppPreferences.heroBlueState) {
-        // A deep azure twin of the airy pastel azure so the glyphs read on
-        // the cream card.
+        // v81 — dark: the light azure twin reads directly on the dark card.
+        if (isCurioDarkTheme()) return CurioColors.HomeAzure
+        // Light: a deep azure twin of the airy pastel azure so the glyphs
+        // read on the cream card.
         return readableLightInk(CurioColors.HomeAzure)
     }
     return curioRoseInk()
@@ -668,8 +682,13 @@ fun settingsCardChipTint(): Color {
  */
 @Composable
 fun settingsCardTintLift(): Color {
-    // v78 — light only (the AMOLED grey glass + dark white lift are gone
-    // with dark mode): a whisper of the page background in the hero hue.
+    // v81 — dark mode: a whisper of the hero's LIGHT ink pulled into the
+    // near-black card, so the option cards read as dark hue-tinted glass on
+    // the pitch-black page (never bright glass).
+    if (isCurioDarkTheme()) {
+        return lerp(Color.Black, settingsCardAccentInk(), 0.20f)
+    }
+    // Light: a whisper of the page background in the hero hue.
     return lerp(
         MaterialTheme.colorScheme.background,
         settingsCardAccentInk(),

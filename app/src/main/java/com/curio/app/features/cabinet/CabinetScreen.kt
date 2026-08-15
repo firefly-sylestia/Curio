@@ -108,6 +108,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -752,14 +753,18 @@ private fun CabinetHeroHeader(
             .height(totalHeight)
     ) {
         // ── Under-sheet — a shared white paper layer, so the tear remains
-        // visible instead of turning into a dark/black strip in dark mode.
+        // v81 — dark: a subtle lighter lip off the dark hero so the seam
+        // still reads (never a bright white sliver on the black page).
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(42.dp)
                 .offset(y = bannerHeight - 18.dp)
                 .clip(sheetShape)
-                .background(CurioColors.CreamWhite)
+                .background(
+                    if (isCurioDarkTheme()) lerp(fill, Color.White, 0.10f)
+                    else CurioColors.CreamWhite
+                )
         )
         // ── Torn-edge shadow — hairline dark rim under the seam.
         Box(

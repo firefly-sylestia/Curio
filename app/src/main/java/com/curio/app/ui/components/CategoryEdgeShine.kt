@@ -5,15 +5,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.unit.dp
-import com.curio.app.data.AppPreferences
+import androidx.compose.ui.graphics.drawscope.clipPath
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v9.x — the theme-style edge shine: a faint hairline light border all
@@ -42,10 +41,34 @@ fun Modifier.categoryEdgeShine(
     intensity: Float = 1f,
     amoledHairline: Boolean = false,
 ): Modifier {
-    // v78 — the AMOLED/Material edge-shine is gone with those styles: the
-    // Curio style is border-free, so the modifier is a no-op (parameters
-    // kept for call-site compatibility).
-    return this
+    // Light: the Curio style is border-free — no-op (parameters kept for
+    // call-site compatibility).
+    if (!isCurioDarkTheme()) return this
+    // v81 — dark mode: the One UI 9.5 "shiny glass edge" — a faint whitish
+    // top-lit gradient INSIDE the shape (the user's "1% whitish edge, not a
+    // border"), scaled by [intensity] like the old shine.
+    return this.drawWithCache {
+        val outline = shape.createOutline(size, layoutDirection, density)
+        val path = outline.toPath()
+        onDrawBehind {
+            clipPath(path) {
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        0f to Color.White.copy(alpha = 0.09f * intensity),
+                        0.15f to Color.White.copy(alpha = 0.03f * intensity),
+                        0.42f to Color.Transparent
+                    ),
+                    size = size
+                )
+            }
+        }
+    }
+}
+
+private fun Outline.toPath(): Path = when (this) {
+    is Outline.Generic -> path
+    is Outline.Rounded -> Path().apply { addRoundRect(roundRect) }
+    is Outline.Rectangle -> Path().apply { addRoundRect(RoundRect(rect)) }
 }
 
 /**

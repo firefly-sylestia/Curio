@@ -130,6 +130,7 @@ import com.curio.app.ui.pet.EYE_STYLE_PIXELS
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
 
 /** One editable color in the palette — its grid key, name and hex. */
@@ -4344,7 +4345,11 @@ private fun PixelGrid(
             )
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(CurioColors.SoftCream)
+            // v81 — dark: the pixel canvas wears a near-black surface so
+            // the sprite reads on the black page.
+            .background(
+                if (isCurioDarkTheme()) Color(0xFF121214) else CurioColors.SoftCream
+            )
     ) {
         // v8.36 — zoom: cells grow so small parts (faces, details) are easy
         // to edit. When the zoomed grid still fits the screen it stays

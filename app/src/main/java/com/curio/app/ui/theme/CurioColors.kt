@@ -178,10 +178,15 @@ object CurioColors {
      * hero fill.
      */
     val HomeRosewood     = Color(0xFFCF8B94)
+    /** v81 — the dark-mode torn-hero twin: the same rosewood hue at a deep,
+     *  slightly desaturated lightness (a NEW SHADE of the same spectrum). */
+    val HomeRosewoodDark = Color(0xFF6E3A44)
     // v27l — the optional sky-azure hero variant: a brighter, fresher azure
     // (the Science/Sky hue at sky-300-ish saturation, held a touch softer
     // than neon).
     val HomeAzure        = Color(0xFF9ED2EF)
+    /** v81 — the dark-mode azure hero twin (same hue, deep shade). */
+    val HomeAzureDark    = Color(0xFF2F5163)
 
     /** Tinted (20% alpha) versions of the legacy accents for backgrounds. */
     val LilacTint     = Lilac.copy(alpha = 0.20f)
@@ -331,9 +336,6 @@ object CurioGradients {
      * card). The pastel accent is already soft enough for white-free ink.
      */
     fun categoryCardFill(accent: Color): Color = when {
-        // v78 — light only (AMOLED/dark treatment gone with dark mode): the
-        // pastel accent stays pure; the plain accent gets a gentle 10%
-        // black deepen for jewel-tone depth.
         AppPreferences.pastelColorsState -> accent
         else -> lerp(accent, Color.Black, 0.10f)
     }
@@ -400,10 +402,16 @@ object CurioGradients {
         } else {
             categoryCardFill(accent)
         }
-        // v7.8 — on tint-washed Curio pages the card melts into the washed
-        // background on the category's OWN hue (same recipe as the page
-        // wash), not the raw cream that dragged cool accents off-family.
-        val end = if (AppPreferences.tintWashEffective()) {
+        // v81 — dark mode: the card melts into the PITCH-BLACK page (no
+        // tint wash in dark), so the gradient ends on the black background
+        // with the dark accent crown on top.
+        val end = if (isCurioDarkTheme()) {
+            MaterialTheme.colorScheme.background
+        } else if (AppPreferences.tintWashEffective()) {
+            // v7.8 — on tint-washed Curio pages the card melts into the
+            // washed background on the category's OWN hue (same recipe as
+            // the page wash), not the raw cream that dragged cool accents
+            // off-family.
             if (AppPreferences.pastelColorsState) lightAccentTint(accent, saturation = 0.22f, lightness = 0.80f)
             else lightAccentTint(accent)
         } else {
@@ -428,23 +436,32 @@ object CurioGradients {
      */
     @Composable
     fun heroBlendGradient(accent: Color): List<Color> {
-        // v78 — light only (the dark/AMOLED branches are gone with dark
-        // mode): the golden companion softens to butter in pastel mode.
         val pastel = AppPreferences.pastelColorsState
+        val dark = isCurioDarkTheme()
 
-        val companionBase = if (pastel) CurioColors.ButterYellow
-        else CurioColors.GoldInk
+        // v81 — dark: the golden companion deepens (the old dark behavior)
+        // so the duotone reads rich on black instead of glowing neon.
+        val companionBase = when {
+            dark && pastel -> lerp(CurioColors.ButterYellow, Color.Black, 0.30f)
+            dark -> lerp(CurioColors.GoldInk, Color.Black, 0.25f)
+            pastel -> CurioColors.ButterYellow
+            else -> CurioColors.GoldInk
+        }
 
         // Top crown — a whisper of light at the very top for a premium
-        // lit-surface feel (crisp in light).
-        val crown = if (pastel) lerp(accent, Color.White, 0.10f)
+        // lit-surface feel. Dark: a softer white whisper so the dark crown
+        // never washes out.
+        val crown = if (dark) lerp(accent, Color.White, 0.08f)
+        else if (pastel) lerp(accent, Color.White, 0.10f)
         else lerp(accent, Color.White, 0.16f)
 
         // The accent stop — the card fill (theme-aware), already pastel in
-        // pastel mode.
-        val accentStop = if (pastel && AppPreferences.pastelCrownDepthState)
-            lerp(categoryCardFill(accent), Color.Black, 0.05f)
-        else categoryCardFill(accent)
+        // pastel mode and already dark in dark mode.
+        val accentStop = when {
+            dark -> lerp(categoryCardFill(accent), Color.Black, 0.06f)
+            pastel && AppPreferences.pastelCrownDepthState -> lerp(categoryCardFill(accent), Color.Black, 0.05f)
+            else -> categoryCardFill(accent)
+        }
 
         return listOf(crown, accentStop, companionBase)
     }
@@ -610,11 +627,14 @@ object CurioMixedDeck {
     fun mixedDeckWash(blend: Color): Color {
         val background = MaterialTheme.colorScheme.background
         if (!AppPreferences.tintWashEffective()) return background
-        // v78 — light only (the dark midnight wash is gone with dark mode):
-        // a pastel twin of the blend over cream at high strength — the hue
-        // is unmistakable per mix while staying light enough for the deep
-        // maroon ink on top (pastel mode: a moderate wash over cream so
-        // green-heavy mixes don't flood the screen with bright mint).
+        // v81 — dark mode: NO page tint — pitch black, the same rule as the
+        // single-category wash (the watermark + deck carry the mix color).
+        if (isCurioDarkTheme()) return background
+        // Light: a pastel twin of the blend over cream at high strength —
+        // the hue is unmistakable per mix while staying light enough for
+        // the deep maroon ink on top (pastel mode: a moderate wash over
+        // cream so green-heavy mixes don't flood the screen with bright
+        // mint).
         return if (AppPreferences.pastelColorsState) lerp(background, blend, 0.72f)
         else lerp(background, lerp(blend, Color.White, 0.40f), 0.85f)
     }

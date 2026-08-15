@@ -401,6 +401,25 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v81 — the reimagined dark mode: pitch black + Samsung One UI 9.5
+  glow.** `themeModeState` (Light/Dark/System) is back in AppPreferences
+  and `isCurioDarkTheme()`/`ForContext` read it (System follows the
+  device). `CurioDarkColorScheme`: pitch-black page, surfaces step up
+  through near-black greys (elevation via lightness), bright accent
+  roles. CategoryInk dark branches: `categoryInk` → the LIGHT 300 twin,
+  `themedAccent` → `darkAccent` (same hue, L≈0.44, ~20% desat),
+  `headerAccent` → same-hue dark hero shade (L≈0.34), the wash collapses
+  to pure black (NO background tint in dark — watermarks carry the
+  category identity, with their pre-existing dark alphas), surfaces →
+  `darkSurfaceTint`/`darkChipTint`. New `CurioGlassEffects.kt`:
+  `curioGlassEdge` (the 1% whitish top-lit edge, NOT a border) +
+  `curioInnerGlow` (the One UI 9.5 radial inner glow) — both dark-only
+  no-ops in light; `categoryEdgeShine` draws the whitish edge in dark, so
+  the treatment is app-wide. The SpinButton wears the glow (Samsung
+  shuffle formula) and the orbit dots flip to the accent's light twin.
+  Buttons/fills reversed per the ask: dark same-hue fills with light twin
+  ink (`themedButtonFill`/`themedButtonInk`). Settings → Appearance and
+  the onboarding theme step re-gain the Light/Dark/System picker.
 - **v79 — sort pill and search pill get the equal middle-size treatment
   (Cabinet + Topic Browser).** The sort dropdown's Row had drifted to
   `heightIn(min = 52.dp)` while the icon-only Search pills

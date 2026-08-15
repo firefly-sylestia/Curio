@@ -81,6 +81,9 @@ fun CurioSettingsCard(
             // elevation reads on midnight (black shadows are invisible).
             .curioDarkGlow(shadowElevation, RoundedCornerShape(28.dp))
             .categoryEdgeShine(RoundedCornerShape(28.dp))
+            // v81 — dark: a faint radial inner glow in the hero hue on the
+            // card (One UI pushed-in glass; self-gating, light is a no-op).
+            .curioInnerGlow(RoundedCornerShape(28.dp), settingsCardChipTint(), strength = 0.10f)
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 

@@ -109,6 +109,7 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.CurioDialogShape
@@ -434,9 +435,12 @@ fun ProfileScreen(navController: NavController) {
         // exact construction); scrolled state = solid frosted pills.
         val restPillBg = heroFill
         val restPillRim = lerp(heroFill, heroInk, 0.42f)
-        val frostPillBg = Color.White
-        val frostPillRim = Color(0xFFD9DEE6)
-        val frostPillIcon = MaterialTheme.colorScheme.onSurfaceVariant
+        // v81 — dark: the scrolled frosted pills become dark glass with a
+        // light rim + light icon (the exact light-mode reversal).
+        val frostPillBg = if (isCurioDarkTheme()) Color(0xFF1B1B1D) else Color.White
+        val frostPillRim = if (isCurioDarkTheme()) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
+        val frostPillIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
+                            else MaterialTheme.colorScheme.onSurfaceVariant
         // Resolve solid target colors from scroll, then animate the paint.
         val targetPillBg = lerp(restPillBg, frostPillBg, frostShift)
         val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
@@ -663,8 +667,10 @@ private fun ProfileHero(
                 .background(
                     // v68 — the paper under the tear picks up a whisper of
                     // the hero's own color instead of a flat cream, so the
-                    // lip always reads tinted with the banner.
-                    lerp(CurioColors.CreamWhite, fill, 0.10f)
+                    // lip always reads tinted with the banner. v81 — dark:
+                    // a subtle lighter lip off the dark hero.
+                    if (isCurioDarkTheme()) lerp(fill, Color.White, 0.10f)
+                    else lerp(CurioColors.CreamWhite, fill, 0.10f)
                 )
         )
         // ── Torn-edge shadow — hairline dark rim under the seam so the
@@ -1061,6 +1067,17 @@ private fun profileRoseAccent(): Color {
     // hero must follow the spin lane like Home/Settings do. The hero wears
     // the last-picked lane's accent.
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
+    // v81 — dark mode: the torn hero wears a NEW SHADE of the same spectrum
+    // — the deep rose/azure twins (never the light shade).
+    if (isCurioDarkTheme()) {
+        if (AppPreferences.heroBlueState) return CurioColors.HomeAzureDark
+        val base = toHsl(CurioColors.HomeRosewood)
+        if (AppPreferences.pastelColorsState) {
+            val pinkHue = (base.h - 15f + 360f) % 360f
+            return fromHsl(pinkHue, ((base.s * 0.90f).coerceIn(0f, 0.80f) + 0.05f).coerceAtMost(0.85f), 0.40f)
+        }
+        return CurioColors.HomeRosewoodDark
+    }
     // v27l — optional sky-azure hero: when enabled, the shared hero wears
     // the airy pastel azure (Science/Sky twin) instead of the rose-wood.
     if (AppPreferences.heroBlueState) {
@@ -1086,6 +1103,8 @@ private fun profileReadableInk(fill: Color): Color {
     // banner in non-pastel). The lane branch resolves like every category
     // hero ([heroHeaderInk]); the plain rose keeps the old ink.
     heroLaneCategory()?.let { return it.heroHeaderInk() }
+    // v81 — dark mode: crisp light ink on the dark rose banner.
+    if (isCurioDarkTheme()) return MaterialTheme.colorScheme.onBackground
     return if (!AppPreferences.pastelColorsState) MaterialTheme.colorScheme.onSurface
            else pastelFillInk(fill)
 }

@@ -55,7 +55,9 @@ fun CurioSearchField(
         modifier = modifier
             .fillMaxWidth()
             // v28 — dark mode elevation visibility (glow + hairline).
+            // v81 — dark: the One UI shiny glass edge on the search pill.
             .curioDarkGlow(3.dp, pillShape)
+            .curioGlassEdge(pillShape)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),

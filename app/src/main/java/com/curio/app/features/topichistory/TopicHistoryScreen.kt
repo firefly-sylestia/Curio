@@ -72,6 +72,7 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioDialogShape
@@ -488,7 +489,11 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
                 .height(42.dp)
                 .offset(y = HistoryHeroBannerHeight - 18.dp)
                 .clip(sheetShape)
-                .background(CurioColors.CreamWhite)
+                // v81 — dark: a subtle lighter lip off the dark hero.
+                .background(
+                    if (isCurioDarkTheme()) lerp(fill, Color.White, 0.10f)
+                    else CurioColors.CreamWhite
+                )
         )
         // ── Torn-edge shadow — hairline dark rim just below the seam.
         Box(

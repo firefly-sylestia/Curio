@@ -23,16 +23,18 @@ import com.curio.app.data.CurioCategory
  */
 @Composable
 fun CurioCategory.categoryInk(): Color {
-    // v78 — light mode only (dark mode removed). The DEEP accent (not
-    // themedAccent): pastel mode softens themedAccent but text/icons on
-    // plain surfaces must stay deep to read. Mid-lightness accents (the new
-    // green/lime lanes, the old sky/amber/red/blue families, the pale
-    // wildcard coral) can't serve as their own ink on the light surfaces —
-    // the washed page and pastel fills drop them below ~4.5:1 (e.g. green
-    // text on the green page wash reads ~3.8:1). Return a deep twin of the
-    // SAME hue so accent text and icons stay readable; genuinely deep
-    // accents (brown, navy, indigo, plum, tech slate…) keep themselves
-    // exactly as before.
+    // v81 — dark mode: the LIGHT 300-level twin is the text/icon ink on the
+    // pitch-black page (the "lighter color is now the text" reversal).
+    if (isCurioDarkTheme()) return lightAccent
+    // The DEEP accent (not themedAccent): pastel mode softens themedAccent
+    // but text/icons on plain surfaces must stay deep to read.
+    // Mid-lightness accents (the new green/lime lanes, the old
+    // sky/amber/red/blue families, the pale wildcard coral) can't serve as
+    // their own ink on the light surfaces — the washed page and pastel
+    // fills drop them below ~4.5:1 (e.g. green text on the green page wash
+    // reads ~3.8:1). Return a deep twin of the SAME hue so accent text and
+    // icons stay readable; genuinely deep accents (brown, navy, indigo,
+    // plum, tech slate…) keep themselves exactly as before.
     return if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
 }
 
@@ -60,9 +62,14 @@ fun CurioCategory.themedAccent(): Color {
     // twin is theme-aware: an airy pastel on the cream surface in light mode,
     // a muted deep pastel over midnight in dark mode. Content on these fills
     // flips to [onAccent] (deep ink in light, light twin in dark).
-    if (!AppPreferences.pastelColorsState) return accent
-    // v78 — light only (dark mode removed): the airy light twin.
-    return pastelAccent(accent, false)
+    if (!AppPreferences.pastelColorsState) {
+        // v81 — dark mode: the researched accent is too deep to read as a
+        // FILL on pitch black (~1.9:1), so it resolves to a NEW SHADE of the
+        // same hue — a readable dark jewel tone ([darkAccent]). Light mode
+        // keeps the exact researched accent.
+        return if (isCurioDarkTheme()) darkAccent(accent) else accent
+    }
+    return pastelAccent(accent, isCurioDarkTheme())
 }
 
 /**
@@ -86,11 +93,18 @@ fun CurioCategory.headerAccent(): Color {
         val b = toHsl(base)
         fromHsl(b.h, (b.s * 0.85f).coerceAtMost(0.60f), b.l)
     }
+    // v81 — dark mode: the torn hero wears a NEW SHADE of the same color
+    // spectrum — a deep, gently desaturated twin (lightness ~0.34) so the
+    // banner reads clearly as dark-mode against the pitch-black page while
+    // the category hue stays recognizable (never the light shade).
+    if (isCurioDarkTheme()) {
+        val a = toHsl(calm)
+        return fromHsl(a.h, (a.s * 0.85f).coerceAtMost(0.55f), 0.34f)
+    }
     if (!AppPreferences.headerDeepState) return calm
     // Hue-preserving deepen: pull lightness down rather than lerping toward
     // black (which would grey the hue). Light mode deepens a touch more so
-    // the banner reads a shade richer on the cream page. v78 — light only
-    // (dark mode removed).
+    // the banner reads a shade richer on the cream page.
     val hsl = toHsl(calm)
     return fromHsl(hsl.h, hsl.s, hsl.l * 0.88f)
 }
@@ -106,7 +120,8 @@ fun CurioCategory.headerAccent(): Color {
  */
 @Composable
 fun CurioCategory.readableAccentInk(): Color {
-    // v78 — light only (dark mode removed).
+    // v81 — dark mode resolves the light twin, exactly like [categoryInk].
+    if (isCurioDarkTheme()) return lightAccent
     return if (accent.needsLightDeepInk()) readableLightInk(accent) else accent
 }
 
@@ -149,7 +164,10 @@ fun CurioCategory.onAccent(): Color = when {
  */
 @Composable
 fun CurioCategory.heroHeaderInk(): Color {
-    // v78 — light only (dark mode removed): the pastel-aware [onAccent].
+    // v81 — dark mode always reads cream-white on the dark banner (the same
+    // blend the shared rose heroes use), never the tinted light twin.
+    if (isCurioDarkTheme()) return pastelFillInk(themedAccent())
+    // Light: the pastel-aware [onAccent].
     return onAccent()
 }
 
@@ -162,7 +180,9 @@ fun CurioCategory.heroHeaderInk(): Color {
  */
 @Composable
 fun CurioCategory.themedButtonFill(): Color {
-    // v78 — light only (dark mode removed): the true category accent.
+    // v81 — dark mode: [themedAccent] already resolves the dark same-hue
+    // shade, so buttons wear a dark fill; [themedButtonInk] flips to the
+    // light twin — the exact light-mode reversal the user asked for.
     return themedAccent()
 }
 
@@ -191,7 +211,9 @@ fun CurioCategory.cardContentInk(): Color = onAccent()
 @Composable
 fun pastelFillInk(fill: Color): Color = when {
     !AppPreferences.pastelColorsState -> Color.White
-    // v78 — light only (the muted dark pastel tint is gone with dark mode).
+    // v81 — dark mode: the muted dark fills get a light tint (85% toward
+    // white keeps the hue whisper while staying crisp light-on-dark).
+    isCurioDarkTheme() -> lerp(fill, Color.White, 0.85f)
     else -> {
         // v27p — deepen the light pastel-fill ink (0.30 -> 0.24 lightness)
         // so even green/yellow pastels (Chemistry, Biology, the mixed-deck
@@ -221,7 +243,7 @@ internal fun CurioCategory.categoryInkFor(pastel: Boolean, dark: Boolean): Color
  * parameterized by pastel mode + dark theme (see [categoryInkFor]).
  */
 internal fun CurioCategory.themedAccentFor(pastel: Boolean, dark: Boolean): Color =
-    if (!pastel) accent else pastelAccent(accent, dark)
+    if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark)
 
 /** Whether a color is pale enough to need a deep ink twin instead of itself. */
 private fun Color.isPale(): Boolean {
@@ -298,10 +320,13 @@ fun CurioCategory.categoryBackgroundWash(): Color {
     // the plain theme background (cream) exactly as they did before the wash
     // rollout.
     if (!AppPreferences.tintWashEffective()) return background
-    // v78 — light mode only (the dark mid-tone wash is gone with dark mode):
-    // a whisper pastel page (lighter + less saturated than the standard wash
-    // in pastel mode) so the airy pastel fills pop instead of melting into
-    // the background.
+    // v81 — dark mode: NO background tint — the page is pitch black (the
+    // user's spec), so the wash collapses to the pure black background and
+    // the watermark carries the category identity instead.
+    if (isCurioDarkTheme()) return background
+    // Light: a whisper pastel page (lighter + less saturated than the
+    // standard wash in pastel mode) so the airy pastel fills pop instead of
+    // melting into the background.
     return if (AppPreferences.pastelColorsState) lightAccentTint(accent, saturation = 0.20f, lightness = 0.90f)
     else lightAccentTint(accent)
 }
@@ -320,8 +345,11 @@ fun CurioCategory.categoryBackgroundWash(): Color {
 @Composable
 fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
     if (!AppPreferences.tintWashEffective()) return base
-    // v78 — light mode only (the dark mid-tone cards are gone with dark
-    // mode): the wash's stronger sibling, so tiles and chips read as a
+    // v81 — dark mode: a near-black card tinted with the category's hue
+    // (elevation reads as lighter surfaces on the black page — the dark
+    // best practice), so cards carry the lane color on pitch black.
+    if (isCurioDarkTheme()) return darkSurfaceTint(accent)
+    // Light: the wash's stronger sibling, so tiles and chips read as a
     // tinted elevated surface on the tinted page.
     return lightSurfaceTint(accent)
 }
@@ -337,8 +365,10 @@ fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfac
 @Composable
 fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorScheme.surfaceContainerHigh): Color {
     if (!AppPreferences.tintWashEnabledState) return base
-    // v78 — light mode only (the dark mid-tone canvas is gone with dark
-    // mode): the wash's stronger sibling.
+    // v81 — dark mode: the mood board keeps its category tint even on the
+    // pitch-black page via the dark surface shade.
+    if (isCurioDarkTheme()) return darkSurfaceTint(accent)
+    // Light: the wash's stronger sibling.
     return lightSurfaceTint(accent)
 }
 
@@ -358,8 +388,11 @@ fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorSche
 @Composable
 fun CurioCategory.categoryChipSurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
     if (!AppPreferences.tintWashEffective()) return base
-    // v78 — light mode only (the desaturated dark chips are gone with dark
-    // mode): the wash's stronger sibling, so chips read as tappable pills.
+    // v81 — dark mode: a touch lighter + more desaturated than cards so the
+    // chip lifts off the near-black cards (deep accents otherwise read
+    // muddy over black).
+    if (isCurioDarkTheme()) return darkChipTint(accent)
+    // Light: the wash's stronger sibling, so chips read as tappable pills.
     return lightSurfaceTint(accent)
 }
 
@@ -377,5 +410,29 @@ private fun lightSurfaceTint(accent: Color): Color =
     if (AppPreferences.pastelColorsState) lightAccentTint(accent, saturation = 0.28f, lightness = 0.86f)
     else lightAccentTint(accent, saturation = 0.36f, lightness = 0.86f)
 
-// v78 — the per-family dark-mode wash tuning (DarkWashTuning /
-// DEFAULT_DARK_WASH / DARK_WASH_TUNING) is gone with dark mode.
+// ── v81 dark-mode shade helpers ────────────────────────────────────────
+/**
+ * The dark-mode ACCENT shade — the SAME hue at a readable dark lightness
+ * (~0.44) with ~20% less saturation (saturated colors vibrate on black —
+ * the dark-mode color research). Fills, gradients and button fills wear
+ * this on the pitch-black page; content on top flips to the light twin
+ * ([categoryInk]/[onAccent]).
+ */
+internal fun darkAccent(color: Color): Color {
+    val a = toHsl(color)
+    return fromHsl(a.h, (a.s * 0.80f).coerceAtMost(0.52f), 0.44f)
+}
+
+/** v81 — dark-mode CARD surface: the accent's hue at near-black lightness
+ *  (elevation reads as lighter surfaces on the black page). */
+private fun darkSurfaceTint(accent: Color): Color {
+    val a = toHsl(accent)
+    return fromHsl(a.h, (a.s * 0.55f).coerceAtMost(0.40f), 0.22f)
+}
+
+/** v81 — dark-mode CHIP surface: a touch lighter and more desaturated than
+ *  cards so chips read as tappable pills on the near-black cards. */
+private fun darkChipTint(accent: Color): Color {
+    val a = toHsl(accent)
+    return fromHsl(a.h, (a.s * 0.45f).coerceAtMost(0.32f), 0.28f)
+}
