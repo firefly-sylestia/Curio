@@ -4164,8 +4164,11 @@ private fun CategoryPickerSheet(
                             .align(Alignment.TopStart)
                             .padding(start = 14.dp, top = 10.dp)
                     )
-                    // Title + mode hint + deck status chip, riding the
-                    // banner (it clears the status bar like every hero).
+                    // Title + deck status chip, riding the banner (it
+                    // clears the status bar like every hero). v79 — the
+                    // title steps down to 28sp and wraps onto two lines
+                    // ("What are we / Exploring?"), and the mode-hint
+                    // subtitle is gone.
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -4175,25 +4178,13 @@ private fun CategoryPickerSheet(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "What are we exploring?",
+                                text = "What are we\nExploring?",
                                 style = MaterialTheme.typography.titleLarge.copy(
-                                    fontSize = 34.sp,
+                                    fontSize = 28.sp,
+                                    lineHeight = 34.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 ),
-                                color = pickerHeroInk,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = if (multiSelectMode) {
-                                    "Tap to toggle decks · Done to spin together"
-                                } else {
-                                    "Tap a deck to spin it. Hold to pick several."
-                                },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = pickerHeroInk.copy(alpha = 0.85f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                color = pickerHeroInk
                             )
                         }
                         // Current category indicator — or selection count in

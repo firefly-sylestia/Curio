@@ -1,6 +1,30 @@
 # Prompt.md — Request log
 
-## Current request — Cabinet + Topic Browser: sort pill and search pill equal middle size (v79)
+## Current request — category picker: smaller two-line title, hint removed (v80)
+
+### What was asked
+"the theme removal got pushed? and also decrease the text size in category
+picker What are e exploring and remove the text below that. and make the
+title go What are we then next line Exploring?"
+
+### What was done
+1. **Push confirmed** — yes: pushing the v79 pill fix carried the v78
+   light-only removal along (same branch); both are on `origin/main`
+   (`f59ac52` + `1714ea4`).
+2. **CategoryPickerSheet banner (SpinScreen.kt):** the title stepped down
+   34 → 28sp and now wraps onto two lines via an explicit line break
+   ("What are we\nExploring?") with a tight 34sp line height; the mode-
+   hint subtitle ("Tap a deck to spin it. Hold to pick several." / "Tap
+   to toggle decks · Done to spin together") was removed entirely. The
+   deck-status chip (category name / "N selected") stays. Note the old
+   `maxLines = 1` had to go with the manual newline or the second line
+   would have been ellipsized away.
+
+### Validation
+Brace/paren delta vs HEAD = 0, `git diff --check` clean, old hint strings
+gone from the file. No Gradle locally (env rule) — CI on push.
+
+## Prior — Cabinet + Topic Browser: sort pill and search pill equal middle size (v79)
 
 ### What was asked
 "in cabinet and topic browser, can u make the search icon shape and the sort

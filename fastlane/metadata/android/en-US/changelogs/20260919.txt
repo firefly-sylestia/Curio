@@ -46,6 +46,7 @@ FIX
 - Settings, its sub pages and Topic History back buttons are now opaque theme-aware pills (no more see-through glass).
 - Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
 - Cabinet and Topic Browser: the sort pill and search pill are the same middle size now (46dp tall, 20dp icons) instead of the sort reading bigger.
+- Spin category picker: the title is smaller and wraps onto two lines ("What are we / Exploring?"), and the subtitle text below it is gone.
 - Mood board images import through the universal Android photo picker.
 - The mood board editor now shows exactly what the saved entry shows — no more resizing or layout jumps between editing and the detail view.
 - Picking a mood collapses the mood selector right away.

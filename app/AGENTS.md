@@ -394,6 +394,13 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v80 — category picker banner: smaller two-line title, hint removed.**
+  `CategoryPickerSheet`'s "What are we exploring?" stepped 34 → 28sp and
+  now wraps onto two lines ("What are we\nExploring?", 34sp line height);
+  the mode-hint subtitle ("Tap a deck to spin it. Hold to pick
+  several." / "Tap to toggle decks · Done to spin together") is deleted.
+  The deck-status chip stays. (`maxLines = 1` was removed with the
+  manual newline or the second line would have ellipsized away.)
 - **v79 — sort pill and search pill get the equal middle-size treatment
   (Cabinet + Topic Browser).** The sort dropdown's Row had drifted to
   `heightIn(min = 52.dp)` while the icon-only Search pills
