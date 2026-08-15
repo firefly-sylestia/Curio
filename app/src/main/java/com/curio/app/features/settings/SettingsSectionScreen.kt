@@ -215,6 +215,14 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v101 — the dark-mode pill glow is the subtle top-only version by
+        // default; the toggle restores the fuller glow for comparison.
+        SettingsRowPulse(highlightKey == "appearance-pill-glow") {
+            CompactSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
+                AppPreferences.setPillGlowSubtleEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
         // v42 — the hero picker is a two-option control (Rose hero / Azure
         // hero), both fully selectable — azure is back and now the DEFAULT.
         // The whole control greys out while Adaptive Hero (below) is active,

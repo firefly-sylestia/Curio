@@ -401,6 +401,19 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v101 — subtle top-only pill glow, as an option.** (1) AppPreferences:
+  new `pillGlowSubtleState` (DEFAULT ON) + `KEY_PILL_GLOW_SUBTLE` +
+  `isPillGlowSubtleEnabled` / `setPillGlowSubtleEnabled`, seeded in
+  `initThemeMode`. (2) CurioGlassEffects.kt — both dark-only effects read
+  the pref: `curioGlassEdge` (subtle) drops the top alphas 0.10/0.04 →
+  0.05/0.02 and ends the gradient at 0.35 (the bottom whisper is GONE —
+  top-only); `curioInnerGlow` (subtle) halves the strength and ties the
+  radius to the SHORT side (`minDimension * 0.55` vs `maxDimension *
+  0.95`) so the radial hugs the pill's top instead of filling it. Off =
+  the original fuller gradient / pushed-in glow. (3) Settings →
+  Appearance: "Subtle pill glow" switch (default ON; off restores the
+  fuller glow for comparison). User asked for the option; default ON per
+  the v97 paper-card precedent (the new look ships, toggle compares).
 - **v100 — search-text audit + filter hierarchy.** (1) SEARCH TEXT: every
   search bar now resolves the THEME text color (`onSurface` — near-black
   light, near-white dark) instead of a colored ink: `CurioSearchField`'s

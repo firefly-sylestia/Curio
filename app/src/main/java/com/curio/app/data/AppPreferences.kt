@@ -295,6 +295,10 @@ object AppPreferences {
     // v97 — the Paper stat card experiment PASSED: on by default app-wide
     // (the Experiments toggles stay for comparison).
     var paperStatCardsState by mutableStateOf(true)
+    // v101 — the pill glow (dark mode) is the SUBTLE top-only version by
+    // default (gentler glass edge + a glow that hugs the pill's top); the
+    // toggle restores the fuller glow for comparison.
+    var pillGlowSubtleState by mutableStateOf(true)
     var paperStatTearState by mutableStateOf(false)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
@@ -540,6 +544,7 @@ object AppPreferences {
         paperHoleRingStyleState = getPaperHoleRingStyle(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
+        pillGlowSubtleState = isPillGlowSubtleEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
         homeTintFollowLaneState = isHomeTintFollowLaneEnabled(context)
@@ -809,6 +814,7 @@ object AppPreferences {
     private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
     private const val KEY_PAPER_HOLE_RING_STYLE = "paper_hole_ring_style"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
+    private const val KEY_PILL_GLOW_SUBTLE = "pill_glow_subtle"
     private const val KEY_HOME_TINT = "home_tint"
     private const val KEY_HOME_HERO_TINT = "home_hero_tint"
     private const val KEY_HOME_TINT_FOLLOW_LANE = "home_tint_follow_lane"
@@ -897,6 +903,15 @@ object AppPreferences {
     fun setPaperStatCardsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_STAT_CARDS, enabled).apply()
         paperStatCardsState = enabled
+    }
+
+    /** Whether the dark-mode pill glow is the subtle top-only version (v101, default ON). */
+    fun isPillGlowSubtleEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PILL_GLOW_SUBTLE, true)
+
+    fun setPillGlowSubtleEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PILL_GLOW_SUBTLE, enabled).apply()
+        pillGlowSubtleState = enabled
     }
 
     /** Whether the stat paper card wears torn paper edges (extended tear on top; experimental, default off). */

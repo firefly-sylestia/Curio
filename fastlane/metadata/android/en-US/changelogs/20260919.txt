@@ -6,6 +6,7 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
+- Dark-mode pill glow is now subtler and hugs only the pill's top edge, and a new Subtle pill glow option in Settings → Appearance lets you restore the fuller glow.
 - Search bars: every search bar now uses the standard theme text color — the Spin filter search no longer washes out, and the hero searches read crisp on the frosted glass.
 - Spin filters: group pills are now category-tinted while the filter chips stay neutral, and both have clearer pill elevation — the accordion reads as parents over options.
 - Update toast is now a compact one-line pill that waits a few seconds past launch instead of popping over the start screen.

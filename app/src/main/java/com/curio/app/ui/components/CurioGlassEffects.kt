@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -21,6 +22,10 @@ import com.curio.app.ui.theme.isCurioDarkTheme
  * the pill's top edge (and a whisper at the bottom), fading out inside the
  * shape — NOT a border. This is the user's "1% whitish edge" ask: extremely
  * subtle, and only rendered in dark mode (a no-op in light).
+ *
+ * v101 — the "Subtle pill glow" option: when ON (the default) the edge is
+ * GENTLER and TOP-ONLY — lower alphas and no bottom whisper — so the pill
+ * catches white only along its top edge.
  */
 fun Modifier.curioGlassEdge(shape: Shape): Modifier = composed {
     val layoutDirection = LocalLayoutDirection.current
@@ -29,14 +34,20 @@ fun Modifier.curioGlassEdge(shape: Shape): Modifier = composed {
         drawContent()
         val path = shape.createOutline(size, layoutDirection, this).toPath()
         clipPath(path) {
+            val subtle = AppPreferences.pillGlowSubtleState
+            val stops = if (subtle) arrayOf(
+                0f to Color.White.copy(alpha = 0.05f),
+                0.14f to Color.White.copy(alpha = 0.02f),
+                0.35f to Color.Transparent
+            ) else arrayOf(
+                0f to Color.White.copy(alpha = 0.10f),
+                0.16f to Color.White.copy(alpha = 0.04f),
+                0.40f to Color.Transparent,
+                0.92f to Color.Transparent,
+                1f to Color.White.copy(alpha = 0.05f)
+            )
             drawRect(
-                brush = Brush.verticalGradient(
-                    0f to Color.White.copy(alpha = 0.10f),
-                    0.16f to Color.White.copy(alpha = 0.04f),
-                    0.40f to Color.Transparent,
-                    0.92f to Color.Transparent,
-                    1f to Color.White.copy(alpha = 0.05f)
-                ),
+                brush = Brush.verticalGradient(*stops),
                 size = size
             )
         }
@@ -62,16 +73,24 @@ fun Modifier.curioInnerGlow(
         drawContent()
         val path = shape.createOutline(size, layoutDirection, this).toPath()
         val glow = lerp(accent, Color.White, 0.75f)
+        // v101 — the "Subtle pill glow" option: when ON (the default) the
+        // glow is HALVED and hugs the pill's top (radius tied to the SHORT
+        // side) so it reads as a top catch instead of filling the pill;
+        // the fuller pushed-in glow stays when the option is off.
+        val subtle = AppPreferences.pillGlowSubtleState
+        val effectiveStrength = if (subtle) strength * 0.5f else strength
+        val radius = if (subtle) size.minDimension * 0.55f
+        else size.maxDimension * 0.95f
         clipPath(path) {
             drawRect(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        glow.copy(alpha = strength),
-                        glow.copy(alpha = strength * 0.35f),
+                        glow.copy(alpha = effectiveStrength),
+                        glow.copy(alpha = effectiveStrength * 0.35f),
                         Color.Transparent
                     ),
                     center = Offset(size.width * 0.30f, size.height * 0.15f),
-                    radius = size.maxDimension * 0.95f
+                    radius = radius
                 ),
                 size = size
             )

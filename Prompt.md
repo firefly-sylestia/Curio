@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — search-text audit + filter hierarchy (v100)
+## Current request — subtle top-only pill glow, as an option (v101)
+
+### What was asked
+1. "decrease that white glow in pills and keep it top only" — the dark-mode
+   pill glow (glass edge + inner glow) reads too strong and fills the pill;
+   make it gentler and confined to the top.
+2. "and make this an option" — a Settings toggle.
+
+### What was done
+1. **AppPreferences** — new `pillGlowSubtleState` (default ON) +
+   `KEY_PILL_GLOW_SUBTLE` + `isPillGlowSubtleEnabled` /
+   `setPillGlowSubtleEnabled`, seeded in `initThemeMode`.
+2. **CurioGlassEffects.kt** — both dark-mode effects now read the pref:
+   - `curioGlassEdge` (subtle): top alphas 0.10/0.04 → 0.05/0.02, gradient
+     ends at 0.35 — the bottom whisper is GONE (top-only).
+   - `curioInnerGlow` (subtle): strength halved and radius tied to the
+     SHORT side (`minDimension * 0.55` vs `maxDimension * 0.95`) so the
+     radial hugs the pill's top instead of filling it.
+   Off = the original fuller gradient / pushed-in glow.
+3. **Settings → Appearance** — "Subtle pill glow" switch (default ON;
+   off restores the fuller glow for comparison).
+
+### Decisions
+Default = ON (the user asked to change the look; the toggle restores the
+old glow — the v97 paper-card pattern). Flip the default if they want it
+opt-in instead.
+
+### Validation
+`git diff --check` clean; `Brush.verticalGradient(*stops)` spread + `Size.
+minDimension` verified; pref read via snapshot state so toggling recomposes
+live. No Gradle locally (env rule) — CI on push.
+
+## Prior — search-text audit + filter hierarchy (v100)
 
 ### What was asked
 1. "fi the search bar text color" — search text doesn't read on its glass
