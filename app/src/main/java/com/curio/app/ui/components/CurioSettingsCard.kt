@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
@@ -64,12 +63,7 @@ fun CurioSettingsCard(
         // flat cream, and AMOLED cards lift to a soft GREY GLASS instead of
         // pure black (raised grey plates, not black slabs).
         color = if (isCurioDarkTheme()) {
-            val metallicBase = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-                Color(0xFF171719)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            }
-            lerp(metallicBase, CurioColors.CoralBlush, 0.08f)
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, CurioColors.CoralBlush, 0.08f)
         } else {
             lerp(
                 MaterialTheme.colorScheme.surfaceContainerLow,
@@ -100,11 +94,9 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
         // keeps the soft coral wash, and AMOLED keeps a muted coral glass
         // plate with coral ink instead of a neutral grey chip — the
         // settings/profile cards keep their color identity on black.
-        val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
-                    else CurioColors.CoralBlush.copy(alpha = if (isCurioDarkTheme()) 0.28f else 0.16f),
+            color = CurioColors.CoralBlush.copy(alpha = if (isCurioDarkTheme()) 0.28f else 0.16f),
             modifier = Modifier.size(38.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -128,7 +120,6 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
  *  as a tappable colored control rather than a flat cream line. */
 @Composable
 fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) {
-    val isAmoled = AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(
@@ -136,8 +127,7 @@ fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () 
                     .size(38.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
-                        else CurioColors.CoralBlush.copy(alpha = if (isCurioDarkTheme()) 0.26f else 0.14f)
+                        CurioColors.CoralBlush.copy(alpha = if (isCurioDarkTheme()) 0.26f else 0.14f)
                     ),
                 contentAlignment = Alignment.Center
             ) {

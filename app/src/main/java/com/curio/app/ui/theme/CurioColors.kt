@@ -39,6 +39,15 @@ object CurioColors {
     val WarmCoralRed     = Color(0xFFE4626F)  // Soft coral-red — error
     val DeepPlum         = Color(0xFF3B0A17)  // Deep maroon — on-primary
 
+    // Unified dark metallic foundation used by every dark theme style.
+    val DarkMetalBackground = Color(0xFF0B0D12)
+    val DarkMetalSurface = Color(0xFF141821)
+    val DarkMetalSurfaceLow = Color(0xFF10141B)
+    val DarkMetalSurfaceHigh = Color(0xFF202733)
+    val DarkMetalSurfaceHighest = Color(0xFF2B3442)
+    val DarkMetalInk = Color(0xFFF4F1F5)
+    val DarkMetalMutedInk = Color(0xFFC8C2CB)
+
     // ── Category accents (researched palette) ──────────────────────────
     // Tailwind-700 harmonized shades: deep enough that WHITE content clears
     // WCAG AA (>= 4.5:1) on every accent, yet vivid enough to stay rich on

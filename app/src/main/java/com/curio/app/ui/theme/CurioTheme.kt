@@ -87,18 +87,18 @@ private val CurioDarkColorScheme = darkColorScheme(
 
     // Android 17-style midnight layers: darker, cleaner, and more
     // dimensional while preserving the light palette untouched.
-    background = Color(0xFF0B1018),
-    onBackground = Color(0xFFF7F2FA),
+    background = CurioColors.DarkMetalBackground,
+    onBackground = CurioColors.DarkMetalInk,
 
-    surface                  = Color(0xFF111722),
-    onSurface                = Color(0xFFF7F2FA),
-    surfaceVariant           = Color(0xFF1C2432),
-    onSurfaceVariant         = Color(0xFFD4CAD3),
-    surfaceContainerLowest   = Color(0xFF070B11),
-    surfaceContainerLow      = Color(0xFF0E141E),
-    surfaceContainer         = Color(0xFF141B27),
-    surfaceContainerHigh     = Color(0xFF1D2634),
-    surfaceContainerHighest  = Color(0xFF283244),
+    surface                  = CurioColors.DarkMetalSurface,
+    onSurface                = CurioColors.DarkMetalInk,
+    surfaceVariant           = CurioColors.DarkMetalSurfaceHigh,
+    onSurfaceVariant         = CurioColors.DarkMetalMutedInk,
+    surfaceContainerLowest   = Color(0xFF080A0E),
+    surfaceContainerLow      = CurioColors.DarkMetalSurfaceLow,
+    surfaceContainer         = CurioColors.DarkMetalSurface,
+    surfaceContainerHigh     = CurioColors.DarkMetalSurfaceHigh,
+    surfaceContainerHighest  = CurioColors.DarkMetalSurfaceHighest,
 
     error             = CurioColors.WarmCoralRed,
     onError           = Color.White,
@@ -312,17 +312,18 @@ fun curioColorScheme(): ColorScheme {
     //    a soft pastel-tinted dark (dark) — still following the
     //    Light/Dark/System setting.
     return when (AppPreferences.themeStyleState) {
-        AppPreferences.THEME_STYLE_AMOLED -> CurioAmoledColorScheme
+        // All dark styles share the same unified metallic surface language.
+        AppPreferences.THEME_STYLE_AMOLED -> if (isDark) CurioDarkColorScheme else CurioLightColorScheme
         AppPreferences.THEME_STYLE_MATERIAL ->
-            // Material You's dynamic palette requires API 31 (Android 12);
-            // on older devices fall back to the Curio palettes so the
-            // style toggle stays harmless everywhere.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val dynamic = if (isDark) dynamicDarkColorScheme(context)
-                              else dynamicLightColorScheme(context)
-                calmMaterialColorScheme(dynamic, isDark)
+            // Material keeps its dynamic light palette, while dark mode uses
+            // the same readable metallic surfaces as Curio and AMOLED.
+            if (isDark) {
+                CurioDarkColorScheme
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val dynamic = dynamicLightColorScheme(context)
+                calmMaterialColorScheme(dynamic, dark = false)
             } else {
-                if (isDark) CurioDarkColorScheme else CurioLightColorScheme
+                CurioLightColorScheme
             }
         else -> if (isDark) CurioDarkColorScheme else CurioLightColorScheme
     }
@@ -359,7 +360,7 @@ fun CurioTheme(
     )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────���──────────
 // Shared dialog styling — one container, shape and action ink for every
 // AlertDialog in the app, so dialogs match the card language (24dp corners)
 // and the pastel-tinted page instead of floating a foreign cream panel.
@@ -379,11 +380,6 @@ val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
  */
 @Composable
 fun curioDialogContainerColor(): Color {
-    // v15 — AMOLED dialogs wear the sleek pure-black glass (the scheme's
-    // #181818 container reads grey next to the app's true-black cards).
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return Color.Black
-    }
     // v31 — every theme pulls the dialog container a small step toward the
     // page background shade so dialogs melt into the page instead of
     // floating a separate elevated cream/grey panel ("no matter the
@@ -439,10 +435,7 @@ fun curioPillLift(): Color =
  */
 @Composable
 fun curioPillTintLift(): Color {
-    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-        return Color(0xFF2A2A2A)
-    }
-    if (isCurioDarkTheme()) return Color.White
+    if (isCurioDarkTheme()) return CurioColors.DarkMetalSurfaceHighest
     return lerp(
         MaterialTheme.colorScheme.background,
         curioRoseInk(),
