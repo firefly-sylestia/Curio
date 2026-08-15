@@ -1,6 +1,33 @@
 # Prompt.md — Request log
 
-## Current request — profile avatar photo (Edit profile) + drawer (v103)
+## Current request — detail hero tear like Home (v104)
+
+### What was asked
+"the detail screen tear still looks so weird ith striaght lines and then
+ tear, whats wrong with it why its not like home screen etc"
+
+### Root cause
+The detail hero was the ONLY screen using the v92 `detail = true` tear
+pattern — a salted seed + two mid-frequency meander sine octaves (17π /
+23π) added to stop unlucky entry hashes from reading as flat lines.
+Instead it made the seam read as mechanical straight lines + a tear for
+many entries. Every other hero (Home, Profile, Settings, Cabinet, drawer,
+filter/picker sheets) uses just `SoftTornBottomShape(seed, bold = true)`.
+
+### What was done
+EntryDetailScreen hero + under-sheet drop `detail = true` (both shapes),
+so the construction is byte-identical to Home (lip 10dp, baseline 14dp,
+bold = true; only the per-entry seed differs). The `detail` parameter
+machinery in PaperCard.kt stays as an unused public opt-in (left in place
+to minimize regression risk — CI validates the call-site change).
+
+### Validation
+`git diff --check` clean; no other `detail = true` callers remain. No
+Gradle locally (env rule) — CI on push. (Carries the previously
+interrupted v103 avatar commit e133e39, which is committed locally but
+was not pushed.)
+
+## Prior — profile avatar photo (Edit profile) + drawer (v103)
 
 ### What was asked
 1. "add avatar image add in edit profile" — the Edit profile dialog gets

@@ -401,6 +401,18 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v104 — detail hero tear = Home's exact construction.** The v92
+  `detail = true` pattern (salted seed + 17π/23π mid-frequency meander
+  octaves, added to stop unlucky entry hashes reading flat) made the
+  detail hero's seam read as mechanical "straight lines then a tear" for
+  many entries. Every other hero (Home, Profile, Settings, Cabinet,
+  drawer, filter/picker sheets) uses plain
+  `SoftTornBottomShape(seed, bold = true)` — so the detail hero + its
+  under-sheet now drop `detail = true` too (EntryDetailScreen), making the
+  construction byte-identical to Home (lip 10dp, baseline 14dp, bold;
+  only the per-entry seed differs). The `detail` parameter machinery in
+  PaperCard.kt stays as an unused public opt-in (left to minimize
+  regression risk; CI validates the call-site change).
 - **v103 — profile avatar photo + drawer.** (1) AppPreferences:
   `KEY_PROFILE_AVATAR` path pref + `getProfileAvatarPath` /
   `setProfileAvatarPath` ("" = none); the photo is copied into filesDir

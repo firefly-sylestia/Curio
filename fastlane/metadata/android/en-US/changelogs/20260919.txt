@@ -6,6 +6,7 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
+- Topic detail: the hero tear now uses the same clean torn-paper seam as the Home banner — the old detail-only pattern that read as straight lines is gone.
 - Profile: pick an avatar photo in Edit profile — it shows on the Profile hero and in the Home menu drawer (the name-initial circle until one is set).
 - Pet Designer auto-import: the bob animation it adds now actually plays — the imported pet performs a happy bob whenever it's been idle for a few seconds.
 - Dark-mode pill glow is now subtler and hugs only the pill's top edge, and a new Subtle pill glow option in Settings → Appearance lets you restore the fuller glow.

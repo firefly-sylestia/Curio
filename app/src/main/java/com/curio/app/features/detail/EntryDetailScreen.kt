@@ -372,16 +372,22 @@ fun EntryDetailScreen(
             // Remembered Shape instances so their internal outline caches
             // survive recompositions (built fresh in the modifier chain, the
             // caches would never hit).
+            // v104 — the detail tear is now Home's EXACT construction: the
+            // old v92 `detail = true` pattern (salted seed + mid-frequency
+            // meander octaves) made the seam read as mechanical straight
+            // lines for many entries — every other hero (Home, Profile,
+            // Settings, Cabinet…) uses just `bold = true`. The detail flag
+            // is gone from both the hero and the under-sheet so they stay
+            // pixel-aligned on the plain bold tear.
             val heroTornShape = remember(tearSeed) {
-                SoftTornBottomShape(tearSeed, bold = true, detail = true)
+                SoftTornBottomShape(tearSeed, bold = true)
             }
             val sheetShape = remember(tearSeed) {
                 SoftTornSheetShape(
                     tearSeed,
                     lip = 10.dp,
                     baseline = 14.dp,
-                    bold = true,
-                    detail = true
+                    bold = true
                 )
             }
             Box(
