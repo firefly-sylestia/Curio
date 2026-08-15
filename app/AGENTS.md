@@ -394,6 +394,21 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v74 — category picker sheet: tear hero to the status bar + no close
+  button.** `CategoryPickerSheet` (Spin) got the filter sheet's v70 tear
+  treatment: `shape = RectangleShape` (flush top), `dragHandle = null`,
+  `contentWindowInsets = { navigationBars ∪ ime }` so the banner fills the
+  very top edge behind the status bar (height `118.dp + statusBar`, content
+  clears it via `statusBarsPadding`; distinct tear seed `0xC4A71E`, category
+  gradient + watermark glyphs). The Close X and the floating drag handle are
+  GONE — swipe-down / scrim tap / Mix-Cancel dismiss instead. The old
+  header row + mode-hint text moved onto the banner: 34sp title, the hint
+  as subtitle (single-select now "Tap a deck to spin it. Hold to pick
+  several." — period, not the · separator; multi keeps "Tap to toggle
+  decks · Done to spin together"), and the current-deck / "N selected"
+  chip as a hero-glass pill. The column dropped its `navigationBarsPadding`
+  (the contentWindowInsets handle the bottom inset now) and the
+  `navigationBarsPadding` + `BottomSheetDefaults` imports went with it.
 - **v73 — filter-sheet group pills wear their group glyphs.** The
   accordion pills in Spin's `FilterSheet` (`FilterGroupPill` — Type /
   Genres / Era / Origin / Franchise) now lead with the same per-group

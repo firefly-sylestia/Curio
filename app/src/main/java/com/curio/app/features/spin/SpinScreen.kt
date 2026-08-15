@@ -54,13 +54,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -4185,13 +4183,20 @@ private fun CategoryPickerSheet(
         }
     }
 
-    // Same full-screen + swipe-down-dismiss pattern as the filter page — a    // ModalBottomSheet expanded to full height with a drag handle.
+    // v73 — the same full-screen + swipe-down-dismiss pattern as the filter
+    // sheet, but the tear hero runs up BEHIND the status bar: flush top
+    // corners (no rounded cap, no floating drag handle) and only the bottom
+    // + IME insets consumed, so the banner fills the very top edge.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // v8.21 — tell the pet a drawer is up so it comes over to peek.
     LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
     DisposableEffect(Unit) {
         onDispose { PetLandmarks.noteSheet("spin", false) }
     }
+    // v73 — the tear hero's height grows with the status-bar inset so the
+    // banner fills the very top edge behind the status bar (the banner
+    // content draws its own status-bar spacing).
+    val pickerHeroHeight = 118.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -4206,91 +4211,158 @@ private fun CategoryPickerSheet(
         } else {
             currentCat.categoryBackgroundWash()
         },
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        // v73 — tear hero to the status bar, the same treatment as the
+        // filter sheet: only the bottom + IME insets consumed (the banner
+        // draws its own status-bar spacing). Swipe-down, scrim tap and the
+        // Mix/Cancel actions still dismiss.
+        contentWindowInsets = { WindowInsets.navigationBars.union(WindowInsets.ime) },
+        shape = RectangleShape,
+        dragHandle = null
     ) {
-        // The sheet spans the whole window; on wide windows the content is
-        // centered in the same max-width column as every other page.
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // contentAlignment takes a full Alignment, not Alignment.Horizontal
-            // (CenterHorizontally) — Center also matches the vertical no-op
-            // since the box wraps the sheet content's height.
-            contentAlignment = Alignment.Center
-        ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = CurioContentMaxWidth)
-                .navigationBarsPadding()
+                .fillMaxSize()
+                .padding(bottom = 20.dp)
         ) {
-                    // ── Close button + header ────────────────────────
+            // ── Torn-hero header (v73) — the picker wears the app's tear
+            //    hero language like the filter sheet: a category-colored
+            //    banner with a soft torn bottom edge, watermark glyphs, the
+            //    title + mode hint and the deck status chip, all riding the
+            //    banner. The close button is gone — swipe-down / scrim tap
+            //    / Mix-Cancel dismiss instead.
+            val pickerHeroSeed = 0xC4A71E // deterministic — never re-rolls
+            val pickerHeroFill = currentCat.themedAccent()
+            val pickerHeroInk = currentCat.onAccent()
+            val pickerHeroTorn = remember(pickerHeroSeed) {
+                SoftTornBottomShape(pickerHeroSeed, bold = true)
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(pickerHeroHeight)
+            ) {
+                // ── Torn-edge hairline shadow (the hero construction) ──
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(pickerHeroHeight)
+                        .offset(y = 1.dp)
+                        .clip(pickerHeroTorn)
+                        .background(Color.Black.copy(alpha = 0.20f))
+                )
+                // ── Category banner, torn bottom edge ───────────────────
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(pickerHeroHeight)
+                        .clip(pickerHeroTorn)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(pickerHeroFill, lerp(pickerHeroFill, Color.Black, 0.08f))
+                            )
+                        )
+                ) {
+                    // Watermark glyphs — a large category symbol peeking
+                    // from the corner + a small twin, both in the hero ink.
+                    CurioIcon(
+                        currentCat.iconGlyph,
+                        null,
+                        tint = pickerHeroInk.copy(alpha = 0.10f),
+                        size = 72.dp,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 10.dp, bottom = 6.dp)
+                    )
+                    CurioIcon(
+                        currentCat.iconGlyph,
+                        null,
+                        tint = pickerHeroInk.copy(alpha = 0.07f),
+                        size = 40.dp,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = 14.dp, top = 10.dp)
+                    )
+                    // Title + mode hint + deck status chip, riding the
+                    // banner (it clears the status bar like every hero).
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .fillMaxSize()
+                            .statusBarsPadding()
+                            .padding(start = 20.dp, end = 14.dp, top = 10.dp, bottom = 18.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            onClick = onDismiss,
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        ) {
-                            CurioIcon(
-                                CurioIcons.Close, "Close",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                size = 22.dp,
-                                modifier = Modifier.padding(9.dp)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "What are we exploring?",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontSize = 34.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                ),
+                                color = pickerHeroInk,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = if (multiSelectMode) {
+                                    "Tap to toggle decks · Done to spin together"
+                                } else {
+                                    "Tap a deck to spin it. Hold to pick several."
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = pickerHeroInk.copy(alpha = 0.85f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
-                        Spacer(Modifier.width(10.dp))
-                        Text(
-                            text = "What are we exploring?",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
                         // Current category indicator — or selection count in
-                        // multi-select mode.
+                        // multi-select mode (hero glass pill).
                         if (multiSelectMode) {
                             Surface(
                                 shape = RoundedCornerShape(50),
-                                color = currentCat.themedAccent().copy(alpha = 0.15f)
+                                color = pickerHeroInk.copy(alpha = 0.16f)
                             ) {
                                 Text(
                                     text = if (selectedSlugs.isEmpty()) "Select decks"
                                     else "${selectedSlugs.size} selected",
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = currentCat.categoryInk(),
+                                    color = pickerHeroInk,
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                                 )
                             }
                         } else {
                             Surface(
                                 shape = RoundedCornerShape(50),
-                                color = currentCat.themedAccent().copy(alpha = 0.15f)
+                                color = pickerHeroInk.copy(alpha = 0.16f)
                             ) {
                                 Text(
                                     text = currentCat.displayName,
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = currentCat.categoryInk(),
+                                    color = pickerHeroInk,
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                                 )
                             }
                         }
                     }
+                }
+            }
 
-                    // ── Mode hint — tap to open, hold to multi-select ──
-                    Text(
-                        text = if (multiSelectMode) {
-                            "Tap to toggle decks · Done to spin together"
-                        } else {
-                            "Tap a deck to spin it · hold to pick several"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
-                    )
+            // The rest of the sheet spans the whole window; on wide windows
+            // the content is centered in the same max-width column as every
+            // other page (the hero above stays full-bleed).
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                // contentAlignment takes a full Alignment, not Alignment.Horizontal
+                // (CenterHorizontally) — Center also matches the vertical no-op
+                // since the box wraps the sheet content's height.
+                contentAlignment = Alignment.Center
+            ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = CurioContentMaxWidth)
+            ) {
 
                     // ── v27k — page tabs: Original lanes vs the New lanes ─
                     Row(
@@ -4520,6 +4592,7 @@ private fun CategoryPickerSheet(
 
                     Spacer(Modifier.height(8.dp))
         }
+    }
     }
     }
 }

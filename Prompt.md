@@ -1,6 +1,39 @@
 # Prompt.md — Request log
 
-## Current request — filter-sheet group pills carry their group icons (v73)
+## Current request — category picker sheet: tear hero to the status bar, no dismiss button (v74)
+
+### What was asked
+"Apply the same status-bar tear treatment to the category picker sheet on
+Spin and remove that dismiss button, and the sub text tap a deck to spin
+it. hold to pick several."
+
+### What was done (all in SpinScreen.kt `CategoryPickerSheet`)
+1. **Tear hero to the status bar** — same treatment as the filter sheet
+   (v70): `shape = RectangleShape` (flush top corners), `dragHandle = null`,
+   `contentWindowInsets = { WindowInsets.navigationBars.union(WindowInsets.ime) }`
+   so only the bottom + IME insets are consumed and the banner fills the
+   very top edge behind the status bar. Banner height grows with the
+   status-bar inset (`118.dp + statusBar`), title/hint/chip clear it with
+   `statusBarsPadding()`. The banner is full-bleed; the deck grid + action
+   row stay centered in the `CurioContentMaxWidth` column on wide windows.
+   Distinct tear seed (`0xC4A71E`), category gradient + watermark glyphs
+   (the FilterSheet construction).
+2. **Dismiss button removed** — the Close X (and the floating drag handle)
+   are gone; swipe-down, scrim tap and Mix/Cancel still dismiss. The
+   header content moved onto the banner: 34sp title, the mode hint as
+   subtitle, and the current-deck / "N selected" chip as a hero-glass pill.
+3. **Sub text** — single-select hint now reads "Tap a deck to spin it.
+   Hold to pick several." (period instead of the · separator); the
+   multi-select hint stays "Tap to toggle decks · Done to spin together".
+4. Column dropped its `navigationBarsPadding()` (the contentWindowInsets
+   handle the bottom inset now, mirroring the filter sheet) and unused
+   imports removed (`navigationBarsPadding`, `BottomSheetDefaults`).
+
+### Validation
+Brace/paren balance clean (545/545, 2037/2037), `git diff --check` clean,
+no stale references. No Gradle locally (env rule) — CI on push.
+
+## Prior — filter-sheet group pills carry their group icons (v73)
 
 ### What was asked
 "Give the Spin filter sheet group pills (Type/Genres/Era/Origin/Franchise)
