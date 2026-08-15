@@ -135,8 +135,8 @@ fun CurioSortDropdown(
                 // 8/6 → 6/4, zone gap 5 → 4dp, min-width 88 → 76dp, so the
                 // added glyph doesn't fatten it.
                 modifier = Modifier
-                    .heightIn(min = 42.dp)
-                    .widthIn(min = 76.dp)
+                    .heightIn(min = 52.dp)
+                    .widthIn(min = 46.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
                 Row(
