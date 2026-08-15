@@ -1,3 +1,5 @@
+REMOVE
+- Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
 ADD
 - Paper stat cards are on by default: the Home and Profile stat panes, the detail meta card and the Profile quests block now wear the paper card look.
 - Edit profile now edits your name and the line under it in one dialog (no separate tagline popup).

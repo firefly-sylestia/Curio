@@ -1,6 +1,35 @@
 # Prompt.md — Request log
 
-## Current request — detail hero tear like Home (v104)
+## Current request — remove sort control + smoother category chips (v105)
+
+### What was asked
+1. "in cabinet and topic browser remove the sorting option"
+2. "make the category chips appear animation more smoother"
+
+### What was done
+1. **Sort removed (Cabinet + Topic Database)** — the shared
+   `CurioSortDropdown` pill + both hero call sites are gone:
+   - CabinetScreen: `cabinetSortField` / `sortAscending` state, the sort
+     `when` in `visibleEntries` (now fixed newest-first
+     `sortedByDescending { capturedAtMillis }`), the hero dropdown, and the
+     private `CabinetSortField` enum removed.
+   - TopicDatabaseScreen: `tdSortField` / `tdSortAscending` + the
+     `sortMode` derivation removed; the rows builder keeps ONLY the default
+     per-lane A–Z branch; `LaunchedEffect(sortMode, …)` →
+     `LaunchedEffect(effectiveCat)`; the hero dropdown +
+     `DatabaseSortMode` / `DatabaseSortField` enums removed.
+   - `ui/components/CurioSortDropdown.kt` DELETED (no callers left); dead
+     `CurioSortOption` + `settingsRoseAccent` imports cleaned.
+2. **Smoother category chip bar (both screens)** — the chip bar now slides
+   in with a longer, decelerating `LinearOutSlowInEasing` tween (380ms
+   slide + 320ms fade; exit 300/220) instead of the snappy 300ms
+   `FastOutSlowInEasing` snap.
+
+### Validation
+`git diff --check` clean; no dangling sort references; file ends cleanly
+(EOF blank line removed). No Gradle locally (env rule) — CI on push.
+
+## Prior — detail hero tear like Home (v104)
 
 ### What was asked
 "the detail screen tear still looks so weird ith striaght lines and then

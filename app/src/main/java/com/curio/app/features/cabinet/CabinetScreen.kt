@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -89,8 +90,6 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
-import com.curio.app.ui.components.CurioSortDropdown
-import com.curio.app.ui.components.CurioSortOption
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -190,10 +189,8 @@ fun CabinetScreen(navController: NavController) {
     val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
     val contentTop = heroTotal +
         (if (chipsVisible) CabinetChipBarHeight else 0.dp) + 12.dp
-    // v26 — sort is a dropdown (field) + a universal ascending/descending
-    // arrow. Default: Date, newest first (descending).
-    var cabinetSortField by rememberSaveable { mutableStateOf(CabinetSortField.DATE.name) }
-    var sortAscending by rememberSaveable { mutableStateOf(false) }
+    // v105 — the sort control is removed; the Cabinet keeps its default
+    // ordering (newest captures first, see [visibleEntries]).
     var selectionMode by rememberSaveable { mutableStateOf(false) }
     var selectedEntryIds by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
     var showBulkDeleteConfirm by rememberSaveable { mutableStateOf(false) }
@@ -223,7 +220,7 @@ fun CabinetScreen(navController: NavController) {
         }
     }
 
-    val visibleEntries = remember(entries, selectedFilter, showLegacyOnly, searchQuery, cabinetSortField, sortAscending) {
+    val visibleEntries = remember(entries, selectedFilter, showLegacyOnly, searchQuery) {
         val q = searchQuery.trim()
         var result = if (selectedFilter == null) entries
             else entries.filter { it.topic.categoryId == selectedFilter }
@@ -240,19 +237,9 @@ fun CabinetScreen(navController: NavController) {
                     it.tags.any { tag -> tag.contains(q, ignoreCase = true) }
             }
         }
-        when (CabinetSortField.valueOf(cabinetSortField)) {
-            CabinetSortField.DATE -> result = if (sortAscending) result.sortedBy { it.capturedAtMillis }
-            else result.sortedByDescending { it.capturedAtMillis }
-            CabinetSortField.TITLE -> {
-                val byTitle = result.sortedBy { it.title?.lowercase() ?: it.topic.name.lowercase() }
-                result = if (sortAscending) byTitle else byTitle.reversed()
-            }
-            CabinetSortField.CATEGORY -> {
-                val byCat = result.sortedBy { it.topic.categoryId.name }
-                result = if (sortAscending) byCat else byCat.reversed()
-            }
-        }
-        result
+        // v105 — the sort control is removed; the Cabinet keeps its default
+        // ordering: newest captures first.
+        result.sortedByDescending { it.capturedAtMillis }
     }
 
     val categorySelectionIds = visibleEntries.map { it.id }.toSet()
@@ -497,16 +484,19 @@ fun CabinetScreen(navController: NavController) {
         // finished (a delayed pop with no visible motion). A vertical SLIDE
         // translates the whole bar instead — the chips emerge from under
         // the torn hero with a real slide + fade.
+        // v105 — smoother: a longer, decelerating slide (LinearOutSlowIn)
+        // with a matched fade so the chips settle gently instead of
+        // snapping down.
         AnimatedVisibility(
             visible = chipsVisible,
             enter = slideInVertically(
                 initialOffsetY = { -it },
-                animationSpec = tween(300, easing = FastOutSlowInEasing)
-            ) + fadeIn(animationSpec = tween(220)),
+                animationSpec = tween(380, easing = LinearOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(320)),
             exit = slideOutVertically(
                 targetOffsetY = { -it },
-                animationSpec = tween(260, easing = FastOutSlowInEasing)
-            ) + fadeOut(animationSpec = tween(160))
+                animationSpec = tween(300, easing = LinearOutSlowInEasing)
+            ) + fadeOut(animationSpec = tween(220))
         ) {
             CabinetStickyChipBar(
                 gridState = gridState,
@@ -606,36 +596,16 @@ fun CabinetScreen(navController: NavController) {
                         backdrop = backdrop
                     )
                 } else {
-                    // v26 — sort dropdown: the label opens the field list,
-                    // the arrow toggles ascending/descending universally.
-                    CurioSortDropdown(
-                        options = listOf(
-                            // v68 — each field carries its sort-type icon
-                            // (calendar / text / tune) shown in the pill.
-                            CurioSortOption(CabinetSortField.DATE.name, "Date", CurioIcons.CalendarToday),
-                            CurioSortOption(CabinetSortField.TITLE.name, "Title", CurioIcons.FormatText),
-                            CurioSortOption(CabinetSortField.CATEGORY.name, "Category", CurioIcons.Tune)
-                        ),
-                        selectedKey = cabinetSortField,
-                        ascending = sortAscending,
-                        onSelect = { cabinetSortField = it },
-                        onToggleDirection = { sortAscending = !sortAscending },
-                        ink = ink,
-                        backdrop = backdrop,
-                        // v36 — the dropdown's accent lights the menu: the
-                        // active category's color when a filter is on, else
-                        // the theme primary.
-                        accent = filterCat?.themedAccent() ?: MaterialTheme.colorScheme.primary,
-                        emphasized = true
-                    )
+                    // v105 — the sort dropdown is gone; the hero row keeps
+                    // the Search pill only.
                     CabinetHeroActionPill(
                         onClick = { searchActive = true },
                         glyph = CurioIcons.Search,
                         contentDescription = "Search captures",
                         ink = ink,
                         backdrop = backdrop,
-                        // v85 — same emphasized fill as the sort pill beside
-                        // it, so the two render as identical siblings.
+                        // v85 — emphasized hero fill (the hero action-pill
+                        // language).
                         emphasized = true
                     )
                 }
@@ -1284,8 +1254,3 @@ private fun FilterChipLite(
         }
     }
 }
-
-
-/** Cabinet sort fields — the sort dropdown selects the field, and the
- * universal arrow toggles ascending/descending (v26). */
-private enum class CabinetSortField { DATE, TITLE, CATEGORY }

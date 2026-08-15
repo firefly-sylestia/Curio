@@ -401,6 +401,21 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v105 — sort control removed + smoother category chips.** (1) SORT
+  REMOVED from Cabinet + Topic Database: `ui/components/CurioSortDropdown.kt`
+  is DELETED (no callers left) and both hero call sites drop it —
+  CabinetScreen removes `cabinetSortField` / `sortAscending` + the sort
+  `when` in `visibleEntries` (fixed newest-first
+  `sortedByDescending { capturedAtMillis }`) + the private
+  `CabinetSortField` enum; TopicDatabaseScreen removes `tdSortField` /
+  `tdSortAscending` + the `sortMode` derivation (the rows builder keeps
+  ONLY the default per-lane A–Z branch;
+  `LaunchedEffect(sortMode, …)` → `LaunchedEffect(effectiveCat)`) +
+  `DatabaseSortMode` / `DatabaseSortField` enums; dead `CurioSortOption`
+  imports + `settingsRoseAccent` import cleaned. (2) SMOOTHER CATEGORY
+  CHIPS: both chip bars slide in with a longer decelerating
+  `LinearOutSlowInEasing` tween (380ms + 320ms fade; exit 300/220)
+  instead of the snappy 300ms `FastOutSlowInEasing` snap.
 - **v104 — detail hero tear = Home's exact construction.** The v92
   `detail = true` pattern (salted seed + 17π/23π mid-frequency meander
   octaves, added to stop unlucky entry hashes reading flat) made the

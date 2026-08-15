@@ -2,6 +2,7 @@ package com.curio.app.features.database
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -67,7 +68,6 @@ import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.pet.PetLandmark
@@ -76,8 +76,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.ui.components.CurioSortDropdown
-import com.curio.app.ui.components.CurioSortOption
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -120,11 +118,8 @@ fun TopicDatabaseScreen(navController: NavController) {
     // blank list every time you come back. v26 — the search query moved into
     // [searchQuery] (the hero search field) but stays saveable here.
     var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
-    // v26 — sort control: a dropdown (Default / Name / Year) plus a
-    // universal ascending/descending arrow. Saved like the search + filter so
-    // it survives reveal round-trips, tab switches, and rotation.
-    var tdSortField by rememberSaveable { mutableStateOf(DatabaseSortField.DEFAULT.name) }
-    var tdSortAscending by rememberSaveable { mutableStateOf(false) }
+    // v105 — the sort control is removed; the browser keeps its default
+    // per-lane A–Z order (see the rows builder).
     // v26 — hero search: the search pill morphs the hero into a search field
     // (the Cabinet's search-morph contract) so search/sort/filters all live
     // in the header instead of scrolling inside the list.
@@ -149,15 +144,6 @@ fun TopicDatabaseScreen(navController: NavController) {
         if (searchActive) {
             searchFocus.requestFocus()
         }
-    }
-    // Map the (field, direction) pair onto the existing sort modes: Default
-    // keeps per-lane A–Z with headers; Name/Year obey the arrow.
-    val sortMode = when (DatabaseSortField.valueOf(tdSortField)) {
-        DatabaseSortField.DEFAULT -> DatabaseSortMode.DEFAULT
-        DatabaseSortField.NAME -> if (tdSortAscending) DatabaseSortMode.ALPHA_ASC
-        else DatabaseSortMode.ALPHA_DESC
-        DatabaseSortField.YEAR -> if (tdSortAscending) DatabaseSortMode.YEAR_OLDEST
-        else DatabaseSortMode.YEAR_NEWEST
     }
     // v7.98 — the scroll position is saved EXPLICITLY (index + offset), not
     // via LazyListState.Saver: the catalog loads asynchronously, so on return
@@ -351,69 +337,32 @@ fun TopicDatabaseScreen(navController: NavController) {
         indexedTopics,
         effectiveCat,
         needle,
-        doneTopics,
-        sortMode
+        doneTopics
     ) {
         value = withContext(Dispatchers.Default) {
             val indexById = indexedTopics.associateBy { it.topic.id }
-            if (sortMode == DatabaseSortMode.DEFAULT) {
-                buildList {
-                    catalog.forEach { (cat, topics) ->
-                        if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                        val shown = topics.mapNotNull { indexById[it.id] }
-                            .filter(matches)
-                            // v26 — the DEFAULT order is now A–Z WITHIN each
-                            // category (stable sort: ties keep file order), so
-                            // the browser reads alphabetically out of the box
-                            // while section headers still group the lanes.
-                            .sortedBy { it.nameKey }
-                        if (shown.isEmpty()) return@forEach
-                        if (effectiveCat == null) {
-                            add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
-                        }
-                        shown.forEach { indexed ->
-                            add(
-                                DatabaseRow(
-                                    key = indexed.topic.id,
-                                    topic = indexed.topic,
-                                    done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
-                                )
-                            )
-                        }
+            // v105 — the sort control is removed; the browser always keeps
+            // its default per-lane A–Z order (stable sort: ties keep file
+            // order) with the category section headers grouping the lanes.
+            buildList {
+                catalog.forEach { (cat, topics) ->
+                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                    val shown = topics.mapNotNull { indexById[it.id] }
+                        .filter(matches)
+                        .sortedBy { it.nameKey }
+                    if (shown.isEmpty()) return@forEach
+                    if (effectiveCat == null) {
+                        add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
                     }
-                }
-            } else {
-                val filtered = indexedTopics.filter { indexed ->
-                    (effectiveCat == null || indexed.category.id == effectiveCat) && matches(indexed)
-                }
-                val sorted = when (sortMode) {
-                    DatabaseSortMode.ALPHA_ASC ->
-                        filtered.sortedWith(compareBy<IndexedTopic>({ it.nameKey }, { it.topic.id }))
-                    DatabaseSortMode.ALPHA_DESC ->
-                        filtered.sortedWith(
-                            compareByDescending<IndexedTopic> { it.nameKey }
-                                .thenByDescending { it.topic.id }
+                    shown.forEach { indexed ->
+                        add(
+                            DatabaseRow(
+                                key = indexed.topic.id,
+                                topic = indexed.topic,
+                                done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                            )
                         )
-                    DatabaseSortMode.YEAR_NEWEST ->
-                        filtered.sortedWith(
-                            compareByDescending<IndexedTopic> { it.year ?: Int.MIN_VALUE }
-                                .thenBy { it.nameKey }
-                                .thenBy { it.topic.id }
-                        )
-                    DatabaseSortMode.YEAR_OLDEST ->
-                        filtered.sortedWith(
-                            compareBy<IndexedTopic> { it.year ?: Int.MAX_VALUE }
-                                .thenBy { it.nameKey }
-                                .thenBy { it.topic.id }
-                        )
-                    DatabaseSortMode.DEFAULT -> filtered
-                }
-                sorted.map { indexed ->
-                    DatabaseRow(
-                        key = indexed.topic.id,
-                        topic = indexed.topic,
-                        done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
-                    )
+                    }
                 }
             }
         }
@@ -446,12 +395,9 @@ fun TopicDatabaseScreen(navController: NavController) {
                 savedScrollOffset = 0
             }
     }
-    // v8.54 — switching the sort reorders the whole list, so land back at
-    // the top instead of keeping a random index into the new ordering.
-    // v27r — switching the CATEGORY filter does the same: a different lane
-    // (or All) starts from the top, never from a stale position into the
-    // new lane.
-    LaunchedEffect(sortMode, effectiveCat) {
+    // v27r — switching the CATEGORY filter (or All) starts from the top,
+    // never from a stale position into the new lane.
+    LaunchedEffect(effectiveCat) {
         if (hasRows && listState.firstVisibleItemIndex > 0) {
             savedScrollIndex = 0
             savedScrollOffset = 0
@@ -671,16 +617,19 @@ fun TopicDatabaseScreen(navController: NavController) {
         // finished (a delayed pop with no visible motion). A vertical SLIDE
         // translates the whole bar instead — the chips emerge from under
         // the torn hero with a real slide + fade.
+        // v105 — smoother: a longer, decelerating slide (LinearOutSlowIn)
+        // with a matched fade so the chips settle gently instead of
+        // snapping down.
         AnimatedVisibility(
             visible = chipsVisible,
             enter = slideInVertically(
                 initialOffsetY = { -it },
-                animationSpec = tween(300, easing = FastOutSlowInEasing)
-            ) + fadeIn(animationSpec = tween(220)),
+                animationSpec = tween(380, easing = LinearOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(320)),
             exit = slideOutVertically(
                 targetOffsetY = { -it },
-                animationSpec = tween(260, easing = FastOutSlowInEasing)
-            ) + fadeOut(animationSpec = tween(160))
+                animationSpec = tween(300, easing = LinearOutSlowInEasing)
+            ) + fadeOut(animationSpec = tween(220))
         ) {
             DatabaseStickyChipBar(
                 listState = listState,
@@ -729,27 +678,9 @@ fun TopicDatabaseScreen(navController: NavController) {
             // @Composable slot isn't the last parameter, and the trailing
             // form fails to bind under K2.
             trailing = { ink ->
-                // Sort dropdown — the label opens the field list, the arrow
-                // toggles ascending/descending universally (v26).
-                CurioSortDropdown(
-                    options = listOf(
-                        // v68 — each field carries its sort-type icon
-                        // (sparkles / text / calendar) shown in the pill.
-                        CurioSortOption(DatabaseSortField.DEFAULT.name, "Default", CurioIcons.AutoAwesome),
-                        CurioSortOption(DatabaseSortField.NAME.name, "Name", CurioIcons.FormatText),
-                        CurioSortOption(DatabaseSortField.YEAR.name, "Year", CurioIcons.CalendarToday)
-                    ),
-                    selectedKey = tdSortField,
-                    ascending = tdSortAscending,
-                    onSelect = { tdSortField = it },
-                    onToggleDirection = { tdSortAscending = !tdSortAscending },
-                    ink = ink,
-                    backdrop = settingsRoseAccent(),
-                    accent = settingsRoseAccent(),
-                    emphasized = true
-                )
-                // Search pill — the pet landmark rides the header with the
-                // search box: the pet still walks over and pokes it, and
+                // v105 — the sort dropdown is gone; the hero row keeps the
+                // Search pill only. The pet landmark rides the header with
+                // the search box: the pet still walks over and pokes it, and
                 // the tour's Browse-Topics stop points at it.
                 PetLandmark(
                     id = "search",
@@ -762,8 +693,8 @@ fun TopicDatabaseScreen(navController: NavController) {
                         contentDescription = "Search topics",
                         ink = ink,
                         modifier = lm,
-                        // v85 — same emphasized fill as the sort pill beside
-                        // it, so the two render as identical siblings.
+                        // v85 — emphasized hero fill (the hero action-pill
+                        // language).
                         emphasized = true
                     )
                 }
@@ -951,19 +882,6 @@ private fun DatabaseChipPop(
         content(eased)
     }
 }
-
-/**
- * How the Topic Database list is ordered. DEFAULT keeps the per-category
- * grouping — A–Z within each lane — with section headers; the other modes
- * flatten to one sorted run (headers are hidden because a global sort
- * breaks grouping).
- */
-private enum class DatabaseSortMode {
-    DEFAULT, ALPHA_ASC, ALPHA_DESC, YEAR_NEWEST, YEAR_OLDEST
-}
-
-/** Sort fields for the sort dropdown (v26) — the arrow toggles direction. */
-private enum class DatabaseSortField { DEFAULT, NAME, YEAR }
 
 /**
  * Best-effort publication/birth year for sorting. Topics have no dedicated
