@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -81,6 +82,29 @@ fun Modifier.curioInnerGlow(
 /** v81 — convenience: the glass edge + inner glow in one chain (dark only). */
 fun Modifier.curioGlassGlow(shape: Shape, accent: Color, strength: Float = 0.16f): Modifier =
     this.curioGlassEdge(shape).curioInnerGlow(shape, accent, strength)
+
+/**
+ * v93 — the One UI torn-edge light catch: a faint light rim tracing the
+ * hero's torn outline (the same [shape], stroked ~1.5px in a whisper of
+ * white) so the ragged paper seam reads as catching light — the shiny-edge
+ * language on the tear, NOT a border. Dark mode only (no-op in light).
+ * The stroke follows the whole closed outline; on the full-bleed tear
+ * heroes the top/side strokes hide under the status bar / at the screen
+ * edges, so the visible catch is the torn bottom edge.
+ */
+fun Modifier.tornSeamLight(shape: Shape, strength: Float = 0.10f): Modifier = composed {
+    val layoutDirection = LocalLayoutDirection.current
+    if (!isCurioDarkTheme()) return@composed this
+    this.drawWithContent {
+        drawContent()
+        val path = shape.createOutline(size, layoutDirection, this).toPath()
+        drawPath(
+            path = path,
+            color = Color.White.copy(alpha = strength),
+            style = Stroke(width = 1.5.dp.toPx())
+        )
+    }
+}
 
 private fun Outline.toPath(): Path = when (this) {
     is Outline.Generic -> path

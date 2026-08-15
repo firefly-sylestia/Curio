@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — One UI light glass + shiny ticket edge + tinted shadows (v93)
+## Current request — torn-edge light catch on the unified tears (v94)
+
+### What was asked
+"continue" — keep going with the One UI 9.5 improvement list.
+
+### What was done
+New `Modifier.tornSeamLight(shape, strength = 0.10f)` in
+CurioGlassEffects.kt: a faint 1.5px white stroke tracing the hero's torn
+outline (dark only, no-op in light) — the "shiny edge" language on the
+ragged seam, not a border. The stroke follows the closed outline; on the
+full-bleed tear heroes the top/side strokes hide under the status bar /
+screen edges, so the visible catch is the torn bottom edge. Applied to all
+four unified tears: Home quest banner, Detail hero, Spin filter sheet hero,
+Spin category-picker hero.
+
+Skipped: spin-button inner glow (already present since v81), active lane
+chip glow (the Spin lane chip bar no longer exists — Categories/Filter
+pills replaced it), rounded-square sheets (intentionally flush so the tear
+hero fills the top edge — would conflict).
+
+### Validation
+Balanced, `git diff --check` clean, imports added in the three screens.
+No Gradle locally — CI on push (this change is committed but NOT pushed
+per the standing user instruction).
+
+## Prior — One UI light glass + shiny ticket edge + tinted shadows (v93)
 
 ### What was asked
 "start that and tell me which screen you gonna do also i want the similiar
