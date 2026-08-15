@@ -394,6 +394,15 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v75 — Home stat card wears an opaque theme-aware pane like Profile's.**
+  The Home Streak · Cabinet · Topics pane's DEFAULT fill (off the "Paper
+  stat card" experiment) was a transparent rose glass (12% → 55% alpha)
+  that read see-through and let the elevation shadow bleed. It now uses
+  Profile's exact stat-pane construction: an OPAQUE vertical gradient of
+  `lerp(heroFill, White, 0.06f)` → `lerp(heroFill, White, 0.26f)` with the
+  AMOLED step toward `HomeRosewood` 0.30, and `shadowElevation` 3dp +
+  `curioDarkGlow` now always apply (they were gated behind the paper-card
+  experiment). The experiment branch is untouched.
 - **v74 — category picker sheet: tear hero to the status bar + no close
   button.** `CategoryPickerSheet` (Spin) got the filter sheet's v70 tear
   treatment: `shape = RectangleShape` (flush top), `dragHandle = null`,

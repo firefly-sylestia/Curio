@@ -565,13 +565,13 @@ fun HomeScreen(navController: NavController) {
                             Surface(
                                 shape = statShape,
                                 color = Color.Transparent,
-                                shadowElevation = if (paperStatsOn) 3.dp else 0.dp,
-                                // v28 — dark mode elevation visibility
-                                // (glow + hairline on the paper card).
-                                modifier = if (paperStatsOn) {
-                                    Modifier
-                                        .curioDarkGlow(3.dp, statShape)
-                                } else Modifier
+                                // v74 — the pane always carries the elevation +
+                                // dark glow, exactly like Profile's stat pane
+                                // (the old 0dp default made the fill read flat
+                                // against the banner).
+                                shadowElevation = 3.dp,
+                                modifier = Modifier
+                                    .curioDarkGlow(3.dp, statShape)
                             ) {
                                 // The fill must wear the card's own shape —
                                 // Surface does not clip its content, so a plain
@@ -592,10 +592,22 @@ fun HomeScreen(navController: NavController) {
                                             ink = questInk
                                         )
                                         else -> Modifier.background(
+                                            // v74 — OPAQUE theme-aware pane, the
+                                            // same construction as Profile's stat
+                                            // pane: the old 12–55% alpha glass
+                                            // read transparent and let the
+                                            // elevation shadow bleed through.
+                                            // The opaque blends resolve to the
+                                            // same perceived tints over the
+                                            // banner while keeping the shadow
+                                            // clean, with an AMOLED rose-wood
+                                            // step (theme-aware like Profile).
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    statGlass.copy(alpha = 0.12f),
-                                                    lerp(statGlass, Color.White, 0.26f).copy(alpha = 0.55f)
+                                                    lerp(statGlass, Color.White, 0.06f),
+                                                    if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED)
+                                                        lerp(statGlass, CurioColors.HomeRosewood, 0.30f)
+                                                    else lerp(statGlass, Color.White, 0.26f)
                                                 )
                                             ),
                                             RoundedCornerShape(20.dp)

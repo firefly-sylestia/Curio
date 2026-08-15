@@ -1,6 +1,29 @@
 # Prompt.md — Request log
 
-## Current request — category picker sheet: tear hero to the status bar, no dismiss button (v74)
+## Current request — Home stat card: opaque theme-aware pane like Profile (v75)
+
+### What was asked
+"the home screen stat card you see how its transparent, make it be similar
+to the profile screen stat card with theme aware"
+
+### What was done (HomeScreen.kt — the Streak · Cabinet · Topics pane)
+1. **Default fill is now OPAQUE and theme-aware** — the old transparent
+   glass (`statGlass.copy(alpha = 0.12f)` → 55% white-lift) read as a see-
+   through wash and let the elevation shadow bleed. It now uses the exact
+   construction Profile's stat pane wears: an opaque vertical gradient of
+   `lerp(fill, White, 0.06f)` → `lerp(fill, White, 0.26f)`, with an AMOLED
+   step toward `HomeRosewood` at 0.30 (Profile's v27n treatment).
+2. **Elevation + dark glow always on** — `shadowElevation` 3dp and
+   `curioDarkGlow` previously applied only under the "Paper stat card"
+   experiment; they now always apply (mirroring Profile), so the opaque
+   pane reads raised off the banner in every theme instead of flat.
+3. The "Paper stat card" experiment branch is untouched.
+
+### Validation
+Brace/paren balance clean (284/284, 979/979), `git diff --check` clean.
+No Gradle locally (env rule) — CI on push.
+
+## Prior — category picker sheet: tear hero to the status bar, no dismiss button (v74)
 
 ### What was asked
 "Apply the same status-bar tear treatment to the category picker sheet on
