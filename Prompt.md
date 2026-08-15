@@ -1,6 +1,37 @@
 # Prompt.md — Request log
 
-## Current request — light warm catch on the unified tears (v95)
+## Current request — detail fixes: dp CI error, theme-aware back/more, stat-card pane (v96)
+
+### What was asked
+1. Fix the CI compile error (`Unresolved reference 'dp'` at
+   CurioGlassEffects.kt:130 — the v94 `tornSeamLight` used `1.5.dp.toPx()`
+   without importing `androidx.compose.ui.unit.dp`).
+2. "the 3 dot and back button in detail page is still white and not
+   matching the dark theme and light theme" — the back + more buttons sit
+   on a hardcoded WHITE frost plate (cream ink on white = washed out;
+   glaring on the black page).
+3. "its date type stat card doesnt match the style of the stat card from
+   home screen or profile" — the Date · Mood · Type meta card.
+
+### What was done
+1. Added `import androidx.compose.ui.unit.dp` to CurioGlassEffects.kt.
+2. `DetailStickyBar`'s frost plate is now THEME-AWARE: light = the hero
+   fill lifted toward the frosted glass (`lerp(heroFill, curioPillTintLift,
+   0.38)`, dark slate ink reads crisp); dark = a DARK hero-tinted glass
+   (`lerp(heroFill, Black, 0.30)`) so the light cream ink actually reads
+   (the reversed light-in-dark contract). Added a `heroFill` param passed
+   from the caller (`heroStart`) + the `curioPillTintLift` import.
+3. The meta card's default (non-paper) pane now uses the PROFILE stat-pane
+   recipe (user's choice): the hero fill lifted toward white 6→26%
+   (`lerp(heroStart, White, 0.06/0.26)`) instead of the old near-white
+   `heroSheetColor` blend that washed the card out; corner radius 18 → 20dp
+   to match Home/Profile. The paper-stat-card experiment path is untouched.
+
+### Validation
+Balanced, `git diff --check` clean, `heroSheetColor` still referenced (6
+sites). No Gradle locally — CI on push.
+
+## Prior — light warm catch on the unified tears (v95)
 
 ### What was asked
 "continue" — keep going with the One UI 9.5 improvement list.

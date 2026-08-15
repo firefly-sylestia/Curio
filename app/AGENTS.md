@@ -401,6 +401,19 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v96 — detail-page fixes.** (1) CI: `tornSeamLight` (v94) used
+  `1.5.dp.toPx()` without importing `androidx.compose.ui.unit.dp` — added.
+  (2) Detail back + more buttons: the frost plate was HARDCODED white
+  (cream ink on white washed out; glared on the black page).
+  `DetailStickyBar`'s frost is now theme-aware — light: hero fill lifted
+  toward the frosted glass (`lerp(heroFill, curioPillTintLift, 0.38)`);
+  dark: a dark hero-tinted glass (`lerp(heroFill, Black, 0.30)`) so the
+  cream ink reads (reversed light-in-dark contract). New `heroFill` param
+  (caller passes `heroStart`). (3) Detail Date · Mood · Type meta card's
+  default pane now uses the PROFILE stat-pane recipe (user's choice):
+  `lerp(heroStart, White, 0.06/0.26)` instead of the near-white
+  `heroSheetColor` blend; corner 18 → 20dp. Paper experiment path
+  untouched.
 - **v95 — light warm catch on the unified tears.** New
   `Modifier.curioLightCatch(shape, strength = 0.10f)`
   (CurioGlassEffects.kt): a soft warm-white top-edge gradient fading down

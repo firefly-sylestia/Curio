@@ -167,6 +167,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.categorySurfaceMoodBoard
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.lightAccentTint
@@ -571,7 +572,9 @@ fun EntryDetailScreen(
                     val metaPaperBg = paperStatCardColor(heroSheetColor)
                     val metaTearOn = metaPaperOn && AppPreferences.paperStatTearState
                     val metaShape: Shape = remember(tearSeed, metaTearOn) {
-                        if (metaTearOn) TornStatPaperShape(tearSeed xor 0x6B4E3E) else RoundedCornerShape(18.dp)
+                        // v95 — 18 → 20dp: matches Home/Profile's stat-card
+                        // corner radius.
+                        if (metaTearOn) TornStatPaperShape(tearSeed xor 0x6B4E3E) else RoundedCornerShape(20.dp)
                     }
                     val metaHolesOn = metaPaperOn && AppPreferences.paperHeaderHolesState
                     val metaRingsOn = metaHolesOn && AppPreferences.paperHoleRingsState
@@ -617,26 +620,24 @@ fun EntryDetailScreen(
                                 )
                             } else {
                                 // ── Opaque theme-aware pane (v75) — the
-                                // same construction language as Profile's
-                                // stat pane (and Home's Streak card): the
-                                // old frosted glass read transparent; the
-                                // opaque blend keeps the same perceived
-                                // category bloom over the THEME-AWARE sheet
-                                // color ([heroSheetColor] resolves near-
-                                // white) while the elevation shadow renders
-                                // clean behind it.
+                                // SAME recipe as Profile's stat pane: the
+                                // hero fill lifted toward white 6→26% (the
+                                // old near-white [heroSheetColor] blend
+                                // washed the Date · Mood · Type card out
+                                // next to Home/Profile's stat cards — v95
+                                // aligns it to the Profile recipe).
                                 Box(
                                     modifier = Modifier
                                         .matchParentSize()
                                         .background(
                                             Brush.verticalGradient(
                                                 listOf(
-                                                    lerp(heroSheetColor, heroStart, 0.30f),
-                                                    lerp(heroSheetColor, heroStart, 0.16f)
+                                                    lerp(heroStart, Color.White, 0.06f),
+                                                    lerp(heroStart, Color.White, 0.26f)
                                                 )
                                             )
                                         )
-                                        .clip(RoundedCornerShape(18.dp))
+                                        .clip(RoundedCornerShape(20.dp))
                                 )
                             }
                             Row(
@@ -809,6 +810,7 @@ fun EntryDetailScreen(
             detailScroll = detailScroll,
             heroControlsProgress = heroControlsProgress,
             heroCardInk = heroCardInk,
+            heroFill = heroStart,
             resolvedEntry = resolvedEntry,
             category = cat,
             context = context,
@@ -1046,6 +1048,7 @@ private fun BoxScope.DetailStickyBar(
     detailScroll: androidx.compose.foundation.ScrollState,
     heroControlsProgress: Float,
     heroCardInk: Color,
+    heroFill: Color,
     resolvedEntry: CurioEntry,
     category: CurioCategory,
     context: Context,
@@ -1060,7 +1063,14 @@ private fun BoxScope.DetailStickyBar(
     }
     val frostShift = FastOutSlowInEasing.transform(stickyProgress)
     val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
-    val stickyFrostBrush = Brush.verticalGradient(0f to Color.White, 1f to Color.White.copy(alpha = 0.97f))
+    // v95 — THEME-AWARE frost plate: light keeps the bright frosted glass
+    // (dark slate ink reads crisp); dark flips to a DARK hero-tinted glass
+    // so the light cream ink actually reads — the old hardcoded WHITE plate
+    // washed out the cream glyphs and glared on the black page (the
+    // reversed light-in-dark contract).
+    val frostFill = if (isCurioDarkTheme()) lerp(heroFill, Color.Black, 0.30f)
+                    else lerp(heroFill, curioPillTintLift(), 0.38f)
+    val stickyFrostBrush = Brush.verticalGradient(0f to frostFill, 1f to frostFill.copy(alpha = 0.97f))
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time
     // graphicsLayer translation — the more-menu's popup anchors to the
     // button's layout position, so a draw-time translate would leave the
