@@ -11,6 +11,10 @@
    the top, visible behind them — fix.
 4. Progress pill (Topic Reveal + Detail): same shadow-visible issue and
    it needs to be a WIDER pill.
+5. Quests screen — quest paths: don't show the task hint (subtitle) in
+   closed path cards; don't show the BRONZE/SILVER tier text — just the
+   badge + the name (minimal). The "In progress" pill is too thin — make
+   it a fuller pill (user confirmed: thin/slim, not the glow).
 
 ### What was done
 1. **Reverts (3a4d6ff)** — both tear-hero catch commits reverted:
@@ -31,12 +35,22 @@
 4. **Progress pill wider** — `CurioProgressPill` horizontal padding
    14 → 18dp (Reveal badge + Detail + Cabinet share the component), so it
    reads as a proper pill instead of a slim strip.
+5. **Quests screen (QuestsScreen.kt)** — (a) `PathCard` (closed path
+   cards in the "Quest paths" grid) no longer shows the `chain.subtitle`
+   task hint ("Spin your way up the ranks" etc.) — it only appears in the
+   open path dialog; (b) the BRONZE/SILVER tier label is gone from
+   `PathCard` — just the medal badge + the chain name (the medal already
+   carries the tier); (c) the "In progress · n/target" pill in
+   `CurrentQuestCard` is a FULLER pill: padding 9dp vertical → 12dp
+   vertical + 14dp horizontal (user picked "too thin/slim" — kept the
+   glass-edge glow).
 
 ### Validation
-`git diff --check` clean; paren/brace deltas vs HEAD = 0 on all four
+`git diff --check` clean; paren/brace deltas vs HEAD = 0 on all five
 files; no dangling `curioInnerGlow` refs in HomeScreen, no 3dp elevation
 left in the pickers, `curioLightCatch`/`tornSeamLight` fully gone from the
-app code. No Gradle locally (env rule) — CI on push.
+app code, `tier`/`accent`/`BadgeTier` still referenced in QuestsScreen.
+No Gradle locally (env rule) — CI on push.
 
 ## Prior — Profile: paper card default + deglow quests + merged edit dialog (v97)
 

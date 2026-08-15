@@ -579,6 +579,9 @@ private fun CurrentQuestCard(
         // informational "In progress" state flips to a DYNAMIC tinted glass
         // (theme-aware rose ink on the surface glass, glass edge in dark) —
         // no more solid pink block for a non-action.
+        // v98 — FULLER pill: the 9dp vertical strip read as a thin sliver
+        // (the progress-pill complaint) — 12dp vertical + 14dp horizontal
+        // gives it a proper pill body.
         val actionable = stage.navRoute != null
         Surface(
             onClick = { stage.navRoute?.let(onNavigate) },
@@ -595,7 +598,7 @@ private fun CurrentQuestCard(
                        else "In progress · ${done.coerceAtMost(stage.target)}/${stage.target}",
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = if (actionable) Color.White else curioRoseInk(),
-                modifier = Modifier.padding(vertical = 9.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -800,13 +803,10 @@ private fun PathCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        chain.subtitle,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    // v98 — minimal: the path card (closed) no longer shows
+                    // the task hint subtitle ("Spin your way up the ranks"
+                    // etc.) — it only appears once the path is opened. Just
+                    // the badge + the name stay.
                 }
                 // The chain's merged medal (best-earned tier).
                 CurioBadgeMedal(stage = display, medalSize = 34.dp)
@@ -835,18 +835,10 @@ private fun PathCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                // v98 — minimal: no more BRONZE/SILVER tier label — the
+                // medal already carries the tier; just the badge + name.
                 if (complete) {
                     CurioIcon(CurioIcons.Check, null, tint = curioSageInk(), size = 14.dp)
-                } else {
-                    Text(
-                        tier.displayName.uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.6.sp
-                        ),
-                        color = accent,
-                        maxLines = 1
-                    )
                 }
             }
         }

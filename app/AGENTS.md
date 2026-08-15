@@ -415,7 +415,13 @@ app/src/main/java/com/curio/app/
   `PickerPresetChip`; covers the full-screen picker AND the Spin sheet).
   (4) `CurioProgressPill` (Topic Reveal + Detail + Cabinet) is WIDER:
   horizontal padding 14 → 18dp so it reads as a proper pill instead of a
-  slim strip with the glow/shadow around it.
+  slim strip with the glow/shadow around it. (5) Quests screen — quest
+  paths are MINIMAL: closed `PathCard`s in the "Quest paths" grid drop the
+  `chain.subtitle` task hint (it only appears in the open path dialog) and
+  the BRONZE/SILVER tier label (just the medal badge + the chain name —
+  the medal already carries the tier); the "In progress · n/target" pill
+  in `CurrentQuestCard` is a FULLER pill (9dp vertical → 12dp vertical +
+  14dp horizontal — user confirmed it read too thin, the glow stays).
 - **v97 — Paper stat card on by default + Profile quests paper card + merged
   Edit profile.** (1) The "Paper stat card" experiment PASSED — default is now
   ON app-wide (`paperStatCardsState` true, `KEY_PAPER_STAT_CARDS` default
