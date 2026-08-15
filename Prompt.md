@@ -1,6 +1,37 @@
 # Prompt.md — Request log
 
-## Current request — CI compile fix: nullable avatarPath (v103 follow-up)
+## Current request — music brand icons in the explore dialog + picker (v106)
+
+### What was asked
+"i added 4 icons add them for music icons in explore dialog and in music
+service selection. dont push it yet." → then, after a CI compile fix,
+"push eveerything".
+
+### What was done
+The 4 official brand SVGs (Apple Music, Spotify, YouTube, YouTube Music)
+are converted to VectorDrawables in `app/src/main/res/drawable/`
+(`ic_music_apple_music`, `ic_music_spotify`, `ic_music_youtube`,
+`ic_music_youtube_music`) — source SVGs archived under
+`design/music-service-icons/`. Apple's gradient is recreated as a
+pink→red→purple aapt gradient (the source embeds it as a raster JPEG
+that can't go in a vector); the YouTube-Music ring uses
+`fillType="evenOdd"`. New `MusicService.brandRes` extension in
+CurioIcons.kt maps each service to its drawable. Wired into two places:
+1. **Explore dialog** (TopicRevealScreen) — the "Watch in" pill shows the
+   service's brand logo (no tint — logos keep their own colors);
+   non-music topics use the YouTube logo. The old glyph stand-ins
+   (`brandTile`) stay as monogram fallback.
+2. **Music service selection** (MusicServiceDialog in
+   SettingsSharedComponents) — each picker row leads with the 26dp brand
+   logo before the radio button.
+
+### Validation
+`git diff --check` clean; all four drawable XMLs parse; no dangling
+`brandTile` / `watchGlyph` references. No Gradle locally (env rule) — CI
+on push. (Followed the earlier `cdd9062` CI fix: ProfileHero's nullable
+`avatarPath` now uses `!isNullOrBlank()`.)
+
+## Prior — CI compile fix: nullable avatarPath (v103 follow-up)
 
 ### What was asked
 The CI compile failed: `ProfileScreen.kt:880:47` — "Only safe (?.) or

@@ -33,8 +33,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,6 +72,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -85,6 +88,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -129,7 +133,7 @@ import com.curio.app.ui.theme.CurioEditorialBody
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.brandTile
+import com.curio.app.ui.theme.brandRes
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
@@ -987,15 +991,14 @@ fun TopicRevealScreen(
         // to the user's chosen music service; everything else stays YouTube.
         val musicTopic = topic.isMusicTopic()
         val watchService = MusicService.fromId(AppPreferences.musicServiceState)
-        // v27u — clean glyph pills: no brand tiles. The browser button wears
-        // the globe (travel_explore); the watch button wears the service's
-        // glyph (youtube_activity for YouTube / YouTube Music, play_circle
-        // for Spotify, music_note for Apple Music) so the pill still hints
-        // what it opens.
-        val watchGlyph = if (musicTopic) {
-            watchService.brandTile().second
+        // v106 — the watch pill wears the service's brand logo (a
+        // VectorDrawable that keeps its own brand colors). Non-music topics
+        // keep YouTube. The old Material-glyph stand-ins ([MusicService
+        // .brandTile]) are retired from the dialog.
+        val watchBrandRes = if (musicTopic) {
+            watchService.brandRes
         } else {
-            CurioIcons.YouTubeActivity
+            R.drawable.ic_music_youtube
         }
         // v27u — the two pills are VISIBLE soft-tinted pills (the old
         // TextButton had no container color, so the pill shape was
@@ -1146,12 +1149,12 @@ fun TopicRevealScreen(
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
-                        // v27u — the service's clean glyph (no brand tile).
-                        CurioIcon(
-                            name = watchGlyph,
+                        // v106 — the service's brand logo (no tint — the
+                        // logos keep their own brand colors).
+                        Image(
+                            painter = painterResource(watchBrandRes),
                             contentDescription = null,
-                            tint = pillInk,
-                            size = 20.dp
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(

@@ -1,5 +1,6 @@
 package com.curio.app.ui.theme
 
+import com.curio.app.R
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.JournalMood
 import com.curio.app.data.MusicService
@@ -381,6 +382,21 @@ fun MusicService.brandTile(): Pair<Color, String> = when (this) {
     MusicService.APPLE_MUSIC -> Color(0xFFFA2D48) to CurioIcons.MusicNote
     MusicService.SPOTIFY -> Color(0xFF1DB954) to CurioIcons.PlayCircle
 }
+
+/**
+ * v106 — the brand-logo VectorDrawable for each music service (converted
+ * from the official brand SVGs the user supplied), used by the explore
+ * dialog's "Watch in" pill and the Music service picker rows. The logos
+ * keep their own brand colors (never tinted); [brandTile]'s glyphs remain
+ * for monogram fallback.
+ */
+val MusicService.brandRes: Int
+    get() = when (this) {
+        MusicService.YOUTUBE -> R.drawable.ic_music_youtube
+        MusicService.YOUTUBE_MUSIC -> R.drawable.ic_music_youtube_music
+        MusicService.APPLE_MUSIC -> R.drawable.ic_music_apple_music
+        MusicService.SPOTIFY -> R.drawable.ic_music_spotify
+    }
 
 /**
  * v27s — a small brand tile: a rounded square in the brand color carrying

@@ -401,6 +401,24 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v106 — music brand logos in the explore dialog + music picker.** The
+  four official service SVGs the user supplied (Apple Music, Spotify,
+  YouTube, YouTube Music — archived under `design/music-service-icons/`)
+  are converted to crisp VectorDrawables in `res/drawable/`
+  (`ic_music_apple_music`, `ic_music_spotify`, `ic_music_youtube`,
+  `ic_music_youtube_music`; Apple's diagonal pink→red→purple gradient is
+  recreated as an aapt `<gradient>` because the source SVG embeds it as a
+  raster JPEG, and the YouTube-Music ring uses `fillType="evenOdd"` so
+  the center stays open). (1) New `MusicService.brandRes` extension in
+  CurioIcons.kt maps each service to its drawable. (2) TopicRevealScreen's
+  "Watch in" pill swaps the old Material glyph (`MusicService.brandTile`)
+  for the service's brand logo via `painterResource` (NEVER tinted — the
+  logos keep their own brand colors; the pill's `pillInk` tint applies
+  only to the glyph pills); non-music topics use the YouTube logo. (3)
+  MusicServiceDialog rows (Settings → Notifications → Music service) lead
+  with the 26dp brand logo before the radio button. The `brandTile`
+  glyph stand-ins stay as monogram fallback (no callers left in the
+  dialog).
 - **v105 — sort control removed + smoother category chips.** (1) SORT
   REMOVED from Cabinet + Topic Database: `ui/components/CurioSortDropdown.kt`
   is DELETED (no callers left) and both hero call sites drop it —

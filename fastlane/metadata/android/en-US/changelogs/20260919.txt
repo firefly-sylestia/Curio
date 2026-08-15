@@ -1,6 +1,7 @@
 REMOVE
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
 ADD
+- Music service icons: the explore "Watch in" pill and the Music service picker now show the real brand logos (Apple Music, Spotify, YouTube, YouTube Music) instead of generic glyphs.
 - Paper stat cards are on by default: the Home and Profile stat panes, the detail meta card and the Profile quests block now wear the paper card look.
 - Edit profile now edits your name and the line under it in one dialog (no separate tagline popup).
 - Dark mode reimagined: pitch-black pages, dark same-hue heroes, reversed buttons and One UI-style inner glow on pills.

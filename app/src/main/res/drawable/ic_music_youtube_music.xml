@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v106 — YouTube Music brand logo, converted from the official SVG the
+     user supplied. Brand colors only; never tinted. The group translation
+     reproduces the source SVG's translate(-21.332031,-21.332031). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="469.336"
+    android:viewportHeight="469.336">
+    <group
+        android:translateX="-21.332031"
+        android:translateY="-21.332031">
+        <!-- Red circle body -->
+        <path
+            android:fillColor="#FF0033"
+            android:pathData="M490.66797,256 C490.66797,126.39844 385.60156,21.332031 256,21.332031 126.39844,21.332031 21.332031,126.39844 21.332031,256 21.332031,385.60156 126.39844,490.66797 256,490.66797 385.60156,490.66797 490.66797,385.60156 490.66797,256 Z" />
+        <!-- White ring (donut: outer 144, inner 122.67 — evenOdd keeps the
+             center open so the red body shows through) -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M256,133.33203 C323.625,133.33203 378.66797,188.375 378.66797,256 378.66797,323.625 323.625,378.66797 256,378.66797 188.375,378.66797 133.33203,323.625 133.33203,256 133.33203,188.375 188.375,133.33203 256,133.33203 M256,112 c-79.57422,0 -144,64.42578 -144,144 0,79.57422 64.42578,144 144,144 79.57422,0 144,-64.42578 144,-144 0,-79.57422 -64.42578,-144 -144,-144 z" />
+        <!-- White play triangle -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M213.33203,320 320,256 213.33203,192 Z" />
+    </group>
+</vector>

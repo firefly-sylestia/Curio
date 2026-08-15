@@ -1,10 +1,12 @@
 package com.curio.app.features.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
@@ -25,6 +28,7 @@ import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.brandRes
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -225,6 +229,13 @@ fun MusicServiceDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
+                            // v106 — the service's brand logo (keeps its own
+                            // brand colors; never tinted).
+                            Image(
+                                painter = painterResource(service.brandRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp)
+                            )
                             RadioButton(
                                 selected = selected,
                                 onClick = null,
