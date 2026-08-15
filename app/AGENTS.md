@@ -401,6 +401,23 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v107 — Apple Music "Watch in" deep links fixed for songs.**
+  `resolveAppleMusicItemUrl` (ExploreSearch.kt) had two bugs that made
+  SONG topics fail while artists and some albums worked (verified live
+  against the iTunes API): (1) the old `music://music.apple.com/{cc}/song/{id}`
+  deep link is a DEAD route — music.apple.com/song/{id} → HTTP 404 — a
+  song's only canonical page is its ALBUM page with `?i=trackId`; the
+  code now uses the API's own `trackViewUrl` / `collectionViewUrl` /
+  `artistLinkUrl` with the scheme swapped to `music://` (tracking
+  `&uo=4` stripped) and `country=$storefront` passed so the link matches
+  the device storefront. (2) The search term never included the artist
+  for songs (the teaser regex only ran for albums) and kept the raw
+  `(1984)` year, which makes the API return ZERO results — the term is
+  now `CurioTopic.byline` (the artist, present on all Album/Song topics)
+  + title with the trailing `(YYYY)` stripped (new `TRAILING_YEAR_IN_PARENS`
+  + `UO_TRACKING_PARAM` private regexes); teaser regex kept only as a
+  blank-byline fallback. Non-Apple services (buildMusicServiceSearchUrl)
+  untouched.
 - **v106 — music brand logos in the explore dialog + music picker.** The
   four official service SVGs the user supplied (Apple Music, Spotify,
   YouTube, YouTube Music — archived under `design/music-service-icons/`)

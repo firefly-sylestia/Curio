@@ -109,12 +109,23 @@ fun buildMusicServiceSearchUrl(
 /**
  * v52b — resolves the topic to a REAL Apple Music catalog item via the
  * public iTunes Search API and returns its native deep link
- * (`music://music.apple.com/{cc}/album|song|artist/{id}`). The Android
- * Apple Music app only handles ITEM pages natively — search links
- * (`music.apple.com/search`) render in an in-app browser with an "Open in
- * browser" banner — so a search URL can never land on the native result.
- * Returns null when nothing is found or the network fails; the caller
- * falls back to [buildMusicServiceSearchUrl]'s search link.
+ * (`music://music.apple.com/...`). The Android Apple Music app only
+ * handles ITEM pages natively — search links (`music.apple.com/search`)
+ * render in an in-app browser with an "Open in browser" banner — so a
+ * search URL can never land on the native result. Returns null when
+ * nothing is found or the network fails; the caller falls back to
+ * [buildMusicServiceSearchUrl]'s search link.
+ *
+ * v107 — two fixes that made SONG topics fail while artists and some
+ * albums worked: (1) the old `music://music.apple.com/{cc}/song/{id}`
+ * deep link is a DEAD route (music.apple.com/song/{id} → HTTP 404 — a
+ * song's only canonical page is its ALBUM page with `?i=trackId`), so we
+ * now use the API's own `trackViewUrl` / `collectionViewUrl` /
+ * `artistLinkUrl` and swap the scheme to `music://`; (2) the search term
+ * now leads with [CurioTopic.byline] (the artist — the old teaser regex
+ * only ran for albums and often misfired) and strips the trailing
+ * `(1984)` year — the API returns ZERO results for parenthesized years —
+ * so the top hit is the right item.
  */
 suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(Dispatchers.IO) {
     val entity = when {
@@ -127,9 +138,17 @@ suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(D
         ?.lowercase(Locale.ROOT)
         ?: "us"
     runCatching {
-        val query = Uri.encode(buildExploreQuery(topic))
-        val conn = URL("https://itunes.apple.com/search?term=$query&media=music&entity=$entity&limit=1")
-            .openConnection() as HttpURLConnection
+        // v107 — focused catalog query: artist + title. byline IS the
+        // artist for Album/Song topics; a trailing "(1984)" makes the API
+        // return zero results, so strip it. The subtype word ("Song") adds
+        // no signal here.
+        val byline = topic.byline.takeIf { it.isNotBlank() }
+            ?: if (topic.subtype.equals("Album", ignoreCase = true)) extractArtist(topic.teaser) else null
+        val title = topic.name.replace(TRAILING_YEAR_IN_PARENS, "").trim()
+        val query = Uri.encode(listOfNotNull(byline, title).joinToString(" "))
+        val conn = URL(
+            "https://itunes.apple.com/search?term=$query&media=music&entity=$entity&country=$storefront&limit=1"
+        ).openConnection() as HttpURLConnection
         conn.connectTimeout = 8000
         conn.readTimeout = 8000
         try {
@@ -137,14 +156,19 @@ suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(D
             val raw = conn.inputStream.bufferedReader().use { it.readText() }
             val first = JSONObject(raw).optJSONArray("results")?.optJSONObject(0)
                 ?: return@runCatching null
-            val id = when (entity) {
-                "album" -> first.optLong("collectionId", -1L)
-                "song" -> first.optLong("trackId", -1L)
-                else -> first.optLong("artistId", -1L)
+            // v107 — canonical URL straight from the API: songs must open
+            // via the ALBUM page + ?i=trackId (the /song/{id} route 404s),
+            // and the URL's country matches the device storefront.
+            val web = when (entity) {
+                "album" -> first.optString("collectionViewUrl")
+                "song" -> first.optString("trackViewUrl")
+                else -> first.optString("artistLinkUrl")
             }
-            if (id <= 0L) return@runCatching null
-            val kind = when (entity) { "album" -> "album"; "song" -> "song"; else -> "artist" }
-            "music://music.apple.com/$storefront/$kind/$id"
+            if (web.isBlank()) return@runCatching null
+            "music://" + web
+                .removePrefix("https://")
+                .removePrefix("http://")
+                .replace(UO_TRACKING_PARAM, "")
         } finally {
             conn.disconnect()
         }
@@ -211,6 +235,16 @@ fun buildEngineSearchUrl(
  */
 fun buildExploreSearchUrl(topic: CurioTopic): String =
     buildEngineSearchUrl(topic)
+
+/**
+ * v107 — a trailing parenthesized year on a topic name ("Purple Rain
+ * (1984)"). The iTunes term API returns ZERO results when the term
+ * contains one, so it's stripped before the catalog search.
+ */
+private val TRAILING_YEAR_IN_PARENS = Regex("\\s*\\(\\d{4}\\)\\s*$")
+
+/** v107 — the iTunes API appends `&uo=4` to its view URLs; not needed in the deep link. */
+private val UO_TRACKING_PARAM = Regex("[?&]uo=\\d+")
 
 /** Year from the topic name ("Citizen Kane (1941)" → "1941"), else era tag. */
 private fun extractYear(topic: CurioTopic): String? {

@@ -9,6 +9,7 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
+- Apple Music: the "Watch in" deep link now opens songs correctly — songs resolve to their album page with the track id (the old /song/ link 404'd), and the search now uses the artist + title so the right track is found.
 - Topic detail: the hero tear now uses the same clean torn-paper seam as the Home banner — the old detail-only pattern that read as straight lines is gone.
 - Profile: pick an avatar photo in Edit profile — it shows on the Profile hero and in the Home menu drawer (the name-initial circle until one is set).
 - Pet Designer auto-import: the bob animation it adds now actually plays — the imported pet performs a happy bob whenever it's been idle for a few seconds.

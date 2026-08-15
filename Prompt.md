@@ -1,6 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — music brand icons in the explore dialog + picker (v106)
+## Current request — Apple Music deep links fail for songs (v107)
+
+### What was asked
+"the apple music link works for artists and some albums but it doesnt
+workfor songs".
+
+### Root cause (verified live against the iTunes API)
+TWO bugs in `resolveAppleMusicItemUrl` (ExploreSearch.kt):
+1. **Dead deep-link route for songs.** The code built
+   `music://music.apple.com/{cc}/song/{trackId}` — but
+   `music.apple.com/us/song/{id}` returns **HTTP 404** (verified). A
+   song's only canonical page is its ALBUM page with `?i=trackId`; the
+   API's `trackViewUrl` is exactly that. Artists (`/artist/`) and albums
+   (`/album/`) use valid routes, which is why they worked.
+2. **Query never included the artist for songs.** `buildExploreQuery`
+   regex-scraped the teaser only for Album topics and appended the raw
+   name + subtype word — so songs searched "Purple Rain 1984 Song" with
+   no artist, and a trailing parenthesized year ("Creep (1992)") made the
+   API return ZERO results (verified).
+
+### What was done
+Rewrote `resolveAppleMusicItemUrl`: (1) use the API's own canonical URL
+(`trackViewUrl` / `collectionViewUrl` / `artistLinkUrl`) with the scheme
+swapped to `music://` and the `&uo=4` tracking param stripped; (2) the
+term is now `byline` (the artist — `CurioTopic.byline`, present on all
+Album/Song topics) + title with the trailing `(YYYY)` stripped
+(`TRAILING_YEAR_IN_PARENS`); teaser regex kept only as a blank-byline
+fallback; (3) `country=$storefront` passed to the API so the deep link
+matches the device's storefront. Verified end-to-end: Purple Rain,
+Hotel California, Sweet Child o' Mine → correct `album/…?i=trackId`
+links; Abbey Road, Dark Side of the Moon, Bowie/Radiohead/Nirvana →
+valid album/artist links. Non-Apple services untouched.
+
+### Validation
+`git diff --check` clean; logic simulated 1:1 against real topics JSON
+before editing. No Gradle locally (env rule) — CI on push.
+
+## Prior — music brand icons in the explore dialog + picker (v106)
 
 ### What was asked
 "i added 4 icons add them for music icons in explore dialog and in music
