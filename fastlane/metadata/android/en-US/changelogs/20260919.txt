@@ -34,6 +34,8 @@ FIX
 - Settings and Profile hero icons follow the hero color in every theme, and the paper under the hero tear picks up its tint.
 - Search bars are pill-shaped across Settings, the Spin filter sheet and Topic History.
 - Spin filter sheet wears the app's tear-hero banner with a bigger category name and cleaner group margins.
+- Spin filters and Category Picker now carry faint watermark backdrops; filter search sits inside the torn header.
+- Dark mode Profile and Settings cards use metallic surfaces, brighter rows and soft color-lit depth.
 - Cabinet and Topic Browser sort pills show the sorting type's icon and are slimmer.
 - Mood board images import through the universal Android photo picker.
 - The mood board editor now shows exactly what the saved entry shows — no more resizing or layout jumps between editing and the detail view.

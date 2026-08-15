@@ -53,7 +53,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1658,14 +1657,21 @@ private fun FilterSheet(
         } else {
             cat.categoryBackgroundWash()
         },
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        dragHandle = null,
+        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            CurioWatermarkBackdrop(
+                activeCat = cat,
+                topClearance = 154.dp,
+                alphaScale = 0.40f,
+                modifier = Modifier.matchParentSize()
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp)
+            ) {
             // ── Torn-hero header (v68) — the sheet wears the app's tear
             //    hero language: a category-colored banner with a soft torn
             //    bottom edge, watermark glyphs and the category name in the
@@ -1681,13 +1687,13 @@ private fun FilterSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(118.dp)
+                    .height(154.dp)
             ) {
                 // ── Torn-edge hairline shadow (the hero construction) ──
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(118.dp)
+                        .height(154.dp)
                         .offset(y = 1.dp)
                         .clip(filterHeroTorn)
                         .background(Color.Black.copy(alpha = 0.20f))
@@ -1696,7 +1702,7 @@ private fun FilterSheet(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(118.dp)
+                        .height(154.dp)
                         .clip(filterHeroTorn)
                         .background(
                             Brush.verticalGradient(
@@ -1713,7 +1719,7 @@ private fun FilterSheet(
                         size = 72.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = 10.dp, bottom = 6.dp)
+                            .padding(end = 10.dp, bottom = 22.dp)
                     )
                     CurioIcon(
                         cat.iconGlyph,
@@ -1728,7 +1734,7 @@ private fun FilterSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(start = 20.dp, end = 14.dp, top = 16.dp, bottom = 18.dp),
+                            .padding(start = 20.dp, end = 14.dp, top = 14.dp, bottom = 58.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -1774,17 +1780,20 @@ private fun FilterSheet(
                             }
                         }
                     }
+                    // Search sits inside the torn banner now, just above the tear.
+                    CurioSearchField(
+                        query = filterQuery,
+                        onQueryChange = { filterQuery = it },
+                        placeholder = "Search filters",
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, bottom = 18.dp)
+                    )
                 }
             }
 
-            // ── v28 — filter search: narrow the chips live ──────────
-            CurioSearchField(
-                query = filterQuery,
-                onQueryChange = { filterQuery = it },
-                placeholder = "Search filters",
-                textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 10.dp)
-            )
 
             // ── Active filter summary chips — this is what was missing ─
             if (activeCount > 0) {
@@ -1797,10 +1806,11 @@ private fun FilterSheet(
                         text = "Active filters",
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp,
                             letterSpacing = 0.5.sp
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 6.dp)
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
                     )
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -1886,7 +1896,7 @@ private fun FilterSheet(
                         .verticalScroll(rememberScrollState())
                         // v68 — proper margins: 14dp under the tear/divider
                         // so the accordion never crowds the header.
-                        .padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 4.dp),
+                        .padding(start = 22.dp, end = 22.dp, top = 18.dp, bottom = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // ── Group pills row ───────────────────────────────
@@ -1939,7 +1949,7 @@ private fun FilterSheet(
                                     // v68 — the section label clears the pill
                                     // row above with its own top margin so the
                                     // open group never reads cramped/offset.
-                                    SectionLabel(key.label, Modifier.padding(top = 6.dp, bottom = 6.dp))
+                                    SectionLabel(key.label, Modifier.padding(top = 12.dp, bottom = 10.dp))
                                     // v44 — the TYPE group is a FLOW row now,
                                     // not a fixed 2-column grid: a long subtype
                                     // takes its own full line and the next chip
@@ -2019,6 +2029,7 @@ private fun FilterSheet(
                         fontWeight = FontWeight.ExtraBold
                     )
                 )
+            }
             }
         }
     }

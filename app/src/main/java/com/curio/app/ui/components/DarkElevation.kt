@@ -2,10 +2,12 @@ package com.curio.app.ui.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * v28 — dark-mode elevation visibility. Compose's black shadows are
@@ -26,16 +28,21 @@ import androidx.compose.ui.unit.dp
 /** The soft light glow tint — a whisper of white so elevation reads as a
  *  gentle lift on midnight surfaces without glowing like a neon tube. */
 @Composable
-fun curioDarkGlowColor(): Color = Color.White.copy(alpha = 0.16f)
+fun curioDarkGlowColor(): Color = Color.White.copy(alpha = 0.22f)
 
 /**
- * RETIRED (v30) — the "Glow shadows" Appearance option was removed because
- * the light glow read as a poor dark-mode look. The modifier is now a no-op
- * identity so every existing call site keeps compiling without drawing
- * anything; the Surface's own black shadowElevation (invisible on midnight
- * anyway) is the only shadow. Kept as a pass-through so the shared elevated
- * components don't need per-file edits, and the dormant [darkGlowState] pref
- * (default false) no longer gates anything.
+ * Dark-mode-only color-lit shadow. Light themes rely on normal Material
+ * shadows; dark themes add this soft white lift behind raised surfaces so
+ * Profile/Settings and shared cards read as metallic depth without borders.
  */
 @Composable
-fun Modifier.curioDarkGlow(elevation: Dp, shape: Shape): Modifier = this
+fun Modifier.curioDarkGlow(elevation: Dp, shape: Shape): Modifier {
+    if (!isCurioDarkTheme() || elevation <= 0.dp) return this
+    return this.shadow(
+        elevation = elevation + 3.dp,
+        shape = shape,
+        ambientColor = curioDarkGlowColor(),
+        spotColor = curioDarkGlowColor(),
+        clip = false
+    )
+}

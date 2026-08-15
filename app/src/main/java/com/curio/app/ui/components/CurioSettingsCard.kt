@@ -29,6 +29,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioIcon
 
 /**
@@ -62,8 +63,13 @@ fun CurioSettingsCard(
         // carry a whisper of the brand rose ([curioPillTintLift]) instead of
         // flat cream, and AMOLED cards lift to a soft GREY GLASS instead of
         // pure black (raised grey plates, not black slabs).
-        color = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
-            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color(0xFF2A2A2A), 0.55f)
+        color = if (isCurioDarkTheme()) {
+            val metallicBase = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) {
+                Color(0xFF171719)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            }
+            lerp(metallicBase, CurioColors.CoralBlush, 0.08f)
         } else {
             lerp(
                 MaterialTheme.colorScheme.surfaceContainerLow,
@@ -76,14 +82,13 @@ fun CurioSettingsCard(
         // with a faint rose tint. The black-glass shine edge keeps them
         // defined, so drop the tonal lift in AMOLED only — shadowElevation
         // stays so the card reads as raised.
-        tonalElevation = if (AppPreferences.themeStyleState == AppPreferences.THEME_STYLE_AMOLED) 0.dp else 3.dp,
+        tonalElevation = if (isCurioDarkTheme()) 6.dp else 3.dp,
         shadowElevation = shadowElevation,
         modifier = modifier
             .fillMaxWidth()
-            // v28 — dark mode: soft light glow + faint hairline so the
-            // elevation reads on midnight (black shadows are invisible).
+            // Dark mode keeps depth from glow + tonal elevation only; no
+            // drawn rims/borders on Profile or Settings cards.
             .curioDarkGlow(shadowElevation, RoundedCornerShape(28.dp))
-            .categoryEdgeShine(RoundedCornerShape(28.dp))
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 
@@ -99,7 +104,7 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
         Surface(
             shape = RoundedCornerShape(14.dp),
             color = if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
-                    else CurioColors.CoralBlush.copy(alpha = 0.16f),
+                    else CurioColors.CoralBlush.copy(alpha = if (isCurioDarkTheme()) 0.28f else 0.16f),
             modifier = Modifier.size(38.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -132,17 +137,27 @@ fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () 
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         if (isAmoled) CurioColors.CoralBlush.copy(alpha = 0.22f)
-                        else CurioColors.CoralBlush.copy(alpha = 0.14f)
+                        else CurioColors.CoralBlush.copy(alpha = if (isCurioDarkTheme()) 0.26f else 0.14f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(icon, null, tint = curioRoseInk(), size = 20.dp)
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isCurioDarkTheme()) FontWeight.SemiBold else FontWeight.Normal),
+                    color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onSurface else Color.Unspecified
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            CurioForwardArrow(tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f), size = 17.dp)
+            CurioForwardArrow(tint = if (isCurioDarkTheme()) curioRoseInk().copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f), size = 17.dp)
         }
     }
 }
@@ -162,7 +177,10 @@ fun CurioSettingsInfoRow(icon: String, title: String, subtitle: String) {
 /** Inset divider aligned to row content (icon column), shared by both screens. */
 @Composable
 fun CurioSettingsDivider() {
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f), modifier = Modifier.padding(start = 33.dp))
+    HorizontalDivider(
+        color = if (isCurioDarkTheme()) Color.White.copy(alpha = 0.06f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+        modifier = Modifier.padding(start = 33.dp)
+    )
 }
 
 /** Shared 12-hour clock label ("9:00 AM") used by Profile + Settings reminder selectors. */

@@ -58,6 +58,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
+import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.MorphEntrance
 
 import com.curio.app.ui.components.categoryEdgeShine
@@ -287,6 +288,11 @@ fun CategoryPickerScreen(navController: NavController) {
             // since the box wraps the sheet content's height.
             contentAlignment = Alignment.Center
         ) {
+            CurioWatermarkBackdrop(
+                activeCat = washCat,
+                alphaScale = 0.38f,
+                modifier = Modifier.matchParentSize()
+            )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
