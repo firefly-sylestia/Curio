@@ -6,6 +6,8 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
+- Search bars: every search bar now uses the standard theme text color — the Spin filter search no longer washes out, and the hero searches read crisp on the frosted glass.
+- Spin filters: group pills are now category-tinted while the filter chips stay neutral, and both have clearer pill elevation — the accordion reads as parents over options.
 - Update toast is now a compact one-line pill that waits a few seconds past launch instead of popping over the start screen.
 - Quest paths and the badge shelf are more minimal: closed path cards and earned shelf tiles show just the badge and the name (no task-hint subtitle, no bronze/silver tier label), and the In-progress pill is a fuller pill.
 - Home's recently-explored pills in dark mode now catch white only at their top edge — the glow no longer fills the whole pill.

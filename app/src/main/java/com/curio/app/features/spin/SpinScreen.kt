@@ -152,7 +152,6 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.deepHueInk
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
@@ -1852,15 +1851,16 @@ private fun FilterSheet(
             //    frosted accent glass in light, light twin on the dark
             //    frosted glass at night).
             val searchGlass = lerp(filterHeroFill, Color.White, 0.30f)
-            val searchInk = cat.categoryInk()
-            // v90 — unified One UI search bar: the frosted category glass +
-            // dynamic category ink through the shared CurioSearchField (the
-            // old 18sp big-type text dropped for the uniform size).
+            // v90 — unified One UI search bar: the frosted category glass
+            // through the shared CurioSearchField.
+            // v100 — search-text audit: the old category ink (deep accent on
+            // the category-TINTED glass — same hue on same hue) washed out;
+            // icon / text / cursor / border now use the THEME text color.
             CurioSearchField(
                 query = filterQuery,
                 onQueryChange = { filterQuery = it },
                 placeholder = "Search filters",
-                ink = searchInk,
+                ink = MaterialTheme.colorScheme.onSurface,
                 fill = searchGlass,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1993,7 +1993,6 @@ private fun FilterSheet(
                                                     selected = chip in draftSubtypes,
                                                     accent = cat.themedAccent(),
                                                     ink = cat.onAccent(),
-                                                    chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                                                     fillMaxWidth = false,
                                                     onClick = {
                                                         draftSubtypes = if (chip in draftSubtypes) draftSubtypes - chip else draftSubtypes + chip
@@ -2013,7 +2012,6 @@ private fun FilterSheet(
                                                     selected = chip in draftFilters,
                                                     accent = cat.themedAccent(),
                                                     ink = cat.onAccent(),
-                                                    chipSurface = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                                                     fillMaxWidth = false,
                                                     onClick = {
                                                         draftFilters = if (chip in draftFilters) draftFilters - chip else draftFilters + chip
@@ -2102,20 +2100,25 @@ private fun CompactChip(
     // surface, never the near-white rose lift) so the light onSurface
     // label reads crisp — the old 0.5 lift toward the near-white glass
     // landed a mid-tone that washed the light text out.
+    // v100 — HIERARCHY: the chips are now the NEUTRAL level — plain theme
+    // surfaceContainerHigh (the callers stopped passing the category-tinted
+    // chipSurface) lifted toward the page surface in light, near-black in
+    // dark — so they read as quiet options under the tinted group pills.
     val inactiveFill = if (isCurioDarkTheme()) lerp(chipSurface, Color.Black, 0.15f)
-    else lerp(chipSurface, curioPillTintLift(), 0.5f)
+    else lerp(chipSurface, MaterialTheme.colorScheme.surface, 0.5f)
     val chipShape = RoundedCornerShape(50)
     Surface(
         shape = chipShape,
         color = if (selected) accent else inactiveFill,
         // v38 — a visible 3dp lift in BOTH states (inactive included) so
         // the unselected chips read as raised pills, not flat tiles.
-        shadowElevation = 3.dp,
+        // v100 — clearer pill elevation: 3 → 4dp (matches the group pills).
+        shadowElevation = 4.dp,
         modifier = Modifier
             .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
             // v83 — dark elevation: the One UI glass edge (+ inner glow on
             // the selected accent chip) reads the pill off the black sheet.
-            .curioDarkGlow(3.dp, chipShape)
+            .curioDarkGlow(4.dp, chipShape)
             .curioGlassEdge(chipShape)
             .curioInnerGlow(chipShape, accent, strength = 0.12f)
             .clip(chipShape)
@@ -2252,8 +2255,11 @@ private fun FilterGroupPill(
     // surface, never the near-white rose lift) so the light onSurface
     // label reads crisp on the black sheet — the glass edge + inner glow
     // carry the raised look.
-    val inactiveFill = if (isCurioDarkTheme()) lerp(chipSurface, Color.Black, 0.15f)
-    else lerp(chipSurface, curioPillTintLift(), 0.5f)
+    // v100 — HIERARCHY: the group pills are now the TINTED level — a
+    // category-accent glass (chipSurface + 22% accent, both themes) so the
+    // accordion rows read as colored parents over the NEUTRAL chips below
+    // (the old value exactly matched the chips' fill — no hierarchy).
+    val inactiveFill = lerp(chipSurface, accent, 0.22f)
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),
@@ -2263,12 +2269,14 @@ private fun FilterGroupPill(
     Surface(
         shape = pillShape,
         color = if (open) accent else inactiveFill,
-        shadowElevation = 3.dp,
+        // v100 — clearer pill elevation: 3 → 4dp so the group pills read
+        // raised off the sheet in light (dark keeps the glass glow).
+        shadowElevation = 4.dp,
         modifier = Modifier
             // v83 — dark elevation: black shadows are invisible on the black
             // sheet, so the pill wears the One UI glass edge (+ inner glow
             // on the accent-filled open state) to read raised off the page.
-            .curioDarkGlow(3.dp, pillShape)
+            .curioDarkGlow(4.dp, pillShape)
             .curioGlassEdge(pillShape)
             .curioInnerGlow(pillShape, accent, strength = 0.12f)
             .clip(pillShape)

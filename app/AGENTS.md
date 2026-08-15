@@ -401,6 +401,22 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v100 — search-text audit + filter hierarchy.** (1) SEARCH TEXT: every
+  search bar now resolves the THEME text color (`onSurface` — near-black
+  light, near-white dark) instead of a colored ink: `CurioSearchField`'s
+  default is onSurfaceVariant → onSurface, and the three hero/tinted call
+  sites (Spin filter sheet, Cabinet hero, Settings hub hero) pass
+  `MaterialTheme.colorScheme.onSurface` — the filter sheet's deep
+  category-ink-on-category-glass washed out (same hue on same hue), the
+  hero bars' banner ink sat ~3:1 on the whitened glass. (2) FILTER
+  HIERARCHY (SpinScreen.kt): the accordion now has two levels —
+  `FilterGroupPill` (closed) is a CATEGORY-TINTED glass
+  (`lerp(chipSurface, accent, 0.22f)`, both themes) while `CompactChip` is
+  NEUTRAL (callers dropped the category-tinted `cat.categorySurface(...)`
+  → plain surfaceContainerHigh, light fill lifts toward `surface`); BOTH
+  pills bump 3 → 4dp elevation + `curioDarkGlow(4.dp)` so the hierarchy
+  reads via color AND lift. User confirmed via ask_user: theme text color
+  + tinted groups / neutral chips / pill elevation.
 - **v99 — compact update toast + delayed past launch.** (1) The in-app
   toast is now a ONE-LINE pill: `CurioInAppToastHost`'s text is capped
   (`maxLines = 1` + `TextOverflow.Ellipsis`) and the pill is slimmer

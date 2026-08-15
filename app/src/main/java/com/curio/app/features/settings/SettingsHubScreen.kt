@@ -327,11 +327,13 @@ fun SettingsHeroHeader(
                         if (active) {
                             // v90 — unified One UI search bar: banner ink +
                             // frosted glass through the shared component.
+                            // v100 — search-text audit: THEME text color on
+                            // the frosted glass (banner ink washed out).
                             CurioSearchField(
                                 query = searchQuery,
                                 onQueryChange = onSearchQueryChange,
                                 placeholder = searchPlaceholder,
-                                ink = ink,
+                                ink = MaterialTheme.colorScheme.onSurface,
                                 fill = lerp(fill, Color.White, 0.30f),
                                 modifier = Modifier
                                     .fillMaxWidth()

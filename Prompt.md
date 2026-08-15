@@ -1,6 +1,53 @@
 # Prompt.md — Request log
 
-## Current request — compact update toast, delayed past launch (v99)
+## Current request — search-text audit + filter hierarchy (v100)
+
+### What was asked
+1. "fi the search bar text color" — search text doesn't read on its glass
+   (user: Spin filter sheet, plus "do an app audit").
+2. "in filters give the group and the filters a differnt shade for hirarcy
+   and differnec" — the group pills and filter chips look identical; give
+   them hierarchy. User chose: group pills TINTED, chips NEUTRAL, and give
+   both pill shadow elevation.
+
+### Root cause
+1. **Search text** — the Spin filter sheet passed the deep CATEGORY ink
+   (`cat.categoryInk()`) on a category-TINTED glass (same hue on same hue;
+   the placeholder at 70% alpha washed out entirely). The Cabinet + Settings
+   hero searches passed banner ink (white in light, ~3:1 on the whitened
+   hero glass). Topic History / page-level searches defaulted to the muted
+   onSurfaceVariant.
+2. **Filter hierarchy** — `FilterGroupPill` and `CompactChip` shared the
+   EXACT same inactive fill (`lerp(chipSurface, curioPillTintLift(), 0.5)`
+   light / `lerp(chipSurface, Black, 0.15)` dark) — zero visual difference
+   between the accordion rows and the chips below them.
+
+### Decision (user confirmed)
+- Search text: THEME text color (onSurface — near-black light, near-white
+  dark) everywhere, applied as an app-wide audit.
+- Hierarchy: group pills = category-tinted glass; chips = neutral; both get
+  clearer (4dp) pill elevation.
+
+### What was done
+1. **Search-text audit** — `CurioSearchField` default ink onSurfaceVariant →
+   onSurface; the three hero/tinted call sites (Spin filter sheet, Cabinet
+   hero, Settings hub hero) now pass `MaterialTheme.colorScheme.onSurface`
+   instead of category ink / banner ink. Every search bar in the app now
+   resolves the standard theme text color.
+2. **Filter hierarchy (SpinScreen.kt)** — `FilterGroupPill` (closed) is now
+   a category-accent glass (`lerp(chipSurface, accent, 0.22f)`, both
+   themes); `CompactChip` is neutral (callers stopped passing the
+   category-tinted `cat.categorySurface(...)` → plain surfaceContainerHigh,
+   light fill lifts toward `surface`). Both pills bump 3 → 4dp elevation +
+   `curioDarkGlow(4.dp)`.
+3. Dead `curioPillTintLift` import removed from SpinScreen.
+
+### Validation
+`git diff --check` clean; `categoryInk`/`categorySurface` imports still used
+in SpinScreen; all CurioSearchField callers audited (Spin, Cabinet,
+Settings×3, Topic History). No Gradle locally (env rule) — CI on push.
+
+## Prior — compact update toast, delayed past launch (v99)
 
 ### What was asked
 1. "fix the update in app toast, what is that its so huge" — the update

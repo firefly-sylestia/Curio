@@ -864,11 +864,15 @@ private fun CabinetHeroHeader(
                             // frosted category glass through the shared
                             // CurioSearchField (same 46dp height + hairline
                             // as every other search bar in the app).
+                            // v100 — search-text audit: the banner ink (white
+                            // in light) sat at ~3:1 on the whitened hero
+                            // glass; the icon/text now use the THEME text
+                            // color so they read crisp on the frosted glass.
                             CurioSearchField(
                                 query = searchQuery,
                                 onQueryChange = onSearchQueryChange,
                                 placeholder = "Search captures…",
-                                ink = ink,
+                                ink = MaterialTheme.colorScheme.onSurface,
                                 fill = lerp(fill, Color.White, 0.30f),
                                 modifier = Modifier
                                     .fillMaxWidth()

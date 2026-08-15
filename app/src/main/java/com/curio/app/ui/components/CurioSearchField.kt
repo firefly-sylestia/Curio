@@ -44,7 +44,8 @@ import com.curio.app.ui.theme.CurioIcons
  *
  * @param ink hero callers pass their banner ink so the icon / placeholder /
  *   text / cursor / hairline all resolve theme-aware (the light twin on the
- *   dark frosted glass at night); null → theme onSurfaceVariant.
+ *   dark frosted glass at night); null → theme onSurface (v100 — the
+ *   standard theme text color, crisp on any glass).
  * @param fill the frosted container (heroes pass `lerp(bannerFill, White,
  *   0.30)`); null → theme surfaceContainerLow.
  */
@@ -62,7 +63,9 @@ fun CurioSearchField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     keyboardActions: KeyboardActions = KeyboardActions(onSearch = {})
 ) {
-    val resolvedInk = ink ?: MaterialTheme.colorScheme.onSurfaceVariant
+    // v100 — the standard theme TEXT color (not the muted onSurfaceVariant):
+    // every search bar in the app reads crisp on its fill.
+    val resolvedInk = ink ?: MaterialTheme.colorScheme.onSurface
     val resolvedFill = fill ?: MaterialTheme.colorScheme.surfaceContainerLow
     val pillShape = RoundedCornerShape(50)
     Surface(
