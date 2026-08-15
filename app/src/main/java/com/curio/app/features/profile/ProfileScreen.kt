@@ -877,7 +877,9 @@ private fun ProfileHero(
                             ) {
                                 // v103 — the avatar photo (circle-clipped by
                                 // the Box) replaces the name initial when set.
-                                if (avatarPath.isNotBlank()) {
+                                // (avatarPath is nullable here — the hero's
+                                // default param — so null-safe blank check.)
+                                if (!avatarPath.isNullOrBlank()) {
                                     ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
                                 } else {
                                     Text(

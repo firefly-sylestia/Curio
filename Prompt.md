@@ -1,6 +1,26 @@
 # Prompt.md — Request log
 
-## Current request — remove sort control + smoother category chips (v105)
+## Current request — CI compile fix: nullable avatarPath (v103 follow-up)
+
+### What was asked
+The CI compile failed: `ProfileScreen.kt:880:47` — "Only safe (?.) or
+non-null asserted (!!.) calls are allowed on a nullable receiver of type
+'String?'". "fix this then push".
+
+### What was done
+`ProfileHero`'s `avatarPath` param is `String? = null` (the avatar photo
+path added in v103), but the hero's photo branch called `.isNotBlank()`
+on it directly. Changed to `!avatarPath.isNullOrBlank()` — the stdlib
+contract smart-casts to a non-null `String` inside the branch, and
+`ProfileAvatarImage` also takes `String?`, so both layers are null-safe.
+One-line fix, no behavior change — the v103 avatar feature compiles again.
+
+### Validation
+`git diff --check` clean. No Gradle locally (env rule) — CI on push.
+(Unrelated uncommitted v106 music-icon work is left out of this push —
+the user asked to hold it until reviewed.)
+
+## Prior — remove sort control + smoother category chips (v105)
 
 ### What was asked
 1. "in cabinet and topic browser remove the sorting option"
