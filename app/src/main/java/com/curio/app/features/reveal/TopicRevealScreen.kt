@@ -122,6 +122,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
@@ -1689,6 +1690,10 @@ private fun HeroCard(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(30.dp))
+                // v92 — the One UI "shiny edge" (same as the Spin ticket,
+                // so the shared-element morph stays pixel-identical), dark
+                // only.
+                .curioGlassEdge(RoundedCornerShape(30.dp))
         ) {
             // ── Gradient brush — pixel-perfect match with the Spin ticket:
             //    same color stops AND the same diagonal linearGradient when

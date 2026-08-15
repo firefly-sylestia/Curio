@@ -267,7 +267,12 @@ fun curioPillLift(): Color =
 @Composable
 fun curioPillTintLift(): Color =
     if (isCurioDarkTheme()) lerp(Color.White, curioRoseInk(), 0.12f)
-    else lerp(MaterialTheme.colorScheme.background, curioRoseInk(), 0.08f)
+    // v92 — light mode wears the SAME bright frosted glass as dark: the
+    // hero pills / plates lift toward a rose-kissed WHITE instead of the
+    // cream background, so Profile/Settings/hero pills read as the same
+    // frosted-glass family in light as they do in dark (the One UI light
+    // look — white glass popping off the tinted hero).
+    else lerp(Color.White, curioRoseInk(), 0.10f)
 
 /**
  * Readable dialog ACTION ink. LIGHT: the scheme primary is the pale

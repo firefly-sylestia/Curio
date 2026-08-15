@@ -2947,6 +2947,11 @@ private fun HeroTicketCard(
                     } else Modifier
                 )
                 .clip(RoundedCornerShape(30.dp))
+                // v92 — the One UI "shiny edge": a faint light-catching rim
+                // along the ticket's top edge (and a whisper at the bottom),
+                // dark only — the Reveal morph card carries the same
+                // modifier so both stay pixel-identical.
+                .curioGlassEdge(RoundedCornerShape(30.dp))
         ) {
             Surface(
                 shape = RoundedCornerShape(30.dp),

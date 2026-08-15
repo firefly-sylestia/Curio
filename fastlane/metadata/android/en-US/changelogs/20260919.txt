@@ -4,6 +4,7 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
+- Light mode: hero pills and plates (Profile, Settings, Cabinet, Topic History) now wear the same bright frosted-glass look as dark mode; the Spin ticket gains the One UI shiny edge and its accent-tinted shadow is on by default.
 - Topic detail, Spin filter and category picker heroes now wear the same clean torn-paper seam and hero color shade as the Home banner (no more straight-line tears).
 - All search bars are now one unified One UI style (same size, dark-aware ink and glass) across Cabinet, Topic Browser, Spin filters, Settings and Topic History.
 - Profile quest plate, quest "In progress" state, picker Original/New tabs and preset chips are now theme-dynamic; picker pills no longer leak their shadow and preset chips are fuller.

@@ -1,6 +1,36 @@
 # Prompt.md — Request log
 
-## Current request — cbrt CI fix + Home-clean tear heroes + hero shade family (v92)
+## Current request — One UI light glass + shiny ticket edge + tinted shadows (v93)
+
+### What was asked
+"start that and tell me which screen you gonna do also i want the similiar
+profile and settings looking in light mode just like dark mode style" —
+begin the One UI 9.5 improvements (glass-edge ticket rim, colored drop
+shadows) and make Profile/Settings light mode wear the same frosted-glass
+look as dark mode.
+
+### Screens touched
+1. **Profile + Settings (and the shared hero-pill family)** — the LIGHT
+   `curioPillTintLift()` now lifts toward a rose-kissed WHITE (was the
+   cream background at 8%), mirroring the dark value — so every hero pill /
+   plate (Settings, Profile, Cabinet, Topic History, Spin filter chips,
+   sort pill, quest plate) reads as the same bright frosted glass in light
+   as it does in dark (the One UI light look — white glass popping off the
+   tinted hero).
+2. **Spin + Topic Reveal** — the One UI "shiny edge": `curioGlassEdge` on
+   the hero ticket card + the Reveal morph card (both stay pixel-identical
+   for the shared-element morph), dark only.
+3. **Spin** — the accent-tinted layered hero shadow (the existing
+   `heroShadowState` recipe: 16dp accent ambient/spot + 5dp black contact)
+   is now the SHIPPED DEFAULT (pref + in-memory defaults flipped to true;
+   the Experiments toggle remains for comparison).
+
+### Validation
+Balanced (Reveal keeps its pre-existing string-literal 1-off), `git diff
+--check` clean. No Gradle locally — CI on push (this change is committed
+but NOT pushed per user request).
+
+## Prior — cbrt CI fix + Home-clean tear heroes + hero shade family (v92)
 
 ### What was asked
 1. Fix the CI compile error (Unresolved reference 'cbrt').

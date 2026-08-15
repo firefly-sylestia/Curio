@@ -282,7 +282,10 @@ object AppPreferences {
     // hero card is now the shipped default.
     var heroBorderState by mutableStateOf(true)
         private set
-    var heroShadowState by mutableStateOf(false)
+    // v92 — the One UI tinted shadow (accent-colored layered glow) is now
+    // the shipped default for the hero ticket; the Experiments toggle
+    // remains for comparison.
+    var heroShadowState by mutableStateOf(true)
     /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
     var paperHeaderCutsState by mutableStateOf(false)
     var paperHeaderHolesState by mutableStateOf(false)
@@ -787,9 +790,11 @@ object AppPreferences {
         heroBorderState = enabled
     }
 
-    /** Whether the soft hero-card shadow is on (default off). */
+    /** Whether the soft hero-card shadow is on — v92: the One UI tinted
+     *  shadow is now the shipped default (was off); the Experiments toggle
+     *  remains for comparison. */
     fun isHeroShadowEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HERO_SHADOW, false)
+        prefs(context).getBoolean(KEY_HERO_SHADOW, true)
 
     fun setHeroShadowEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HERO_SHADOW, enabled).apply()

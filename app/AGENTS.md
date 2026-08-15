@@ -401,6 +401,20 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v93 — One UI light glass + shiny ticket edge + tinted shadows.** (1)
+  `curioPillTintLift()` LIGHT value: was `lerp(background, curioRoseInk(),
+  0.08)` (cream) — now `lerp(Color.White, curioRoseInk(), 0.10)` (rose-
+  kissed white), mirroring the dark value, so every hero pill / plate
+  (Settings, Profile, Cabinet, Topic History, Spin filter chips, sort
+  pill, quest plate) reads as the same bright frosted glass in light as in
+  dark (the user's "profile/settings light like dark style" ask). All 11
+  call sites are hero-pill fills — safe to lift globally. (2) Spin hero
+  ticket + Topic Reveal morph card now carry `curioGlassEdge` (the One UI
+  shiny top-edge rim, dark only) — both stay pixel-identical for the
+  morph. (3) The hero ticket's accent-tinted layered shadow (the existing
+  `heroShadowState` recipe) is now the SHIPPED DEFAULT — in-memory
+  default + `isHeroShadowEnabled` pref default flipped to true; the
+  Experiments toggle remains for comparison.
 - **v92 — Home-clean tear heroes + hero shade family + cbrt fix.** (1)
   `kotlin.math.cbrt` (used by the v88 OKLab `toOklab`) was missing its
   import — added. (2) Detail hero tear: the old `detail = true`-only tear
