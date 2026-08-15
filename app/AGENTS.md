@@ -401,6 +401,17 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v99 — compact update toast + delayed past launch.** (1) The in-app
+  toast is now a ONE-LINE pill: `CurioInAppToastHost`'s text is capped
+  (`maxLines = 1` + `TextOverflow.Ellipsis`) and the pill is slimmer
+  (inner padding 18/12 → 16/10dp, host margin 24 → 20dp) so a long
+  message can never balloon it. (2) The launch update toast no longer
+  shows on the start screen: `UpdateChecker.notifyIfUpdateAvailable`
+  waits 4s past the check before showing the toast (the once-per-version
+  notification still fires immediately), and the copy is shortened to
+  "Curio vX update available" (was the full "…is available — update in
+  Support & diagnostics" sentence that wrapped to two lines on a phone).
+  User confirmed (ask_user): compact + delayed past launch — NOT removed.
 - **v98 — tear-catch revert + dark pill polish.** (1) REVERTED the v94/v95
   tear-hero light catches: `curioLightCatch` (light warm catch) +
   `tornSeamLight` (dark torn-edge stroke) are removed from CurioGlassEffects

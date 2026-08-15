@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -117,7 +118,7 @@ fun CurioInAppToastHost(
                 color = curioDialogContainerColor(),
                 shadowElevation = 6.dp,
                 modifier = Modifier
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 20.dp)
                     .then(
                         if (action != null) Modifier.clickable {
                             CurioToast.dismiss(m.id)
@@ -126,7 +127,9 @@ fun CurioInAppToastHost(
                     )
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                    // v99 — slim pill: tighter padding; the text below is
+                    // capped at one line so a long message can't balloon it.
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -144,7 +147,11 @@ fun CurioInAppToastHost(
                             fontWeight = FontWeight.SemiBold
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        // v99 — a toast is a one-line pill: ellipsize instead
+                        // of wrapping so it never reads as a huge block.
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (m.actionLabel != null) {
                         VerticalDivider(

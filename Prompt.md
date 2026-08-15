@@ -1,6 +1,44 @@
 # Prompt.md — Request log
 
-## Current request — revert tear catches + dark pill polish (v98)
+## Current request — compact update toast, delayed past launch (v99)
+
+### What was asked
+1. "fix the update in app toast, what is that its so huge" — the update
+   toast renders as a huge pill.
+2. "and why it shows at start screen" — the update toast pops over the
+   Home screen right at launch.
+
+### Root cause
+1. **Huge pill** — the toast text was a full sentence ("Curio v1.0.1 is
+   available — update in Support & diagnostics") with NO line cap, plus a
+   glyph + divider + "Open" label; on a phone width it wrapped to 2+
+   lines, so the pill ballooned.
+2. **Start-screen toast** — `MainActivity.onCreate` runs
+   `UpdateChecker.notifyIfUpdateAvailable` (v53 notifier), which fires
+   `CurioToast.show` the moment the GitHub check returns — over whatever
+   screen is up at launch (Home), once per version. The toast host floats
+   above every screen, so it always lands at the start.
+
+### Decision (user confirmed)
+Delay the toast a few seconds past launch (compact + delayed, NOT
+removed) — the once-per-version notification stays immediate.
+
+### What was done
+1. **Compact pill** — `CurioInAppToastHost` text is capped at one line
+   (`maxLines = 1`, `TextOverflow.Ellipsis`), pill padding tightened
+   (inner 18/12 → 16/10dp, host margin 24 → 20dp) so no toast can
+   balloon.
+2. **Delayed + shorter copy** — `notifyIfUpdateAvailable` waits 4s
+   (kotlinx.coroutines.delay) before showing the toast; message shortened
+   to "Curio v1.0.1 update available"; the notification still fires
+   immediately.
+
+### Validation
+`git diff --check` clean; `delay` imported; only the update notifier
+calls `CurioToast.show`, so the one-line cap affects no other caller.
+No Gradle locally (env rule) — CI on push.
+
+## Prior — revert tear catches + dark pill polish (v98)
 
 ### What was asked
 1. Revert 023d21b (light warm catch on the tears) and 37531ae (torn-edge

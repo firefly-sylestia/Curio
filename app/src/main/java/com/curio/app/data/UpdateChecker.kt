@@ -17,6 +17,7 @@ import com.curio.app.ui.components.CurioToast
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.io.File
@@ -268,7 +269,8 @@ object UpdateChecker {
      * release is newer than the installed build:
      *  - an IN-APP toast ([CurioToast]) announces it (v63 — replaces the old
      *    android.widget.Toast), tappable to open Support & diagnostics
-     *    (v63b), and
+     *    (v63b), compact one-line pill that waits a few seconds past launch
+     *    so it isn't glued to the start screen (v99), and
      *  - a NOTIFICATION fires alongside it.
      * Both are ONCE PER VERSION — [AppPreferences] remembers the last
      * announced tag, so a pending update is announced on the first launch
@@ -291,8 +293,12 @@ object UpdateChecker {
             // In-app toast — rendered by CurioInAppToastHost in the NavHost;
             // global state survives the check racing the UI's first frame.
             // Tapping it opens Support & diagnostics (actionId "support").
+            // v99 — wait a few seconds past launch so the pill reads as a
+            // later announcement, not part of the start screen (the
+            // notification below still fires immediately).
+            delay(4_000)
             CurioToast.show(
-                "Curio ${release.tagName} is available — update in Support & diagnostics",
+                "Curio ${release.tagName} update available",
                 glyph = CurioIcons.Download,
                 actionLabel = "Open",
                 actionId = "support"
