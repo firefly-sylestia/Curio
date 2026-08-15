@@ -134,8 +134,13 @@ fun CurioSortDropdown(
                 // before the label and slims again: label-zone padding
                 // 8/6 → 6/4, zone gap 5 → 4dp, min-width 88 → 76dp, so the
                 // added glyph doesn't fatten it.
+                // v79 — middle-size unification: height 52 → 46dp so the
+                // sort pill matches the icon-only Search pill (42 → 46dp),
+                // and the sort-type glyph 16 → 20dp to match the 20dp
+                // glyphs on the hero action pills — both read equal-sized
+                // siblings in the Cabinet + Topic Browser heroes.
                 modifier = Modifier
-                    .heightIn(min = 52.dp)
+                    .heightIn(min = 46.dp)
                     .widthIn(min = 46.dp)
             ) {
                 // ── Label zone — opens the dropdown ──
@@ -151,7 +156,7 @@ fun CurioSortDropdown(
                         name = selected?.glyph ?: CurioIcons.Tune,
                         contentDescription = null,
                         tint = ink,
-                        size = 16.dp
+                        size = 20.dp
                     )
                     Text(
                         text = selected?.label.orEmpty(),

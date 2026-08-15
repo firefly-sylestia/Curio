@@ -394,6 +394,16 @@ app/src/main/java/com/curio/app/
   a **"Pet size"** card (before the Eyes card): live preview +
   Small/Medium/Large + Reset size, writing `design.copy(petScale = …)`
   with undo — the Eyes-section pattern.
+- **v79 — sort pill and search pill get the equal middle-size treatment
+  (Cabinet + Topic Browser).** The sort dropdown's Row had drifted to
+  `heightIn(min = 52.dp)` while the icon-only Search pills
+  (`SettingsHeroActionPill` / `CabinetHeroActionPill`) stayed at the
+  v30-uniform 42dp — so the sort pill read big next to a small search
+  pill. Unified at the middle: both pills are now **46dp tall** (sort
+  52→46, hero action pills 42→46) and both carry **20dp glyphs** (sort-
+  type icon 16→20, action-pill glyphs 22→20). Shared components, so the
+  whole hero-pill family stays uniform; width remains content-driven
+  (the sort pill keeps its label + chevron + direction arrow).
 - **v78 — light-only: Dark / AMOLED / Material removed, Curio light
   stays.** The entire theme-style + theme-mode machinery is gone:
   `AppPreferences` lost `themeStyleState`/`themeModeState` (prefs,

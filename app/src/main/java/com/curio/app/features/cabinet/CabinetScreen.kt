@@ -1207,8 +1207,11 @@ private fun CabinetHeroActionPill(
             // controls read as substantial buttons, not tiny chips.
             // v30 — uniform 42dp height so label-only pills match glyph
             // pills and the sort dropdown (which reads the same 42dp).
+            // v79 — middle-size unification with the sort pill: height
+            // 42 → 46dp and glyph 22 → 20dp so the icon-only Search pill
+            // reads the same size as the sort dropdown beside it.
             modifier = Modifier
-                .heightIn(min = 42.dp)
+                .heightIn(min = 46.dp)
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -1218,7 +1221,7 @@ private fun CabinetHeroActionPill(
                     name = glyph,
                     contentDescription = contentDescription,
                     tint = ink,
-                    size = 22.dp
+                    size = 20.dp
                 )
             }
             if (label != null) {

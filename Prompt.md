@@ -1,6 +1,35 @@
 # Prompt.md — Request log
 
-## Current request — light-only: dark/AMOLED/Material removed (v78)
+## Current request — Cabinet + Topic Browser: sort pill and search pill equal middle size (v79)
+
+### What was asked
+"in cabinet and topic browser, can u make the search icon shape and the sort
+icon shape which gets expanded. give them the equal middle size treatment.
+all of its dimention needs to be same, coz rn the sort pill looks big and
+the search icon pill small"
+
+### What was done
+Root cause: the sort dropdown's Row carried `heightIn(min = 52.dp)` (its
+v43 comment still claimed "the same 42dp height") while the icon-only
+Search pills ([SettingsHeroActionPill] / [CabinetHeroActionPill]) were
+42dp with 22dp glyphs — so the sort pill read big next to the small
+search pill. Unified at the middle:
+
+1. **Height 46dp for both** — `CurioSortDropdown` 52 → 46dp;
+   `SettingsHeroActionPill` + `CabinetHeroActionPill` 42 → 46dp (shared
+   components, so Settings/Profile/Support hero pills stay uniform too).
+2. **Glyphs 20dp for both** — the sort-type icon 16 → 20dp; the hero
+   action-pill glyphs 22 → 20dp.
+3. Everything else already matched: full 50dp capsule, 3dp elevation,
+   same fills. Width stays content-driven (the sort pill carries the
+   label + chevron + direction arrow, so it can't be width-equal to an
+   icon-only pill).
+
+### Validation
+Brace/paren deltas vs HEAD = 0 on all three files, `git diff --check`
+clean. No Gradle locally (env rule) — CI on push.
+
+## Prior — light-only: dark/AMOLED/Material removed (v78)
 
 ### What was asked
 "remove the dark mode and amoled mode entirely. just light mode, no dark
