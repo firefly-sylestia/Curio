@@ -1,6 +1,50 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: Updates page redesign (saved notes, markdown, status header)
+## Current request — COMPLETED: detail-screen tear corners, quick-fact box, "…" fold toggle
+
+All of this session's work is done, committed and pushed (`1ab650e`).
+
+The user: "oh yeah the tear is looking good but in some places it reaches
+the set and looks cut and please fix the ter style of detail screen. and
+also make the box behind the quick fact better and remove the more and
+less text, just show ... and nothing hen expanded but keep its touch to
+more and less function."
+
+### 1 — Detail tear "reaches the edge and looks cut"
+Root cause: the seeded torn bottom edge (`SoftTearParams.broadDisp` =
+waves + value noise + the tilted slant `tilt * (nx - 0.5f)`, which alone
+drifts ±up-to-10dp between the corners) can notch the hero's corners AT
+the screen's left/right edges and read as "cut". Worst on the
+edge-to-edge detail hero, whose seed is the ENTRY HASH — so some entries
+drew a deep up-bite at a corner. Fix in the SHARED tear path
+(PaperCard.kt): `buildSoftTornPath` now fades the displacement to zero
+over the last ~5% at each end, and `buildSoftSheetPath` applies the SAME
+fade to its torn top + lip wobble so hero and under-sheet stay
+pixel-aligned (sheet top stays 4dp behind the hero everywhere). The
+middle 90% keeps its full torn character; corners meet the nominal edge.
+Applied to every torn hero (Home/Profile/Settings/Cabinet/Detail) since
+they share the shape — verified via a python mirror: middle fade factor
+1.0, corners ramp to zero.
+
+### 2 — Quick-fact box
+`QuickFactCard`'s translucent white @38% plate washed out against the
+tinted page wash in light and glowed like a bright sheet in dark. Now a
+theme-aware OPAQUE plate: `lerp(surfaceContainerLow, categoryInk, 0.06f)`
+light / `lerp(surfaceContainerHigh, ink, 0.10f)` dark, plus a hairline
+category-ink rim in dark mode (`Modifier.border`, import added) — the
+settings-card language.
+
+### 3 — Fold toggle
+"…more" / "…less" words removed: collapsed shows a lone "…" affordance;
+expanded turns it `Color.Transparent` — visually nothing, but the tap
+target stays the same size, so tapping the same spot still folds it back.
+
+### Validation
+Brace balance (both files depth 0); `git diff --check` clean; fade
+behavior verified via python mirror; no Gradle locally (env rule) — CI
+validates compile on push. Pushed to `main`.
+
+## Previous request — COMPLETED: Updates page redesign (saved notes, markdown, status header)
 
 All of this session's work is done, committed and pushed (`8b0bf57`).
 
