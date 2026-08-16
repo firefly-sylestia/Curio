@@ -1,6 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — dark-mode polish: icons, pills, search bars, tear, detail buttons (v108)
+## Current request — CI cache/artifact cleanup + stop PR JAR uploads
+
+### What was asked
+"in pr my push my deployment cache is piling up for the .jar builds and
+other things, can u delete the old cache and make the expiry shorter, and
+also dont upload jar file in pr push from now on"
+
+### What was found
+- **Caches:** 164 GitHub Actions cache entries (~4.05 GB) on `main` —
+  `gradle/actions/setup-gradle` keys the Gradle User Home cache with the
+  commit SHA, so every push writes fresh `gradle-home-v2|Linux-X64|…`
+  entries that linger until GitHub's 7-day no-access eviction.
+- **Artifacts:** ~30 `curio-desktop-jar-*` artifacts (4.3 MB each,
+  14-day retention) — one per PR/push commit; lint reports also at
+  14 days; APKs already at 1 day.
+
+### What was done
+1. **Deleted old caches via API:** removed entries not accessed in the
+   last day (164 → 86, ~4 GB freed). All `curio-desktop-jar-*` artifacts
+   deleted; lint-report artifacts older than 3 days deleted (85).
+2. **`android.yml`:** desktop JAR upload gated with
+   `if: github.event_name != 'pull_request'` and retention 14 → 1 day;
+   lint-report retention 14 → 1 day; added a `cache-cleanup` job (push +
+   workflow_dispatch only) that deletes cache entries not accessed in 2
+   days so the SHA-keyed Gradle caches stop accumulating.
+3. **DOX pass:** updated `.github/AGENTS.md` (1-day artifact retention,
+   cache-cleanup job, desktop CI JAR policy) and root `AGENTS.md`
+   (desktop CI paragraph; also corrected stale claims that native
+   Windows installers build on PR/push — they're tag-only + manual
+   dispatch).
+
+### Validation
+YAML parsed clean (node `yaml`); `git diff --check` clean. Committed +
+ pushed (`7ca2a2b`). No Gradle locally (env rule) — CI on push. Note:
+GitHub cache retention is fixed at 7 days of no access (not configurable
+per repo), so the 2-day prune job is what makes cache expiry effectively
+shorter. Web app untouched.
+
 
 ### What was asked
 A 5-part fix list (all visual, dark-mode heavy):
