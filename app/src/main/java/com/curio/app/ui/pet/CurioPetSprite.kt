@@ -138,8 +138,12 @@ object PetPointer {
                         // like a click on desktop. A scroll's release arrives
                         // with pressStart already nulled by the drag-cancel,
                         // so scrolling never makes the eyes react.
-                        if (pressStart != null && !dragging) {
-                            position = pressStart
+                        // Capture the press point into a val so the nullable
+                        // local smart-casts (the compiler can't smart-cast
+                        // `pressStart` — it's a var mutated across branches).
+                        val tapPoint = pressStart
+                        if (tapPoint != null && !dragging) {
+                            position = tapPoint
                         }
                         press = null
                         pressStart = null
