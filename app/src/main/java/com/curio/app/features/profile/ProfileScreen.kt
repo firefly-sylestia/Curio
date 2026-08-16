@@ -559,7 +559,10 @@ private fun ProfileSearchPill(
                 name = CurioIcons.Search,
                 contentDescription = "Search settings",
                 tint = iconTint,
-                size = 22.dp
+                size = 22.dp,
+                // v115 — the magnifier reads a hair low in the 42dp pill
+                // (same correction as the Home top-bar pills).
+                modifier = Modifier.offset(y = (-1f).dp)
             )
         }
     }
@@ -1365,7 +1368,14 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
                         .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.DustyBlue))),
                     contentAlignment = Alignment.Center
                 ) {
-                    CurioIcon(CurioIcons.Settings, null, tint = Color.White, size = 23.dp)
+                    CurioIcon(
+                        CurioIcons.Settings, null,
+                        tint = Color.White,
+                        size = 23.dp,
+                        // v115 — the cog's optical weight reads a hair low in
+                        // the 46dp block (same correction as the Home pills).
+                        modifier = Modifier.offset(y = (-1f).dp)
+                    )
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Settings & preferences", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))

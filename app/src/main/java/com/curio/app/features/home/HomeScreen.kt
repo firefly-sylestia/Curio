@@ -1302,11 +1302,12 @@ private fun TopBarPill(
                 contentDescription = contentDescription,
                 tint = iconTint,
                 size = 22.dp,
-                // The shared icon renderer already applies the standard 1dp
-                // optical lift, but the menu/person glyphs' ink still reads a
-                // hair low inside the small 42dp pill — nudge it up a touch
-                // more (the same extra correction the casino glyph wears).
-                modifier = Modifier.offset(y = (-0.5f).dp)
+                // The shared icon renderer centers the ink in the natural
+                // line box, but the menu/person glyphs' optical weight still
+                // reads a hair low inside the small 42dp pill — nudge it up
+                // (v115: deepened from -0.5dp — the glyphs were still a
+                // touch low after the v114 centering fix).
+                modifier = Modifier.offset(y = (-1.5f).dp)
             )
         }
     }
@@ -1519,11 +1520,14 @@ private fun PinnedTopicRow(
 @Composable
 private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
     val cat = CurioCategories.byId(entry.topic.categoryId)
-    // Solid category-tinted card — matches the recents topic rows.
+    // Solid category-tinted card in light mode — matches the recents topic
+    // rows. v115 — dark mode: the Home recents go back to plain dark
+    // surface cards (the category tint on pitch black was dropped); the
+    // recents page (RecentScreen) keeps its tinted rows.
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = cat.categorySurface(),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else cat.categorySurface(),
         // v27u — recents rows sit on a soft 2dp lift.
         shadowElevation = 2.dp,
         modifier = Modifier
@@ -2084,7 +2088,11 @@ private fun DrawerNavItem(
                     CurioIcon(
                         icon, null,
                         tint = iconTint,
-                        size = 22.dp
+                        size = 22.dp,
+                        // v115 — drawer menu glyphs read a hair low in the
+                        // 40dp chip (same optical-weight correction as the
+                        // Home top-bar pills).
+                        modifier = Modifier.offset(y = (-1f).dp)
                     )
                 }
             }
@@ -2130,14 +2138,16 @@ private fun ExploreTopicRow(
     tag: String? = null
 ) {
     val accent = category.themedAccent()
-    // Solid category-tinted card — the recents topics wear a solid
-    // background in their category's color family (matching the gradient
-    // identity), instead of a backgroundless row.
+    // Solid category-tinted card in light mode — the recents topics wear a
+    // solid background in their category's color family (matching the
+    // gradient identity), instead of a backgroundless row. v115 — dark
+    // mode: the Home recents go back to plain dark surface cards (no
+    // category tint on pitch black).
     val rowShape = RoundedCornerShape(20.dp)
     Surface(
         onClick = onClick,
         shape = rowShape,
-        color = category.categorySurface(),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else category.categorySurface(),
         // v27u — recents rows sit on a soft 2dp lift.
         shadowElevation = 2.dp,
         modifier = Modifier

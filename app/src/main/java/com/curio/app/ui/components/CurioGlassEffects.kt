@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
@@ -36,28 +35,12 @@ fun Modifier.curioGlassEdge(shape: Shape): Modifier = composed {
         // The top catch must follow the pill's CURVED contour, not the
         // bounding box: a full-width band on a capsule paints past the
         // pill's rounded ends (the classic "the glow peeks out from behind
-        // the pill" look). The mask is a capsule hugging the pill's TOP
-        // edge with the same corner radius, so the bright band fades
-        // before the curved ends and the catch reads as sitting INSIDE the
-        // pill. The mask is drawn as a translated rounded-rect path (not a
-        // centered one) so its top edge stays glued to the pill's top.
+        // the pill" look). The band is drawn full-width so it covers the
+        // WHOLE button edge-to-edge, and it is clipped to the pill outline
+        // so the pill's own curved rim trims it at the rounded ends — the
+        // catch reads as sitting INSIDE the pill, spanning its full length.
         val path = shape.createOutline(size, layoutDirection, this).toPath()
         val subtle = AppPreferences.pillGlowSubtleState
-        val insetW = size.width * 0.10f
-        val bandH = size.height * 0.55f
-        val maskRadius = bandH / 2f
-        fun bandMask(top: Boolean) = Path().apply {
-            addRoundRect(
-                RoundRect(
-                    left = insetW,
-                    top = if (top) 0f else size.height - bandH,
-                    right = size.width - insetW,
-                    bottom = if (top) bandH else size.height,
-                    radiusX = maskRadius,
-                    radiusY = maskRadius
-                )
-            )
-        }
         val stops = if (subtle) arrayOf(
             0f to Color.White.copy(alpha = 0.05f),
             0.14f to Color.White.copy(alpha = 0.02f),
@@ -69,20 +52,14 @@ fun Modifier.curioGlassEdge(shape: Shape): Modifier = composed {
             0.92f to Color.Transparent,
             1f to Color.White.copy(alpha = 0.05f)
         )
-        // Top catch — always drawn (and a mirrored bottom catch for the
-        // full "shiny glass" look when the subtle option is off). Both
-        // bands are clipped to the pill outline AND the inset capsule
-        // mask, so the bright edge follows the pill's curved contour
-        // instead of painting past its rounded ends.
+        // Top catch — always drawn (the subtle stops only reach the top;
+        // the full stops add the whisper of white at the bottom for the
+        // "shiny glass" look). The single vertical gradient spans the full
+        // button width and is clipped to the pill outline, so the bright
+        // edge follows the pill's curved contour instead of painting past
+        // its rounded ends or stopping short of them.
         clipPath(path) {
-            clipPath(bandMask(top = true)) {
-                drawRect(brush = Brush.verticalGradient(*stops), size = size)
-            }
-            if (!subtle) {
-                clipPath(bandMask(top = false)) {
-                    drawRect(brush = Brush.verticalGradient(*stops), size = size)
-                }
-            }
+            drawRect(brush = Brush.verticalGradient(*stops), size = size)
         }
     }
 }

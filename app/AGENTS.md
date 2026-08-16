@@ -417,6 +417,15 @@ app/src/main/java/com/curio/app/
   ink in the icon's layout box with ~1dp margin on both sides. See
   CurioIcons.kt for the full derivation; DO NOT reintroduce the old
   trim/padding combo.
+  **v115 — small spot corrections:** the natural box centers the ink, but
+  a few glyphs' OPTICAL weight still reads a hair low inside compact
+  circular/pill buttons, so those spots carry their own tiny lift:
+  Home's `TopBarPill` (Menu + Person, -1.5dp), the drawer's `DrawerNavItem`
+  chips (-1dp), Profile's `ProfileSearchPill` magnifier (-1dp) and the
+  `SettingsNavCard` cog (-1dp). Keep these per-site; do not re-add a
+  global draw-time lift to `CurioIcon` (the old 1dp `graphicsLayer` lift
+  was removed in v113 because it pushed near-top-bearing glyphs into
+  clipped parents).
 - **v114 — pet eyes no longer react to touch scrolls; scaled eye pixels stay
   crisp.** (1) **Eyes stopped flicking at the start of every scroll:**
   `PetPointer.trackerModifier` aimed the eyes on `Press`, so every
@@ -472,41 +481,38 @@ app/src/main/java/com/curio/app/
   random styles) glides smoothly with no band lines. 4+ accents still
   fall to [oklabCentroid]. The object docstring's stale "every blend
   clears 4.5:1 against white" claim was corrected.
-- **v114 — mood board: ONE shared board arrangement (full-screen editor
-  saves exactly what you arrange) + a Copy board button.** The format kept
-  a SECOND tile list + quote-position list for the full-screen editor
-  (`fullTiles`/`fullQuotePositions`, saved to `tileLayoutsFull`/
-  `quotePositionsFull`) that never synced from the inline adds — so
-  arranging in full-screen changed only the full list, the saved small card
-  (which renders the INLINE list) showed a different "cut" board, and
-  fresh boards opened the full-screen editor empty. Both canvases now edit
-  the SAME shared `tiles`/`quoteCards`; the save still writes
-  `tileLayoutsFull`/`quotePositionsFull` as mirrors (legacy readers fall
-  back to them). Editing a legacy dual-list entry seeds the shared list
-  from the FULL layouts when the inline ones are empty ("if one is empty
-  and the other has something, copy the populated one") — so legacy
-  full-screen arrangements survive a re-save. The quote size/position
-  save bug is the same root cause: the small card previously rendered the
-  inline list (never-dragged slots against an empty extent) instead of
-  the arranged placements. Added a **Copy board** pill (inline
-  BottomCenter + full-screen BottomEnd above Add images, shown whenever
-  the board has content): duplicates every tile nudged +28dp with a
-  slight rotation, and every quote card (same text/spans/tilt/style/
-  color/width, fresh `(-1,-1)` position → its own deterministic slot).
-  The dead v57 override plumbing (`quotePositionsOverride`,
-  `onMoveQuoteOverride`, `onResizeQuoteOverride`, `fullTiles`,
-  `fullQuotePositions`) was removed.
-- **v114 — dark-mode pill glow no longer peeks past the pill shape.**
-  The One UI dark-mode pill treatments (`curioGlassEdge` top catch +
-  `curioInnerGlow` radial) were painted against the pill's BOUNDING BOX, so
-  on capsule pills (50-radius) the bright top band crossed the pill's
+- **v114 → v115 — mood board: the two editing/save flows stay SEPARATE
+  (v114's merge was reverted) + a Copy board button that copies the
+  INLINE board into the full-screen editor.** The format keeps the v57
+  dual arrangement: the inline board edits `tiles`/`quoteCards.positions`
+  (saved to `tileLayouts`/`quotePositions`), the full-screen editor edits
+  its OWN `fullTiles`/`fullQuotePositions` (saved to
+  `tileLayoutsFull`/`quotePositionsFull`) — arranging full-screen does
+  NOT change the small card, and the two views start identical only until
+  one is rearranged. v114 briefly merged both canvases onto one shared
+  list; that broke the user's intended flow ("it was two different
+  editing and save flow — you merged it again"), so it was reverted to
+  the separate-list design. The full-screen dialog shows a **Copy board**
+  pill (BottomEnd, above Add images) when the full-screen board is empty
+  but the inline board has content: it copies the inline tiles into
+  `fullTiles` and the inline quote placements into `fullQuotePositions`
+  (index-aligned; text/style/tilt/width stay shared) — "copies what the
+  outside board had on inside".
+- **v114 → v115 — dark-mode pill glow hugs the pill shape WITHOUT
+  shrinking to the middle.** The One UI dark-mode pill treatment
+  (`curioGlassEdge` top catch) was painted against the pill's BOUNDING BOX,
+  so on capsule pills (50-radius) the bright top band crossed the pill's
   curved ends and read as "the shadow peeking out from behind the pill".
-  (1) **`curioGlassEdge` (CurioGlassEffects.kt) now clips its gradient to
-  a capsule mask hugging the pill's TOP edge** — same corner radius, 10%
-  side insets, 55% band height, top edge glued to the pill's top — so the
-  bright catch fades before the rounded ends and reads as sitting INSIDE
-  the pill. (2) **`curioInnerGlow` keeps its radial inside the pill's
-  curved rim** (the pill outline clips anything crossing the capsule). (3)
+  (1) **`curioGlassEdge` (CurioGlassEffects.kt) now clips its FULL-WIDTH
+  vertical-gradient band to the pill's own outline** — the pill's curved
+  rim trims the band at the rounded ends, so the catch covers the WHOLE
+  button edge-to-edge and stays inside the shape. (v114 first tried an
+  inset capsule mask — 10% side insets, 55% band height — which made the
+  glow visible ONLY in the middle, so v115 dropped the mask and let the
+  pill outline do the trimming; the non-subtle option's bottom whisper is
+  the single gradient's final stop.) (2) **`curioInnerGlow` keeps its
+  radial inside the pill's curved rim** (the pill outline clips anything
+  crossing the capsule). (3)
   **Capsule-pill call sites switched from `categoryEdgeShine` (a
   full-width band that crosses the curved ends) to the shape-matched
   `curioGlassEdge`:** the Category Picker's Original/New `PickerPageTab`,
@@ -1014,6 +1020,12 @@ app/src/main/java/com/curio/app/
   dark-only no-ops in light. Other `curioDarkGlow` sites (stat cards,
   session card, stop button, tag chips) left as-is — not the recents pill
   family.
+  **v115 — the HOME recents rows are NOT category-tinted in dark mode**
+  (user: "bring back the dark mode home screen recents not being
+  colored"): `RecentEntryRow` + the Home `ExploreTopicRow` now use
+  `surfaceContainerLow` instead of `categorySurface()` when
+  `isCurioDarkTheme()` (the recents PAGE — RecentScreen — keeps its
+  tinted rows).
 - **v88 — dark-mode mixed colors fixed at the root (the "mixed colors are
   bad" bug).** The curated `PairBlends`/`TripleBlends` tables are keyed on
   the RAW researched accents, but the Spin caller pre-resolved every

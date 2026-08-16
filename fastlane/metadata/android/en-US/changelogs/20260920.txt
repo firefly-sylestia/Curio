@@ -22,8 +22,8 @@ ADD
 
 FIX
 - Mixed-deck colors: the green, teal, purple and blue mixes are now vivid and clean instead of dark and muddy, and the mixed deck's hero card glides through the colors smoothly — no more visible lines or stripes across the card.
-- Mood board: the full-screen editor now saves exactly what you arrange — photos and quote cards land in the same spot in the saved card (no more cut/empty board), and editing an older board keeps your full-screen arrangement.
-- Mood board: a Copy board button (in the full-screen editor and on the small board) duplicates the whole board — every photo and quote card — so you can build a second board on top.
+- Mood board: the full-screen editor keeps its own arrangement separate from the small card again — you can arrange each board on its own.
+- Mood board: a Copy board button in the full-screen editor copies your small board (photos + quote cards) into the full-screen board when it's empty.
 - Remaining stock buttons now match the custom pill style: tour Skip/Next, crash-screen actions, FieldMind's Finish/Save and the Sound Bite trim pair use the app's rounded pills instead of boxy default corners.
 - Pet eyes no longer flick toward your finger at the start of every scroll, and the enlarged/shrunk eye pixels render crisp instead of glitchy.
 - Icons in buttons are no longer pushed down and cut at the bottom: glyphs are vertically centered in their slot at every system font size.

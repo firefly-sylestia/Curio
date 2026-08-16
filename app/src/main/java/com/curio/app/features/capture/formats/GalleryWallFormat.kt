@@ -155,15 +155,30 @@ fun GalleryWallFormat(
 ) {
     val tiles = remember(initialData) {
         mutableStateListOf<MoodTile>().apply {
-            // v114 — legacy entries saved under the old dual-list scheme may
-            // carry the arrangement ONLY in tileLayoutsFull (arranged in the
-            // full-screen editor, which wrote just the full list). "If one is
-            // empty and the other has something", copy the populated one —
-            // otherwise editing such an entry would open an empty board and
-            // re-saving would erase the full-screen arrangement for good.
-            val src = initialData?.tileLayouts
+            initialData?.tileLayouts?.forEachIndexed { i, t ->
+                add(
+                    MoodTile(
+                        id = i,
+                        uri = t.uri,
+                        offsetXPx = t.offsetXPx,
+                        offsetYPx = t.offsetYPx,
+                        rotationDeg = t.rotationDeg,
+                        widthPx = t.widthPx,
+                        heightPx = t.heightPx
+                    )
+                )
+            }
+        }
+    }
+    // v57 — the FULL-SCREEN arrangement, saved separately from the inline
+    // one. Seeded from the saved full layout (legacy entries: the inline
+    // layout, so both views start identical until the user rearranges in
+    // the expanded editor). Edited ONLY by the full-screen canvas.
+    val fullTiles = remember(initialData) {
+        mutableStateListOf<MoodTile>().apply {
+            val src = initialData?.tileLayoutsFull
                 ?.takeIf { it.isNotEmpty() }
-                ?: initialData?.tileLayoutsFull.orEmpty()
+                ?: initialData?.tileLayouts.orEmpty()
             src.forEachIndexed { i, t ->
                 add(
                     MoodTile(
@@ -179,16 +194,6 @@ fun GalleryWallFormat(
             }
         }
     }
-    // v114 — ONE shared arrangement. The mood board used to keep a second
-    // "full-screen" tile list + quote-position list saved separately from
-    // the inline one: arranging in the full-screen editor changed only the
-    // full list, so on save the small card (which renders the inline list)
-    // showed a different, "cut" board, and fresh boards opened the full-
-    // screen editor empty (the full list never synced from the inline
-    // adds). The board is now a single arrangement: positions are raw board
-    // pixels that every view (inline card, full-screen editor, expanded
-    // dialog, export) scales to fit its own canvas, so what you arrange in
-    // full-screen is exactly what saves and what every view shows.
     var caption by remember(initialData) { mutableStateOf(initialData?.caption ?: "") }
     // Note-paper style for the caption box — legacy entries lack the field
     // (Gson → null), fall back to the take-level paperStyle → RULED.
@@ -211,11 +216,7 @@ fun GalleryWallFormat(
         initialStyles = initialData?.quoteStyles.orEmpty(),
         initialColors = initialData?.quoteColors.orEmpty(),
         // v7.20 — per-card board positions (dragged in the editor).
-        // v114 — legacy dual-list entries may hold the placements only in
-        // quotePositionsFull (full-screen editor); copy the populated one.
-        initialPositions = initialData?.quotePositions
-            ?.takeIf { it.isNotEmpty() }
-            ?: initialData?.quotePositionsFull.orEmpty(),
+        initialPositions = initialData?.quotePositions.orEmpty(),
         // v7.22 — per-card on-board flag (chip = on the board, bottom
         // button = below the board). Legacy entries lack it → all on-board.
         initialOnBoard = initialData?.quoteOnBoard.orEmpty(),
@@ -223,6 +224,29 @@ fun GalleryWallFormat(
         defaultColor = initialData?.captionColor ?: NotePaperColor.CREAM
     )
     var boardExpanded by remember { mutableStateOf(false) }
+    // v57 — the FULL-SCREEN quote placements (the expanded board's own
+    // pixel space), aligned 1:1 with the shared cards by index. Text,
+    // style, tilt and WIDTH stay shared — only where each card sits differs
+    // per view. Padded as cards are added; the remove hook keeps it aligned.
+    val fullQuotePositions = remember(initialData) {
+        mutableStateListOf<CaptureData.QuotePos>().apply {
+            val src = initialData?.quotePositionsFull
+                ?.takeIf { it.isNotEmpty() }
+                ?: initialData?.quotePositions.orEmpty()
+            addAll(src)
+        }
+    }
+    // Keep the full-screen list index-aligned when a card is deleted
+    // (additions are padded by the LaunchedEffect below).
+    quoteCards.onCardRemoved = { idx ->
+        if (idx in fullQuotePositions.indices) fullQuotePositions.removeAt(idx)
+    }
+    LaunchedEffect(quoteCards.positions.size) {
+        while (fullQuotePositions.size < quoteCards.positions.size) {
+            fullQuotePositions.add(CaptureData.QuotePos(-1f, -1f))
+        }
+    }
+
     // v7.19 — the quote card currently open in the floating edit dialog.
     // The cards themselves float INSIDE the board (see MoodBoardCanvas);
     // tapping one opens this dialog with the full rich-text editor.
@@ -238,12 +262,18 @@ fun GalleryWallFormat(
     // A caption-only board is still a draft — it must save and must trigger
     // the leave / format-switch guards (the old tiles/quotes-only rule let
     // a caption-only take exit silently and lose the caption).
-    val canSave = tiles.isNotEmpty() || quoteCards.hasContent || caption.isNotBlank()
+    // v57 — fullTiles counts toward savability too: a board arranged ONLY
+    // in the full-screen editor (never touched inline) must still save.
+    val canSave = tiles.isNotEmpty() || fullTiles.isNotEmpty() || quoteCards.hasContent || caption.isNotBlank()
     LaunchedEffect(
         canSave, caption, tiles.toList(), captionStyle, captionColor, mood,
         quoteCards.quotes.toList(), quoteCards.spans.toList(), quoteCards.tilts.toList(),
         quoteCards.styles.toList(), quoteCards.colors.toList(), quoteCards.positions.toList(),
-        quoteCards.onBoard.toList()
+        quoteCards.onBoard.toList(),
+        // v57 — the full-screen arrangement is part of the save pipeline:
+        // moving a tile or quote in the expanded editor must re-emit the
+        // entry with the updated full layouts.
+        fullTiles.toList(), fullQuotePositions.toList()
     ) {
         onCanSaveChange(canSave)
         onDataChanged(
@@ -252,10 +282,10 @@ fun GalleryWallFormat(
                 caption = caption,
                 imageUris = tiles.map { it.uri },
                 tileLayouts = tiles.map { CaptureData.TileLayout(it.uri, it.offsetXPx, it.offsetYPx, it.rotationDeg, it.widthPx, it.heightPx) },
-                // v114 — one arrangement: the full layout mirrors the inline
-                // one (kept populated for legacy readers of the expanded
-                // board, which falls back to the inline list when empty).
-                tileLayoutsFull = tiles.map { CaptureData.TileLayout(it.uri, it.offsetXPx, it.offsetYPx, it.rotationDeg, it.widthPx, it.heightPx) },
+                // v57 — the full-screen arrangement, saved alongside the
+                // inline one. Falls back to the inline layout for legacy
+                // entries (empty → the expanded view shows the inline board).
+                tileLayoutsFull = fullTiles.map { CaptureData.TileLayout(it.uri, it.offsetXPx, it.offsetYPx, it.rotationDeg, it.widthPx, it.heightPx) },
                 captionStyle = captionStyle,
                 captionColor = captionColor,
                 quotes = quoteCards.quotes.toList(),
@@ -266,9 +296,8 @@ fun GalleryWallFormat(
                 // v7.20 — dragged card positions (editor board px; (-1,-1)
                 // = never dragged → saved views use the deterministic slot).
                 quotePositions = quoteCards.positions.toList(),
-                // v114 — one arrangement: the full-screen placements mirror
-                // the shared ones (kept populated for legacy readers).
-                quotePositionsFull = quoteCards.positions.toList(),
+                // v57 — the full-screen editor's card placements.
+                quotePositionsFull = fullQuotePositions.toList(),
                 // v7.22 — per-card on-board flag (chip vs bottom button).
                 quoteOnBoard = quoteCards.onBoard.toList(),
                 // Legacy fallback — mirror the caption's style.
@@ -411,11 +440,65 @@ fun GalleryWallFormat(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
             ) {
+                // v115 — copy the INLINE (outside) board into this
+                // full-screen editor. The two boards are separate editing /
+                // save flows, so a board arranged only inline starts the
+                // full-screen view empty; this button brings the inline
+                // arrangement in (tiles + quote placements) when the
+                // full-screen board is empty and the inline one has
+                // content.
+                if (fullTiles.isEmpty() && (tiles.isNotEmpty() || quoteCards.quotes.isNotEmpty())) {
+                    Surface(
+                        onClick = {
+                            // Tiles: copy the inline arrangement as-is (the
+                            // full-screen list is empty, so ids mirror the
+                            // inline ones).
+                            tiles.forEach { fullTiles.add(it) }
+                            // Quotes: copy the inline placements into the
+                            // full-screen list, index-aligned (text/style/
+                            // tilt/width are SHARED — only where each card
+                            // sits differs per view).
+                            while (fullQuotePositions.size < quoteCards.positions.size) {
+                                fullQuotePositions.add(CaptureData.QuotePos(-1f, -1f))
+                            }
+                            quoteCards.positions.forEachIndexed { i, p ->
+                                val w = quoteCards.widths.getOrElse(i) { -1f }
+                                fullQuotePositions[i] = CaptureData.QuotePos(p.x, p.y, w)
+                            }
+                        },
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                        shadowElevation = 0.dp,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .navigationBarsPadding()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 88.dp)
+                            .zIndex(60f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.ContentCopy,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 15.dp
+                            )
+                            Text(
+                                text = "Copy board",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 MoodBoardCanvas(
-                    // v114 — ONE shared arrangement: the full-screen editor
-                    // edits the SAME board the small card renders, so what
-                    // you arrange full-screen is exactly what saves.
-                    tiles = tiles,
+                    // v57 — the full-screen editor arranges its OWN copy of
+                    // the tiles (fullTiles), saved separately from the
+                    // inline arrangement.
+                    tiles = fullTiles,
                     accent = accent,
                     tint = tint,
                     seed = seed,
@@ -427,7 +510,27 @@ fun GalleryWallFormat(
                     quoteState = quoteCards,
                     onEditQuote = { editingQuoteIndex = it },
                     // v7.22 — the board chip's quotes float ON the board.
-                    onAddQuote = { quoteCards.addCard(captionStyle, captionColor, onBoard = true) }
+                    onAddQuote = { quoteCards.addCard(captionStyle, captionColor, onBoard = true) },
+                    // v57 — quotes sit at their FULL-SCREEN placements here.
+                    quotePositionsOverride = fullQuotePositions.toList(),
+                    onMoveQuoteOverride = { i, x, y ->
+                        while (fullQuotePositions.size <= i) {
+                            fullQuotePositions.add(CaptureData.QuotePos(-1f, -1f))
+                        }
+                        val w = quoteCards.widths.getOrElse(i) { -1f }
+                        fullQuotePositions[i] = CaptureData.QuotePos(x, y, w)
+                    },
+                    onResizeQuoteOverride = { i, w ->
+                        // Widths are shared between the views; mirror the
+                        // shared setWidth so the full-screen placement's own
+                        // .w stays in sync (the card reads it on render).
+                        quoteCards.setWidth(i, w)
+                        while (fullQuotePositions.size <= i) {
+                            fullQuotePositions.add(CaptureData.QuotePos(-1f, -1f))
+                        }
+                        val p = fullQuotePositions.getOrElse(i) { CaptureData.QuotePos(-1f, -1f) }
+                        fullQuotePositions[i] = CaptureData.QuotePos(p.x, p.y, w)
+                    }
                 )
             }
         }
@@ -455,7 +558,15 @@ private fun MoodBoardCanvas(
     // card (which then appears on the board).
     quoteState: QuoteCardsState? = null,
     onEditQuote: (Int) -> Unit = {},
-    onAddQuote: () -> Unit = {}
+    onAddQuote: () -> Unit = {},
+    // v57 — full-screen arrangement overrides: when provided, the canvas
+    // renders and drags the floating quote cards against THIS position list
+    // (the expanded board's own pixels) instead of [quoteState.positions],
+    // and routes moves/resizes to the override callbacks. Null = the inline
+    // board (cards live in [quoteState]).
+    quotePositionsOverride: List<CaptureData.QuotePos>? = null,
+    onMoveQuoteOverride: ((Int, Float, Float) -> Unit)? = null,
+    onResizeQuoteOverride: ((Int, Float) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -851,11 +962,7 @@ private fun MoodBoardCanvas(
                         styles = quoteState.styles.toList(),
                         colors = quoteState.colors.toList(),
                         tilts = quoteState.tilts.toList(),
-                        // v114 — ONE shared arrangement: both editors render
-                        // and drag the cards against [quoteState.positions]
-                        // (raw board px), so full-screen placements are
-                        // exactly what saves and every view shows.
-                        positions = quoteState.positions.toList(),
+                        positions = quotePositionsOverride ?: quoteState.positions.toList(),
                         // v7.22 — only on-board cards float here; below-board
                         // cards render under the board in their own section.
                         onBoard = quoteState.onBoard.toList(),
@@ -876,10 +983,21 @@ private fun MoodBoardCanvas(
                         boardMaxX = boardMaxX,
                         boardMaxY = boardMaxY,
                         onEditCard = onEditQuote,
+                        // v57 — the full-screen board routes moves to its own
+                        // position list; the inline board uses the shared one.
+                        onMoveCard = { i, x, y ->
+                            if (onMoveQuoteOverride != null) onMoveQuoteOverride(i, x, y)
+                            else quoteState.setPosition(i, x, y)
+                        },
                         // v42 — a drag on the card's resize grip commits the
                         // card's new width (raw board px) to the entry.
-                        onMoveCard = { i, x, y -> quoteState.setPosition(i, x, y) },
-                        onResizeCard = { i, w -> quoteState.setWidth(i, w) }
+                        // v57 — widths are SHARED between the views (a card
+                        // property, not a placement), so both boards commit
+                        // through the same setWidth.
+                        onResizeCard = { i, w ->
+                            if (onResizeQuoteOverride != null) onResizeQuoteOverride(i, w)
+                            else quoteState.setWidth(i, w)
+                        }
                     )
                 }
 
@@ -951,84 +1069,6 @@ private fun MoodBoardCanvas(
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                             color = pastelFillInk(accent)
                         )
-                    }
-                }
-
-                // ── Copy board (v114) — duplicates the WHOLE board: every
-                // tile copied with a nudge so the copies are visible, every
-                // quote card duplicated (same text, paper, tilt, width;
-                // fresh slot so it's immediately on-screen). Shown whenever
-                // the board has any content — the user can build a second
-                // board on top of the first.
-                if (tiles.isNotEmpty() || (quoteState != null && quoteState.quotes.isNotEmpty())) {
-                    Surface(
-                        onClick = {
-                            val nudge = with(density) { 28.dp.toPx() }
-                            val baseId = (tiles.maxOfOrNull { it.id } ?: -1) + 1
-                            // Snapshot the list first so the adds never read
-                            // the growing list (infinite copy otherwise).
-                            tiles.toList().forEachIndexed { i, t ->
-                                tiles.add(
-                                    t.copy(
-                                        id = baseId + i,
-                                        offsetXPx = finiteOr(t.offsetXPx) + nudge,
-                                        offsetYPx = finiteOr(t.offsetYPx) + nudge,
-                                        rotationDeg = (finiteOr(t.rotationDeg) + 5f) % 360f
-                                    )
-                                )
-                            }
-                            // Duplicate every quote card — parallel-list
-                            // discipline like addCard, but copying the source
-                            // card's text/spans/tilt/style/color/width so the
-                            // copy is a true duplicate. Position stays
-                            // (-1,-1) → the copy lands on its own
-                            // deterministic slot, immediately visible.
-                            quoteState?.let { qs ->
-                                val count = qs.quotes.size
-                                for (i in 0 until count) {
-                                    qs.quotes.add(qs.quotes[i])
-                                    qs.spans.add(qs.spans.getOrElse(i) { emptyList() })
-                                    qs.tilts.add(qs.tilts.getOrElse(i) { 0f })
-                                    qs.styles.add(qs.styles.getOrElse(i) { NotePaperStyle.RULED })
-                                    qs.colors.add(qs.colors.getOrElse(i) { NotePaperColor.CREAM })
-                                    qs.positions.add(CaptureData.QuotePos(-1f, -1f))
-                                    qs.widths.add(qs.widths.getOrElse(i) { -1f })
-                                    qs.onBoard.add(qs.onBoard.getOrElse(i) { true })
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(28.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-                        shadowElevation = 0.dp,
-                        modifier = Modifier
-                            .align(if (fullScreen) Alignment.BottomEnd else Alignment.BottomCenter)
-                            .then(if (fullScreen) Modifier.navigationBarsPadding() else Modifier)
-                            .padding(
-                                start = if (fullScreen) 16.dp else 0.dp,
-                                end = 16.dp,
-                                // Full-screen: above the Add-images button.
-                                // Inline: on the rail with the other chips.
-                                bottom = if (fullScreen) 88.dp else 16.dp
-                            )
-                            .zIndex(60f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.ContentCopy,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 15.dp
-                            )
-                            Text(
-                                text = "Copy board",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                     }
                 }
             }                // ── Pin-to-front drop zone (appears while dragging) ──────
