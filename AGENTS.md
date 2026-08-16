@@ -281,15 +281,17 @@ constructors.
   JSON saved-entries store (`~/.curio/entries.json`, reactive via Compose
   state).
 - CI: the `desktop` job in `.github/workflows/android.yml` compiles and
-  builds the module on every push (`:desktop:build`) and uploads the
-  compiled JAR as an artifact (`curio-desktop-jar-*`), so the port can't
-  silently rot. Native Windows installers (`.exe` app image + `.msi`)
-  build on PRs/pushes to `main`/`Alpha` AND tag pushes via
+  builds the module on every push and PR (`:desktop:build`) so the port
+  can't silently rot, and uploads the compiled JAR as an artifact
+  (`curio-desktop-jar-*`) **only on branch pushes** (PR runs skip the
+  upload — a 4MB jar per PR commit was piling up in artifact storage),
+  with 1-day retention. Native Windows installers (`.exe` app image +
+  `.msi`) build only on tag pushes (plus manual dispatch) via
   `.github/workflows/desktop-release.yml` (a windows-latest runner, WiX
   via chocolatey, jpackage `createDistributable` for the `.exe` app image
   + `packageDistributionForCurrentOS` for the `.msi`; the portable zip +
   `.msi` attach to the GitHub release on tags and upload as run artifacts
-  on PR/push builds).
+  on manual-dispatch runs).
 
 **To run locally:** `./gradlew :desktop:run` (this environment forbids
 running Gradle — CI validates instead).

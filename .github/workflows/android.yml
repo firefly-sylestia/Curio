@@ -105,9 +105,11 @@ jobs:
             app/build/reports/lint/**/*.html
             app/build/reports/lint/**/*.xml
           # Lint reports are best-effort diagnostics; the Gradle step above
-          # remains authoritative for CI success/failure.
+          # remains authoritative for CI success/failure. Throwaway
+          # diagnostics — shrink to the minimum so artifact storage barely
+          # accumulates (matches the release-APK retention below).
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 1
 
       - name: Upload release APKs
         if: success()
@@ -122,9 +124,11 @@ jobs:
           retention-days: 1
 
   # v27t — Compose Multiplatform desktop port: keep the JVM/desktop module
-  # compiling on every push so the port can't silently rot, and upload the
-  # compiled JAR as a downloadable artifact. Native .exe/.dmg/.deb packaging
-  # happens in a dedicated desktop release workflow (tag pushes).
+  # compiling on every push AND every PR so the port can't silently rot.
+  # The compiled JAR is only uploaded on branch pushes (main/Alpha), never
+  # on PR runs — a 4MB jar per PR commit was piling up in artifact storage.
+  # Native .exe/.dmg/.deb packaging happens in a dedicated desktop release
+  # workflow (tag pushes).
   desktop:
     name: Compile Curio Desktop (JVM)
     runs-on: ubuntu-latest
@@ -153,10 +157,43 @@ jobs:
       # NOT a standalone-runnable app — a runnable desktop build needs the
       # Compose runtime + Skiko native libs, which the desktop release
       # workflow bundles via jpackage on a tag push.
+      # Branch pushes only (never PR runs): PR CI is throwaway and a 4MB jar
+      # per commit was accumulating in artifact storage. Retention shrunk to
+      # the 1-day minimum to match the release-APK policy.
       - name: Upload desktop JAR
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v6
         with:
           name: curio-desktop-jar-${{ github.run_number }}
           path: desktop/build/libs/*.jar
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
+
+  # Cache hygiene — gradle/actions/setup-gradle keys the Gradle User Home
+  # cache with the commit SHA, so every push writes fresh cache entries and
+  # the old ones linger until GitHub's 7-day no-access eviction. That piled
+  # up to 150+ entries / 4GB+. Prune entries not accessed in the last 2 days
+  # on every branch push so cache storage stays flat. PR runs skip this
+  # (fork PRs can't write actions caches anyway, and PR-branch entries are
+  # short-lived).
+  cache-cleanup:
+    name: Prune stale Gradle caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      actions: write
+
+    steps:
+      - name: Delete caches not accessed in 2 days
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cutoff=$(date -u -d '2 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          deleted=0
+          for id in $(gh api "repos/${{ github.repository }}/actions/caches" --paginate \
+            -q ".actions_caches[] | select(.last_accessed_at < \"$cutoff\") | .id"); do
+            gh api -X DELETE "repos/${{ github.repository }}/actions/caches/$id" > /dev/null
+            deleted=$((deleted+1))
+          done
+          echo "Deleted $deleted stale cache entrie(s) not accessed since $cutoff"

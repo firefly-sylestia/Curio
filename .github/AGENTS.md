@@ -29,9 +29,10 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 - Validates all topic catalogs with the self-contained Gradle `validateTopics` task (wired into `preBuild`); no external scripts are shipped in the repo.
 - Runs the Gradle `lintDebug`, `validateTopics`, and `assembleRelease` checks in GitHub Actions using the hosted Android toolchain — **release build only**, no debug APK is produced (debug remains available for local development via the app's debug build type).
-- Uploads lint reports plus the release-variant APKs (universal + per-ABI splits) for 14 days. Lint-report upload is best-effort and silently skips the artifact when Gradle fails before producing reports; the Gradle check remains authoritative.
+- Uploads lint reports plus the single universal release APK (splits are disabled for PR/push via `-PcurioAbiSplits=false`) as throwaway artifacts with **1-day retention** (the tag release workflow attaches the permanent APK set to GitHub Releases instead). Lint-report upload is best-effort and silently skips the artifact when Gradle fails before producing reports; the Gradle check remains authoritative.
 - Signs the release variant with the same `KEYSTORE_*` signing secrets as the release workflow when GitHub provides them (pushes to `main`, same-repo PRs, manual dispatch) and verifies **every** release APK's signature is not the debug key. On fork PRs, where GitHub strips secrets, the release variant falls back to the app module's debug-signing config so CI still passes.
 - Cancels an older in-progress run for the same ref when a newer run starts.
+- Runs a `cache-cleanup` job on branch pushes (not PRs) that deletes GitHub Actions cache entries not accessed in the last 2 days — `gradle/actions/setup-gradle` keys the Gradle User Home cache with the commit SHA, so every push otherwise leaves fresh entries behind until GitHub's 7-day eviction.
 
 ### Release workflow (Android)
 
@@ -44,6 +45,15 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 - **Tag version is the build version:** the workflow exports the tag (e.g. `v1.2.3`) as `RELEASE_VERSION`, and `app/build.gradle.kts` uses it as `versionName` with the leading `v` stripped (`1.2.3`; prerelease suffixes like `-alpha` survive). Local dev and PR CI don't set the env var, so the default `1.0.0` applies there. `versionCode` stays the date-based value — only the version name follows the tag.
 - Publishes the release APKs through a GitHub Release, marking `alpha`, `beta`, and `rc` tags as prereleases.
 - Never falls back to debug signing for a published release.
+
+### Desktop CI job (android.yml) + desktop release workflow
+
+The `desktop` job in `android.yml` compiles the JVM/desktop module on
+**every push and PR** so the port can't silently rot. The compiled JAR is
+uploaded as an artifact **only on branch pushes** (`main`/`Alpha`) — PR runs
+skip the upload (a 4MB jar per PR commit was piling up in artifact storage)
+— and with **1-day retention**, matching the release-APK policy. Native
+`.exe`/`.msi` packaging happens in the tag-only workflow below.
 
 ### Desktop release workflow
 
