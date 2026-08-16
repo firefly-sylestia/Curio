@@ -1,6 +1,42 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: icons pushed down/cut at the bottom + pill glow peeking past the pill
+## Current request — COMPLETED: pet eyes flick on touch scrolls + glitchy eye pixels
+
+All of this session's work is done, committed and pushed (`bd95876`).
+
+### 1. Pet eyes STILL reacted to touch scrolls (PetPointer tracker)
+The eyes aimed on `Press`, so every touch-scroll began with a visible
+snap toward the finger's touchdown point — the 8dp drag-cancel only
+fired once the finger actually moved, and the 2s look-timeout kept the
+snap visible. (Also: `press` was set on Press, so the look never faded
+until Release.)
+- **Fix:** the tracker now only REMEMBERS the press point on Press and
+  commits the aim on Release when the gesture was a clean tap (no
+  drag) — via `position` (the hover path), so the sprite's existing 2s
+  look-timeout fades the aim back to neutral exactly like a desktop
+  click. A scroll's Release arrives with `pressStart` already nulled by
+  the drag-cancel, so scrolling never aims the eyes. Mouse hover/click
+  behavior unchanged. (`press` field stays null-on-hold; the sprite's
+  fade logic keys off it correctly.)
+
+### 2. Scaled eye pixels looked glitchy (CurioPetSprite eye rendering)
+The v71 eye-size presets scaled the DRAW SPACE (`DrawScope.scale` at
+0.72/1.0/1.35 around each eye's center): each eye cell became a
+fractional-size rect on a fractional grid, so cells landed BETWEEN
+device pixels and rendered as misaligned glitchy lines.
+- **Fix:** the scaled eyes are now drawn on an INTEGER device-pixel
+  lattice — each cell is `round(scaleF × opx)` px (≥1), snapped to the
+  lattice around the eye's center (4.5/7 and 10.5/7). Crisp at every
+  preset; at scaleF = 1 the cells land exactly on the face's pixel
+  grid (floor/ceil lattice), so Medium eyes are byte-identical to the
+  original rendering.
+
+### Validation
+Imports checked (`roundToInt` added; `scale`/`translate` still used by
+`drawDetailLayer`/eyes); diff reviewed; no Gradle locally (env rule) — CI
+validates on push. Pushed to `main`.
+
+## Previous request — COMPLETED: icons pushed down/cut at the bottom + pill glow peeking past the pill
 
 All of this session's work is done, committed and pushed (`835677b`).
 
