@@ -1,6 +1,33 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: pet eyes flick on touch scrolls + glitchy eye pixels
+## Current request — COMPLETED: stock buttons converted to the pill/chip language
+
+All of this session's work is done, committed and pushed (`4bbcc64`).
+
+Swept all `Button`/`OutlinedButton` call sites (167 matches) for stock M3
+styling sitting next to the custom pill family. Fixed:
+1. **Tour Skip/Next (CurioNavHost)** — 16dp corners → full capsules
+   `RoundedCornerShape(50)` (54dp tall, in the tour bar).
+2. **Crash screen (CurioCrashScreen)** — three `OutlinedButton`s 16dp →
+   24dp (the Mix-button language); the 28dp primary CTA kept.
+3. **FieldMind (FieldMindObservationScreen)** — Finish + Save were fully
+   stock (default 20dp corners, primaryContainer fill, hardcoded white
+   icon): Finish → pill 50, Save → 24dp, both theme-primary fill with
+   `onPrimary` icon/text; removed the now-unused `Color` import.
+4. **Sound Bite trim pair (SoundBiteFormat)** — Keep full + Apply Trim
+   16dp → 24dp, kept as a matched pair.
+
+Intentional keepers (documented in the AGENTS.md v114 bullet): dialog
+`TextButton`s (`curioDialogActionButtonColors`), themed `RadioButton`s,
+the M3 `SegmentedButton` in Settings, and self-contained flows
+(onboarding 18/26dp, bug-report 28dp) keep their own styling.
+
+### Validation
+diff reviewed; imports checked (ButtonDefaults added to FieldMind;
+Color removed); no Gradle locally (env rule) — CI validates on push.
+Pushed to `main`.
+
+## Previous request — COMPLETED: pet eyes flick on touch scrolls + glitchy eye pixels
 
 All of this session's work is done, committed and pushed (`bd95876`).
 
