@@ -41,6 +41,19 @@ TextButtons became the app's **pill actions** (`DialogPillAction` —
 caption now explains the auto square crop ("Square-cropped from the
 middle — tap to adjust.").
 
+### Follow-up — dark-mode dialogs match the settings option-card glass (`aa1fbb0`)
+User: "make the dark mode dialog black background follow the theme style,
+make it be like settings option background". The dark branch of
+`curioDialogContainerColor` (CurioTheme.kt) was a flat grey slab
+(`lerp(surfaceContainerHigh, background, 0.55f)` ≈ 0xFF0D0D0D); it now
+uses the EXACT `CurioSettingsCard` construction —
+`lerp(surfaceContainerLow, tintLift, 0.30f)` with the dark tint lift
+`lerp(Color.Black, curioRoseInk(), 0.20f)` (neutral rose — a dialog
+floats over any page, so no lane accent) — so every AlertDialog (edit
+profile, crop, two-step, …) reads as the same near-black option-card
+glass as the Settings cards. Light mode untouched. AGENTS.md v116 bullet
++ changelog updated.
+
 ### Validation
 Brace balance (both files depth 0); unused-import sweep (removed
 `HorizontalDivider`; `getValue`/`setValue` delegate false-positives
