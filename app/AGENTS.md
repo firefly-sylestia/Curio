@@ -424,6 +424,14 @@ app/src/main/java/com/curio/app/
   accent Add/Change photo, Adjust, destructive Remove); the caption now
   explains the auto square crop. `loadAvatarSource` falls back to the
   current square avatar for pre-v116 avatars (no source was kept then).
+  (4) **Dark dialogs match the settings option cards**: the dark branch of
+  `curioDialogContainerColor` (CurioTheme.kt) now uses the SAME fill as
+  `CurioSettingsCard` — `lerp(surfaceContainerLow, tintLift, 0.30f)` with
+  the dark tint lift `lerp(Color.Black, curioRoseInk(), 0.20f)` (the
+  neutral rose, since a dialog floats over any page) — instead of the old
+  `lerp(surfaceContainerHigh, background, 0.55f)` grey slab, so every
+  AlertDialog (edit profile, crop, two-step, etc.) reads as black
+  option-card glass on the black page.
 - **v114 — CurioIcon glyphs stay vertically centered (no bottom cut) at every
   font scale.** Root cause was the icon Text's `includeFontPadding = false` +
   `LineHeightStyle.Trim.Both` + `lineHeight = 1.0em` combo: trimming the

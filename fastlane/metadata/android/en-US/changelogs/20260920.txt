@@ -21,6 +21,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Dark mode dialogs now match the settings cards — the dialog background is the same near-black option-card glass as the rest of the theme.
 - Profile photo: portrait and tall images no longer get squished — every pick is auto-cropped to a square from the middle, and you can adjust the crop by hand (pan + pinch) before saving.
 - Edit profile dialog: bigger avatar with a crop badge and pill-style photo actions instead of the plain text buttons.
 - Detail screen: the torn hero's edge now runs out cleanly at the screen edges — some entries' tears used to notch the hero's corners and look cut.

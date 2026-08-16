@@ -223,15 +223,22 @@ val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
  * the page background so the dialog melts into the tinted page instead of
  * floating a separate panel. LIGHT: toward the soft cream. DARK (v81):
  * toward the pitch-black background, so dialogs read as near-black glass
- * on the black page (with the hero pill edge-glow on top).
+ * on the black page (with the hero pill edge-glow on top). v116 — the dark
+ * fill is now the SETTINGS OPTION CARD construction (the same
+ * `lerp(surfaceContainerLow, tintLift, 0.30f)` as [CurioSettingsCard], with
+ * the hero-rose whisper as the tint lift) so dialogs match the option-card
+ * black glass exactly instead of reading as a separate grey slab.
  */
 @Composable
 fun curioDialogContainerColor(): Color {
     if (isCurioDarkTheme()) {
         return lerp(
-            MaterialTheme.colorScheme.surfaceContainerHigh,
-            MaterialTheme.colorScheme.background,
-            0.55f
+            MaterialTheme.colorScheme.surfaceContainerLow,
+            // The dark tint lift mirrors settingsCardTintLift: a whisper of
+            // the brand rose into black (the dialog floats over any page, so
+            // it uses the neutral rose rather than a lane accent).
+            lerp(Color.Black, curioRoseInk(), 0.20f),
+            0.30f
         )
     }
     // v11 — light: a soft near-background sheet that matches the page wash
