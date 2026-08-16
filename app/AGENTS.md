@@ -437,7 +437,17 @@ app/src/main/java/com/curio/app/
   hero:** `DetailStickyBar`'s dark frost was `lerp(heroFill, Black, 0.30)`
   (a near-black slab); it's now `lerp(heroFill, White, 0.10)` — the same
   hero-hued lip the under-sheet wears, so the controls read as part of
-  the banner. Light frost unchanged.
+  the banner. Light frost unchanged. (7) **Profile XP-progress block
+  leaves the paper stat card:** the v97 "quests & achievements wears the
+  shared paper card" is REVERTED — `ProgressAndAchievementsCard` ("XP
+  progress" + quest list + badge preview) is not a stat bar, so it always
+  renders on the plain `CurioSettingsCard` (no paper fill, no torn edges,
+  no holes/rings). The paper style stays on the real stat panes: Home
+  Streak · Cabinet · Topics, the hero's Level · Saved · Lanes, the detail
+  meta card. Dead quests-paper locals removed
+  (`questsPaperOn/Bg/TearOn/Shape/HolesOn/RingsOn/RingStyle/Content` +
+  the unused `settingsCardTintLift` import); `paperStatCard*` /
+  `TornStatPaperShape` imports stay (the hero stat pane still uses them).
 - **v107 — Apple Music "Watch in" deep links fixed for songs.**
   `resolveAppleMusicItemUrl` (ExploreSearch.kt) had two bugs that made
   SONG topics fail while artists and some albums worked (verified live

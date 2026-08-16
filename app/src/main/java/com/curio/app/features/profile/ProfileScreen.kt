@@ -78,7 +78,6 @@ import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.ui.components.ProfileAvatarImage
 import java.io.File
 import com.curio.app.features.settings.heroPageBackground
-import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -377,21 +376,12 @@ fun ProfileScreen(navController: NavController) {
                     // Keep the whole gamification story together: XP explains
                     // the current level, the quest row opens the full journey,
                     // and the badge preview shows the immediate payoff.
-                    // v97 — the quests block wears the shared PAPER card when
-                    // the "Paper stat card" experiment is on (now the default):
-                    // the same construction as the hero's Level · Saved · Lanes
-                    // pane (paper fill + torn edges + holes/rings toggles).
-                    // The plate inside lost its glowing gradient look too.
-                    val questsPaperOn = AppPreferences.paperStatCardsState
-                    val questsPaperBg = paperStatCardColor(settingsCardTintLift())
-                    val questsTearOn = questsPaperOn && AppPreferences.paperStatTearState
-                    val questsShape: Shape = remember(questsTearOn) {
-                        if (questsTearOn) TornStatPaperShape(0x6B4E3E) else RoundedCornerShape(28.dp)
-                    }
-                    val questsHolesOn = questsPaperOn && AppPreferences.paperHeaderHolesState
-                    val questsRingsOn = questsHolesOn && AppPreferences.paperHoleRingsState
-                    val questsRingStyle = AppPreferences.paperHoleRingStyleState
-                    val questsContent: @Composable () -> Unit = {
+                    // v108 — the XP progress / quests block is NOT a stat bar,
+                    // so it never wears the paper stat card: it stays on the
+                    // plain settings card. The paper style is reserved for the
+                    // real stat panes (Home Streak · Cabinet · Topics, the
+                    // hero's Level · Saved · Lanes, the detail meta card).
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                         ProgressAndAchievementsCard(
                             xp = displayXp,
                             progress = progress.first,
@@ -401,34 +391,6 @@ fun ProfileScreen(navController: NavController) {
                                 navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
                             }
                         )
-                    }
-                    if (questsPaperOn) {
-                        Surface(
-                            shape = questsShape,
-                            color = Color.Transparent,
-                            shadowElevation = 3.dp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .curioDarkGlow(3.dp, questsShape)
-                        ) {
-                            Box(
-                                modifier = Modifier.paperStatCardFill(
-                                    shape = questsShape,
-                                    fill = questsPaperBg,
-                                    holesOn = questsHolesOn,
-                                    ringsOn = questsRingsOn,
-                                    ringStyle = questsRingStyle,
-                                    ink = MaterialTheme.colorScheme.onSurface,
-                                    dark = isCurioDarkTheme()
-                                )
-                            ) {
-                                Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-                                    questsContent()
-                                }
-                            }
-                        }
-                    } else {
-                        CurioSettingsCard(shadowElevation = 0.dp) { questsContent() }
                     }
                 }
             }

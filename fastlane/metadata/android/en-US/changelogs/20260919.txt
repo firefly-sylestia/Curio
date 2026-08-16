@@ -15,6 +15,7 @@ FIX
 - Dark mode: search bars across the app (Cabinet, Topic Browser, Spin filters) now use the near-black chip glass instead of the muddy mid-tone background.
 - Dark mode: the Spin filter and category picker titles (category name, "What are we exploring?", "Pick what you're in the mood for") now read cream-white on the dark banner instead of the washed pastel tint.
 - Topic detail: the back and more buttons now blend with the hero's color in dark mode instead of sitting on a near-black plate.
+- Profile: the XP progress / quests box no longer wears the paper stat card style — that look is reserved for the real stat bars (Home, Profile hero, detail meta card).
 - Apple Music: the "Watch in" deep link now opens songs correctly — songs resolve to their album page with the track id (the old /song/ link 404'd), and the search now uses the artist + title so the right track is found.
 - Topic detail: the hero tear now uses the same clean torn-paper seam as the Home banner — the old detail-only pattern that read as straight lines is gone.
 - Profile: pick an avatar photo in Edit profile — it shows on the Profile hero and in the Home menu drawer (the name-initial circle until one is set).

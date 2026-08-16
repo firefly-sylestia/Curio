@@ -72,6 +72,13 @@ A 5-part fix list (all visual, dark-mode heavy):
    hairline rim stay.
 6. `DetailStickyBar` dark frost → `lerp(heroFill, White, 0.10)` (the same
    hero-hued lip the under-sheet wears); light frost unchanged.
+7. **(follow-up, item 6)** Profile XP-progress block: the v97 paper-card
+   wrapping of `ProgressAndAchievementsCard` ("XP progress" + quests +
+   badge preview) is reverted — it's not a stat bar, so it always renders
+   on the plain `CurioSettingsCard`. The paper style stays on the real
+   stat panes (Home Streak · Cabinet · Topics, hero Level · Saved · Lanes,
+   detail meta card). Dead quests-paper locals + the now-unused
+   `settingsCardTintLift` import removed.
 
 ### Validation
 `git diff --check` clean; brace counts balanced in all changed files; no
