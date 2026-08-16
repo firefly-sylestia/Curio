@@ -20,6 +20,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Mixed-deck colors: the green, teal, purple and blue mixes are now vivid and clean instead of dark and muddy, and the mixed deck's hero card glides through the colors smoothly — no more visible lines or stripes across the card.
 - Mood board: the full-screen editor now saves exactly what you arrange — photos and quote cards land in the same spot in the saved card (no more cut/empty board), and editing an older board keeps your full-screen arrangement.
 - Mood board: a Copy board button (in the full-screen editor and on the small board) duplicates the whole board — every photo and quote card — so you can build a second board on top.
 - Remaining stock buttons now match the custom pill style: tour Skip/Next, crash-screen actions, FieldMind's Finish/Save and the Sound Bite trim pair use the app's rounded pills instead of boxy default corners.

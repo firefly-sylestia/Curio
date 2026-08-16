@@ -449,6 +449,29 @@ app/src/main/java/com/curio/app/
   themed `RadioButton`s, the M3 `SegmentedButton` control in Settings,
   and self-contained flows (onboarding 18/26dp, bug-report 28dp) keep
   their own language.
+- **v114 — mixed-deck colors: vivid blends (no near-black mud) + a smooth
+  hero gradient (no band "lines").** The user flagged the green/teal,
+  magenta/purple and blue mixes as bad (the red/coral mixes were fine).
+  Root cause: the curated pair/triple blends had been "deepened until they
+  clear 4.5:1 against white", which pushed several to near-black mud
+  (Rose+Teal 0xFF4A12A8 ≈ 11% lightness, dark blues, dark teals) — while
+  the reds the user liked were never over-darkened. The decks never needed
+  the white-contrast deepening: the peek cards deepen each stop per-card
+  (HSL lightness drop for the reel hierarchy) and use same-hue deep ink
+  ([pastelFillInk]'s light branch); the hero's white ink rides the
+  theme-resolved gradient like every single deck. Fix 1: retuned the
+  flagged pair/triple blends to vivid, clean mid-tones in the same hue
+  families (violet 0xFF8B5CF6 / fuchsia 0xFFC026D3 / blue 0xFF2563EB /
+  jade 0xFF0BA36D / teal 0xFF0FA3A3, etc. — Tailwind 500/600-style
+  shades; contrast ≥ the reds' 1.2–1.3). Fix 2 — "don't use gradients
+  with lines": `mixedDeckGradient` previously emitted accent → curated
+  seam → accent stops, which painted visible STRIPES on the hero card.
+  It now theme-resolves each accent and OKLab-interpolates ~7 fine steps
+  between consecutive accents ([oklabGradientStops]), so the hero's
+  diagonal / reversed / radial brush (kept — the user wants rounded /
+  random styles) glides smoothly with no band lines. 4+ accents still
+  fall to [oklabCentroid]. The object docstring's stale "every blend
+  clears 4.5:1 against white" claim was corrected.
 - **v114 — mood board: ONE shared board arrangement (full-screen editor
   saves exactly what you arrange) + a Copy board button.** The format kept
   a SECOND tile list + quote-position list for the full-screen editor

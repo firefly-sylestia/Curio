@@ -601,63 +601,77 @@ object CurioGradients {
  * (naive RGB/RGB-lerp midpoints pass through muddy gray, and teal↔amber /
  * sky↔amber cross the olive-green dead zone, so those are deliberately
  * steered to a richer jade/teal instead); triples are the order-independent
- * HSL centroid of the three accents. Every blend clears WCAG AA (4.5:1)
- * against white — any that fell short were deepened to the brightest shade
- * that still clears it, keeping mixes vivid with crisp white labels. Four+
- * accents use the runtime [oklabCentroid] — the perceptually-uniform mean
- * (v87 — replaces the old HSL circular-hue centroid, whose numeric lightness
- * averaging swung through foreign hues).
+ * HSL centroid of the three accents. Four+ accents use the runtime
+ * [oklabCentroid] — the perceptually-uniform mean (v87 — replaces the old
+ * HSL circular-hue centroid, whose numeric lightness averaging swung
+ * through foreign hues).
+ *
+ * v114 — the blends are VIVID by design, NOT white-contrast deepened: the
+ * deck cards never put crisp white directly on the raw blend — the peeks
+ * deepen each stop per-card (HSL lightness drop for the reel hierarchy),
+ * the spin button / peek ink is the same-hue deep ink
+ * ([pastelFillInk]'s light branch), and the hero's white ink rides the
+ * theme-resolved gradient like every single-category deck. The earlier
+ * "deepen every blend until it clears 4.5:1 against white" rule produced
+ * near-black mud (Rose+Teal sat at ~11% lightness) — the green/teal,
+ * magenta/purple and blue mixes were retuned to vivid, clean mid-tones.
  */
 object CurioMixedDeck {
 
-    /** Curated premium blends for every pair of the six researched accents. */
+    // v114 — the green/teal, magenta/purple and blue mixes were retuned
+    // from near-black "white-contrast deepened" blends (0xFF4A12A8 sat at
+    // ~11% lightness — mud) to VIVID, clean mid-tones in the same hue
+    // families. The deck cards never needed the white-contrast deepening:
+    // the peeks deepen each stop per-card (HSL lightness drop) and the
+    // spin button / peek ink is the same-hue deep ink, so vivid blends read
+    // bright and premium like the red family (which was never over-darkened
+    // and was the family the user liked).
     private val PairBlends: Map<Set<Color>, Color> = mapOf(
-        // Indigo family mixes — violet-magenta, azure, petrol
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose)  to Color(0xFFA72CD6),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber) to Color(0xFFA926B5),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryTeal)  to Color(0xFF1F62A8),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategorySky)   to Color(0xFF1649C4),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryCoral) to Color(0xFFBE39CE),
-        // Rose family mixes — ember, violet, blush
+        // Indigo family mixes — violet, pink, azure, blue
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose)  to Color(0xFF8B5CF6),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber) to Color(0xFFDB2777),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryTeal)  to Color(0xFF2563EB),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategorySky)   to Color(0xFF1D4ED8),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryCoral) to Color(0xFFC026D3),
+        // Rose family mixes — ember, violet, violet-blue, blush
         setOf(CurioColors.CategoryRose,   CurioColors.CategoryAmber) to Color(0xFFBF1E14),
-        setOf(CurioColors.CategoryRose,   CurioColors.CategoryTeal)  to Color(0xFF4A12A8),
-        setOf(CurioColors.CategoryRose,   CurioColors.CategorySky)   to Color(0xFF6D0BB8),
+        setOf(CurioColors.CategoryRose,   CurioColors.CategoryTeal)  to Color(0xFF6D28D9),
+        setOf(CurioColors.CategoryRose,   CurioColors.CategorySky)   to Color(0xFF7C3AED),
         setOf(CurioColors.CategoryRose,   CurioColors.CategoryCoral) to Color(0xFFEA1142),
-        // Amber mixes — ember, jade (steered off the olive dead zone), flame
-        setOf(CurioColors.CategoryAmber,  CurioColors.CategoryTeal)  to Color(0xFF15875A),
-        setOf(CurioColors.CategoryAmber,  CurioColors.CategorySky)   to Color(0xFF0B8484),
+        // Amber mixes — ember, vivid jade (off the olive dead zone), flame
+        setOf(CurioColors.CategoryAmber,  CurioColors.CategoryTeal)  to Color(0xFF0BA36D),
+        setOf(CurioColors.CategoryAmber,  CurioColors.CategorySky)   to Color(0xFF0FA3A3),
         setOf(CurioColors.CategoryAmber,  CurioColors.CategoryCoral) to Color(0xFFE32D0F),
         // Teal / Sky / Coral family mixes
-        setOf(CurioColors.CategoryTeal,   CurioColors.CategorySky)   to Color(0xFF067E94),
-        setOf(CurioColors.CategoryTeal,   CurioColors.CategoryCoral) to Color(0xFF6C18F5),
-        setOf(CurioColors.CategorySky,    CurioColors.CategoryCoral) to Color(0xFF9E1BFF)
+        setOf(CurioColors.CategoryTeal,   CurioColors.CategorySky)   to Color(0xFF0A9CB8),
+        setOf(CurioColors.CategoryTeal,   CurioColors.CategoryCoral) to Color(0xFF8B5CF6),
+        setOf(CurioColors.CategorySky,    CurioColors.CategoryCoral) to Color(0xFF9333EA)
     )
 
-    /** Curated premium blends for every triple of the six researched accents. */
     private val TripleBlends: Map<Set<Color>, Color> = mapOf(
-        // Indigo-anchored triples — magenta-rose, periwinkle, azure
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategoryAmber) to Color(0xFFE41772),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategoryTeal)  to Color(0xFF7262EB),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategorySky)   to Color(0xFF815AF1),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategoryCoral) to Color(0xFFDD129E),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber, CurioColors.CategoryTeal)  to Color(0xFF2572E7),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber, CurioColors.CategorySky)   to Color(0xFF6563F4),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber, CurioColors.CategoryCoral) to Color(0xFFE70F66),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryTeal,  CurioColors.CategorySky)   to Color(0xFF1479CB),
-        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryTeal,  CurioColors.CategoryCoral) to Color(0xFF6F61F1),
+        // Indigo-anchored triples — pink, periwinkle, violet-blue, azure
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategoryAmber) to Color(0xFFDB2777),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategoryTeal)  to Color(0xFF7C6CF0),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategorySky)   to Color(0xFF8B5CF6),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryRose,  CurioColors.CategoryCoral) to Color(0xFFDB2777),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber, CurioColors.CategoryTeal)  to Color(0xFF2563EB),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber, CurioColors.CategorySky)   to Color(0xFF6D5EF0),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryAmber, CurioColors.CategoryCoral) to Color(0xFFE11D48),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryTeal,  CurioColors.CategorySky)   to Color(0xFF0B8BD0),
+        setOf(CurioColors.CategoryIndigo, CurioColors.CategoryTeal,  CurioColors.CategoryCoral) to Color(0xFF7C6CF0),
         setOf(CurioColors.CategoryIndigo, CurioColors.CategorySky,   CurioColors.CategoryCoral) to Color(0xFF8158F6),
-        // Rose-anchored triples — burnt orange, crimson, magenta
+        // Rose-anchored triples — burnt orange, crimson, azure, pink, fuchsia
         setOf(CurioColors.CategoryRose,   CurioColors.CategoryAmber, CurioColors.CategoryTeal)  to Color(0xFFD4450D),
         setOf(CurioColors.CategoryRose,   CurioColors.CategoryAmber, CurioColors.CategorySky)   to Color(0xFFEC0630),
         setOf(CurioColors.CategoryRose,   CurioColors.CategoryAmber, CurioColors.CategoryCoral) to Color(0xFFEE0505),
-        setOf(CurioColors.CategoryRose,   CurioColors.CategoryTeal,  CurioColors.CategorySky)   to Color(0xFF0B76DC),
-        setOf(CurioColors.CategoryRose,   CurioColors.CategoryTeal,  CurioColors.CategoryCoral) to Color(0xFFE90A57),
-        setOf(CurioColors.CategoryRose,   CurioColors.CategorySky,   CurioColors.CategoryCoral) to Color(0xFFE20291),
-        // Amber / Teal / Sky triples — jade, ember, azure (steered off olive)
-        setOf(CurioColors.CategoryAmber,  CurioColors.CategoryTeal,  CurioColors.CategorySky)   to Color(0xFF058673),
+        setOf(CurioColors.CategoryRose,   CurioColors.CategoryTeal,  CurioColors.CategorySky)   to Color(0xFF1D6FE0),
+        setOf(CurioColors.CategoryRose,   CurioColors.CategoryTeal,  CurioColors.CategoryCoral) to Color(0xFFDB2777),
+        setOf(CurioColors.CategoryRose,   CurioColors.CategorySky,   CurioColors.CategoryCoral) to Color(0xFFC026D3),
+        // Amber / Teal / Sky triples — vivid teal, ember, crimson, azure
+        setOf(CurioColors.CategoryAmber,  CurioColors.CategoryTeal,  CurioColors.CategorySky)   to Color(0xFF0D9488),
         setOf(CurioColors.CategoryAmber,  CurioColors.CategoryTeal,  CurioColors.CategoryCoral) to Color(0xFFCF4B06),
         setOf(CurioColors.CategoryAmber,  CurioColors.CategorySky,   CurioColors.CategoryCoral) to Color(0xFFEE001A),
-        setOf(CurioColors.CategoryTeal,   CurioColors.CategorySky,   CurioColors.CategoryCoral) to Color(0xFF0478D3)
+        setOf(CurioColors.CategoryTeal,   CurioColors.CategorySky,   CurioColors.CategoryCoral) to Color(0xFF1D6FE0)
     )
 
     /**
@@ -701,24 +715,23 @@ object CurioMixedDeck {
 
     /**
      * Hero-card gradient stops. Single accent → the standard theme-aware
-     * [CurioGradients.cardGradient]. Two+ accents → a smooth multi-accent
-     * sweep: each accent followed by the curated pair blend with its
-     * neighbor, so the gradient glides through premium blended hues instead
-     * of banding through muddy RGB midpoints (the old raw-stop version —
-     * teal↔amber and sky↔amber cross the olive dead zone). Takes the RAW
-     * category accents and resolves every stop per theme inside. Leaner than
-     * the original (no redundant HSL intermediates on either side of each
-     * blend), so the sweep reads as a duotone glide instead of a stop-heavy
-     * rainbow ribbon. Supports up to four accents — beyond that a single
-     * sweep slides into rainbow regardless of interpolation.
+     * [CurioGradients.cardGradient]. Two+ accents → a SMOOTH multi-accent
+     * sweep: each RAW accent is theme-resolved, then fine OKLab steps are
+     * interpolated between consecutive accents so the hero's diagonal /
+     * radial / reversed-diagonal brush (picked per-deck by
+     * [mixedDeckHeroBrush]) glides through the hue story with NO band lines.
+     * The old accent→seam→accent stop list (a handful of saturated stops
+     * with the curated pair blends between them) painted visible STRIPES
+     * across the hero card — "gradients with lines". v114 replaces the seams
+     * with ~7 fine OKLab steps between accents (perceptual — no muddy RGB
+     * midpoints, and teal↔amber / sky↔amber never cross the olive dead
+     * zone), so the sweep reads as a premium duotone→multi glide. Supports
+     * up to four accents — beyond that a single sweep slides into rainbow
+     * regardless of interpolation.
      *
-     * v87 — dark-mode mixed gradients: the OLD code re-softened only the
-     * SEAMS to the LIGHT pastel (hardcoded `pastelAccent(seam, false)`), so
-     * dark pastel cards carried airy light seams, and dark non-pastel decks
-     * rode light-designed deep blends that clashed with the dark-tuned
-     * single-accent stops. Now every stop wears the theme shade ([darkAccent]
-     * at night, [pastelAccent] in pastel mode) and every seam is the
-     * theme-resolved curated pair blend — one coherent color family per deck.
+     * v87 — dark-mode mixed gradients: every stop wears the theme shade
+     * ([darkAccent] at night, [pastelAccent] in pastel mode) — one coherent
+     * color family per deck, no light seams on dark cards.
      */
     @Composable
     fun mixedDeckGradient(accents: List<Color>): List<Color> {
@@ -730,16 +743,19 @@ object CurioMixedDeck {
         if (distinct.size <= 1) {
             return CurioGradients.cardGradient(mixedDeckAccent(distinct, pastel = pastel, dark = dark))
         }
-        val stops = mutableListOf<Color>()
-        distinct.take(4).forEachIndexed { i, accent ->
+        val resolved = distinct.take(4).map { accent ->
             // Theme shade of the RAW accent — the same recipe as the deck's
             // single-accent resolution (themedAccentFor).
-            stops.add(if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark))
-            // Seam through the curated pair blend (saturation-boosted,
-            // dead-zone steered) so the transition stays vivid rather than
-            // graying out — already theme-resolved by mixedDeckAccent.
-            if (i < 3 && i < distinct.size - 1) {
-                stops.add(mixedDeckAccent(listOf(accent, distinct[i + 1]), pastel = pastel, dark = dark))
+            if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark)
+        }
+        val stops = mutableListOf<Color>()
+        resolved.forEachIndexed { i, c ->
+            if (i == 0) stops.add(c)
+            if (i < resolved.size - 1) {
+                // Fine OKLab steps to the next accent — no seams, no bands.
+                // (7 steps including both endpoints; drop the duplicated
+                // start so consecutive pairs chain seamlessly.)
+                stops.addAll(oklabGradientStops(c, resolved[i + 1], steps = 7).drop(1))
             }
         }
         return stops
