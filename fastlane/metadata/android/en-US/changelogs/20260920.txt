@@ -21,6 +21,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Settings & Profile options now show clean bare icons — the colored box behind each glyph is gone — and every settings sub-page (Appearance, Preferences, Recording, Backup, Experiments, Updates and Support) renders its options in the same paper cards as the Settings hub instead of transparent rows.
+- Profile and Settings button icons (back, search/settings and the Home menu/profile pills) sit a touch higher — the glyphs' optical weight no longer reads low inside the circular pills.
 - Mixed-deck colors: the green, teal, purple and blue mixes are now vivid and clean instead of dark and muddy, and the mixed deck's hero card glides through the colors smoothly — no more visible lines or stripes across the card.
 - Mood board: the full-screen editor keeps its own arrangement separate from the small card again — you can arrange each board on its own.
 - Mood board: a Copy board button in the full-screen editor copies your small board (photos + quote cards) into the full-screen board when it's empty.

@@ -43,6 +43,7 @@ import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSectionLabel
+import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -113,6 +114,10 @@ fun SupportScreen(navController: NavController) {
             ) {
                 item { CurioSectionLabel("Updates") }
                 item {
+                    // v115 — the support sections sit in the shared settings
+                    // card so the page reads as settings options, not
+                    // transparent rows floating on the backdrop.
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CurioCardHeader(CurioIcons.Download, "Updates", "Your build and what's new")
                         // Version — tappable: five taps TOGGLE promo mode
@@ -170,9 +175,11 @@ fun SupportScreen(navController: NavController) {
                             navController.navigate(CurioRoutes.UPDATES) { launchSingleTop = true }
                         }
                     }
+                    }
                 }
                 item { CurioSectionLabel("Feedback") }
                 item {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CurioCardHeader(CurioIcons.BugReport, "Reports & crash logs", "Tell us what broke")
                         CurioSettingsRow(
@@ -199,12 +206,14 @@ fun SupportScreen(navController: NavController) {
                             "Diagnostic tool"
                         ) { CurioCrashReporter.testCrash() }
                     }
+                    }
                 }
                 // ── About Curio — merged here from the old Settings → About
                 //    page (v24): Replay intro + the project link. One page,
                 //    reached from Settings and Profile alike.
                 item { CurioSectionLabel("About Curio") }
                 item {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CurioCardHeader(CurioIcons.Info, "About Curio", "The app, the journey, and its source")
                         CurioSettingsRow(
@@ -230,6 +239,7 @@ fun SupportScreen(navController: NavController) {
                                 )
                             }
                         }
+                    }
                     }
                 }
             }

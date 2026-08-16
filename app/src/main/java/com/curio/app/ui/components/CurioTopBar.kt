@@ -2,6 +2,7 @@ package com.curio.app.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +62,14 @@ fun CurioBackButton(
             contentDescription = contentDescription,
             tint = contentColor,
             size = 24.dp,
-            modifier = Modifier.padding(8.dp)
+            // v115 — the chevron's optical weight reads a hair low in the
+            // 40dp circular pill (the same optical-weight correction as the
+            // Home top-bar pills and the Profile/Settings sticky pills): the
+            // natural line box centers the ink, but the < glyph's visual
+            // mass sits slightly below its ink box center.
+            modifier = Modifier
+                .padding(8.dp)
+                .offset(y = (-1f).dp)
         )
     }
     if (disableRipple) {

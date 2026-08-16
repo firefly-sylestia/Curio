@@ -1,15 +1,11 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
@@ -33,8 +28,9 @@ import com.curio.app.ui.theme.CurioIcon
 
 /**
  * Shared paper-card primitives for Profile + Settings — one visual language
- * for both screens so they can never drift apart (28dp cards with icon-chip
- * headers, arrow rows for navigation, inset dividers).
+ * for both screens so they can never drift apart (28dp cards with bare-icon
+ * headers, arrow rows for navigation, inset dividers). v115 — the icons are
+ * BARE (no colored chip box behind them).
  */
 
 /** 28dp paper card — the shared container for Profile and Settings cards.
@@ -87,32 +83,21 @@ fun CurioSettingsCard(
     ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
 }
 
-/** Icon-chip card header — coral glyph chip + title + subtitle (v15: AMOLED swaps the coral chip for a neutral glass plate). */
+/** Icon-card header — bare accent icon + title + subtitle (v115: the
+ *  colored chip box behind the glyph is gone — just the icon, matching
+ *  every settings row). */
 @Composable
 fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        // v42 — the header chip is COLOR-TINTED in every theme now: light
-        // keeps the soft coral wash, and AMOLED keeps a muted coral glass
-        // plate with coral ink instead of a neutral grey chip — the
-        // settings/profile cards keep their color identity on black.
-        // v72 — the chip + glyph follow the hero the page wears
-        // ([settingsCardChipTint] / [settingsCardAccentInk]): lane accent
-        // under Adaptive Hero, the azure twin when the sky-azure hero is on,
-        // the rose otherwise — never a mismatched fixed coral.
-        val chipTint = settingsCardChipTint()
-        Surface(
-            shape = RoundedCornerShape(14.dp),
-            color = chipTint.copy(alpha = 0.16f),
-            modifier = Modifier.size(38.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                CurioIcon(
-                    icon, null,
-                    tint = settingsCardAccentInk(),
-                    size = 20.dp
-                )
-            }
-        }
+        // v115 — the icon is BARE: no chip box behind it. The accent ink
+        // follows the hero the page wears ([settingsCardAccentInk]): lane
+        // accent under Adaptive Hero, the azure twin when the sky-azure
+        // hero is on, the rose otherwise — never a mismatched fixed coral.
+        CurioIcon(
+            icon, null,
+            tint = settingsCardAccentInk(),
+            size = 21.dp
+        )
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -120,24 +105,16 @@ fun CurioCardHeader(icon: String, title: String, subtitle: String, modifier: Mod
     }
 }
 
-/** Navigable setting row — accent-tinted icon chip + label/subtitle + forward
- *  arrow. v42 — the icon sits in a soft coral-tinted chip (matching the
- *  card-header language) instead of a plain grey glyph, so every row reads
- *  as a tappable colored control rather than a flat cream line. */
+/** Navigable setting row — bare accent icon + label/subtitle + forward
+ *  arrow. v115 — the icon is BARE: the soft coral chip box is gone, so
+ *  every row reads as a clean tappable option (the info-row language),
+ *  not a colored block. */
 @Composable
 fun CurioSettingsRow(icon: String, title: String, subtitle: String, onClick: () -> Unit) {
-    val chipTint = settingsCardChipTint()
     Surface(onClick = onClick, color = Color.Transparent, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(chipTint.copy(alpha = 0.14f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CurioIcon(icon, null, tint = settingsCardAccentInk(), size = 20.dp)
-            }
+            // v115 — bare glyph at the info-row size (21dp, accent ink).
+            CurioIcon(icon, null, tint = settingsCardAccentInk(), size = 21.dp)
             Column(modifier = Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.bodyLarge)
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)

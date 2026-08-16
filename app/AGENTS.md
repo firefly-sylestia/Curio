@@ -420,12 +420,32 @@ app/src/main/java/com/curio/app/
   **v115 — small spot corrections:** the natural box centers the ink, but
   a few glyphs' OPTICAL weight still reads a hair low inside compact
   circular/pill buttons, so those spots carry their own tiny lift:
-  Home's `TopBarPill` (Menu + Person, -1.5dp), the drawer's `DrawerNavItem`
-  chips (-1dp), Profile's `ProfileSearchPill` magnifier (-1dp) and the
-  `SettingsNavCard` cog (-1dp). Keep these per-site; do not re-add a
-  global draw-time lift to `CurioIcon` (the old 1dp `graphicsLayer` lift
-  was removed in v113 because it pushed near-top-bearing glyphs into
-  clipped parents).
+  Home's `TopBarPill` (Menu + Person, -2dp), the drawer's `DrawerNavItem`
+  chips (-1dp), Profile's `ProfileSearchPill` magnifier (-2dp), the
+  `SettingsNavCard` cog (-2dp) and `CurioBackButton`'s chevron (-1dp,
+  covering the Profile + Settings sticky/hero back pills). The first
+  pass (-1/-1.5dp) was still a touch low, so the Profile/Settings spots
+  deepened by another 1dp. Keep these per-site; do not re-add a global
+  draw-time lift to `CurioIcon` (the old 1dp `graphicsLayer` lift was
+  removed in v113 because it pushed near-top-bearing glyphs into clipped
+  parents).
+- **v115 — settings/profile option icons are BARE (no colored chip box),
+  and the settings sub-pages render their options inside the shared
+  settings card.** (1) **Icons: `CurioSettingsRow` and `CurioCardHeader`
+  dropped the coral/rose tinted chip box behind their glyphs** — the
+  icon now renders bare at 21dp in the hero-matched accent ink
+  (`settingsCardAccentInk`), the same treatment `CurioSettingsInfoRow`
+  always had, so every settings row/header reads as a clean option, not
+  a colored block. Profile's `SettingsNavCard` cog also lost its blue
+  gradient block (bare accent cog). (2) **Sub pages: the flat rows that
+  used to sit transparently on the watermark backdrop now live inside
+  `CurioSettingsCard(shadowElevation = 0.dp)`** — the four section pages
+  (Appearance / Preferences / Recording / Backup & restore via
+  `SettingsPageContent`, which also card-wraps the two-pane hub's right
+  pane), plus Experiments, Backup tools, Support & diagnostics and the
+  Updates sub-page. Every settings destination now uses the same
+  row-in-card language as the hub; the Promo preview page keeps its
+  showcase cards (previews + share buttons, not option rows).
 - **v114 — pet eyes no longer react to touch scrolls; scaled eye pixels stay
   crisp.** (1) **Eyes stopped flicking at the start of every scroll:**
   `PetPointer.trackerModifier` aimed the eyes on `Press`, so every

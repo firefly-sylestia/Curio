@@ -68,6 +68,7 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
+import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
@@ -101,11 +102,16 @@ internal fun SettingsPageContent(
     navController: NavController,
     highlightKey: String? = null
 ) {
-    when (page) {
-        SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
-        SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
-        SettingsPage.RECORDING -> RecordingSection(highlightKey)
-        SettingsPage.DATA -> DataSection(navController, highlightKey)
+    // v115 — every sub-page's options sit in the same paper card as the
+    // hub rows, so the section screens read as proper settings options
+    // instead of transparent rows floating on the backdrop.
+    CurioSettingsCard(shadowElevation = 0.dp) {
+        when (page) {
+            SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
+            SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
+            SettingsPage.RECORDING -> RecordingSection(highlightKey)
+            SettingsPage.DATA -> DataSection(navController, highlightKey)
+        }
     }
 }
 

@@ -1305,9 +1305,9 @@ private fun TopBarPill(
                 // The shared icon renderer centers the ink in the natural
                 // line box, but the menu/person glyphs' optical weight still
                 // reads a hair low inside the small 42dp pill — nudge it up
-                // (v115: deepened from -0.5dp — the glyphs were still a
-                // touch low after the v114 centering fix).
-                modifier = Modifier.offset(y = (-1.5f).dp)
+                // (v115: deepened -0.5dp -> -1.5dp -> -2dp — the glyphs were
+                // still a touch low after the v114 centering fix).
+                modifier = Modifier.offset(y = (-2f).dp)
             )
         }
     }

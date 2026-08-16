@@ -58,6 +58,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSectionLabel
+import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
@@ -195,6 +196,10 @@ fun UpdatesScreen(navController: NavController) {
             ) {
                 item { CurioSectionLabel("Updates") }
                 item {
+                    // v115 — the update rows sit in the shared settings card
+                    // so the page reads as settings options, not transparent
+                    // rows floating on the backdrop.
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         // Version readout.
                         Row(
@@ -286,9 +291,11 @@ fun UpdatesScreen(navController: NavController) {
                             )
                         }
                     }
+                    }
                 }
                 item { CurioSectionLabel("Need help?") }
                 item {
+                    CurioSettingsCard(shadowElevation = 0.dp) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CurioSettingsRow(
                             CurioIcons.Info,
@@ -305,6 +312,7 @@ fun UpdatesScreen(navController: NavController) {
                             "How updates work",
                             "Updates install the latest release from GitHub"
                         )
+                    }
                     }
                 }
             }

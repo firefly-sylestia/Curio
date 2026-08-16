@@ -75,6 +75,7 @@ import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.ui.components.ProfileAvatarImage
 import java.io.File
 import com.curio.app.features.settings.heroPageBackground
@@ -109,7 +110,6 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
-import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
@@ -560,9 +560,10 @@ private fun ProfileSearchPill(
                 contentDescription = "Search settings",
                 tint = iconTint,
                 size = 22.dp,
-                // v115 — the magnifier reads a hair low in the 42dp pill
-                // (same correction as the Home top-bar pills).
-                modifier = Modifier.offset(y = (-1f).dp)
+                // v115 — the magnifier reads a hair low in the 42dp pill;
+                // deepened -1dp -> -2dp (still a touch low after the first
+                // pass). Same optical-weight correction as the Home pills.
+                modifier = Modifier.offset(y = (-2f).dp)
             )
         }
     }
@@ -1359,24 +1360,15 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(15.dp))
-                        // Blue settings block — the cog reads distinctly from
-                        // the coral quests/level chips (v7.103).
-                        .background(Brush.verticalGradient(CurioGradients.cardGradient(CurioColors.DustyBlue))),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CurioIcon(
-                        CurioIcons.Settings, null,
-                        tint = Color.White,
-                        size = 23.dp,
-                        // v115 — the cog's optical weight reads a hair low in
-                        // the 46dp block (same correction as the Home pills).
-                        modifier = Modifier.offset(y = (-1f).dp)
-                    )
-                }
+                // v115 — the cog is a BARE icon now (no colored box behind
+                // it), matching every other settings row; it still reads a
+                // hair low, so the same -2dp optical lift applies.
+                CurioIcon(
+                    CurioIcons.Settings, null,
+                    tint = settingsCardAccentInk(),
+                    size = 23.dp,
+                    modifier = Modifier.offset(y = (-2f).dp)
+                )
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Settings & preferences", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                     Text(

@@ -48,6 +48,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSectionLabel
+import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
@@ -326,6 +327,10 @@ fun BackupToolsScreen(navController: NavController) {
         ) {
             item { CurioSectionLabel("Your data") }
             item {
+                // v115 — the backup rows sit in the shared settings card so
+                // the workspace reads as settings options, not transparent
+                // rows floating on the backdrop.
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     CurioSettingsRow(CurioIcons.Backup, "Back up now", "Save captures, settings + recordings") {
                         backupLauncher.launch(CurioBackupManager.suggestedFileName())
@@ -340,9 +345,11 @@ fun BackupToolsScreen(navController: NavController) {
                     } else "Never"
                     CurioSettingsInfoRow(CurioIcons.History, "Last backup", backupLabel)
                 }
+                }
             }
             item { CurioSectionLabel("Auto backup") }
             item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Toggle row — pick the location the FIRST time it's
                     // switched on; afterwards the saved destination is reused.
@@ -404,9 +411,11 @@ fun BackupToolsScreen(navController: NavController) {
                         CurioSettingsInfoRow(CurioIcons.History, "Last auto backup", autoLabel)
                     }
                 }
+                }
             }
             item { CurioSectionLabel("Legacy import") }
             item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     CurioSettingsRow(
                         CurioIcons.History,
@@ -424,6 +433,7 @@ fun BackupToolsScreen(navController: NavController) {
                     }
                     CurioSettingsDivider()
                     CurioSettingsInfoRow(CurioIcons.Info, "Additive import", "Existing Curio captures are never replaced")
+                }
                 }
             }
         }

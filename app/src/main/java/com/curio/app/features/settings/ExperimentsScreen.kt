@@ -35,6 +35,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSectionLabel
+import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
@@ -87,6 +88,10 @@ fun ExperimentsScreen(navController: NavController) {
         ) {
             item { CurioSectionLabel("Spin visuals") }
             item {
+                // v115 — the experiment rows sit in the shared settings card
+                // so the page reads as settings options, not transparent
+                // rows floating on the backdrop.
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // v25 — the Enhanced main gradient experiment PASSED
                     // (always ON), so its toggle was removed here.
@@ -97,8 +102,10 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setHeroShadowEnabled(context, it)
                     }
                 }
+                }
             }
             item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("Top-lit deck cards", "Peek cards catch light at the top edge", AppPreferences.peekGradientState) {
                         AppPreferences.setPeekGradientEnabled(context, it)
@@ -115,6 +122,7 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPeekTitlesEnabled(context, it)
                     }
                 }
+                }
             }
             // v25 — the Deck & controls card is gone: the 3D shuffle button
             // (always on) and Pastel crown depth (PASSED, always on) both had
@@ -126,6 +134,7 @@ fun ExperimentsScreen(navController: NavController) {
             // v27 — paper & header experiments, all OFF by default.
             item { CurioSectionLabel("Paper & headers") }
             item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("Title cut lines", "Two short lines under header titles", AppPreferences.paperHeaderCutsState) {
                         AppPreferences.setPaperHeaderCutsEnabled(context, it)
@@ -179,9 +188,11 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setHeroTearSheetEnabled(context, it)
                     }
                 }
+                }
             }
             item { CurioSectionLabel("Promo") }
             item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     CurioSettingsRow(
                         CurioIcons.Star,
@@ -191,8 +202,13 @@ fun ExperimentsScreen(navController: NavController) {
                         navController.navigate(CurioRoutes.PROMO) { launchSingleTop = true }
                     }
                 }
+                }
             }
-            item { CurioSettingsInfoRow(CurioIcons.Info, "About experiments", "These controls are temporary and may change") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                    CurioSettingsInfoRow(CurioIcons.Info, "About experiments", "These controls are temporary and may change")
+                }
+            }
         }
         // Drawn on top of the scroll content — rows slide under the ragged
         // tear as they scroll up.
