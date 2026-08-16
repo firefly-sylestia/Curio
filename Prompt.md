@@ -1,8 +1,66 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: songs lane expanded to 1,000 real songs
+## Current request — COMPLETED: mood board dual-flow revert + glow, dark Home recents, icon lifts
 
-All of this session's work is done, committed and pushed (`36d5d04`).
+All of this session's work is done, committed and pushed (`75abe24`).
+
+The user (referencing commit `c5ee2ac`/`12f3ea1`): "i asked you to add a
+copy board button which just copies what the outside board had on inside
+and it was two different editing and save flow. but you merged it again,
+revert that please. and also the glow in dark mode you messed it up, now
+the length of the glow is inaccurate, its not covering fully the button.
+its visible in the middle only. and bring back the dark mode home screen
+recents not being colored. and still the profile and settings icon and
+now also the drawer menu and profile button are little to the down but
+the icon being cut from button is fixed."
+
+### 1 — Mood board: revert the v114 shared-arrangement merge
+`12f3ea1` had merged the inline + full-screen boards onto ONE shared
+arrangement; the user's intent was always TWO separate editing/save
+flows, with a copy button that copies the INLINE board into the
+full-screen editor ("copies what the outside board had on inside").
+Restored the v57 dual-list design (`fullTiles`/`fullQuotePositions`
+→ `tileLayoutsFull`/`quotePositionsFull`, edited only by the full-screen
+canvas) by checking out the pre-merge file, then added a **Copy board**
+pill in the full-screen dialog (BottomEnd, above Add images) shown when
+`fullTiles.isEmpty()` but the inline board has content: copies inline
+tiles into `fullTiles` + inline quote placements into
+`fullQuotePositions` (index-aligned; text/style/tilt/width stay shared).
+`canSave` keeps counting `fullTiles`. AGENTS.md v114 bullet rewritten
+(v114 → v115).
+
+### 2 — Dark-mode glow shrank to the middle
+`curioGlassEdge` (from `835677b`) masked its catch to a capsule with 10%
+side insets + 55% band height, so the glow only showed mid-button.
+Now the vertical-gradient band is FULL-WIDTH and clipped to the pill's
+own outline (the curved rim trims the ends) — covers edge-to-edge,
+stays inside the shape; the non-subtle option's bottom whisper is the
+single gradient's final stop. Dropped the now-unused RoundedCornerShape
+import; RoundRect still used by `toPath()`.
+
+### 3 — Dark-mode Home recents uncolored
+`RecentEntryRow` + Home `ExploreTopicRow` now use
+`surfaceContainerLow` instead of `categorySurface()` when
+`isCurioDarkTheme()`; the Recents PAGE (RecentScreen) keeps its tinted
+rows. AGENTS.md v89 bullet annotated.
+
+### 4 — Icon spots still a hair low (cut is fixed)
+The v114 natural-box centering left a few glyphs' OPTICAL weight low in
+compact circular/pill buttons. Per-site lifts: Home `TopBarPill`
+(Menu + Person) −0.5dp → −1.5dp; drawer `DrawerNavItem` chips −1dp;
+Profile `ProfileSearchPill` magnifier −1dp; `SettingsNavCard` cog −1dp.
+AGENTS.md v114 icon bullet annotated (do NOT re-add a global lift — the
+old 1dp `graphicsLayer` lift was removed in v113 for clipping).
+
+### Validation
+`git diff --cached --check` clean; full GalleryWallFormat diff reviewed
+(revert + copy button coherent; no stale v114 references; no external
+callers of the removed override params). No Gradle locally (env rule) —
+CI validates compile on push.
+
+## Previous request — COMPLETED: songs lane expanded to 1,000 real songs
+
+All of that session's work is done, committed and pushed (`36d5d04`).
 
 The user: "increase the songs to 1000 and use proper real facts and add
 some good songs new one 2000s and above."
