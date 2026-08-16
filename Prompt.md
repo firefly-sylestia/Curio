@@ -1,8 +1,49 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: mood board full-screen editor save bug + Copy board button
+## Current request — COMPLETED: mixed-deck colors vivid + smooth hero gradient
 
-All of this session's work is done, committed and pushed (`12f3ea1`).
+All of this session's work is done, committed and pushed (`cfc43d1`).
+
+The user: "fix the new mixed colors some are bad and dont use gradints with
+line." Asked which families were bad → **green/teal, magenta/purple, blue**
+(red/coral were fine); for the gradient asked for **rounded/random styles**
+(the seed-varied brush) but without band lines.
+
+### Root cause 1 — near-black mud in the flagged families
+Measured WCAG contrast of every curated pair/triple blend: the flagged
+families were the DARK ones (Rose+Teal 0xFF4A12A8 ≈ 11% lightness, dark
+blues 0xFF1649C4, dark teals 0xFF15875A) — they'd been "deepened until
+4.5:1 vs white" per the docstring, which is unnecessary: the peek cards
+deepen each stop per-card (HSL lightness drop) with same-hue deep ink
+([pastelFillInk]), and the hero rides the theme-resolved gradient like
+single decks. The reds the user liked (0xFFEE0505 etc., contrast 1.2–1.3)
+were never over-darkened.
+- **Fix:** retuned the flagged pair/triple blends to vivid, clean
+  mid-tones in the same hue families (Tailwind 500/600-style): violet
+  0xFF8B5CF6, fuchsia 0xFFC026D3, blue 0xFF2563EB, jade 0xFF0BA36D, teal
+  0xFF0FA3A3, etc. Contrast ≥ the reds' floor. Red/orange blends untouched.
+
+### Root cause 2 — band "lines" on the hero card
+`mixedDeckGradient` emitted accent → curated seam → accent stops (a
+handful of saturated stops), which painted visible STRIPES across the
+hero in the diagonal/reversed/radial brush.
+- **Fix:** theme-resolve each accent (darkAccent / pastelAccent / raw per
+  theme), then OKLab-interpolate ~7 fine steps between consecutive
+  accents ([oklabGradientStops]) → smooth multi-hue glide, no seams.
+  The per-deck brush styles (diagonal / reversed / radial by seed) are
+  KEPT per the user's "rounded or random" ask. 4+ accents still fall to
+  [oklabCentroid].
+- Corrected the object docstring's stale "every blend clears 4.5:1
+  against white" claim.
+
+### Validation
+Contrast verified with a python WCAG script (candidates ≥ the reds' 1.2–
+1.3 floor); diff + braces reviewed; `git diff --check` clean; no Gradle
+locally (env rule) — CI validates on push. Pushed to `main`.
+
+## Previous request — COMPLETED: mood board full-screen editor save bug + Copy board button
+
+All of that session's work is done, committed and pushed (`12f3ea1`).
 
 The user: "the moodboard full screen editor needs fixing too when it saves
 it changes and also keep the photo and quote add different for both but
