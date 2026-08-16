@@ -54,7 +54,7 @@ profile, crop, two-step, …) reads as the same near-black option-card
 glass as the Settings cards. Light mode untouched. AGENTS.md v116 bullet
 + changelog updated.
 
-### Follow-up — Edit profile dialog declutter + crop-before-apply (`<<hash>>`)
+### Follow-up — Edit profile dialog declutter + crop-before-apply (`d58cbc0`)
 User: "the proflie editing dialog is bad the adjust button shoul not be
 there, tapping the pfp does thee same neither the crop icoon. and when i
 add the photo it should show the crop dialog before applying and its
