@@ -1,6 +1,45 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: launcher icon from the designer's new source SVG
+## Current request — COMPLETED: bare settings icons + carded sub pages + deeper icon lifts
+
+All of this session's work is done, committed and pushed (`8d4ed47`).
+
+The user: "the profile and settings buttons glyph icons are still little
+down and also dont give the icons a colored box background just keep the
+icon and also unify the sub pages to look like settings options not
+transparent texts".
+
+### 1 — Profile/Settings button glyphs STILL low
+First-pass lifts (-1/-1.5dp) weren't enough. Deepened: Home `TopBarPill`
+(Menu + Person) -1.5 → -2dp; `ProfileSearchPill` -1 → -2dp;
+`SettingsNavCard` cog -1 → -2dp; and `CurioBackButton`'s chevron gained
+its first lift (-1dp) — the shared back pill on the Profile sticky bar
+and every Settings hero. Per-site offsets only — do NOT re-add a global
+`CurioIcon` lift (v113 clipping lesson, AGENTS.md v114/v115 bullets).
+
+### 2 — Icons out of colored boxes
+`CurioSettingsRow` and `CurioCardHeader` dropped the coral/rose tinted
+chip box behind their glyphs — bare 21dp accent-ink icon
+(`settingsCardAccentInk`), the `CurioSettingsInfoRow` language. Profile's
+`SettingsNavCard` cog also lost its blue gradient block (bare accent
+cog, -2dp lift kept). Removed now-orphaned imports in CurioSettingsCard.kt
+(background/Box/clip/size/fillMaxSize) + CurioGradients in ProfileScreen.
+
+### 3 — Sub pages carded like hub options
+Flat rows that floated transparently on the watermark backdrop now sit in
+`CurioSettingsCard(shadowElevation = 0.dp)`: the four section pages via
+`SettingsPageContent` (also card-wraps the two-pane hub's right pane),
+Experiments (4 sections + info row), Backup tools (3 sections), Support
+(3 sections) and the Updates sub-page (2 sections). Promo's showcase
+page keeps its preview cards (previews + share buttons, not option
+rows).
+
+### Validation
+Brace balance verified per file (python tokenizer: all depth 0);
+`git diff --check` clean; orphan-import sweeps done; no Gradle locally
+(env rule) — CI validates compile on push. Pushed to `main`.
+
+## Previous request — COMPLETED: launcher icon from the designer's new source SVG
 
 All of this session's work is done, committed and pushed (`0310e5d`).
 
