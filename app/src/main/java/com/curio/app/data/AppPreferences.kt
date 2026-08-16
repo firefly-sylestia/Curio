@@ -204,6 +204,39 @@ object AppPreferences {
     fun setLastNotifiedUpdateVersion(context: Context, version: String) =
         prefs(context).edit().putString(KEY_LAST_NOTIFIED_UPDATE, version).apply()
 
+    // ── Update-check result cache (v115) ─────────────────────────────
+    // The last successful check's release info is SAVED locally so the
+    // Updates page shows the release notes instantly on open — no
+    // reloading the network result on every visit (the page still
+    // refreshes in the background).
+    private const val KEY_UPDATE_CACHE_TAG = "update_cache_tag"
+    private const val KEY_UPDATE_CACHE_NOTES = "update_cache_notes"
+    private const val KEY_UPDATE_CACHE_HTML = "update_cache_html_url"
+    private const val KEY_UPDATE_CACHE_APK = "update_cache_apk_url"
+
+    fun getCachedUpdateInfo(context: Context): UpdateInfo? {
+        val tag = prefs(context).getString(KEY_UPDATE_CACHE_TAG, "").orEmpty()
+        if (tag.isBlank()) return null
+        return UpdateInfo(
+            tagName = tag,
+            htmlUrl = prefs(context).getString(KEY_UPDATE_CACHE_HTML, "").orEmpty()
+                .ifBlank { "https://github.com/firefly-sylestia/Curio/releases/tag/$tag" },
+            releaseNotes = prefs(context).getString(KEY_UPDATE_CACHE_NOTES, "").orEmpty()
+                .takeIf { it.isNotBlank() },
+            apkUrl = prefs(context).getString(KEY_UPDATE_CACHE_APK, "").orEmpty()
+                .takeIf { it.isNotBlank() }
+        )
+    }
+
+    fun setCachedUpdateInfo(context: Context, info: UpdateInfo) {
+        prefs(context).edit()
+            .putString(KEY_UPDATE_CACHE_TAG, info.tagName)
+            .putString(KEY_UPDATE_CACHE_NOTES, info.releaseNotes.orEmpty())
+            .putString(KEY_UPDATE_CACHE_HTML, info.htmlUrl)
+            .putString(KEY_UPDATE_CACHE_APK, info.apkUrl.orEmpty())
+            .apply()
+    }
+
     // Theme mode (v81) — "light" / "dark" / "system". v78 removed the
     // theme system; the reimagined dark mode (pitch-black pages, dark
     // same-hue hero shades, Samsung-style inner glow) returns here as a

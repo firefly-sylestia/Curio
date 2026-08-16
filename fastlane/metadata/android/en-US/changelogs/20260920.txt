@@ -21,6 +21,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Updates page: the release notes are now saved on your device, so they show instantly when you open the page instead of reloading from the internet — and they render properly (headers, bullets, bold) instead of raw text.
+- Updates page: a new status header shows your version chip and check state, and an update-available banner makes the download action front and center.
 - Settings & Profile options now show clean bare icons — the colored box behind each glyph is gone — and every settings sub-page (Appearance, Preferences, Recording, Backup, Experiments, Updates and Support) renders its options in the same paper cards as the Settings hub instead of transparent rows.
 - Profile and Settings button icons (back, search/settings and the Home menu/profile pills) sit a touch higher — the glyphs' optical weight no longer reads low inside the circular pills.
 - Mixed-deck colors: the green, teal, purple and blue mixes are now vivid and clean instead of dark and muddy, and the mixed deck's hero card glides through the colors smoothly — no more visible lines or stripes across the card.

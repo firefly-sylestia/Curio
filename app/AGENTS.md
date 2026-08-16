@@ -446,6 +446,27 @@ app/src/main/java/com/curio/app/
   Updates sub-page. Every settings destination now uses the same
   row-in-card language as the hub; the Promo preview page keeps its
   showcase cards (previews + share buttons, not option rows).
+- **v115 — Updates page redesigned: status header + saved release notes +
+  markdown-lite rendering.** (1) **The last successful check is CACHED**
+  (`AppPreferences.getCachedUpdateInfo` / `setCachedUpdateInfo` — tag,
+  notes, htmlUrl, apkUrl): opening the Updates page shows the saved notes
+  INSTANTLY (no network reload on every visit); the auto-check still
+  refreshes silently in the background (`runCheck(keepResult = …)` keeps
+  the saved result visible while checking) and only replaces it on
+  success — a failed refresh keeps the saved result and marks the row
+  "Couldn't refresh · tap to retry". The fetch path saves every
+  successful result, so after updating, the notes for the installed
+  version show. (2) **Page design:** a status header (accent status dot
+  tinted by state — rose download / sage check / error — headline +
+  subline + a `v{version}` chip) replaces the plain version row; the
+  update action lives in an accent-tinted banner (Update now CTA,
+  download progress, retry states, Open release on GitHub); notes move to
+  their own "What's new" card. (3) **Release notes render markdown-lite**
+  (`parseReleaseNotes`/`parseInline`/`ReleaseNotesBlock`, hand-rolled —
+  the project has no markdown dependency): `#/##/###` headers, `-`/`*`
+  bullets with accent dots, `---` dividers, `**bold**` spans,
+  `[label](url)` links stripped to labels and `` `code` `` to plain text —
+  the raw GitHub body no longer shows as literal markdown.
 - **v114 — pet eyes no longer react to touch scrolls; scaled eye pixels stay
   crisp.** (1) **Eyes stopped flicking at the start of every scroll:**
   `PetPointer.trackerModifier` aimed the eyes on `Press`, so every
