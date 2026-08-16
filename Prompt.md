@@ -1,6 +1,55 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: bare settings icons + carded sub pages + deeper icon lifts
+## Current request — COMPLETED: Updates page redesign (saved notes, markdown, status header)
+
+All of this session's work is done, committed and pushed (`8b0bf57`).
+
+The user: "the updater page looks boring and the update it notes it shows
+thats also bad. and why cant it just saves that note intead of reloading
+it."
+
+### 1 — Notes are now SAVED (no reload on open)
+`AppPreferences.getCachedUpdateInfo` / `setCachedUpdateInfo` cache the
+last successful check (tag, notes, htmlUrl, apkUrl). `UpdatesScreen`
+loads the cache into `updateInfo` + state BEFORE any network call, so the
+notes show instantly on every open; the auto-check then refreshes
+silently in the background via `runCheck(keepResult = …)` (keeps the
+saved result visible while Checking) and only replaces it on success — a
+failed refresh keeps the saved notes and marks the row "Couldn't refresh
+· tap to retry". Every successful fetch re-saves, so after updating, the
+installed version's notes show. Kotlin gotcha handled: `updateInfo` is a
+delegated var — won't smart-cast after null-check, so the failure path
+captures it into a local `val saved` first.
+
+### 2 — Release notes render markdown-lite
+Hand-rolled parser (`parseReleaseNotes` / `parseInline` /
+`ReleaseNotesBlock`) — the project has NO markdown dependency, so the
+common GitHub-body syntax is parsed by hand: `#/##/###` headers (bold
+title lines), `-`/`*`/`•` bullets (accent dots), `---` dividers
+(`HorizontalDivider`), `**bold**` spans (`buildAnnotatedString` +
+`withStyle`), `[label](url)` links stripped to labels, `` `code` `` to
+plain text. Verified against a realistic body via a python mirror. Used
+`StringBuilder.setLength(0)` (not `.clear()` — API-availability safety).
+
+### 3 — Page is no longer boring
+Status header: accent status dot (44dp circle, tinted by state — rose
+`curioRoseInk` download / sage `curioSageInk` check / error), headline,
+subline, and a `v{version}` pill chip — replaces the plain version row.
+The update action moved into an accent-tinted banner inside the status
+card (Update now title + Download & install pill / progress bar / retry
+states / Open release on GitHub). Notes live in their own "What's new"
+card with a "View release on GitHub" link when up to date. The update
+checker toggle stays at the bottom of the status card; the "Need help?"
+card is unchanged. The old `UpdateResultCard` + `AnimatedVisibility` +
+`notesExpanded` state are gone.
+
+### Validation
+Brace balance (depth 0) + unused-import sweep (only the expected
+`getValue`/`setValue` delegate false-positives) + `git diff --check`
+clean; parser unit-tested via python mirror; no Gradle locally (env
+rule) — CI validates compile on push. Pushed to `main`.
+
+## Previous request — COMPLETED: bare settings icons + carded sub pages + deeper icon lifts
 
 All of this session's work is done, committed and pushed (`8d4ed47`).
 
