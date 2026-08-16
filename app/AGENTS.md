@@ -417,6 +417,24 @@ app/src/main/java/com/curio/app/
   ink in the icon's layout box with ~1dp margin on both sides. See
   CurioIcons.kt for the full derivation; DO NOT reintroduce the old
   trim/padding combo.
+- **v114 — pet eyes no longer react to touch scrolls; scaled eye pixels stay
+  crisp.** (1) **Eyes stopped flicking at the start of every scroll:**
+  `PetPointer.trackerModifier` aimed the eyes on `Press`, so every
+  touch-scroll began with a visible eye-snap at the finger's touchdown
+  point (the 8dp drag-cancel only fired after the finger moved). The
+  tracker now only REMEMBERS the press point and commits the aim on
+  `Release` when the gesture was a clean tap (no drag) — via `position`
+  (the hover path), so the sprite's existing 2s look-timeout fades it
+  back to neutral. A scroll's release arrives with `pressStart` already
+  nulled by the drag-cancel, so scrolling never aims the eyes. Mouse
+  hover + click still work. (2) **Scaled eye pixels were glitchy:** the
+  v71 draw-space eye scaling (`DrawScope.scale` at 0.72/1.0/1.35)
+  rendered each eye cell as a fractional-size rect on a fractional grid
+  → cells landed between device pixels → misaligned "glitchy lines".
+  `CurioPetSprite` now draws the scaled eye on an INTEGER device-pixel
+  lattice: each cell is `round(scaleF × opx)` px, snapped to the lattice
+  around the eye's center (4.5/7 and 10.5/7) — crisp at every preset,
+  and at `scaleF = 1` it lands exactly on the face's pixel grid.
 - **v114 — dark-mode pill glow no longer peeks past the pill shape.**
   The One UI dark-mode pill treatments (`curioGlassEdge` top catch +
   `curioInnerGlow` radial) were painted against the pill's BOUNDING BOX, so

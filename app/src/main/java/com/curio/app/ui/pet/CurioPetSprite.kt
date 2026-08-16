@@ -50,6 +50,7 @@ import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
@@ -97,17 +98,24 @@ object PetPointer {
                 activityTick++
                 when (event.type) {
                     PointerEventType.Press -> {
-                        press = change.position
+                        // Remember the press point but DON'T aim yet. Aiming
+                        // on Press made the eyes snap toward the finger at
+                        // the START of every touch-scroll (the drag-cancel
+                        // below only fires after 8dp of travel, so every
+                        // scroll began with a visible eye-flick at the touch
+                        // point). The eyes only look where the gesture turns
+                        // out to be a real tap.
+                        press = null
                         pressStart = change.position
                         dragging = false
-                        position = change.position
                     }
                     PointerEventType.Move -> {
                         val start = pressStart
                         if (start != null) {
                             // The finger moved far enough to be a drag (a
-                            // touch-scroll) — cancel the tap-aim so the eyes
-                            // go NEUTRAL instead of following the scroll.
+                            // touch-scroll) — cancel any pending tap-aim so
+                            // the eyes go NEUTRAL instead of following the
+                            // scroll.
                             val dist = (change.position - start).getDistance()
                             if (dist > with(density) { 8.dp.toPx() }) {
                                 dragging = true
@@ -123,6 +131,16 @@ object PetPointer {
                         }
                     }
                     PointerEventType.Release -> {
+                        // A clean tap (pressed and released without dragging):
+                        // NOW aim at the tap point, briefly — via [position]
+                        // (the hover path), so the sprite's existing 2-second
+                        // look-timeout fades the aim back to neutral exactly
+                        // like a click on desktop. A scroll's release arrives
+                        // with pressStart already nulled by the drag-cancel,
+                        // so scrolling never makes the eyes react.
+                        if (pressStart != null && !dragging) {
+                            position = pressStart
+                        }
                         press = null
                         pressStart = null
                         dragging = false
@@ -888,24 +906,35 @@ fun CurioPetSprite(
                                     "star" -> starEye
                                     else -> ink
                                 }
-                                translate(left = offX * opx, top = offY * opx) {
-                                    scale(
-                                        scaleX = scaleF,
-                                        scaleY = scaleF,
-                                        pivot = Offset(4.5f * opx, 7f * opx)
-                                    ) {
-                                        eyePixels?.filter { it.first < 8 }?.forEach { (c, r, slot) ->
-                                            drawPx(c, r, eyeColor(slot))
-                                        }
+                                // v114 — draw the scaled eye on an INTEGER
+                                // device-pixel lattice instead of scaling the
+                                // draw space. DrawScope.scale with a
+                                // non-integer factor (0.72 / 1.35) turned every
+                                // eye cell into a fractional-size rect on a
+                                // fractional grid, so cells landed between
+                                // device pixels and rendered as glitchy,
+                                // misaligned lines. Each scaled cell is now
+                                // round(scaleF × opx) device px, snapped to
+                                // the integer lattice around the eye's
+                                // center — crisp at every size preset (and at
+                                // scaleF = 1 it lands exactly on the face's
+                                // pixel grid).
+                                val eyeCell = (opx * scaleF).roundToInt().coerceAtLeast(1)
+                                fun drawScaledEye(pixels: List<Triple<Int, Int, String>>, centerC: Float, centerR: Float) {
+                                    pixels.forEach { (c, r, slot) ->
+                                        val left = (centerC * opx + (c - centerC) * eyeCell).roundToInt()
+                                        val top = (centerR * opx + (r - centerR) * eyeCell).roundToInt()
+                                        drawRect(
+                                            color = eyeColor(slot),
+                                            topLeft = Offset(left.toFloat(), top.toFloat()),
+                                            size = Size(eyeCell.toFloat(), eyeCell.toFloat())
+                                        )
                                     }
-                                    scale(
-                                        scaleX = scaleF,
-                                        scaleY = scaleF,
-                                        pivot = Offset(10.5f * opx, 7f * opx)
-                                    ) {
-                                        eyePixels?.filter { it.first >= 8 }?.forEach { (c, r, slot) ->
-                                            drawPx(c, r, eyeColor(slot))
-                                        }
+                                }
+                                translate(left = offX * opx, top = offY * opx) {
+                                    eyePixels?.let { pixels ->
+                                        drawScaledEye(pixels.filter { it.first < 8 }, 4.5f, 7f)
+                                        drawScaledEye(pixels.filter { it.first >= 8 }, 10.5f, 7f)
                                     }
                                 }
                             }
