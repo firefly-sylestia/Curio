@@ -1,6 +1,46 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: mood board dual-flow revert + glow, dark Home recents, icon lifts
+## Current request — COMPLETED: launcher icon from the designer's new source SVG
+
+All of this session's work is done, committed and pushed (`0310e5d`).
+
+The user: "output 8 is the main icon and output 7 is without the icon
+just the background, output 8 have both icons and background. now
+properly use this and remove the old png. and make sure the design stays
+the same" — then corrected: "no no i uploaded another svg use that for
+icon keep the splash screen as it is that good just the icon now".
+
+### What shipped
+- The user supplied several `svgviewer-output (N).svg` files at the
+  repo root. Outputs 7/8 were a background-only / icon+background pair of
+a DIFFERENT (simpler, no-waves, no-frame) design — rejected. The final
+upload, `svgviewer-output (5).svg`, matches the current shipped design:
+same planet cx=380 cy=320 r=122, moon cx=650 cy=500 r=55, layered waves
+at the bottom — pixel-diff vs the old PNG ≈ 2.9%, the ONLY material
+change is the missing white frame.
+- Rendered to `drawable-nodpi/ic_launcher_icon.png` (2048×2048 via
+  sharp, at /tmp) with the SAME card geometry as the old art (~84–88%
+  of canvas, same center) → the existing 28dp inset in
+  `ic_launcher_foreground.xml` still applies unchanged (card ~44×47dp
+  inside the 66dp launcher safe zone).
+- `ic_launcher_foreground.xml` now references `@drawable/ic_launcher_icon`
+  (comment rewritten v113 → v115: white frame gone, geometry same).
+- The SPLASH keeps rendering `@drawable/ic_launcher_art` (the v113
+  raster, `drawable-nodpi/ic_launcher_art.png`) untouched — user
+  approved it as-is, "just the icon now".
+- `ic_launcher_background.xml` (full-bleed sky + stars), monochrome
+  (planet+moon silhouette — positions match output 5 exactly) and
+  `ic_notification` (path silhouette, same geometry) unchanged.
+- New SVG archived at `design/launcher-icon/curio-launcher-icon-v2.svg`;
+  root `svgviewer-output` files cleaned up (7/8 had already been
+  removed earlier).
+
+### Validation
+Geometry verified vs the old raster (84%×88% card, centered); XML
+rewrites are trivial (drawable ref swap + comment); no Gradle locally
+(env rule) — CI validates on push.
+
+## Previous request — COMPLETED: mood board dual-flow revert + glow, dark Home recents, icon lifts
 
 All of this session's work is done, committed and pushed (`75abe24`).
 
