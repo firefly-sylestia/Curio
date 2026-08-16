@@ -1,8 +1,57 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: stock buttons converted to the pill/chip language
+## Current request — COMPLETED: mood board full-screen editor save bug + Copy board button
 
-All of this session's work is done, committed and pushed (`4bbcc64`).
+All of this session's work is done, committed and pushed (`12f3ea1`).
+
+The user: "the moodboard full screen editor needs fixing too when it saves
+it changes and also keep the photo and quote add different for both but
+also add a copy button if one is empty and other one have something."
+Clarified: full-screen arrangement was cut on save (not "saved differently"),
+quote cards saved small/out of position; copy = duplicate the existing
+content. Asked for the copy-button behavior — user chose **Copy whole
+board** (duplicates ALL tiles + quote cards, always available when the
+board has anything).
+
+### Root cause — dual board arrangements (`fullTiles` / `fullQuotePositions`)
+The format kept a SECOND tile list + quote-position list for the
+full-screen editor (saved to `tileLayoutsFull` / `quotePositionsFull`),
+seeded from the full layouts and edited ONLY by the expanded canvas:
+- Arranging in full-screen changed only the full list → the saved small
+  card (which renders the INLINE `tileLayouts`) showed a different, "cut"
+  board; fresh boards opened the full-screen editor EMPTY (the full list
+  never synced from the inline adds).
+- The quote size/position save bug is the same root cause: the small card
+  rendered the inline positions (never-dragged `(-1,-1)` → deterministic
+  slots against an EMPTY extent) instead of the arranged placements.
+
+### Fix — ONE shared arrangement
+- Both canvases (inline + full-screen) now edit the SAME `tiles` list and
+  `quoteCards` state. Save still writes `tileLayoutsFull` /
+  `quotePositionsFull` as MIRRORS of the shared lists (legacy readers of
+  the expanded board / export fall back to them).
+- Legacy migration: editing a dual-list entry seeds the shared list from
+  the FULL layouts when the inline ones are empty ("if one is empty and
+  the other has something, copy the populated one") — legacy
+  full-screen arrangements survive a re-save.
+- Dead v57 plumbing removed: `quotePositionsOverride`,
+  `onMoveQuoteOverride`, `onResizeQuoteOverride` params, `fullTiles`,
+  `fullQuotePositions`, the index-alignment `onCardRemoved` hook.
+- **Copy board button** (v114): pill (28dp, `CurioIcons.ContentCopy`),
+  inline BottomCenter / full-screen BottomEnd above Add images, shown
+  when `tiles.isNotEmpty() || quotes.isNotEmpty()`. Copies every tile
+  with a +28dp nudge + 5° rotation, every quote card with same
+  text/spans/tilt/style/color/width and a fresh `(-1,-1)` position → its
+  own deterministic slot.
+
+### Validation
+diff reviewed; dead refs confirmed gone (grep); imports still used
+(LaunchedEffect/Random/NotePaper*); no Gradle locally (env rule) — CI
+validates on push. Pushed to `main`.
+
+## Previous request — COMPLETED: stock buttons converted to the pill/chip language
+
+All of that session's work is done, committed and pushed (`4bbcc64`).
 
 Swept all `Button`/`OutlinedButton` call sites (167 matches) for stock M3
 styling sitting next to the custom pill family. Fixed:
