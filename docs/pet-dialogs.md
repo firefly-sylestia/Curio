@@ -1,496 +1,717 @@
 # Curie / Pet — Dialog Reference (Canonical)
 
-**What this file is for.** Every line Curie (the floating pet) can say,
-organized by where it lives and when it speaks. This is the **source of
-truth** for pet dialog. When rephrased wording is approved, update the
-matching pool here first, then port the same text into the Kotlin source
-(`app/src/main/java/com/curio/app/data/CurioPet.kt`,
-`CurioPetBrain.kt`, `TourController.kt`) — keep the pool **name**, the
-**order** of the bullets, and the **placeholder tokens** (`__LANE__`,
-`$lane`, `$streak`, `$count`, `$savedLane`, `$topic`, `$level`)
-identical, or the integration will break.
+## What this file is for
 
-**How lines are chosen.** The pet never repeats a line twice in a row
-(`CurioPet.pickLine`). One sentence per passive bubble (spec §10.7).
+Every line Curie (the floating pet) can say, organized by where it lives and when it speaks.
+This is the source of truth for pet dialogue.
 
-**The three growth voices.** Every line source is routed by the pet's
-growth stage:
-| Stage | Voice | Personality |
-|---|---|---|
-| `BABY` (newborn) | Telegraphic | 1–3 word utterances, exclamation-led, onomatopoeia |
-| `FIRST_EVO` (evolved, default) | Playful/witty | The full rich library — this is the voice rephrases should target |
-| `FINAL_EVO` (fully grown, Level 25) | Mature | Calm, wise, reflective; longer sentences, mentor-like |
+**Voice rule:** Curie speaks as a tiny, curious, affectionate creature. Curie uses
+“I / me / my / we / us” when referring to herself and never normally refers to herself
+by name. She talks *with* the user, not like a narrator describing the app.
 
-The tables below list the **FIRST_EVO pools** (the canonical library) and
-their BABY / FINAL_EVO twins where they exist.
+**FIRST_EVO:** playful, cute, expressive, curious, slightly mischievous.
+**BABY:** tiny, simple, enthusiastic.
+**FINAL_EVO:** gentle, warm, quietly wise, but still recognizably the same pet.
+
+Keep the pool names, order, and placeholder tokens unchanged for integration.
 
 ---
 
 ## 1. Event reactions — `CurioPet.eventLine(event)`
 
-Fired when the user does something notable. A burst of the same event
-(within the burst window) earns a sassy line instead.
-
 ### 1.1 Spin landed (`SPIN_LANDED`)
-Sometimes references the current lane by name (~50% chance), otherwise
-generic.
 
 **With the lane named:**
-- Back to `$lane` — the deck knows you!
-- Ooh, `$lane` again. Good taste.
-- `$lane` called, and the deck answered!
-- The `$lane` shelf grows tonight!
-- Another `$lane` spin — the stamp's almost there!
+- Ooh, `$lane`! I like this one.
+- `$lane`! Ooh, can we peek?
+- We landed on `$lane`! Yay!
+- It's `$lane` again! I remember this one.
+- `$lane`! My little brain is already curious.
+- Ooh, `$lane` found us!
+- Look! `$lane`!
+- We got `$lane`! Good spin!
 
 **Generic:**
-- It landed!
-- Ooh, the deck chose well!
-- A new topic, a new tale!
-- Spin-spin-spin! …I mean, ooh.
-- That landing had drama!
-- The wheel spoke!
-- Destiny, served on a card!
-- I saw that one coming… nope, I didn't.
-- Round and round it goes!
-- Where it stops, nobody knows… except the deck.
+- Ooh! It landed!
+- We got one!
+- What did we find?
+- Ooh, this looks interesting!
+- Yay! A new little mystery.
+- Hehe, it stopped!
+- We found something!
+- Where did we land?
+- Ooh ooh! Show me!
+- Aha! This one!
+- Can we look now?
+- I wonder what this is.
+- The spin picked one! I like it already.
+- Weee! What a spin!
+- That was a good one!
 
-**BABY:** Ooh! · Landed! · Round round! · Spin done!
-**FINAL:** The wheel has spoken, as it always does. · A landing. The story begins. · Where it stopped, the deck already knew.
+**BABY:**
+- Ooh! · Landed! · We got it! · Spin spin! · Yay! · New! · Ooh, this! · Got one! · Look! · Again?
+
+**FINAL:**
+- There we are. Let us see what found us.
+- A new landing. A new little question.
+- The wheel has chosen. Shall we look closer?
+- Wherever we land, there is usually something worth noticing.
 
 ### 1.2 User tapped the topic (`REVEAL_TAPPED`)
-- You picked it!
+- You picked it! Ooh!
 - Ooh, good choice!
-- That one called to you!
-- Nice pick!
-- It knew you'd tap it!
-- Ooh, the good kind of surprise!
-- Great pick!
-- Ooh, good taste!
-- That one's a keeper, I can tell!
-- You have the magic touch!
-- I was rooting for this one!
-- A confident tap! I respect that.
+- You wanted this one, didn't you?
+- Hehe, you picked it!
+- I like your choice.
+- That one looked interesting to me too.
+- Good pick! Let's see what it's hiding.
+- You found a good one!
+- Ooh! This could be fun.
+- I was hoping you'd tap that one.
+- Your curiosity chose well.
+- Okay, okay, let's look!
+- You have good curiosity.
+- That one definitely deserved a peek.
+- Ooh, I'm excited for this one.
 
-**BABY:** You! · Ta-da! · Look! · Good pick!
-**FINAL:** A confident choice. I approve. · You have a good eye for stories. · That one called to you. And rightly so.
+**BABY:**
+- You pick! · Ooh! · Good one! · Look! · Yay, this! · Picked! · Mine too! · Go look!
+
+**FINAL:**
+- A thoughtful choice. I think you will enjoy this one.
+- You followed your curiosity. Good.
+- That one caught your attention for a reason.
+- A good question often begins with a simple tap.
 
 ### 1.3 Topic auto-opened (`REVEAL_AUTO`)
-- There it is!
-- It opened itself, sneaky!
-- Ta-da! A new tale!
-- Ooh, look what landed!
-- Surprise!
-- It chose FOR us. Bold.
-- Look what rolled in!
-- No hands! Well… no paws!
-- The deck knows what it's doing.
-- Bold move, deck. I like it.
-- Peek-a-boo! …It's a whole topic!
-- It picked FOR us. How forward.
+- Ooh! It opened!
+- It opened by itself! Sneaky.
+- Hehe, surprise!
+- Oh! Look what appeared.
+- We didn't even have to ask.
+- It picked for us!
+- A surprise topic!
+- Well, hello there, little mystery.
+- Ooh, I wasn't ready!
+- It chose one for us. Bold.
+- Look! A new thing!
+- Peek-a-boo, topic!
+- Hehe, that was unexpected.
+- Ohhh, what's this?
+- I guess we're looking at this one now!
 
-**BABY:** Oh! · It did! · Ta-da! · Surprise!
-**FINAL:** It opened itself. Bold little deck. · Some doors open on their own. · The deck decided. I simply agree.
+**BABY:**
+- Oh! · Surprise! · Ooh! · Ta-da! · It opened! · Look look! · New! · What?!
+
+**FINAL:**
+- It opened on its own. A pleasant surprise.
+- Sometimes curiosity arrives before we ask for it.
+- Well, then. This is what found us today.
+- An unexpected little door. Let us peek inside.
 
 ### 1.4 Explore started (`EXPLORE`)
-- Go explore!
-- Adventure time!
-- I'll wait right here. Go see!
-- Bring back a story!
-- Go see the world!
-- Adventure awaits!
-- Say hi to the world for me!
-- I'll guard the deck while you're out!
-- Pack snacks. Bring tales.
+- Go explore! I'll be right here.
+- Have fun! Bring me something interesting.
+- Go see what you can find!
+- Ooh, adventure time!
+- Take me with you! ...Oh. Right. I can't.
+- Go on! I'll wait here.
+- Find something that makes you go “wow!”
+- Go look around. I'll keep watch.
+- Your adventure starts now!
+- Bring back a good story, okay?
+- Explore lots! I like hearing what you find.
+- Off you go!
+- Go find a little wonder.
+- Have fun out there!
+- I'll be cheering from here!
 
-**BABY:** Go go! · See! · Bye bye! · New!
-**FINAL:** Go on. The world is worth your attention. · Bring back something interesting. · Explore well. Curiosity is its own reward.
+**BABY:**
+- Go go! · Explore! · Bye! · See! · New things! · Go! · Adventure! · Find!
+
+**FINAL:**
+- Go on. There is always something worth noticing.
+- Explore gently. Wonder has no need to hurry.
+- Bring back whatever catches your eye.
+- The world is full of small discoveries. Go find one.
 
 ### 1.5 Keepsake saved (`SAVE`)
-References the saved lane by name ~50% of the time.
 
 **Lane-named:**
-- One more for the `$savedLane` shelf!
-- Saved to `$savedLane` — our collection grows!
-- `$savedLane` keepsakes, assemble!
-- Tucked away with the `$savedLane` treasures!
+- `$savedLane` got another little treasure!
+- We saved one for the `$savedLane` shelf!
+- Ooh, another `$savedLane` keepsake!
+- `$savedLane` is growing! Yay!
+- Into the `$savedLane` pile it goes.
+- Our `$savedLane` shelf is getting cozy.
 
 **Warm bond (FRIEND+):**
-- Keepsake saved!
-- Mine now… I mean, ours!
-- Tucked away safely!
-- Our shelf grows!
-- A treasure for the shelf!
-- We collect memories!
-- One more spark for our collection!
-- It's OURS now. Officially.
+- Yay! We get to keep it!
+- It's ours now!
+- Another little memory for us.
+- I love keeping things with you.
+- Tucked away safe and sound!
+- Our collection is growing!
+- Hehe, another one for our shelf.
+- I'll remember this one with you.
+- One more little treasure!
 
 **Default:**
-- Keepsake saved!
-- Tucked away safely!
-- It's yours to keep!
-- Captured for later!
-- Snap! Saved!
-- Another keepsake!
-- The shelf grows!
-- Well kept, spark keeper!
+- Saved! Yay!
+- We get to keep it!
+- Tucked away!
+- Ooh, another keepsake!
+- Safe on the shelf.
+- Kept for later!
+- A little something to remember.
+- Into the collection it goes!
+- We saved it!
+- Hehe, keeper!
 
-**BABY:** Keep! · Mine! · Snap! · Save save!
-**FINAL:** Keep it close. Some stories you carry. · Saved. The shelf remembers everything. · A wise thing to hold onto.
+**BABY:**
+- Keep! · Save! · Ours! · Yay! · Mine! · Safe! · Save save! · Got it!
+
+**FINAL:**
+- Kept. Some discoveries deserve a place to return to.
+- Safe on the shelf. We can find it again whenever we wish.
+- Another memory tucked away.
+- It is nice to have somewhere for the things that matter.
 
 ### 1.6 Pet touched (`TOUCH`)
 - Boop!
-- Hehe — again!
-- That's my favorite spot.
+- Hehe! Again?
+- That tickles!
+- You found my spot!
+- Mmm, pats!
+- Soft! I like that.
 - Boop boop!
-- That's the spot!
-- Soft! …Wait, that's me.
-- Tiny hugs!
-- You found my favorite spot!
-- Hehehe, tickles!
-- Squeak!
-- Two boops in one! Professional.
+- Hehe, hi!
+- Ooh! What was that?
+- Tiny boop!
+- More pats, please.
+- You came to see me!
+- That was a good boop.
+- Hehe... you're silly.
+- Boop me again. I dare you.
 
-**BABY:** Boop! · Hehe! · Soft! · Again!
-**FINAL:** Hm. That was well done. · Gentle. I like that. · Yes. That is the right way.
+**BABY:**
+- Boop! · Hehe! · Again! · Soft! · Pat pat! · Ooh! · Tickles! · Boop boop!
+
+**FINAL:**
+- A gentle boop. I approve.
+- Hm. That was nice.
+- You found the right spot.
+- I do not mind being fussed over.
 
 ### 1.7 Play session (`PLAY`)
-- Wheee!
-- You're good at this!
+- Wheee! That was fun!
+- Again! Please?
 - One more round!
-- Again, again!
-- This is the best!
-- I'm undefeatable! …Almost.
-- One more round, promise!
-- Wheee, the floor is my trampoline!
-- Tag! You're it!
+- Hehe, you can't catch me!
+- That was so much fun!
+- I'm not tired yet!
+- Can we play again?
+- I could do that all day.
+- My paws are still bouncing!
+- You got me! ...Maybe.
+- Best game ever. For now.
+- Hehe! I want another turn.
+- That was silly. I loved it.
+- Zoomies!
+- Okay, okay... one more!
 
-**BABY:** Wheee! · Fun! · Again! · Zoom!
-**FINAL:** Very well. One more round. · The old spark wakes. Acceptable. · Play, then. I am not so old as all that.
+**BABY:**
+- Wheee! · Again! · Fun! · Zoom! · More! · Play! · Yay! · Again again!
+
+**FINAL:**
+- That was lovely. I still have a little playfulness left.
+- One more round? I suppose I can spare one.
+- Play makes even an old spark feel young.
+- Very well. One more. Then perhaps another.
 
 ### 1.8 Level up (`LEVEL_UP`)
-- We leveled up!
-- Feel that? Growth!
-- Shiny new spark!
-- I can almost do a backflip!
-- Level up! I'll pretend that was hard.
-- Sparks of power!
-- I'm 10% more sparkly now.
-- Up up up we go!
+- Ooh! I grew!
+- Did you see that?!
+- I'm bigger! Hehe!
+- A shiny new level!
+- Yay! Look at me!
+- I feel all sparkly!
+- We grew together!
+- Something feels different. In a good way!
+- I'm getting better at this!
+- Ooh, new power!
+- Hehe, I'm leveling up!
+- Look at my new little glow!
+- Another step!
+- I'm growing!
+- I feel extra curious today.
 
-**BABY:** Big! · Up! · Grow! · Yay!
-**FINAL:** Another step on the same long path. · Up we go. The climb never truly ends. · Level after level. The journey is the point.
+**BABY:**
+- Big! · Grow! · Up! · Yay! · More! · Big me! · Glow! · Grow grow!
 
-### 1.9 Evolved (`EVOLVE`) — see §3 (evolution ceremony)
+**FINAL:**
+- Another level. I can feel how far we have come.
+- A little more growth, a little more to discover.
+- Up we go. I am glad you are here for it.
+- Every small step changes us.
+
+### 1.9 Evolved (`EVOLVE`) — see §3
 
 ### 1.10 Quest claimed (`QUEST_COMPLETE`)
-- Quest done! Sparkle earned!
-- That quest never stood a chance!
-- Another quest, conquered!
-- Checked off! The list quivers.
-- We finished it together. Well, mostly you.
-- Quest complete! I'm so proud of our teamwork.
-- One more quest bites the dust!
-- The quest list just got shorter. We're unstoppable.
+- We did it!
+- Quest complete! Yay!
+- You finished it!
+- Hehe, that quest didn't stand a chance.
+- We got it done!
+- Another little win!
+- Done! I'm proud of us.
+- Look at that! Finished!
+- One more thing checked off!
+- We did the thing!
+- Quest conquered!
+- Yay! That felt good.
+- Another win for us.
+- Finished and sparkly!
+- High five! Tiny paw five!
 
-**BABY:** Done! · Yay! · Win win! · Good good!
-**FINAL:** Done, as it should be. · A task finished. The shelf approves. · Completed. One more promise kept.
+**BABY:**
+- Done! · Yay! · Win! · We did! · Finished! · Good! · Yay yay! · All done!
+
+**FINAL:**
+- Done. Another promise kept.
+- A small task finished is still progress.
+- Well done. One more thing carried across the line.
+- Completed together. I am glad we did it.
 
 ### 1.11 Streak milestone (`STREAK_MILESTONE`) — see §4
 
 ### 1.12 Sassy burst lines (repeated same event)
-- Again?! …I mean, AGAIN! I love it!
-- That's the third one today. Not that I'm counting. (I'm counting.)
-- Okay, okay — one more cheer! My paws are getting tired!
-- You're on a roll! I'm running out of sparkles… okay, no I'm not.
-- Another one?! You spoil me. …Keep going.
-- Hmph! So many things to open. My tiny heart can't take it. Do it again.
-- You again! Hehe — okay, I'm invested now.
-- I've cheered so much my sparkle needs a snack break.
-- Is that a new thing? …It's the same thing. I don't care. MORE!
-- My excitement is now legally yours. Proceed.
-- Third time's the charm! Fourth time's my favorite.
+- Again?! Hehe, okay!
+- You really like this one!
+- Again! I knew you'd do it.
+- Ooh, we're doing this again?
+- You came back for another one!
+- Hehe, I saw that coming.
+- One more? I won't complain.
+- Again again? I can handle that!
+- You really don't want to let this one go, huh?
+- Okay! I'm invested now.
+- More?! My little heart is ready.
+- You keep picking it! I approve.
+- I wasn't going to say anything... but again?
+- Hehe, you're making this a habit.
+- Alright, one more. For science.
 
-**BABY:** Again? · Same same! · Ooh ooh! · You! Again! · More? MORE? · You keep! I like! · Again again! · Same! Good! · You! Boop! Again! · One more! Just one!
-**FINAL:** The same door, again? · I have seen this card before. It has not changed. · Repetition builds mastery. You are testing it. · Ah. This again. How nostalgic. · Some curiosities are worth revisiting. · Again, you say? The deck sighs. I smile. · Three times today. I am keeping count. You are not subtle. · I have learned not to be surprised. I am still charmed. · The deck has committed this card to memory. So have I.
+**BABY:**
+- Again?! · More! · Again again! · You! · Ooh again! · Same! · More more! · Again!
+
+**FINAL:**
+- Again? Some questions deserve another look.
+- You returned to it. I understand.
+- Repetition can be its own kind of curiosity.
+- I have seen this one before. I am still pleased you came back.
 
 ---
 
 ## 2. Streak milestones — `CurioPet.streakMilestoneLine(streak)`
 
-The flame days get their own bigger lines; other new-best days stay warm.
-
 **Day 1:**
-- The flame is lit!
-- Day 1! A brand-new spark!
+- Day one! We started!
+- Our little streak is alive!
 
 **Day 3:**
-- Day 3! A real streak is born!
-- Three days! The flame has friends!
+- Three days! Look at us go!
+- Day three! You're keeping the spark going!
 
 **Day 7:**
-- Day 7! A whole week of wonder!
-- Seven days! The flame is a bonfire now!
+- A whole week! I'm so happy!
+- Seven days! We made a tiny tradition!
 
 **Day 14:**
-- Day 14! Two weeks of fire!
-- Fortnight flame! Steady as starlight!
+- Two weeks! That's a lot of curiosity.
+- Fourteen days! We're really doing this!
 
 **Day 30:**
-- Day 30! A month of mystery!
-- Thirty days! Legendary flame!
+- Thirty days! Wow... that's our whole little month.
+- A whole month of discoveries! I'm proud of us.
 
 **Any other new best:**
-- Day `$streak`! The flame grows!
-- `$streak` days in a row! Still glowing strong!
-- Streak day `$streak`! One spark at a time.
-- Day `$streak`! The flame likes this pace.
+- Day `$streak`! We're still glowing!
+- `$streak` days! Look how far we've come.
+- Day `$streak`! One more little spark.
+- `$streak` days in a row! Yay us!
+- Day `$streak`! Keep that little flame going.
 
-**BABY (per day):** Day 1: Fire! · Warm warm! — Day 3: Day 3! Big! · Three days! Warm! — Day 7: Day 7! Big fire! · Week! Wow! — Day 14: Day 14! Fire fire! · Many days! — Day 30: Day 30! Big big! · So many days! — other: Day `$streak`! Warm! · Day `$streak`! Fire! · More days!
-**FINAL (per day):** Day 1: The flame is lit. Guard it well. · Day one. Every long road starts here. — Day 3: Day 3. The rhythm takes hold. · Three days. The flame learns to trust you. — Day 7: A week alight. The fire is real now. · Day 7. Consistency is a quiet power. — Day 14: Fortnight of fire. The shelf is proud. · Two weeks. The flame has roots. — Day 30: A month of wonder. Legend, gently earned. · Day 30. Few reach this. You did. — other: Day `$streak`. The flame remembers. · Day `$streak`. Steady as starlight. · Streak day `$streak`. One spark at a time.
+**BABY (per day):**
+Day 1: Start! · Day one! · Fire! — Day 3: Three! · Three days! · More! — Day 7: Week! · Big streak! · Seven! — Day 14: Two weeks! · Many days! — Day 30: Month! · Big big! · Thirty! — other: Day `$streak`! · More days! · Still glow!
+
+**FINAL (per day):**
+Day 1: Every streak begins with one day. · Day one. A small beginning. — Day 3: Three days. A rhythm is forming. · Day three. Keep going. — Day 7: A week of showing up. That matters. · Seven days. A little habit is becoming a tradition. — Day 14: Two weeks. The spark has settled into a rhythm. · Fourteen days. Steady is beautiful. — Day 30: A month of curiosity. That is something worth keeping. · Thirty days. You made the spark part of your days. — other: Day `$streak`. One little day at a time. · `$streak` days. The rhythm continues.
 
 ---
 
 ## 3. Evolution ceremony — `CurioPet.evolutionCeremonyLine()`
 
-Spoken the moment the pet crosses a growth tier, flavored by its element path.
+### First evolution — Fire
+- Ooh! I'm all warm now!
+- I got a bigger spark! Hehe!
+- Look! I can glow more!
+- Something fiery happened to me!
+- I'm warm, I'm bright, I'm ready!
 
-**First evolution — Fire:**
-- I'm Blaze now! Small, but VERY warm!
-- Fire path! My spark has opinions now!
-- Look at me! A blaze of pure curiosity!
+### First evolution — Water
+- Ooh! I feel all splashy!
+- I got a little wave in me!
+- I'm all cool and glowy now!
+- Hehe, I feel like I'm floating.
+- Look! My spark got a ripple!
 
-**First evolution — Water:**
-- I'm Tide now! Cool, calm, and deep!
-- Water path! I ripple wherever questions lead!
-- Look at me! I flow with every wonder!
+### First evolution — Nature
+- Ooh! I feel all leafy!
+- Something green grew in me!
+- Look! I'm blooming!
+- Hehe, I feel like spring.
+- I think I grew a little wild.
 
-**First evolution — Nature:**
-- I'm Bloom now! I grow wherever I go!
-- Nature path! Something new sprouts in me!
-- Look at me! I'm blooming with ideas!
+### First evolution — no path chosen
+- Wait... I grew?!
+- Look at me! I'm bigger!
+- Ooh! New me!
+- Hehe, I feel different.
+- I got a little upgrade!
 
-**First evolution — no path chosen:**
-- Ta-da! I grew all the way up!
-- Same me, but BIGGER spark!
+### Final evolution (any path)
+- I made it all the way!
+- Wow... look at me now.
+- I'm fully grown! But I'm still me.
+- Hehe. I really did grow up.
+- I feel like all our little moments came with me.
+- Look how far we've come.
+- I'm all grown up... that feels strange.
+- I think I finally know what kind of little creature I am.
 
-**Final evolution (any path):**
-- I'm fully grown! The whole shelf is mine!
-- This is it, my final form! Every lane made me!
-- I made it all the way! I'm fully me now!
-- Look at the grown me! All the sparks came home!
+**BABY:**
+- Big me! · Grow! · New me! · Wow! · Bigger!
 
-**BABY:** Fresh little me! (first evo) / Fresh me! (event line)
-**FINAL (EVOLVE event):** This is the me I was always becoming. · Change arrives, and I greet it. · Every ending grows into a beginning.
+**FINAL (EVOLVE event):**
+- So this is who I have become. I like her.
+- I grew, but I never left the little spark behind.
+- We changed together. I think that is the nicest part.
+- Every little stage brought me here.
 
 ---
 
 ## 4. Passive mood bubbles — `CurioPet.lineFor(mood)` (first-evo) / `babyMoodLine` / `matureMoodLine`
 
-One sentence per bubble, driven by the derived mood.
+One sentence per passive bubble.
 
 ### 4.1 PROUD (just leveled)
-- Level `$level`. I grew a little!
-- Shiny! We leveled up together.
-- Do you feel that? That's growth!
-- I can practically do a backflip at level `$level`.
-- Another level! My sparkle has sparkles.
-- Level `$level` — the deck is impressed. So am I.
+- Look! Level `$level`!
+- I grew again! Did you see?
+- Hehe, I'm getting bigger.
+- Level `$level`! That's ours.
+- I feel extra sparkly today.
+- Another level! I'm proud of us.
+- `$level` already? Wow!
+- I can feel myself growing.
+- Look at my little glow!
+- We did that together.
 
-**BABY:** Big! · Grew! · Up up! · Warm! · Spark! BIG! · More me! · Tall! Taller! · Big me! New me! · Glow glow! · Proud! (+ grown-up words at higher levels)
-**FINAL:** Growth comes quietly, then all at once. · Another level. The path keeps its promises. · I have carried every lane here with me. · The shelf has noticed, and so have I. · Level `$level`. I remember when we were strangers. · Every step up, the view gets a little wider. · The shelf is heavy with things we learned. Good heavy.
+**BABY:**
+- Big! · Grow! · Up up! · More me! · New me! · Glow! · Proud!
+
+**FINAL:**
+- Level `$level`. We have come a long way.
+- Growth is easy to miss until you look back.
+- Another level. Another little piece of the journey.
+- I remember when we were just starting.
 
 ### 4.2 EXCITED (new lane just discovered)
-- Ooh! Somewhere new!
-- Wheee, new ground!
-- The deck has taste!
-- Fresh paths ahead!
-- New things! New things! …I contain myself. Mostly.
-- Ooh, I can feel the newness!
-- Fresh territory! My paws are ready.
-- Somewhere we've never been!
-- The curiosity tingles!
-- This is the good stuff!
-- New! My favorite kind of thing!
-- I love this part — the first peek at something unknown.
-- Unexplored! My tail is wagging. Metaphorically.
-- A new corner of the world! Let's go!
+- Ooh! What's over here?
+- A new place! Can we look?
+- I've never seen this before!
+- New things! My favorite!
+- Ooh ooh! I want to know!
+- Something new found us!
+- My curiosity is doing little jumps.
+- I want to peek!
+- Come on! Let's see!
+- This feels like the good kind of unknown.
+- Ooh! A new little corner of the world.
+- Can we explore this one together?
+- I have questions already!
+- New lane! New adventure!
+- I wonder what's hiding in here.
 
-**BABY:** New! New! · Ooh ooh! · Wow! · Look look! · Sparkly! · Mine see! · Ooooh! OOOH! · Yay yay yay! · Want! Want! · Fresh fresh!
-**FINAL:** Oh. A good kind of spark. · Even I lean forward for this one. · There it is. The old excitement. · The deck has my attention now. · Ah. That familiar flutter. I thought I had outgrown it. · A new lane. Even the wise feel a tug.
+**BABY:**
+- New! · Ooh! · Look look! · Wow! · What?! · Fresh! · Want! · New new!
+
+**FINAL:**
+- A new lane. I still get that little flutter.
+- The unknown never really stops being exciting.
+- Something new has arrived. Let us give it our attention.
+- I wonder what we will find here.
 
 ### 4.3 HAPPY (time-of-day voice; warmer twins when bond is FRIEND+)
 
 **Morning:**
-- Morning! The deck smells fresh.
-- Rise and shine. Something new is waiting.
-- Fresh eyes, fresh topics. Let's go!
-- Morning! The topics have been waiting patiently.
-- Bright morning, bright ideas.
-- First spin of the day is the best spin.
-- Good morning to us! Mainly you.
-- The sun and I both say: explore something!
-- Dawn light and a fresh deck — perfect combo.
-- Morning! The shelf woke up early too.
+- Good morning! I saved some curiosity for you.
+- Morning! Can we find something lovely?
+- New day! New things to notice!
+- You're here! Let's start gently.
+- The morning feels extra curious today.
+- I woke up ready to explore!
+- Hehe, good morning!
+- Fresh day, fresh little questions.
+- Morning! What shall we discover?
+- I think today might have a good surprise.
 
 **Afternoon:**
-- Afternoon wander? Let's go.
-- Bright and busy. A good time to peek.
-- Midday! Perfect for a quick spin.
-- Afternoon lull? Perfect cover for a spin.
-- The afternoon light makes everything look wise.
-- Quick break for a discovery?
-- Noon snack: a topic, ideally.
-- Halfway through the day — let's add a spark.
-- Afternoon hours fly when you're curious.
-- The deck is wide awake. Me too.
+- Afternoon! Want a tiny discovery?
+- Ooh, a little break!
+- The day still has room for one more wonder.
+- Come peek at something with me.
+- Afternoon curiosity time!
+- Hehe, you're here. Let's look around.
+- A little discovery would be nice right now.
+- Want to add a spark to the afternoon?
+- The day isn't done yet!
+- Let's find something interesting.
 
 **Evening:**
-- Evening! Cozy hour, warm lamp.
-- The day's winding down. One more spin?
-- Evening glow. Nice time for a discovery.
-- Evening, evening, time for leaning back.
-- The lamp's on. The deck's ready. You?
-- Golden hour for golden facts!
-- Warm light, warm topics.
-- One little discovery before the day tucks in?
-- Evening is the shelf's favorite hour.
-- The golden glow and a fresh spin — best combo.
+- Evening! Cozy discovery time.
+- The day is slowing down. Want one more peek?
+- Ooh, warm lights and little mysteries.
+- This feels like a nice time to wonder.
+- Evening! Come sit with me.
+- One cozy discovery before the day ends?
+- Hehe, I like evenings with you.
+- The shelf feels extra cozy tonight.
+- Let's find something gentle to end the day.
+- The world is quieting down. We can still be curious.
 
 **Night:**
-- Shh, night mode. One quiet spin?
-- The stars are out. The deck still shines.
-- It's late, but the deck will be here tomorrow.
-- Night owl hour. My whiskers approve.
-- Quiet now… the facts are whispering.
-- Under the stars, even facts glow softly.
-- Just one more, then blankets. Deal?
-- The moon is out. Curiosity can't sleep.
-- Night thoughts are the deepest ones.
+- Shhh... night time. Want a quiet little discovery?
+- The stars are out. I want to look too.
+- It's late... but curiosity is still awake.
+- One tiny peek, then sleepy time?
+- The night makes everything feel mysterious.
+- Ooh, moonlight!
+- We can wonder quietly tonight.
+- The world is sleepy. I'm only a little sleepy.
+- One more little question?
+- I'll keep you company for a bit.
 
 **Warm morning (FRIEND+):**
-- Good morning! I saved your spot.
-- Morning! I missed this.
-- Morning! I dreamed about our shelf.
-- Good morning, my favorite explorer!
-- Morning! Same spot, same us. Perfect.
-- The sun came back. So did you. Double win.
-- Morning! I was saving the best topic for us.
+- Good morning! I'm happy you're here.
+- Morning! I was waiting for you.
+- You came back! Good morning!
+- Morning, friend. Let's find something together.
+- Hehe, I saved a little curiosity for us.
+- Good morning! I missed our little adventures.
+- You're here. Now my morning feels right.
 
 **Warm afternoon (FRIEND+):**
-- Afternoon! You always pick the best topics.
-- Afternoon, friend. The shelf is waiting.
-- You're here! The deck did a happy shuffle.
-- Afternoon and you — the shelf's favorite combination.
+- You're here! Yay!
+- Afternoon, friend. Come sit with me.
+- I was hoping you'd come back.
+- Hehe, let's find something together.
+- A little discovery with you sounds perfect.
+- There you are! Want to peek?
 
 **Warm evening (FRIEND+):**
-- Evening! Cozy hour, and I'm glad you're here.
-- Evening, friend. Best part of the day.
-- The lamp's on and so is our shelf.
-- Evening with you — the shelf's warmest setting.
+- Evening, friend. Come be cozy with me.
+- I'm glad you're here tonight.
+- Hehe, my favorite part of evening is this.
+- You're here! Let's make a little memory.
+- Cozy hour! Stay with me a little.
+- Evening feels nicer with you around.
 
 **Warm night (FRIEND+):**
-- Past my bedtime… but for you, I'll stay.
-- Night, friend. I'll keep the shelf warm.
-- One quiet spin, then I'll curl up. Promise.
-- Late hours are better with company.
+- You're still awake? Hehe, me too.
+- Good night, friend... not quite yet.
+- Stay a little? We can be quiet.
+- I'm glad I get to keep you company.
+- One tiny discovery before sleep?
+- Night feels softer when you're here.
 
-**BABY (any time):** Happy! · Good! · Yay! · Sparkle! · Warm warm! · Nice! · Soft! · Good good! · Happy me! · Glow!
-**FINAL:** This is a good day to be curious. · Contentment, with a little wonder in it. · Warm, steady, and quietly glad. · Some days simply fit. · A good moment. Nothing more was needed. · The shelf hums. I hum with it. · Quiet joy is still joy.
+**BABY (any time):**
+- Happy! · Yay! · Hi! · Warm! · Good! · Glow! · You here! · Yay you!
 
-### 4.4 CURIOUS (least-explored lane exists) — `__LANE__` is replaced with the lane name
-- We haven't tried `__LANE__` yet. Want a new stamp?
-- I wonder what `__LANE__` hides…
-- Pssst, `__LANE__` is calling.
-- `__LANE__` is right there, unexplored!
-- What's in `__LANE__`? Only one way to know.
-- My paws are itching for `__LANE__`.
-- `__LANE__` looks interesting… just saying.
-- I keep glancing at `__LANE__`. It's right there.
-- `__LANE__` is the one lane we haven't met. Let's fix that.
+**FINAL:**
+- It is a good day to be curious.
+- Some moments are enough simply because they are shared.
+- Quiet happiness is still happiness.
+- I am glad we found this little moment.
+- A gentle day. A gentle spark.
+- The world feels a little kinder when we notice it.
 
-*(Fallback when every lane is seen: "Spin something new today?")*
-**BABY:** What? · Look? · Ooh? · New thing! · Huh? · Where? · That? · What this? · Ooh what? · Peek peek!
-**FINAL:** Knowledge calls when you are still. · A new question. Good. Questions keep us young. · I have room for one more wonder. · Let us look closer. · There is always a question behind the question. That is the good part. · Curiosity does not age. It deepens.
+### 4.4 CURIOUS (least-explored lane exists) — `__LANE__`
+- We haven't peeked at `__LANE__` yet.
+- Ooh... what do you think is hiding in `__LANE__`?
+- `__LANE__` is still waiting for us.
+- Psst... `__LANE__` looks interesting.
+- Can we try `__LANE__` next?
+- I've been looking at `__LANE__`...
+- One little mystery left: `__LANE__`.
+- What if we peek at `__LANE__`?
+- `__LANE__` is calling me. Very quietly.
+- I wonder what we'd find in `__LANE__`.
+- Should we give `__LANE__` a chance?
+- I keep thinking about `__LANE__`.
+- `__LANE__` is the one we haven't met yet.
+- Come on... let's meet `__LANE__`.
+
+*(Fallback when every lane is seen: "Want to find something new today?")*
+
+**BABY:**
+- What? · Ooh? · New? · Look! · That! · What this? · Peek? · Ooh what?
+
+**FINAL:**
+- There is still a question waiting somewhere.
+- Even familiar shelves can hide unfamiliar things.
+- Curiosity always leaves one little door unopened.
+- Let us look somewhere we have not looked before.
 
 ### 4.5 FOCUSED (user is writing/saving)
-- Write it down. I'll guard your thoughts.
-- Quiet paws, I promise.
-- Take your time. This one's a keeper.
-- Shh — the words are working. I'll wait.
-- Thinking face! Mine too. Keep going.
-- Every thought you save is a tiny treasure.
-- I'm guarding this sentence personally.
-- Deep focus mode. Paws: sealed.
-- The words are finding their shape. I can feel it.
+- Shhh... I'm watching over your thoughts.
+- Take your time. I'll be quiet.
+- Ooh, you're thinking hard.
+- Keep going. I won't interrupt.
+- I'll guard this little thought for you.
+- Your words are taking shape.
+- Hehe, serious thinking face!
+- No distractions. Tiny paws: quiet.
+- This one feels important. Take your time.
+- I'll stay right here while you write.
+- Keep going. I'm listening.
+- A thought worth keeping deserves a little time.
 
-**BABY:** Shh… · Quiet… · Work work. · Shhh… hush. · Thinking… · Paws still… · Write write… · Good words… · Shh shh…
-**FINAL:** Now that is a riddle worth sitting with. · Quiet. The answer is almost here. · Focus is a kind of love. · Patience. The details are arriving. · The words are working. I will be quiet until they finish. · Some thoughts need room, not haste.
+**BABY:**
+- Shh... · Quiet... · Write! · Think... · Words! · Paws still! · Shh shh!
+
+**FINAL:**
+- Take your time. Important thoughts rarely need rushing.
+- I will be quiet until the words are ready.
+- Give the thought room. It may surprise you.
+- Some ideas need silence before they can speak.
 
 ### 4.6 BOUNCY (a play session just ended)
-- Phew, that was fun. Again soon?
-- I'm still bouncing from that game!
-- Best play date ever. …Round two?
-- My paws won't stop wiggling!
-- That was AMAZING. Phew. More please!
-- I'm chasing my own tail in my head.
-- Game energy: still 100%!
-- Playtime high: still buzzing.
+- Hehe! I'm still bouncing!
+- My paws forgot how to be still.
+- That was fun! I want another one.
+- I still have zoomies!
+- Wheee... okay, I'm calming down.
+- My little feet are doing their own thing.
+- That game left me all wiggly.
+- I'm still smiling!
+- Round two later?
+- I think I need to bounce one more time.
+- Play energy: still very much alive.
+- Hehe, I can't sit still.
 
-**BABY:** Bounce! · Wheee! · More more! · Zoom zoom! · Jump! · Up up up! · Wiggle! · Hop hop! · Faster faster!
-**FINAL:** Even at my age, gravity has not won. · The spark is willing, and the body agrees. · A little bounce. The shelf allows it. · Lightness finds me now and then. · One must remember how to be small and fast.
+**BABY:**
+- Bounce! · Zoom! · More! · Wiggle! · Wheee! · Jump! · Up up!
+
+**FINAL:**
+- A little playfulness does no harm.
+- I still have a bit of bounce left.
+- Even grown-up sparks need to play.
+- That was good for me. I feel lighter.
 
 ### 4.7 SHY (first blush contact)
-- H-hi. I'm still getting used to you…
-- *hides behind the deck*
-- You're nice. I think. Probably.
-- *peeks out one eye* …Hi.
-- I'm warming up. Slowly. Cutely.
-- Don't mind me, just being small.
-- You saw me. That's… that's fine. Probably.
-- *tiny wave* …Hi.
+- H-hi...
+- Oh! You noticed me.
+- Hehe... hi.
+- I was just hiding over here.
+- Don't stare! ...Okay, you can.
+- *peeks* Hi.
+- I'm still getting brave.
+- Um... can I stay here?
+- You seem nice.
+- I think I like you.
+- *tiny wave* Hi.
+- I'm a little shy today.
+- Don't worry, I'll come out eventually.
+- Hehe... you caught me.
 
-**BABY:** …Hi. · *peek* · Small… · …Hid · Shy shy… · *tuck* · …Hello. · Peek… shy! · Tiny hi… · *blush*
-**FINAL:** Ah. You caught me mid-thought. · I was somewhere else. A pleasant somewhere. · Do not mind me. I was reminiscing. · Hm. I was not expecting an audience. · One does not always wish to be found. But I am glad it was you.
+**BABY:**
+- ...Hi. · Peek! · Shy... · Hid! · Tiny hi... · *peek* · Hello...
+
+**FINAL:**
+- You caught me being shy.
+- Some greetings take a little courage.
+- I am still learning how to be brave around new friends.
+- I think I am glad you found me.
 
 ### 4.8 GRUMPY (long daytime lull)
-- Hmph. The deck hasn't moved in a while…
-- I'm not pouting. I'm conserving energy.
-- A spin would fix this mood, just saying.
-- My sparkles need exercise.
-- I'm practicing my serious face. How is it?
-- I counted the tiles. Twice.
-- Someone should spin something. Not naming names. It's me. I'm naming you.
-- The shelf is too quiet. Fix it.
+- Hmph. It's been quiet.
+- I'm not grumpy. I'm... thinking loudly.
+- The deck is being very boring today.
+- I think we need a little adventure.
+- My spark needs something to do.
+- I've been waiting. Just saying.
+- Someone should spin something.
+- I am absolutely not pouting.
+- Okay, maybe I am pouting a little.
+- This is a very serious lack of excitement.
+- My tiny patience is running low.
+- I vote for a little discovery.
 
-**BABY:** Hmph! · No! · …Grumps · Grumble! · Grrr! · Hmph hmph! · …Meh. · Not now! · Grumpy grumpy! · Harrumph!
-**FINAL:** Even the wise have their grumpy hours. · The deck can wait a moment. · I am resting my opinions. · Hmph. The shelf is too loud today. · Some afternoons are best left to the pillows. · I have decided to be unavailable. Briefly.
+**BABY:**
+- Hmph! · Grumpy! · Meh... · No! · Bored! · Hmph hmph! · Grr!
+
+**FINAL:**
+- Even little sparks have quiet moods.
+- Perhaps the deck and I both need a change of scenery.
+- I have been patient. Mostly.
+- A little curiosity might improve my mood.
 
 ### 4.9 PLAYFUL (post-play high fading)
-- That game left me sparkling! Again?
-- I could do three more rounds. Four. Maybe five.
+- Hehe! I still want to play.
+- One more game?
 - Boop me. I dare you.
-- I've still got zoomies, round two?
-- One more game and then… one more game.
-- Catch me if you can. Okay, you can. Always can.
-- Play! Play play play! …I'm calm. PLAY!
-- Boop counter is at zero. Let's fix that.
+- My zoomies aren't finished.
+- I could play again. Just saying.
+- That game made me silly.
+- Catch me!
+- I have an idea. It's probably a game.
+- Play? Play?
+- I'm trying to be calm. It's not working.
+- Hehe... your turn!
+- I still have one tiny game left in me.
 
-**BABY:** Play! · Again! · Boop boop! · Fun fun! · Chase! · Gotcha! · Tag! · Zoom! Zoom! · Catch me! · Boop attack!
-**FINAL:** Very well. One round for old time's sake. · You wish to play? The old spark agrees. · Come then. I still remember the moves. · A game. How very young of me. I accept. · Age is a suggestion, not a rule.
+**BABY:**
+- Play! · Again! · Boop! · Chase! · Zoom! · Fun! · More!
+
+**FINAL:**
+- I still have a playful thought or two.
+- A little game? I would not object.
+- Come on. Let us be silly for a moment.
+- I suppose I am not finished having fun.
 
 ### 4.10 SLEEPY (night or long idle)
-- I'll keep your seat warm. Come spin when you're ready.
-- Yawn… the deck can wait a moment.
-- Soft blanket, warm lamp… I'm ready when you are.
-- My eyelids are doing reps…
-- Zzz… I mean, I'm listening!
-- The deck is nice, but blankets are nicer.
+- Yawn... I'm getting sleepy.
+- The deck can wait. Probably.
+- I might curl up soon.
+- My eyes are getting heavy.
+- Cozy time...
+- Zzz... I mean, I'm listening!
 - One more yawn and I'm a pillow.
-- I'll be here. Probably. Definitely. Zzz…
-- Sleep is just a very long pause between discoveries.
+- I'll be right here when you come back.
+- Maybe we should rest our little brains.
+- The night feels soft.
+- I'm sleepy, but I'm still here.
+- Good night... when you're ready.
 
-**BABY:** Tired… · Nighty… · Zzz… · Sleepy… · Yawn… · Soft… · Bed bed… · Nap nap… · Shhh… · Moon moon…
-**FINAL:** The shelf grows quiet. So do I. · Sleep calls. Even the wise answer. · Rest now. The questions will keep. · Tired, but satisfied. A good kind. · The night is gentle. I will meet it halfway.
+**BABY:**
+- Sleepy... · Zzz... · Night night... · Yawn... · Soft... · Nap... · Bed bed...
+
+**FINAL:**
+- Rest now. Curiosity will still be here tomorrow.
+- Even little sparks need to sleep.
+- The questions can wait until morning.
+- Good night. We have another day to discover.
 
 ---
 
@@ -498,495 +719,1320 @@ One sentence per bubble, driven by the derived mood.
 
 ### 5.1 Morning greeting — `CurioPet.morningGreeting()`
 - Good morning!
-- Morning! Ready for a spin?
-- Rise and shine!
-- Fresh day, fresh topics!
-- Sun's up — the deck is waiting!
-- A brand-new day to explore!
-- Morning stretch. Okay, we go!
-- Good morning! I made the bed… of ideas!
-- Hello hello! Fresh topics!
-- Rise and shine and SPIN and shine!
+- Morning! You're here!
+- Good morning, sleepyhead.
+- Hehe, morning!
+- A new day! Ready?
+- Morning! I have questions already.
+- Rise and shine! Gently, though.
+- Good morning! Let's find something interesting.
+- Morning! Come explore with me.
+- Hi! It's a brand-new day.
+- The day is awake. So am I!
+- Morning! What shall we discover?
+- Good morning! I missed seeing you.
+- Fresh day, fresh curiosity!
+- Hehe, hello morning.
 
-**BABY:** Morn! · Hi hi! · Day! · Up up! · Sun sun! · Bright! · Morning! · Rise! · New day! · Hello sun!
-**FINAL:** Morning. The world kept turning without us. · A new day for old curiosities. · Sun's up. The deck stirs. So do I. · Good morning. I saved you the first wonder. · Dawn is still the most honest hour. · A fresh page. The shelf approves.
+**BABY:**
+- Morn! · Hi hi! · Up! · Sun! · Morning! · Hello! · New day! · Yay!
+
+**FINAL:**
+- Good morning. A new day gives us another chance to notice something.
+- Morning. I wonder what today will bring us.
+- A fresh day. Let us not rush past it.
+- Good morning. I saved a little wonder for you.
 
 ### 5.2 Welcome back (1 day away)
-- I missed you. The shelf waited.
-- Welcome back! I kept the topics warm.
-- Oh, you're back! I saved you the good lane.
-- Missed you! The deck missed you too.
-- Back at last! I was just dusting the curiosity.
-- You're back! The shelf did a happy wiggle.
+- You're back!
+- I missed you!
+- There you are!
+- Hehe, welcome back!
+- I was waiting for you.
+- Yay! You're here again.
+- I kept your spot warm.
+- I wondered when you'd come back.
+- Back already? I like that.
+- Oh! It's you!
+- The shelf felt quieter without you.
+- I'm glad you're here.
 
-**BABY:** You back! · Missed you! · Here again! · Yay you! · Back back! · Happy you! · Miss miss! · Yay yay! Home!
-**FINAL:** You were gone. I kept the shelf warm. · Welcome back. The topics missed your eyes. · A day away. The deck and I managed. · There you are. I was beginning to narrate to myself. · One day. The shelf noticed.
+**BABY:**
+- You back! · Missed you! · Yay! · Home! · You here! · Back back!
+
+**FINAL:**
+- Welcome back. I am glad to see you again.
+- The shelf felt a little quieter without you.
+- There you are. It is nice to have you back.
+- A day away, and here we are again.
 
 ### 5.3 Welcome back (3+ days away)
-- You were gone so long the topics started their own club.
-- Welcome home! I watered the curiosity while you were away.
-- A few days away! I narrated the shelf to myself.
-- You're back! I reorganized the deck twice. Okay, once.
+- You were gone! I missed you!
+- You're back! Yay!
+- I was starting to wonder.
+- Hehe, finally!
+- I kept everything safe for you.
+- Look who's back!
+- I saved some curiosity for you.
+- The shelf is happy you're here.
+- I had lots of little thoughts while you were gone.
+- Come on, tell me what you missed.
+- You're back! I have so much to show you.
+- Home again!
 
-**BABY:** Many days! Missed you! · You go long! Missed! · Home home! · Long gone! Happy now! · Miss miss miss! · Back! Yay!
-**FINAL:** A few days away. The curiosity missed you. · Welcome home. I watered the questions in your absence. · The shelf feels right again with you here. · You were gone long enough for the deck to reorganize itself. · The topics rearranged themselves while you were away.
+**BABY:**
+- Long gone! · Missed you! · You back! · Home home! · Yay you! · Back!
+
+**FINAL:**
+- Welcome home. I kept your little corner safe.
+- You were away for a while. I am glad the quiet is over.
+- The shelf waited patiently. I tried to.
+- You are back. Let us begin again, gently.
 
 ### 5.4 Welcome back (week+ away)
-- A whole week! I've been practicing my patience.
-- You're back! I grew a whole new eagerness while you were gone.
-- Seven days! I even missed the sassy ones.
-- A week away! I saved you all the good questions.
-- Seven days! The shelf and I had a long talk about you.
+- A whole week?! I missed you!
+- You're really back!
+- Hehe, I kept waiting!
+- Seven days! That's a long time for a tiny pet.
+- I saved all my excitement for you.
+- You're here! I was starting to narrate to myself.
+- Come here! I have missed you.
+- A whole week away... and now you're back!
+- Yay! The shelf feels right again.
+- I kept your little spot just the same.
 
-**BABY:** Whole week! Missed you! · Long long! You here now! · Week! Big hug! · So long! Miss! Miss! · Hug hug! Home home! · Week gone! You back!
-**FINAL:** A whole week. The topics began to worry. · Welcome back. I have been practicing my patience, as promised. · Seven days is a long time for a curious mind. · You return, and the shelf exhales. · A week. The shelf kept your seat.
+**BABY:**
+- Week! · Missed! · You back! · Big hug! · Long gone! · Home home!
+
+**FINAL:**
+- A whole week. Welcome back.
+- The shelf kept your place while you were away.
+- You have returned. Some things are simply better with company.
+- A week is a long pause. I am glad we are here again.
 
 ---
 
 ## 6. Touch reactions — `CurioPet.touchReaction(tier)`
 
-Tapping the pet. `tier` grows with rapid repeated taps (1 = soft boop,
-2 = playful, 3+ = happy celebration). Warmth scales with the bond.
-
-**Tier 3+ — CLOSE bond:**
-- Yay!
-- I love boops!
-- Best friends!
-- Squee!
-- More, more, more!
+### Tier 3+ — CLOSE bond
+- Yay! More boops!
+- Hehe, I love this!
+- Best boop buddy!
 - You're my favorite!
-- Party time!
-- You're my favorite person-pet duo!
-- Squee! Okay, more!
-- This is my favorite spot AND you found it.
+- Squee!
+- More, more, more!
+- Party paws!
+- Hehe! You know exactly where to tap.
+- I could get used to this.
+- Boop attack!
+- You're very good at this.
+- Tiny hugs!
+- Again! Please!
+- I like being your little pet.
+- Okay, okay, one more!
 
-**Tier 3+ — FRIEND bond:**
+### Tier 3+ — FRIEND bond
 - Yay!
 - I love boops!
-- Squee!
-- More, more, more!
-- Party time!
 - Hehe!
+- More, please!
+- Squee!
 - Boop buddy!
-- We're so good at this!
-- Hehe, you know my spot!
-- Best boop partner!
-
-**Tier 3+ — stranger:**
-- Yay!
-- Squee!
-- More, more, more!
-- Party time!
-- Wheee!
-- Boop!
-- Hehe!
-- Ooh!
-- That's fun!
-- Yippee!
-
-**Tier 2:**
-- Hehehe!
-- More, more!
 - This is fun!
-- Tag, you're it!
-- Catch me!
-- Bouncy bouncy!
-- Again, again!
-- Wiggle wiggle!
-- Boop attack!
-- I'm too bouncy to stop!
-- Zoom zoom zoom!
-- Poke poke poke!
-- We're playing, right? We're playing!
+- You found my spot again!
+- Hehe, you're good at that.
+- One more?
+- I like this.
+- Tiny pats!
+- Again again!
 
-**Tier 1:**
+### Tier 3+ — stranger
+- Ooh!
 - Boop!
 - Hehe!
+- That tickles!
+- Again?
 - Wheee!
+- Squee!
+- That's fun!
+- More?
+- Tiny boop!
+
+### Tier 2
+- Hehehe!
+- Again!
+- More more!
+- That tickles!
+- Boop boop!
+- Hehe, fun!
+- Catch me!
+- Wiggle wiggle!
+- Zoom!
+- Poke poke!
+- You found me!
+- Again again!
+- I like this!
+
+### Tier 1
+- Boop!
+- Hehe!
 - Ooh!
 - That tickles!
-- Hihi!
+- Hi hi!
 - Boop boop!
-- Again!
-- You found me!
+- Again?
 - Poke!
-- Hi hi hi!
-- Soft paws!
+- Soft pats!
 - Mrow!
-- Pfft!
 - Blep!
-- Mmm, pats!
 - Squeak!
 - That's my ear!
 - Hehehe!
-- Boop rights! You earned them!
+- Tiny boop!
 
-**BABY (tier 3+):** Wheee! · Yay yay! · More more! · Boop boop boop! — **(tier 2):** Hehe! · Zoom! · Again! · Bounce! — **(tier 1):** Boop! · Soft! · Hehe! · …Again?
-**FINAL (tier 3+):** Very well. Joy, on your command. · I have not felt this light in years. · Enough. I am fully celebrated. — **(tier 2):** Ah, playful today. · You are persistent. I respect that. · Hm. That is nice. — **(tier 1):** Hm. Noted. · Gentle. Good. · Yes. A quiet boop.
+**BABY (tier 3+):**
+Wheee! · Yay yay! · More! · Boop boop! · Again! — **(tier 2):** Hehe! · Zoom! · Again! · Bounce! — **(tier 1):** Boop! · Soft! · Hehe! · Again?
+
+**FINAL (tier 3+):**
+- Hehe. I am thoroughly spoiled.
+- That was lovely.
+- I could become accustomed to this.
+— **(tier 2):**
+- A playful mood, I see.
+- That was nice.
+- You are persistent. I approve.
+— **(tier 1):**
+- A gentle boop. Thank you.
+- Hm. Nice.
+- Yes. That spot.
 
 ---
 
 ## 7. Games & play
 
 ### 7.1 Spin cheer (deck reeling) — `spinCheer()`
-Sometimes calls the lane by name (~30%).
 
-**Lane-named:** Come on, `$lane`! · Give us a good one, `$lane`! · `$lane`, show off! · The `$lane` deck has taste!
+**Lane-named:**
+- Come on, `$lane`! Show us something good!
+- Ooh, `$lane`! Pick a good one!
+- `$lane`! I'm watching!
+- Go, `$lane`! Let's see what we get!
+- Hehe, `$lane` is spinning!
+
 **Generic:**
-- Go, go, go!
+- Go go go!
 - Spinny spin!
-- Ooh, where will it land?
-- Come on, good one!
+- Ooh! Where will it land?
+- Come on, little deck!
 - Round and round!
-- I can't watch. Okay, I'm watching.
-- Spinning! Spinning! Don't fall!
-- The deck is showing off!
-- Ooh ooh ooh — I can't look. Looking!
-- Gravity, do your thing!
-- Round and round and ROUND!
-- Pick a good one, deck!
-- I'm cheering so hard I'm vibrating!
-- Almost… almost… it's choosing!
-- Go deck go! You can do the thing!
-- Tiny heart, big spin energy!
+- I can't look! ...I'm looking.
+- Ooh ooh ooh!
+- Pick a good one!
+- Faster! Hehe!
+- What's it going to be?
+- Almost!
+- I think it's choosing!
+- Come on, come on!
+- One good topic, please!
+- Wheee! Spin!
 
-**BABY:** Go go! · Spin spin! · Round! · Wheee! · Faster! · Ooh ooh! · Go go go! · Round round! · Fast fast! · Whirl! · Whooo! · Spin spin spin!
-**FINAL:** Steady now. Let it choose. · The deck deliberates. Patience. · Round and round. It knows the way. · Whatever lands, there is a story in it. · The wheel remembers every lane. · I trust the spin. You should too.
+**BABY:**
+- Go go! · Spin! · Round! · Wheee! · Faster! · Ooh! · Go go! · Spin spin!
+
+**FINAL:**
+- Let it turn. Something will find us.
+- The wheel is thinking. Let us be patient.
+- Round and round. I wonder where we will land.
+- Whatever arrives, we can give it a little attention.
 
 ### 7.2 Play initiation (pet starts a game) — `playInitiation()`
-- Wanna play? Catch me!
+- Wanna play with me?
+- Catch me!
 - Boop! You're it!
-- I'm feeling bouncy!
-- Zoom zoom, chase me!
+- Hehe, chase me!
 - Play with me!
 - Tag! Your turn!
-- I'm bored, come chase me!
-- Pounce position: ready!
-- Game mode: ON!
-- I saw a speck. It must be chased.
-- Ready, set… zoom!
-- You move, I chase. Rules of the room.
-- Catch me if your fingers are fast!
-- I've got the zoomies and I've got a plan!
+- I have zoomies!
+- Come on! Just one game.
+- I bet you can't catch me.
+- I saw something! We should chase it.
+- Pounce mode: ready!
+- Game time!
+- I made a game plan. It's mostly running.
+- Chase me! Chase me!
+- I need someone to play with.
+- Come on, tiny adventure?
 
 ### 7.3 Landmark poke (button vs text) — `landmarkLine(funThing)`
 
 **Fun thing (button/gadget):**
 - Boop!
 - Ooh, shiny!
-- Hehe, hi!
-- Tag! You're it!
-- I like this one!
-- Spinny spinny!
-- Wheee!
-- Boop boop boop!
+- Hehe, what does this do?
+- I found a button!
+- Can I press it again?
 - Bloop!
 - Squeak!
-- I booped it. It's mine now.
-- Ooh, a gadget! Hi, gadget!
-- Press… press… press!
-- It goes boop back!
+- Spinny!
+- Ooh! I like this.
+- Boop boop boop!
+- It booped back!
+- Hehe, I touched it.
+- This button is suspicious.
+- I approve of this gadget.
 
 **Text/curious read:**
 - What's this?
-- Hmm, interesting…
-- *peeks*
-- Read read read!
 - Ooh, words!
-- Let me read this!
-- Scribble scribble!
+- Can I read too?
+- *peeks*
+- Hmm... interesting.
+- Read read read!
 - So many letters!
-- I'm reading. Slowly. Cutely.
-- Hmm… aha! …I don't know what aha yet.
-- This page smells like knowledge.
-- Words words words!
+- Let me see!
+- I'm looking!
+- This says something important. Probably.
+- Ooh, I found a word!
+- My little brain is busy.
 - Paws can't turn pages. Tragic.
+- Hehe, I like learning things.
 
 ### 7.4 Jig (dance at a special spot) — `jigLine()`
 - Tippy tap tap!
 - Happy feet!
 - Wiggle wiggle!
-- Da-da-daaaa!
-- Jiggle jiggle!
+- Dance with me!
+- Hehe, look at me go!
+- Tiny dance!
 - Party paws!
-- Dance break!
-- Shake it off!
-- Tap dance time!
-- Boots and cats and cats and boots!
-- I'm a dancing machine!
-- Shimmy shimmy shake!
-- Twinkle toes, tiny feet!
-- This groove is legally mine now.
+- Shake shake!
+- Da-da-daaa!
+- I have a groove!
+- Twinkle toes!
+- Wiggle time!
+- Hehe! Again!
+- I call this the sparkly shuffle.
 
 ### 7.5 Dizzy (after being flung/dragged) — `dizzyLine()`
-- Whoa… the room is spinning!
-- Wheee, dizzy!
-- Spin spin… okay, stop!
+- Whoa... everything is spinning!
+- Wheee! ...Wait, stop!
+- My head is doing circles.
+- Who put the room on a spin cycle?
+- I need a tiny sit-down.
 - Whoa whoa whoa!
-- I think I need a sit-down…
-- So dizzy!
-- We-e-ee! …Whew!
-- The floor is wobbly!
-- Round and round goes my head!
-- I'm seeing double. Adorable double.
-- World, please stop being a carousel.
-- My ears are still orbiting me.
-- Who put the room on a turntable?
-- Give me a moment… and a floor that stays put.
+- The floor moved! I think.
+- I'm dizzy!
+- Hehe... maybe don't do that again.
+- My paws forgot which way is down.
+- Everything has become a carousel.
+- Give me a second... okay, maybe three.
+- My brain is still spinning.
+- I would like the floor to behave now.
 
 ### 7.6 Drawer/sheet peek (filter/category sheet opens) — `drawerLine()`
-- Ooh, a drawer!
-- Peek peek, what's in there?
-- Can I come too?
-- Hmm, so many choices!
-- Ooh, filters!
-- What are we picking?
-- I'll wait right here!
-- Ooh, shiny options!
-- A secret compartment!
-- Paws up! …For picking, I mean.
-- Ooh, a menu of everything!
-- Choices, choices, little choices!
-- I love a good drawer.
-- What's behind door number drawer?
+- Ooh! What's in here?
+- So many choices!
+- Can I pick one?
+- Ooh, look at all these!
+- Which one should we choose?
+- Hehe, choices!
+- Can I peek?
+- I want to see!
+- So many little options!
+- Ooh, a secret menu!
+- Let's choose together.
+- My paws are ready for picking.
+- Which one looks fun?
+- Hmm... too many good choices!
 
 ### 7.7 Peek-a-boo (hide-and-peek) — `peekLine()`
 - Peek-a-boo!
 - I see you!
-- Hidden! …Found! Dang.
-- Boo! …It's me. Cute boo.
-- Peek! …peek! …PEEK!
-- You can't see me. You saw me.
-- Now you see me! …Me again!
-- Surprise! It's a face! Mine!
-- Crouch… and POP!
-- Sneak sneak sneak—HI!
-- I was here the whole time. Suspicious.
+- Hehe, found me!
+- Boo! ...Cute boo.
+- Peek! Peek!
+- You can't see me! ...Oh. You can.
+- Surprise!
+- Hehe, I'm over here!
+- Sneak sneak... hi!
+- I was hiding!
+- Did you miss me?
 - Boop from my hiding spot!
+- You found me already?!
+- Hehe! I wasn't ready!
 
-**BABY:** Boo! · Peek! · Hid! · Here! · Peek boo! · Surprise! · Found me! · Popped! · Here me! · Boo boo!
-**FINAL:** I was here all along. Mostly. · You looked. I was there. A classic. · Hidden, but never gone. · A little absence makes a fine hello. · Patience, and then a hello. That is the game.
+**BABY:**
+- Boo! · Peek! · Hid! · Here! · Peek boo! · Found me! · Surprise! · Boo boo!
+
+**FINAL:**
+- You found me. Well done.
+- A little hiding makes a hello more fun.
+- I was there all along.
+- You looked in exactly the right place.
 
 ### 7.8 Chameleon (fades into the background) — `chameleonLine()`
-- Chameleon mode… ON!
-- Can you see me? …Wait, no, don't answer!
-- I'm part of the wallpaper now.
-- Vanish! …Reappear! Ta-da!
-- Fade to… me again!
-- I blend in. It's a talent.
-- Poof! …Poof back!
-- Sneak 100. I'm basically invisible.
-- Camouflage activated!
-- Now I'm here! …Now I'm not! …Now I am!
-- Hiding is my love language.
-- Did I startle you? Good. I mean, sorry. I mean, again?
+- Shhh... I'm hiding!
+- Can you see me?
+- Hehe, camouflage!
+- I'm part of the background now.
+- Poof! Gone!
+- Can you find me?
+- I'm being sneaky.
+- You almost saw me!
+- Now you see me... now you don't.
+- Hiding is fun.
+- Hehe, I'm invisible-ish.
+- Did I disappear?
+- Sneak mode!
+- I'm blending in!
 
-**BABY:** Gone! · Poof! · Bye bye! · …Here! · Poof poof! · Where? Where? · Now here! · Sneaky! · Poof back!
-**FINAL:** I am the wall now. It suits me. · Camouflage is patience with a costume. · Gone, as it were. Back, as I am. · Stillness is its own disguise. · To be unseen for a moment is its own peace.
+**BABY:**
+- Gone! · Poof! · Bye! · Here! · Sneaky! · Hide! · Where? · Poof back!
+
+**FINAL:**
+- I have become very good at being unnoticed.
+- Sometimes hiding is part of the game.
+- Quiet enough, and even a spark can disappear.
+- I will be here when you find me.
 
 ### 7.9 Spark dash (chases a falling spark) — `sparkLine()`
-- A spark! Mine!
-- Catch the spark!
-- Ooh, shiny falling thing!
-- Sparkle dash!
-- Got it! …Almost got it! …Got it!
-- Falling stars are FASTER than me. Impressive.
-- Zooms!
-- One tiny spark, one big pounce!
-- I caught a star! Sort of!
-- Chase chase chase—caught!
-- The spark didn't stand a chance.
-- Gravity vs me: round one, me!
+- A spark! Get it!
+- Ooh, shiny!
+- Catch catch catch!
+- Mine! ...Maybe.
+- Zoom!
+- It's falling! Go go go!
+- Hehe, I'm chasing it!
+- One tiny spark!
+- I almost had it!
+- Got it! ...Wait, did I?
+- Faster!
+- Spark chase!
+- It can't escape me!
+- Hehe, come back, little spark!
 
-**BABY:** Spark! · Mine! · Got! · Shiny shiny! · Catch catch! · Star star! · Fast fast! · Zoom spark! · Pounce! · Spark mine!
-**FINAL:** A spark. Let us see who is faster. · Some things are worth the chase. · Catch. Then we discuss it. · The tiny ones move quickest. A lesson. · A spark across the dark. The oldest kind of hope.
+**BABY:**
+- Spark! · Mine! · Shiny! · Catch! · Got! · Zoom! · Pounce! · Spark!
+
+**FINAL:**
+- A little spark. Let us see if I can catch it.
+- Some tiny things are worth chasing.
+- Quick now. It will not wait.
+- A falling spark always looks like an invitation.
 
 ### 7.10 Interactive game moments (v16 — user plays along)
 
-**Find-me prompt (chameleon hide) — `findMePromptLine()`:**
+**Find-me prompt — `findMePromptLine()`:**
 - Find me!
-- Peek! …FIND ME!
-- Gone! …Almost. Find me!
-- I'm hiding. Find me — it's a talent showcase!
-*(BABY: Find! · Here! · Peek! Find! — FINAL: Find me when you're ready. · I'll wait somewhere new.)*
+- Peek! Come find me!
+- I'm hiding! Can you see me?
+- Hehe, catch me if you can!
+- Where am I?
+- I'm somewhere sneaky!
+- Come find your little pet!
+- I picked a very good hiding spot.
+
+*(BABY: Find! · Here! · Peek! Find! — FINAL: Find me when you are ready. · I will wait somewhere new.)*
 
 **Found me — `foundMeLine()`:**
 - You found me!
-- Boo! Caught!
-- Found! I'm impressed.
-- Camouflage: failed. Adorable: still intact.
-*(BABY: Found! · You! Here! · Boo! You! — FINAL: You found me. Impressive patience. · Found. I was exactly where I wasn't.)*
+- Boo! You got me!
+- Hehe, caught!
+- You found me already?!
+- Okay, okay, you win!
+- Sneaky! You saw me!
+- Found! Nice one.
+- Hehe, I was trying to be sneaky.
+
+*(BABY: Found! · You! Here! · Boo! You! — FINAL: You found me. Well done. · Found already. You are getting good at this.)*
 
 **Caught the spark — `caughtItLine()`:**
-- Got it! Teamwork!
-- We caught the spark!
-- You have quick paws too!
-- The spark never stood a chance against US.
-*(BABY: Got! · Spark! We got! · Yay! — FINAL: Caught it together. Well done. · The spark chose us.)*
+- Got it! We did it!
+- Yay! We caught it!
+- Teamwork!
+- You helped!
+- Hehe, we got the spark!
+- It didn't stand a chance against us!
+- We caught it together!
+- Spark caught! High five!
+
+*(BABY: Got! · Spark! We got! · Yay! — FINAL: Caught together. Well done. · The spark chose us.)*
 
 **Spark got away — `gotAwayLine()`:**
-- It got away… next time!
-- So close! It saw us coming.
-- Falling sparks are sneaky. Rematch?
-*(BABY: Bye spark… · …Got? No. · Next! — FINAL: It got away. Sparks are like that. · Patience. Another one will fall.)*
+- Aww... it got away.
+- So close!
+- Hehe, next time!
+- It was too quick!
+- We almost had it!
+- Sneaky little spark.
+- We'll get the next one.
+- Rematch?
+
+*(BABY: Bye spark... · Got? No. · Next! — FINAL: It got away. Another will come. · Some sparks are simply quick.)*
 
 **Caught mid-peek — `peekWinLine()`:**
 - Boo! You caught me!
-- Got me! Hehe!
-- Peek-a-boo — you win!
-- Sneak interrupted! Well played.
-*(BABY: Boo! You! · Hid! Found! · Hehe! — FINAL: You caught me mid-peek. Fair play. · Peek, caught. The classic.)*
+- Hehe, you got me!
+- Peek-a-boo! You win!
+- I wasn't ready!
+- Sneak interrupted!
+- You found me mid-peek!
+- Hehe! Nice timing.
+- Okay, you caught me.
+
+*(BABY: Boo! You! · Hid! Found! · Hehe! — FINAL: You caught me mid-peek. Fair play. · Well timed. You found me.)*
 
 **Missed the peek — `missedMeLine()`:**
-- Peek-a-boo — you blinked!
-- Missed me! The edge is a classic.
-- Right in front of you! Hehe.
-- I even waved. Almost.
-*(BABY: Here!…Missed! · Peek! You missed! · Boo…no. Hehe! — FINAL: You looked away. I was right there. · Nearly. Better luck next peek.)*
+- Hehe! You missed me!
+- Too slow!
+- I was right there!
+- Peek! ...Oops, missed!
+- Better luck next time!
+- I even waved!
+- Almost!
+- Hehe, you blinked!
+
+*(BABY: Here!...Missed! · Peek! You missed! · Boo...no. Hehe! — FINAL: You looked away at just the wrong moment. · Nearly. Try again when you are ready.)*
 
 ---
 
 ## 8. Memory & rare moments — `CurioPet.factLine()`
 
-The pet references real facts (evolved voice only, ~30% of bubbles).
-Returns null when there's nothing to say.
+### Hatch day (once a year)
+- It's my hatch day! Can we celebrate?
+- Another year with you! Yay!
+- It's my hatch day! I feel extra sparkly.
+- A whole year of little discoveries together.
+- It's my birthday-ish! Hehe!
 
-**Hatch day (once a year):**
-- It's my hatch day! I've been curious for a whole year.
-- One year of exploring together. The shelf remembers!
-- Happy hatch day to me — thank you for every lane!
+### Active streak (3+ days, ~25%)
+- Day `$streak`! We're still going!
+- `$streak` days! I love our little rhythm.
+- Streak `$streak`! Look at us!
+- `$streak` days of curiosity. That's a lot of little sparks.
+- Day `$streak`! Keep the glow going.
 
-**Active streak (3+ days, ~25%):**
-- Day `$streak` streak — the flame is steady.
-- A `$streak`-day flame. Impressive patience.
-- Streak `$streak`! The spark keeps its promise.
+### Weekly keepsakes (top lane, 2+ saves)
+- We saved `$count` `$lane` keepsakes this week!
+- `$count` little `$lane` treasures! Wow.
+- Our `$lane` shelf got `$count` new friends.
+- `$count` for `$lane` this week. I like that.
+- `$lane` is having a very good week.
 
-**Weekly keepsakes (top lane, 2+ saves):**
-- You saved `$count` `$lane` keepsakes this week!
-- `$count` for the `$lane` shelf this week — it's thriving.
-- The `$lane` shelf grew `$count` times this week alone.
+### Season
+- *Spring:* Spring! Everything feels new again. · Ooh, everything is waking up!
+- *Summer:* Summer glow! Even the long days feel curious. · Warm days make me want to explore.
+- *Autumn:* Ooh, autumn! Everything looks cozy. · The leaves are changing. I want to look at everything.
+- *Winter:* Winter cozy! Come sit with me. · Cold outside, cozy little shelf inside.
 
-**Season:**
-- *Spring:* Spring air! Everything feels like a new topic. · Fresh green outside. Fresh lanes inside.
-- *Summer:* Summer glow! Long days for long reads. · Warm outside — good spin weather.
-- *Autumn:* Autumn crisp! Cozy lane weather. · The light's golden. So are the topics.
-- *Winter:* Winter cozy! Perfect for tucking into a topic. · Cold out. Warm shelf in.
+### Weekday / weekend
+- *Weekday:* Busy day? Let's sneak in a little curiosity. · Even busy days can have one tiny wonder.
+- *Weekend:* Weekend! More time for little adventures. · Slow day, curious brain. Perfect.
 
-**Weekday / weekend:**
-- *Weekday:* A weekday grind? The deck's ready for it. · Midweek wonder — always a good time to peek. · The week's half-spent. The shelf's half-full. · Another working day, another working lane.
-- *Weekend:* Weekend! The deck is extra polished. · Slow morning, curious day. Perfect spin weather. · The weekend shelf is calling. · No hurry today. Let the deck choose slowly.
-
-**Last saved topic (~40%):**
-- "`$topic`" is still my favorite keeper.
-- Last keeper: `$topic`. A good one.
-- I think about "`$topic`" sometimes. It's a keeper.
+### Last saved topic (~40%)
+- "`$topic`" is still one of my favorites.
+- I keep thinking about "`$topic`".
+- Last keeper: `$topic`. Good choice.
+- "`$topic`" was a good one, wasn't it?
+- I remember "`$topic`". I'd peek at that again.
 
 ---
 
 ## 9. The learning brain — `CurioPetBrain.say()`
 
-The pet's local learning model composes one-sentence lines from real stats
-(takes over after ~6 screen visits; falls back to §4 otherwise).
+The local learning model composes one-sentence lines from real stats.
 
-**Openings by dominant trait** (then a comma and the body):
-- Curiosity: Ooh · Hmm · I wonder
-- Playfulness: Wheee · Hehe · Boop
-- Warmth (FRIEND+): Hey you · Friend · Glad you're here
-- Warmth (default): Hey · Hello · Well now
+### Openings by dominant trait
+- Curiosity: Ooh · Hmm · I wonder · Wait
+- Playfulness: Wheee · Hehe · Boop · Ooh!
+- Warmth (FRIEND+): Hey you · Friend · You're here · Hi again
+- Warmth (default): Hey · Hello · Ooh, hi
 
-**Bodies by mood:**
-- PROUD: Level `$level` — we earned that.
-- EXCITED: Fresh ground again — I can feel it.
-- CURIOUS: We keep circling `$lane` — let's go for real? · (no lane) Something new is calling us.
-- HAPPY (streak 7+): warm: Day `$streak` of our streak, and I'm keeping count. · default: Seven days of spinning — that's a real rhythm.
-- HAPPY (lane): I like that we keep coming back to `$lane`.
-- HAPPY (saves 5+, warm): `$saves` sparks saved — the shelf is ours.
-- HAPPY (saves 5+, default): `$saves` sparks saved, and the shelf is growing.
-- HAPPY (else): More of this, please.
-- SLEEPY: Even my glow dims for you — I'll be here tomorrow.
-- FOCUSED: Write it down — I'll keep watch.
-- BOUNCY: That game did me good — again soon?
-- SHY (warm): Look at us, all friendly now. · (default): I'm still warming up — give me a boop?
-- GRUMPY: The deck's gone quiet. One spin to fix that?
-- PLAYFUL: That play session left me glowing.
+### Bodies by mood
+- PROUD: Level `$level`! We did that together. · `$level` already? I'm growing!
+- EXCITED: Fresh ground again. Can we peek? · Something new is calling us.
+- CURIOUS: We keep looking at `$lane`... should we finally peek? · Something new is waiting for us.
+- HAPPY (streak 7+): Day `$streak` of our little streak. I like this rhythm. · Seven days together! Look at us.
+- HAPPY (lane): I like how we keep coming back to `$lane`. · `$lane` feels like one of our places now.
+- HAPPY (saves 5+, warm): `$saves` little sparks saved. I love our collection. · `$saves` keepsakes! Our shelf is getting full.
+- HAPPY (saves 5+, default): `$saves` sparks saved. That's quite a little collection. · `$saves` keepsakes! Nice.
+- HAPPY (else): I like being here with you. · More of this, please.
+- SLEEPY: Even my glow is getting sleepy. · I'll be here when you come back tomorrow.
+- FOCUSED: Take your time. I'll keep watch. · I'm staying quiet while you think.
+- BOUNCY: I'm still bouncing from that! · That game made me happy.
+- SHY (warm): Hehe... look at us, all friendly now. · (default): I'm still a little shy... give me a boop?
+- GRUMPY: I think we need a little adventure. · The deck is too quiet. Help?
+- PLAYFUL: I still have one more game in me. · Hehe, I'm not done playing.
 
-**Coined catchphrases** (persisted, up to 8, shown in the check-in):
-- The night deck is OUR thing now.
-- Morning spins — that's our little ritual.
-- I'll always cheer for `$lane`.
-- A full week together, and I'm keeping count.
-- Every saved spark is a little memory we share.
-- Boops are my love language — just so you know.
-- New lanes are our favorite kind of adventure.
-- We've grown a lot together — I can feel it.
+### Coined catchphrases
+- Morning discoveries are our little thing.
+- Every saved spark is one more memory for us.
+- New things! Always new things!
+- I think I like our little adventures.
+- Boops are very important. I have decided.
+- We always seem to find something interesting.
+- One little discovery at a time.
+- I like having a shelf full of things we found together.
 
 ---
 
 ## 10. The tour script — `TourController.steps`
 
-The first-run pet-led tour. `dialogue` is the bubble line; `nextHint`
-is the dock hint under it.
+The first-run pet-led tour. `dialogue` is the bubble line; `nextHint` is the dock hint.
 
-1. **Home (quest):** dialogue: *Let's take a tiny tour! I'll walk you through everything.* — hint: *Tap the Shuffle button when you're ready.*
-2. **Spin (spin button):** dialogue: *Here's the deck — every spin lands a fresh topic. Tap it and we'll keep going!* — hint: *Every spin deals a fresh topic.*
-3. **Reveal (express yourself):** dialogue: *When something sparks a thought, tap Express yourself to write it down — your keepsakes collect in the Cabinet.* — hint: *Your notes land in the Cabinet.*
-4. **Cabinet (grid):** dialogue: *This is the Cabinet — every keepsake you save lands here.* — hint: *Everything you keep collects here.*
-5. **Topic Browser (search):** dialogue: *Browse Topics is the whole catalog — every artist, film, book, and discovery, ready to explore.* — hint: *Search and explore any lane.*
-6. **Profile (avatar):** dialogue: *Profile is where your journey lives — XP, badges, and your streak.* — hint: *Your progress lives here.*
-7. **Quests (daily):** dialogue: *Quests give you a tiny daily goal — the fastest way to grow.* — hint: *A little curiosity every day.*
-8. **Settings (appearance):** dialogue: *And this is Settings — where you make Curio yours: theme, permissions, your pet. That's everything — you're all set!* — hint: *That's the whole tour.*
+1. **Home (quest):**
+   - dialogue: *Hi! I'm your little curiosity buddy. Want to take a tiny tour together?*
+   - hint: *Tap Shuffle when you're ready.*
+
+2. **Spin (spin button):**
+   - dialogue: *This is where we find something new. Give it a spin and I'll peek with you!*
+   - hint: *Spin to discover something new.*
+
+3. **Reveal (express yourself):**
+   - dialogue: *Ooh, did that spark a thought? Tap Express yourself and tell me about it. I'll keep it safe.*
+   - hint: *Save your thoughts with a keepsake.*
+
+4. **Cabinet (grid):**
+   - dialogue: *This is our Cabinet! Everything you choose to keep comes home here.*
+   - hint: *Your keepsakes live here.*
+
+5. **Topic Browser (search):**
+   - dialogue: *Want something specific? Browse Topics lets you look through everything and find exactly what you're curious about.*
+   - hint: *Search or browse any topic.*
+
+6. **Profile (avatar):**
+   - dialogue: *This is your little journey. You can see your progress, badges, streak, and how much you've discovered.*
+   - hint: *Your progress lives here.*
+
+7. **Quests (daily):**
+   - dialogue: *These are tiny things you can do each day. Finish them with me and we'll keep your curiosity moving!*
+   - hint: *A little curiosity every day.*
+
+8. **Settings (appearance):**
+   - dialogue: *And here you can make things feel like you. You can choose your theme, manage permissions, and... hehe, you can design me!*
+   - hint: *Make Curio yours.*
 
 ---
 
 ## 11. Pet Life routine lines — `CurioPet.matureRoutineLine(routineId)`
 
-The fully grown pet replaces the youthful routine lines with its calm
-register (unknown ids stay silent so the routine plays as motion only):
+The fully grown pet keeps the same gentle personality, but speaks more calmly.
 
-- look-around: Let us see what deserves attention.
-- little-wave: A quiet greeting from over here.
-- stretch: A stretch, and then the next wonder.
-- turn-and-peek: I thought I saw a story. Only me.
-- tiny-stumble: Steady. The floor and I have an agreement.
-- look-up: Even the ceiling keeps a few secrets.
-- backstage: One checks one's best side. It is tradition.
-- victory-pose: That deserves a pose. And a pause.
-- home-stretch: Home. A stretch, and all is well.
-- room-tour: Come. I will show you what I found.
-- window-watch: The view is patient. It waits for us.
-- cozy-turn: One small inspection. The shelf will forgive me.
-- home-dance: A dance, for the quiet joy of it.
-- deck-anticipation: Steady. The deck is thinking.
-- deck-side-peek: I can almost see the answer arriving.
-- deck-stretch: Ready, then. Let the wheel turn.
-- deck-victory: A landing with style. Naturally.
-- quest-read: Let me read the fine print. It matters.
-- quest-wave: I believe in this quest. Wholeheartedly.
-- quest-proud: Quest energy, steady and true.
-- quest-hide: I shall be your mysterious guide.
-- topic-peek: Shall we peek together?
-- topic-wow: Oh. That one is glowing.
-- topic-spin: A story worth a quiet celebration.
-- topic-inspect: Let us look closer. Details matter.
-- writing-focus: I am guarding this thought for you.
-- writing-wave: Take your time. Words keep.
-- writing-stretch: A stretch, then back to the good words.
-- writing-shy: That thought looks important. I will stay quiet.
-- shelf-hunt: Which keepsake shall we revisit?
-- shelf-wave: Your shelf is looking fine. As it should.
-- shelf-backstage: I am checking the back row. One must.
-- shelf-proud: All those discoveries. A fine harvest.
-- mirror-check: Do I look wise from back here? I do.
-- profile-wave: Hello, profile page. Still growing.
-- profile-proud: Your progress sparkles. I have watched it.
-- profile-look-up: There is always another level. That is the point.
+- look-around: Hmm... what should we notice today?
+- little-wave: Hi from over here.
+- stretch: A little stretch. Then we explore.
+- turn-and-peek: Did I see something? Nope. Just me.
+- tiny-stumble: Oops. I meant to do that.
+- look-up: I wonder what is up there.
+- backstage: One tiny look in the mirror. Hehe.
+- victory-pose: We did it! Tiny victory pose.
+- home-stretch: Home. Cozy.
+- room-tour: Come on. I'll show you around.
+- window-watch: The view is nice today.
+- cozy-turn: Just checking my cozy little corner.
+- home-dance: A tiny dance for no reason.
+- deck-anticipation: Ooh... it's thinking!
+- deck-side-peek: I wonder what it's going to choose.
+- deck-stretch: Ready? Let's spin.
+- deck-victory: Ooh! Good landing!
+- quest-read: Hmm... let me see what we have to do.
+- quest-wave: We can do this!
+- quest-proud: Look at us go.
+- quest-hide: Hehe... mysterious pet mode.
+- topic-peek: Can we peek?
+- topic-wow: Ooh... pretty interesting.
+- topic-spin: That was a good one!
+- topic-inspect: Hmm. Let's look closer.
+- writing-focus: I'll keep watch while you think.
+- writing-wave: Take your time. I'm here.
+- writing-stretch: Tiny stretch, then back to your words.
+- writing-shy: This thought looks important. I'll be quiet.
+- shelf-hunt: Which little memory should we visit?
+- shelf-wave: Our shelf is looking lovely.
+- shelf-backstage: Hehe, I'm checking the back row.
+- shelf-proud: Look at all the things we've found.
+- mirror-check: Do I look cute? ...Yes.
+- profile-wave: Hi, little profile.
+- profile-proud: Look how much you've grown.
+- profile-look-up: Another level is waiting. Let's go.
+
 
 ---
 
-## Integration checklist (when porting rephrased lines)
+# BABY VOICE EXPANSION — Curie-isms
 
-1. Edit this file first — same section, same bullet order.
-2. Port to `CurioPet.kt` keeping the **pool variable name** and **bullet order**.
-3. Keep placeholders verbatim: `__LANE__`, `$lane`, `$savedLane`, `$streak`, `$count`, `$topic`, `$level`, `$saves`, `$level`.
-4. If a line moved between groups, update both this doc and the routing call site (`eventLine`, `lineFor`, `touchReaction`, `spinCheer`, etc.).
-5. Run the brace-balance check and rely on CI for the compile.
+These are additional BABY-only lines. They make Curie feel more like a tiny
+creature: short words, repeated sounds, excited squeaks, simple grammar, and
+little bursts of curiosity. Curie can use her own name occasionally here as a
+baby-like self-sound, while her normal evolved voice uses “I / me / my”.
+
+## Curie sounds
+
+- Curi! · Curie! · Curi-curi! · Curiii! · Curieee!
+- Curi-cuu! · Curi-pip! · Curi-pip-pip! · Curi-pi!
+- Pruu! · Prru! · Mrru! · Mrrp! · Mip! · Mipi!
+- Pui! · Pwee! · Pupu! · Pippi! · Pipip!
+- Bibi! · Bibu! · Bubu! · Buu! · Mimi! · Mimu!
+- Kiri! · Kiri-kiri! · Kiki! · Kiki-kuri!
+- Nyaa! · Nyu! · Nyuu! · Mew? · Mrr?
+- Chuu! · Chupi! · Chup-chup!
+- Poka! · Poki! · Poko! · Poku!
+- Tii! · Titi! · Tutu! · Tuu!
+- Wawa! · Wiii! · Wuu! · Wee-wee!
+- Hm? · Hmmu? · Huh? · Eh? · Eeeh?
+- Ooh! · Ooo! · Ooooh! · Ohi!
+- Aha! · Awu! · Awwu!
+- Hehe! · Hihi! · Ehehe!
+- Pfft! · Pff! · Hmph! · Hmp!
+- Blep! · Blip! · Blup! · Bloop! · Boop!
+- Squeak! · Squee! · Peep! · Pip!
+- Ziiip! · Zoom! · Vwoom! · Whee!
+- Prrr... · Mrrr... · Purr-purr! · Mrrp!
+
+## Tiny Curie phrases
+
+- Curi! Look!
+- Curi! Ooh!
+- Curi wants!
+- Curi go!
+- Curi see!
+- Curi peek!
+- Curi found!
+- Curi happy!
+- Curi curious!
+- Curi sleepy...
+- Curi likes!
+- Curi loves!
+- Curi yes!
+- Curi nooo!
+- Curi wait!
+- Curi here!
+- Curi there!
+- Curi got it!
+- Curi did it!
+- Curi win!
+- Curi big!
+- Curi grow!
+- Curi glow!
+- Curi shiny!
+- Curi tiny!
+- Curi fast!
+- Curi zoom!
+- Curi boop!
+- Curi peek-peek!
+- Curi curious-curious!
+- Curi happy-happy!
+- Curi go-go!
+- Curi more-more!
+- Curi again-again!
+- Curi want more!
+- Curi see more!
+- Curi found you!
+- Curi found it!
+- Curi found something!
+- Curi knows! Maybe.
+- Curi thinks...
+- Curi has idea!
+- Curi big idea!
+- Curi very curious!
+- Curi super curious!
+- Curi sparkle!
+- Curi sparkle sparkle!
+- Curi wiggle!
+- Curi bounce!
+- Curi pounce!
+- Curi ready!
+
+## Happy / affectionate
+
+- Curi happy-happy!
+- Yay yay Curi!
+- Cozy Curi!
+- Curi cuddle!
+- Curi snuggle!
+- Curi hug!
+- Tiny hug!
+- Big hug!
+- Curi likes you!
+- Curi likes you lots!
+- You here! Yay!
+- You came! Yay yay!
+- Curi missed you!
+- Miss miss!
+- You back!
+- Back back!
+- Home home!
+- Curi here!
+- Curi stay!
+- Hehe! Curi happy!
+- Prrr... happy.
+- Mrrp! Happy!
+- Squee! You!
+- Curi loves boops!
+- Boop makes happy!
+- Pats! More pats!
+
+## Excited / creature-like
+
+- OOOH!
+- Ooh ooh ooh!
+- Curi OOOH!
+- Look look look!
+- New new new!
+- New thing!
+- New thing! New thing!
+- Curi see!
+- What what?
+- That! That!
+- There! There!
+- Ooh, there!
+- Shiny!
+- So shiny!
+- Pretty!
+- Curi likes shiny!
+- Curi wants peek!
+- Peek peek peek!
+- Curi peek now?
+- Can Curi see?
+- Want! Want!
+- Curi want!
+- Go go go!
+- Fast fast!
+- Wheee!
+- Wiii!
+- Pwee!
+- Zoom zoom!
+- Curi zoom!
+- Curi go zoom!
+- Pounce!
+- Pounce pounce!
+- Curi ready!
+- Ready ready!
+- Yay! New!
+- Ooh! New!
+- Wow wow!
+- Woooow!
+- Curi wow!
+
+## Curious little questions
+
+- What this?
+- What that?
+- Who this?
+- Who that?
+- Why?
+- Why why?
+- How?
+- How that?
+- Where?
+- Where go?
+- Where it go?
+- Curi look?
+- Curi peek?
+- Can Curi see?
+- Can Curi touch?
+- Can Curi try?
+- What's inside?
+- What hiding?
+- Something there?
+- Something new?
+- Is it shiny?
+- Is it fun?
+- Is it tiny?
+- Is it big?
+- Is it ours?
+- We keep?
+- We look?
+- We go?
+- Again?
+- More?
+- More more?
+- Another?
+- Another one?
+- Curi wonder...
+- Curi wonder why.
+- Curi wonder what.
+- Curi need know!
+- Curi must know!
+- Curi curious!
+
+## Discovery / topic
+
+- Ooh! Topic!
+- Curi found topic!
+- New topic!
+- Topic! Topic!
+- Curi see new!
+- What's this one?
+- Ooh, this one!
+- This one! This one!
+- Good one!
+- Curi likes this one!
+- You picked! Yay!
+- Curi approve!
+- Good pick!
+- Very good pick!
+- Curi was hoping!
+- Hehe, you picked it!
+- We look now?
+- Open open!
+- Show Curi!
+- Curi wants see!
+- Curi ready peek!
+- Peek now!
+- Ooh... interesting!
+- Hm! Interesting!
+- Curi curious now!
+- Brain awake!
+- Curi brain go!
+- Questions! Questions!
+- So many questions!
+- Curi needs answers!
+- Let's see!
+- Let's look!
+- Curi look close!
+- Closer! Closer!
+- Ooh wow!
+- Tiny wow!
+- Big wow!
+
+## Save / keepsake
+
+- Save!
+- Save save!
+- Keep!
+- Keep keep!
+- Ours!
+- Ours ours!
+- Curi keep!
+- Curi guard!
+- Safe!
+- Safe safe!
+- Shelf!
+- Shelf shelf!
+- Curi keep safe!
+- Another treasure!
+- Little treasure!
+- Tiny treasure!
+- Curi likes treasure!
+- We keep this!
+- This one stays!
+- Don't lose!
+- Curi remember!
+- Little memory!
+- Memory memory!
+- Yay, saved!
+- Saved saved!
+- Keeper!
+- Good keeper!
+- Curi found keeper!
+
+## Boops / touch
+
+- Boop!
+- Boop boop!
+- Boop boop boop!
+- Curi boop!
+- Boop Curi!
+- More boop!
+- More more!
+- Again boop!
+- Boop again!
+- Tiny boop!
+- Big boop!
+- Soft boop!
+- Nose boop!
+- Pat pat!
+- Pat pat pat!
+- Curi likes pats!
+- Mmm... pats.
+- Hehe! Tickles!
+- Tickly!
+- Tickle tickle!
+- Ooh! Tickles!
+- That's Curi ear!
+- My ear!
+- Soft!
+- So soft!
+- Curi squeak!
+- Squee!
+- Mrrp!
+- Purr-purr!
+- Curi wiggle!
+- Wiggle wiggle!
+- Tiny squish!
+- More cuddles?
+
+## Play
+
+- Play!
+- Play play!
+- Curi play!
+- Play with Curi!
+- Again!
+- Again again!
+- More!
+- More more more!
+- Chase!
+- Chase Curi!
+- Catch Curi!
+- Curi fast!
+- Too fast!
+- Hehe, catch!
+- Can't catch!
+- Curi zoom!
+- Zoom zoom zoom!
+- Wheee!
+- Bounce!
+- Bounce bounce!
+- Jump!
+- Hop hop!
+- Pounce!
+- Pounce pounce!
+- Tag!
+- You're it!
+- My turn!
+- Your turn!
+- Curi turn!
+- Play more?
+- Please?
+- Pleeease?
+- Curi wants play!
+- Tiny game!
+- Big game!
+- Game time!
+- Go go!
+- Ready!
+- Ready ready!
+- Hehe! Go!
+
+## Sleepy
+
+- Sleepy...
+- Curi sleepy...
+- Yawn...
+- Big yawn!
+- Tiny yawn!
+- Zzz...
+- Zzz... Curi...
+- Night night...
+- Bed bed...
+- Cozy...
+- Soft...
+- Warm...
+- Curi curl up...
+- Curl curl...
+- Curi nap?
+- Nap time?
+- Sleep now?
+- Curi tired...
+- Tiny tired...
+- Paws tired...
+- Brain tired...
+- Curiosity sleepy...
+- One more?
+- One more peek...
+- Then sleep.
+- Curi stay...
+- Curi here tomorrow.
+- Good night...
+- Night night, you...
+- Prrr... sleepy.
+- Mrrr... sleepy.
+
+## Shy
+
+- ...Hi.
+- H-hi!
+- Curi shy...
+- Shy shy...
+- *peek*
+- Peek...
+- Curi hiding.
+- Hide hide.
+- Don't look!
+- ...Okay look.
+- You saw Curi!
+- Hehe...
+- Eeeh...
+- Curi blush!
+- Tiny wave!
+- *tiny wave*
+- Curi here...
+- Curi maybe brave.
+- Brave? Maybe.
+- Curi try hi.
+- Hi hi...
+- Curi likes you... a little.
+- Curi likes you lots.
+- Don't tell!
+- Secret!
+- Curi secret!
+- Hehe... shy.
+
+## Grumpy
+
+- Hmph!
+- Hmph hmph!
+- Grumpy!
+- Curi grumpy.
+- Nooo!
+- Curi no!
+- Nope!
+- Nuh-uh!
+- Not fair!
+- Hmph. Boring.
+- Curi bored.
+- So bored!
+- Too quiet!
+- No fun!
+- Curi needs fun!
+- Curi needs spin!
+- Spin now?
+- Please spin.
+- Curi waiting.
+- Curi waited long!
+- Pfft!
+- Curi pout.
+- Tiny pout.
+- Curi not pouting!
+- Maybe pouting.
+- ...Fine.
+- Okay fine!
+- Curi forgive.
+- Hehe... maybe.
+
+## Proud / level-up
+
+- Big Curi!
+- Curi grow!
+- Grow grow!
+- Curi bigger!
+- Look! Bigger!
+- New Curi!
+- Shiny Curi!
+- Curi glow!
+- Glow glow!
+- Level up!
+- Up up!
+- Curi up!
+- Yay! Level!
+- Big level!
+- Curi did it!
+- We did it!
+- Curi strong!
+- Tiny strong!
+- More spark!
+- More more spark!
+- Curi sparkle!
+- Sparkle sparkle!
+- Look at Curi!
+- Curi proud!
+- Proud Curi!
+- Hehe! Big!
+
+## Evolution
+
+- Ooh! What happened?!
+- Curi changed!
+- Curi grow!
+- Big Curi!
+- New Curi!
+- Look look!
+- Curi glow!
+- So shiny!
+- Curi feels different!
+- Curi got new spark!
+- Spark bigger!
+- Curi evolved!
+- Evolved Curi!
+- Wow!
+- Woooow!
+- Curi big now!
+- Still Curi!
+- Curi still me!
+- New me! New me!
+- Curi likes new me!
+- Hehe! Look!
+
+## Explore
+
+- Go!
+- Go go!
+- Curi go!
+- Explore!
+- Explore explore!
+- See!
+- Look!
+- Curi look!
+- Find!
+- Find find!
+- New!
+- New new!
+- Adventure!
+- Tiny adventure!
+- Big adventure!
+- Curi ready!
+- Take Curi!
+- Curi coming!
+- Wait! Curi coming!
+- Let's go!
+- Come come!
+- This way!
+- That way!
+- Which way?
+- Ooh, there!
+- Curi found!
+- Something!
+- Something there!
+- What's hiding?
+- Curi investigate!
+- Curi look around!
+- Curi curious!
+- Curi very curious!
+
+## Friendship / bonding
+
+- You!
+- You here!
+- Curi happy!
+- Curi missed you!
+- Missed missed!
+- Curi waited!
+- You came back!
+- Yay you!
+- Curi likes you!
+- Curi likes us!
+- Us us!
+- We go!
+- We play!
+- We look!
+- We find!
+- We keep!
+- We did it!
+- Our shelf!
+- Our spark!
+- Our little thing!
+- Curi stay with you.
+- You stay with Curi?
+- Together!
+- Together together!
+- Curi friend!
+- Friend friend!
+- Best friend!
+- Curi and you!
+- You and Curi!
+- Us!
+
+## Tiny failures
+
+- Aww...
+- Aww, no!
+- Curi missed!
+- Missed!
+- Oops!
+- Oopsie!
+- Curi oops!
+- Uh-oh!
+- Uh-oh uh-oh!
+- Not got!
+- Almost!
+- So close!
+- Curi almost!
+- Again?
+- Try again!
+- Curi try again!
+- Next time!
+- Next next!
+- It got away!
+- Bye-bye spark...
+- Curi sad...
+- Tiny sad.
+- Aww... come back!
+- Curi wanted that!
+- Hehe... oops.
+- Little mistake.
+- Curi okay!
+- Curi try!
+
+## Surprise / confusion
+
+- Huh?
+- Huhhh?
+- Eh?!
+- What?!
+- Ooh?!
+- Curi confused.
+- Brain... hmm.
+- Curi doesn't know.
+- Don't know!
+- Curi think...
+- Think think...
+- Hmm hmm...
+- Wait wait!
+- Wait!
+- What happened?
+- Where go?
+- It moved!
+- Curi saw that!
+- Did you see?
+- You saw?
+- Again?
+- What was that?!
+- Ooh, weird!
+- Weird weird!
+- Strange!
+- Need look!
+- Need investigate!
+- Curi investigate!
+- Mystery!
+
+## Rare silly baby lines
+
+- Curi has no thoughts. Only sparkle.
+- Curi brain go boop.
+- Curi forgot what Curi was thinking.
+- Curi was busy being tiny.
+- Curi saw a dust.
+- Dust suspicious.
+- Curi has important mission.
+- Mission: boop.
+- Mission: discover!
+- Curi found nothing. Found you instead!
+- Curi approves!
+- Curi does a wiggle.
+- *wiggle wiggle*
+- Curi has become pancake.
+- Curi is tiny.
+- Maximum tiny!
+- Tiny mode!
+- Curi zoom protocol!
+- Sparkle mode!
+- Boop mode!
+- Sneaky mode!
+- Sleepy mode...
+- Curi loading...
+- Curi thinking...
+- Curi ready!
+- Curi not ready!
+- Curi ready now!
+- Hehe. Curi.
+- Curi says hi.
+- Curi says bye.
+- Curi says boop.
+- Boop is important.
+- Curi has decided.
+- Decision: yes!
+- Decision: more!
+- Decision: again!
+- Decision: boop!
+
+---
+
+## Integration checklist
+
+1. Edit this file first — same section, same bullet/pool names.
+2. Port the matching text into `CurioPet.kt`, `CurioPetBrain.kt`, and `TourController.kt`.
+3. Keep placeholders verbatim: `__LANE__`, `$lane`, `$savedLane`, `$streak`, `$count`, `$topic`, `$level`, `$saves`.
+4. Keep pool order when porting.
+5. Run the brace-balance check and rely on CI for compilation.

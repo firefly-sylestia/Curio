@@ -1,6 +1,57 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: Home avatar pill + drawer sections + Support update link (`a3a9f94`)
+## Current request — COMPLETED: pet dialogue fully ported to the canonical dialog doc
+
+The user: "i added the new pet dialogs and also more dialogs, imtegrate
+and replace all the current dialogs with those. dont miss any." — with
+the rewritten `docs/pet-dialogs.md` attached (same content as the
+working-tree file). Source of truth: every pool in the doc, ported 1:1
+into `CurioPet.kt`, `CurioPetBrain.kt`, `TourController.kt` (pool names,
+order, and the `__LANE__` / `$lane` / `$savedLane` / `$streak` / `$count` /
+`$topic` / `$level` / `$saves` placeholders kept verbatim).
+
+### Sections ported (none missed)
+- **§1 events** — SPIN_LANDED (lane + generic), REVEAL_TAPPED, REVEAL_AUTO,
+  EXPLORE, SAVE (lane + warm + default), TOUCH, PLAY, LEVEL_UP, QUEST_COMPLETE,
+  sassy bursts — FIRST_EVO pools + BABY + FINAL (babyEventLine /
+  matureEventLine).
+- **§2 streaks** (streakMilestoneLine / babyStreakLine / matureStreakLine),
+  **§3 evolution** (path-flavored ceremony + no-path + final + BABY/FINAL).
+- **§4 moods** — PROUD (now live-level inline), EXCITED, HAPPY
+  (morning/afternoon/evening/night + warm twins), CURIOUS (`__LANE__` +
+  new fallback "Want to find something new today?"), FOCUSED, BOUNCY, SHY,
+  GRUMPY, PLAYFUL, SLEEPY — first/baby/mature pools all replaced.
+- **§5 greetings** (morningGreeting + welcome-back day/3-day/week pools,
+  all voices), **§6 touch** (CLOSE/FRIEND/stranger/tier2/tier1 + baby/mature).
+- **§7 games** — spinCheer, playInitiation, landmarkLine, jigLine,
+  dizzyLine, drawerLine, peekLine, chameleonLine, sparkLine + the six
+  interactive moments (findMe/foundMe/caughtIt/gotAway/peekWin/missedMe).
+- **§8 factLine** — hatch day (5), active streak (5), weekly keepsakes (5),
+  season (2 each), weekday/weekend (2 each), last-saved-topic (5).
+- **§9 brain** — openings per trait, bodies per mood (now multi-option
+  pools via `CurioPet.pickLine` — anti-repeat applies), coined catchphrases
+  = the doc's 8 lines mapped to the coin conditions (`laneLabel` var
+  removed).
+- **§10 tour** — all 8 steps' dialogue + nextHint.
+- **§11 matureRoutineLine** — all 36 routine lines.
+- **§12 BABY VOICE EXPANSION (Curie-isms)** — new pools
+  `babySaveLines` / `babyTouchLines` / `babyLevelUpLines` / `babyEvolveLines` /
+  `babyExploreLines` / `babyDiscoveryLines` / `babyMishapLines` feed the
+  matching baby events; `babyCurieLines` (sounds + tiny phrases + rare
+  silly, ~130 lines) rides EVERY baby pick; excited/happy/curious/
+  sleepy/shy/grumpy/playful mood pools absorbed their doc categories.
+
+Also removed the dead `happyLines` pool (old text, unreferenced).
+PetDesign.kt's custom-reaction preview defaults were left untouched (not
+in the doc's scope).
+
+### Validation
+Brace balance depth 0 on all three files (python brace check); grep
+sweeps confirm every old pool phrase is gone and distinctive lines from
+every doc section are present; `git diff --check` clean; no Gradle
+locally (env rule) — CI validates compile on push.
+
+## Previous request — COMPLETED: Home avatar pill + drawer sections + Support update link (`a3a9f94`)
 
 All of this session's work is done, committed and pushed.
 

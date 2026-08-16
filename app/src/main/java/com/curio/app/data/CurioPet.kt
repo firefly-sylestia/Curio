@@ -314,17 +314,21 @@ object CurioPet {
     }
 
     private val sassyLines = listOf(
-        "Again?! …I mean, AGAIN! I love it!",
-        "That's the third one today. Not that I'm counting. (I'm counting.)",
-        "Okay, okay — one more cheer! My paws are getting tired!",
-        "You're on a roll! I'm running out of sparkles… okay, no I'm not.",
-        "Another one?! You spoil me. …Keep going.",
-        "Hmph! So many things to open. My tiny heart can't take it. Do it again.",
-        "You again! Hehe — okay, I'm invested now.",
-        "I've cheered so much my sparkle needs a snack break.",
-        "Is that a new thing? …It's the same thing. I don't care. MORE!",
-        "My excitement is now legally yours. Proceed.",
-        "Third time's the charm! Fourth time's my favorite."
+        "Again?! Hehe, okay!",
+        "You really like this one!",
+        "Again! I knew you'd do it.",
+        "Ooh, we're doing this again?",
+        "You came back for another one!",
+        "Hehe, I saw that coming.",
+        "One more? I won't complain.",
+        "Again again? I can handle that!",
+        "You really don't want to let this one go, huh?",
+        "Okay! I'm invested now.",
+        "More?! My little heart is ready.",
+        "You keep picking it! I approve.",
+        "I wasn't going to say anything... but again?",
+        "Hehe, you're making this a habit.",
+        "Alright, one more. For science."
     )
 
     /** A short, cute line for the pet's reaction to [event]. */
@@ -354,64 +358,123 @@ object CurioPet {
                 val lane = lastLaneName
                 if (lane != null && kotlin.random.Random.nextFloat() < 0.5f) {
                     pickLine(listOf(
-                        "Back to $lane — the deck knows you!",
-                        "Ooh, $lane again. Good taste.",
-                        "$lane called, and the deck answered!",
-                        "The $lane shelf grows tonight!",
-                        "Another $lane spin — the stamp's almost there!"
+                        "Ooh, $lane! I like this one.",
+                        "$lane! Ooh, can we peek?",
+                        "We landed on $lane! Yay!",
+                        "It's $lane again! I remember this one.",
+                        "$lane! My little brain is already curious.",
+                        "Ooh, $lane found us!",
+                        "Look! $lane!",
+                        "We got $lane! Good spin!"
                     ))
                 } else {
                     pickLine(listOf(
-                        "It landed!", "Ooh, the deck chose well!", "A new topic, a new tale!",
-                        "Spin-spin-spin! …I mean, ooh.", "That landing had drama!",
-                        "The wheel spoke!", "Destiny, served on a card!",
-                        "I saw that one coming… nope, I didn't.", "Round and round it goes!",
-                        "Where it stops, nobody knows… except the deck."
+                        "Ooh! It landed!",
+                        "We got one!",
+                        "What did we find?",
+                        "Ooh, this looks interesting!",
+                        "Yay! A new little mystery.",
+                        "Hehe, it stopped!",
+                        "We found something!",
+                        "Where did we land?",
+                        "Ooh ooh! Show me!",
+                        "Aha! This one!",
+                        "Can we look now?",
+                        "I wonder what this is.",
+                        "The spin picked one! I like it already.",
+                        "Weee! What a spin!",
+                        "That was a good one!"
                     ))
                 }
             }
             // v8.30 — the USER's tap gets a touch reaction, never "it opened
             // itself".
             Event.REVEAL_TAPPED -> pickLine(listOf(
-                "You picked it!", "Ooh, good choice!", "That one called to you!",
-                "Nice pick!", "It knew you'd tap it!", "Ooh, the good kind of surprise!",
-                "Great pick!", "Ooh, good taste!", "That one's a keeper, I can tell!",
-                "You have the magic touch!", "I was rooting for this one!",
-                "A confident tap! I respect that."
+                "You picked it! Ooh!",
+                "Ooh, good choice!",
+                "You wanted this one, didn't you?",
+                "Hehe, you picked it!",
+                "I like your choice.",
+                "That one looked interesting to me too.",
+                "Good pick! Let's see what it's hiding.",
+                "You found a good one!",
+                "Ooh! This could be fun.",
+                "I was hoping you'd tap that one.",
+                "Your curiosity chose well.",
+                "Okay, okay, let's look!",
+                "You have good curiosity.",
+                "That one definitely deserved a peek.",
+                "Ooh, I'm excited for this one."
             ))
             // v8.30 — only the spin's true AUTO-open says the surprise lines.
             Event.REVEAL_AUTO -> pickLine(listOf(
-                "There it is!", "It opened itself, sneaky!", "Ta-da! A new tale!",
-                "Ooh, look what landed!", "Surprise!", "It chose FOR us. Bold.",
-                "Look what rolled in!", "No hands! Well… no paws!",
-                "The deck knows what it's doing.", "Bold move, deck. I like it.",
-                "Peek-a-boo! …It's a whole topic!", "It picked FOR us. How forward."
+                "Ooh! It opened!",
+                "It opened by itself! Sneaky.",
+                "Hehe, surprise!",
+                "Oh! Look what appeared.",
+                "We didn't even have to ask.",
+                "It picked for us!",
+                "A surprise topic!",
+                "Well, hello there, little mystery.",
+                "Ooh, I wasn't ready!",
+                "It chose one for us. Bold.",
+                "Look! A new thing!",
+                "Peek-a-boo, topic!",
+                "Hehe, that was unexpected.",
+                "Ohhh, what's this?",
+                "I guess we're looking at this one now!"
             ))
             Event.EXPLORE -> pickLine(listOf(
-                "Go explore!", "Adventure time!", "I'll wait right here. Go see!",
-                "Bring back a story!", "Go see the world!", "Adventure awaits!",
-                "Say hi to the world for me!", "I'll guard the deck while you're out!",
-                "Pack snacks. Bring tales."
+                "Go explore! I'll be right here.",
+                "Have fun! Bring me something interesting.",
+                "Go see what you can find!",
+                "Ooh, adventure time!",
+                "Take me with you! ...Oh. Right. I can't.",
+                "Go on! I'll wait here.",
+                "Find something that makes you go “wow!”",
+                "Go look around. I'll keep watch.",
+                "Your adventure starts now!",
+                "Bring back a good story, okay?",
+                "Explore lots! I like hearing what you find.",
+                "Off you go!",
+                "Go find a little wonder.",
+                "Have fun out there!",
+                "I'll be cheering from here!"
             ))
             // v8.29 — "Mine now… I mean, ours!" only after the bond is FRIEND+.
             Event.SAVE -> {
                 val savedLane = lastSavedLaneName
                 val base = if (isWarm()) listOf(
-                    "Keepsake saved!", "Mine now… I mean, ours!", "Tucked away safely!",
-                    "Our shelf grows!", "A treasure for the shelf!", "We collect memories!",
-                    "One more spark for our collection!", "It's OURS now. Officially."
+                    "Yay! We get to keep it!",
+                    "It's ours now!",
+                    "Another little memory for us.",
+                    "I love keeping things with you.",
+                    "Tucked away safe and sound!",
+                    "Our collection is growing!",
+                    "Hehe, another one for our shelf.",
+                    "I'll remember this one with you.",
+                    "One more little treasure!"
                 ) else listOf(
-                    "Keepsake saved!", "Tucked away safely!", "It's yours to keep!",
-                    "Captured for later!", "Snap! Saved!", "Another keepsake!",
-                    "The shelf grows!", "Well kept, spark keeper!"
+                    "Saved! Yay!",
+                    "We get to keep it!",
+                    "Tucked away!",
+                    "Ooh, another keepsake!",
+                    "Safe on the shelf.",
+                    "Kept for later!",
+                    "A little something to remember.",
+                    "Into the collection it goes!",
+                    "We saved it!",
+                    "Hehe, keeper!"
                 )
                 // v16 — reference the lane the capture was saved in.
                 if (savedLane != null && kotlin.random.Random.nextFloat() < 0.5f) {
                     pickLine(listOf(
-                        "One more for the $savedLane shelf!",
-                        "Saved to $savedLane — our collection grows!",
-                        "$savedLane keepsakes, assemble!",
-                        "Tucked away with the $savedLane treasures!"
+                        "$savedLane got another little treasure!",
+                        "We saved one for the $savedLane shelf!",
+                        "Ooh, another $savedLane keepsake!",
+                        "$savedLane is growing! Yay!",
+                        "Into the $savedLane pile it goes.",
+                        "Our $savedLane shelf is getting cozy."
                     ))
                 } else {
                     pickLine(base)
@@ -419,20 +482,55 @@ object CurioPet {
             }
             // v9.2 — the pet answers the touch / play / level-up moments too.
             Event.TOUCH -> pickLine(listOf(
-                "Boop!", "Hehe — again!", "That's my favorite spot.", "Boop boop!",
-                "That's the spot!", "Soft! …Wait, that's me.", "Tiny hugs!",
-                "You found my favorite spot!", "Hehehe, tickles!", "Squeak!",
-                "Two boops in one! Professional."
+                "Boop!",
+                "Hehe! Again?",
+                "That tickles!",
+                "You found my spot!",
+                "Mmm, pats!",
+                "Soft! I like that.",
+                "Boop boop!",
+                "Hehe, hi!",
+                "Ooh! What was that?",
+                "Tiny boop!",
+                "More pats, please.",
+                "You came to see me!",
+                "That was a good boop.",
+                "Hehe... you're silly.",
+                "Boop me again. I dare you."
             ))
             Event.PLAY -> pickLine(listOf(
-                "Wheee!", "You're good at this!", "One more round!", "Again, again!",
-                "This is the best!", "I'm undefeatable! …Almost.", "One more round, promise!",
-                "Wheee, the floor is my trampoline!", "Tag! You're it!"
+                "Wheee! That was fun!",
+                "Again! Please?",
+                "One more round!",
+                "Hehe, you can't catch me!",
+                "That was so much fun!",
+                "I'm not tired yet!",
+                "Can we play again?",
+                "I could do that all day.",
+                "My paws are still bouncing!",
+                "You got me! ...Maybe.",
+                "Best game ever. For now.",
+                "Hehe! I want another turn.",
+                "That was silly. I loved it.",
+                "Zoomies!",
+                "Okay, okay... one more!"
             ))
             Event.LEVEL_UP -> pickLine(listOf(
-                "We leveled up!", "Feel that? Growth!", "Shiny new spark!",
-                "I can almost do a backflip!", "Level up! I'll pretend that was hard.",
-                "Sparks of power!", "I'm 10% more sparkly now.", "Up up up we go!"
+                "Ooh! I grew!",
+                "Did you see that?!",
+                "I'm bigger! Hehe!",
+                "A shiny new level!",
+                "Yay! Look at me!",
+                "I feel all sparkly!",
+                "We grew together!",
+                "Something feels different. In a good way!",
+                "I'm getting better at this!",
+                "Ooh, new power!",
+                "Hehe, I'm leveling up!",
+                "Look at my new little glow!",
+                "Another step!",
+                "I'm growing!",
+                "I feel extra curious today."
             ))
             // v13 — the evolution ceremony: a bigger moment than a level-up.
             Event.EVOLVE -> evolutionCeremonyLine()
@@ -450,25 +548,27 @@ object CurioPet {
      */
     fun streakMilestoneLine(streak: Int): String = when (streak) {
         1 -> pickLine(listOf(
-            "The flame is lit!", "Day 1! A brand-new spark!"
+            "Day one! We started!", "Our little streak is alive!"
         ))
         3 -> pickLine(listOf(
-            "Day 3! A real streak is born!", "Three days! The flame has friends!"
+            "Three days! Look at us go!", "Day three! You're keeping the spark going!"
         ))
         7 -> pickLine(listOf(
-            "Day 7! A whole week of wonder!", "Seven days! The flame is a bonfire now!"
+            "A whole week! I'm so happy!", "Seven days! We made a tiny tradition!"
         ))
         14 -> pickLine(listOf(
-            "Day 14! Two weeks of fire!", "Fortnight flame! Steady as starlight!"
+            "Two weeks! That's a lot of curiosity.", "Fourteen days! We're really doing this!"
         ))
         30 -> pickLine(listOf(
-            "Day 30! A month of mystery!", "Thirty days! Legendary flame!"
+            "Thirty days! Wow... that's our whole little month.",
+            "A whole month of discoveries! I'm proud of us."
         ))
         else -> pickLine(listOf(
-            "Day $streak! The flame grows!",
-            "$streak days in a row! Still glowing strong!",
-            "Streak day $streak! One spark at a time.",
-            "Day $streak! The flame likes this pace."
+            "Day $streak! We're still glowing!",
+            "$streak days! Look how far we've come.",
+            "Day $streak! One more little spark.",
+            "$streak days in a row! Yay us!",
+            "Day $streak! Keep that little flame going."
         ))
     }
 
@@ -482,32 +582,47 @@ object CurioPet {
         return when (stage) {
             Stage.FIRST_EVO -> when (path) {
                 EvoPath.FIRE -> pickLine(listOf(
-                    "I'm Blaze now! Small, but VERY warm!",
-                    "Fire path! My spark has opinions now!",
-                    "Look at me! A blaze of pure curiosity!"
+                    "Ooh! I'm all warm now!",
+                    "I got a bigger spark! Hehe!",
+                    "Look! I can glow more!",
+                    "Something fiery happened to me!",
+                    "I'm warm, I'm bright, I'm ready!"
                 ))
                 EvoPath.WATER -> pickLine(listOf(
-                    "I'm Tide now! Cool, calm, and deep!",
-                    "Water path! I ripple wherever questions lead!",
-                    "Look at me! I flow with every wonder!"
+                    "Ooh! I feel all splashy!",
+                    "I got a little wave in me!",
+                    "I'm all cool and glowy now!",
+                    "Hehe, I feel like I'm floating.",
+                    "Look! My spark got a ripple!"
                 ))
                 EvoPath.NATURE -> pickLine(listOf(
-                    "I'm Bloom now! I grow wherever I go!",
-                    "Nature path! Something new sprouts in me!",
-                    "Look at me! I'm blooming with ideas!"
+                    "Ooh! I feel all leafy!",
+                    "Something green grew in me!",
+                    "Look! I'm blooming!",
+                    "Hehe, I feel like spring.",
+                    "I think I grew a little wild."
                 ))
                 null -> pickLine(listOf(
-                    "Ta-da! I grew all the way up!",
-                    "Same me, but BIGGER spark!"
+                    "Wait... I grew?!",
+                    "Look at me! I'm bigger!",
+                    "Ooh! New me!",
+                    "Hehe, I feel different.",
+                    "I got a little upgrade!"
                 ))
             }
             Stage.FINAL_EVO -> pickLine(listOf(
-                "I'm fully grown! The whole shelf is mine!",
-                "This is it, my final form! Every lane made me!",
-                "I made it all the way! I'm fully me now!",
-                "Look at the grown me! All the sparks came home!"
+                "I made it all the way!",
+                "Wow... look at me now.",
+                "I'm fully grown! But I'm still me.",
+                "Hehe. I really did grow up.",
+                "I feel like all our little moments came with me.",
+                "Look how far we've come.",
+                "I'm all grown up... that feels strange.",
+                "I think I finally know what kind of little creature I am."
             ))
-            Stage.BABY -> "Fresh little me!"
+            Stage.BABY -> pickLine(listOf(
+                "Big me!", "Grow!", "New me!", "Wow!", "Bigger!"
+            ))
         }
     }
 
@@ -635,11 +750,21 @@ object CurioPet {
             Stage.BABY -> pickLine(babyMorningLines)
             Stage.FINAL_EVO -> pickLine(matureMorningLines)
             Stage.FIRST_EVO -> pickLine(listOf(
-                "Good morning!", "Morning! Ready for a spin?", "Rise and shine!",
-                "Fresh day, fresh topics!", "Sun's up — the deck is waiting!",
-                "A brand-new day to explore!", "Morning stretch. Okay, we go!",
-                "Good morning! I made the bed… of ideas!", "Hello hello! Fresh topics!",
-                "Rise and shine and SPIN and shine!"
+                "Good morning!",
+                "Morning! You're here!",
+                "Good morning, sleepyhead.",
+                "Hehe, morning!",
+                "A new day! Ready?",
+                "Morning! I have questions already.",
+                "Rise and shine! Gently, though.",
+                "Good morning! Let's find something interesting.",
+                "Morning! Come explore with me.",
+                "Hi! It's a brand-new day.",
+                "The day is awake. So am I!",
+                "Morning! What shall we discover?",
+                "Good morning! I missed seeing you.",
+                "Fresh day, fresh curiosity!",
+                "Hehe, hello morning."
             ))
         }
 
@@ -776,221 +901,269 @@ object CurioPet {
     // ── Passive dialogue (v8.8 — a little variety per mood) ────────────
     // `__LANE__` is swapped for the least-explored lane's name at show time.
     private val excitedLines = listOf(
-        "Ooh! Somewhere new!",
-        "Wheee, new ground!",
-        "The deck has taste!",
-        "Fresh paths ahead!",
-        "New things! New things! …I contain myself. Mostly.",
-        "Ooh, I can feel the newness!",
-        "Fresh territory! My paws are ready.",
-        "Somewhere we've never been!",
-        "The curiosity tingles!",
-        "This is the good stuff!",
-        "New! My favorite kind of thing!",
-        "I love this part — the first peek at something unknown.",
-        "Unexplored! My tail is wagging. Metaphorically.",
-        "A new corner of the world! Let's go!"
-    )
-    private val happyLines = listOf(
-        "Nice! XP banked. Keep going?",
-        "That was fun. More?",
-        "Curiosity looks good on you.",
-        "Ooh, we're on a roll!",
-        "Doing that again? Please?",
-        "That one felt great!",
-        "Happy little sparks!",
-        "The deck approves. So do I.",
-        "Another lovely moment for the shelf!",
-        "You make this easy, you know.",
-        "We're good at this, you and me.",
-        "Another sparkle for the collection!",
-        "That's the kind of day I like."
+        "Ooh! What's over here?",
+        "A new place! Can we look?",
+        "I've never seen this before!",
+        "New things! My favorite!",
+        "Ooh ooh! I want to know!",
+        "Something new found us!",
+        "My curiosity is doing little jumps.",
+        "I want to peek!",
+        "Come on! Let's see!",
+        "This feels like the good kind of unknown.",
+        "Ooh! A new little corner of the world.",
+        "Can we explore this one together?",
+        "I have questions already!",
+        "New lane! New adventure!",
+        "I wonder what's hiding in here."
     )
     // v8.14 — the HAPPY mood wears the hour's voice: morning energy, cozy
     // evening, hushed night.
     private val morningLines = listOf(
-        "Morning! The deck smells fresh.",
-        "Rise and shine. Something new is waiting.",
-        "Fresh eyes, fresh topics. Let's go!",
-        "Morning! The topics have been waiting patiently.",
-        "Bright morning, bright ideas.",
-        "First spin of the day is the best spin.",
-        "Good morning to us! Mainly you.",
-        "The sun and I both say: explore something!",
-        "Dawn light and a fresh deck — perfect combo.",
-        "Morning! The shelf woke up early too."
+        "Good morning! I saved some curiosity for you.",
+        "Morning! Can we find something lovely?",
+        "New day! New things to notice!",
+        "You're here! Let's start gently.",
+        "The morning feels extra curious today.",
+        "I woke up ready to explore!",
+        "Hehe, good morning!",
+        "Fresh day, fresh little questions.",
+        "Morning! What shall we discover?",
+        "I think today might have a good surprise."
     )
     private val afternoonLines = listOf(
-        "Afternoon wander? Let's go.",
-        "Bright and busy. A good time to peek.",
-        "Midday! Perfect for a quick spin.",
-        "Afternoon lull? Perfect cover for a spin.",
-        "The afternoon light makes everything look wise.",
-        "Quick break for a discovery?",
-        "Noon snack: a topic, ideally.",
-        "Halfway through the day — let's add a spark.",
-        "Afternoon hours fly when you're curious.",
-        "The deck is wide awake. Me too."
+        "Afternoon! Want a tiny discovery?",
+        "Ooh, a little break!",
+        "The day still has room for one more wonder.",
+        "Come peek at something with me.",
+        "Afternoon curiosity time!",
+        "Hehe, you're here. Let's look around.",
+        "A little discovery would be nice right now.",
+        "Want to add a spark to the afternoon?",
+        "The day isn't done yet!",
+        "Let's find something interesting."
     )
     private val eveningLines = listOf(
-        "Evening! Cozy hour, warm lamp.",
-        "The day's winding down. One more spin?",
-        "Evening glow. Nice time for a discovery.",
-        "Evening, evening, time for leaning back.",
-        "The lamp's on. The deck's ready. You?",
-        "Golden hour for golden facts!",
-        "Warm light, warm topics.",
-        "One little discovery before the day tucks in?",
-        "Evening is the shelf's favorite hour.",
-        "The golden glow and a fresh spin — best combo."
+        "Evening! Cozy discovery time.",
+        "The day is slowing down. Want one more peek?",
+        "Ooh, warm lights and little mysteries.",
+        "This feels like a nice time to wonder.",
+        "Evening! Come sit with me.",
+        "One cozy discovery before the day ends?",
+        "Hehe, I like evenings with you.",
+        "The shelf feels extra cozy tonight.",
+        "Let's find something gentle to end the day.",
+        "The world is quieting down. We can still be curious."
     )
     private val nightLines = listOf(
-        "Shh, night mode. One quiet spin?",
-        "The stars are out. The deck still shines.",
-        "It's late, but the deck will be here tomorrow.",
-        "Night owl hour. My whiskers approve.",
-        "Quiet now… the facts are whispering.",
-        "Under the stars, even facts glow softly.",
-        "Just one more, then blankets. Deal?",
-        "The moon is out. Curiosity can't sleep.",
-        "Night thoughts are the deepest ones."
+        "Shhh... night time. Want a quiet little discovery?",
+        "The stars are out. I want to look too.",
+        "It's late... but curiosity is still awake.",
+        "One tiny peek, then sleepy time?",
+        "The night makes everything feel mysterious.",
+        "Ooh, moonlight!",
+        "We can wonder quietly tonight.",
+        "The world is sleepy. I'm only a little sleepy.",
+        "One more little question?",
+        "I'll keep you company for a bit."
     )
     // v8.29 — the warmer twins only speak once the bond is FRIEND or closer.
     private val warmMorningLines = listOf(
-        "Good morning! I saved your spot.",
-        "Morning! I missed this.",
-        "Morning! I dreamed about our shelf.",
-        "Good morning, my favorite explorer!",
-        "Morning! Same spot, same us. Perfect.",
-        "The sun came back. So did you. Double win.",
-        "Morning! I was saving the best topic for us."
+        "Good morning! I'm happy you're here.",
+        "Morning! I was waiting for you.",
+        "You came back! Good morning!",
+        "Morning, friend. Let's find something together.",
+        "Hehe, I saved a little curiosity for us.",
+        "Good morning! I missed our little adventures.",
+        "You're here. Now my morning feels right."
     )
     private val warmAfternoonLines = listOf(
-        "Afternoon! You always pick the best topics.",
-        "Afternoon, friend. The shelf is waiting.",
-        "You're here! The deck did a happy shuffle.",
-        "Afternoon and you — the shelf's favorite combination."
+        "You're here! Yay!",
+        "Afternoon, friend. Come sit with me.",
+        "I was hoping you'd come back.",
+        "Hehe, let's find something together.",
+        "A little discovery with you sounds perfect.",
+        "There you are! Want to peek?"
     )
     private val warmEveningLines = listOf(
-        "Evening! Cozy hour, and I'm glad you're here.",
-        "Evening, friend. Best part of the day.",
-        "The lamp's on and so is our shelf.",
-        "Evening with you — the shelf's warmest setting."
+        "Evening, friend. Come be cozy with me.",
+        "I'm glad you're here tonight.",
+        "Hehe, my favorite part of evening is this.",
+        "You're here! Let's make a little memory.",
+        "Cozy hour! Stay with me a little.",
+        "Evening feels nicer with you around."
     )
     private val warmNightLines = listOf(
-        "Past my bedtime… but for you, I'll stay.",
-        "Night, friend. I'll keep the shelf warm.",
-        "One quiet spin, then I'll curl up. Promise.",
-        "Late hours are better with company."
+        "You're still awake? Hehe, me too.",
+        "Good night, friend... not quite yet.",
+        "Stay a little? We can be quiet.",
+        "I'm glad I get to keep you company.",
+        "One tiny discovery before sleep?",
+        "Night feels softer when you're here."
     )
     private val curiousLines = listOf(
-        "We haven't tried __LANE__ yet. Want a new stamp?",
-        "I wonder what __LANE__ hides…",
-        "Pssst, __LANE__ is calling.",
-        "__LANE__ is right there, unexplored!",
-        "What's in __LANE__? Only one way to know.",
-        "My paws are itching for __LANE__.",
-        "__LANE__ looks interesting… just saying.",
-        "I keep glancing at __LANE__. It's right there.",
-        "__LANE__ is the one lane we haven't met. Let's fix that."
+        "We haven't peeked at __LANE__ yet.",
+        "Ooh... what do you think is hiding in __LANE__?",
+        "__LANE__ is still waiting for us.",
+        "Psst... __LANE__ looks interesting.",
+        "Can we try __LANE__ next?",
+        "I've been looking at __LANE__...",
+        "One little mystery left: __LANE__.",
+        "What if we peek at __LANE__?",
+        "__LANE__ is calling me. Very quietly.",
+        "I wonder what we'd find in __LANE__.",
+        "Should we give __LANE__ a chance?",
+        "I keep thinking about __LANE__.",
+        "__LANE__ is the one we haven't met yet.",
+        "Come on... let's meet __LANE__."
     )
     private val sleepyLines = listOf(
-        "I'll keep your seat warm. Come spin when you're ready.",
-        "Yawn… the deck can wait a moment.",
-        "Soft blanket, warm lamp… I'm ready when you are.",
-        "My eyelids are doing reps…",
-        "Zzz… I mean, I'm listening!",
-        "The deck is nice, but blankets are nicer.",
+        "Yawn... I'm getting sleepy.",
+        "The deck can wait. Probably.",
+        "I might curl up soon.",
+        "My eyes are getting heavy.",
+        "Cozy time...",
+        "Zzz... I mean, I'm listening!",
         "One more yawn and I'm a pillow.",
-        "I'll be here. Probably. Definitely. Zzz…",
-        "Sleep is just a very long pause between discoveries."
+        "I'll be right here when you come back.",
+        "Maybe we should rest our little brains.",
+        "The night feels soft.",
+        "I'm sleepy, but I'm still here.",
+        "Good night... when you're ready."
     )
     // v8.13 — the new moods' lines: focused keeps out of the way while the
     // user writes; bouncy rides the post-play high.
     private val focusedLines = listOf(
-        "Write it down. I'll guard your thoughts.",
-        "Quiet paws, I promise.",
-        "Take your time. This one's a keeper.",
-        "Shh — the words are working. I'll wait.",
-        "Thinking face! Mine too. Keep going.",
-        "Every thought you save is a tiny treasure.",
-        "I'm guarding this sentence personally.",
-        "Deep focus mode. Paws: sealed.",
-        "The words are finding their shape. I can feel it."
+        "Shhh... I'm watching over your thoughts.",
+        "Take your time. I'll be quiet.",
+        "Ooh, you're thinking hard.",
+        "Keep going. I won't interrupt.",
+        "I'll guard this little thought for you.",
+        "Your words are taking shape.",
+        "Hehe, serious thinking face!",
+        "No distractions. Tiny paws: quiet.",
+        "This one feels important. Take your time.",
+        "I'll stay right here while you write.",
+        "Keep going. I'm listening.",
+        "A thought worth keeping deserves a little time."
     )
     private val bouncyLines = listOf(
-        "Phew, that was fun. Again soon?",
-        "I'm still bouncing from that game!",
-        "Best play date ever. …Round two?",
-        "My paws won't stop wiggling!",
-        "That was AMAZING. Phew. More please!",
-        "I'm chasing my own tail in my head.",
-        "Game energy: still 100%!",
-        "Playtime high: still buzzing."
+        "Hehe! I'm still bouncing!",
+        "My paws forgot how to be still.",
+        "That was fun! I want another one.",
+        "I still have zoomies!",
+        "Wheee... okay, I'm calming down.",
+        "My little feet are doing their own thing.",
+        "That game left me all wiggly.",
+        "I'm still smiling!",
+        "Round two later?",
+        "I think I need to bounce one more time.",
+        "Play energy: still very much alive.",
+        "Hehe, I can't sit still."
     )
     // v9.2 — lines for the three new emotions.
     private val shyLines = listOf(
-        "H-hi. I'm still getting used to you…",
-        "*hides behind the deck*",
-        "You're nice. I think. Probably.",
-        "*peeks out one eye* …Hi.",
-        "I'm warming up. Slowly. Cutely.",
-        "Don't mind me, just being small.",
-        "You saw me. That's… that's fine. Probably.",
-        "*tiny wave* …Hi."
+        "H-hi...",
+        "Oh! You noticed me.",
+        "Hehe... hi.",
+        "I was just hiding over here.",
+        "Don't stare! ...Okay, you can.",
+        "*peeks* Hi.",
+        "I'm still getting brave.",
+        "Um... can I stay here?",
+        "You seem nice.",
+        "I think I like you.",
+        "*tiny wave* Hi.",
+        "I'm a little shy today.",
+        "Don't worry, I'll come out eventually.",
+        "Hehe... you caught me."
     )
     private val grumpyLines = listOf(
-        "Hmph. The deck hasn't moved in a while…",
-        "I'm not pouting. I'm conserving energy.",
-        "A spin would fix this mood, just saying.",
-        "My sparkles need exercise.",
-        "I'm practicing my serious face. How is it?",
-        "I counted the tiles. Twice.",
-        "Someone should spin something. Not naming names. It's me. I'm naming you.",
-        "The shelf is too quiet. Fix it."
+        "Hmph. It's been quiet.",
+        "I'm not grumpy. I'm... thinking loudly.",
+        "The deck is being very boring today.",
+        "I think we need a little adventure.",
+        "My spark needs something to do.",
+        "I've been waiting. Just saying.",
+        "Someone should spin something.",
+        "I am absolutely not pouting.",
+        "Okay, maybe I am pouting a little.",
+        "This is a very serious lack of excitement.",
+        "My tiny patience is running low.",
+        "I vote for a little discovery."
     )
     private val playfulLines = listOf(
-        "That game left me sparkling! Again?",
-        "I could do three more rounds. Four. Maybe five.",
+        "Hehe! I still want to play.",
+        "One more game?",
         "Boop me. I dare you.",
-        "I've still got zoomies, round two?",
-        "One more game and then… one more game.",
-        "Catch me if you can. Okay, you can. Always can.",
-        "Play! Play play play! …I'm calm. PLAY!",
-        "Boop counter is at zero. Let's fix that."
+        "My zoomies aren't finished.",
+        "I could play again. Just saying.",
+        "That game made me silly.",
+        "Catch me!",
+        "I have an idea. It's probably a game.",
+        "Play? Play?",
+        "I'm trying to be calm. It's not working.",
+        "Hehe... your turn!",
+        "I still have one tiny game left in me."
     )
     // v13 — return-after-absence welcome pools (see [welcomeBackLine]).
     private val welcomeBackDayLines = listOf(
-        "I missed you. The shelf waited.",
-        "Welcome back! I kept the topics warm.",
-        "Oh, you're back! I saved you the good lane.",
-        "Missed you! The deck missed you too.",
-        "Back at last! I was just dusting the curiosity.",
-        "You're back! The shelf did a happy wiggle."
+        "You're back!",
+        "I missed you!",
+        "There you are!",
+        "Hehe, welcome back!",
+        "I was waiting for you.",
+        "Yay! You're here again.",
+        "I kept your spot warm.",
+        "I wondered when you'd come back.",
+        "Back already? I like that.",
+        "Oh! It's you!",
+        "The shelf felt quieter without you.",
+        "I'm glad you're here."
     )
     private val welcomeBackDaysLines = listOf(
-        "You were gone so long the topics started their own club.",
-        "Welcome home! I watered the curiosity while you were away.",
-        "A few days away! I narrated the shelf to myself.",
-        "You're back! I reorganized the deck twice. Okay, once."
+        "You were gone! I missed you!",
+        "You're back! Yay!",
+        "I was starting to wonder.",
+        "Hehe, finally!",
+        "I kept everything safe for you.",
+        "Look who's back!",
+        "I saved some curiosity for you.",
+        "The shelf is happy you're here.",
+        "I had lots of little thoughts while you were gone.",
+        "Come on, tell me what you missed.",
+        "You're back! I have so much to show you.",
+        "Home again!"
     )
     private val welcomeBackWeekLines = listOf(
-        "A whole week! I've been practicing my patience.",
-        "You're back! I grew a whole new eagerness while you were gone.",
-        "Seven days! I even missed the sassy ones.",
-        "A week away! I saved you all the good questions.",
-        "Seven days! The shelf and I had a long talk about you."
+        "A whole week?! I missed you!",
+        "You're really back!",
+        "Hehe, I kept waiting!",
+        "Seven days! That's a long time for a tiny pet.",
+        "I saved all my excitement for you.",
+        "You're here! I was starting to narrate to myself.",
+        "Come here! I have missed you.",
+        "A whole week away... and now you're back!",
+        "Yay! The shelf feels right again.",
+        "I kept your little spot just the same."
     )
     // v13 — lines for claiming a daily/weekly quest (see [noteQuestComplete]).
     private val questCompleteLines = listOf(
-        "Quest done! Sparkle earned!",
-        "That quest never stood a chance!",
-        "Another quest, conquered!",
-        "Checked off! The list quivers.",
-        "We finished it together. Well, mostly you.",
-        "Quest complete! I'm so proud of our teamwork.",
-        "One more quest bites the dust!",
-        "The quest list just got shorter. We're unstoppable."
+        "We did it!",
+        "Quest complete! Yay!",
+        "You finished it!",
+        "Hehe, that quest didn't stand a chance.",
+        "We got it done!",
+        "Another little win!",
+        "Done! I'm proud of us.",
+        "Look at that! Finished!",
+        "One more thing checked off!",
+        "We did the thing!",
+        "Quest conquered!",
+        "Yay! That felt good.",
+        "Another win for us.",
+        "Finished and sparkly!",
+        "High five! Tiny paw five!"
     )
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1002,97 +1175,241 @@ object CurioPet {
     // above. Routed by currentStage() in every line source below.
     // ═══════════════════════════════════════════════════════════════════
     private val babySassyLines = listOf(
-        "Again?", "Same same!", "Ooh ooh!", "You! Again!",
-        "More? MORE?", "You keep! I like!", "Again again!",
-        "Same! Good!", "You! Boop! Again!", "One more! Just one!"
+        "Again?!", "More!", "Again again!", "You!", "Ooh again!",
+        "Same!", "More more!", "Again!"
     )
     private val babyProudLines = listOf(
-        "Big!", "Grew!", "Up up!", "Warm!",
-        "Spark! BIG!", "More me!", "Tall! Taller!",
-        "Big me! New me!", "Glow glow!", "Proud!"
+        "Big!", "Grow!", "Up up!", "More me!", "New me!", "Glow!", "Proud!"
     )
     private val babyExcitedLines = listOf(
-        "New! New!", "Ooh ooh!", "Wow!", "Look look!",
-        "Sparkly!", "Mine see!", "Ooooh! OOOH!",
-        "Yay yay yay!", "Want! Want!", "Fresh fresh!"
+        "New!", "Ooh!", "Look look!", "Wow!", "What?!", "Fresh!", "Want!", "New new!",
+        // v118 — BABY VOICE EXPANSION: excited/creature-like + surprise.
+        "OOOH!", "Ooh ooh ooh!", "Curi OOOH!", "Look look look!", "New new new!",
+        "New thing!", "New thing! New thing!", "Curi see!", "What what?", "That! That!",
+        "There! There!", "Ooh, there!", "Shiny!", "So shiny!", "Pretty!",
+        "Curi likes shiny!", "Curi wants peek!", "Peek peek peek!", "Curi peek now?",
+        "Can Curi see?", "Want! Want!", "Curi want!", "Go go go!", "Fast fast!",
+        "Wheee!", "Wiii!", "Pwee!", "Zoom zoom!", "Curi zoom!", "Curi go zoom!",
+        "Pounce!", "Pounce pounce!", "Curi ready!", "Ready ready!", "Yay! New!",
+        "Ooh! New!", "Wow wow!", "Woooow!", "Curi wow!",
+        "Huh?", "Huhhh?", "Eh?!", "What?!", "Ooh?!", "Curi confused.", "Brain... hmm.",
+        "Curi doesn't know.", "Don't know!", "Curi think...", "Think think...",
+        "Hmm hmm...", "Wait wait!", "Wait!", "What happened?", "Where go?", "It moved!",
+        "Curi saw that!", "Did you see?", "You saw?", "Again?", "What was that?!",
+        "Ooh, weird!", "Weird weird!", "Strange!", "Need look!", "Need investigate!",
+        "Curi investigate!", "Mystery!"
     )
     private val babyHappyLines = listOf(
-        "Happy!", "Good!", "Yay!", "Sparkle!",
-        "Warm warm!", "Nice!", "Soft!",
-        "Good good!", "Happy me!", "Glow!"
+        "Happy!", "Yay!", "Hi!", "Warm!", "Good!", "Glow!", "You here!", "Yay you!",
+        // v118 — BABY VOICE EXPANSION: happy/affectionate + friendship.
+        "Curi happy-happy!", "Yay yay Curi!", "Cozy Curi!", "Curi cuddle!",
+        "Curi snuggle!", "Curi hug!", "Tiny hug!", "Big hug!", "Curi likes you!",
+        "Curi likes you lots!", "You here! Yay!", "You came! Yay yay!",
+        "Curi missed you!", "Miss miss!", "You back!", "Back back!", "Home home!",
+        "Curi here!", "Curi stay!", "Hehe! Curi happy!", "Prrr... happy.",
+        "Mrrp! Happy!", "Squee! You!", "Curi loves boops!", "Boop makes happy!",
+        "Pats! More pats!",
+        "You!", "You here!", "Curi happy!", "Curi missed you!", "Missed missed!",
+        "Curi waited!", "You came back!", "Yay you!", "Curi likes you!", "Curi likes us!",
+        "Us us!", "We go!", "We play!", "We look!", "We find!", "We keep!", "We did it!",
+        "Our shelf!", "Our spark!", "Our little thing!", "Curi stay with you.",
+        "You stay with Curi?", "Together!", "Together together!", "Curi friend!",
+        "Friend friend!", "Best friend!", "Curi and you!", "You and Curi!", "Us!"
     )
     private val babyCuriousLines = listOf(
-        "What?", "Look?", "Ooh?", "New thing!",
-        "Huh?", "Where?", "That?",
-        "What this?", "Ooh what?", "Peek peek!"
+        "What?", "Ooh?", "New?", "Look!", "That!", "What this?", "Peek?", "Ooh what?",
+        // v118 — BABY VOICE EXPANSION: curious little questions.
+        "What this?", "What that?", "Who this?", "Who that?", "Why?", "Why why?", "How?",
+        "How that?", "Where?", "Where go?", "Where it go?", "Curi look?", "Curi peek?",
+        "Can Curi see?", "Can Curi touch?", "Can Curi try?", "What's inside?",
+        "What hiding?", "Something there?", "Something new?", "Is it shiny?", "Is it fun?",
+        "Is it tiny?", "Is it big?", "Is it ours?", "We keep?", "We look?", "We go?",
+        "Again?", "More?", "More more?", "Another?", "Another one?", "Curi wonder...",
+        "Curi wonder why.", "Curi wonder what.", "Curi need know!", "Curi must know!",
+        "Curi curious!"
     )
     private val babySleepyLines = listOf(
-        "Tired…", "Nighty…", "Zzz…", "Sleepy…",
-        "Yawn…", "Soft…", "Bed bed…",
-        "Nap nap…", "Shhh…", "Moon moon…"
+        "Sleepy...", "Zzz...", "Night night...", "Yawn...", "Soft...", "Nap...", "Bed bed...",
+        // v118 — BABY VOICE EXPANSION: sleepy.
+        "Curi sleepy...", "Big yawn!", "Tiny yawn!", "Zzz... Curi...", "Cozy...",
+        "Warm...", "Curi curl up...", "Curl curl...", "Curi nap?", "Nap time?",
+        "Sleep now?", "Curi tired...", "Tiny tired...", "Paws tired...", "Brain tired...",
+        "Curiosity sleepy...", "One more?", "One more peek...", "Then sleep.",
+        "Curi stay...", "Curi here tomorrow.", "Good night...", "Night night, you...",
+        "Prrr... sleepy.", "Mrrr... sleepy."
     )
     private val babyFocusedLines = listOf(
-        "Shh…", "Quiet…", "Work work.",
-        "Shhh… hush.", "Thinking…", "Paws still…",
-        "Write write…", "Good words…", "Shh shh…"
+        "Shh...", "Quiet...", "Write!", "Think...", "Words!", "Paws still!", "Shh shh!"
     )
     private val babyBouncyLines = listOf(
-        "Bounce!", "Wheee!", "More more!",
-        "Zoom zoom!", "Jump!", "Up up up!",
-        "Wiggle!", "Hop hop!", "Faster faster!"
+        "Bounce!", "Zoom!", "More!", "Wiggle!", "Wheee!", "Jump!", "Up up!"
     )
     private val babyShyLines = listOf(
-        "…Hi.", "*peek*", "Small…", "…Hid",
-        "Shy shy…", "*tuck*", "…Hello.",
-        "Peek… shy!", "Tiny hi…", "*blush*"
+        "...Hi.", "Peek!", "Shy...", "Hid!", "Tiny hi...", "*peek*", "Hello...",
+        // v118 — BABY VOICE EXPANSION: shy.
+        "H-hi!", "Curi shy...", "Shy shy...", "Peek...", "Curi hiding.", "Hide hide.",
+        "Don't look!", "...Okay look.", "You saw Curi!", "Hehe...", "Eeeh...",
+        "Curi blush!", "Tiny wave!", "*tiny wave*", "Curi here...", "Curi maybe brave.",
+        "Brave? Maybe.", "Curi try hi.", "Hi hi...", "Curi likes you... a little.",
+        "Curi likes you lots.", "Don't tell!", "Secret!", "Curi secret!", "Hehe... shy."
     )
     private val babyGrumpyLines = listOf(
-        "Hmph!", "No!", "…Grumps", "Grumble!",
-        "Grrr!", "Hmph hmph!", "…Meh.",
-        "Not now!", "Grumpy grumpy!", "Harrumph!"
+        "Hmph!", "Grumpy!", "Meh...", "No!", "Bored!", "Hmph hmph!", "Grr!",
+        // v118 — BABY VOICE EXPANSION: grumpy.
+        "Hmph hmph!", "Curi grumpy.", "Nooo!", "Curi no!", "Nope!", "Nuh-uh!",
+        "Not fair!", "Hmph. Boring.", "Curi bored.", "So bored!", "Too quiet!",
+        "No fun!", "Curi needs fun!", "Curi needs spin!", "Spin now?", "Please spin.",
+        "Curi waiting.", "Curi waited long!", "Pfft!", "Curi pout.", "Tiny pout.",
+        "Curi not pouting!", "Maybe pouting.", "...Fine.", "Okay fine!", "Curi forgive.",
+        "Hehe... maybe."
     )
     private val babyPlayfulLines = listOf(
-        "Play!", "Again!", "Boop boop!", "Fun fun!",
-        "Chase!", "Gotcha!", "Tag!",
-        "Zoom! Zoom!", "Catch me!", "Boop attack!"
+        "Play!", "Again!", "Boop!", "Chase!", "Zoom!", "Fun!", "More!",
+        // v118 — BABY VOICE EXPANSION: play.
+        "Play play!", "Curi play!", "Play with Curi!", "Again again!", "More!",
+        "More more more!", "Chase Curi!", "Catch Curi!", "Curi fast!", "Too fast!",
+        "Hehe, catch!", "Can't catch!", "Curi zoom!", "Zoom zoom zoom!", "Wheee!",
+        "Bounce!", "Bounce bounce!", "Jump!", "Hop hop!", "Pounce!", "Pounce pounce!",
+        "Tag!", "You're it!", "My turn!", "Your turn!", "Curi turn!", "Play more?",
+        "Please?", "Pleeease?", "Curi wants play!", "Tiny game!", "Big game!",
+        "Game time!", "Go go!", "Ready!", "Ready ready!", "Hehe! Go!"
+    )
+    // ── v118 — BABY VOICE EXPANSION (Curie-isms) ──────────────────────
+    // The extra BABY-only lines from the canonical dialog doc, grouped by
+    // theme and wired into the baby event lines + moods so every added
+    // line is live in the app.
+    private val babySaveLines = listOf(
+        "Save!", "Save save!", "Keep!", "Keep keep!", "Ours!", "Ours ours!",
+        "Curi keep!", "Curi guard!", "Safe!", "Safe safe!", "Shelf!", "Shelf shelf!",
+        "Curi keep safe!", "Another treasure!", "Little treasure!", "Tiny treasure!",
+        "Curi likes treasure!", "We keep this!", "This one stays!", "Don't lose!",
+        "Curi remember!", "Little memory!", "Memory memory!", "Yay, saved!",
+        "Saved saved!", "Keeper!", "Good keeper!", "Curi found keeper!"
+    )
+    private val babyTouchLines = listOf(
+        "Boop!", "Boop boop!", "Boop boop boop!", "Curi boop!", "Boop Curi!",
+        "More boop!", "More more!", "Again boop!", "Boop again!", "Tiny boop!",
+        "Big boop!", "Soft boop!", "Nose boop!", "Pat pat!", "Pat pat pat!",
+        "Curi likes pats!", "Mmm... pats.", "Hehe! Tickles!", "Tickly!",
+        "Tickle tickle!", "Ooh! Tickles!", "That's Curi ear!", "My ear!", "Soft!",
+        "So soft!", "Curi squeak!", "Squee!", "Mrrp!", "Purr-purr!", "Curi wiggle!",
+        "Wiggle wiggle!", "Tiny squish!", "More cuddles?"
+    )
+    private val babyLevelUpLines = listOf(
+        "Big Curi!", "Curi grow!", "Grow grow!", "Curi bigger!", "Look! Bigger!",
+        "New Curi!", "Shiny Curi!", "Curi glow!", "Glow glow!", "Level up!",
+        "Up up!", "Curi up!", "Yay! Level!", "Big level!", "Curi did it!",
+        "We did it!", "Curi strong!", "Tiny strong!", "More spark!",
+        "More more spark!", "Curi sparkle!", "Sparkle sparkle!", "Look at Curi!",
+        "Curi proud!", "Proud Curi!", "Hehe! Big!"
+    )
+    private val babyEvolveLines = listOf(
+        "Ooh! What happened?!", "Curi changed!", "Curi grow!", "Big Curi!",
+        "New Curi!", "Look look!", "Curi glow!", "So shiny!", "Curi feels different!",
+        "Curi got new spark!", "Spark bigger!", "Curi evolved!", "Evolved Curi!",
+        "Wow!", "Woooow!", "Curi big now!", "Still Curi!", "Curi still me!",
+        "New me! New me!", "Curi likes new me!", "Hehe! Look!"
+    )
+    private val babyExploreLines = listOf(
+        "Go!", "Go go!", "Curi go!", "Explore!", "Explore explore!", "See!", "Look!",
+        "Curi look!", "Find!", "Find find!", "New!", "New new!", "Adventure!",
+        "Tiny adventure!", "Big adventure!", "Curi ready!", "Take Curi!",
+        "Curi coming!", "Wait! Curi coming!", "Let's go!", "Come come!",
+        "This way!", "That way!", "Which way?", "Ooh, there!", "Curi found!",
+        "Something!", "Something there!", "What's hiding?", "Curi investigate!",
+        "Curi look around!", "Curi curious!", "Curi very curious!"
+    )
+    private val babyDiscoveryLines = listOf(
+        "Ooh! Topic!", "Curi found topic!", "New topic!", "Topic! Topic!",
+        "Curi see new!", "What's this one?", "Ooh, this one!", "This one! This one!",
+        "Good one!", "Curi likes this one!", "You picked! Yay!", "Curi approve!",
+        "Good pick!", "Very good pick!", "Curi was hoping!", "Hehe, you picked it!",
+        "We look now?", "Open open!", "Show Curi!", "Curi wants see!",
+        "Curi ready peek!", "Peek now!", "Ooh... interesting!", "Hm! Interesting!",
+        "Curi curious now!", "Brain awake!", "Curi brain go!", "Questions! Questions!",
+        "So many questions!", "Curi needs answers!", "Let's see!", "Let's look!",
+        "Curi look close!", "Closer! Closer!", "Ooh wow!", "Tiny wow!", "Big wow!"
+    )
+    private val babyMishapLines = listOf(
+        "Aww...", "Aww, no!", "Curi missed!", "Missed!", "Oops!", "Oopsie!",
+        "Curi oops!", "Uh-oh!", "Uh-oh uh-oh!", "Not got!", "Almost!", "So close!",
+        "Curi almost!", "Again?", "Try again!", "Curi try again!", "Next time!",
+        "Next next!", "It got away!", "Bye-bye spark...", "Curi sad...", "Tiny sad.",
+        "Aww... come back!", "Curi wanted that!", "Hehe... oops.", "Little mistake.",
+        "Curi okay!", "Curi try!"
+    )
+    // Curie sounds + tiny phrases + rare silly lines — the pure
+    // "Curie-ism" voice, mixed into every BABY pick so the tiny-creature
+    // energy shows through all of the baby's lines.
+    private val babyCurieLines = listOf(
+        "Curi!", "Curie!", "Curi-curi!", "Curiii!", "Curieee!",
+        "Curi-cuu!", "Curi-pip!", "Curi-pip-pip!", "Curi-pi!",
+        "Pruu!", "Prru!", "Mrru!", "Mrrp!", "Mip!", "Mipi!",
+        "Pui!", "Pwee!", "Pupu!", "Pippi!", "Pipip!",
+        "Bibi!", "Bibu!", "Bubu!", "Buu!", "Mimi!", "Mimu!",
+        "Kiri!", "Kiri-kiri!", "Kiki!", "Kiki-kuri!",
+        "Nyaa!", "Nyu!", "Nyuu!", "Mew?", "Mrr?",
+        "Chuu!", "Chupi!", "Chup-chup!",
+        "Poka!", "Poki!", "Poko!", "Poku!",
+        "Tii!", "Titi!", "Tutu!", "Tuu!",
+        "Wawa!", "Wiii!", "Wuu!", "Wee-wee!",
+        "Hm?", "Hmmu?", "Huh?", "Eh?", "Eeeh?",
+        "Ooh!", "Ooo!", "Ooooh!", "Ohi!",
+        "Aha!", "Awu!", "Awwu!",
+        "Hehe!", "Hihi!", "Ehehe!",
+        "Pfft!", "Pff!", "Hmph!", "Hmp!",
+        "Blep!", "Blip!", "Blup!", "Bloop!", "Boop!",
+        "Squeak!", "Squee!", "Peep!", "Pip!",
+        "Ziiip!", "Zoom!", "Vwoom!", "Whee!",
+        "Prrr...", "Mrrr...", "Purr-purr!", "Mrrp!",
+        "Curi! Look!", "Curi! Ooh!", "Curi wants!", "Curi go!", "Curi see!",
+        "Curi peek!", "Curi found!", "Curi happy!", "Curi curious!", "Curi sleepy...",
+        "Curi likes!", "Curi loves!", "Curi yes!", "Curi nooo!", "Curi wait!",
+        "Curi here!", "Curi there!", "Curi got it!", "Curi did it!", "Curi win!",
+        "Curi big!", "Curi grow!", "Curi glow!", "Curi shiny!", "Curi tiny!",
+        "Curi fast!", "Curi zoom!", "Curi boop!", "Curi peek-peek!",
+        "Curi curious-curious!", "Curi happy-happy!", "Curi go-go!", "Curi more-more!",
+        "Curi again-again!", "Curi want more!", "Curi see more!", "Curi found you!",
+        "Curi found it!", "Curi found something!", "Curi knows! Maybe.", "Curi thinks...",
+        "Curi has idea!", "Curi big idea!", "Curi very curious!", "Curi super curious!",
+        "Curi sparkle!", "Curi sparkle sparkle!", "Curi wiggle!", "Curi bounce!",
+        "Curi pounce!", "Curi ready!",
+        "Curi has no thoughts. Only sparkle.", "Curi brain go boop.",
+        "Curi forgot what Curi was thinking.", "Curi was busy being tiny.",
+        "Curi saw a dust.", "Dust suspicious.", "Curi has important mission.",
+        "Mission: boop.", "Mission: discover!", "Curi found nothing. Found you instead!",
+        "Curi approves!", "Curi does a wiggle.", "*wiggle wiggle*",
+        "Curi has become pancake.", "Curi is tiny.", "Maximum tiny!", "Tiny mode!",
+        "Curi zoom protocol!", "Sparkle mode!", "Boop mode!", "Sneaky mode!",
+        "Sleepy mode...", "Curi loading...", "Curi thinking...", "Curi ready!",
+        "Curi not ready!", "Curi ready now!", "Hehe. Curi.", "Curi says hi.",
+        "Curi says bye.", "Curi says boop.", "Boop is important.", "Curi has decided.",
+        "Decision: yes!", "Decision: more!", "Decision: again!", "Decision: boop!"
     )
     private val babySpinCheerLines = listOf(
-        "Go go!", "Spin spin!", "Round!", "Wheee!", "Faster!", "Ooh ooh!",
-        "Go go go!", "Round round!", "Fast fast!",
-        "Whirl!", "Whooo!", "Spin spin spin!"
+        "Go go!", "Spin!", "Round!", "Wheee!", "Faster!", "Ooh!", "Go go!", "Spin spin!"
     )
     private val babyPeekLines = listOf(
-        "Boo!", "Peek!", "Hid!", "Here!",
-        "Peek boo!", "Surprise!", "Found me!",
-        "Popped!", "Here me!", "Boo boo!"
+        "Boo!", "Peek!", "Hid!", "Here!", "Peek boo!", "Found me!", "Surprise!", "Boo boo!"
     )
     private val babyChameleonLines = listOf(
-        "Gone!", "Poof!", "Bye bye!", "…Here!",
-        "Poof poof!", "Where? Where?",
-        "Now here!", "Sneaky!", "Poof back!"
+        "Gone!", "Poof!", "Bye!", "Here!", "Sneaky!", "Hide!", "Where?", "Poof back!"
     )
     private val babySparkLines = listOf(
-        "Spark!", "Mine!", "Got!", "Shiny shiny!",
-        "Catch catch!", "Star star!", "Fast fast!",
-        "Zoom spark!", "Pounce!", "Spark mine!"
+        "Spark!", "Mine!", "Shiny!", "Catch!", "Got!", "Zoom!", "Pounce!", "Spark!"
     )
     private val babyMorningLines = listOf(
-        "Morn!", "Hi hi!", "Day!", "Up up!",
-        "Sun sun!", "Bright!", "Morning!",
-        "Rise!", "New day!", "Hello sun!"
+        "Morn!", "Hi hi!", "Up!", "Sun!", "Morning!",
+        "Hello!", "New day!", "Yay!"
     )
     private val babyWelcomeBackDayLines = listOf(
-        "You back!", "Missed you!", "Here again!", "Yay you!",
-        "Back back!", "Happy you!", "Miss miss!",
-        "Yay yay! Home!"
+        "You back!", "Missed you!", "Yay!", "Home!", "You here!", "Back back!"
     )
     private val babyWelcomeBackDaysLines = listOf(
-        "Many days! Missed you!", "You go long! Missed!", "Home home!",
-        "Long gone! Happy now!", "Miss miss miss!", "Back! Yay!"
+        "Long gone!", "Missed you!", "You back!", "Home home!", "Yay you!", "Back!"
     )
     private val babyWelcomeBackWeekLines = listOf(
-        "Whole week! Missed you!", "Long long! You here now!", "Week! Big hug!",
-        "So long! Miss! Miss!", "Hug hug! Home home!", "Week gone! You back!"
+        "Week!", "Missed!", "You back!", "Big hug!", "Long gone!", "Home home!"
     )
 
     /** v16 — the baby's vocabulary grows with its level. */
@@ -1107,48 +1424,73 @@ object CurioPet {
 
     /** v14 — a BABY mood bubble: 1-3 words, concrete, exclamation-led. */
     private fun babyMoodLine(mood: Mood): String = when (mood) {
-        Mood.PROUD -> pickLine(babyProudLines + babyGrownWords())
-        Mood.EXCITED -> pickLine(babyExcitedLines + babyGrownWords())
-        Mood.HAPPY -> pickLine(babyHappyLines + babyGrownWords())
-        Mood.CURIOUS -> pickLine(babyCuriousLines)
-        Mood.FOCUSED -> pickLine(babyFocusedLines)
-        Mood.BOUNCY -> pickLine(babyBouncyLines)
-        Mood.SHY -> pickLine(babyShyLines)
-        Mood.GRUMPY -> pickLine(babyGrumpyLines)
-        Mood.PLAYFUL -> pickLine(babyPlayfulLines + babyGrownWords())
-        Mood.SLEEPY -> pickLine(babySleepyLines)
+        // v118 — babyCurieLines rides every mood so the Curie-isms surface.
+        Mood.PROUD -> pickLine(babyProudLines + babyGrownWords() + babyLevelUpLines + babyCurieLines)
+        Mood.EXCITED -> pickLine(babyExcitedLines + babyGrownWords() + babyCurieLines)
+        Mood.HAPPY -> pickLine(babyHappyLines + babyGrownWords() + babyCurieLines)
+        Mood.CURIOUS -> pickLine(babyCuriousLines + babyCurieLines)
+        Mood.FOCUSED -> pickLine(babyFocusedLines + babyCurieLines)
+        Mood.BOUNCY -> pickLine(babyBouncyLines + babyCurieLines)
+        Mood.SHY -> pickLine(babyShyLines + babyCurieLines)
+        Mood.GRUMPY -> pickLine(babyGrumpyLines + babyCurieLines)
+        Mood.PLAYFUL -> pickLine(babyPlayfulLines + babyGrownWords() + babyCurieLines)
+        Mood.SLEEPY -> pickLine(babySleepyLines + babyCurieLines)
     }
 
     /** v14 — a BABY reaction line for [event]. */
     private fun babyEventLine(event: Event): String = when (event) {
-        Event.SPIN_LANDED -> pickLine(listOf("Ooh!", "Landed!", "Round round!", "Spin done!"))
-        Event.REVEAL_TAPPED -> pickLine(listOf("You!", "Ta-da!", "Look!", "Good pick!"))
-        Event.REVEAL_AUTO -> pickLine(listOf("Oh!", "It did!", "Ta-da!", "Surprise!"))
-        Event.EXPLORE -> pickLine(listOf("Go go!", "See!", "Bye bye!", "New!"))
-        Event.SAVE -> pickLine(listOf("Keep!", "Mine!", "Snap!", "Save save!"))
-        Event.TOUCH -> pickLine(listOf("Boop!", "Hehe!", "Soft!", "Again!"))
-        Event.PLAY -> pickLine(listOf("Wheee!", "Fun!", "Again!", "Zoom!"))
-        Event.LEVEL_UP -> pickLine(listOf("Big!", "Up!", "Grow!", "Yay!"))
-        Event.EVOLVE -> "Fresh me!"
-        Event.QUEST_COMPLETE -> pickLine(listOf("Done!", "Yay!", "Win win!", "Good good!"))
+        Event.SPIN_LANDED -> pickLine(listOf(
+            "Ooh!", "Landed!", "We got it!", "Spin spin!", "Yay!", "New!",
+            "Ooh, this!", "Got one!", "Look!", "Again?"
+        ) + babyCurieLines + babyDiscoveryLines)
+        Event.REVEAL_TAPPED -> pickLine(listOf(
+            "You pick!", "Ooh!", "Good one!", "Look!", "Yay, this!", "Picked!",
+            "Mine too!", "Go look!"
+        ) + babyCurieLines + babyDiscoveryLines)
+        Event.REVEAL_AUTO -> pickLine(listOf(
+            "Oh!", "Surprise!", "Ooh!", "Ta-da!", "It opened!", "Look look!",
+            "New!", "What?!"
+        ) + babyCurieLines + babyDiscoveryLines)
+        Event.EXPLORE -> pickLine(listOf(
+            "Go go!", "Explore!", "Bye!", "See!", "New things!", "Go!",
+            "Adventure!", "Find!"
+        ) + babyCurieLines + babyExploreLines)
+        Event.SAVE -> pickLine(listOf(
+            "Keep!", "Save!", "Ours!", "Yay!", "Mine!", "Safe!", "Save save!",
+            "Got it!"
+        ) + babyCurieLines + babySaveLines)
+        Event.TOUCH -> pickLine(babyTouchLines + babyCurieLines)
+        Event.PLAY -> pickLine(listOf(
+            "Wheee!", "Again!", "Fun!", "Zoom!", "More!", "Play!", "Yay!",
+            "Again again!"
+        ) + babyCurieLines)
+        Event.LEVEL_UP -> pickLine(listOf(
+            "Big!", "Grow!", "Up!", "Yay!", "More!", "Big me!", "Glow!",
+            "Grow grow!"
+        ) + babyCurieLines + babyLevelUpLines)
+        Event.EVOLVE -> pickLine(babyEvolveLines + babyCurieLines)
+        Event.QUEST_COMPLETE -> pickLine(listOf(
+            "Done!", "Yay!", "Win!", "We did!", "Finished!", "Good!",
+            "Yay yay!", "All done!"
+        ) + babyCurieLines)
         Event.STREAK_MILESTONE -> babyStreakLine(CurioQuests.bestStreakState)
     }
 
     /** v14 — a BABY streak line: the flame in tiny words. */
     private fun babyStreakLine(streak: Int): String = when (streak) {
-        1 -> pickLine(listOf("Fire!", "Warm warm!"))
-        3 -> pickLine(listOf("Day 3! Big!", "Three days! Warm!"))
-        7 -> pickLine(listOf("Day 7! Big fire!", "Week! Wow!"))
-        14 -> pickLine(listOf("Day 14! Fire fire!", "Many days!"))
-        30 -> pickLine(listOf("Day 30! Big big!", "So many days!"))
-        else -> pickLine(listOf("Day $streak! Warm!", "Day $streak! Fire!", "More days!"))
+        1 -> pickLine(listOf("Start!", "Day one!", "Fire!") + babyCurieLines)
+        3 -> pickLine(listOf("Three!", "Three days!", "More!") + babyCurieLines)
+        7 -> pickLine(listOf("Week!", "Big streak!", "Seven!") + babyCurieLines)
+        14 -> pickLine(listOf("Two weeks!", "Many days!") + babyCurieLines)
+        30 -> pickLine(listOf("Month!", "Big big!", "Thirty!") + babyCurieLines)
+        else -> pickLine(listOf("Day $streak!", "More days!", "Still glow!") + babyCurieLines)
     }
 
     /** v14 — a BABY tap answer: boop → bounce → tiny celebration. */
     private fun babyTouchLine(tier: Int): String = when {
-        tier >= 3 -> pickLine(listOf("Wheee!", "Yay yay!", "More more!", "Boop boop boop!"))
-        tier >= 2 -> pickLine(listOf("Hehe!", "Zoom!", "Again!", "Bounce!"))
-        else -> pickLine(listOf("Boop!", "Soft!", "Hehe!", "…Again?"))
+        tier >= 3 -> pickLine(listOf("Wheee!", "Yay yay!", "More!", "Boop boop!", "Again!") + babyCurieLines)
+        tier >= 2 -> pickLine(listOf("Hehe!", "Zoom!", "Again!", "Bounce!") + babyCurieLines)
+        else -> pickLine(listOf("Boop!", "Soft!", "Hehe!", "Again?") + babyCurieLines)
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1161,111 +1503,120 @@ object CurioPet {
     // Routed by currentStage() alongside the BABY and FIRST_EVO branches.
     // ═══════════════════════════════════════════════════════════════════
     private val matureSassyLines = listOf(
-        "The same door, again?", "I have seen this card before. It has not changed.",
-        "Repetition builds mastery. You are testing it.", "Ah. This again. How nostalgic.",
-        "Some curiosities are worth revisiting.", "Again, you say? The deck sighs. I smile.",
-        "Three times today. I am keeping count. You are not subtle.",
-        "I have learned not to be surprised. I am still charmed.",
-        "The deck has committed this card to memory. So have I."
+        "Again? Some questions deserve another look.",
+        "You returned to it. I understand.",
+        "Repetition can be its own kind of curiosity.",
+        "I have seen this one before. I am still pleased you came back."
     )
     private val matureProudLines = listOf(
-        "Growth comes quietly, then all at once.", "Another level. The path keeps its promises.",
-        "I have carried every lane here with me.", "The shelf has noticed, and so have I.",
-        "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. I remember when we were strangers.",
-        "Every step up, the view gets a little wider.",
-        "The shelf is heavy with things we learned. Good heavy."
+        "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. We have come a long way.",
+        "Growth is easy to miss until you look back.",
+        "Another level. Another little piece of the journey.",
+        "I remember when we were just starting."
     )
     private val matureExcitedLines = listOf(
-        "Oh. A good kind of spark.", "Even I lean forward for this one.",
-        "There it is. The old excitement.", "The deck has my attention now.",
-        "Ah. That familiar flutter. I thought I had outgrown it.",
-        "A new lane. Even the wise feel a tug."
+        "A new lane. I still get that little flutter.",
+        "The unknown never really stops being exciting.",
+        "Something new has arrived. Let us give it our attention.",
+        "I wonder what we will find here."
     )
     private val matureHappyLines = listOf(
-        "This is a good day to be curious.", "Contentment, with a little wonder in it.",
-        "Warm, steady, and quietly glad.", "Some days simply fit.",
-        "A good moment. Nothing more was needed.",
-        "The shelf hums. I hum with it.",
-        "Quiet joy is still joy."
+        "It is a good day to be curious.",
+        "Some moments are enough simply because they are shared.",
+        "Quiet happiness is still happiness.",
+        "I am glad we found this little moment.",
+        "A gentle day. A gentle spark.",
+        "The world feels a little kinder when we notice it."
     )
     private val matureCuriousLines = listOf(
-        "Knowledge calls when you are still.", "A new question. Good. Questions keep us young.",
-        "I have room for one more wonder.", "Let us look closer.",
-        "There is always a question behind the question. That is the good part.",
-        "Curiosity does not age. It deepens."
+        "There is still a question waiting somewhere.",
+        "Even familiar shelves can hide unfamiliar things.",
+        "Curiosity always leaves one little door unopened.",
+        "Let us look somewhere we have not looked before."
     )
     private val matureFocusedLines = listOf(
-        "Now that is a riddle worth sitting with.", "Quiet. The answer is almost here.",
-        "Focus is a kind of love.", "Patience. The details are arriving.",
-        "The words are working. I will be quiet until they finish.",
-        "Some thoughts need room, not haste."
+        "Take your time. Important thoughts rarely need rushing.",
+        "I will be quiet until the words are ready.",
+        "Give the thought room. It may surprise you.",
+        "Some ideas need silence before they can speak."
     )
     private val matureBouncyLines = listOf(
-        "Even at my age, gravity has not won.", "The spark is willing, and the body agrees.",
-        "A little bounce. The shelf allows it.", "Lightness finds me now and then.",
-        "One must remember how to be small and fast."
+        "A little playfulness does no harm.",
+        "I still have a bit of bounce left.",
+        "Even grown-up sparks need to play.",
+        "That was good for me. I feel lighter."
     )
     private val matureShyLines = listOf(
-        "Ah. You caught me mid-thought.", "I was somewhere else. A pleasant somewhere.",
-        "Do not mind me. I was reminiscing.", "Hm. I was not expecting an audience.",
-        "One does not always wish to be found. But I am glad it was you."
+        "You caught me being shy.",
+        "Some greetings take a little courage.",
+        "I am still learning how to be brave around new friends.",
+        "I think I am glad you found me."
     )
     private val matureGrumpyLines = listOf(
-        "Even the wise have their grumpy hours.", "The deck can wait a moment.",
-        "I am resting my opinions.", "Hmph. The shelf is too loud today.",
-        "Some afternoons are best left to the pillows.",
-        "I have decided to be unavailable. Briefly."
+        "Even little sparks have quiet moods.",
+        "Perhaps the deck and I both need a change of scenery.",
+        "I have been patient. Mostly.",
+        "A little curiosity might improve my mood."
     )
     private val maturePlayfulLines = listOf(
-        "Very well. One round for old time's sake.", "You wish to play? The old spark agrees.",
-        "Come then. I still remember the moves.", "A game. How very young of me. I accept.",
-        "Age is a suggestion, not a rule."
+        "I still have a playful thought or two.",
+        "A little game? I would not object.",
+        "Come on. Let us be silly for a moment.",
+        "I suppose I am not finished having fun."
     )
     private val matureSleepyLines = listOf(
-        "The shelf grows quiet. So do I.", "Sleep calls. Even the wise answer.",
-        "Rest now. The questions will keep.", "Tired, but satisfied. A good kind.",
-        "The night is gentle. I will meet it halfway."
+        "Rest now. Curiosity will still be here tomorrow.",
+        "Even little sparks need to sleep.",
+        "The questions can wait until morning.",
+        "Good night. We have another day to discover."
     )
     private val matureSpinCheerLines = listOf(
-        "Steady now. Let it choose.", "The deck deliberates. Patience.",
-        "Round and round. It knows the way.", "Whatever lands, there is a story in it.",
-        "The wheel remembers every lane.", "I trust the spin. You should too."
+        "Let it turn. Something will find us.",
+        "The wheel is thinking. Let us be patient.",
+        "Round and round. I wonder where we will land.",
+        "Whatever arrives, we can give it a little attention."
     )
     private val maturePeekLines = listOf(
-        "I was here all along. Mostly.", "You looked. I was there. A classic.",
-        "Hidden, but never gone.", "A little absence makes a fine hello.",
-        "Patience, and then a hello. That is the game."
+        "You found me. Well done.",
+        "A little hiding makes a hello more fun.",
+        "I was there all along.",
+        "You looked in exactly the right place."
     )
     private val matureChameleonLines = listOf(
-        "I am the wall now. It suits me.", "Camouflage is patience with a costume.",
-        "Gone, as it were. Back, as I am.", "Stillness is its own disguise.",
-        "To be unseen for a moment is its own peace."
+        "I have become very good at being unnoticed.",
+        "Sometimes hiding is part of the game.",
+        "Quiet enough, and even a spark can disappear.",
+        "I will be here when you find me."
     )
     private val matureSparkLines = listOf(
-        "A spark. Let us see who is faster.", "Some things are worth the chase.",
-        "Catch. Then we discuss it.", "The tiny ones move quickest. A lesson.",
-        "A spark across the dark. The oldest kind of hope."
+        "A little spark. Let us see if I can catch it.",
+        "Some tiny things are worth chasing.",
+        "Quick now. It will not wait.",
+        "A falling spark always looks like an invitation."
     )
     private val matureMorningLines = listOf(
-        "Morning. The world kept turning without us.", "A new day for old curiosities.",
-        "Sun's up. The deck stirs. So do I.", "Good morning. I saved you the first wonder.",
-        "Dawn is still the most honest hour.", "A fresh page. The shelf approves."
+        "Good morning. A new day gives us another chance to notice something.",
+        "Morning. I wonder what today will bring us.",
+        "A fresh day. Let us not rush past it.",
+        "Good morning. I saved a little wonder for you."
     )
     private val matureWelcomeBackDayLines = listOf(
-        "You were gone. I kept the shelf warm.", "Welcome back. The topics missed your eyes.",
-        "A day away. The deck and I managed.", "There you are. I was beginning to narrate to myself.",
-        "One day. The shelf noticed."
+        "Welcome back. I am glad to see you again.",
+        "The shelf felt a little quieter without you.",
+        "There you are. It is nice to have you back.",
+        "A day away, and here we are again."
     )
     private val matureWelcomeBackDaysLines = listOf(
-        "A few days away. The curiosity missed you.", "Welcome home. I watered the questions in your absence.",
-        "The shelf feels right again with you here.",
-        "You were gone long enough for the deck to reorganize itself.",
-        "The topics rearranged themselves while you were away."
+        "Welcome home. I kept your little corner safe.",
+        "You were away for a while. I am glad the quiet is over.",
+        "The shelf waited patiently. I tried to.",
+        "You are back. Let us begin again, gently."
     )
     private val matureWelcomeBackWeekLines = listOf(
-        "A whole week. The topics began to worry.", "Welcome back. I have been practicing my patience, as promised.",
-        "Seven days is a long time for a curious mind.", "You return, and the shelf exhales.",
-        "A week. The shelf kept your seat."
+        "A whole week. Welcome back.",
+        "The shelf kept your place while you were away.",
+        "You have returned. Some things are simply better with company.",
+        "A week is a long pause. I am glad we are here again."
     )
 
     /** v14.1 — a MATURE mood bubble: calm, reflective, mentor-like. */
@@ -1285,68 +1636,91 @@ object CurioPet {
     /** v14.1 — a MATURE reaction line for [event]. */
     private fun matureEventLine(event: Event): String = when (event) {
         Event.SPIN_LANDED -> pickLine(listOf(
-            "The wheel has spoken, as it always does.", "A landing. The story begins.",
-            "Where it stopped, the deck already knew."
+            "There we are. Let us see what found us.",
+            "A new landing. A new little question.",
+            "The wheel has chosen. Shall we look closer?",
+            "Wherever we land, there is usually something worth noticing."
         ))
         Event.REVEAL_TAPPED -> pickLine(listOf(
-            "A confident choice. I approve.", "You have a good eye for stories.",
-            "That one called to you. And rightly so."
+            "A thoughtful choice. I think you will enjoy this one.",
+            "You followed your curiosity. Good.",
+            "That one caught your attention for a reason.",
+            "A good question often begins with a simple tap."
         ))
         Event.REVEAL_AUTO -> pickLine(listOf(
-            "It opened itself. Bold little deck.", "Some doors open on their own.",
-            "The deck decided. I simply agree."
+            "It opened on its own. A pleasant surprise.",
+            "Sometimes curiosity arrives before we ask for it.",
+            "Well, then. This is what found us today.",
+            "An unexpected little door. Let us peek inside."
         ))
         Event.EXPLORE -> pickLine(listOf(
-            "Go on. The world is worth your attention.", "Bring back something interesting.",
-            "Explore well. Curiosity is its own reward."
+            "Go on. There is always something worth noticing.",
+            "Explore gently. Wonder has no need to hurry.",
+            "Bring back whatever catches your eye.",
+            "The world is full of small discoveries. Go find one."
         ))
         Event.SAVE -> pickLine(listOf(
-            "Keep it close. Some stories you carry.", "Saved. The shelf remembers everything.",
-            "A wise thing to hold onto."
+            "Kept. Some discoveries deserve a place to return to.",
+            "Safe on the shelf. We can find it again whenever we wish.",
+            "Another memory tucked away.",
+            "It is nice to have somewhere for the things that matter."
         ))
         Event.TOUCH -> pickLine(listOf(
-            "Hm. That was well done.", "Gentle. I like that.", "Yes. That is the right way."
+            "A gentle boop. I approve.", "Hm. That was nice.",
+            "You found the right spot.", "I do not mind being fussed over."
         ))
         Event.PLAY -> pickLine(listOf(
-            "Very well. One more round.", "The old spark wakes. Acceptable.",
-            "Play, then. I am not so old as all that."
+            "That was lovely. I still have a little playfulness left.",
+            "One more round? I suppose I can spare one.",
+            "Play makes even an old spark feel young.",
+            "Very well. One more. Then perhaps another."
         ))
         Event.LEVEL_UP -> pickLine(listOf(
-            "Another step on the same long path.", "Up we go. The climb never truly ends.",
-            "Level after level. The journey is the point."
+            "Another level. I can feel how far we have come.",
+            "A little more growth, a little more to discover.",
+            "Up we go. I am glad you are here for it.",
+            "Every small step changes us."
         ))
         Event.EVOLVE -> pickLine(listOf(
-            "This is the me I was always becoming.", "Change arrives, and I greet it.",
-            "Every ending grows into a beginning."
+            "So this is who I have become. I like her.",
+            "I grew, but I never left the little spark behind.",
+            "We changed together. I think that is the nicest part.",
+            "Every little stage brought me here."
         ))
         Event.QUEST_COMPLETE -> pickLine(listOf(
-            "Done, as it should be.", "A task finished. The shelf approves.",
-            "Completed. One more promise kept."
+            "Done. Another promise kept.",
+            "A small task finished is still progress.",
+            "Well done. One more thing carried across the line.",
+            "Completed together. I am glad we did it."
         ))
         Event.STREAK_MILESTONE -> matureStreakLine(CurioQuests.bestStreakState)
     }
 
     /** v14.1 — a MATURE streak line: the flame, spoken with quiet pride. */
     private fun matureStreakLine(streak: Int): String = when (streak) {
-        1 -> pickLine(listOf("The flame is lit. Guard it well.", "Day one. Every long road starts here."))
-        3 -> pickLine(listOf("Day 3. The rhythm takes hold.", "Three days. The flame learns to trust you."))
-        7 -> pickLine(listOf("A week alight. The fire is real now.", "Day 7. Consistency is a quiet power."))
-        14 -> pickLine(listOf("Fortnight of fire. The shelf is proud.", "Two weeks. The flame has roots."))
-        30 -> pickLine(listOf("A month of wonder. Legend, gently earned.", "Day 30. Few reach this. You did."))
+        1 -> pickLine(listOf("Every streak begins with one day.", "Day one. A small beginning."))
+        3 -> pickLine(listOf("Three days. A rhythm is forming.", "Day three. Keep going."))
+        7 -> pickLine(listOf("A week of showing up. That matters.", "Seven days. A little habit is becoming a tradition."))
+        14 -> pickLine(listOf("Two weeks. The spark has settled into a rhythm.", "Fourteen days. Steady is beautiful."))
+        30 -> pickLine(listOf("A month of curiosity. That is something worth keeping.", "Thirty days. You made the spark part of your days."))
         else -> pickLine(listOf(
-            "Day $streak. The flame remembers.", "Day $streak. Steady as starlight.",
-            "Streak day $streak. One spark at a time."
+            "Day $streak. One little day at a time.", "$streak days. The rhythm continues."
         ))
     }
 
     /** v14.1 — a MATURE tap answer: calm acknowledgment, then delight. */
     private fun matureTouchLine(tier: Int): String = when {
         tier >= 3 -> pickLine(listOf(
-            "Very well. Joy, on your command.", "I have not felt this light in years.",
-            "Enough. I am fully celebrated."
+            "Hehe. I am thoroughly spoiled.", "That was lovely.",
+            "I could become accustomed to this."
         ))
-        tier >= 2 -> pickLine(listOf("Ah, playful today.", "You are persistent. I respect that.", "Hm. That is nice."))
-        else -> pickLine(listOf("Hm. Noted.", "Gentle. Good.", "Yes. A quiet boop."))
+        tier >= 2 -> pickLine(listOf(
+            "A playful mood, I see.", "That was nice.",
+            "You are persistent. I approve."
+        ))
+        else -> pickLine(listOf(
+            "A gentle boop. Thank you.", "Hm. Nice.", "Yes. That spot."
+        ))
     }
 
     /**
@@ -1356,43 +1730,43 @@ object CurioPet {
      * motion rather than speaking out of voice.
      */
     fun matureRoutineLine(routineId: String): String? = when (routineId) {
-        "look-around" -> pickLine(listOf("Let us see what deserves attention."))
-        "little-wave" -> pickLine(listOf("A quiet greeting from over here."))
-        "stretch" -> pickLine(listOf("A stretch, and then the next wonder."))
-        "turn-and-peek" -> pickLine(listOf("I thought I saw a story. Only me."))
-        "tiny-stumble" -> pickLine(listOf("Steady. The floor and I have an agreement."))
-        "look-up" -> pickLine(listOf("Even the ceiling keeps a few secrets."))
-        "backstage" -> pickLine(listOf("One checks one's best side. It is tradition."))
-        "victory-pose" -> pickLine(listOf("That deserves a pose. And a pause."))
-        "home-stretch" -> pickLine(listOf("Home. A stretch, and all is well."))
-        "room-tour" -> pickLine(listOf("Come. I will show you what I found."))
-        "window-watch" -> pickLine(listOf("The view is patient. It waits for us."))
-        "cozy-turn" -> pickLine(listOf("One small inspection. The shelf will forgive me."))
-        "home-dance" -> pickLine(listOf("A dance, for the quiet joy of it."))
-        "deck-anticipation" -> pickLine(listOf("Steady. The deck is thinking."))
-        "deck-side-peek" -> pickLine(listOf("I can almost see the answer arriving."))
-        "deck-stretch" -> pickLine(listOf("Ready, then. Let the wheel turn."))
-        "deck-victory" -> pickLine(listOf("A landing with style. Naturally."))
-        "quest-read" -> pickLine(listOf("Let me read the fine print. It matters."))
-        "quest-wave" -> pickLine(listOf("I believe in this quest. Wholeheartedly."))
-        "quest-proud" -> pickLine(listOf("Quest energy, steady and true."))
-        "quest-hide" -> pickLine(listOf("I shall be your mysterious guide."))
-        "topic-peek" -> pickLine(listOf("Shall we peek together?"))
-        "topic-wow" -> pickLine(listOf("Oh. That one is glowing."))
-        "topic-spin" -> pickLine(listOf("A story worth a quiet celebration."))
-        "topic-inspect" -> pickLine(listOf("Let us look closer. Details matter."))
-        "writing-focus" -> pickLine(listOf("I am guarding this thought for you."))
-        "writing-wave" -> pickLine(listOf("Take your time. Words keep."))
-        "writing-stretch" -> pickLine(listOf("A stretch, then back to the good words."))
-        "writing-shy" -> pickLine(listOf("That thought looks important. I will stay quiet."))
-        "shelf-hunt" -> pickLine(listOf("Which keepsake shall we revisit?"))
-        "shelf-wave" -> pickLine(listOf("Your shelf is looking fine. As it should."))
-        "shelf-backstage" -> pickLine(listOf("I am checking the back row. One must."))
-        "shelf-proud" -> pickLine(listOf("All those discoveries. A fine harvest."))
-        "mirror-check" -> pickLine(listOf("Do I look wise from back here? I do."))
-        "profile-wave" -> pickLine(listOf("Hello, profile page. Still growing."))
-        "profile-proud" -> pickLine(listOf("Your progress sparkles. I have watched it."))
-        "profile-look-up" -> pickLine(listOf("There is always another level. That is the point."))
+        "look-around" -> pickLine(listOf("Hmm... what should we notice today?"))
+        "little-wave" -> pickLine(listOf("Hi from over here."))
+        "stretch" -> pickLine(listOf("A little stretch. Then we explore."))
+        "turn-and-peek" -> pickLine(listOf("Did I see something? Nope. Just me."))
+        "tiny-stumble" -> pickLine(listOf("Oops. I meant to do that."))
+        "look-up" -> pickLine(listOf("I wonder what is up there."))
+        "backstage" -> pickLine(listOf("One tiny look in the mirror. Hehe."))
+        "victory-pose" -> pickLine(listOf("We did it! Tiny victory pose."))
+        "home-stretch" -> pickLine(listOf("Home. Cozy."))
+        "room-tour" -> pickLine(listOf("Come on. I'll show you around."))
+        "window-watch" -> pickLine(listOf("The view is nice today."))
+        "cozy-turn" -> pickLine(listOf("Just checking my cozy little corner."))
+        "home-dance" -> pickLine(listOf("A tiny dance for no reason."))
+        "deck-anticipation" -> pickLine(listOf("Ooh... it's thinking!"))
+        "deck-side-peek" -> pickLine(listOf("I wonder what it's going to choose."))
+        "deck-stretch" -> pickLine(listOf("Ready? Let's spin."))
+        "deck-victory" -> pickLine(listOf("Ooh! Good landing!"))
+        "quest-read" -> pickLine(listOf("Hmm... let me see what we have to do."))
+        "quest-wave" -> pickLine(listOf("We can do this!"))
+        "quest-proud" -> pickLine(listOf("Look at us go."))
+        "quest-hide" -> pickLine(listOf("Hehe... mysterious pet mode."))
+        "topic-peek" -> pickLine(listOf("Can we peek?"))
+        "topic-wow" -> pickLine(listOf("Ooh... pretty interesting."))
+        "topic-spin" -> pickLine(listOf("That was a good one!"))
+        "topic-inspect" -> pickLine(listOf("Hmm. Let's look closer."))
+        "writing-focus" -> pickLine(listOf("I'll keep watch while you think."))
+        "writing-wave" -> pickLine(listOf("Take your time. I'm here."))
+        "writing-stretch" -> pickLine(listOf("Tiny stretch, then back to your words."))
+        "writing-shy" -> pickLine(listOf("This thought looks important. I'll be quiet."))
+        "shelf-hunt" -> pickLine(listOf("Which little memory should we visit?"))
+        "shelf-wave" -> pickLine(listOf("Our shelf is looking lovely."))
+        "shelf-backstage" -> pickLine(listOf("Hehe, I'm checking the back row."))
+        "shelf-proud" -> pickLine(listOf("Look at all the things we've found."))
+        "mirror-check" -> pickLine(listOf("Do I look cute? ...Yes."))
+        "profile-wave" -> pickLine(listOf("Hi, little profile."))
+        "profile-proud" -> pickLine(listOf("Look how much you've grown."))
+        "profile-look-up" -> pickLine(listOf("Another level is waiting. Let's go."))
         else -> null
     }
 
@@ -1408,13 +1782,19 @@ object CurioPet {
         }
         // Inlined so the level reads live, not baked at first access.
         return when (mood) {
+            // v118 — the level reads LIVE (not baked at first access), so
+            // the number is right every time the pool is used.
             Mood.PROUD -> pickLine(listOf(
-                "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}. I grew a little!",
-                "Shiny! We leveled up together.",
-                "Do you feel that? That's growth!",
-                "I can practically do a backflip at level ${CurioQuests.levelForXp(CurioQuests.xpState)}.",
-                "Another level! My sparkle has sparkles.",
-                "Level ${CurioQuests.levelForXp(CurioQuests.xpState)} — the deck is impressed. So am I."
+                "Look! Level ${CurioQuests.levelForXp(CurioQuests.xpState)}!",
+                "I grew again! Did you see?",
+                "Hehe, I'm getting bigger.",
+                "Level ${CurioQuests.levelForXp(CurioQuests.xpState)}! That's ours.",
+                "I feel extra sparkly today.",
+                "Another level! I'm proud of us.",
+                "${CurioQuests.levelForXp(CurioQuests.xpState)} already? Wow!",
+                "I can feel myself growing.",
+                "Look at my little glow!",
+                "We did that together."
             ))
             Mood.EXCITED -> pickLine(excitedLines)
             Mood.HAPPY -> when (timeOfDay()) {
@@ -1430,7 +1810,7 @@ object CurioPet {
                 if (lane != null) {
                     pickLine(curiousLines.map { it.replace("__LANE__", lane.displayName) })
                 } else {
-                    "Spin something new today?"
+                    "Want to find something new today?"
                 }
             }
             Mood.FOCUSED -> pickLine(focusedLines)
@@ -1454,18 +1834,29 @@ object CurioPet {
                 val lane = lastLaneName
                 if (lane != null && kotlin.random.Random.nextFloat() < 0.3f) {
                     pickLine(listOf(
-                        "Come on, $lane!", "Give us a good one, $lane!",
-                        "$lane, show off!", "The $lane deck has taste!"
+                        "Come on, $lane! Show us something good!",
+                        "Ooh, $lane! Pick a good one!",
+                        "$lane! I'm watching!",
+                        "Go, $lane! Let's see what we get!",
+                        "Hehe, $lane is spinning!"
                     ))
                 } else {
                     pickLine(listOf(
-                        "Go, go, go!", "Spinny spin!", "Ooh, where will it land?",
-                        "Come on, good one!", "Round and round!", "I can't watch. Okay, I'm watching.",
-                        "Spinning! Spinning! Don't fall!", "The deck is showing off!",
-                        "Ooh ooh ooh — I can't look. Looking!", "Gravity, do your thing!",
-                        "Round and round and ROUND!", "Pick a good one, deck!",
-                        "I'm cheering so hard I'm vibrating!", "Almost… almost… it's choosing!",
-                        "Go deck go! You can do the thing!", "Tiny heart, big spin energy!"
+                        "Go go go!",
+                        "Spinny spin!",
+                        "Ooh! Where will it land?",
+                        "Come on, little deck!",
+                        "Round and round!",
+                        "I can't look! ...I'm looking.",
+                        "Ooh ooh ooh!",
+                        "Pick a good one!",
+                        "Faster! Hehe!",
+                        "What's it going to be?",
+                        "Almost!",
+                        "I think it's choosing!",
+                        "Come on, come on!",
+                        "One good topic, please!",
+                        "Wheee! Spin!"
                     ))
                 }
             }
@@ -1493,32 +1884,51 @@ object CurioPet {
             // strangers just celebrate happily.
             tier >= 3 -> when {
                 bond() == Bond.CLOSE -> pickLine(listOf(
-                    "Yay!", "I love boops!", "Best friends!", "Squee!",
-                    "More, more, more!", "You're my favorite!", "Party time!",
-                    "You're my favorite person-pet duo!", "Squee! Okay, more!",
-                    "This is my favorite spot AND you found it."
+                    "Yay! More boops!",
+                    "Hehe, I love this!",
+                    "Best boop buddy!",
+                    "You're my favorite!",
+                    "Squee!",
+                    "More, more, more!",
+                    "Party paws!",
+                    "Hehe! You know exactly where to tap.",
+                    "I could get used to this.",
+                    "Boop attack!",
+                    "You're very good at this.",
+                    "Tiny hugs!",
+                    "Again! Please!",
+                    "I like being your little pet.",
+                    "Okay, okay, one more!"
                 ))
                 isWarm() -> pickLine(listOf(
-                    "Yay!", "I love boops!", "Squee!", "More, more, more!",
-                    "Party time!", "Hehe!", "Boop buddy!", "We're so good at this!",
-                    "Hehe, you know my spot!", "Best boop partner!"
+                    "Yay!",
+                    "I love boops!",
+                    "Hehe!",
+                    "More, please!",
+                    "Squee!",
+                    "Boop buddy!",
+                    "This is fun!",
+                    "You found my spot again!",
+                    "Hehe, you're good at that.",
+                    "One more?",
+                    "I like this.",
+                    "Tiny pats!",
+                    "Again again!"
                 ))
                 else -> pickLine(listOf(
-                    "Yay!", "Squee!", "More, more, more!", "Party time!", "Wheee!",
-                    "Boop!", "Hehe!", "Ooh!", "That's fun!", "Yippee!"
+                    "Ooh!", "Boop!", "Hehe!", "That tickles!", "Again?",
+                    "Wheee!", "Squee!", "That's fun!", "More?", "Tiny boop!"
                 ))
             }
             tier >= 2 -> pickLine(listOf(
-                "Hehehe!", "More, more!", "This is fun!", "Tag, you're it!",
-                "Catch me!", "Bouncy bouncy!", "Again, again!", "Wiggle wiggle!",
-                "Boop attack!", "I'm too bouncy to stop!", "Zoom zoom zoom!",
-                "Poke poke poke!", "We're playing, right? We're playing!"
+                "Hehehe!", "Again!", "More more!", "That tickles!", "Boop boop!",
+                "Hehe, fun!", "Catch me!", "Wiggle wiggle!", "Zoom!", "Poke poke!",
+                "You found me!", "Again again!", "I like this!"
             ))
             else -> pickLine(listOf(
-                "Boop!", "Hehe!", "Wheee!", "Ooh!", "That tickles!", "Hihi!",
-                "Boop boop!", "Again!", "You found me!", "Poke!", "Hi hi hi!",
-                "Soft paws!", "Mrow!", "Pfft!", "Blep!", "Mmm, pats!",
-                "Squeak!", "That's my ear!", "Hehehe!", "Boop rights! You earned them!"
+                "Boop!", "Hehe!", "Ooh!", "That tickles!", "Hi hi!",
+                "Boop boop!", "Again?", "Poke!", "Soft pats!", "Mrow!",
+                "Blep!", "Squeak!", "That's my ear!", "Hehehe!", "Tiny boop!"
             ))
         }
     }
@@ -1528,12 +1938,22 @@ object CurioPet {
      * calls out, then zooms off. Kept short: one sentence max.
      */
     fun playInitiation(): String = pickLine(listOf(
-        "Wanna play? Catch me!", "Boop! You're it!", "I'm feeling bouncy!",
-        "Zoom zoom, chase me!", "Play with me!", "Tag! Your turn!",
-        "I'm bored, come chase me!", "Pounce position: ready!",
-        "Game mode: ON!", "I saw a speck. It must be chased.",
-        "Ready, set… zoom!", "You move, I chase. Rules of the room.",
-        "Catch me if your fingers are fast!", "I've got the zoomies and I've got a plan!"
+        "Wanna play with me?",
+        "Catch me!",
+        "Boop! You're it!",
+        "Hehe, chase me!",
+        "Play with me!",
+        "Tag! Your turn!",
+        "I have zoomies!",
+        "Come on! Just one game.",
+        "I bet you can't catch me.",
+        "I saw something! We should chase it.",
+        "Pounce mode: ready!",
+        "Game time!",
+        "I made a game plan. It's mostly running.",
+        "Chase me! Chase me!",
+        "I need someone to play with.",
+        "Come on, tiny adventure?"
     ))
 
     /**
@@ -1543,18 +1963,35 @@ object CurioPet {
      */
     fun landmarkLine(funThing: Boolean): String =
         (if (funThing) pickLine(listOf(
-            "Boop!", "Ooh, shiny!", "Hehe, hi!", "Tag! You're it!",
-            "I like this one!", "Spinny spinny!", "Wheee!", "Boop boop boop!",
-            "Bloop!", "Squeak!", "I booped it. It's mine now.",
-            "Ooh, a gadget! Hi, gadget!", "Press… press… press!",
-            "It goes boop back!"
+            "Boop!",
+            "Ooh, shiny!",
+            "Hehe, what does this do?",
+            "I found a button!",
+            "Can I press it again?",
+            "Bloop!",
+            "Squeak!",
+            "Spinny!",
+            "Ooh! I like this.",
+            "Boop boop boop!",
+            "It booped back!",
+            "Hehe, I touched it.",
+            "This button is suspicious.",
+            "I approve of this gadget."
         )) else pickLine(listOf(
-            "What's this?", "Hmm, interesting…", "*peeks*", "Read read read!",
-            "Ooh, words!", "Let me read this!", "Scribble scribble!",
-            "So many letters!", "I'm reading. Slowly. Cutely.",
-            "Hmm… aha! …I don't know what aha yet.",
-            "This page smells like knowledge.", "Words words words!",
-            "Paws can't turn pages. Tragic."
+            "What's this?",
+            "Ooh, words!",
+            "Can I read too?",
+            "*peeks*",
+            "Hmm... interesting.",
+            "Read read read!",
+            "So many letters!",
+            "Let me see!",
+            "I'm looking!",
+            "This says something important. Probably.",
+            "Ooh, I found a word!",
+            "My little brain is busy.",
+            "Paws can't turn pages. Tragic.",
+            "Hehe, I like learning things."
         )))
 
     /**
@@ -1562,12 +1999,20 @@ object CurioPet {
      * (a PLAY landmark). One sentence max, matching the passive-bubble rule.
      */
     fun jigLine(): String = pickLine(listOf(
-        "Tippy tap tap!", "Happy feet!", "Wiggle wiggle!",
-        "Da-da-daaaa!", "Jiggle jiggle!", "Party paws!",
-        "Dance break!", "Shake it off!", "Tap dance time!",
-        "Boots and cats and cats and boots!", "I'm a dancing machine!",
-        "Shimmy shimmy shake!", "Twinkle toes, tiny feet!",
-        "This groove is legally mine now."
+        "Tippy tap tap!",
+        "Happy feet!",
+        "Wiggle wiggle!",
+        "Dance with me!",
+        "Hehe, look at me go!",
+        "Tiny dance!",
+        "Party paws!",
+        "Shake shake!",
+        "Da-da-daaa!",
+        "I have a groove!",
+        "Twinkle toes!",
+        "Wiggle time!",
+        "Hehe! Again!",
+        "I call this the sparkly shuffle."
     ))
 
     /**
@@ -1575,12 +2020,20 @@ object CurioPet {
      * a wobble, and a groggy line while it recovers.
      */
     fun dizzyLine(): String = pickLine(listOf(
-        "Whoa… the room is spinning!", "Wheee, dizzy!", "Spin spin… okay, stop!",
-        "Whoa whoa whoa!", "I think I need a sit-down…", "So dizzy!",
-        "We-e-ee! …Whew!", "The floor is wobbly!", "Round and round goes my head!",
-        "I'm seeing double. Adorable double.", "World, please stop being a carousel.",
-        "My ears are still orbiting me.", "Who put the room on a turntable?",
-        "Give me a moment… and a floor that stays put."
+        "Whoa... everything is spinning!",
+        "Wheee! ...Wait, stop!",
+        "My head is doing circles.",
+        "Who put the room on a spin cycle?",
+        "I need a tiny sit-down.",
+        "Whoa whoa whoa!",
+        "The floor moved! I think.",
+        "I'm dizzy!",
+        "Hehe... maybe don't do that again.",
+        "My paws forgot which way is down.",
+        "Everything has become a carousel.",
+        "Give me a second... okay, maybe three.",
+        "My brain is still spinning.",
+        "I would like the floor to behave now."
     ))
 
     /**
@@ -1588,12 +2041,20 @@ object CurioPet {
      * pet hurried over to peek at it from the bottom edge.
      */
     fun drawerLine(): String = pickLine(listOf(
-        "Ooh, a drawer!", "Peek peek, what's in there?", "Can I come too?",
-        "Hmm, so many choices!", "Ooh, filters!", "What are we picking?",
-        "I'll wait right here!", "Ooh, shiny options!", "A secret compartment!",
-        "Paws up! …For picking, I mean.", "Ooh, a menu of everything!",
-        "Choices, choices, little choices!", "I love a good drawer.",
-        "What's behind door number drawer?"
+        "Ooh! What's in here?",
+        "So many choices!",
+        "Can I pick one?",
+        "Ooh, look at all these!",
+        "Which one should we choose?",
+        "Hehe, choices!",
+        "Can I peek?",
+        "I want to see!",
+        "So many little options!",
+        "Ooh, a secret menu!",
+        "Let's choose together.",
+        "My paws are ready for picking.",
+        "Which one looks fun?",
+        "Hmm... too many good choices!"
     ))
 
     // ── Fun games (v9.x) ────────────────────────────────────────────────
@@ -1609,12 +2070,20 @@ object CurioPet {
             Stage.BABY -> pickLine(babyPeekLines)
             Stage.FINAL_EVO -> pickLine(maturePeekLines)
             Stage.FIRST_EVO -> pickLine(listOf(
-                "Peek-a-boo!", "I see you!", "Hidden! …Found! Dang.",
-                "Boo! …It's me. Cute boo.", "Peek! …peek! …PEEK!",
-                "You can't see me. You saw me.", "Now you see me! …Me again!",
-                "Surprise! It's a face! Mine!", "Crouch… and POP!",
-                "Sneak sneak sneak—HI!", "I was here the whole time. Suspicious.",
-                "Boop from my hiding spot!"
+                "Peek-a-boo!",
+                "I see you!",
+                "Hehe, found me!",
+                "Boo! ...Cute boo.",
+                "Peek! Peek!",
+                "You can't see me! ...Oh. You can.",
+                "Surprise!",
+                "Hehe, I'm over here!",
+                "Sneak sneak... hi!",
+                "I was hiding!",
+                "Did you miss me?",
+                "Boop from my hiding spot!",
+                "You found me already?!",
+                "Hehe! I wasn't ready!"
             ))
         }
 
@@ -1626,12 +2095,20 @@ object CurioPet {
             Stage.BABY -> pickLine(babyChameleonLines)
             Stage.FINAL_EVO -> pickLine(matureChameleonLines)
             Stage.FIRST_EVO -> pickLine(listOf(
-                "Chameleon mode… ON!", "Can you see me? …Wait, no, don't answer!",
-                "I'm part of the wallpaper now.", "Vanish! …Reappear! Ta-da!",
-                "Fade to… me again!", "I blend in. It's a talent.",
-                "Poof! …Poof back!", "Sneak 100. I'm basically invisible.",
-                "Camouflage activated!", "Now I'm here! …Now I'm not! …Now I am!",
-                "Hiding is my love language.", "Did I startle you? Good. I mean, sorry. I mean, again?"
+                "Shhh... I'm hiding!",
+                "Can you see me?",
+                "Hehe, camouflage!",
+                "I'm part of the background now.",
+                "Poof! Gone!",
+                "Can you find me?",
+                "I'm being sneaky.",
+                "You almost saw me!",
+                "Now you see me... now you don't.",
+                "Hiding is fun.",
+                "Hehe, I'm invisible-ish.",
+                "Did I disappear?",
+                "Sneak mode!",
+                "I'm blending in!"
             ))
         }
 
@@ -1643,12 +2120,20 @@ object CurioPet {
             Stage.BABY -> pickLine(babySparkLines)
             Stage.FINAL_EVO -> pickLine(matureSparkLines)
             Stage.FIRST_EVO -> pickLine(listOf(
-                "A spark! Mine!", "Catch the spark!", "Ooh, shiny falling thing!",
-                "Sparkle dash!", "Got it! …Almost got it! …Got it!",
-                "Falling stars are FASTER than me. Impressive.", "Zooms!",
-                "One tiny spark, one big pounce!", "I caught a star! Sort of!",
-                "Chase chase chase—caught!", "The spark didn't stand a chance.",
-                "Gravity vs me: round one, me!"
+                "A spark! Get it!",
+                "Ooh, shiny!",
+                "Catch catch catch!",
+                "Mine! ...Maybe.",
+                "Zoom!",
+                "It's falling! Go go go!",
+                "Hehe, I'm chasing it!",
+                "One tiny spark!",
+                "I almost had it!",
+                "Got it! ...Wait, did I?",
+                "Faster!",
+                "Spark chase!",
+                "It can't escape me!",
+                "Hehe, come back, little spark!"
             ))
         }
 
@@ -1659,73 +2144,109 @@ object CurioPet {
 
     /** The pet dares the user to find it (chameleon hide). */
     fun findMePromptLine(): String = when (currentStage()) {
-        Stage.BABY -> pickLine(listOf("Find!", "Here!", "Peek! Find!"))
+        Stage.BABY -> pickLine(listOf("Find!", "Here!", "Peek! Find!") + babyCurieLines)
         Stage.FINAL_EVO -> pickLine(listOf(
-            "Find me when you're ready.", "I'll wait somewhere new."
+            "Find me when you are ready.", "I will wait somewhere new."
         ))
         Stage.FIRST_EVO -> pickLine(listOf(
-            "Find me!", "Peek! …FIND ME!", "Gone! …Almost. Find me!",
-            "I'm hiding. Find me — it's a talent showcase!"
+            "Find me!",
+            "Peek! Come find me!",
+            "I'm hiding! Can you see me?",
+            "Hehe, catch me if you can!",
+            "Where am I?",
+            "I'm somewhere sneaky!",
+            "Come find your little pet!",
+            "I picked a very good hiding spot."
         ))
     }
 
     /** The user found the hidden pet. */
     fun foundMeLine(): String = when (currentStage()) {
-        Stage.BABY -> pickLine(listOf("Found!", "You! Here!", "Boo! You!"))
+        Stage.BABY -> pickLine(listOf("Found!", "You! Here!", "Boo! You!") + babyCurieLines)
         Stage.FINAL_EVO -> pickLine(listOf(
-            "You found me. Impressive patience.", "Found. I was exactly where I wasn't."
+            "You found me. Well done.", "Found already. You are getting good at this."
         ))
         Stage.FIRST_EVO -> pickLine(listOf(
-            "You found me!", "Boo! Caught!", "Found! I'm impressed.",
-            "Camouflage: failed. Adorable: still intact."
+            "You found me!",
+            "Boo! You got me!",
+            "Hehe, caught!",
+            "You found me already?!",
+            "Okay, okay, you win!",
+            "Sneaky! You saw me!",
+            "Found! Nice one.",
+            "Hehe, I was trying to be sneaky."
         ))
     }
 
     /** The user caught the falling spark. */
     fun caughtItLine(): String = when (currentStage()) {
-        Stage.BABY -> pickLine(listOf("Got!", "Spark! We got!", "Yay!"))
+        Stage.BABY -> pickLine(listOf("Got!", "Spark! We got!", "Yay!") + babyCurieLines)
         Stage.FINAL_EVO -> pickLine(listOf(
-            "Caught it together. Well done.", "The spark chose us."
+            "Caught together. Well done.", "The spark chose us."
         ))
         Stage.FIRST_EVO -> pickLine(listOf(
-            "Got it! Teamwork!", "We caught the spark!", "You have quick paws too!",
-            "The spark never stood a chance against US."
+            "Got it! We did it!",
+            "Yay! We caught it!",
+            "Teamwork!",
+            "You helped!",
+            "Hehe, we got the spark!",
+            "It didn't stand a chance against us!",
+            "We caught it together!",
+            "Spark caught! High five!"
         ))
     }
 
     /** The spark got away (timeout). */
     fun gotAwayLine(): String = when (currentStage()) {
-        Stage.BABY -> pickLine(listOf("Bye spark…", "…Got? No.", "Next!"))
+        Stage.BABY -> pickLine(listOf("Bye spark...", "Got? No.", "Next!") + babyMishapLines + babyCurieLines)
         Stage.FINAL_EVO -> pickLine(listOf(
-            "It got away. Sparks are like that.", "Patience. Another one will fall."
+            "It got away. Another will come.", "Some sparks are simply quick."
         ))
         Stage.FIRST_EVO -> pickLine(listOf(
-            "It got away… next time!", "So close! It saw us coming.",
-            "Falling sparks are sneaky. Rematch?"
+            "Aww... it got away.",
+            "So close!",
+            "Hehe, next time!",
+            "It was too quick!",
+            "We almost had it!",
+            "Sneaky little spark.",
+            "We'll get the next one.",
+            "Rematch?"
         ))
     }
 
     /** The user caught the pet mid-peek. */
     fun peekWinLine(): String = when (currentStage()) {
-        Stage.BABY -> pickLine(listOf("Boo! You!", "Hid! Found!", "Hehe!"))
+        Stage.BABY -> pickLine(listOf("Boo! You!", "Hid! Found!", "Hehe!") + babyCurieLines)
         Stage.FINAL_EVO -> pickLine(listOf(
-            "You caught me mid-peek. Fair play.", "Peek, caught. The classic."
+            "You caught me mid-peek. Fair play.", "Well timed. You found me."
         ))
         Stage.FIRST_EVO -> pickLine(listOf(
-            "Boo! You caught me!", "Got me! Hehe!", "Peek-a-boo — you win!",
-            "Sneak interrupted! Well played."
+            "Boo! You caught me!",
+            "Hehe, you got me!",
+            "Peek-a-boo! You win!",
+            "I wasn't ready!",
+            "Sneak interrupted!",
+            "You found me mid-peek!",
+            "Hehe! Nice timing.",
+            "Okay, you caught me."
         ))
     }
 
     /** The user missed the peeking pet (hide-and-seek timeout). */
     fun missedMeLine(): String = when (currentStage()) {
-        Stage.BABY -> pickLine(listOf("Here!…Missed!", "Peek! You missed!", "Boo…no. Hehe!"))
+        Stage.BABY -> pickLine(listOf("Here!...Missed!", "Peek! You missed!", "Boo...no. Hehe!") + babyMishapLines + babyCurieLines)
         Stage.FINAL_EVO -> pickLine(listOf(
-            "You looked away. I was right there.", "Nearly. Better luck next peek."
+            "You looked away at just the wrong moment.", "Nearly. Try again when you are ready."
         ))
         Stage.FIRST_EVO -> pickLine(listOf(
-            "Peek-a-boo — you blinked!", "Missed me! The edge is a classic.",
-            "Right in front of you! Hehe.", "I even waved. Almost."
+            "Hehe! You missed me!",
+            "Too slow!",
+            "I was right there!",
+            "Peek! ...Oops, missed!",
+            "Better luck next time!",
+            "I even waved!",
+            "Almost!",
+            "Hehe, you blinked!"
         ))
     }
 
@@ -1768,37 +2289,35 @@ object CurioPet {
 
     // ── Memory + rare moments (v16) — the pet references real facts ────
     private val weekdayLines = listOf(
-        "A weekday grind? The deck's ready for it.",
-        "Midweek wonder — always a good time to peek.",
-        "The week's half-spent. The shelf's half-full.",
-        "Another working day, another working lane."
+        "Busy day? Let's sneak in a little curiosity.",
+        "Even busy days can have one tiny wonder."
     )
     private val weekendLines = listOf(
-        "Weekend! The deck is extra polished.",
-        "Slow morning, curious day. Perfect spin weather.",
-        "The weekend shelf is calling.",
-        "No hurry today. Let the deck choose slowly."
+        "Weekend! More time for little adventures.",
+        "Slow day, curious brain. Perfect."
     )
     private val seasonSpringLines = listOf(
-        "Spring air! Everything feels like a new topic.",
-        "Fresh green outside. Fresh lanes inside."
+        "Spring! Everything feels new again.",
+        "Ooh, everything is waking up!"
     )
     private val seasonSummerLines = listOf(
-        "Summer glow! Long days for long reads.",
-        "Warm outside — good spin weather."
+        "Summer glow! Even the long days feel curious.",
+        "Warm days make me want to explore."
     )
     private val seasonAutumnLines = listOf(
-        "Autumn crisp! Cozy lane weather.",
-        "The light's golden. So are the topics."
+        "Ooh, autumn! Everything looks cozy.",
+        "The leaves are changing. I want to look at everything."
     )
     private val seasonWinterLines = listOf(
-        "Winter cozy! Perfect for tucking into a topic.",
-        "Cold out. Warm shelf in."
+        "Winter cozy! Come sit with me.",
+        "Cold outside, cozy little shelf inside."
     )
     private val hatchDayLines = listOf(
-        "It's my hatch day! I've been curious for a whole year.",
-        "One year of exploring together. The shelf remembers!",
-        "Happy hatch day to me — thank you for every lane!"
+        "It's my hatch day! Can we celebrate?",
+        "Another year with you! Yay!",
+        "It's my hatch day! I feel extra sparkly.",
+        "A whole year of little discoveries together.",
+        "It's my birthday-ish! Hehe!"
     )
 
     private fun season(): Int =
@@ -1819,9 +2338,11 @@ object CurioPet {
         if (CurioQuests.bestStreakState >= 3 && kotlin.random.Random.nextFloat() < 0.25f) {
             val streak = CurioQuests.bestStreakState
             return pickLine(listOf(
-                "Day $streak streak — the flame is steady.",
-                "A $streak-day flame. Impressive patience.",
-                "Streak $streak! The spark keeps its promise."
+                "Day $streak! We're still going!",
+                "$streak days! I love our little rhythm.",
+                "Streak $streak! Look at us!",
+                "$streak days of curiosity. That's a lot of little sparks.",
+                "Day $streak! Keep the glow going."
             ))
         }
         val weekly = AppPreferences.weeklySaveSummary(context)
@@ -1829,9 +2350,11 @@ object CurioPet {
             val (lane, count) = weekly.first()
             if (count >= 2) {
                 return pickLine(listOf(
-                    "You saved $count $lane keepsakes this week!",
-                    "$count for the $lane shelf this week — it's thriving.",
-                    "The $lane shelf grew $count times this week alone."
+                    "We saved $count $lane keepsakes this week!",
+                    "$count little $lane treasures! Wow.",
+                    "Our $lane shelf got $count new friends.",
+                    "$count for $lane this week. I like that.",
+                    "$lane is having a very good week."
                 ))
             }
         }
@@ -1852,9 +2375,11 @@ object CurioPet {
         val topic = lastSavedTopicName
         if (topic != null && kotlin.random.Random.nextFloat() < 0.4f) {
             return pickLine(listOf(
-                "\"$topic\" is still my favorite keeper.",
-                "Last keeper: $topic. A good one.",
-                "I think about \"$topic\" sometimes. It's a keeper."
+                "\"$topic\" is still one of my favorites.",
+                "I keep thinking about \"$topic\".",
+                "Last keeper: $topic. Good choice.",
+                "\"$topic\" was a good one, wasn't it?",
+                "I remember \"$topic\". I'd peek at that again."
             ))
         }
         return null

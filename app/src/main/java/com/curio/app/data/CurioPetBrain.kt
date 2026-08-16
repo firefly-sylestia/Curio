@@ -225,7 +225,6 @@ object CurioPetBrain {
         val nightShare = (hist[CurioPet.TimeOfDay.NIGHT.name] ?: 0).toFloat() / total
         val morningShare = (hist[CurioPet.TimeOfDay.MORNING.name] ?: 0).toFloat() / total
         val lane = favoriteLane(context)
-        val laneLabel = lane?.displayName
         val saves = CurioQuests.lifetimeState.saves
         val streak = CurioQuests.bestStreakState
 
@@ -239,19 +238,20 @@ object CurioPetBrain {
         }
         // Ordered from the most personal to the most generic.
         // All coined lines are one sentence (spec §10.7 — they surface as
-        // passive bubbles).
-        if (tryCoin(traits[Trait.NIGHT_OWL]!! > 0.55f && nightShare > 0.4f, "The night deck is OUR thing now.")) return
-        if (tryCoin(morningShare > 0.4f, "Morning spins — that's our little ritual.")) return
+        // passive bubbles). v118 — the coin phrases come from the canonical
+        // dialog doc §9 ("Coined catchphrases"), mapped to the conditions.
+        if (tryCoin(traits[Trait.NIGHT_OWL]!! > 0.55f && nightShare > 0.4f, "One little discovery at a time.")) return
+        if (tryCoin(morningShare > 0.4f, "Morning discoveries are our little thing.")) return
         // laneLabel is captured up front: the smart-cast from `lane != null`
         // in the condition argument does NOT flow into the phrase argument
         // (arguments are independent expressions), so `${lane.displayName}`
         // here was a compile error (CI v8.44).
-        if (tryCoin(lane != null && laneEngagementShare(context, lane) > 0.6f, "I'll always cheer for ${laneLabel}.")) return
-        if (tryCoin(streak >= 7, "A full week together, and I'm keeping count.")) return
-        if (tryCoin(saves >= 10, "Every saved spark is a little memory we share.")) return
-        if (tryCoin(traits[Trait.PLAYFULNESS]!! > 0.55f, "Boops are my love language — just so you know.")) return
-        if (tryCoin(traits[Trait.CURIOSITY]!! > 0.55f, "New lanes are our favorite kind of adventure.")) return
-        if (tryCoin(traits[Trait.WARMTH]!! > 0.5f, "We've grown a lot together — I can feel it.")) return
+        if (tryCoin(lane != null && laneEngagementShare(context, lane) > 0.6f, "I think I like our little adventures.")) return
+        if (tryCoin(streak >= 7, "We always seem to find something interesting.")) return
+        if (tryCoin(saves >= 10, "Every saved spark is one more memory for us.")) return
+        if (tryCoin(traits[Trait.PLAYFULNESS]!! > 0.55f, "Boops are very important. I have decided.")) return
+        if (tryCoin(traits[Trait.CURIOSITY]!! > 0.55f, "New things! Always new things!")) return
+        if (tryCoin(traits[Trait.WARMTH]!! > 0.5f, "I like having a shelf full of things we found together.")) return
     }
 
     // ── Voice — one-sentence, fully grounded lines in the learned voice ─
@@ -277,40 +277,83 @@ object CurioPetBrain {
         // Coined catchphrases surface often once developed.
         if (coined.isNotEmpty() && (0..9).random() < 3) return coined.random()
         val opening = when (voice) {
-            Trait.CURIOSITY -> listOf("Ooh", "Hmm", "I wonder").random()
-            Trait.PLAYFULNESS -> listOf("Wheee", "Hehe", "Boop").random()
+            // v118 — the doc §9 openings by dominant trait.
+            Trait.CURIOSITY -> listOf("Ooh", "Hmm", "I wonder", "Wait").random()
+            Trait.PLAYFULNESS -> listOf("Wheee", "Hehe", "Boop", "Ooh!").random()
             // dominantTrait only ever returns CURIOSITY/PLAYFULNESS/WARMTH.
-            else -> (if (warm) listOf("Hey you", "Friend", "Glad you're here")
-            else listOf("Hey", "Hello", "Well now")).random()
+            else -> (if (warm) listOf("Hey you", "Friend", "You're here", "Hi again")
+            else listOf("Hey", "Hello", "Ooh, hi")).random()
         }
         // One sentence max (spec §10.7), fully grounded in real stats.
+        // v118 — the bodies come from the doc §9 pools (multi-option, picked
+        // through the anti-repeat bag like every other pet line).
         val body = when (mood) {
-            CurioPet.Mood.PROUD -> "Level $level — we earned that."
-            CurioPet.Mood.EXCITED -> "Fresh ground again — I can feel it."
-            CurioPet.Mood.CURIOUS ->
-                lane?.let { "We keep circling ${it.displayName} — let's go for real?" }
-                    ?: "Something new is calling us."
-            CurioPet.Mood.HAPPY -> when {
-                streak >= 7 -> if (warm) {
-                    "Day $streak of our streak, and I'm keeping count."
-                } else {
-                    "Seven days of spinning — that's a real rhythm."
-                }
-                lane != null -> "I like that we keep coming back to ${lane.displayName}."
-                saves >= 5 -> if (warm) {
-                    "$saves sparks saved — the shelf is ours."
-                } else {
-                    "$saves sparks saved, and the shelf is growing."
-                }
-                else -> "More of this, please."
+            CurioPet.Mood.PROUD -> CurioPet.pickLine(listOf(
+                "Level $level! We did that together.",
+                "$level already? I'm growing!"
+            ))
+            CurioPet.Mood.EXCITED -> CurioPet.pickLine(listOf(
+                "Fresh ground again. Can we peek?",
+                "Something new is calling us."
+            ))
+            CurioPet.Mood.CURIOUS -> {
+                val laneName = lane?.displayName
+                CurioPet.pickLine(
+                    if (laneName != null) listOf(
+                        "We keep looking at $laneName... should we finally peek?"
+                    ) else listOf(
+                        "Something new is waiting for us."
+                    )
+                )
             }
-            CurioPet.Mood.SLEEPY -> "Even my glow dims for you — I'll be here tomorrow."
-            CurioPet.Mood.FOCUSED -> "Write it down — I'll keep watch."
-            CurioPet.Mood.BOUNCY -> "That game did me good — again soon?"
+            CurioPet.Mood.HAPPY -> when {
+                streak >= 7 -> CurioPet.pickLine(listOf(
+                    "Day $streak of our little streak. I like this rhythm.",
+                    "Seven days together! Look at us."
+                ))
+                lane != null -> CurioPet.pickLine(listOf(
+                    "I like how we keep coming back to ${lane.displayName}.",
+                    "${lane.displayName} feels like one of our places now."
+                ))
+                saves >= 5 -> CurioPet.pickLine(
+                    if (warm) listOf(
+                        "$saves little sparks saved. I love our collection.",
+                        "$saves keepsakes! Our shelf is getting full."
+                    ) else listOf(
+                        "$saves sparks saved. That's quite a little collection.",
+                        "$saves keepsakes! Nice."
+                    )
+                )
+                else -> CurioPet.pickLine(listOf(
+                    "I like being here with you.",
+                    "More of this, please."
+                ))
+            }
+            CurioPet.Mood.SLEEPY -> CurioPet.pickLine(listOf(
+                "Even my glow is getting sleepy.",
+                "I'll be here when you come back tomorrow."
+            ))
+            CurioPet.Mood.FOCUSED -> CurioPet.pickLine(listOf(
+                "Take your time. I'll keep watch.",
+                "I'm staying quiet while you think."
+            ))
+            CurioPet.Mood.BOUNCY -> CurioPet.pickLine(listOf(
+                "I'm still bouncing from that!",
+                "That game made me happy."
+            ))
             // v9.2 — the three new emotions get their own grounded lines.
-            CurioPet.Mood.SHY -> if (warm) "Look at us, all friendly now." else "I'm still warming up — give me a boop?"
-            CurioPet.Mood.GRUMPY -> "The deck's gone quiet. One spin to fix that?"
-            CurioPet.Mood.PLAYFUL -> "That play session left me glowing."
+            CurioPet.Mood.SHY -> CurioPet.pickLine(
+                if (warm) listOf("Hehe... look at us, all friendly now.")
+                else listOf("I'm still a little shy... give me a boop?")
+            )
+            CurioPet.Mood.GRUMPY -> CurioPet.pickLine(listOf(
+                "I think we need a little adventure.",
+                "The deck is too quiet. Help?"
+            ))
+            CurioPet.Mood.PLAYFUL -> CurioPet.pickLine(listOf(
+                "I still have one more game in me.",
+                "Hehe, I'm not done playing."
+            ))
         }
         return "$opening, $body"
     }

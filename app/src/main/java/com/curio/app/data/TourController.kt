@@ -21,52 +21,53 @@ object TourController {
     )
 
     val steps: List<Step> = listOf(
+        // v118 — dialogue + hints ported from the canonical dialog doc §10.
         Step(
             id = "home-quest",
             route = CurioRoutes.HOME,
             routePrefix = CurioRoutes.HOME,
             landmarkId = "quest",
-            dialogue = "Let\u2019s take a tiny tour! I\u2019ll walk you through everything.",
-            nextHint = "Tap the Shuffle button when you\u2019re ready."
+            dialogue = "Hi! I'm your little curiosity buddy. Want to take a tiny tour together?",
+            nextHint = "Tap Shuffle when you're ready."
         ),
         Step(
             id = "spin-button",
             route = CurioRoutes.SPIN,
             routePrefix = CurioRoutes.SPIN,
             landmarkId = "spin",
-            dialogue = "Here\u2019s the deck \u2014 every spin lands a fresh topic. Tap it and we\u2019ll keep going!",
-            nextHint = "Every spin deals a fresh topic."
+            dialogue = "This is where we find something new. Give it a spin and I'll peek with you!",
+            nextHint = "Spin to discover something new."
         ),
         Step(
             id = "express-yourself",
             route = CurioRoutes.revealForBrowse("artists", "David Bowie"),
             routePrefix = CurioRoutes.REVEAL.substringBefore("/"),
             landmarkId = "express-yourself",
-            dialogue = "When something sparks a thought, tap Express yourself to write it down \u2014 your keepsakes collect in the Cabinet.",
-            nextHint = "Your notes land in the Cabinet."
+            dialogue = "Ooh, did that spark a thought? Tap Express yourself and tell me about it. I'll keep it safe.",
+            nextHint = "Save your thoughts with a keepsake."
         ),
         Step(
             id = "cabinet",
             route = CurioRoutes.CABINET,
             routePrefix = CurioRoutes.CABINET,
             landmarkId = "grid",
-            dialogue = "This is the Cabinet \u2014 every keepsake you save lands here.",
-            nextHint = "Everything you keep collects here."
+            dialogue = "This is our Cabinet! Everything you choose to keep comes home here.",
+            nextHint = "Your keepsakes live here."
         ),
         Step(
             id = "topic-browser",
             route = CurioRoutes.DATABASE,
             routePrefix = CurioRoutes.DATABASE,
             landmarkId = "search",
-            dialogue = "Browse Topics is the whole catalog \u2014 every artist, film, book, and discovery, ready to explore.",
-            nextHint = "Search and explore any lane."
+            dialogue = "Want something specific? Browse Topics lets you look through everything and find exactly what you're curious about.",
+            nextHint = "Search or browse any topic."
         ),
         Step(
             id = "profile",
             route = CurioRoutes.PROFILE,
             routePrefix = CurioRoutes.PROFILE,
             landmarkId = "avatar",
-            dialogue = "Profile is where your journey lives \u2014 XP, badges, and your streak.",
+            dialogue = "This is your little journey. You can see your progress, badges, streak, and how much you've discovered.",
             nextHint = "Your progress lives here."
         ),
         Step(
@@ -74,7 +75,7 @@ object TourController {
             route = CurioRoutes.QUESTS,
             routePrefix = CurioRoutes.QUESTS,
             landmarkId = "daily",
-            dialogue = "Quests give you a tiny daily goal \u2014 the fastest way to grow.",
+            dialogue = "These are tiny things you can do each day. Finish them with me and we'll keep your curiosity moving!",
             nextHint = "A little curiosity every day."
         ),
         Step(
@@ -82,8 +83,8 @@ object TourController {
             route = CurioRoutes.SETTINGS,
             routePrefix = CurioRoutes.SETTINGS,
             landmarkId = "appearance",
-            dialogue = "And this is Settings \u2014 where you make Curio yours: theme, permissions, your pet. That\u2019s everything \u2014 you\u2019re all set!",
-            nextHint = "That\u2019s the whole tour."
+            dialogue = "And here you can make things feel like you. You can choose your theme, manage permissions, and... hehe, you can design me!",
+            nextHint = "Make Curio yours."
         ),
     )
 

@@ -22,6 +22,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Curie's dialogue: every line the pet can say — events, moods, streak milestones, evolution, touch reactions, games, welcome-backs, memory lines, the first-run tour and the baby's Curie-isms — now matches the canonical dialog doc (tiny curious creature voice).
 - Home: the profile button on the top bar now shows your avatar photo, and the drawer's avatar and greeting text are bigger.
 - Support & diagnostics: a direct "Updates" row opens the update page (check, release notes & install).
 - Support & diagnostics: the Updates entry moved to the bottom of the page and is no longer repeated — the duplicate "Open Updates" row and its placeholder header are gone.

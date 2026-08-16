@@ -464,6 +464,29 @@ app/src/main/java/com/curio/app/
   (3) **Support & diagnostics gained an Updates row** (Download icon)
   that opens the dedicated Updates sub-page — the v116 de-dupe stays
   intact (exactly one link, no duplicate header).
+- **v118 — pet dialogue fully ported to the canonical dialog doc.** Every
+  line in `CurioPet.kt` / `CurioPetBrain.kt` / `TourController.kt` now
+  matches `docs/pet-dialogs.md` (the user's rewrite — tiny curious
+  creature voice, "I/me/we", no self-naming in evolved voices). All §1
+  event pools (SPIN_LANDED → QUEST_COMPLETE + sassy), §2 streak, §3
+  evolution ceremony, §4 moods (10 × first/baby/mature + time-of-day),
+  §5 greetings/welcome-backs, §6 touch tiers/bonds, §7 games (spinCheer,
+  play, landmark, jig, dizzy, drawer, peek, chameleon, spark, the six
+  interactive moments), §8 memory/factLine, §9 brain openings/bodies,
+  §10 tour script, §11 mature routine lines — all replaced 1:1 (pool
+  names, order, placeholders `__LANE__`/`$lane`/`$savedLane`/`$streak`/
+  `$count`/`$topic`/`$level`/`$saves` kept). §12 BABY VOICE EXPANSION
+  (Curie-isms) is wired in: thematic pools (`babySaveLines`,
+  `babyTouchLines`, `babyLevelUpLines`, `babyEvolveLines`,
+  `babyExploreLines`, `babyDiscoveryLines`, `babyMishapLines`) feed the
+  matching baby events, `babyCurieLines` (sounds + tiny phrases + rare
+  silly lines) rides EVERY baby pick, and the excited/happy/curious/
+  sleepy/shy/grumpy/playful mood pools absorbed their categories. The
+  brain's `say()` bodies are now multi-option pools picked through
+  `CurioPet.pickLine` (anti-repeat); the coined catchphrases are the
+  doc's §9 set. Dead `happyLines` pool removed. PetDesign.kt's
+  custom-reaction preview defaults are untouched (not in the doc's
+  scope).
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`
