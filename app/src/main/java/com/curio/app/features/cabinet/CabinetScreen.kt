@@ -333,8 +333,17 @@ fun CabinetScreen(navController: NavController) {
         // ragged tear and the pinned chips as they scroll — the settings
         // overlay pattern.
         if (visibleEntries.isEmpty()) {
+            // v119 — the empty state registers the same "grid" landmark the
+            // filled grid does, so the pet-led tour's Cabinet stop keeps its
+            // anchor even with nothing saved yet (otherwise the guide bubble
+            // floats over the tour dock's Next button).
+            PetLandmark(
+                id = "grid",
+                kind = PetLandmarks.Kind.CURIOUS,
+                screen = "cabinet"
+            ) { m ->
             Box(
-                modifier = Modifier
+                modifier = m
                     .fillMaxSize()
                     .padding(top = contentTop)
             ) {
@@ -398,6 +407,7 @@ fun CabinetScreen(navController: NavController) {
                         }
                     )
                 }
+            }
             }
             }
         } else {

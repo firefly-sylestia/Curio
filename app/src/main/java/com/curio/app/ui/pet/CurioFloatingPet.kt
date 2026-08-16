@@ -77,6 +77,10 @@ import kotlin.random.Random
 
 private val FLOAT_SIZE = 72.dp
 private val EDGE_MARGIN = 14.dp
+// v119 — the tour dock (Skip | Next: 54dp buttons + 28dp vertical padding
+// + nav inset) owns the bottom band of the screen; neither the tour guide
+// pet nor its speech bubble may sit on top of it.
+private val TOUR_DOCK_BAND = 96.dp
 // v17 — a wander that spans more than this fraction of the screen's larger
 // dimension TELEPORTS (blink + landing squish) instead of sliding across
 // quickly; shorter hops keep the gentle walk.
@@ -551,14 +555,25 @@ fun CurioFloatingPet(
         // prevents autonomous pokes from triggering unrelated UI behavior.
         LaunchedEffect(tourStep?.id, tourLandmark?.bounds, overlayOrigin, maxW, maxH) {
             val step = tourStep ?: return@LaunchedEffect
-            val landmark = tourLandmark ?: return@LaunchedEffect
-            val center = landmark.bounds.center - overlayOrigin
+            // The tour dock (Skip | Next) owns the bottom band — the guide
+            // pet must never stand on top of it, so its walk target is
+            // floored just above the dock.
+            val dockFloorPx = (maxH - petPx - with(density) { TOUR_DOCK_BAND.toPx() } - navBottom)
+                .coerceAtLeast(marginPx)
+            val center = if (tourLandmark != null) {
+                tourLandmark.bounds.center - overlayOrigin
+            } else {
+                // No landmark for this stop (e.g. the empty Cabinet): park
+                // the guide top-center, low enough that its bubble fits
+                // above it, so neither can drift over the dock.
+                Offset(maxW / 2f, marginPx + petPx / 2f + with(density) { 220.dp.toPx() })
+            }
             val side = if (center.x > maxW / 2f) -1f else 1f
             val target = Offset(
                 (center.x + side * petPx * 0.95f)
                     .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)),
                 (center.y - petPx / 2f)
-                    .coerceIn(marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx))
+                    .coerceIn(marginPx, dockFloorPx)
             )
             facing = if (target.x >= pos.x) 1f else -1f
             moving = true
@@ -1976,6 +1991,15 @@ fun CurioFloatingPet(
             with(density) { FLOAT_SIZE.toPx() }
         }
         val tourBubbleGapPx = with(density) { 8.dp.toPx() }
+        // The tour dock (Skip | Next) owns the bottom band of the screen —
+        // the guide bubble must never cover it, so its top is capped just
+        // above the dock. Landmarks that span the whole screen (like the
+        // Cabinet grid) can't fit a bubble above them, so those pin the
+        // bubble to the top of the screen instead of dropping it onto the
+        // dock.
+        val dockBandPx = with(density) { TOUR_DOCK_BAND.toPx() } + navBottom
+        val maxBubbleTop = (maxH - tourBubbleHeightPx - dockBandPx)
+            .coerceAtLeast(marginPx)
         val bubbleOffset = tourActiveLandmark?.bounds?.let { bounds ->
             // Landmark bounds are in window coordinates; convert them to this
             // overlay's local coordinate space before applying Modifier.offset.
@@ -1989,8 +2013,14 @@ fun CurioFloatingPet(
                 .coerceIn(marginPx, (maxW - tourBubbleWidthPx - marginPx).coerceAtLeast(marginPx))
             val aboveY = localBounds.top - tourBubbleHeightPx - tourBubbleGapPx
             val belowY = localBounds.bottom + tourBubbleGapPx
-            val y = if (aboveY >= marginPx) aboveY else belowY
-                .coerceIn(marginPx, (maxH - tourBubbleHeightPx - marginPx).coerceAtLeast(marginPx))
+            val y = when {
+                aboveY >= marginPx && aboveY <= maxBubbleTop -> aboveY
+                belowY <= maxBubbleTop -> belowY
+                // Landmark reaches the screen edge — pin the bubble to the
+                // top instead of hovering over the dock.
+                localBounds.top <= marginPx -> marginPx
+                else -> maxBubbleTop
+            }
             IntOffset(x.roundToInt(), y.roundToInt())
         } ?: IntOffset(
             pos.x.roundToInt().coerceIn(
@@ -1998,6 +2028,7 @@ fun CurioFloatingPet(
                 (maxW - with(density) { 160.dp.toPx() }).toInt()
             ),
             (pos.y - tourBubbleHeightPx).roundToInt()
+                .coerceIn(marginPx.roundToInt(), maxBubbleTop.roundToInt())
         )
         LaunchedEffect(tourStep?.id) {
             tourBubbleSize = IntSize.Zero

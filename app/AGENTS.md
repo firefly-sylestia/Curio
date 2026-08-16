@@ -487,6 +487,22 @@ app/src/main/java/com/curio/app/
   doc's §9 set. Dead `happyLines` pool removed. PetDesign.kt's
   custom-reaction preview defaults are untouched (not in the doc's
   scope).
+- **v119 — the tour dock's Skip/Next is never covered by the guide.**
+  The pet-led tour's Cabinet stop dropped the speech bubble onto the
+  bottom dock: the `grid` landmark wraps a `fillMaxSize()` grid, so the
+  bubble's "above" placement never fit and the "below" fallback was
+  clamped to the very bottom — over the Next button (an empty Cabinet
+  was worse: no landmark at all, so the bubble floated over the pet
+  wherever the previous step had parked it). Fixes in
+  `CurioFloatingPet.kt`: the tour bubble is capped above a new
+  `TOUR_DOCK_BAND` (96dp + nav inset); landmarks reaching the screen
+  edge pin the bubble to the TOP of the screen instead; the pet's tour
+  walk target is floored above the same band so it never stands on the
+  dock; a landmark-less stop parks the guide top-center; and the
+  no-landmark bubble fallback is clamped on-screen/above the dock. And
+  in `CabinetScreen.kt` the EMPTY state now registers the same `grid`
+  landmark the filled grid does, so the tour always has an anchor on
+  the Cabinet stop.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

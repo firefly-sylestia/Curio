@@ -1,6 +1,8 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: pet dialogue fully ported to the canonical dialog doc
+## Current request — COMPLETED: pet dialogue fully ported to the canonical dialog doc (`6f7c9cb`)
+
+All of this session's work is done, committed and pushed.
 
 The user: "i added the new pet dialogs and also more dialogs, imtegrate
 and replace all the current dialogs with those. dont miss any." — with
@@ -50,6 +52,24 @@ Brace balance depth 0 on all three files (python brace check); grep
 sweeps confirm every old pool phrase is gone and distinctive lines from
 every doc section are present; `git diff --check` clean; no Gradle
 locally (env rule) — CI validates compile on push.
+
+### Follow-up — tour dock no longer covered by the guide bubble
+User (before the port was pushed): "dont push it the cabinet dialog is
+covering the next button in tour so fix that first then go ahead and
+push." Root cause: the tour's Cabinet stop dropped the speech bubble
+onto the bottom dock — the `grid` landmark wraps a `fillMaxSize()`
+grid, so the bubble's "above" placement never fit and the "below"
+fallback clamped to the very bottom (over Next); an empty Cabinet was
+worse (no landmark at all → the bubble floated over the pet wherever
+the reveal step had parked it, near the bottom). Fixes in
+`CurioFloatingPet.kt`: new `TOUR_DOCK_BAND` (96dp + nav inset); the
+bubble's top is capped above it, landmarks that reach the screen edge
+pin the bubble to the TOP of the screen, the pet's tour-walk target is
+floored above the band, a landmark-less stop parks the pet top-center,
+and the no-landmark bubble fallback is clamped on-screen/above the
+dock. `CabinetScreen.kt` now registers the `grid` landmark on the
+empty branch too, so the tour always has an anchor. Committed and
+pushed together with the port.
 
 ## Previous request — COMPLETED: Home avatar pill + drawer sections + Support update link (`a3a9f94`)
 
