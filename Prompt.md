@@ -1,6 +1,54 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: detail-screen tear corners, quick-fact box, "…" fold toggle
+## Current request — COMPLETED: profile avatar crop editor + auto center-square crop + Edit profile dialog redesign
+
+All of this session's work is done, committed and pushed (`0f846cd`).
+
+The user: "the edit profile dialog is boring also i cant crop images and
+portraight images get squished so give cropped fucntion and auto crop
+from middle by default".
+
+### 1 — No more squished portraits (auto center-square crop)
+The old picker COPIED the raw bytes — a tall portrait photo got
+stretched into the square avatar. Now `ProfileScreen` DECODES the pick
+EXIF-correctly (`decodeAvatarSource`: ImageDecoder 28+ bounded to
+2048px with its own EXIF pass disabled, BitmapFactory sample 26-27; the
+framework `ExifInterface` rotation is applied manually so both API
+paths agree) and saves a **CENTER-SQUARE crop from the middle**
+(`centerSquareCrop` → `scaleToMax` 512px) as the avatar. The editable
+SOURCE is saved beside it as `profile_avatar_src_*.png` so the crop
+editor can re-frame the ORIGINAL photo (not the cropped square).
+
+### 2 — Manual crop editor (new `AvatarCropDialog.kt`)
+No crop library (project is dependency-light): a fixed SQUARE crop
+window with the photo panning and pinching behind it (drag to move,
+pinch to zoom — never smaller than cover-fit, up to 5×, Reset returns
+to the auto center crop), rule-of-thirds grid + corner brackets in the
+dialog accent. Apply hands back the exact source-pixel `IntRect`
+(`currentCropRect`, clamped before use) which `saveAvatar` re-crops and
+re-saves; Cancel discards. The ImageBitmap is hoisted out of the Canvas
+draw block (`remember(bitmap) { bitmap.asImageBitmap() }`) so gestures
+don't allocate per frame. The crop dialog is composed AFTER the edit
+dialog so its window stacks on top; closing the edit dialog also clears
+`cropSource` (no stray crop window). `loadAvatarSource` falls back to
+the current square avatar for pre-v116 avatars (no source was kept).
+
+### 3 — Edit profile dialog redesigned (no longer boring)
+The 64dp preview grew to **84dp with an accent crop/photo badge** on the
+corner (tap the avatar to adjust when set, else pick); the flat stock
+TextButtons became the app's **pill actions** (`DialogPillAction` —
+50% radius: accent Add/Change photo, Adjust, destructive Remove); the
+caption now explains the auto square crop ("Square-cropped from the
+middle — tap to adjust.").
+
+### Validation
+Brace balance (both files depth 0); unused-import sweep (removed
+`HorizontalDivider`; `getValue`/`setValue` delegate false-positives
+kept); fixed a param-shadowing bug in `scaleToMax` (`max` → `maxSide`);
+`git diff --check` clean; no Gradle locally (env rule) — CI validates
+compile on push. Pushed to `main`.
+
+## Previous request — COMPLETED: detail-screen tear corners, quick-fact box, "…" fold toggle
 
 All of this session's work is done, committed and pushed (`1ab650e`).
 
