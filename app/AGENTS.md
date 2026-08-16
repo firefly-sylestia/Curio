@@ -435,6 +435,20 @@ app/src/main/java/com/curio/app/
   lattice: each cell is `round(scaleF × opx)` px, snapped to the lattice
   around the eye's center (4.5/7 and 10.5/7) — crisp at every preset,
   and at `scaleF = 1` it lands exactly on the face's pixel grid.
+- **v114 — remaining stock M3 buttons converted to the pill language.**
+  Sweep of `Button`/`OutlinedButton` call sites that still used boxy
+  default corners/colors next to the custom pill family: the tour's
+  Skip/Next controls (16dp → full `RoundedCornerShape(50)` capsules in
+  the tour bar), the crash screen's three `OutlinedButton`s (16dp →
+  24dp, matching the Mix-button language), FieldMind's Finish/Save
+  buttons (stock 20dp + primaryContainer → pill 50 / 24dp with theme
+  primary fill + `onPrimary` icon/text — the old hardcoded white icon
+  clashed with the default fill), and the Sound Bite trim pair (Keep
+  full + Apply Trim, 16dp → 24dp, kept as a matched pair). Intentional
+  exceptions: dialog `TextButton`s (`curioDialogActionButtonColors`),
+  themed `RadioButton`s, the M3 `SegmentedButton` control in Settings,
+  and self-contained flows (onboarding 18/26dp, bug-report 28dp) keep
+  their own language.
 - **v114 — dark-mode pill glow no longer peeks past the pill shape.**
   The One UI dark-mode pill treatments (`curioGlassEdge` top catch +
   `curioInnerGlow` radial) were painted against the pill's BOUNDING BOX, so

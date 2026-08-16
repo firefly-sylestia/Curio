@@ -810,7 +810,10 @@ fun CurioNavHost(
                 Button(
                     onClick = { TourController.skip() },
                     modifier = Modifier.weight(1f).height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    // v114 — full capsule to match the app's pill language
+                    // (the old 16dp boxy corners read stock M3 next to the
+                    // custom pill/chip family).
+                    shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -827,7 +830,7 @@ fun CurioNavHost(
                 Button(
                     onClick = { advanceTourAndNavigate() },
                     modifier = Modifier.weight(1f).height(54.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(50)
                 ) {
                     Text(
                         if (TourController.isLastStep) "Done" else "Next",

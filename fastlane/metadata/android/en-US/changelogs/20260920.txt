@@ -20,6 +20,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Remaining stock buttons now match the custom pill style: tour Skip/Next, crash-screen actions, FieldMind's Finish/Save and the Sound Bite trim pair use the app's rounded pills instead of boxy default corners.
 - Pet eyes no longer flick toward your finger at the start of every scroll, and the enlarged/shrunk eye pixels render crisp instead of glitchy.
 - Icons in buttons are no longer pushed down and cut at the bottom: glyphs are vertically centered in their slot at every system font size.
 - Pill shadows in dark mode: the glow on small pills (progress pill, filter chips, Apply, category picker tabs, presets and the reveal actions) now hugs the pill's shape instead of peeking out past the rounded ends.

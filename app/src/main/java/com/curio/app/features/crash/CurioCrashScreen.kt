@@ -201,7 +201,9 @@ fun CurioCrashScreen(navController: NavController) {
         ) {
             OutlinedButton(
                 onClick = { showFullLog = !showFullLog },
-                shape = RoundedCornerShape(16.dp),
+                // v114 — 24dp rounded to match the app's button language
+                // (the old 16dp corners read stock M3).
+                shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
@@ -218,7 +220,7 @@ fun CurioCrashScreen(navController: NavController) {
                     }
                     context.startActivity(Intent.createChooser(share, "Share crash report"))
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Share", style = MaterialTheme.typography.labelLarge)
@@ -231,7 +233,7 @@ fun CurioCrashScreen(navController: NavController) {
         Spacer(Modifier.height(12.dp))
         OutlinedButton(
             onClick = { navController.navigate(CurioRoutes.BUG_REPORT) { launchSingleTop = true } },
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(24.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Report a bug", style = MaterialTheme.typography.labelLarge)

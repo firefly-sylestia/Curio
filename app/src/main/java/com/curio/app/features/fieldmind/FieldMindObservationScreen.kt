@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -28,7 +29,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -171,7 +171,17 @@ fun FieldMindObservationScreen(navController: NavController) {
                     Text(formatElapsed(elapsed), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
                 if (active) {
-                    Button(onClick = ::finishSession) { Text("Finish") }
+                    // v114 — app pill treatment (the stock M3 button with
+                    // default 20dp corners + primaryContainer fill read as a
+                    // leftover next to the custom pill family).
+                    Button(
+                        onClick = ::finishSession,
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) { Text("Finish") }
                 }
             }
         }
@@ -186,11 +196,19 @@ fun FieldMindObservationScreen(navController: NavController) {
         Button(
             onClick = ::saveObservation,
             enabled = !saving && (observed.isNotBlank() || evidence.isNotBlank() || contextNote.isNotBlank()),
+            // v114 — app button treatment: 24dp rounded + primary fill (the
+            // old default M3 button read stock, and its primaryContainer fill
+            // clashed with the white icon below).
+            shape = RoundedCornerShape(24.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            CurioIcon(CurioIcons.Check, null, tint = Color.White, size = 18.dp)
+            CurioIcon(CurioIcons.Check, null, tint = MaterialTheme.colorScheme.onPrimary, size = 18.dp)
             Spacer(Modifier.width(6.dp))
-            Text(if (saving) "Saving…" else "Save observation")
+            Text(if (saving) "Saving…" else "Save observation", color = MaterialTheme.colorScheme.onPrimary)
         }
         Spacer(Modifier.height(18.dp))
     }

@@ -796,7 +796,10 @@ private fun TrimSection(
             // Keep Full — dismiss trim UI
             Surface(
                 onClick = onKeepFull,
-                shape = RoundedCornerShape(16.dp),
+                // v114 — 24dp rounded to match the app's button language
+                // (the old 16dp corners read stock M3 next to the pill
+                // chips).
+                shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.weight(1f)
             ) {
@@ -814,7 +817,7 @@ private fun TrimSection(
             Button(
                 onClick = onApplyTrim,
                 enabled = hasTrim && !trimInProgress,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accent,
                     contentColor = pastelFillInk(accent),
