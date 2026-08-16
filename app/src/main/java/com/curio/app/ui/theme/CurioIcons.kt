@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -285,9 +284,6 @@ val JournalMood.glyph: String
         JournalMood.OVERWHELMED -> CurioIcons.MoodOverwhelmed
     }
 
-/** Shared painted-ink correction for the Material Symbols font's low visual baseline. */
-private val MaterialSymbolsOpticalLift = 1.dp
-
 /**
  * Renders a Material Symbols glyph via ligature.
  *
@@ -332,14 +328,6 @@ fun CurioIcon(
             textAlign = TextAlign.Center,
             maxLines = 1,
             softWrap = false,
-            modifier = Modifier.graphicsLayer {
-                // Material Symbols reserve a little more visual space below
-                // the glyph than above it. Nudge only the painted ink up by
-                // one dp; the icon's layout box stays perfectly centered.
-                // This keeps icons visually centered in compact pills without
-                // changing their touch target or measured box.
-                translationY = -MaterialSymbolsOpticalLift.toPx()
-            },
             style = TextStyle(
                 lineHeight = iconSp,
                 // Material Symbols are font glyphs, not vector Icons. Remove

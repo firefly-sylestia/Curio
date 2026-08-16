@@ -1169,13 +1169,22 @@ fun PetDesignerScreen(navController: NavController) {
         }
 
         // v109 — the hero tear is now SCROLLABLE, not sticky: it translates
-        // up 1:1 with the list (viewportStartOffset = total scrolled pixels)
-        // so it rides away with the content instead of staying pinned while
-        // rows slide under the seam. Drawn on top of the list as before, so
-        // the tear stays crisp over the content it leaves behind.
+        // up 1:1 with the list so it rides away with the content instead of
+        // staying pinned while rows slide under the seam. Drawn on top of
+        // the list as before, so the tear stays crisp over the content it
+        // leaves behind.
+        // v113 — FIX: `viewportStartOffset` is the viewport start in CONTENT
+        // coordinates, NOT the scroll position — with this list's top content
+        // padding (SettingsHeroTotalHeight + 8) it reads NEGATIVE at rest, so
+        // the old `-viewportStartOffset` translated the hero DOWN by the
+        // whole hero height and it floated mid-screen. Adding
+        // `beforeContentPadding` (the same top padding) recovers the true
+        // scroll: 0 at rest, +S once scrolled — the hero starts pinned to
+        // the top and rides up 1:1 from there.
         Box(
             modifier = Modifier.graphicsLayer {
-                translationY = -listState.layoutInfo.viewportStartOffset.toFloat()
+                val info = listState.layoutInfo
+                translationY = -(info.viewportStartOffset + info.beforeContentPadding).toFloat()
             }
         ) {
             SettingsHeroHeader(

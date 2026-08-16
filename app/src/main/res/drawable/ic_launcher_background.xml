@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    v113 — Curio's new cosmic launcher mark (the user-supplied SVG: a mint
-    planet, pink moon and gold waves over a midnight sky). This layer is the
-    full-bleed backdrop: the sky gradient + stars fill the whole mask so the
-    adaptive icon reads as a seamless cosmic scene around the card art in
-    ic_launcher_foreground.xml (which carries the rounded card + planet +
-    moon + waves). viewport 1024×1024 mirrors the source SVG 1:1.
+    v113 — Curio's new cosmic launcher mark. This layer is the full-bleed
+    backdrop: the midnight sky gradient + stars fill the whole mask so the
+    adaptive icon reads as a seamless cosmic scene AROUND the rounded card
+    (the designer's PNG, drawn inset in ic_launcher_foreground.xml at ~44×47dp
+    so the launcher mask never crops the card's frame). The gradient matches
+    the card's own sky, so the two composite behind the white frame.
+    viewport 1024×1024 mirrors the source SVG 1:1.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"

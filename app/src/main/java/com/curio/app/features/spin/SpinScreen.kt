@@ -2271,6 +2271,16 @@ private fun FilterGroupPill(
     // accordion rows read as colored parents over the NEUTRAL chips below
     // (the old value exactly matched the chips' fill — no hierarchy).
     val inactiveFill = lerp(chipSurface, accent, 0.22f)
+    // v113 — the CLOSED pill's glyph tint: in pastel LIGHT mode the accent
+    // resolves to an airy pastel, and a pastel glyph on the 22%-accent-tinted
+    // fill vanished entirely. Flip to the deep same-hue ink (pastelFillInk's
+    // light branch — same hue, lightness ~0.24) so the group icons read on
+    // the light tinted fill; dark and non-pastel keep the accent exactly as
+    // before.
+    val inactiveGlyphInk = if (!isCurioDarkTheme() && AppPreferences.pastelColorsState)
+        pastelFillInk(accent)
+    else
+        accent
     val chevronRotation by animateFloatAsState(
         targetValue = if (open) 180f else 0f,
         animationSpec = tween(280, easing = FastOutSlowInEasing),
@@ -2301,7 +2311,7 @@ private fun FilterGroupPill(
             CurioIcon(
                 glyph,
                 null,
-                tint = if (open) ink else accent,
+                tint = if (open) ink else inactiveGlyphInk,
                 size = 20.dp
             )
             Text(

@@ -20,6 +20,10 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Launcher icon: the cosmic card art now comes straight from the designer's PNG and is sized so the whole card fits the launcher shape — the frame, stars and waves are no longer cut off.
+- Detail: the explore-session duration no longer repeats twice — it lives once in the Date · Mood · Session · Type card, and the old pill above it is gone.
+- Filter page: the Type · Genres · Era · Origin · Franchise group icons now show in light mode — inactive group pills use a deep ink instead of the pale pastel that vanished on the tinted fill.
+- Icons across the app (Recents rows, Shuffle card, Settings, bottom nav and buttons everywhere): no longer shaved at the top inside buttons — the icon glyphs sit centered in their slots instead of being clipped by the button edges.
 - Mood board: photos can now be dragged all the way to the top of the small editor — the empty band above the collage is usable space (band-placed photos show in the same spot in the saved card).
 - Mood board: quote cards no longer glitch or slide off the card when dragged to the top — they're clamped to the visible board, and new quote cards land on the collage instead of floating off it.
 - Mood board: the inline board no longer resizes while you drag, grow or shrink photos — the fit freezes once the board has content, and quote cards are width-capped so they can't balloon past the small board.

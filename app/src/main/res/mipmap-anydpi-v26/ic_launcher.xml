@@ -2,11 +2,11 @@
 <!--
     Adaptive-icon declaration for Curio (API 26+).
     Background = the full-bleed midnight sky + stars, foreground = the
-    v113 cosmic scene (mint planet, pink moon, gold waves, white card
-    frame) in ic_launcher_foreground.xml. The adaptive-icon framework
-    composites these two layers per the launcher's chosen mask shape
-    (circle/squircle/teardrop/etc.) and handles foreground parallax for
-    Pixel-style launchers.
+    v113 cosmic card art (the designer's PNG, drawn inset so the whole
+    card + frame fits the mask safe zone) in ic_launcher_foreground.xml.
+    The adaptive-icon framework composites these two layers per the
+    launcher's chosen mask shape (circle/squircle/teardrop/etc.) and
+    handles foreground parallax for Pixel-style launchers.
 
     For pre-API-26 launchers (which minSdk=26 in this app excludes — see
     app/build.gradle.kts), PNG fallbacks under mipmap-{density}/ would be

@@ -226,8 +226,14 @@ fun SplashScreen(navController: NavHostController) {
                                     shape = RoundedCornerShape(50)
                                 )
                         )
+                        // v113 — the splash renders the FULL card art directly
+                        // (the raw designer PNG), not ic_launcher_foreground:
+                        // the launcher foreground is now inset to fit the
+                        // adaptive safe zone (~52dp of 108), which would draw
+                        // the card tiny on the splash. The raw art fills the
+                        // 112dp logo box at its native proportions.
                         Image(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
+                            painter = painterResource(R.drawable.ic_launcher_art),
                             contentDescription = null,
                             modifier = Modifier.size(112.dp),
                             contentScale = ContentScale.Fit

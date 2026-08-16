@@ -58,7 +58,7 @@ app/src/main/java/com/curio/app/
 - `app/src/main/res/values/strings.xml` — Curio app name + screen titles + category display names
 - `app/src/main/res/values/themes.xml` — `Theme.Curio` (M3 DayNight no-actionbar, Midnight Signal bootstrap surface)
 - `app/src/main/res/values/colors.xml` — Midnight Signal XML resources used at the OS-level splash/background before Compose takes over
-- `app/src/main/res/drawable/ic_launcher_{background,foreground,monochrome}.xml` — the v113 COSMIC launcher mark (user-supplied SVG, 1024 viewport): mint planet + pink moon over layered pink/gold waves on a midnight navy→magenta sky, inside a rounded card with a white frame; `ic_launcher_background` is the full-bleed sky + stars, `ic_launcher_foreground` carries the whole scene (also rendered by the splash), `ic_launcher_monochrome` is the planet+moon silhouette; `ic_notification` is the same mark at 24dp
+- `app/src/main/res/drawable-nodpi/ic_launcher_art.png` — the v113 COSMIC launcher mark, the DESIGNER'S RASTER (2048×2048 PNG of the user-supplied art; archived at `design/launcher-icon/curio-launcher-icon.png`): a mint planet with a pink moon over layered pink/gold waves on a midnight navy→magenta sky, inside a rounded card with a white frame. Used directly (no vector conversion — the hand-converted vector was rejected as "broken / not properly placed"). `ic_launcher_foreground.xml` is an `<inset android:inset="28dp">` around the bitmap, so the whole card (~44×47dp) fits the launcher mask's safe zone — the card spans ~84–88% of the raw canvas, so full-bleed the mask sliced the frame/stars/waves; `ic_launcher_background.xml` is the full-bleed sky gradient + stars the card floats on; `ic_launcher_monochrome.xml` is the planet+moon silhouette (themed icons); `ic_notification` is the same mark at 24dp. The SPLASH renders `@drawable/ic_launcher_art` directly (not the inset foreground) so the full card fills the splash logo box.
 - `app/src/main/res/mipmap-anydpi-v26/ic_launcher{,_round}.xml` — adaptive-icon declarations referencing the colored and monochrome layers above
 - `app/src/main/assets/topics/` — Curio topic data files and schema reference (one per ready category; see Content authoring below)
 
@@ -401,6 +401,31 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v113 — detail pill de-dupe, filter-page icons, icon glyph clipping,
+  pet-designer hero mid-screen float.** (1) **Detail hero: the explore-
+  session duration no longer duplicates** — the "explored 12m" pill above
+  the Date · Mood · Session · Type card was removed; the Session segment
+  inside the stat card is the single source. (2) **Spin filter sheet:
+  inactive group-pill glyphs visible in light mode** — `FilterGroupPill`
+  tinted the closed pill's glyph with the raw `accent`, which in pastel
+  LIGHT resolves to an airy pastel and vanished on the 22%-accent fill;
+  light + pastel now uses `pastelFillInk(accent)` (deep same-hue ink,
+  L≈0.24), dark + non-pastel keep `accent`. (3) **CurioIcon glyphs no
+  longer clipped at the top in buttons** — the 1dp `graphicsLayer
+  { translationY = -1dp }` "optical lift" drew the ink 1dp ABOVE the
+  icon's layout box; the Material Symbols font's line box is 1.2em (hhea
+  ascent 1056 + descent 96 vs 960 upem), and near-top-bearing glyphs
+  (timer, auto_awesome, sparkle tips — 40/960-unit bearings) sat exactly
+  at the box top, so any clipped parent (every M3 Surface with a shape
+  clips) sliced the glyph's top. The lift is removed; glyphs render
+  centered per the font's design bearings. (4) **Pet Designer hero no
+  longer floats mid-screen** — the v109 scroll-away hero translated by
+  `-viewportStartOffset`, but `viewportStartOffset` is the viewport start
+  in CONTENT coordinates (negative by the top content padding at rest), so
+  at rest the hero sat ~`SettingsHeroTotalHeight` down the screen. The
+  translation now adds `layoutInfo.beforeContentPadding` (the same top
+  padding): `-(viewportStartOffset + beforeContentPadding)` = 0 at rest,
+  -S when scrolled — the hero pins to the top and rides up 1:1.
 - **v113 — mood board inline editor: full-card placement + quote-card
   fixes.** (1) **Tiles can be dragged anywhere in the visible card** — the
   drag, pinch-resize, grow and commit clamps were the FROZEN collage extent,
@@ -427,17 +452,25 @@ app/src/main/java/com/curio/app/
   layouts' maxX/maxY (saved card), boardW/fit.scale (expanded dialog) and
   maxX/maxY (export).
 - **v113 — new COSMIC launcher icon + 1.1.0 version bump.** (1) **Icon:**
-  the user-supplied `svgviewer-output (3).svg` (a mint planet with a pink
-  moon over layered pink/gold waves on a midnight navy→magenta sky, inside a
-  rounded card with a white frame) replaces the old angular open-portal
-  mark. `ic_launcher_background` = full-bleed sky + stars; `ic_launcher_foreground`
-  = the whole clipped scene + white frame (vector viewport 1024×1024 = the
-  SVG 1:1; the SVG's feDropShadow/feGaussianBlur filters don't exist in
-  VectorDrawable, so the white planet/moon/wave strokes carry the
-  separation); `ic_launcher_monochrome` = planet + moon silhouette;
+  the user-supplied art (first `svgviewer-output (3).svg`, then — after the
+  hand-converted VECTOR was rejected as "broken / not properly placed" — the
+  designer's `svgviewer-output (3).png` RASTER, 2048×2048, archived at
+  `design/launcher-icon/curio-launcher-icon.png`) replaces the old angular
+  open-portal mark: a mint planet with a pink moon over layered pink/gold
+  waves on a midnight navy→magenta sky, inside a rounded card with a white
+  frame. The art is used as the PNG DIRECTLY — no vector conversion.
+  `drawable-nodpi/ic_launcher_art.png` = the raw bitmap; `ic_launcher_foreground`
+  = an `<inset android:inset="28dp">` around that bitmap (the card spans
+  ~84–88% of the raw canvas, so full-bleed the launcher mask sliced the
+  frame/top stars/bottom waves; inset 28 → the card renders at ~44×47dp,
+  fully inside the 66dp safe circle, floating on the sky);
+  `ic_launcher_background` = the full-bleed sky gradient + stars (its
+  gradient matches the card's own sky so the two composite behind the
+  frame); `ic_launcher_monochrome` = planet + moon silhouette;
   `ic_notification` = the same mark at 24dp. The splash (SplashScreen.kt)
-  renders `ic_launcher_foreground` directly, so it picks up the new art
-  automatically. (2) **Version:** `versionName` 1.0.1 → **1.1.0** and
+  renders `@drawable/ic_launcher_art` directly (the full card, not the
+  inset foreground) so the splash logo box stays full-size. (2) **Version:**
+  `versionName` 1.0.1 → **1.1.0** and
   `versionCode` 20260919 → **20260920** (the bump missed on the previous
   feature releases); the store changelog moved to
   `fastlane/.../changelogs/20260920.txt` (the 20260919 draft is gone).
