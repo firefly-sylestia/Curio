@@ -600,10 +600,14 @@ fun PetDesignerScreen(navController: NavController) {
             )
         }
         val wide = windowWidthSizeClass().isWide
-        Column(modifier = Modifier.fillMaxSize()) {
         // v109 — the list state drives the hero's scroll-away translation
         // (the tear now scrolls with the content instead of staying pinned).
+        // Declared in the OUTER Box scope, not inside the Column lambda: the
+        // LazyColumn (inside the Column) AND the overlaid hero Box (a Column
+        // SIBLING, drawn on top) both read it — a val inside the Column's
+        // content lambda is invisible to the sibling overlay.
         val listState = rememberLazyListState()
+        Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

@@ -181,8 +181,34 @@ suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(D
  * installed (a bare custom-scheme launch would throw
  * ActivityNotFoundException), so the https equivalent is opened instead —
  * preserving the old browser behavior.
+ *
+ * v110 — `music.youtube.com` links are package-PINNED to the YouTube Music
+ * app (`com.google.android.apps.youtube.music`): the app's App Links
+ * verification for that domain is unreliable — many devices hand the URL to
+ * Chrome instead of the app, so the "Listen in" pill never opens inside
+ * YouTube Music. Package-scoped delivery bypasses verification, so the
+ * search lands IN the app; when the app isn't installed (no handler for
+ * the pinned package) the plain https link opens in the browser instead.
  */
 fun openSearchUrl(context: Context, url: String) {
+    // v110 — the YouTube Music deep link: pin the intent to the app's
+    // package so the OS delivers it there even when App Links verification
+    // for music.youtube.com failed (the flaky-browser case). Falls back to
+    // the bare https intent (browser) when the app isn't installed.
+    if (url.startsWith("https://music.youtube.com/")) {
+        val pinned = runCatching {
+            context.startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    .setPackage(YOUTUBE_MUSIC_ANDROID_PACKAGE)
+            )
+        }
+        if (pinned.isFailure) {
+            runCatching {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        }
+        return
+    }
     try {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     } catch (e: ActivityNotFoundException) {
@@ -196,6 +222,9 @@ fun openSearchUrl(context: Context, url: String) {
         }
     }
 }
+
+/** v110 — the YouTube Music Android app's package (Play Store id). */
+private const val YOUTUBE_MUSIC_ANDROID_PACKAGE = "com.google.android.apps.youtube.music"
 
 /**
  * v27s — the music lanes: Album / Artist / Song topics route the reveal

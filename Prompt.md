@@ -118,6 +118,42 @@ leftover bright-glass search fills or `searchGlass` refs; all 11 under-sheet
 clip sites sit inside the new gate. No Gradle locally (env rule) — CI on
 push. Web app untouched (Android-only ask).
 
+## Follow-up — CI compile failure + YouTube Music link (v110)
+
+### What was asked
+"fix this also the youtube music link is not opening inside the app" —
+with a CI log showing `compileReleaseKotlin`/`compileDebugKotlin` FAILED:
+`PetDesignerScreen.kt:1174:33 Unresolved reference 'listState'`.
+
+### Root causes
+1. **Compile error (scope bug):** the v109 pet-designer fix declared
+   `val listState = rememberLazyListState()` INSIDE the `Column { }`
+   content lambda (line 606), but the hero overlay `Box` that reads
+   `listState.layoutInfo.viewportStartOffset` (line 1174) is a Column
+   SIBLING in the outer Box scope — a val inside a lambda is invisible to
+   the sibling, so the reference was unresolved.
+2. **YouTube Music opens the browser:** `buildMusicServiceSearchUrl`
+   returns a plain `https://music.youtube.com/search?q=` URL; the YTM app's
+   App Links verification for that domain is unreliable, so on many devices
+   ACTION_VIEW hands the URL to Chrome instead of the app.
+
+### What was done
+1. `PetDesignerScreen.kt`: moved the `listState` declaration UP to the
+   outer Box scope (before the Column) — both the LazyColumn (inside the
+   Column) and the hero overlay (sibling) resolve it. CI should pass.
+2. `ExploreSearch.kt` `openSearchUrl`: `https://music.youtube.com/` URLs
+   are now package-PINNED to `com.google.android.apps.youtube.music` via
+   `Intent.setPackage` — package-scoped delivery bypasses App Links
+   verification, so the search lands in the YTM app. Falls back to the
+   plain https intent (browser) when the app isn't installed (the pinned
+   start throws `ActivityNotFoundException`). Apple Music's `music://`
+   fallback logic untouched.
+
+### Validation
+Braces balanced in both files; `git diff --check` clean; the LazyColumn
+still receives `state = listState` and the overlay still reads it — both in
+scope now. No Gradle locally (env rule) — CI on push.
+
 ## Prior — Apple Music deep links fail for songs (v107)
 
 ### What was asked

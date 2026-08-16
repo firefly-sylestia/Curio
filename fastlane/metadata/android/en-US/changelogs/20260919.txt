@@ -18,6 +18,7 @@ FIX
 - Profile: the XP progress / quests box no longer wears the paper stat card style — that look is reserved for the real stat bars (Home, Profile hero, detail meta card).
 - Pet designer: the hero banner now scrolls away with the content instead of staying pinned over it — the tear no longer hides the studio toolbar, which now pins cleanly below the status bar.
 - Music topics in the explore dialog now say "Listen in" for audio services (Apple Music, Spotify, YouTube Music) — "Watch in" stays for YouTube and non-music topics.
+- YouTube Music: the "Listen in" link now opens inside the YouTube Music app instead of the browser (it falls back to the browser only when the app isn't installed).
 - Mood board: the inline board no longer resizes while you drag, grow or shrink photos — the fit freezes once the board has content, and quote cards are width-capped so they can't balloon past the small board (and can shrink smaller).
 - Music service picker: the round radio indicator is gone — the selected service reads through the row's fill alone.
 - Apple Music: the "Watch in" deep link now opens songs correctly — songs resolve to their album page with the track id (the old /song/ link 404'd), and the search now uses the artist + title so the right track is found.

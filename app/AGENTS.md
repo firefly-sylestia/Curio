@@ -401,6 +401,24 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v110 — pet designer scroll compiles + YouTube Music opens in-app.**
+  (1) **CI compile fix:** `PetDesignerScreen` declared `val listState =
+  rememberLazyListState()` INSIDE the `Column { }` content lambda, but the
+  v109 hero overlay `Box` (which reads `listState.layoutInfo
+  .viewportStartOffset` for the scroll-away translation) is a Column
+  SIBLING — a val inside the lambda's scope is invisible to the sibling, so
+  `compileReleaseKotlin` failed with "Unresolved reference 'listState'".
+  The declaration moved UP to the outer Box scope (before the Column); both
+  the LazyColumn (inside the Column) and the hero overlay (sibling) now
+  resolve it. (2) **YouTube Music opens IN the app:** `openSearchUrl`
+  (ExploreSearch.kt) now package-PINS every `https://music.youtube.com/`
+  URL to `com.google.android.apps.youtube.music`
+  (`Intent.setPackage`) — the YTM app's App Links verification for that
+  domain is unreliable (many devices hand the URL to Chrome, so the
+  "Listen in" pill opened the browser), and package-scoped delivery
+  bypasses verification, landing the search in the YTM app. When the app
+  isn't installed (no handler for the pinned package) the plain https
+  intent opens the browser instead.
 - **v108 — dark-mode chip glass for pills & search bars; hero texts use
   cream ink; under-sheet opt-out; detail buttons blend.** (1) **YouTube
   logo un-squished:** `ic_music_youtube.xml` had a 28.57×20 viewport in a
