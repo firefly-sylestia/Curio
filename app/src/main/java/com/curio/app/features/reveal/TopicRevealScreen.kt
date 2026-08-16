@@ -63,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -127,6 +128,7 @@ import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
+import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
@@ -1004,8 +1006,19 @@ fun TopicRevealScreen(
         // TextButton had no container color, so the pill shape was
         // invisible): an opaque lerp of the dialog action ink over the
         // dialog container.
+        // v108 — dark mode: the pills wear the FILTER CHIPS' dark raised
+        // glass (near-black tinted surface + One UI edge/glow + 4dp lift)
+        // so the explore actions match the app's chip family at night.
         val pillInk = curioDialogActionColor()
-        val pillFill = lerp(curioDialogContainerColor(), pillInk, 0.14f)
+        val pillShape = RoundedCornerShape(50)
+        val pillFill = if (isCurioDarkTheme()) {
+            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+        } else {
+            lerp(curioDialogContainerColor(), pillInk, 0.14f)
+        }
+        // The glow's accent: the topic's own category shade (the filter
+        // chips glow with their lane accent too).
+        val pillGlowAccent = cat.themedAccent()
         // v11 — the dialog wears the shared Curio dialog theme: the card-
         // matching 24dp shape, the pastel-aware container, and the readable
         // action ink (deep rose on light/pastel so the buttons never wash
@@ -1097,7 +1110,14 @@ fun TopicRevealScreen(
                             startExploreSession(topic, buildEngineSearchUrl(topic))
                         },
                         colors = curioDialogActionButtonColors(containerColor = pillFill),
-                        shape = RoundedCornerShape(50),
+                        shape = pillShape,
+                        // v108 — the filter-chip pill recipe in dark: a 4dp
+                        // lift + the One UI edge/glow (no-ops in light).
+                        modifier = Modifier
+                            .shadow(4.dp, pillShape)
+                            .curioDarkGlow(4.dp, pillShape)
+                            .curioGlassEdge(pillShape)
+                            .curioInnerGlow(pillShape, pillGlowAccent, strength = 0.12f),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
                         // v27u — clean globe glyph for the user's chosen engine.
@@ -1146,7 +1166,14 @@ fun TopicRevealScreen(
                             }
                         },
                         colors = curioDialogActionButtonColors(containerColor = pillFill),
-                        shape = RoundedCornerShape(50),
+                        shape = pillShape,
+                        // v108 — the filter-chip pill recipe in dark: a 4dp
+                        // lift + the One UI edge/glow (no-ops in light).
+                        modifier = Modifier
+                            .shadow(4.dp, pillShape)
+                            .curioDarkGlow(4.dp, pillShape)
+                            .curioGlassEdge(pillShape)
+                            .curioInnerGlow(pillShape, pillGlowAccent, strength = 0.12f),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
                         // v106 — the service's brand logo (no tint — the

@@ -90,6 +90,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
+import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -725,6 +726,9 @@ private fun CabinetHeroHeader(
         // ── Under-sheet — a shared white paper layer, so the tear remains
         // v81 — dark: a subtle lighter lip off the dark hero so the seam
         // still reads (never a bright white sliver on the black page).
+        // v108 — OFF by default (Settings → Experiments → Paper & headers);
+        // the toggle restores this extra paper layer.
+        if (AppPreferences.heroTearSheetState) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -736,6 +740,7 @@ private fun CabinetHeroHeader(
                     else CurioColors.CreamWhite
                 )
         )
+        }
         // ── Torn-edge shadow — hairline dark rim under the seam.
         Box(
             modifier = Modifier
@@ -843,7 +848,9 @@ private fun CabinetHeroHeader(
                                 onQueryChange = onSearchQueryChange,
                                 placeholder = "Search captures…",
                                 ink = MaterialTheme.colorScheme.onSurface,
-                                fill = lerp(fill, Color.White, 0.30f),
+                                // v108 — dark: the filter chips' near-black
+                                // raised glass instead of the mid-tone lift.
+                                fill = curioSearchFill(fill),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(searchFocus)
@@ -1133,7 +1140,12 @@ private fun CabinetHeroActionPill(
     // cream) so the Cabinet's hero pills stop reading as flat cream blocks;
     // AMOLED gets a soft grey glass instead of pitch black. Dark keeps the
     // white lift so the pill stays a brighter glass on the deep banner.
-    val fill = when {
+    // v108 — dark mode swaps to the FILTER CHIPS' dark raised glass
+    // (near-black tinted surface) so the hero pills read as part of the
+    // same chip family at night; destructive stays its black-lean pill.
+    val fill = if (isCurioDarkTheme()) {
+        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+    } else when {
         destructive -> lerp(backdrop, Color.Black, 0.14f)
         emphasized -> lerp(backdrop, curioPillTintLift(), 0.24f)
         else -> lerp(backdrop, curioPillTintLift(), 0.38f)

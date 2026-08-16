@@ -395,6 +395,10 @@ fun HomeScreen(navController: NavController) {
                 // sheet's torn top hides behind the opaque banner while its
                 // uneven lip reads white below the tear, and the page wash
                 // starts right after it.
+                // v108 — OFF by default (Settings → Experiments → Paper &
+                // headers): the hero tears straight into the page; the
+                // toggle restores this extra paper layer.
+                if (AppPreferences.heroTearSheetState) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -408,6 +412,7 @@ fun HomeScreen(navController: NavController) {
                             else Color(0xFFFDFCF9)
                         )
                 )
+                }
                 // ── Torn-edge shadow — a hairline dark rim just below the
                 // hero's torn seam (the SAME seeded torn shape, nudged down
                 // ~1dp) so the tear reads as a real paper edge casting a
@@ -1901,6 +1906,9 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                 // Paper under-sheet (same seed -> pixel-aligned seam). v81 —
                 // dark: a subtle lighter lip so the seam reads on the dark
                 // banner.
+                // v108 — OFF by default (the hero tears straight into the
+                // page); the Experiments toggle restores this layer.
+                if (AppPreferences.heroTearSheetState) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1912,6 +1920,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             else CurioColors.CreamWhite
                         )
                 )
+                }
                 // Torn-edge shadow - hairline rim under the ragged seam.
                 Box(
                     modifier = Modifier

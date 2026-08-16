@@ -766,6 +766,9 @@ private fun ProfileHero(
         // up-bites of the banner, carrying the accent of the color.
         // Same seeded torn top as the banner,
         // hidden behind it except through the up-bites.
+        // v108 — OFF by default (Settings → Experiments → Paper & headers);
+        // the toggle restores this extra paper layer.
+        if (AppPreferences.heroTearSheetState) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -781,6 +784,7 @@ private fun ProfileHero(
                     else lerp(CurioColors.CreamWhite, fill, 0.10f)
                 )
         )
+        }
         // ── Torn-edge shadow — hairline dark rim under the seam so the
         // tear reads as a real paper edge (the Home construction).
         Box(

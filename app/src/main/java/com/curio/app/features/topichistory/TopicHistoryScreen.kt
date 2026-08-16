@@ -483,6 +483,9 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
     ) {
         // ── White under-sheet — the tear's uneven lip reads white below
         // the opaque banner (shared paper layer in every theme).
+        // v108 — OFF by default (Settings → Experiments → Paper & headers);
+        // the toggle restores this extra paper layer.
+        if (AppPreferences.heroTearSheetState) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -495,6 +498,7 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
                     else CurioColors.CreamWhite
                 )
         )
+        }
         // ── Torn-edge shadow — hairline dark rim just below the seam.
         Box(
             modifier = Modifier
@@ -538,7 +542,13 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
                             // glass read transparent; the opaque lerp of the
                             // banner fill toward the theme-aware lift keeps
                             // the same perceived tint with a clean shadow.
-                            containerColor = lerp(fill, curioPillTintLift(), 0.38f),
+                            // v108 — dark: the filter-chip glass so the back
+                            // pill matches the action-pill family at night.
+                            containerColor = if (isCurioDarkTheme()) {
+                                lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+                            } else {
+                                lerp(fill, curioPillTintLift(), 0.38f)
+                            },
                             contentColor = ink,
                             shadowElevation = 3.dp,
                             disableRipple = true

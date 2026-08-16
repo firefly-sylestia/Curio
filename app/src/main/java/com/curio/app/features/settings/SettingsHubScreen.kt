@@ -71,6 +71,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSearchField
+import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioSettingsDivider
@@ -200,6 +201,9 @@ fun SettingsHeroHeader(
             // the sheet turns a soft rose so the torn edge keeps reading
             // through the up-bites of the pure-black banner (black-on-black
             // would hide the seam), carrying the accent of the color.
+            // v108 — OFF by default (Settings → Experiments → Paper &
+            // headers); the toggle restores this extra paper layer.
+            if (AppPreferences.heroTearSheetState) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -214,6 +218,7 @@ fun SettingsHeroHeader(
                 )
 
         )
+            }
         // ── Torn-edge shadow — hairline dark rim under the seam (same
         // black rim as Home's hero, in every theme — NOT the theme
         // onSurface, which resolves white-ish in dark mode).
@@ -272,7 +277,14 @@ fun SettingsHeroHeader(
                             // of the banner fill toward the theme-aware lift
                             // resolves to the same perceived tint with a clean
                             // elevation shadow.
-                            containerColor = lerp(fill, curioPillTintLift(), 0.38f),
+                            // v108 — dark: the same filter-chip glass as the
+                            // action pills so the back pill matches its
+                            // siblings on the dark banner.
+                            containerColor = if (isCurioDarkTheme()) {
+                                lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+                            } else {
+                                lerp(fill, curioPillTintLift(), 0.38f)
+                            },
                             contentColor = symbolTint,
                             shadowElevation = 3.dp,
                             disableRipple = true
@@ -334,7 +346,9 @@ fun SettingsHeroHeader(
                                 onQueryChange = onSearchQueryChange,
                                 placeholder = searchPlaceholder,
                                 ink = MaterialTheme.colorScheme.onSurface,
-                                fill = lerp(fill, Color.White, 0.30f),
+                                // v108 — dark: the filter chips' near-black
+                                // raised glass instead of the mid-tone lift.
+                                fill = curioSearchFill(fill),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .then(
@@ -427,7 +441,14 @@ fun SettingsHeroActionPill(
     // cream) so settings/profile buttons stop reading as flat cream blocks;
     // AMOLED gets a soft grey glass instead of pitch black. Dark keeps the
     // white lift so the pill stays a brighter glass on the deep banner.
-    val fill = lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
+    // v108 — dark mode swaps to the FILTER CHIPS' dark raised glass
+    // (near-black tinted surface) so the hero pills read as part of the
+    // same chip family at night instead of bright glass on the dark banner.
+    val fill = if (isCurioDarkTheme()) {
+        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+    } else {
+        lerp(backdrop, curioPillTintLift(), if (emphasized) 0.24f else 0.38f)
+    }
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),

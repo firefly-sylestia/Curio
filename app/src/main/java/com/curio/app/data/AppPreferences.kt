@@ -312,6 +312,11 @@ object AppPreferences {
     var pillGlowSubtleState by mutableStateOf(true)
     var paperStatTearState by mutableStateOf(false)
         private set
+    // v108 — torn heroes wear ONLY their bottom tear by default; the white
+    // paper under-sheet (the extra layered lip below the seam) is an opt-in
+    // experiment in Settings → Experiments → Paper & headers.
+    var heroTearSheetState by mutableStateOf(false)
+        private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
     var homeTintState by mutableStateOf(false)
     var homeHeroTintState by mutableStateOf(false)
@@ -556,6 +561,7 @@ object AppPreferences {
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
         pillGlowSubtleState = isPillGlowSubtleEnabled(context)
+        heroTearSheetState = isHeroTearSheetEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
         homeTintFollowLaneState = isHomeTintFollowLaneEnabled(context)
@@ -826,6 +832,7 @@ object AppPreferences {
     private const val KEY_PAPER_HOLE_RING_STYLE = "paper_hole_ring_style"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
     private const val KEY_PILL_GLOW_SUBTLE = "pill_glow_subtle"
+    private const val KEY_HERO_TEAR_SHEET = "hero_tear_sheet"
     private const val KEY_HOME_TINT = "home_tint"
     private const val KEY_HOME_HERO_TINT = "home_hero_tint"
     private const val KEY_HOME_TINT_FOLLOW_LANE = "home_tint_follow_lane"
@@ -932,6 +939,20 @@ object AppPreferences {
     fun setPaperStatTearEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_STAT_TEAR, enabled).apply()
         paperStatTearState = enabled
+    }
+
+    /**
+     * v108 — whether the torn heroes wear their white paper UNDER-SHEET
+     * (the layered lip below the hero's own bottom tear). Default OFF: the
+     * hero tears straight into the page. Turning it on restores the extra
+     * paper layer for comparison (Settings → Experiments → Paper & headers).
+     */
+    fun isHeroTearSheetEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_HERO_TEAR_SHEET, false)
+
+    fun setHeroTearSheetEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_HERO_TEAR_SHEET, enabled).apply()
+        heroTearSheetState = enabled
     }
 
     /** Whether the torn-hero headers wear a slightly darker category accent (default ON). */

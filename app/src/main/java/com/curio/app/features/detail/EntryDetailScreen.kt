@@ -390,6 +390,10 @@ fun EntryDetailScreen(
                     bold = true
                 )
             }
+            // v108 — OFF by default (Settings → Experiments → Paper &
+            // headers): the hero tears straight into the page; the toggle
+            // restores this extra paper layer.
+            if (AppPreferences.heroTearSheetState) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -409,6 +413,7 @@ fun EntryDetailScreen(
                         else heroSheetColor
                     )
             )
+            }
 
             // ── Torn-edge shadow — a hairline dark rim just below the
             // hero's torn seam (the SAME seeded torn shape, nudged down
@@ -1068,7 +1073,10 @@ private fun BoxScope.DetailStickyBar(
     // so the light cream ink actually reads — the old hardcoded WHITE plate
     // washed out the cream glyphs and glared on the black page (the
     // reversed light-in-dark contract).
-    val frostFill = if (isCurioDarkTheme()) lerp(heroFill, Color.Black, 0.30f)
+    // v108 — the dark frost is a HERO-HUED glass (the same white-lift lip
+    // the under-sheet wears) instead of the near-black plate, so the back /
+    // more buttons read as part of the hero instead of a black slab on it.
+    val frostFill = if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
                     else lerp(heroFill, curioPillTintLift(), 0.38f)
     val stickyFrostBrush = Brush.verticalGradient(0f to frostFill, 1f to frostFill.copy(alpha = 0.97f))
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time

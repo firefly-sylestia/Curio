@@ -171,6 +171,13 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Deeper header color", "Torn-hero headers wear a slightly darker category accent (on by default)", AppPreferences.headerDeepState) {
                         AppPreferences.setHeaderDeepEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    // v108 — the layered white paper lip below the hero's own
+                    // bottom tear is OFF by default; the toggle restores it
+                    // for comparison.
+                    ExperimentSwitchRow("Torn hero under-sheet", "The white paper lip below torn heroes — off: the hero tears straight into the page", AppPreferences.heroTearSheetState) {
+                        AppPreferences.setHeroTearSheetEnabled(context, it)
+                    }
                 }
             }
             item { CurioSectionLabel("Promo") }

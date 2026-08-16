@@ -401,6 +401,43 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v108 — dark-mode chip glass for pills & search bars; hero texts use
+  cream ink; under-sheet opt-out; detail buttons blend.** (1) **YouTube
+  logo un-squished:** `ic_music_youtube.xml` had a 28.57×20 viewport in a
+  square 24dp box — VectorDrawable maps non-uniformly, so the logo drew
+  vertically stretched. The art now sits centered in a square 28.57×28.57
+  viewport (group translateY 4.285) — uniform scale, ~3dp breathing room.
+  (2) **Dark pills = filter-chip glass:** the explore dialog's "Explore" +
+  "Watch in" pills and every hero action pill (`SettingsHeroActionPill`,
+  `CabinetHeroActionPill`, and the settings-family back pills in
+  `SettingsHeroHeader` + Topic History) swap their bright white-lift glass
+  for the CompactChip dark raised glass
+  (`lerp(surfaceContainerHigh, Black, 0.15)`) in dark mode — light keeps
+  the v93 frosted glass; the explore pills also gain the chip's 4dp lift +
+  `curioDarkGlow`/`curioGlassEdge`/`curioInnerGlow(accent 0.12)`. (3)
+  **Search-bar audit (dark):** every hero search field (Cabinet hero,
+  `SettingsHeroHeader`/Topic DB, Spin filter sheet) now resolves its fill
+  through the new shared `curioSearchFill(backdrop)` — light lifts toward
+  white as before, dark drops to the chip near-black glass (the old
+  `lerp(bannerFill, White, 0.30)` landed a muddy mid-tone on the dark
+  banners/black sheet). (4) **Hero banner titles use cream ink in dark:**
+  the Spin filter sheet ("Discoveries" + "Pick what you're in the mood
+  for") and the category picker sheet ("What are we\nExploring?") now
+  resolve `filterHeroInk`/`pickerHeroInk` via `heroHeaderInk()` instead
+  of `onAccent()` — dark pastel mode was painting the tinted LIGHT twin
+  as title text over the deep banner; dark now reads the same
+  cream-white the Cabinet/Home hero titles use. (5) **"Torn hero
+  under-sheet" experiment (default OFF):** new `heroTearSheetState` pref
+  (Settings → Experiments → Paper & headers) — with it off, every torn
+  hero tears straight into the page (only the hero's own bottom tear +
+  hairline rim); ON restores the white paper lip. Gated in all 11
+  under-sheet call sites: Home quest + drawer, EntryDetail, Spin filter +
+  picker sheets, Cabinet, Settings hero, Profile, Topic History,
+  Onboarding, PromoMode. (6) **Detail back/more frost blends with the
+  hero:** `DetailStickyBar`'s dark frost was `lerp(heroFill, Black, 0.30)`
+  (a near-black slab); it's now `lerp(heroFill, White, 0.10)` — the same
+  hero-hued lip the under-sheet wears, so the controls read as part of
+  the banner. Light frost unchanged.
 - **v107 — Apple Music "Watch in" deep links fixed for songs.**
   `resolveAppleMusicItemUrl` (ExploreSearch.kt) had two bugs that made
   SONG topics fail while artists and some albums worked (verified live

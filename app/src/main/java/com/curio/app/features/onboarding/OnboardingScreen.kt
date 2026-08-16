@@ -449,6 +449,9 @@ private fun OnboardingHeroBackdrop() {
         // ── Under-sheet — the shared white paper layer, so the tear stays
         // bright beneath the rose hero in every theme. It pokes a couple of
         // dp BELOW the hero so the ragged seam reads.
+        // v108 — OFF by default (Settings → Experiments → Paper & headers);
+        // the toggle restores this extra paper layer.
+        if (AppPreferences.heroTearSheetState) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -462,6 +465,7 @@ private fun OnboardingHeroBackdrop() {
                     else CurioColors.CreamWhite
                 )
         )
+        }
         // ── Torn-edge shadow — hairline dark rim under the seam.
         Box(
             modifier = Modifier

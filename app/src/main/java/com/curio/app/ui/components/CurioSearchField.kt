@@ -23,12 +23,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.isCurioDarkTheme
+
+/**
+ * v108 — the canonical frosted search-bar fill for the hero call sites:
+ * LIGHT lifts the banner [backdrop] toward white (the bright frosted
+ * glass); DARK swaps to the filter chips' near-black raised glass
+ * (`lerp(surfaceContainerHigh, Black, 0.15)`) so every search bar matches
+ * the app's chip family at night instead of a muddy mid-tone.
+ */
+@Composable
+fun curioSearchFill(backdrop: Color): Color =
+    if (isCurioDarkTheme()) {
+        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+    } else {
+        lerp(backdrop, Color.White, 0.30f)
+    }
 
 /**
  * THE canonical Curio search box — one shared One UI style for every search
@@ -46,8 +63,8 @@ import com.curio.app.ui.theme.CurioIcons
  *   text / cursor / hairline all resolve theme-aware (the light twin on the
  *   dark frosted glass at night); null → theme onSurface (v100 — the
  *   standard theme text color, crisp on any glass).
- * @param fill the frosted container (heroes pass `lerp(bannerFill, White,
- *   0.30)`); null → theme surfaceContainerLow.
+ * @param fill the frosted container (heroes pass [curioSearchFill]; null →
+ *   theme surfaceContainerLow).
  */
 @Composable
 fun CurioSearchField(

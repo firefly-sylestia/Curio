@@ -348,6 +348,9 @@ fun PromoShareCard(topicsTotal: Int) {
                 .weight(0.60f)
         ) {
             // Cream sheet peeking up through the tear bites.
+            // v108 — OFF by default (the same torn-hero under-sheet
+            // toggle in Settings → Experiments → Paper & headers).
+            if (AppPreferences.heroTearSheetState) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -357,6 +360,7 @@ fun PromoShareCard(topicsTotal: Int) {
                     .clip(sheetShape)
                     .background(PromoPaper)
             )
+            }
             // The rose banner, clipped to the seeded torn bottom edge.
             Box(
                 modifier = Modifier
