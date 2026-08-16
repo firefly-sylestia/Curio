@@ -1,8 +1,67 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: draft recovery keeps its take + filter Apply pill matches chips
+## Current request — COMPLETED: icons pushed down/cut at the bottom + pill glow peeking past the pill
 
-All of this session's work is done, committed and pushed (`e297f91`).
+All of this session's work is done, committed and pushed (`835677b`).
+
+### 1. CurioIcon glyphs pushed DOWN and cut at the BOTTOM (font-size driven)
+The user clarified the icon-cutting was font-size related: at large system
+font sizes the glyphs sat low and their ink bottoms were sliced (they
+confirmed the previous "optical lift" fix addressed the wrong direction).
+- **Root cause (measured, not guessed):** the icon `Text` used
+  `includeFontPadding = false` + `LineHeightStyle.Trim.Both` +
+  `lineHeight = 1.0em`. Trimming below the font's NATURAL 1.2em line box
+  (hhea ascent 1.1em / descent 0.1em) plus the trim's int rounding
+  (ascent −69 → −68, descent 6 → −5 at 24dp/420dpi) dropped the baseline
+  ~5px below the icon box → ink center ~2dp low, ink bottom ~1dp past the
+  box → cut by clipped button shapes. Verified against the REAL glyph ink
+  bounds parsed from the bundled TTF (ink spans +0.04em..+0.96em above
+  baseline for every glyph — never below baseline — so the ink is
+  designed to center in the natural line box; the natural box's center IS
+  the ink center). Also confirmed this Compose version (BOM 2026.05.01,
+  plain `Density` with raw `configuration.fontScale`) compensates
+  fontScale EXACTLY — the em is constant, so the bug showed at every
+  scale ≥ 1.0 and "fixed" only below 1.0 via the `coerceAtLeast(1f)`
+  (glyph smaller than box).
+- **Fix:** keep the fontScale compensation
+  (`size / fontScale.coerceAtLeast(1f)`), restore the natural line box:
+  `PlatformTextStyle(includeFontPadding = true)` (default) and NO
+  line-height trim — `lineHeight = 1.0em` acts as a Minimum. The 1.2em
+  natural box centers the ink in the icon's layout box with ~1dp margin
+  top and bottom, at every font scale. `LineHeightStyle` import removed.
+  Do NOT reintroduce the trim/padding combo (AGENTS.md v114 bullet has
+  the full derivation).
+
+### 2. Pill glow leaking past the pill shape (dark mode)
+The user pinned the leak to: progress pill, filter chips / Show all,
+category picker tabs/presets — and confirmed it's a shape-mismatch issue
+(the glow paints against the pill's bounding box, crossing the capsule's
+curved ends). `curioDarkGlow` is a retired no-op, so the culprits were the
+One UI dark-mode treatments.
+- **curioGlassEdge (CurioGlassEffects.kt):** the top catch is now clipped
+  to a capsule mask hugging the pill's TOP contour — 10% side insets,
+  55% band height, matching corner radius, top edge glued to the pill's
+  top — so the bright band fades before the rounded ends. A mirrored
+  BOTTOM band preserves the "shiny glass" bottom catch when the Subtle
+  option is off.
+- **curioInnerGlow:** radial stays inside the pill's curved rim (capped
+  reach + pill-outline clip).
+- **Call sites:** category picker `PickerPageTab` + `PickerPresetChip` +
+  Mix button and the reveal `RevealAlreadyButton` (all capsule pills)
+  switched from the full-width `categoryEdgeShine` band to
+  `curioGlassEdge` (+ `curioInnerGlow` 0.12, matching the Spin
+  filter-chip family). Modest-corner cards (Start-exploring 24dp,
+  topic/settings/hero cards) keep `categoryEdgeShine`.
+
+### Validation
+Font geometry verified by parsing the bundled TTF (head/hhea/loca/glyf/
+post); Compose trim + Density behavior verified against the androidx source;
+imports checked for orphans; no Gradle locally (env rule) — CI validates on
+push. Pushed to `main`.
+
+## Previous session — COMPLETED: draft recovery keeps its take + filter Apply pill matches chips
+
+All of that session's work is done, committed and pushed (`e297f91`).
 
 ### 1. Draft recovery restored the WRONG take (SaveCaptureScreen)
 When "Express yourself" opened with a default take (sound bite, etc.), the
