@@ -1,8 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: mixed-deck colors vivid + smooth hero gradient
+## Current request — COMPLETED: songs lane expanded to 1,000 real songs
 
-All of this session's work is done, committed and pushed (`cfc43d1`).
+All of this session's work is done, committed and pushed (`36d5d04`).
+
+The user: "increase the songs to 1000 and use proper real facts and add
+some good songs new one 2000s and above."
+
+### What shipped
+- `app/src/main/assets/topics/songs.json`: **60 → 1,000 entries** (the
+  original 60 preserved byte-for-byte), all tier 1, schema-validated.
+- Decade mix: 1960s (66) · 1970s (119) · 1980s (155) · 1990s (118) ·
+  2000s (165) · 2010s (273) · 2020s (104) — **~54% are 2000s or newer**
+  per the user's "new songs 2000s+" ask.
+- Every entry: real song + artist + year, a factual teaser (a quirky
+  backstory — sample-based, record-breaking, behind-the-scenes), a
+  curiously-framed listen instruction, and Listen action
+  (`durationMinutes: 3`).
+
+### How it was authored
+One-off generator at `/tmp/gen_songs.py` (per-decade batches) → dedupe
+by name+artist+year → ID slug seeded with the existing 60 song IDs so
+same-name songs get `-{year}` / `-{artist}-{year}` suffixes → merged with
+originals → validated: unique ids across ALL topic files, ≤450-char
+teasers, ≤600-char instructions, name ≤80, `verb: "Listen"`, tier 1–3,
+`imageUrl: ""`. Trimmed 18 filler entries to land exactly at 1,000.
+
+### Validation
+Python mirror of the `validateTopics` Gradle task: 0 errors; cross-file
+ID uniqueness vs all 20 other topic files (17,070 topics total now).
+Changelog + AGENTS.md updated. No Gradle locally (env rule) — CI runs
+`validateTopics` on push.
+
+## Previous request — COMPLETED: mixed-deck colors vivid + smooth hero gradient
+
+All of that session's work is done, committed and pushed (`cfc43d1`).
 
 The user: "fix the new mixed colors some are bad and dont use gradints with
 line." Asked which families were bad → **green/teal, magenta/purple, blue**
