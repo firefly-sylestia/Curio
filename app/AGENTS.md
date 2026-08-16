@@ -437,7 +437,20 @@ app/src/main/java/com/curio/app/
   hero:** `DetailStickyBar`'s dark frost was `lerp(heroFill, Black, 0.30)`
   (a near-black slab); it's now `lerp(heroFill, White, 0.10)` — the same
   hero-hued lip the under-sheet wears, so the controls read as part of
-  the banner. Light frost unchanged. (7) **Profile XP-progress block
+  the banner. Light frost unchanged. (8) **Pet designer hero tear is now
+  SCROLLABLE, not sticky:** the `SettingsHeroHeader` overlay translates up
+  1:1 with the list (`Modifier.graphicsLayer { translationY =
+  -listState.layoutInfo.viewportStartOffset }` — viewportStartOffset is
+  the total scrolled pixels, monotonic through the sticky toolbar, so the
+  hero rides away with the content and never jumps back) instead of
+  staying pinned while rows slide under the seam. The LazyColumn gained a
+  `rememberLazyListState()`; the sticky studio toolbar now wears
+  `statusBarsPadding()` + the theme background so it pins BELOW the
+  status bar — before, it pinned at the viewport top and was invisible
+  behind the opaque hero (sticky headers pin at the viewport top, never
+  under the hero). The hero keeps its full-bleed tear; content padding
+  (`SettingsHeroTotalHeight + 8`) unchanged.
+  (7) **Profile XP-progress block
   leaves the paper stat card:** the v97 "quests & achievements wears the
   shared paper card" is REVERTED — `ProgressAndAchievementsCard` ("XP
   progress" + quest list + badge preview) is not a stat bar, so it always

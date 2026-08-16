@@ -79,6 +79,16 @@ A 5-part fix list (all visual, dark-mode heavy):
    stat panes (Home Streak · Cabinet · Topics, hero Level · Saved · Lanes,
    detail meta card). Dead quests-paper locals + the now-unused
    `settingsCardTintLift` import removed.
+8. **(follow-up, item 7)** Pet designer hero tear is now SCROLLABLE, not
+   sticky: the overlaid `SettingsHeroHeader` translates up 1:1 with the
+   list via `graphicsLayer { translationY = -listState.layoutInfo
+   .viewportStartOffset }` (total scrolled pixels — monotonic through the
+   sticky toolbar, so no jump-back). The LazyColumn gained a
+   `rememberLazyListState()`; the sticky studio toolbar now has
+   `statusBarsPadding()` + theme background so it pins below the status
+   bar (sticky headers pin at the viewport top — previously it pinned
+   invisibly behind the opaque hero). Full-bleed tear + content padding
+   unchanged.
 
 ### Validation
 `git diff --check` clean; brace counts balanced in all changed files; no

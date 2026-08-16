@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -600,10 +601,14 @@ fun PetDesignerScreen(navController: NavController) {
         }
         val wide = windowWidthSizeClass().isWide
         Column(modifier = Modifier.fillMaxSize()) {
+        // v109 — the list state drives the hero's scroll-away translation
+        // (the tear now scrolls with the content instead of staying pinned).
+        val listState = rememberLazyListState()
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f),
+            state = listState,
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
@@ -615,8 +620,17 @@ fun PetDesignerScreen(navController: NavController) {
             // ── Sticky studio toolbar: the ONE place for save / import /
             //    export / undo / redo / reset (v8.52 — the old pinned
             //    footer SaveArea is gone, so no duplicate buttons). ──────
+            // v109 — the hero scrolls away now, so the pinned toolbar must
+            // clear the status bar (it used to hide behind the overlaid
+            // hero); the container wears the page background so the pinned
+            // bar reads as a solid strip.
             stickyHeader {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
                     EditorToolbar(
                         design = design,
                         dirty = design != initialDesign,
@@ -1150,12 +1164,23 @@ fun PetDesignerScreen(navController: NavController) {
         )
         }
 
-        SettingsHeroHeader(
-            title = "Pet designer",
-            subtitle = "Draw your own Curie",
-            onBack = { navController.popBackStack() },
-            compact = wide
-        )
+        // v109 — the hero tear is now SCROLLABLE, not sticky: it translates
+        // up 1:1 with the list (viewportStartOffset = total scrolled pixels)
+        // so it rides away with the content instead of staying pinned while
+        // rows slide under the seam. Drawn on top of the list as before, so
+        // the tear stays crisp over the content it leaves behind.
+        Box(
+            modifier = Modifier.graphicsLayer {
+                translationY = -listState.layoutInfo.viewportStartOffset.toFloat()
+            }
+        ) {
+            SettingsHeroHeader(
+                title = "Pet designer",
+                subtitle = "Draw your own Curie",
+                onBack = { navController.popBackStack() },
+                compact = wide
+            )
+        }
 
         // ── Draw & switch preview picker overlay (v8.49) ─────────────
         pickerCategory?.let { category ->
