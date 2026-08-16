@@ -280,18 +280,21 @@ constructors.
 - `desktop/src/main/kotlin/com/curio/desktop/DesktopEntryStore.kt` — the
   JSON saved-entries store (`~/.curio/entries.json`, reactive via Compose
   state).
-- CI: the `desktop` job in `.github/workflows/android.yml` compiles and
-  builds the module on every push and PR (`:desktop:build`) so the port
-  can't silently rot, and uploads the compiled JAR as an artifact
-  (`curio-desktop-jar-*`) **only on branch pushes** (PR runs skip the
-  upload — a 4MB jar per PR commit was piling up in artifact storage),
-  with 1-day retention. Native Windows installers (`.exe` app image +
-  `.msi`) build only on tag pushes (plus manual dispatch) via
-  `.github/workflows/desktop-release.yml` (a windows-latest runner, WiX
-  via chocolatey, jpackage `createDistributable` for the `.exe` app image
-  + `packageDistributionForCurrentOS` for the `.msi`; the portable zip +
-  `.msi` attach to the GitHub release on tags and upload as run artifacts
-  on manual-dispatch runs).
+- CI: the desktop build paths are **DISABLED until the app is finished** —
+  the `desktop` job in `.github/workflows/android.yml` and the `windows`
+  job in `.github/workflows/desktop-release.yml` are both gated with
+  `if: false` (flip to `if: true` to re-enable). When active: the
+  `desktop` job compiles the module on every push and PR
+  (`:desktop:build`) so the port can't silently rot, and uploads the
+  compiled JAR as an artifact (`curio-desktop-jar-*`) **only on branch
+  pushes** (PR runs skip the upload — a 4MB jar per PR commit was piling
+  up in artifact storage), with 1-day retention. Native Windows
+  installers (`.exe` app image + `.msi`) build only on tag pushes (plus
+  manual dispatch) via `desktop-release.yml` (a windows-latest runner,
+  WiX via chocolatey, jpackage `createDistributable` for the `.exe` app
+  image + `packageDistributionForCurrentOS` for the `.msi`; the portable
+  zip + `.msi` attach to the GitHub release on tags and upload as run
+  artifacts on manual-dispatch runs).
 
 **To run locally:** `./gradlew :desktop:run` (this environment forbids
 running Gradle — CI validates instead).

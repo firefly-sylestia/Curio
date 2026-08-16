@@ -123,14 +123,19 @@ jobs:
           # APKs attached to tag RELEASES (release.yml) stay permanent.
           retention-days: 1
 
-  # v27t — Compose Multiplatform desktop port: keep the JVM/desktop module
-  # compiling on every push AND every PR so the port can't silently rot.
-  # The compiled JAR is only uploaded on branch pushes (main/Alpha), never
-  # on PR runs — a 4MB jar per PR commit was piling up in artifact storage.
-  # Native .exe/.dmg/.deb packaging happens in a dedicated desktop release
-  # workflow (tag pushes).
+  # v27t — Compose Multiplatform desktop port. DISABLED (if: false) until
+  # the desktop app is finished — the port isn't ready, so stop burning CI
+  # minutes building it on every push/PR and on tag pushes
+  # (desktop-release.yml is gated the same way). To re-enable: flip this
+  # `if: false` to `if: true` (and restore the desktop-release.yml gate).
+  # When active: keep the JVM/desktop module compiling on every push AND
+  # every PR so the port can't silently rot; the compiled JAR is uploaded
+  # only on branch pushes (main/Alpha), never on PR runs — a 4MB jar per
+  # PR commit was piling up in artifact storage. Native .exe/.dmg/.deb
+  # packaging happens in a dedicated desktop release workflow (tag pushes).
   desktop:
     name: Compile Curio Desktop (JVM)
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

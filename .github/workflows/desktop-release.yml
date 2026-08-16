@@ -1,14 +1,20 @@
 # Curio Desktop Release — native Windows installers for the Compose
 # Multiplatform desktop port (desktop/ module).
 #
-# Tag-only: PR/push CI builds just the Android APK (see android.yml). On a
-# v* tag this workflow runs on a windows-latest runner, builds the proper
-# Curio.exe app image + .msi, and attaches the portable zip + installer to
-# the GitHub release alongside the Android APKs published by release.yml.
-# The Android workflow may create the release body first; this workflow only
-# writes its own body when it creates the release (update_release_body is
-# false), so the two never clobber each other's text. Manual dispatch runs
-# the same build and uploads the files as run artifacts for testing.
+# DISABLED (windows job gated with `if: false`) until the desktop app is
+# finished — the port isn't ready, so tag pushes must NOT build/upload
+# desktop installers. Re-enable by flipping the job gate to `if: true`
+# (android.yml's desktop job is gated the same way).
+#
+# When active: Tag-only — PR/push CI builds just the Android APK (see
+# android.yml). On a v* tag this workflow runs on a windows-latest runner,
+# builds the proper Curio.exe app image + .msi, and attaches the portable
+# zip + installer to the GitHub release alongside the Android APKs
+# published by release.yml. The Android workflow may create the release
+# body first; this workflow only writes its own body when it creates the
+# release (update_release_body is false), so the two never clobber each
+# other's text. Manual dispatch runs the same build and uploads the files
+# as run artifacts for testing.
 name: Curio Desktop Release
 
 on:
@@ -26,6 +32,7 @@ concurrency:
 jobs:
   windows:
     name: Build Windows installer (.exe app image + .msi)
+    if: false
     runs-on: windows-latest
     timeout-minutes: 30
     env:

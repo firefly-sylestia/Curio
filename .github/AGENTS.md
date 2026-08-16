@@ -48,19 +48,22 @@ GitHub Actions automation and contributor templates for the Curio Android reposi
 
 ### Desktop CI job (android.yml) + desktop release workflow
 
-The `desktop` job in `android.yml` compiles the JVM/desktop module on
-**every push and PR** so the port can't silently rot. The compiled JAR is
-uploaded as an artifact **only on branch pushes** (`main`/`Alpha`) — PR runs
-skip the upload (a 4MB jar per PR commit was piling up in artifact storage)
-— and with **1-day retention**, matching the release-APK policy. Native
-`.exe`/`.msi` packaging happens in the tag-only workflow below.
+**DISABLED until the desktop app is finished.** Both desktop build paths
+are gated with `if: false` (the `desktop` job in `android.yml` and the
+`windows` job in `desktop-release.yml`), so neither push/PR CI nor tag
+pushes build the desktop module. Re-enable by flipping both gates to
+`if: true`. When active:
 
-### Desktop release workflow
-
-`desktop-release.yml` is **tag-only**: it runs on a **windows-latest**
-runner on the same `v*` tags as the Android release workflow (plus manual
-dispatch for testing — PR/push CI builds just the Android APK, see
-`android.yml`). It:
+- The `desktop` job in `android.yml` compiles the JVM/desktop module on
+  **every push and PR** so the port can't silently rot. The compiled JAR
+  is uploaded as an artifact **only on branch pushes** (`main`/`Alpha`) —
+  PR runs skip the upload (a 4MB jar per PR commit was piling up in
+  artifact storage) — and with **1-day retention**, matching the
+  release-APK policy.
+- `desktop-release.yml` (below) is **tag-only**: it runs on a
+  **windows-latest** runner on the same `v*` tags as the Android release
+  workflow (plus manual dispatch for testing — PR/push CI builds just the
+  Android APK, see `android.yml`). It:
 
 - Requires NO secrets — the desktop port has no signing story yet (jpackage
   code signing is optional and unconfigured).
