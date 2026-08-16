@@ -17,8 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategory
-import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioGlassEdge
+import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -136,8 +137,14 @@ fun PickerPresetChip(
         shadowElevation = 2.dp,
         modifier = Modifier
             // v28 — soft glow + top-lit shine.
+            // v114 — the dark-mode edge must match the filter-chip pill
+            // treatment: `categoryEdgeShine` painted a full-width band that
+            // peeked past the capsule's rounded ends — `curioGlassEdge` +
+            // `curioInnerGlow` hug the pill shape (same family as the Spin
+            // filter chips / reveal explore pills).
             .curioDarkGlow(2.dp, shape)
-            .categoryEdgeShine(shape, accent = accent)
+            .curioGlassEdge(shape)
+            .curioInnerGlow(shape, accent, strength = 0.12f)
     ) {
         Row(
             // v90 — fuller pill: 10 → 12dp vertical padding and the glyph

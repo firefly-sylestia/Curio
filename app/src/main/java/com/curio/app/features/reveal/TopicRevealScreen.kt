@@ -1533,7 +1533,6 @@ private fun RevealAlreadyButton(
     } else {
         cat.categoryInk().copy(alpha = 0.40f)
     }
-    val shineAccent = cat.themedAccent()
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -1546,8 +1545,12 @@ private fun RevealAlreadyButton(
         shadowElevation = 3.dp,
         modifier = modifier
             // v28 — dark mode elevation visibility (glow + hairline).
+            // v114 — the dark-mode edge must match the pill family:
+            // `categoryEdgeShine` painted a full-width band that peeked past
+            // the capsule's rounded ends — `curioGlassEdge` hugs the shape
+            // (same as the reveal explore pills / filter chips).
             .curioDarkGlow(3.dp, RoundedCornerShape(50))
-            .categoryEdgeShine(RoundedCornerShape(50), accent = shineAccent)
+            .curioGlassEdge(RoundedCornerShape(50))
             // Give the writing action a real, forgiving tap target across its
             // entire weighted half of the row. The old inner padding made the
             // visible label look wider than the actual touchable surface.

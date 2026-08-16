@@ -61,9 +61,10 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
 
-import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioGlassEdge
+import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -539,8 +540,11 @@ fun CategoryPickerScreen(navController: NavController) {
                         .weight(1f)
                         // v28 — dark mode: soft glow + top-lit shine, no
                         // border rings on the black AMOLED plate.
+                        // v114 — shape-matched glass edge (the old
+                        // categoryEdgeShine band peeked past the capsule).
                         .curioDarkGlow(2.dp, mixShape)
-                        .categoryEdgeShine(mixShape)
+                        .curioGlassEdge(mixShape)
+                        .curioInnerGlow(mixShape, washCat.themedAccent(), strength = 0.12f)
                 ) {
                     CurioIcon(CurioIcons.Check, null, size = 18.dp)
                     Text(
@@ -621,8 +625,14 @@ fun PickerPageTab(
         shadowElevation = 2.dp,
         modifier = Modifier
             // v28 — soft glow + top-lit shine.
+            // v114 — the dark-mode edge must match the filter-chip pill
+            // treatment: `categoryEdgeShine` painted a full-width band that
+            // peeked past the capsule's rounded ends — `curioGlassEdge` +
+            // `curioInnerGlow` hug the pill shape (same family as the Spin
+            // filter chips / reveal explore pills).
             .curioDarkGlow(2.dp, shape)
-            .categoryEdgeShine(shape, accent = accent)
+            .curioGlassEdge(shape)
+            .curioInnerGlow(shape, accent, strength = 0.12f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),

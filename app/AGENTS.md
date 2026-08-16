@@ -401,6 +401,41 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v114 — CurioIcon glyphs stay vertically centered (no bottom cut) at every
+  font scale.** Root cause was the icon Text's `includeFontPadding = false` +
+  `LineHeightStyle.Trim.Both` + `lineHeight = 1.0em` combo: trimming the
+  line below the font's NATURAL 1.2em box, plus the trim's int rounding,
+  dropped the baseline ~2dp below the icon box — every glyph sat low and
+  its ink bottom was sliced by clipped button shapes (worse at large system
+  font sizes, where the cut was most visible). The Material Symbols font's
+  ink is designed to be centered in its natural line box (glyph ink spans
+  +0.04em..+0.96em above the baseline; the baseline sits at 1.1em of the
+  1.2em box), so the fix keeps the fontScale compensation (`size / fontScale`)
+  and restores the natural box: `PlatformTextStyle(includeFontPadding = true)`
+  (the default — the platform font padding stays) and NO line-height trim, so
+  `lineHeight = 1.0em` acts as a minimum. The 1.2em natural box centers the
+  ink in the icon's layout box with ~1dp margin on both sides. See
+  CurioIcons.kt for the full derivation; DO NOT reintroduce the old
+  trim/padding combo.
+- **v114 — dark-mode pill glow no longer peeks past the pill shape.**
+  The One UI dark-mode pill treatments (`curioGlassEdge` top catch +
+  `curioInnerGlow` radial) were painted against the pill's BOUNDING BOX, so
+  on capsule pills (50-radius) the bright top band crossed the pill's
+  curved ends and read as "the shadow peeking out from behind the pill".
+  (1) **`curioGlassEdge` (CurioGlassEffects.kt) now clips its gradient to
+  a capsule mask hugging the pill's TOP edge** — same corner radius, 10%
+  side insets, 55% band height, top edge glued to the pill's top — so the
+  bright catch fades before the rounded ends and reads as sitting INSIDE
+  the pill. (2) **`curioInnerGlow` keeps its radial inside the pill's
+  curved rim** (the pill outline clips anything crossing the capsule). (3)
+  **Capsule-pill call sites switched from `categoryEdgeShine` (a
+  full-width band that crosses the curved ends) to the shape-matched
+  `curioGlassEdge`:** the Category Picker's Original/New `PickerPageTab`,
+  the `PickerPresetChip` quick-mix chips (both also gain `curioInnerGlow`
+  accent 0.12, matching the Spin filter-chip family), the picker's Mix
+  button, and the reveal's `RevealAlreadyButton`. Cards with modest corner
+  radii (Start-exploring 24dp, topic/settings/hero cards) keep
+  `categoryEdgeShine` — it reads as a proper edge there.
 - **v113 — resume-draft take fix + filter-sheet Apply pill family.** (1)
   **Resume draft restores the draft's OWN take:** `SaveCaptureScreen`'s
   single-section init seeded a resumed draft into a `defaultFormat` section

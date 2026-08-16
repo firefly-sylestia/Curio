@@ -20,6 +20,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Icons in buttons are no longer pushed down and cut at the bottom: glyphs are vertically centered in their slot at every system font size.
+- Pill shadows in dark mode: the glow on small pills (progress pill, filter chips, Apply, category picker tabs, presets and the reveal actions) now hugs the pill's shape instead of peeking out past the rounded ends.
 - Resume draft: a draft written on a non-default take (e.g. a Journal take on a Voice category) now restores onto that take instead of the page's default one.
 - Filter sheet: the Apply / Show all button is now a raised pill that matches the filter chips instead of a flat button.
 - Launcher icon: the cosmic card art now comes straight from the designer's PNG and is sized so the whole card fits the launcher shape — the frame, stars and waves are no longer cut off.

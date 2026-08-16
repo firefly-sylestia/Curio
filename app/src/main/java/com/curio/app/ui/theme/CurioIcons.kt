@@ -23,7 +23,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -330,15 +329,19 @@ fun CurioIcon(
             softWrap = false,
             style = TextStyle(
                 lineHeight = iconSp,
-                // Material Symbols are font glyphs, not vector Icons. Remove
-                // the platform font padding and center the line box so their
-                // visible ink sits in the same vertical center as adjacent
-                // text and button content.
-                platformStyle = PlatformTextStyle(includeFontPadding = false),
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both
-                )
+                // Material Symbols' ink is designed to sit vertically centered
+                // in its NATURAL 1.2em line box (glyph ink spans +0.04em..
+                // +0.96em above the baseline; the baseline sits at 1.1em of
+                // the 1.2em box). Keep the platform font padding and let the
+                // line height act as a minimum, so the natural box centers the
+                // ink inside the icon's layout box — glyphs stay perfectly
+                // centered with a small margin and never get clipped by
+                // buttons' rounded shapes at any system font scale.
+                // (v114 — includeFontPadding=false + Trim.Both trimmed the
+                // line below the font metrics and the trim's int rounding
+                // dropped the baseline ~2dp below the icon box: every icon
+                // sat low and its ink bottom was cut by clipped parents.)
+                platformStyle = PlatformTextStyle(includeFontPadding = true)
             )
         )
     }
