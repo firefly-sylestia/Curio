@@ -14,11 +14,18 @@ or something."
    `titleLarge` → `headlineSmall` to match the bigger circle).
 2. **Row lifted a touch** — the greeting row's bottom padding 28 → 40dp
    (still well inside the 186dp hero; the tear stays put).
-3. **Long names no longer cut** — the "Hi name" line now uses
-   `TextAutoSize.StepBased` (max = headlineMedium's font size, min 14sp,
-   1sp steps) with `maxLines = 1`, `softWrap = false` and Ellipsis as the
-   last resort, so the font steps down until the name fits the row.
-   Import added: `androidx.compose.ui.text.TextAutoSize`.
+3. **Long names no longer cut** — the "Hi name" line's style steps down
+   by length: headlineMedium ≤ 16 chars → titleLarge ≤ 26 → titleMedium
+   beyond, with the single-line Ellipsis as the last resort.
+
+### CI fix — TextAutoSize does NOT resolve on this classpath
+First attempt used `TextAutoSize.StepBased`; CI failed with "Unresolved
+reference 'TextAutoSize'" at the import AND the call site (both debug
+and release compile). `androidx.compose.ui.text.TextAutoSize` is not
+resolvable on this project's Compose classpath despite the 2026.05.01
+BOM. Replaced with the manual length-based font step-down above (no new
+API); verified brace balance + grep (no residual TextAutoSize refs
+besides the explanatory comment).
 
 ### Validation
 Brace balance depth 0; `git diff --check` clean; hero-geometry check

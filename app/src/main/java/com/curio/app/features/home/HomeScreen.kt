@@ -73,7 +73,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextAutoSize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -2079,24 +2078,26 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     ),
                                     color = drawerInk.copy(alpha = 0.85f)
                                 )
+                                // v122 — a long name steps the font down so
+                                // it fits the row instead of getting cut: the
+                                // greeting grows past headlineMedium and the
+                                // style drops to titleLarge, then titleMedium
+                                // (the single-line ellipsis stays as the last
+                                // resort). The manual steps avoid the
+                                // TextAutoSize API, which isn't resolvable on
+                                // this project's Compose classpath.
+                                val greeting = "Hi $displayName"
+                                val greetingStyle = when {
+                                    greeting.length <= 16 -> MaterialTheme.typography.headlineMedium
+                                    greeting.length <= 26 -> MaterialTheme.typography.titleLarge
+                                    else -> MaterialTheme.typography.titleMedium
+                                }
                                 Text(
-                                    "Hi $displayName",
-                                    style = MaterialTheme.typography.headlineMedium.copy(
-                                        fontWeight = FontWeight.ExtraBold
-                                    ),
+                                    greeting,
+                                    style = greetingStyle.copy(fontWeight = FontWeight.ExtraBold),
                                     color = drawerInk,
                                     maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Ellipsis,
-                                    // v122 — a long name steps its font down
-                                    // (headlineMedium down to 14sp, 1sp steps)
-                                    // so it fits the row; the ellipsis is the
-                                    // last resort.
-                                    autoSize = TextAutoSize.StepBased(
-                                        minFontSize = 14.sp,
-                                        maxFontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                                        stepSize = 1.sp
-                                    )
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     "Spin it. Explore it. Capture it.",

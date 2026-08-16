@@ -538,11 +538,14 @@ app/src/main/java/com/curio/app/
   The drawer hero avatar grew 56 → 64dp (the initial-letter fallback
   stepped up `titleLarge` → `headlineSmall` to match), the greeting row
   sits a touch higher (`bottom` 28 → 40dp, still inside the 186dp hero),
-  and the "Hi name" line no longer gets CUT on long names: it now uses
-  `TextAutoSize.StepBased` (`maxFontSize` = headlineMedium's size, down
-  to 14sp in 1sp steps, `maxLines = 1` + `softWrap = false` + Ellipsis
-  as the last resort) so the font steps down until the name fits.
-  Import added: `androidx.compose.ui.text.TextAutoSize`.
+  and the "Hi name" line no longer gets CUT on long names: the greeting
+  style steps down by length (headlineMedium ≤16 chars → titleLarge
+  ≤26 → titleMedium beyond) with the single-line Ellipsis as the last
+  resort. NOTE: the first attempt used `TextAutoSize.StepBased`, which
+  FAILED CI — `androidx.compose.ui.text.TextAutoSize` is not resolvable
+  on this project's Compose classpath (despite the 2026.05.01 BOM), so
+  the manual length-based font steps are the shipped approach. Do NOT
+  reintroduce TextAutoSize without first confirming it resolves.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`
