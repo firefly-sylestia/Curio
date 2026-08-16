@@ -432,6 +432,25 @@ app/src/main/java/com/curio/app/
   `lerp(surfaceContainerHigh, background, 0.55f)` grey slab, so every
   AlertDialog (edit profile, crop, two-step, etc.) reads as black
   option-card glass on the black page.
+- **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
+  `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
+  -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`
+  opened a nested comment, the block's own closing `*/` closed the NEST
+  instead, and the outer KDoc stayed open to EOF — swallowing the trailing
+  `private enum class UpdateCheckUi` / `UpdateDownloadUi` declarations and
+  the `ReleaseNotesBlock` helpers, which surfaced as dozens of
+  "Unresolved reference" errors + "Syntax error: Unclosed comment". The
+  KDoc is reworded (and now carries a NOTE). LESSON: never write a
+  slash-star pair inside a block comment/KDoc in this codebase; if you
+  must describe it, spell it as words ("slash-star").
+- **v116 — Support & diagnostics page: Updates moved to the END and
+  de-duplicated.** The "Updates" section was the FIRST section with a
+  card header (Download icon + "Updates / Your build and what's new")
+  AND an "Open Updates" row (Download icon) — three "Updates" entries on
+  one page. The section now sits LAST (after About Curio) and keeps ONLY
+  the Version readout row (five taps → Experiments); the card header and
+  the "Open Updates" row are gone (the update flow lives on the dedicated
+  Updates sub-page, Settings → Updates). Dead `FontWeight` import removed.
 - **v114 — CurioIcon glyphs stay vertically centered (no bottom cut) at every
   font scale.** Root cause was the icon Text's `includeFontPadding = false` +
   `LineHeightStyle.Trim.Both` + `lineHeight = 1.0em` combo: trimming the

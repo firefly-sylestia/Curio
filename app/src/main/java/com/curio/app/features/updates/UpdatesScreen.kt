@@ -550,8 +550,14 @@ fun UpdatesScreen(navController: NavController) {
 
 /** One parsed line of the GitHub release-notes body (markdown-lite — the
  *  project carries no markdown dependency, so the common release-note
- *  syntax is parsed by hand: # headers, -/* bullets, --- dividers, **bold**
- *  and [label](url) links). */
+ *  syntax is parsed by hand: # headers, - bullets, --- dividers, **bold**
+ *  and [label](url) links).
+ *
+ *  NOTE: never write a slash-star pair inside a KDoc — Kotlin block
+ *  comments NEST, so a stray hyphen slash-star in this comment once
+ *  opened a nested comment that swallowed this block's closing
+ *  star-slash (and everything after it, including the trailing enum
+ *  declarations) and broke the whole-file compile. */
 private sealed interface NoteBlock {
     data class Header(val text: String) : NoteBlock
     data class Bullet(val text: String) : NoteBlock

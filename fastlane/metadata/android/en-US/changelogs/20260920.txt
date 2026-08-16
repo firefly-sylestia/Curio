@@ -21,6 +21,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Support & diagnostics: the Updates entry moved to the bottom of the page and is no longer repeated — the duplicate "Open Updates" row and its placeholder header are gone.
 - Dark mode dialogs now match the settings cards — the dialog background is the same near-black option-card glass as the rest of the theme.
 - Profile photo: portrait and tall images no longer get squished — every pick is auto-cropped to a square from the middle, and you can adjust the crop by hand (pan + pinch) before saving.
 - Edit profile dialog: bigger avatar with a crop badge and pill-style photo actions instead of the plain text buttons.

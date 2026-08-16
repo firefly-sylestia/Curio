@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -59,13 +58,14 @@ import kotlinx.coroutines.delay
  * opens with a ScreenEntrance animation.
  *
  * Contents:
- *  - Updates: v112 — the update flow (check / release notes / download /
- *    install) moved to its OWN sub-page (Settings → Updates). This page
- *    keeps the version readout (five-tap diagnostic → Experiments) and a
- *    row that opens the Updates page.
  *  - Feedback: Report a bug, Crash logs, Test crash.
  *  - About Curio: Replay intro + the open-source GitHub repository (merged
  *    here from the old Settings → About page).
+ *  - Updates (LAST): v112 — the update flow (check / release notes /
+ *    download / install) moved to its OWN sub-page (Settings → Updates).
+ *    This page keeps ONLY the version readout (five-tap diagnostic →
+ *    Experiments) at the end — no duplicate Updates entry or placeholder
+ *    header (v116).
  */
 @Composable
 fun SupportScreen(navController: NavController) {
@@ -112,71 +112,6 @@ fun SupportScreen(navController: NavController) {
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item { CurioSectionLabel("Updates") }
-                item {
-                    // v115 — the support sections sit in the shared settings
-                    // card so the page reads as settings options, not
-                    // transparent rows floating on the backdrop.
-                    CurioSettingsCard(shadowElevation = 0.dp) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        CurioCardHeader(CurioIcons.Download, "Updates", "Your build and what's new")
-                        // Version — tappable: five taps TOGGLE promo mode
-                        // (on → off, off → on); the promo page then shows
-                        // the resulting state. Subtitle hints while counting
-                        // and shows the live mode when on.
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    versionTaps++
-                                    if (versionTaps >= 5) {
-                                        versionTaps = 0
-                                        // v24 — the five-tap opens the
-                                        // Experiments screen (and keeps it
-                                        // open); it no longer toggles promo
-                                        // mode (promo lives in Experiments).
-                                        navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
-                                    }
-                                }
-                                .padding(horizontal = 4.dp, vertical = 13.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            CurioIcon(
-                                CurioIcons.Info, null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 21.dp
-                            )
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("Version", style = MaterialTheme.typography.bodyLarge)
-                                Text(
-                                    text = when {
-                                        versionTaps in 1..4 ->
-                                            "Tap ${5 - versionTaps} more to open Experiments"
-                                        else ->
-                                            "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                        CurioSettingsDivider()
-                        // v112 — the update flow (check / release notes /
-                        // download / install) lives on the dedicated Updates
-                        // sub-page; this row is the link there.
-                        CurioSettingsRow(
-                            CurioIcons.Download,
-                            "Open Updates",
-                            "Your build, release notes & update checker"
-                        ) {
-                            navController.navigate(CurioRoutes.UPDATES) { launchSingleTop = true }
-                        }
-                    }
-                    }
-                }
                 item { CurioSectionLabel("Feedback") }
                 item {
                     CurioSettingsCard(shadowElevation = 0.dp) {
@@ -236,6 +171,63 @@ fun SupportScreen(navController: NavController) {
                                         Intent.ACTION_VIEW,
                                         Uri.parse("https://github.com/firefly-sylestia/Curio")
                                     )
+                                )
+                            }
+                        }
+                    }
+                    }
+                }
+                // ── Updates — the LAST section: the update flow itself lives
+                //    on the dedicated Updates sub-page (Settings → Updates),
+                //    so this keeps only the version readout (five taps →
+                //    Experiments) with no duplicate Updates entry (v116).
+                item { CurioSectionLabel("Updates") }
+                item {
+                    // v115 — the support sections sit in the shared settings
+                    // card so the page reads as settings options, not
+                    // transparent rows floating on the backdrop.
+                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        // Version — tappable: five taps TOGGLE promo mode
+                        // (on → off, off → on); the promo page then shows
+                        // the resulting state. Subtitle hints while counting
+                        // and shows the live mode when on.
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    versionTaps++
+                                    if (versionTaps >= 5) {
+                                        versionTaps = 0
+                                        // v24 — the five-tap opens the
+                                        // Experiments screen (and keeps it
+                                        // open); it no longer toggles promo
+                                        // mode (promo lives in Experiments).
+                                        navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
+                                    }
+                                }
+                                .padding(horizontal = 4.dp, vertical = 13.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.Info, null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 21.dp
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Version", style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    text = when {
+                                        versionTaps in 1..4 ->
+                                            "Tap ${5 - versionTaps} more to open Experiments"
+                                        else ->
+                                            "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
