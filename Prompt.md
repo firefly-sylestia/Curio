@@ -1,6 +1,8 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: Home avatar pill + drawer sections + Support update link
+## Current request — COMPLETED: Home avatar pill + drawer sections + Support update link (`a3a9f94`)
+
+All of this session's work is done, committed and pushed.
 
 The user: "show the avatr in home screen profile icon, and in drawer make
 the profile avatar a little bigger and also the text. make the topic
