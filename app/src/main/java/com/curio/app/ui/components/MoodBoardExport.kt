@@ -557,7 +557,11 @@ private fun MoodBoardShareCard(
                             onBoard = data.quoteOnBoard.orEmpty(),
                             canvasWPx = maxX,
                             canvasHPx = maxY,
-                            boardScale = scale
+                            boardScale = scale,
+                            // v113 — deterministic slots in RAW space (the
+                            // export's canvas IS the raw board already).
+                            boardMaxX = maxX,
+                            boardMaxY = maxY
                         )
                     }
                 }

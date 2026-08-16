@@ -789,20 +789,28 @@ private fun MoodBoardCanvas(
                                 if (idx >= 0) {
                                     val t = tiles[idx]
                                     val factor = 1.45f
+                                    // v113 — grow clamps to the FULL visible
+                                    // card like the drag clamps (the old clamp
+                                    // capped growth at the frozen collage
+                                    // extent, so a photo couldn't be enlarged
+                                    // up into the top band either).
+                                    val safeScale = positiveFiniteOr(boardScale, 1f)
+                                    val rawMinX = (0f - finiteOr(boardOffsetX)) / safeScale
+                                    val rawMinY = (0f - finiteOr(boardOffsetY)) / safeScale
+                                    val rawMaxX = (canvasWPx - finiteOr(boardOffsetX)) / safeScale
+                                    val rawMaxY = (canvasHPx - finiteOr(boardOffsetY)) / safeScale
                                     val growW = (positiveFiniteOr(t.widthPx, minTilePx) * factor)
-                                        .coerceIn(minTilePx, boardMaxX.coerceAtLeast(minTilePx))
+                                        .coerceIn(minTilePx, (rawMaxX - rawMinX).coerceAtLeast(minTilePx))
                                     val growH = (positiveFiniteOr(t.heightPx, minTilePx) * factor)
-                                        .coerceIn(minTilePx, boardMaxY.coerceAtLeast(minTilePx))
+                                        .coerceIn(minTilePx, (rawMaxY - rawMinY).coerceAtLeast(minTilePx))
                                     val newW = positiveFiniteOr(growW, minTilePx)
                                     val newH = positiveFiniteOr(growH, minTilePx)
-                                    val cw = positiveFiniteOr(boardMaxX, canvasWPx)
-                                    val ch = positiveFiniteOr(boardMaxY, canvasHPx)
                                     // Keep the CENTER fixed so the growth feels
-                                    // anchored, then clamp into the board.
+                                    // anchored, then clamp into the visible card.
                                     val newX = (finiteOr(t.offsetXPx) + (t.widthPx - newW) / 2f)
-                                        .coerceIn(0f, (cw - newW).coerceAtLeast(0f))
+                                        .coerceIn(rawMinX, (rawMaxX - newW).coerceAtLeast(rawMinX))
                                     val newY = (finiteOr(t.offsetYPx) + (t.heightPx - newH) / 2f)
-                                        .coerceIn(0f, (ch - newH).coerceAtLeast(0f))
+                                        .coerceIn(rawMinY, (rawMaxY - newH).coerceAtLeast(rawMinY))
                                     tiles[idx] = t.copy(
                                         offsetXPx = newX,
                                         offsetYPx = newY,
@@ -833,29 +841,29 @@ private fun MoodBoardCanvas(
                                     // never snaps or collapses when released.
                                     // Drag deltas are SCREEN px — divide by the
                                     // board scale so commits land in raw space.
-                                    // v7.25 — clamp to the BOARD's raw bounds
-                                    // (matches the preview), so a committed tile
-                                    // can never land in the centered margins.
-                                    val cw = positiveFiniteOr(
-                                        boardMaxX,
-                                        positiveFiniteOr(canvasWPx, positiveFiniteOr(t.widthPx, minTilePx))
-                                    )
-                                    val ch = positiveFiniteOr(
-                                        boardMaxY,
-                                        positiveFiniteOr(canvasHPx, positiveFiniteOr(t.heightPx, minTilePx))
-                                    )
+                                    // v113 — clamp to the FULL visible card
+                                    // (display [0, canvas] mapped back through
+                                    // the fit), matching the preview: a
+                                    // committed tile can ride up into the band
+                                    // above a centered collage.
                                     val safeScale = positiveFiniteOr(boardScale, 1f)
+                                    val safeOffsetX = finiteOr(boardOffsetX)
+                                    val safeOffsetY = finiteOr(boardOffsetY)
+                                    val rawMinX = (0f - safeOffsetX) / safeScale
+                                    val rawMinY = (0f - safeOffsetY) / safeScale
+                                    val rawMaxX = (canvasWPx - safeOffsetX) / safeScale
+                                    val rawMaxY = (canvasHPx - safeOffsetY) / safeScale
                                     val safeGestureScale = positiveFiniteOr(preview.scale, 1f)
                                     val safeDx = finiteOr(preview.dx)
                                     val safeDy = finiteOr(preview.dy)
                                     val baseW = positiveFiniteOr(t.widthPx, minTilePx)
                                     val baseH = positiveFiniteOr(t.heightPx, minTilePx)
-                                    val newW = (baseW * safeGestureScale).coerceIn(minTilePx, cw.coerceAtLeast(minTilePx))
-                                    val newH = (baseH * safeGestureScale).coerceIn(minTilePx, ch.coerceAtLeast(minTilePx))
+                                    val newW = (baseW * safeGestureScale).coerceIn(minTilePx, (rawMaxX - rawMinX).coerceAtLeast(minTilePx))
+                                    val newH = (baseH * safeGestureScale).coerceIn(minTilePx, (rawMaxY - rawMinY).coerceAtLeast(minTilePx))
                                     val newX = (finiteOr(t.offsetXPx) + safeDx / safeScale)
-                                        .coerceIn(0f, (cw - newW).coerceAtLeast(0f))
+                                        .coerceIn(rawMinX, (rawMaxX - newW).coerceAtLeast(rawMinX))
                                     val newY = (finiteOr(t.offsetYPx) + safeDy / safeScale)
-                                        .coerceIn(0f, (ch - newH).coerceAtLeast(0f))
+                                        .coerceIn(rawMinY, (rawMaxY - newH).coerceAtLeast(rawMinY))
                                     tiles[idx] = t.copy(
                                         offsetXPx = finiteOr(newX),
                                         offsetYPx = finiteOr(newY),
@@ -878,9 +886,7 @@ private fun MoodBoardCanvas(
                             onDragEnd = { draggingTileId = null },
                             boardScale = boardScale,
                             boardOffsetX = boardOffsetX,
-                            boardOffsetY = boardOffsetY,
-                            boardMaxX = boardMaxX,
-                            boardMaxY = boardMaxY
+                            boardOffsetY = boardOffsetY
                         )
                     }
                 }
@@ -917,6 +923,11 @@ private fun MoodBoardCanvas(
                         // no display-width cap, so resized cards keep their
                         // exact raw width for precise placement.
                         rawSpace = fullScreen,
+                        // v113 — the deterministic slot lives in the collage's
+                        // RAW space (the frozen extent), so fresh/never-dragged
+                        // cards land ON the collage in every fitted view.
+                        boardMaxX = boardMaxX,
+                        boardMaxY = boardMaxY,
                         onEditCard = onEditQuote,
                         // v57 — the full-screen board routes moves to its own
                         // position list; the inline board uses the shared one.
@@ -1220,11 +1231,7 @@ private fun MoodBoardEditorTile(
     // by the scale so commits land in raw space (1.0 = full-screen editor).
     boardScale: Float = 1f,
     boardOffsetX: Float = 0f,
-    boardOffsetY: Float = 0f,
-    // v7.25 — the board's raw bounds (drag clamps). 0 = fall back to the
-    // full canvas (full-screen editor / pre-measure first frame).
-    boardMaxX: Float = 0f,
-    boardMaxY: Float = 0f
+    boardOffsetY: Float = 0f
 ) {
     val density = LocalDensity.current
     // Preview lives INSIDE the tile so per-frame writes recompose only this
@@ -1250,12 +1257,11 @@ private fun MoodBoardEditorTile(
     // tile's stored size so tiles never flash at 0x0 or drift to the corner.
     val canvasW = positiveFiniteOr(canvasWPx, positiveFiniteOr(tile.widthPx, 1f))
     val canvasH = positiveFiniteOr(canvasHPx, positiveFiniteOr(tile.heightPx, 1f))
-    // v7.25 — RAW-space drag clamps are the BOARD's raw bounds (the visible
-    // collage), not the full canvas: the inline board is centered inside the
-    // card, so canvas-sized clamps let tiles slide into the margins. The
-    // full-screen editor passes canvasW/H via boardMaxX/Y = canvas (1:1).
-    val clampW = if (boardMaxX > 0f) boardMaxX else canvasW
-    val clampH = if (boardMaxY > 0f) boardMaxY else canvasH
+    // v113 — RAW-space drag clamps are the FULL visible card (display
+    // [0, canvas] mapped back through the fit), not the frozen collage
+    // extent: the centered fit left an untouchable band above the collage
+    // (the image "wouldn't go all the way up"). Full-screen editing passes
+    // offsets 0 / scale 1, so the bounds collapse to [0, canvas] (1:1).
     val preview = dragPreview.value
     val scale = preview?.scale ?: 1f
     // Drag deltas arrive in SCREEN px; the display is scaled by boardScale,
@@ -1263,22 +1269,26 @@ private fun MoodBoardEditorTile(
     val safeBoardScale = positiveFiniteOr(boardScale, 1f)
     val rawDx = finiteOr(preview?.dx ?: 0f) / safeBoardScale
     val rawDy = finiteOr(preview?.dy ?: 0f) / safeBoardScale
-    // RAW-space tile geometry (the stored/committed space, clamped to the
-    // raw board bounds).
-    val safeClampW = positiveFiniteOr(clampW, canvasW)
-    val safeClampH = positiveFiniteOr(clampH, canvasH)
+    // Raw-space bounds of the visible card: display = raw*scale + offset,
+    // so raw = (display - offset) / scale. Negative raws are allowed — a
+    // centered board puts the collage top below the card top, and the
+    // editor lets tiles ride up into that band.
+    val safeOffsetX = finiteOr(boardOffsetX)
+    val safeOffsetY = finiteOr(boardOffsetY)
+    val rawMinX = (0f - safeOffsetX) / safeBoardScale
+    val rawMinY = (0f - safeOffsetY) / safeBoardScale
+    val rawMaxX = (canvasW - safeOffsetX) / safeBoardScale
+    val rawMaxY = (canvasH - safeOffsetY) / safeBoardScale
     val safeScalePreview = positiveFiniteOr(scale, 1f)
     val safeTileW = positiveFiniteOr(tile.widthPx, minTilePx)
     val safeTileH = positiveFiniteOr(tile.heightPx, minTilePx)
-    val rawW = (safeTileW * safeScalePreview).coerceIn(minTilePx, safeClampW.coerceAtLeast(minTilePx))
-    val rawH = (safeTileH * safeScalePreview).coerceIn(minTilePx, safeClampH.coerceAtLeast(minTilePx))
+    val rawW = (safeTileW * safeScalePreview).coerceIn(minTilePx, (rawMaxX - rawMinX).coerceAtLeast(minTilePx))
+    val rawH = (safeTileH * safeScalePreview).coerceIn(minTilePx, (rawMaxY - rawMinY).coerceAtLeast(minTilePx))
     val rawX = (finiteOr(tile.offsetXPx) + rawDx)
-        .coerceIn(0f, (safeClampW - rawW).coerceAtLeast(0f))
+        .coerceIn(rawMinX, (rawMaxX - rawW).coerceAtLeast(rawMinX))
     val rawY = (finiteOr(tile.offsetYPx) + rawDy)
-        .coerceIn(0f, (safeClampH - rawH).coerceAtLeast(0f))
+        .coerceIn(rawMinY, (rawMaxY - rawH).coerceAtLeast(rawMinY))
     // SCALED display geometry — what the user sees (matches the saved card).
-    val safeOffsetX = finiteOr(boardOffsetX)
-    val safeOffsetY = finiteOr(boardOffsetY)
     val renderW = (rawW * safeBoardScale).takeIf { it.isFinite() } ?: minTilePx
     val renderH = (rawH * safeBoardScale).takeIf { it.isFinite() } ?: minTilePx
     val renderX = (rawX * safeBoardScale + safeOffsetX).takeIf { it.isFinite() } ?: 0f

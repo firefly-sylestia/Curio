@@ -236,8 +236,11 @@ fun MoodBoardTiles(
             modifier = Modifier
                 .offset {
                     IntOffset(
-                        tile.offsetXPx.roundToInt().coerceIn(0, canvasWPx.roundToInt()),
-                        tile.offsetYPx.roundToInt().coerceIn(0, canvasHPx.roundToInt())
+                        // v113 — allow band placements (negative raw offsets
+                        // from the editor's full-card drag freedom): the old
+                        // ≥0 clamp pinned them to the collage's top-left.
+                        tile.offsetXPx.roundToInt().coerceIn(-canvasWPx.roundToInt(), canvasWPx.roundToInt()),
+                        tile.offsetYPx.roundToInt().coerceIn(-canvasHPx.roundToInt(), canvasHPx.roundToInt())
                     )
                 }
                 .zIndex(i.toFloat())
@@ -699,6 +702,12 @@ fun MoodBoardFloatingCards(
     // views (inline editor, saved card, expanded dialog, export) leave it
     // false so the display-width cap below can bind huge resized cards.
     rawSpace: Boolean = false,
+    // v113 — the collage's RAW board extent (maxX/maxY). The deterministic
+    // slot is computed in this space so never-dragged cards land ON the
+    // collage in every fitted view (display = raw slot × scale + offset).
+    // 0 = derive from canvas ÷ scale (exact for width-fitted boards).
+    boardMaxX: Float = 0f,
+    boardMaxY: Float = 0f,
     onEditCard: ((Int) -> Unit)? = null,
     onMoveCard: ((index: Int, x: Float, y: Float) -> Unit)? = null,
     // v42 — commits a resized card's new width (RAW board px — the caller
@@ -722,7 +731,15 @@ fun MoodBoardFloatingCards(
         // Skip below-board cards — they render under the board in their own
         // section, not on the collage. Missing flags (legacy) → on-board.
         if (onBoard != null && onBoard.getOrElse(i) { true } == false) return@forEachIndexed
-        val slot = moodBoardQuoteSlot(i, canvasWPx, canvasHPx)
+        // v113 — slot in RAW board space: the old code computed it from the
+        // DISPLAY canvas and then scaled it AGAIN (placed × boardScale), so
+        // in a fitted inline board a fresh card rendered off the collage
+        // (double-scaled) and the second slot fell below the board entirely.
+        val slot = moodBoardQuoteSlot(
+            i,
+            if (boardMaxX > 0f) boardMaxX else if (scale > 0f) canvasWPx / scale else canvasWPx,
+            if (boardMaxY > 0f) boardMaxY else if (scale > 0f) canvasHPx / scale else canvasHPx
+        )
         val saved = positions.getOrElse(i) { CaptureData.QuotePos(-1f, -1f) }
         val placed = if (saved.x >= 0f && saved.y >= 0f) saved
             else CaptureData.QuotePos(slot.x, slot.y)
@@ -750,8 +767,14 @@ fun MoodBoardFloatingCards(
             y = placed.y * scale + offsetY,
             w = cardW * displayScale,
             h = slot.h * displayScale,
-            boardW = canvasWPx * scale,
-            boardH = canvasHPx * scale,
+            // v113 — the drag/resize clamps bound the VISIBLE display space:
+            // the card for the inline editor is canvasWPx × canvasHPx, NOT
+            // canvas × scale — the old formula let a card be dragged off the
+            // bottom/right edge whenever the board was zoomed above 1× (the
+            // "glitching" when dragging cards around the fitted board).
+            // Read-only views never drag, so the change is inert there.
+            boardW = canvasWPx,
+            boardH = canvasHPx,
             seed = seed?.let { it + i * 0x1F31 },
             onEdit = onEditCard?.let { edit -> { edit(i) } },
             onMove = onMoveCard?.let { move ->

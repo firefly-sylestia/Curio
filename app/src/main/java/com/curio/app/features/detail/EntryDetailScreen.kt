@@ -2761,8 +2761,11 @@ private fun fitTileLayout(
     val scaledTiles = safeTiles.map {
         CaptureData.TileLayout(
             uri = it.uri,
-            offsetXPx = (it.offsetXPx * safeScale).coerceIn(0f, maxBoardW),
-            offsetYPx = (it.offsetYPx * safeScale).coerceIn(0f, maxBoardH),
+            // v113 — allow band placements (negative raw offsets from the
+            // editor's full-card drag freedom); the ≥0 clamp pinned them to
+            // the collage's top-left in the saved views.
+            offsetXPx = (it.offsetXPx * safeScale).coerceIn(-maxBoardW, maxBoardW),
+            offsetYPx = (it.offsetYPx * safeScale).coerceIn(-maxBoardH, maxBoardH),
             rotationDeg = it.rotationDeg,
             widthPx = (it.widthPx * safeScale).coerceIn(1f, maxTileW),
             heightPx = (it.heightPx * safeScale).coerceIn(1f, maxTileH)
@@ -3218,8 +3221,11 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
                 val scaledTiles = safeTileLayouts.map {
                     CaptureData.TileLayout(
                         uri = it.uri,
-                        offsetXPx = (it.offsetXPx * boardScale).coerceIn(0f, canvasW * 2f),
-                        offsetYPx = (it.offsetYPx * boardScale).coerceIn(0f, canvasH * 2f),
+                        // v113 — allow band placements (negative raw offsets
+                        // from the editor's full-card drag freedom); the ≥0
+                        // clamp pinned them to the collage's top-left.
+                        offsetXPx = (it.offsetXPx * boardScale).coerceIn(-canvasW * 2f, canvasW * 2f),
+                        offsetYPx = (it.offsetYPx * boardScale).coerceIn(-canvasH * 2f, canvasH * 2f),
                         rotationDeg = it.rotationDeg,
                         widthPx = (it.widthPx * boardScale).coerceIn(1f, canvasW * 2f),
                         heightPx = (it.heightPx * boardScale).coerceIn(1f, canvasH * 2f)
@@ -3339,6 +3345,9 @@ private fun GalleryWallRender(entry: CurioEntry, category: CurioCategory, navCon
                             canvasWPx = boardW,
                             canvasHPx = boardH,
                             boardScale = boardScale,
+                            // v113 — deterministic slots in RAW space.
+                            boardMaxX = maxX,
+                            boardMaxY = maxY,
                             // v7.37 — stable per-entry seed so the on-board
                             // paper slips never re-roll their tears.
                             seed = noteSeed(entry.id, 60)
@@ -3583,6 +3592,10 @@ private fun ExpandedMoodBoardDialog(
                             canvasWPx = boardW,
                             canvasHPx = boardH,
                             boardScale = fit.scale,
+                            // v113 — deterministic slots in RAW space (the
+                            // scaled board ÷ the fit scale back to raw).
+                            boardMaxX = boardW / fit.scale,
+                            boardMaxY = boardH / fit.scale,
                             // v7.37 — stable per-entry seed so the on-board
                             // paper slips never re-roll their tears. The
                             // dialog carries its entry-derived [seed] (no

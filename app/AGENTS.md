@@ -401,6 +401,31 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v113 — mood board inline editor: full-card placement + quote-card
+  fixes.** (1) **Tiles can be dragged anywhere in the visible card** — the
+  drag, pinch-resize, grow and commit clamps were the FROZEN collage extent,
+  but the centered fit leaves an empty band above the collage, so an image
+  couldn't be dragged "all the way up". Clamps are now the FULL card
+  (display [0, canvas] mapped back through the fit: raw ∈
+  [(0-offset)/scale, (canvas-offset)/scale − size] — negative raws allowed).
+  The fit stays frozen (v108), so the zoom never jumps mid-drag; the saved
+  views (MoodBoardTiles' offset clamp, EntryDetail's inline fit +
+  fitTileLayout) now allow the same negative offsets so a band-placed photo
+  renders in the same spot in edit and detail. (2) **Quote cards can no
+  longer be dragged off the card** — MoodBoardFloatingCards passed boardW/H
+  = canvas × scale to the drag/resize clamps, so on a zoomed (scale > 1)
+  fitted board a card could be dragged past the bottom/right edge and its
+  committed position re-rendered inconsistently ("glitching when I take it
+  to the top"). The clamps now bound the VISIBLE canvas (boardW/H =
+  canvasWPx/HPx). (3) **Never-dragged quote cards land ON the collage** —
+  the deterministic slot was computed from the DISPLAY canvas and then
+  scaled AGAIN (double-scale: display = canvasSlot × scale), so a fresh card
+  in a fitted board rendered off the collage and the second slot fell below
+  the board. MoodBoardFloatingCards now takes boardMaxX/Y (the collage's
+  RAW extent) and computes the slot in RAW space (display = raw × scale +
+  offset); callers pass the frozen extent (inline editor), the saved
+  layouts' maxX/maxY (saved card), boardW/fit.scale (expanded dialog) and
+  maxX/maxY (export).
 - **v112 — Updates sub-page + opt-in update checker, auto-backup, top-right
   update pill.** (1) **Updates page** (`features/updates/UpdatesScreen.kt`,
   route `UPDATES`, Settings hub row + Support & diagnostics "Open Updates"

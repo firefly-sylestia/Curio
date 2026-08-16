@@ -15,6 +15,8 @@ ADD
 FIX
 - Last backup: the row now updates right after a backup instead of showing "Never".
 - Update toast: remade as a small pill in the top-right corner.
+- Mood board: photos can now be dragged all the way to the top of the small editor — the empty band above the collage is usable space (band-placed photos show in the same spot in the saved card).
+- Mood board: quote cards no longer glitch or slide off the card when dragged to the top — they're clamped to the visible board, and new quote cards land on the collage instead of floating off it.
 - Dark mode: the YouTube logo in the explore "Watch in" pill is no longer squished — it keeps its proper shape.
 - Dark mode: hero action pills (Search, Category, back) and the explore dialog's Explore / Watch-in buttons now wear the same raised chip glass as the filter chips.
 - Dark mode: search bars across the app (Cabinet, Topic Browser, Spin filters) now use the near-black chip glass instead of the muddy mid-tone background.
