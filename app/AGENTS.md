@@ -461,6 +461,16 @@ app/src/main/java/com/curio/app/
   (`questsPaperOn/Bg/TearOn/Shape/HolesOn/RingsOn/RingStyle/Content` +
   the unused `settingsCardTintLift` import); `paperStatCard*` /
   `TornStatPaperShape` imports stay (the hero stat pane still uses them).
+  (9) **"Watch in" → "Listen in" for audio services + music picker loses
+  its radio.** The explore dialog's second pill label is now dynamic:
+  music topics (Album/Artist/Song) whose chosen service is NOT YouTube
+  (Apple Music / Spotify / YouTube Music — audio) say "Listen in";
+  YouTube and non-music topics keep "Watch in" (video). The `MusicService
+  Dialog` row no longer draws a `RadioButton` — selection reads through
+  the row's solid v27q fill alone (the other picker dialogs in the file
+  keep theirs); the dialog subtitle was reworded to stay neutral
+  ("Which streaming service opens albums, artists and songs from the
+  explore dialog").
 - **v107 — Apple Music "Watch in" deep links fixed for songs.**
   `resolveAppleMusicItemUrl` (ExploreSearch.kt) had two bugs that made
   SONG topics fail while artists and some albums worked (verified live

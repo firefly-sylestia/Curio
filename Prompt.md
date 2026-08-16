@@ -89,6 +89,12 @@ A 5-part fix list (all visual, dark-mode heavy):
    bar (sticky headers pin at the viewport top — previously it pinned
    invisibly behind the opaque hero). Full-bleed tear + content padding
    unchanged.
+9. **(follow-up, item 8)** Explore dialog pill label is now dynamic:
+   music topics with a non-YouTube service (Apple Music / Spotify /
+   YouTube Music — audio) say "Listen in"; YouTube and non-music topics
+   keep "Watch in". The `MusicServiceDialog` row dropped its
+   `RadioButton` (selection reads via the solid v27q fill); the dialog
+   subtitle was reworded neutrally.
 
 ### Validation
 `git diff --check` clean; brace counts balanced in all changed files; no

@@ -1002,6 +1002,14 @@ fun TopicRevealScreen(
         } else {
             R.drawable.ic_music_youtube
         }
+        // v109 — music topics open an AUDIO service (Apple Music / Spotify /
+        // YouTube Music): the pill says "Listen in". Only YouTube (video) —
+        // and non-music topics, which always search YouTube — keeps "Watch in".
+        val watchLabel = if (musicTopic && watchService != MusicService.YOUTUBE) {
+            "Listen in"
+        } else {
+            "Watch in"
+        }
         // v27u — the two pills are VISIBLE soft-tinted pills (the old
         // TextButton had no container color, so the pill shape was
         // invisible): an opaque lerp of the dialog action ink over the
@@ -1185,7 +1193,7 @@ fun TopicRevealScreen(
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            "Watch in",
+                            watchLabel,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

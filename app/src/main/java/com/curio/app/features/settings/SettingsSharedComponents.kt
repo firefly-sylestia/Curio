@@ -203,7 +203,10 @@ fun MusicServiceDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "Which streaming service the \"Watch in\" button opens for albums, artists and songs.",
+                    // v109 — the pill says "Listen in" for audio services
+                    // (Apple Music / Spotify / YouTube Music) and "Watch in"
+                    // for YouTube, so the subtitle stays neutral.
+                    "Which streaming service opens albums, artists and songs from the explore dialog.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -236,14 +239,8 @@ fun MusicServiceDialog(
                                 contentDescription = null,
                                 modifier = Modifier.size(26.dp)
                             )
-                            RadioButton(
-                                selected = selected,
-                                onClick = null,
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = if (selected) dialogRowSelectedInk()
-                                                   else curioDialogActionColor()
-                                )
-                            )
+                            // v109 — no radio indicator: selection reads
+                            // through the row's solid fill (v27q) alone.
                             Column {
                                 Text(service.displayName, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
                                 Text(
