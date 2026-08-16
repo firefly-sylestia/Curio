@@ -6,8 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
+import android.net.Uri
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureRepository
+import com.curio.app.data.CurioBackupManager
 import com.curio.app.data.CurioDatabase
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
@@ -37,6 +39,12 @@ import com.curio.app.ui.theme.CurioTheme
  * access; screens load only the category data they need.
  */
 class MainActivity : ComponentActivity() {
+
+    /** Auto-backup throttle — at most one background backup per day. */
+    private companion object {
+        const val AUTO_BACKUP_INTERVAL_MILLIS = 24L * 60 * 60 * 1000
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -94,8 +102,34 @@ class MainActivity : ComponentActivity() {
         // v53 — update notifier on app start: a toast whenever a check finds
         // a newer release, and a notification ONCE per version (never
         // re-notified for the same tag). Offline/failures are silent.
-        lifecycleScope.launch {
-            runCatching { UpdateChecker.notifyIfUpdateAvailable(this@MainActivity) }
+        // OPT-IN: Curio is offline-first, so the background check (which
+        // costs data every launch) only runs when the Updates page toggle is
+        // ON. The manual check on the Updates page always works.
+        if (AppPreferences.isUpdateCheckerEnabled(this)) {
+            lifecycleScope.launch {
+                runCatching { UpdateChecker.notifyIfUpdateAvailable(this@MainActivity) }
+            }
+        }
+        // Auto backup: when enabled with a saved destination, write a backup
+        // there automatically — throttled to once per ~24h so a frequent
+        // launch never spams the drive. Runs in the background; failures are
+        // silent (the manual "Back up now" path remains authoritative).
+        if (AppPreferences.isAutoBackupEnabled(this)) {
+            val autoUri = AppPreferences.getAutoBackupUri(this)
+            if (autoUri.isNotBlank()) {
+                val lastAuto = AppPreferences.getAutoBackupLastAtMillis(this)
+                val due = System.currentTimeMillis() - lastAuto >= AUTO_BACKUP_INTERVAL_MILLIS
+                if (lastAuto == 0L || due) {
+                    lifecycleScope.launch {
+                        withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            runCatching {
+                                CurioBackupManager.export(this@MainActivity, Uri.parse(autoUri))
+                                AppPreferences.setAutoBackupLastAtMillis(this@MainActivity, System.currentTimeMillis())
+                            }
+                        }
+                    }
+                }
+            }
         }
         // Load the persisted quests/levels state (XP, journey, daily quests,
         // achievements) before any screen reads it.

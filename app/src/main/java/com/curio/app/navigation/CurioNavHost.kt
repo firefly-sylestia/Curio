@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,6 +84,7 @@ import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
 import com.curio.app.features.support.PromoModeScreen
 import com.curio.app.features.support.SupportScreen
+import com.curio.app.features.updates.UpdatesScreen
 import com.curio.app.features.crash.CurioCrashScreen
 import com.curio.app.features.lightbox.LightboxScreen
 import com.curio.app.features.managecategories.ManageCategoriesScreen
@@ -160,11 +162,11 @@ private fun isBrowseRevealRoute(entry: NavBackStackEntry?): Boolean =
  * Push destinations that use the detail page's center pop-up (scale + fade)
  * instead of the generic horizontal slide — v8.4x: Save/Capture (+ its edit
  * routes), Profile, Quests, Settings (hub + every section), Pet Designer,
- * Topic History, Manage Categories, Recents, Support/Bug Report, and the
- * Topic Database. Lightbox, Category Picker, Reveal, and the boot gates keep
- * their own treatments. Values are route PREFIXES (substringBefore("/")) so
- * parameterised routes like capture/{...}, the edit-* family, and settings
- * sub-pages all match by prefix.
+ * Topic History, Manage Categories, Recents, Support/Bug Report, the
+ * Topic Database, and the Updates page. Lightbox, Category Picker, Reveal,
+ * and the boot gates keep their own treatments. Values are route PREFIXES
+ * (substringBefore("/")) so parameterised routes like capture/{...}, the
+ * edit-* family, and settings sub-pages all match by prefix.
  */
 private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.CAPTURE.substringBefore("/"),
@@ -181,7 +183,8 @@ private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.RECYCLE_BIN,
     CurioRoutes.SUPPORT,
     CurioRoutes.BUG_REPORT,
-    CurioRoutes.DATABASE
+    CurioRoutes.DATABASE,
+    CurioRoutes.UPDATES
 )
 
 /** True when the destination is one of the center-pop push screens. */
@@ -729,6 +732,9 @@ fun CurioNavHost(
             composable(CurioRoutes.SUPPORT) {
                 SupportScreen(navController = navController)
             }
+            composable(CurioRoutes.UPDATES) {
+                UpdatesScreen(navController = navController)
+            }
             composable(CurioRoutes.PROMO) {
                 PromoModeScreen(navController = navController)
             }
@@ -999,21 +1005,21 @@ fun CurioNavHost(
     }
 
     // v63 — the app's IN-APP toast (the update notice, etc.) floats above
-    // every screen; the bottom clearance clears the bottom nav bar so the
-    // pill reads over content, never over the bar. It lives in its own
-    // full-size Box at the NavHost root (after the Scaffold), so `align`
-    // resolves to a BoxScope regardless of the enclosing screen state.
-    // v63b — toasts with an action are tappable: the update toast's
-    // "support" action opens Support & diagnostics.
+    // every screen. v112 — REMADE as a SMALL pill anchored to the TOP-RIGHT
+    // corner (below the status bar) instead of the old bottom-center pill.
+    // It lives in its own full-size Box at the NavHost root (after the
+    // Scaffold), so `align` resolves to a BoxScope regardless of the
+    // enclosing screen state. v63b — toasts with an action are tappable:
+    // the update toast's "support" action opens the Updates page.
     Box(modifier = Modifier.fillMaxSize()) {
         CurioInAppToastHost(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 96.dp),
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 8.dp, end = 16.dp),
             onAction = { actionId ->
                 if (actionId == "support") {
-                    navController.navigate(CurioRoutes.SUPPORT) {
+                    navController.navigate(CurioRoutes.UPDATES) {
                         launchSingleTop = true
                     }
                 }

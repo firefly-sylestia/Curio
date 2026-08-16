@@ -183,6 +183,8 @@ object CurioRoutes {
     const val CRASH = "crash"
     const val BUG_REPORT = "bug-report"
     const val SUPPORT = "support"
+    // v112 — dedicated Updates sub-page (own UI, replaced the Support card).
+    const val UPDATES = "updates"
     const val PROMO = "promo"
     // v26 — recycle bin for soft-deleted captures (Settings entry).
     const val RECYCLE_BIN = "recycle-bin"

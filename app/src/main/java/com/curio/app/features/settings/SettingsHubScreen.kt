@@ -1138,9 +1138,12 @@ private val SettingsSections = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
                     // v26 — recycle bin for soft-deleted captures.
                     SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN),
+                    // v112 — the dedicated Updates sub-page (its own UI,
+                    // replaces the old update card inside Support).
+                    SettingsRowEntry(CurioIcons.Download, "Updates", "Your build, release notes & update checker", CurioRoutes.UPDATES),
                     // v24 — merged into the shared Support & diagnostics page
                     // (same screen Profile's "Support & diagnostics" opens).
-                    SettingsRowEntry(CurioIcons.Info, "Support & diagnostics", "Updates, reports, help & app details", CurioRoutes.SUPPORT)
+                    SettingsRowEntry(CurioIcons.Info, "Support & diagnostics", "Reports, help & app details", CurioRoutes.SUPPORT)
                 )
             )
         )
@@ -1199,11 +1202,13 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     // ── Backup & restore (own screen — no row pulse) ─────────────────
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
+    // ── Updates (v112 — dedicated sub-page) ─────────────────────────
+    SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.UPDATES),
+    SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.UPDATES),
+    SettingsDeepRow(CurioIcons.Notifications, "Update checker", "Opt-in background update checks", CurioRoutes.UPDATES),
     // ── About ────────────────────────────────────────────────────────
     // v24 — About content lives on the shared Support & diagnostics page.
-    SettingsDeepRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again", CurioRoutes.SUPPORT),
-    SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.SUPPORT),
-    SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.SUPPORT)
+    SettingsDeepRow(CurioIcons.Replay, "Replay intro", "See the welcome screens again", CurioRoutes.SUPPORT)
 )
 
 /** One flat search result — the matching row plus its section context so

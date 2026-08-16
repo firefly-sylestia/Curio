@@ -268,8 +268,8 @@ object UpdateChecker {
      * v53 — background update notifier, run on app start. When the latest
      * release is newer than the installed build:
      *  - an IN-APP toast ([CurioToast]) announces it (v63 — replaces the old
-     *    android.widget.Toast), tappable to open Support & diagnostics
-     *    (v63b), compact one-line pill that waits a few seconds past launch
+     *    android.widget.Toast), tappable to open the Updates page (v63b /
+     *    v112), compact one-line pill that waits a few seconds past launch
      *    so it isn't glued to the start screen (v99), and
      *  - a NOTIFICATION fires alongside it.
      * Both are ONCE PER VERSION — [AppPreferences] remembers the last
@@ -292,7 +292,7 @@ object UpdateChecker {
         withContext(Dispatchers.Main) {
             // In-app toast — rendered by CurioInAppToastHost in the NavHost;
             // global state survives the check racing the UI's first frame.
-            // Tapping it opens Support & diagnostics (actionId "support").
+            // Tapping it opens the Updates page (actionId "support").
             // v99 — wait a few seconds past launch so the pill reads as a
             // later announcement, not part of the start screen (the
             // notification below still fires immediately).
@@ -318,10 +318,10 @@ object UpdateChecker {
         val notification = NotificationCompat.Builder(appContext, UPDATE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Curio ${release.tagName} is available")
-            .setContentText("A newer version is ready — open Curio and update from Support & diagnostics.")
+            .setContentText("A newer version is ready — open Curio and update from the Updates page.")
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText("A newer version is ready — open Curio and update from Support & diagnostics.")
+                    .bigText("A newer version is ready — open Curio and update from the Updates page.")
             )
             .setContentIntent(contentIntent)
             .setAutoCancel(true)

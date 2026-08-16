@@ -401,6 +401,34 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v112 — Updates sub-page + opt-in update checker, auto-backup, top-right
+  update pill.** (1) **Updates page** (`features/updates/UpdatesScreen.kt`,
+  route `UPDATES`, Settings hub row + Support & diagnostics "Open Updates"
+  row): settings-family torn-rose sub-page with the version readout, a
+  Check for updates row, an animated result card (release notes preview /
+  "Update now" download → system installer / Open release), and the
+  **opt-in Update checker toggle** (`updateCheckerEnabledState`, default
+  OFF — Curio is offline-first, so the background check that costs data
+  every launch only runs when enabled; the manual check always works).
+  The OLD update card in Support & diagnostics was REMOVED (the update
+  flow lives only on the Updates page now); Support keeps the Version
+  five-tap → Experiments diagnostic. The update notification + toast copy
+  point to the Updates page. (2) **Update toast remade:** the in-app toast
+  is now a SMALL pill in the TOP-RIGHT corner below the status bar
+  (`CurioInAppToastHost` anchored `TopEnd` + `statusBarsPadding` in the
+  NavHost root; compact 12/7 padding, 16dp glyph, slides down from above)
+  instead of the old bottom-center pill; tapping it opens the Updates page.
+  (3) **Auto backup** (BackupToolsScreen "Auto backup" section): opt-in
+  toggle — the FIRST time it's switched on the user picks a save location
+  once (`CreateDocument`, `takePersistableUriPermission` + persisted URI
+  in `auto_backup_uri`); MainActivity then exports a backup there on app
+  start, throttled to ~once per 24h (`AUTO_BACKUP_INTERVAL_MILLIS`,
+  `auto_backup_last_at`). The section shows Backup location (tappable to
+  change) + Last auto backup. (4) **"Last backup" row fix:** the row is
+  driven by the export's `ExportResult.exportedAtMillis` (the exact write
+  timestamp) instead of a stale prefs re-read, and BackupToolsScreen
+  re-reads the backup timestamps on ON_RESUME — it no longer reads
+  "Never" right after a successful backup.
 - **v110 — pet designer scroll compiles + YouTube Music opens in-app.**
   (1) **CI compile fix:** `PetDesignerScreen` declared `val listState =
   rememberLazyListState()` INSIDE the `Column { }` content lambda, but the

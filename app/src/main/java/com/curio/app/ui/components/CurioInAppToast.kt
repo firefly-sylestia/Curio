@@ -88,6 +88,11 @@ object CurioToast {
  * [CurioToast.current], auto-dismisses after ~3.5s, and animates in/out
  * with a soft slide + fade. Toasts that carry an action are tappable:
  * tapping dismisses them and forwards the action key to [onAction].
+ *
+ * v112 — REMADE as a SMALL pill for the TOP-RIGHT corner (the old
+ * bottom-center pill was removed): compact padding, smaller glyph/text,
+ * slides down from above instead of up from below. The NavHost places it
+ * with statusBarsPadding + a corner margin.
  */
 @Composable
 fun CurioInAppToastHost(
@@ -108,7 +113,7 @@ fun CurioInAppToastHost(
         modifier = modifier,
         enter = slideInVertically(
             animationSpec = tween(260, easing = FastOutSlowInEasing)
-        ) { height -> height / 3 } + fadeIn(animationSpec = tween(220)),
+        ) { height -> -height / 2 } + fadeIn(animationSpec = tween(220)),
         exit = fadeOut(animationSpec = tween(180))
     ) {
         message?.let { m ->
@@ -118,7 +123,6 @@ fun CurioInAppToastHost(
                 color = curioDialogContainerColor(),
                 shadowElevation = 6.dp,
                 modifier = Modifier
-                    .padding(horizontal = 20.dp)
                     .then(
                         if (action != null) Modifier.clickable {
                             CurioToast.dismiss(m.id)
@@ -127,23 +131,23 @@ fun CurioInAppToastHost(
                     )
             ) {
                 Row(
-                    // v99 — slim pill: tighter padding; the text below is
-                    // capped at one line so a long message can't balloon it.
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    // v112 — small pill: compact padding + smaller glyph/text
+                    // so the corner pill reads as a light notice, not a block.
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (m.glyph != null) {
                         CurioIcon(
                             name = m.glyph,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            size = 20.dp
+                            size = 16.dp
                         )
                     }
                     Text(
                         text = m.text,
-                        style = MaterialTheme.typography.bodyMedium.copy(
+                        style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
@@ -162,7 +166,7 @@ fun CurioInAppToastHost(
                         )
                         Text(
                             text = m.actionLabel,
-                            style = MaterialTheme.typography.labelLarge.copy(
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.ExtraBold
                             ),
                             color = MaterialTheme.colorScheme.primary

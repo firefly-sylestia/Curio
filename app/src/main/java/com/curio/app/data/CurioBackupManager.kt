@@ -105,7 +105,14 @@ object CurioBackupManager {
     )
 
     /** Result of a successful export. */
-    data class ExportResult(val captureCount: Int, val uri: Uri)
+    data class ExportResult(
+        val captureCount: Int,
+        val uri: Uri,
+        /** Millis when the backup was written — drives the "Last backup" row
+         *  directly (a stale prefs re-read made it read "Never" after a
+         *  successful export). */
+        val exportedAtMillis: Long
+    )
 
     /** Result of a successful restore. */
     data class RestoreResult(val captureCount: Int, val preferenceFiles: Int)
@@ -285,7 +292,7 @@ object CurioBackupManager {
             .putLong(KEY_LAST_BACKUP_AT, exportedAt)
             .putInt(KEY_LAST_BACKUP_COUNT, captures.size)
             .apply()
-        return ExportResult(captures.size, uri)
+        return ExportResult(captures.size, uri, exportedAt)
     }
 
     /**

@@ -1,6 +1,9 @@
 REMOVE
+- The old update card in Support & diagnostics is gone — checking, release notes and installing now live on the dedicated Updates page.
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
 ADD
+- Updates page: a dedicated sub-page (Settings → Updates) with your version, a check for updates with release notes, direct APK download & install, and the opt-in Update checker toggle — the background check is off by default to save data.
+- Auto backup: pick a save location once and Curio backs up your captures and settings there automatically about once a day (opt-in).
 - Torn hero under-sheet: an opt-in experiment in Settings → Experiments → Paper & headers — off by default, torn heroes now tear straight into the page with just their bottom tear (turn it on to restore the paper lip).
 - Music service icons: the explore "Watch in" pill and the Music service picker now show the real brand logos (Apple Music, Spotify, YouTube, YouTube Music) instead of generic glyphs.
 - Paper stat cards are on by default: the Home and Profile stat panes, the detail meta card and the Profile quests block now wear the paper card look.
@@ -10,6 +13,8 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets now ride the tear hero; filter sheet search matches the Cabinet hero search, and the Filter badge counts matching topics.
 - Cabinet + Topic Browser: the sort pill is now a labeled pill that matches the Category pill's size and look, with the active sort field shown right on it.
 FIX
+- Last backup: the row now updates right after a backup instead of showing "Never".
+- Update toast: remade as a small pill in the top-right corner.
 - Dark mode: the YouTube logo in the explore "Watch in" pill is no longer squished — it keeps its proper shape.
 - Dark mode: hero action pills (Search, Category, back) and the explore dialog's Explore / Watch-in buttons now wear the same raised chip glass as the filter chips.
 - Dark mode: search bars across the app (Cabinet, Topic Browser, Spin filters) now use the near-black chip glass instead of the muddy mid-tone background.
@@ -68,7 +73,7 @@ FIX
 - Mood board: expanded view on older entries no longer crashes; quote cards no longer balloon on compact collages.
 - Session screenshots no longer auto-attach; photo-library permission removed — nothing reads your photos.
 - Saved progress (pages / episodes) shows on Cabinet cards and the detail page.
-- Update notice is an in-app toast instead of the system toast, once per version, and opens Support & diagnostics on tap.
+- Update notice is an in-app toast instead of the system toast, once per version, and opens the Updates page on tap.
 - Topic loading is faster (parallel lanes, shared parses, tiered memory release).
 - Backup export and restore stream in chunks so large archives can't crash.
 - Filter chips, sort pills and category pills have proper elevation and contrast in every theme.

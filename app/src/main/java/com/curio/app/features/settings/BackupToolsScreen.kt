@@ -1,33 +1,44 @@
 package com.curio.app.features.settings
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.background
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioBackupManager
 import com.curio.app.data.CurioCategories
@@ -42,6 +53,7 @@ import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -62,6 +74,25 @@ fun BackupToolsScreen(navController: NavController) {
     var legacyPendingUri by remember { mutableStateOf<Uri?>(null) }
     var legacyBusy by remember { mutableStateOf(false) }
     var legacyStatus by remember { mutableStateOf<Pair<Boolean, String>?>(null) }
+    // Auto backup — the opt-in daily backup to a location picked ONCE.
+    var autoBackupEnabled by remember { mutableStateOf(AppPreferences.isAutoBackupEnabled(context)) }
+    var autoBackupUriStr by remember { mutableStateOf(AppPreferences.getAutoBackupUri(context)) }
+    var lastAutoBackupAt by remember { mutableStateOf(AppPreferences.getAutoBackupLastAtMillis(context)) }
+
+    // Refresh the backup timestamps whenever the screen resumes — a backup
+    // (manual or the background auto-backup) can complete while the screen
+    // is away, and a stale read would otherwise keep showing "Never".
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                lastBackupAt = CurioBackupManager.lastBackupAtMillis(context)
+                lastAutoBackupAt = AppPreferences.getAutoBackupLastAtMillis(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     val backupLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(CurioBackupManager.MIME_TYPE)
@@ -70,7 +101,11 @@ fun BackupToolsScreen(navController: NavController) {
             scope.launch {
                 try {
                     val result = CurioBackupManager.export(context, uri)
-                    lastBackupAt = CurioBackupManager.lastBackupAtMillis(context)
+                    // Drive the row from the export result itself (the exact
+                    // write timestamp) instead of re-reading prefs — the meta
+                    // write is applied asynchronously to disk, and a stale
+                    // re-read could show "Never" right after a backup.
+                    lastBackupAt = result.exportedAtMillis
                     backupStatus = true to (
                         "Backed up ${result.captureCount} capture(s), your settings and sound recordings.\n" +
                             "Keep the file somewhere safe. It brings everything back on a new device."
@@ -96,6 +131,30 @@ fun BackupToolsScreen(navController: NavController) {
                     backupStatus = false to "Restore failed: ${e.message ?: "unknown error"}"
                 }
             }
+        }
+    }
+
+    // Auto backup destination — CreateDocument ONCE. The chosen document URI
+    // is persisted with a persistable permission grant so the background
+    // auto-backup (MainActivity, throttled to ~once a day) can write to it
+    // without re-asking. Tapping the "Backup location" row re-opens this
+    // picker to change the destination.
+    val autoBackupLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(CurioBackupManager.MIME_TYPE)
+    ) { uri ->
+        if (uri != null) {
+            // Some providers can't grant a persistable permission — best
+            // effort only; the auto-backup then just falls back to manual.
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            }
+            AppPreferences.setAutoBackupUri(context, uri.toString())
+            AppPreferences.setAutoBackupEnabled(context, true)
+            autoBackupUriStr = uri.toString()
+            autoBackupEnabled = true
         }
     }
 
@@ -280,6 +339,70 @@ fun BackupToolsScreen(navController: NavController) {
                         SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastBackupAt))
                     } else "Never"
                     CurioSettingsInfoRow(CurioIcons.History, "Last backup", backupLabel)
+                }
+            }
+            item { CurioSectionLabel("Auto backup") }
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Toggle row — pick the location the FIRST time it's
+                    // switched on; afterwards the saved destination is reused.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Backup, null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 21.dp
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Auto backup", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                text = if (autoBackupEnabled) "Saves to your location about once a day"
+                                else "Pick a location once, back up on its own",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Switch(
+                            checked = autoBackupEnabled,
+                            onCheckedChange = { enabled ->
+                                if (enabled && autoBackupUriStr.isBlank()) {
+                                    // No destination yet — ask where first.
+                                    autoBackupLauncher.launch(CurioBackupManager.suggestedFileName())
+                                } else {
+                                    AppPreferences.setAutoBackupEnabled(context, enabled)
+                                    autoBackupEnabled = enabled
+                                }
+                            },
+                            colors = SwitchDefaults.colors()
+                        )
+                    }
+                    if (autoBackupEnabled) {
+                        CurioSettingsDivider()
+                        val locationName = autoBackupUriStr
+                            .takeIf { it.isNotBlank() }
+                            ?.let { runCatching { Uri.parse(it).lastPathSegment }.getOrNull() }
+                            ?.substringAfterLast(':')
+                            ?.takeIf { it.isNotBlank() }
+                        CurioSettingsRow(
+                            CurioIcons.Inventory2,
+                            "Backup location",
+                            locationName ?: "Choose a location"
+                        ) {
+                            autoBackupLauncher.launch(CurioBackupManager.suggestedFileName())
+                        }
+                        CurioSettingsDivider()
+                        val autoLabel = if (lastAutoBackupAt > 0L) {
+                            SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastAutoBackupAt))
+                        } else "Not yet"
+                        CurioSettingsInfoRow(CurioIcons.History, "Last auto backup", autoLabel)
+                    }
                 }
             }
             item { CurioSectionLabel("Legacy import") }

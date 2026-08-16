@@ -600,6 +600,8 @@ object AppPreferences {
         bedDesignRowsState = getBedDesignRows(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
+        updateCheckerEnabledState = isUpdateCheckerEnabled(context)
+        autoBackupEnabledState = isAutoBackupEnabled(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────
@@ -1685,6 +1687,59 @@ object AppPreferences {
     fun setPetPartTransformsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PET_PART_TRANSFORMS, enabled).apply()
         petPartTransformsState = enabled
+    }
+
+    // ── Update checker (opt-in) ──────────────────────────────────────
+    // Curio is an offline-first app: the background update check (and its
+    // notification/toast) costs data every launch. OFF by default — the
+    // Updates page's toggle opts in. The MANUAL check on the Updates page
+    // always works regardless of this flag.
+    private const val KEY_UPDATE_CHECKER_ENABLED = "update_checker_enabled"
+
+    var updateCheckerEnabledState by mutableStateOf(false)
+        private set
+
+    fun isUpdateCheckerEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_UPDATE_CHECKER_ENABLED, false)
+
+    fun setUpdateCheckerEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_UPDATE_CHECKER_ENABLED, enabled).apply()
+        updateCheckerEnabledState = enabled
+    }
+
+    // ── Auto backup (pick a folder once) ─────────────────────────────
+    // The user picks a save location ONCE (CreateDocument); the chosen
+    // document URI is persisted with a persistable permission grant so a
+    // background auto-backup can write to it without re-asking.
+    private const val KEY_AUTO_BACKUP_ENABLED = "auto_backup_enabled"
+    private const val KEY_AUTO_BACKUP_URI = "auto_backup_uri"
+    private const val KEY_AUTO_BACKUP_LAST_AT = "auto_backup_last_at"
+
+    var autoBackupEnabledState by mutableStateOf(false)
+        private set
+
+    fun isAutoBackupEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_AUTO_BACKUP_ENABLED, false)
+
+    fun setAutoBackupEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_AUTO_BACKUP_ENABLED, enabled).apply()
+        autoBackupEnabledState = enabled
+    }
+
+    /** The persisted auto-backup destination URI string, or "" when unset. */
+    fun getAutoBackupUri(context: Context): String =
+        prefs(context).getString(KEY_AUTO_BACKUP_URI, "").orEmpty()
+
+    fun setAutoBackupUri(context: Context, uri: String) {
+        prefs(context).edit().putString(KEY_AUTO_BACKUP_URI, uri).apply()
+    }
+
+    /** Milliseconds of the last AUTO backup run, or 0 if never. */
+    fun getAutoBackupLastAtMillis(context: Context): Long =
+        prefs(context).getLong(KEY_AUTO_BACKUP_LAST_AT, 0L)
+
+    fun setAutoBackupLastAtMillis(context: Context, millis: Long) {
+        prefs(context).edit().putLong(KEY_AUTO_BACKUP_LAST_AT, millis).apply()
     }
 
     // ── Internal ─────────────────────────────────────────────────────
