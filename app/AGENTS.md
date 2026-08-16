@@ -467,7 +467,27 @@ app/src/main/java/com/curio/app/
   bullets with accent dots, `---` dividers, `**bold**` spans,
   `[label](url)` links stripped to labels and `` `code` `` to plain text —
   the raw GitHub body no longer shows as literal markdown.
-- **v114 — pet eyes no longer react to touch scrolls; scaled eye pixels stay
+- **v115 — detail-screen tear runs out cleanly at the screen edges; the
+  quick-fact box is theme-aware; the fold toggle is a bare "…".** (1)
+  **Tear corners:** the seeded torn bottom edge (waves + noise + the tilted
+  slant, which alone drifts ±up-to-10dp between the corners) could notch
+  the hero's corners AT the screen's left/right edges and read as "cut" —
+  worst on the edge-to-edge detail hero, whose seed is the entry hash, so
+  some entries drew a deep up-bite at a corner. `buildSoftTornPath` and
+  `buildSoftSheetPath` now fade the displacement to ZERO over the last ~5%
+  at each end (the SAME fade in both, so the hero and its white under-sheet
+  stay pixel-aligned): the middle 90% keeps its full torn character and the
+  corners meet the nominal edge — applied to every torn hero (Home,
+  Profile, Settings, Cabinet, Detail) since they share the shape. (2)
+  **Quick-fact box** (EntryDetail `QuickFactCard`): the old translucent
+  white @38% plate washed out against the tinted page wash in light and
+  glowed like a bright sheet in dark — now a theme-aware OPAQUE plate
+  (`lerp(surfaceContainerLow, categoryInk, 0.06f)` light /
+  `lerp(surfaceContainerHigh, ink, 0.10f)` dark) with a hairline category
+  rim in dark mode, matching the settings-card language. (3) **Fold
+  toggle:** the "…more" / "…less" words are gone — collapsed shows a lone
+  "…" affordance; expanded turns it `Color.Transparent` (the tap target
+  stays, same size) so tapping the same spot still folds it back.
   crisp.** (1) **Eyes stopped flicking at the start of every scroll:**
   `PetPointer.trackerModifier` aimed the eyes on `Press`, so every
   touch-scroll began with a visible eye-snap at the finger's touchdown

@@ -21,6 +21,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Detail screen: the torn hero's edge now runs out cleanly at the screen edges — some entries' tears used to notch the hero's corners and look cut.
+- Detail screen: the quick-fact box is a proper theme-aware plate now (no more washed-out white box in light or bright sheet in dark), and the "…more / …less" words became a tidy "…" toggle that still expands and folds the fact.
 - Updates page: the release notes are now saved on your device, so they show instantly when you open the page instead of reloading from the internet — and they render properly (headers, bullets, bold) instead of raw text.
 - Updates page: a new status header shows your version chip and check state, and an update-available banner makes the download action front and center.
 - Settings & Profile options now show clean bare icons — the colored box behind each glyph is gone — and every settings sub-page (Appearance, Preferences, Recording, Backup, Experiments, Updates and Support) renders its options in the same paper cards as the Settings hub instead of transparent rows.

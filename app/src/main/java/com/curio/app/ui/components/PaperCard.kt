@@ -1343,17 +1343,34 @@ private fun buildSoftTornPath(
     }
     val p = SoftTearParams(seed, density, bold, detail)
     val step = with(density) { 4.dp.toPx() }
+    // v115 — run the tear out cleanly at the left/right edges: fade the
+    // displacement to zero over the last ~5% at each end. The seeded seam
+    // (waves + noise + the tilted slant, which alone drifts ±up-to-10dp
+    // between the corners) can otherwise notch the hero's corners at the
+    // screen edge and read as "cut" — worst on the edge-to-edge detail
+    // hero, whose seed is the entry hash, so some entries draw a deep
+    // up-bite at a corner. The fade keeps the torn character across the
+    // middle and the corners meet the nominal edge.
+    fun tornDisp(x: Float): Float {
+        val t = x / w
+        val fade = when {
+            t < 0.05f -> t / 0.05f
+            t > 0.95f -> (1f - t) / 0.05f
+            else -> 1f
+        }
+        return p.disp(x, w) * fade
+    }
     // Clockwise: straight top, straight right, torn bottom (right→left),
     // straight left, close.
     path.moveTo(0f, 0f)
     path.lineTo(w, 0f)
-    path.lineTo(w, h + p.disp(w, w))
+    path.lineTo(w, h + tornDisp(w))
     var x = w - step
     while (x > 0f) {
-        path.lineTo(x, h + p.disp(x, w))
+        path.lineTo(x, h + tornDisp(x))
         x -= step
     }
-    path.lineTo(0f, h + p.disp(0f, w))
+    path.lineTo(0f, h + tornDisp(0f))
     path.close()
     return path
 }
@@ -1385,6 +1402,17 @@ private fun buildSoftSheetPath(
     }
     val p = SoftTearParams(seed, density, bold, detail)
     val step = with(density) { 4.dp.toPx() }
+    // v115 — the same corner fade as the hero's torn edge, so the sheet's
+    // torn top rides the hero's faded curve (pixel-aligned) and its lip
+    // runs out cleanly at the screen edges instead of notching.
+    fun cornerFade(x: Float): Float {
+        val t = x / w
+        return when {
+            t < 0.05f -> t / 0.05f
+            t > 0.95f -> (1f - t) / 0.05f
+            else -> 1f
+        }
+    }
     // Keep the hero and sheet on the SAME broad wave rhythm, but do not
     // duplicate the hero's fine tooth. The exposed white gets only a small,
     // separately seeded paper wobble so it feels like a second sheet edge
@@ -1404,7 +1432,7 @@ private fun buildSoftSheetPath(
                 normalizedX * p.rippleWaves * 0.9f,
                 p.phase + 53f
             ) - 0.5f) * 2f * with(density) { if (detail) 0.40.dp.toPx() else 0.30.dp.toPx() }
-        return sharedShape + extraRipple
+        return (sharedShape + extraRipple) * cornerFade(x)
     }
     // Clockwise: a SOLID top (hidden behind the hero), down the right side,
     // then the restrained uneven lower lip. Only the lower edge is torn so
@@ -1412,7 +1440,7 @@ private fun buildSoftSheetPath(
     // Keep the backing path inside its measured box even for a seeded peak;
     // the overlap behind the hero handles the top edge, while this clamp
     // guarantees the lower white sheet can never be clipped into a gap.
-    val topAt: (Float) -> Float = { x -> baselinePx + p.disp(x, w) }
+    val topAt: (Float) -> Float = { x -> baselinePx + p.disp(x, w) * cornerFade(x) }
     val bottomAt: (Float) -> Float = { x ->
         (topAt(x) + lipPx + bottomBump(x)).coerceAtMost(h - 0.5f)
     }

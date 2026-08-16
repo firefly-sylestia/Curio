@@ -19,6 +19,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -1439,8 +1440,10 @@ private fun FormatBody(
  * background. The ink is the category's theme-aware [categoryInk]: deep
  * accent in light / pastel-light (reads on the airy pastel washes), so the
  * text stays readable in every color mode. Collapsed to 2 lines with a
- * "…more" toggle (only shown
- * when the teaser actually overflows); tapping "…less" folds it back.
+ * "…" fold toggle (only shown when the teaser actually overflows);
+ * tapping it expands, and when expanded the "…" turns invisible (the tap
+ * target stays) so tapping the same spot folds it back — v115: the old
+ * "…more" / "…less" words are gone.
  *
  * v7.38 — SECONDARY HIERARCHY: the whole block is deliberately SMALLER
  * than the category label above it — a labelMedium caption heading + a
@@ -1456,11 +1459,17 @@ private fun QuickFactCard(
     var expanded by rememberSaveable { mutableStateOf(false) }
     var hasOverflow by remember { mutableStateOf(false) }
     val ink = cat.categoryInk()
-    // v20 — a soft frosted plate behind the description text so it reads
-    // clearly over the page's glyph watermark. Deliberately LIGHTER than the
-    // hero's frost: translucent, so the category wash still glows through (a
-    // whisper of milk glass in light/pastel).
-    val paneFill = Color.White.copy(alpha = 0.38f)
+    // v115 — the box behind the quick fact is a theme-aware OPAQUE plate now:
+    // the old translucent white @38% washed out against the tinted page wash
+    // in light and glowed like a bright sheet in dark mode. The scheme's
+    // surface is lifted toward the category ink (a whisper of the entry's
+    // color, like the settings cards), and dark mode adds a hairline rim so
+    // the plate reads defined on the black page.
+    val paneFill = if (isCurioDarkTheme()) {
+        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, ink, 0.10f)
+    } else {
+        lerp(MaterialTheme.colorScheme.surfaceContainerLow, ink, 0.06f)
+    }
     val paneShape = RoundedCornerShape(16.dp)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -1485,6 +1494,12 @@ private fun QuickFactCard(
                 .fillMaxWidth()
                 .clip(paneShape)
                 .background(paneFill)
+                .then(
+                    // Dark mode: a hairline rim in the category ink so the
+                    // plate reads as a defined surface on the black page.
+                    if (isCurioDarkTheme()) Modifier.border(1.dp, ink.copy(alpha = 0.18f), paneShape)
+                    else Modifier
+                )
                 .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Column {
@@ -1498,10 +1513,14 @@ private fun QuickFactCard(
                     onTextLayout = { layoutResult -> hasOverflow = layoutResult.hasVisualOverflow }
                 )
                 if (expanded || hasOverflow) {
+                    // v115 — the "…more" / "…less" words are gone: collapsed
+                    // shows a lone "…" affordance; expanded turns it
+                    // INVISIBLE but keeps the same tap target, so the fold
+                    // toggle still works by tapping the same spot.
                     Text(
-                        text = if (expanded) "…less" else "…more",
+                        text = "…",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = ink.copy(alpha = 0.85f),
+                        color = if (expanded) Color.Transparent else ink.copy(alpha = 0.85f),
                         modifier = Modifier
                             .clickable { expanded = !expanded }
                             .padding(top = 3.dp)
