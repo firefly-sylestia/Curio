@@ -2,7 +2,6 @@ package com.curio.app.ui.components
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +16,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,6 +55,12 @@ import kotlin.math.roundToInt
  * No third-party crop library (the app is dependency-light): the frame,
  * grid and gestures are plain Compose, so the dialog wears the app's
  * dialog styling instead of a foreign crop screen.
+ *
+ * v116 — the crop state is hoisted into the dialog body and the actions
+ * use the classic AlertDialog confirmButton/dismissButton overload, so
+ * Apply can read the LIVE crop rect while the buttons stay in the dialog
+ * bar (the first version put Cancel/Apply inside `text` and called
+ * AlertDialog without confirmButton, which matched no overload).
  */
 @Composable
 fun AvatarCropDialog(
@@ -69,6 +75,30 @@ fun AvatarCropDialog(
     // every frame during pinch/pan would jank the gesture.
     val image = remember(bitmap) { bitmap.asImageBitmap() }
 
+    // Crop state hoisted here so the Apply button (the dialog's
+    // confirmButton) can compute the live crop rect.
+    var scale by remember { mutableFloatStateOf(0f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    var scale0 by remember { mutableFloatStateOf(0f) }
+    var framePx by remember { mutableFloatStateOf(0f) }
+
+    fun clampAxis(v: Float, displayDim: Float, frameDim: Float): Float =
+        if (displayDim <= frameDim) 0f
+        else v.coerceIn(-(displayDim - frameDim) / 2f, (displayDim - frameDim) / 2f)
+
+    // The source-pixel square currently under the frame.
+    fun currentCropRect(): IntRect {
+        val dw = imgW * scale
+        val dh = imgH * scale
+        val topLeft = offset + Offset(framePx / 2f, framePx / 2f) -
+            Offset(dw / 2f, dh / 2f)
+        val left = ((-topLeft.x) / scale).roundToInt().coerceIn(0, imgW)
+        val top = ((-topLeft.y) / scale).roundToInt().coerceIn(0, imgH)
+        val right = ((framePx - topLeft.x) / scale).roundToInt().coerceIn(0, imgW)
+        val bottom = ((framePx - topLeft.y) / scale).roundToInt().coerceIn(0, imgH)
+        return IntRect(left, top, right, bottom)
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = curioDialogContainerColor(),
@@ -76,30 +106,6 @@ fun AvatarCropDialog(
         title = { Text("Crop photo", fontWeight = FontWeight.ExtraBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Crop state hoisted here so the Apply button (below) can
-                // compute the live crop rect.
-                var scale by remember { mutableFloatStateOf(0f) }
-                var offset by remember { mutableStateOf(Offset.Zero) }
-                var scale0 by remember { mutableFloatStateOf(0f) }
-                var framePx by remember { mutableFloatStateOf(0f) }
-
-                fun clampAxis(v: Float, displayDim: Float, frameDim: Float): Float =
-                    if (displayDim <= frameDim) 0f
-                    else v.coerceIn(-(displayDim - frameDim) / 2f, (displayDim - frameDim) / 2f)
-
-                // The source-pixel square currently under the frame.
-                fun currentCropRect(): IntRect {
-                    val dw = imgW * scale
-                    val dh = imgH * scale
-                    val topLeft = offset + Offset(framePx / 2f, framePx / 2f) -
-                        Offset(dw / 2f, dh / 2f)
-                    val left = ((-topLeft.x) / scale).roundToInt().coerceIn(0, imgW)
-                    val top = ((-topLeft.y) / scale).roundToInt().coerceIn(0, imgH)
-                    val right = ((framePx - topLeft.x) / scale).roundToInt().coerceIn(0, imgW)
-                    val bottom = ((framePx - topLeft.y) / scale).roundToInt().coerceIn(0, imgH)
-                    return IntRect(left, top, right, bottom)
-                }
-
                 // ── Square crop canvas — the visible area IS the crop ──
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                     val fp = with(LocalDensity.current) { maxWidth.toPx() }
@@ -205,29 +211,25 @@ fun AvatarCropDialog(
                         )
                     }
                 }
-                // ── Actions — Cancel text button + Apply accent pill (the
-                //    rect is computed from the LIVE crop state). ──
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
-                        Text("Cancel")
-                    }
-                    Surface(
-                        onClick = { onConfirm(currentCropRect()) },
-                        shape = RoundedCornerShape(50),
-                        color = curioDialogActionColor(),
-                        contentColor = Color.White
-                    ) {
-                        Text(
-                            "Apply",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
-                        )
-                    }
-                }
+            }
+        },
+        confirmButton = {
+            Surface(
+                onClick = { onConfirm(currentCropRect()) },
+                shape = RoundedCornerShape(50),
+                color = curioDialogActionColor(),
+                contentColor = Color.White
+            ) {
+                Text(
+                    "Apply",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
+                Text("Cancel")
             }
         }
     )

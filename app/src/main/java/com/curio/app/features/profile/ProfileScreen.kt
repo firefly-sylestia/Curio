@@ -75,11 +75,9 @@ import androidx.navigation.NavController
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
-import android.os.Build
 import androidx.compose.ui.unit.IntRect
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
@@ -217,27 +215,11 @@ fun ProfileScreen(navController: NavController) {
     // crop dialog is open (rendered above the edit dialog).
     var cropSource by remember { mutableStateOf<Bitmap?>(null) }
     val scope = rememberCoroutineScope()
-    val avatarPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        scope.launch {
-            val src = withContext(Dispatchers.IO) { decodeAvatarSource(context, uri) }
-            if (src != null) saveAvatar(src, null) // null → auto center crop
-        }
-    }
-    fun removeAvatar() {
-        avatarPath.takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
-        context.filesDir.listFiles()
-            ?.filter { it.name.startsWith("profile_avatar_") }
-            ?.forEach { it.delete() }
-        avatarPath = ""
-        cropSource = null
-        AppPreferences.setProfileAvatarPath(context, "")
-    }
     // Saves the avatar — center-square auto-crop by default, or the manual
     // crop rect from the crop editor. Stores BOTH the square avatar and
     // the editable source (so Crop can re-frame the original photo).
+    // NOTE: declared BEFORE the picker below — local functions can't be
+    // forward-referenced in Kotlin (the picker's lambda calls saveAvatar).
     fun saveAvatar(source: Bitmap, cropRect: IntRect?) {
         val cropped = if (cropRect == null) {
             centerSquareCrop(source)
@@ -266,6 +248,24 @@ fun ProfileScreen(navController: NavController) {
             ?.forEach { it.delete() }
         avatarPath = if (avatarFile.exists() && avatarFile.length() > 0L) avatarFile.absolutePath else ""
         AppPreferences.setProfileAvatarPath(context, avatarPath)
+    }
+    val avatarPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val src = withContext(Dispatchers.IO) { decodeAvatarSource(context, uri) }
+            if (src != null) saveAvatar(src, null) // null → auto center crop
+        }
+    }
+    fun removeAvatar() {
+        avatarPath.takeIf { it.isNotBlank() }?.let { runCatching { File(it).delete() } }
+        context.filesDir.listFiles()
+            ?.filter { it.name.startsWith("profile_avatar_") }
+            ?.forEach { it.delete() }
+        avatarPath = ""
+        cropSource = null
+        AppPreferences.setProfileAvatarPath(context, "")
     }
     // Opens the crop editor with the saved source (falling back to the
     // current square avatar) so the user can re-frame the photo.
@@ -1623,25 +1623,21 @@ private fun taglineForStreak(streakDays: Int): String = when {
 // the original photo. The manual crop hands back a source-pixel [IntRect].
 
 /** Decodes a picked image EXIF-correctly and bounded (never full-size, so a
- *  40MP camera photo can't OOM the decode). ImageDecoder handles the bound
- *  for API 28+ (its EXIF pass is disabled — the rotation is applied here so
- *  both API paths behave identically); API 26-27 sample via BitmapFactory. */
+ *  40MP camera photo can't OOM the decode). Uses BitmapFactory for EVERY
+ *  API level: it never applies EXIF orientation itself (documented), so the
+ *  framework [ExifInterface] rotation below is applied identically on all
+ *  devices — ImageDecoder's EXIF behavior varies across Android versions
+ *  (auto-apply on some, not on others) and has no public toggle, so a
+ *  single deterministic path avoids both double-rotation and compile/API
+ *  availability risk. */
 private fun decodeAvatarSource(context: Context, uri: Uri): Bitmap? = runCatching {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
-    val decoded = if (Build.VERSION.SDK_INT >= 28) {
-        val src = ImageDecoder.createSource(context.contentResolver, uri)
-        ImageDecoder.decodeBitmap(src) { decoder, _, _ ->
-            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-            decoder.setTargetSize(2048, 2048)
-            decoder.setIsExifOrientationRequired(false)
-        }
-    } else {
-        var sample = 1
-        while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= 2048) sample *= 2
-        val opts = BitmapFactory.Options().apply { inSampleSize = sample }
-        context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) }
-    } ?: return@runCatching null
+    var sample = 1
+    while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= 2048) sample *= 2
+    val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+    val decoded = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) }
+        ?: return@runCatching null
     // Framework ExifInterface (API 24+) handles content:// URIs — rotate to
     // upright before any cropping so the square comes from the RIGHT photo.
     val rotation = runCatching {
