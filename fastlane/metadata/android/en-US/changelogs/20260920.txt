@@ -30,7 +30,7 @@ FIX
 - Pill shadows in dark mode: the glow on small pills (progress pill, filter chips, Apply, category picker tabs, presets and the reveal actions) now hugs the pill's shape instead of peeking out past the rounded ends.
 - Resume draft: a draft written on a non-default take (e.g. a Journal take on a Voice category) now restores onto that take instead of the page's default one.
 - Filter sheet: the Apply / Show all button is now a raised pill that matches the filter chips instead of a flat button.
-- Launcher icon: the cosmic card art now comes straight from the designer's PNG and is sized so the whole card fits the launcher shape — the frame, stars and waves are no longer cut off.
+- Launcher icon: the cosmic card art is now rendered from the designer's latest source — same mint planet, pink moon and waves, with the white frame dropped — and still sized so the whole card fits the launcher shape.
 - Detail: the explore-session duration no longer repeats twice — it lives once in the Date · Mood · Session · Type card, and the old pill above it is gone.
 - Filter page: the Type · Genres · Era · Origin · Franchise group icons now show in light mode — inactive group pills use a deep ink instead of the pale pastel that vanished on the tinted fill.
 - Icons across the app (Recents rows, Shuffle card, Settings, bottom nav and buttons everywhere): no longer shaved at the top inside buttons — the icon glyphs sit centered in their slots instead of being clipped by the button edges.

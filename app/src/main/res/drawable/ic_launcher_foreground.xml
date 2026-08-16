@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    v113 — Curio's cosmic launcher mark, applied from the designer's PNG
-    (drawable-nodpi/ic_launcher_art.png, 2048×2048, the raster of the
-    user-supplied art: a mint planet with a pink moon over layered pink and
-    gold waves on a midnight navy→magenta sky, inside a rounded card with a
-    white frame).
+    v115 — Curio's cosmic launcher mark, applied from the designer's NEW
+    SVG (svgviewer-output (5).svg, archived at
+    design/launcher-icon/curio-launcher-icon-v2.svg) rendered to a 2048×2048
+    raster (drawable-nodpi/ic_launcher_icon.png): a mint planet with a pink
+    moon over layered pink/gold waves on a midnight navy→magenta sky, inside
+    a rounded card. Same card geometry as the previous art (84–88% of the
+    canvas) — only the white frame is gone, matching the new source.
 
-    The art is a ROUNDED CARD with a white frame and transparent corners —
-    at the adaptive-icon canvas size (108dp) the card spans ~84–88%, which
-    the launcher's mask (66dp safe zone) would crop: the frame, top stars
-    and bottom waves were getting sliced ("broken / not properly placed").
-    So the bitmap is inset 28dp on every side: the art fills the central
-    52dp, the card lands at ~44×47dp — fully inside the safe circle, frame
-    intact — floating on the full-bleed sky in ic_launcher_background.xml
-    (whose gradient matches the card's own sky, so the two composite
-    seamlessly behind the frame). The 2048px source downscales cleanly to
-    every density.
+    The art is a ROUNDED CARD with transparent corners — at the
+    adaptive-icon canvas size (108dp) the card spans ~84–88%, which the
+    launcher's mask (66dp safe zone) would crop: the frame, top stars and
+    bottom waves were getting sliced ("broken / not properly placed"). So
+    the bitmap is inset 28dp on every side: the art fills the central
+    52dp, the card lands at ~44×47dp — fully inside the safe circle —
+    floating on the full-bleed sky in ic_launcher_background.xml (whose
+    gradient matches the card's own sky, so the two composite seamlessly
+    behind the card). The 2048px source downscales cleanly to every
+    density.
 
-    The SPLASH screen renders @drawable/ic_launcher_art directly (not this
-    inset) so the full card art still fills the splash logo box.
+    The SPLASH screen keeps rendering @drawable/ic_launcher_art (the
+    previous raster) directly — the user approved it as-is.
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:inset="28dp"
-    android:drawable="@drawable/ic_launcher_art" />
+    android:drawable="@drawable/ic_launcher_icon" />
