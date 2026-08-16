@@ -271,6 +271,16 @@ fun CurioFloatingPet(
             poofAt = at
             poofKey++
         }
+
+        // v121 — game mode picks games in a cycle (HIDE_SEEK → CHAMELEON →
+        // SPARK → …) so all three get played evenly, instead of random.
+        var cycleGameIndex by remember { mutableIntStateOf(-1) }
+
+        /** v121 — the next game in the game-mode cycle. */
+        fun nextGameModeGame(): PetGame {
+            cycleGameIndex = (cycleGameIndex + 1) % PetGame.entries.size
+            return PetGame.entries[cycleGameIndex]
+        }
         // v8.26 — the speech bubble fades + rises in and out instead of
         // popping, so line changes feel smooth rather than abrupt.
         val bubbleAnim = remember { Animatable(0f) }
@@ -1646,9 +1656,10 @@ fun CurioFloatingPet(
                             // v8.20 — a fresh drag starts clear of the bed.
                             PetLandmarks.setHovered("bed", false)
                             // v120 — in game mode a drag also starts the
-                            // round (it plays once the drag ends).
+                            // round (it plays once the drag ends). v121 —
+                            // the game cycles so all three get played evenly.
                             if (gameMode && !gameActive) {
-                                gameRequest = PetGame.entries.random()
+                                gameRequest = nextGameModeGame()
                             }
                         },
                         onDrag = { change, amount ->
@@ -1794,8 +1805,10 @@ fun CurioFloatingPet(
                             lastTouch = System.currentTimeMillis()
                             // v120 — in game mode the next tap starts the
                             // round (the wander loop plays it to completion).
+                            // v121 — the game cycles so all three get played
+                            // evenly.
                             if (gameMode && !gameActive) {
-                                gameRequest = PetGame.entries.random()
+                                gameRequest = nextGameModeGame()
                             } else if (peeking && hideSeekActive) {
                                 // v16 — catching the pet mid-hide-and-seek is a
                                 // win, not a boop: the peek round ends in a

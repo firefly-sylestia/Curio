@@ -25,7 +25,7 @@ FIX
 - Tour: the guide's speech bubble no longer covers the Next button on the bottom dock — the Cabinet stop keeps its anchor even when empty, and the bubble/pet stay above the dock.
 - Curie's dialogue: every line the pet can say — events, moods, streak milestones, evolution, touch reactions, games, welcome-backs, memory lines, the first-run tour and the baby's Curie-isms — now matches the canonical dialog doc (tiny curious creature voice).
 - Curie's games: rounds now always play to completion (nothing interrupts them), hide-and-seek poofs to a corner for up to 5s (tap to find it, sad face if missed), and the star catch is a 10s round of falling stars — tap a star or drag Curie into one, with the score spoken at the end.
-- Curie now chats its mood lines every ~20-40s of idle, long-press starts a game mode (one game, then it ends), and it starts random games on its own at random times.
+- Curie now chats its mood lines every ~20-40s of idle, long-press starts a game mode that cycles through all three games (one round, then it ends), and it starts random games on its own at random times.
 - Home: the profile button on the top bar now shows your avatar photo, and the drawer's avatar and greeting text are bigger.
 - Support & diagnostics: a direct "Updates" row opens the update page (check, release notes & install).
 - Support & diagnostics: the Updates entry moved to the bottom of the page and is no longer repeated — the duplicate "Open Updates" row and its placeholder header are gone.

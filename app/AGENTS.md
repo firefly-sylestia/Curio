@@ -513,9 +513,11 @@ app/src/main/java/com/curio/app/
   so NOTHING overrides a round (the old probabilistic inline game
   blocks + per-game cooldown vars are gone). (3) GAME MODE: long-press
   no longer sends the pet home — it arms game mode (pet stays put,
-  autonomy paused); the next tap OR drag starts ONE random game, then
-  game mode ends. Drag the pet onto its flower bed to send it home
-  (unchanged). (4) HIDE-AND-SEEK: the pet POOFS out and teleports to a
+  autonomy paused); the next tap OR drag starts ONE game, then game
+  mode ends. v121 — game mode CYCLES through the games (HIDE_SEEK →
+  CHAMELEON → SPARK → …) so all three get played evenly; the auto-flow
+  scheduler keeps its random picks. Drag the pet onto its flower bed to
+  send it home (unchanged). (4) HIDE-AND-SEEK: the pet POOFS out and teleports to a
   random corner, just a sliver visible; tap the sliver to win; miss it
   and after up to 5s it poofs back with a sad face (`EyeStyle.CLOSED` +
   `MouthStyle.O` via `reactionFace`) + `missedMeLine()`. Chameleon's

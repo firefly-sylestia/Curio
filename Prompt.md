@@ -55,6 +55,14 @@ disappointment on fail, poof animations both ways; chatter → Chatty
    a scheduler effect requests a RANDOM game at random 20-50s intervals
    (scaled by the game-frequency setting, honoring GAME_MIN_SPACING_MS).
 
+### Follow-up — game mode cycles the games (`c448645`)
+User: "Make game mode pick the game by a cycle instead of random, so all
+three get played evenly." Game mode (tap or drag after a long-press)
+now picks via `nextGameModeGame()` — a `cycleGameIndex` that walks
+HIDE_SEEK → CHAMELEON → SPARK → … The auto-flow scheduler keeps its
+random picks ("random time and random games" stays true); only game
+mode cycles.
+
 ### Validation
 Brace balance depth 0; dead-ref sweep clean (sparkTarget/sparkWon/
 sparkKey/lastHideSeekAt/lastChameleonAt/lastSparkAt + the three per-game
