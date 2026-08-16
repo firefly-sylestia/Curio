@@ -81,6 +81,9 @@ fun AvatarCropDialog(
     var offset by remember { mutableStateOf(Offset.Zero) }
     var scale0 by remember { mutableFloatStateOf(0f) }
     var framePx by remember { mutableFloatStateOf(0f) }
+    // The dialog accent, resolved in the composable scope — the Canvas draw
+    // lambda is NOT a @Composable context, so this can't be called in there.
+    val dialogAccent = curioDialogActionColor()
 
     fun clampAxis(v: Float, displayDim: Float, frameDim: Float): Float =
         if (displayDim <= frameDim) 0f
@@ -162,7 +165,7 @@ fun AvatarCropDialog(
                         }
                         // Rule-of-thirds grid + corner brackets in the dialog
                         // accent so the frame reads as a crop window.
-                        val accent = curioDialogActionColor()
+                        val accent = dialogAccent
                         for (i in 1..2) {
                             val t = framePx * i / 3f
                             drawLine(accent.copy(alpha = 0.45f), Offset(t, 0f), Offset(t, framePx), strokeWidth = 1f)
