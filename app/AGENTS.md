@@ -449,6 +449,30 @@ app/src/main/java/com/curio/app/
   themed `RadioButton`s, the M3 `SegmentedButton` control in Settings,
   and self-contained flows (onboarding 18/26dp, bug-report 28dp) keep
   their own language.
+- **v114 — mood board: ONE shared board arrangement (full-screen editor
+  saves exactly what you arrange) + a Copy board button.** The format kept
+  a SECOND tile list + quote-position list for the full-screen editor
+  (`fullTiles`/`fullQuotePositions`, saved to `tileLayoutsFull`/
+  `quotePositionsFull`) that never synced from the inline adds — so
+  arranging in full-screen changed only the full list, the saved small card
+  (which renders the INLINE list) showed a different "cut" board, and
+  fresh boards opened the full-screen editor empty. Both canvases now edit
+  the SAME shared `tiles`/`quoteCards`; the save still writes
+  `tileLayoutsFull`/`quotePositionsFull` as mirrors (legacy readers fall
+  back to them). Editing a legacy dual-list entry seeds the shared list
+  from the FULL layouts when the inline ones are empty ("if one is empty
+  and the other has something, copy the populated one") — so legacy
+  full-screen arrangements survive a re-save. The quote size/position
+  save bug is the same root cause: the small card previously rendered the
+  inline list (never-dragged slots against an empty extent) instead of
+  the arranged placements. Added a **Copy board** pill (inline
+  BottomCenter + full-screen BottomEnd above Add images, shown whenever
+  the board has content): duplicates every tile nudged +28dp with a
+  slight rotation, and every quote card (same text/spans/tilt/style/
+  color/width, fresh `(-1,-1)` position → its own deterministic slot).
+  The dead v57 override plumbing (`quotePositionsOverride`,
+  `onMoveQuoteOverride`, `onResizeQuoteOverride`, `fullTiles`,
+  `fullQuotePositions`) was removed.
 - **v114 — dark-mode pill glow no longer peeks past the pill shape.**
   The One UI dark-mode pill treatments (`curioGlassEdge` top catch +
   `curioInnerGlow` radial) were painted against the pill's BOUNDING BOX, so
