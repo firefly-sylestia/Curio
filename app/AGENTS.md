@@ -534,6 +534,15 @@ app/src/main/java/com/curio/app/
   honoring `GAME_MIN_SPACING_MS`. Dead state/constants removed
   (`sparkTarget`/`sparkKey`/`sparkWon`/`lastHideSeekAt`/`lastChameleonAt`/
   `lastSparkAt` + the three per-game cooldowns).
+- **v122 — drawer greeting: bigger avatar, lifted row, auto-shrinking name.**
+  The drawer hero avatar grew 56 → 64dp (the initial-letter fallback
+  stepped up `titleLarge` → `headlineSmall` to match), the greeting row
+  sits a touch higher (`bottom` 28 → 40dp, still inside the 186dp hero),
+  and the "Hi name" line no longer gets CUT on long names: it now uses
+  `TextAutoSize.StepBased` (`maxFontSize` = headlineMedium's size, down
+  to 14sp in 1sp steps, `maxLines = 1` + `softWrap = false` + Ellipsis
+  as the last resort) so the font steps down until the name fits.
+  Import added: `androidx.compose.ui.text.TextAutoSize`.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

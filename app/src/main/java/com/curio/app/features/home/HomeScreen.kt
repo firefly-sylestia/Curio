@@ -73,6 +73,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextAutoSize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -2041,16 +2042,19 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
-                                .padding(start = 24.dp, end = 24.dp, bottom = 28.dp)
+                                .padding(start = 24.dp, end = 24.dp, bottom = 40.dp)
                         ) {
                             val avatarPath = AppPreferences.getProfileAvatarPath(context)
                             // v118 — the avatar grew 48 → 56dp and the
                             // greeting text stepped up (CURIO labelMedium,
                             // name headlineMedium, tagline bodyMedium) per
                             // the user's "a little bigger" request.
+                            // v122 — 56 → 64dp, the row sits a touch higher
+                            // (bottom 28 → 40dp), and a long name auto-shrinks
+                            // to fit instead of being cut.
                             Box(
                                 modifier = Modifier
-                                    .size(56.dp)
+                                    .size(64.dp)
                                     .shadow(2.dp, CircleShape)
                                     .clip(CircleShape)
                                     .background(heroFill),
@@ -2061,7 +2065,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 } else {
                                     Text(
                                         displayName.firstOrNull()?.uppercase().orEmpty(),
-                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
                                         color = drawerInk
                                     )
                                 }
@@ -2082,7 +2086,17 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     ),
                                     color = drawerInk,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                    // v122 — a long name steps its font down
+                                    // (headlineMedium down to 14sp, 1sp steps)
+                                    // so it fits the row; the ellipsis is the
+                                    // last resort.
+                                    autoSize = TextAutoSize.StepBased(
+                                        minFontSize = 14.sp,
+                                        maxFontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                                        stepSize = 1.sp
+                                    )
                                 )
                                 Text(
                                     "Spin it. Explore it. Capture it.",

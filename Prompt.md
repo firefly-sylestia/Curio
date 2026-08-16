@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: pet games reworked + dialogue actually spoken (`e0d3e97`)
+## Current request — COMPLETED: drawer avatar bigger + lifted + auto-shrinking name
+
+All of this session's work is done, committed and pushed.
+
+The user: "also in drawer increase the avatar size a little bit and move
+it a little above and when wi add a longer name the namame gets cut so
+do something about it with maybe compact name adjustment it gets small
+or something."
+
+### What shipped (`HomeScreen.kt` drawer hero)
+1. **Avatar 56 → 64dp** (the initial-letter fallback stepped up
+   `titleLarge` → `headlineSmall` to match the bigger circle).
+2. **Row lifted a touch** — the greeting row's bottom padding 28 → 40dp
+   (still well inside the 186dp hero; the tear stays put).
+3. **Long names no longer cut** — the "Hi name" line now uses
+   `TextAutoSize.StepBased` (max = headlineMedium's font size, min 14sp,
+   1sp steps) with `maxLines = 1`, `softWrap = false` and Ellipsis as the
+   last resort, so the font steps down until the name fits the row.
+   Import added: `androidx.compose.ui.text.TextAutoSize`.
+
+### Validation
+Brace balance depth 0; `git diff --check` clean; hero-geometry check
+(64dp avatar + 40dp lift fits the 186dp hero); no Gradle locally (env
+rule) — CI validates compile on push.
+
+## Previous request — COMPLETED: pet games reworked + dialogue actually spoken (`c448645`, + `27bb64b` cycle, + `9273c5c` bubble fix)
 
 All of this session's work is done, committed and pushed.
 
