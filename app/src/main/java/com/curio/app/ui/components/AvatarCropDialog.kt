@@ -16,7 +16,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioDialogShape
-import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlin.math.min
@@ -61,6 +59,12 @@ import kotlin.math.roundToInt
  * Apply can read the LIVE crop rect while the buttons stay in the dialog
  * bar (the first version put Cancel/Apply inside `text` and called
  * AlertDialog without confirmButton, which matched no overload).
+ *
+ * v117 — the buttons are a MATCHED pill pair (the dialog language):
+ * Cancel is a calm surface pill next to the accent Apply pill, instead of
+ * a flat TextButton next to a lone filled pill. The dialog is now opened
+ * by every photo pick BEFORE the avatar is saved — Apply saves the crop,
+ * Cancel discards the pick.
  */
 @Composable
 fun AvatarCropDialog(
@@ -226,13 +230,22 @@ fun AvatarCropDialog(
                 Text(
                     "Apply",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
                 )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) {
-                Text("Cancel")
+            Surface(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ) {
+                Text(
+                    "Cancel",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                )
             }
         }
     )

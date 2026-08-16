@@ -415,15 +415,30 @@ app/src/main/java/com/curio/app/
   never smaller than cover-fit, reset returns to the center crop); Apply
   hands back the exact source-pixel `IntRect` (`currentCropRect`) which is
   re-cropped and re-saved. No crop library — plain Compose gestures, the
-  app's dialog styling. Opens from the Edit profile dialog; composed
-  AFTER it so the crop window stacks on top; canceling the edit dialog
-  also clears the crop state. (3) **Edit profile dialog redesigned:** the
-  64dp preview grew to 84dp with an accent **crop/photo badge** on the
-  corner (tap the avatar to adjust when set, else pick); the flat stock
-  TextButtons became the app's **pill actions** (`DialogPillAction` —
-  accent Add/Change photo, Adjust, destructive Remove); the caption now
-  explains the auto square crop. `loadAvatarSource` falls back to the
-  current square avatar for pre-v116 avatars (no source was kept then).
+  app's dialog styling. Composed AFTER the edit dialog so its window
+  stacks on top; canceling the edit dialog also clears the crop state.
+  (3) **Edit profile dialog redesigned:** the 64dp preview grew to 84dp
+  with an accent **crop/photo badge** on the corner (tap the avatar to
+  adjust when set, else pick); the flat stock TextButtons became the
+  app's **pill actions** (`DialogPillAction` — accent Add/Change photo,
+  Adjust, destructive Remove); the caption now explains the auto square
+  crop. `loadAvatarSource` falls back to the current square avatar for
+  pre-v116 avatars (no source was kept then).
+- **v117 — crop-before-apply + decluttered Edit profile dialog.** (1)
+  **Picking a photo now opens the crop editor FIRST** — the pick no
+  longer applies the center crop immediately: `avatarPicker` hands the
+  decoded source to `cropSource` and only Apply saves
+  (`saveAvatar(src, rect)`); Cancel discards the pick. The dead
+  `openCropEditor` / `loadAvatarSource` re-crop path is gone. (2) **Edit
+  dialog declutter:** the **Adjust pill, the crop/photo badge and
+  tap-avatar-to-crop are all REMOVED** (the avatar is a static 84dp
+  preview) — Change photo is the only way back into the crop editor;
+  captions updated ("Square photo — Change photo to re-crop." / "Pick a
+  photo — you can crop it to a square before saving."). (3) **Crop
+  dialog buttons are a MATCHED pill pair** — Cancel is a calm surface
+  pill next to the accent Apply pill (was a flat TextButton next to a
+  lone filled pill); unused `TextButton` / `curioDialogActionButtonColors`
+  imports removed.
   (4) **Dark dialogs match the settings option cards**: the dark branch of
   `curioDialogContainerColor` (CurioTheme.kt) now uses the SAME fill as
   `CurioSettingsCard` — `lerp(surfaceContainerLow, tintLift, 0.30f)` with

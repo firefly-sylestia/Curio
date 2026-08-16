@@ -54,12 +54,35 @@ profile, crop, two-step, …) reads as the same near-black option-card
 glass as the Settings cards. Light mode untouched. AGENTS.md v116 bullet
 + changelog updated.
 
+### Follow-up — Edit profile dialog declutter + crop-before-apply (`<<hash>>`)
+User: "the proflie editing dialog is bad the adjust button shoul not be
+there, tapping the pfp does thee same neither the crop icoon. and when i
+add the photo it should show the crop dialog before applying and its
+buttons are bad".
+
+1. **Crop before apply:** the pick no longer saves immediately —
+   `avatarPicker` decodes the source into `cropSource` (the crop dialog
+   opens on top of the edit dialog) and only Apply saves
+   (`saveAvatar(src, rect)`); Cancel discards the pick. The now-dead
+   `openCropEditor` + `loadAvatarSource` re-crop path (and its
+   `onCropAvatar` param) were deleted.
+2. **Dialog declutter:** the **Adjust pill, the avatar corner
+   crop/photo badge and tap-avatar-to-crop are all gone** — the 84dp
+   avatar is a static preview, and the pill row is just accent
+   Change/Add photo + destructive Remove. Captions updated ("Square
+   photo — Change photo to re-crop." / "Pick a photo — you can crop it
+   to a square before saving.").
+3. **Crop dialog buttons:** Cancel is now a calm surface pill matched
+   to the accent Apply pill (was a flat TextButton next to a lone
+   filled pill) — the app's pill dialog language. Unused
+   `TextButton` / `curioDialogActionButtonColors` imports removed from
+   AvatarCropDialog.kt.
+
 ### Validation
-Brace balance (both files depth 0); unused-import sweep (removed
-`HorizontalDivider`; `getValue`/`setValue` delegate false-positives
-kept); fixed a param-shadowing bug in `scaleToMax` (`max` → `maxSide`);
-`git diff --check` clean; no Gradle locally (env rule) — CI validates
-compile on push. Pushed to `main`.
+`git diff --check` clean; grep sweep confirms no leftover
+`onCropAvatar` / `openCropEditor` / `loadAvatarSource` / badge refs; no
+Gradle locally (env rule) — CI validates compile on push. Pushed to
+`main`.
 
 ## Previous request — COMPLETED: detail-screen tear corners, quick-fact box, "…" fold toggle
 

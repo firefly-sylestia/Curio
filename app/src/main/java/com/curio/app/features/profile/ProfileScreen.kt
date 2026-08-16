@@ -255,7 +255,10 @@ fun ProfileScreen(navController: NavController) {
         uri ?: return@rememberLauncherForActivityResult
         scope.launch {
             val src = withContext(Dispatchers.IO) { decodeAvatarSource(context, uri) }
-            if (src != null) saveAvatar(src, null) // null → auto center crop
+            // v117 — the pick does NOT apply immediately: it opens the crop
+            // editor first, so the user frames the square before anything
+            // is saved (Apply saves; canceling discards the pick).
+            if (src != null) cropSource = src
         }
     }
     fun removeAvatar() {
@@ -266,15 +269,6 @@ fun ProfileScreen(navController: NavController) {
         avatarPath = ""
         cropSource = null
         AppPreferences.setProfileAvatarPath(context, "")
-    }
-    // Opens the crop editor with the saved source (falling back to the
-    // current square avatar) so the user can re-frame the photo.
-    fun openCropEditor() {
-        if (cropSource != null) return
-        scope.launch {
-            val src = withContext(Dispatchers.IO) { loadAvatarSource(context) }
-            if (src != null) cropSource = src
-        }
     }
     var crashCount by remember { mutableIntStateOf(0) }
     var totalSaved by remember { mutableIntStateOf(0) }
@@ -356,8 +350,6 @@ fun ProfileScreen(navController: NavController) {
         onNameInputChange = { nameInput = it },
         onPickAvatar = { avatarPicker.launch("image/*") },
         onRemoveAvatar = { removeAvatar() },
-        // v115 — the crop editor opens from the edit dialog.
-        onCropAvatar = { openCropEditor() },
         cropSource = cropSource,
         onCropApply = { rect ->
             cropSource?.let { src -> saveAvatar(src, rect) }
@@ -648,8 +640,6 @@ private fun ProfileDialogs(
     onNameInputChange: (String) -> Unit,
     onPickAvatar: () -> Unit,
     onRemoveAvatar: () -> Unit,
-    // v115 — the manual crop editor opens from the edit dialog.
-    onCropAvatar: () -> Unit,
     // The crop editor source bitmap — non-null while cropping (rendered
     // ABOVE the edit dialog so the crop window is on top).
     cropSource: Bitmap?,
@@ -671,10 +661,11 @@ private fun ProfileDialogs(
             title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // v115 — a BIGGER avatar with a crop badge, plus pill
-                    // actions. The photo is auto-cropped to a square from
-                    // the middle on pick; the badge (or tapping the avatar)
-                    // opens the manual crop editor to re-frame it.
+                    // v117 — a clean preview with NO badge and no tap-to-
+                    // crop: every pick opens the crop editor BEFORE anything
+                    // is saved, so the avatar is always framed by the user
+                    // (the old Adjust pill, tap-avatar and crop badge are
+                    // gone — Change photo is the only way in).
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -683,10 +674,7 @@ private fun ProfileDialogs(
                             modifier = Modifier
                                 .size(84.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                .clickable {
-                                    if (avatarPath.isNotBlank()) onCropAvatar() else onPickAvatar()
-                                },
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                             contentAlignment = Alignment.Center
                         ) {
                             if (avatarPath.isNotBlank()) {
@@ -698,22 +686,6 @@ private fun ProfileDialogs(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            // Crop/photo badge — accent circle at the corner.
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(curioDialogActionColor()),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CurioIcon(
-                                    name = if (avatarPath.isNotBlank()) CurioIcons.Crop else CurioIcons.Add,
-                                    contentDescription = if (avatarPath.isNotBlank()) "Adjust photo" else "Add photo",
-                                    tint = Color.White,
-                                    size = 16.dp
-                                )
-                            }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -721,8 +693,8 @@ private fun ProfileDialogs(
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                             )
                             Text(
-                                if (avatarPath.isNotBlank()) "Square-cropped from the middle — tap to adjust."
-                                else "Pick a photo — we'll crop it to a square for you.",
+                                if (avatarPath.isNotBlank()) "Square photo — Change photo to re-crop."
+                                else "Pick a photo — you can crop it to a square before saving.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -738,7 +710,6 @@ private fun ProfileDialogs(
                             onClick = onPickAvatar
                         )
                         if (avatarPath.isNotBlank()) {
-                            DialogPillAction(label = "Adjust", onClick = onCropAvatar)
                             DialogPillAction(label = "Remove", destructive = true, onClick = onRemoveAvatar)
                         }
                     }
@@ -1690,18 +1661,4 @@ private fun scaleToMax(bitmap: Bitmap, maxSide: Int): Bitmap {
         (bitmap.height * scale).roundToInt(),
         true
     )
-}
-
-/** The editable source for the crop editor — the saved original photo;
- *  falls back to the current square avatar for pre-v115 avatars (no source
- *  was kept then). */
-private fun loadAvatarSource(context: Context): Bitmap? {
-    val source = context.filesDir.listFiles()
-        ?.filter { it.name.startsWith("profile_avatar_src_") }
-        ?.maxByOrNull { it.lastModified() }
-    val file = source ?: runCatching {
-        AppPreferences.getProfileAvatarPath(context).takeIf { it.isNotBlank() }?.let { File(it) }
-    }.getOrNull()
-    val bmp = file?.takeIf { it.exists() }?.let { BitmapFactory.decodeFile(it.absolutePath) }
-    return if (bmp != null && bmp.width > 0 && bmp.height > 0) bmp else null
 }
