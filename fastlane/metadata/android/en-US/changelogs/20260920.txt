@@ -8,7 +8,8 @@ ADD
 - Category picker: Original/New tabs and quick-mix presets ride the tear hero; the filter sheet search matches the Cabinet hero search.
 - Music service icons: the explore "Watch in" / "Listen in" pill and the Music service picker show the real brand logos (Apple Music, Spotify, YouTube, YouTube Music).
 - Spin: weighted shuffle deck (tiered picks, liked topics 2×), peek cards, 3D shuffle, category mixes and quick presets.
-- 30+ category lanes and 16,000+ hand-curated topics with quick facts, tags and explore actions.
+- 30+ category lanes and 17,000+ hand-curated topics with quick facts, tags and explore actions.
+- Songs lane expanded to 1,000 real songs from the 1960s to today — half of them 2000s and newer, each with a real backstory.
 - Topic Reveal: hero ticket, quick fact, tag chips, pin, Like/Dislike and reading/watching progress.
 - Explore sessions: timed real-world research flow with your search engine, floating timer, reminders and a shared session note.
 - Save your take: Voice, Review, Journal + quotes, Mood board and Field notes; multiple takes per topic, custom tags, moods, note-paper styling, voice notes and image attachments.
