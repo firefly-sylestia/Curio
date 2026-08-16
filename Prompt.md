@@ -95,6 +95,22 @@ A 5-part fix list (all visual, dark-mode heavy):
    keep "Watch in". The `MusicServiceDialog` row dropped its
    `RadioButton` (selection reads via the solid v27q fill); the dialog
    subtitle was reworded neutrally.
+10. **(follow-up, mood board)** Inline small mood board: two glitch fixes.
+    (a) **Frozen fit** — the v69 live re-fit recomputed the board scale
+    from the current tile bounding box on every commit, so dragging a
+    photo inward (or shrinking it) made the whole board zoom/resize
+    ("the size changes when I move / expand / shrink photos").
+    `MoodBoardCanvas` now freezes a grow-only `sessionExtentX/Y` at the
+    first content's bounding box (`LaunchedEffect(tiles.size)`, reset to
+    0 when the board empties); every commit clamps tiles inside it, so
+    the scale never changes mid-session. (b) **Quote-card width cap** —
+    the v60 display cap only bound never-resized cards; a card the user
+    RESIZED kept full scale and ballooned past the small board (and
+    couldn't shrink small enough). `MoodBoardFloatingCards` gained
+    `rawSpace: Boolean = false`; fit-scaled views (inline editor, saved
+    card, expanded dialog, export) now cap ALL cards at ≤40% of the
+    canvas, while the full-screen editor passes `rawSpace = true` for
+    exact raw widths. Resize-grip floor lowered 60 → 48 render px.
 
 ### Validation
 `git diff --check` clean; brace counts balanced in all changed files; no

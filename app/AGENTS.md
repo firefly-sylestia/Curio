@@ -469,8 +469,34 @@ app/src/main/java/com/curio/app/
   Dialog` row no longer draws a `RadioButton` — selection reads through
   the row's solid v27q fill alone (the other picker dialogs in the file
   keep theirs); the dialog subtitle was reworded to stay neutral
-  ("Which streaming service opens albums, artists and songs from the
-  explore dialog").
+  (  "Which streaming service opens albums, artists and songs from the
+  explore dialog"). (10) **Inline mood board: STABLE fit + quote cards
+  bounded.** Two glitch fixes in the inline (small) editor. (a) **The
+  board fit is FROZEN once content exists** (`MoodBoardCanvas` in
+  GalleryWallFormat.kt): the v69 live re-fit recomputed `boardMaxX/Y`
+  (and thus `boardScale`/`boardOffsetX/Y`) from the CURRENT tile
+  bounding box on EVERY commit — drag a photo inward and the extent
+  shrank, the board zoomed in and every tile + floating quote card
+  visibly jumped ("the size changes when I move / expand / shrink
+  photos" glitch). A `sessionExtentX/Y` (`remember`ed floats) now
+  freezes at the first content's bounding box via a grow-only
+  `LaunchedEffect(tiles.size)`: every commit (drag, pinch, grow, add)
+  clamps tiles INSIDE it, so no gesture can exceed it; the freeze
+  resets to 0 when the board empties so a fresh board re-freezes at its
+  own size. The saved card re-fits to the final saved layouts, which all
+  live inside the frozen extent, so edit and detail still agree. (b)
+  **Floating quote cards are width-capped in every fit-scaled view:**
+  the v60 display cap applied only to never-resized cards — a card the
+  user RESIZED kept the full scale and ballooned past the small board
+  when the fit zoomed in (scale > 1), and couldn't shrink small enough
+  ("the quote card is too big"). `MoodBoardFloatingCards` gained a
+  `rawSpace: Boolean = false` param; when false (inline editor, saved
+  card, expanded dialog, export) `displayScale` is now capped for ALL
+  cards at `canvasWPx * 0.40 / cardW` (≤40% of the canvas — was 44%
+  and only for slot cards); the full-screen editor passes `rawSpace =
+  true` and keeps exact raw widths for precise placement. The resize
+  grip's absolute floor dropped 60 → 48 render px so a capped card can
+  shrink to a genuinely small note.
 - **v107 — Apple Music "Watch in" deep links fixed for songs.**
   `resolveAppleMusicItemUrl` (ExploreSearch.kt) had two bugs that made
   SONG topics fail while artists and some albums worked (verified live

@@ -694,6 +694,11 @@ fun MoodBoardFloatingCards(
     boardScale: Float = 1f,
     offsetX: Float = 0f,
     offsetY: Float = 0f,
+    // v108 — true for raw 1:1 spaces (the full-screen editor): cards render
+    // at their exact raw width so precise placement works. All fit-scaled
+    // views (inline editor, saved card, expanded dialog, export) leave it
+    // false so the display-width cap below can bind huge resized cards.
+    rawSpace: Boolean = false,
     onEditCard: ((Int) -> Unit)? = null,
     onMoveCard: ((index: Int, x: Float, y: Float) -> Unit)? = null,
     // v42 — commits a resized card's new width (RAW board px — the caller
@@ -724,15 +729,18 @@ fun MoodBoardFloatingCards(
         // v42 — a resized card (saved.w >= 0) keeps its custom WIDTH; cards
         // never resized use the deterministic slot width as before.
         val cardW = if (saved.w >= 0f) saved.w else slot.w
-        // v60 — cap the fallback card's DISPLAY size on a scaled-up board.
+        // v60/v108 — cap EVERY card's DISPLAY size on a scaled-up board.
         // The slot width is ~41% of the raw board; when the collage is
         // smaller than the canvas it zooms to fill (scale > 1), and the raw
-        // slot width multiplies by that zoom — a quote card could balloon
-        // to a huge slab in the small inline editor. Resized cards (saved.w
-        // set by the user's grip/pinch) keep the full scale — only the
-        // deterministic fallback cards are clamped to ~44% of the canvas.
-        val displayScale = if (saved.w >= 0f) scale
-            else scale.coerceAtMost((canvasWPx * 0.44f) / slot.w.coerceAtLeast(1f))
+        // card width multiplies by that zoom — a quote card balloons to a
+        // huge slab in the small inline editor. v60 capped only the
+        // deterministic-slot cards; a card the user RESIZED kept the full
+        // scale and still ballooned ("the quote card is too big"): bind the
+        // displayed card to ≤ 40% of the canvas in any fitted view. The
+        // raw-space full-screen editor (rawSpace) keeps the exact raw width
+        // for precise placement.
+        val displayScale = if (rawSpace) scale
+            else scale.coerceAtMost((canvasWPx * 0.40f) / cardW.coerceAtLeast(1f))
         MoodBoardFloatingCard(
             text = quote,
             style = styles.getOrElse(i) { NotePaperStyle.RULED },
@@ -810,11 +818,13 @@ private fun MoodBoardFloatingCard(
 
     val renderX = (x + dragDelta.x).coerceIn(0f, (boardW - w).coerceAtLeast(0f))
     val renderY = (y + dragDelta.y).coerceIn(0f, (boardH - currentCardH).coerceAtLeast(0f))
-    // v42 — width clamps: never smaller than half the slot (taps still hit
-    // it), never larger than the board itself. Captured via
-    // rememberUpdatedState so the never-restarting grip gesture reads the
-    // LATEST clamps (a dragged/resized card moves them).
-    val minW = (w * 0.5f).coerceAtLeast(60f)
+    // v42 — width clamps: never smaller than half the current width (taps
+    // still hit it; v108 lowered the absolute floor so a capped card can
+    // shrink down to a genuinely small note), never larger than the board
+    // itself. Captured via rememberUpdatedState so the never-restarting
+    // grip gesture reads the LATEST clamps (a dragged/resized card moves
+    // them).
+    val minW = (w * 0.5f).coerceAtLeast(48f)
     val maxW = (boardW - x).coerceAtLeast(minW)
     val currentMinW by rememberUpdatedState(minW)
     val currentMaxW by rememberUpdatedState(maxW)

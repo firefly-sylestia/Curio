@@ -558,16 +558,44 @@ private fun MoodBoardCanvas(
     // past the frozen extent — the saved view then re-fitted and the board
     // "resized" between edit and detail (a fresh board even showed 1:1
     // while the saved card zoomed to the content).
+    //
+    // v108 — FREEZE the fit once the board has content. The live re-fit
+    // above made the whole board (tiles AND the floating quote cards on it)
+    // visibly resize on every commit: drag a photo inward and the extent
+    // shrank, the board zoomed in and every tile jumped — the "the size
+    // changes when I move / expand / shrink photos" glitch. The session
+    // extent freezes at the first content's bounding box and NEVER shrinks
+    // for the rest of the session: every commit (drag, pinch, grow, add)
+    // clamps tiles INSIDE it, so no gesture can exceed it — the scale only
+    // changes when the board empties (reset to 0, so the next add re-freezes
+    // at its own size). The saved card re-fits to the final saved layouts,
+    // which all live inside this frozen extent, so edit and detail agree.
     val liveExtentX = tiles.maxOfOrNull {
         finiteOr(it.offsetXPx) + positiveFiniteOr(it.widthPx, 0f)
     }?.takeIf { it.isFinite() } ?: 0f
     val liveExtentY = tiles.maxOfOrNull {
         finiteOr(it.offsetYPx) + positiveFiniteOr(it.heightPx, 0f)
     }?.takeIf { it.isFinite() } ?: 0f
+    var sessionExtentX by remember { mutableFloatStateOf(0f) }
+    var sessionExtentY by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(tiles.size) {
+        if (tiles.isEmpty()) {
+            // Board emptied — clear the freeze so the next add re-freezes
+            // at its own size instead of inheriting the old board's zoom.
+            sessionExtentX = 0f
+            sessionExtentY = 0f
+        } else {
+            // Grow-only: adopt the current content extent. (Adds can't
+            // exceed it — placement clamps — so this fires effectively
+            // once, at the board's first content.)
+            if (liveExtentX > sessionExtentX) sessionExtentX = liveExtentX
+            if (liveExtentY > sessionExtentY) sessionExtentY = liveExtentY
+        }
+    }
     val boardMaxX = if (fullScreen || tiles.isEmpty()) canvasWPx
-        else positiveFiniteOr(liveExtentX, canvasWPx)
+        else positiveFiniteOr(sessionExtentX, positiveFiniteOr(liveExtentX, canvasWPx))
     val boardMaxY = if (fullScreen || tiles.isEmpty()) canvasHPx
-        else positiveFiniteOr(liveExtentY, canvasHPx)
+        else positiveFiniteOr(sessionExtentY, positiveFiniteOr(liveExtentY, canvasHPx))
     val (boardScale, boardOffsetX, boardOffsetY) = if (fullScreen || tiles.isEmpty()) {
         Triple(1f, 0f, 0f)
     } else {
@@ -885,6 +913,10 @@ private fun MoodBoardCanvas(
                         boardScale = boardScale,
                         offsetX = boardOffsetX,
                         offsetY = boardOffsetY,
+                        // v108 — the full-screen editor is raw 1:1 space:
+                        // no display-width cap, so resized cards keep their
+                        // exact raw width for precise placement.
+                        rawSpace = fullScreen,
                         onEditCard = onEditQuote,
                         // v57 — the full-screen board routes moves to its own
                         // position list; the inline board uses the shared one.
