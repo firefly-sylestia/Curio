@@ -551,7 +551,16 @@ fun SaveCaptureScreen(
                             canSave = true
                         })
                     sectionInitData != null ->
-                        add(CaptureSectionState(0, sectionEntryFormat ?: defaultFormat).apply {
+                        // v113 — the resumed section wears the DRAFT's OWN
+                        // format, not the page default: the old code seeded
+                        // the draft's data into a `defaultFormat` section, so
+                        // resuming a draft written on a non-default take
+                        // (e.g. a Journal draft on a SoundBite category)
+                        // opened the default take's body with the wrong data
+                        // and the draft never "restored". Edit mode keeps
+                        // [sectionEntryFormat] (the saved entry's format);
+                        // new-capture resumes fall back to `formatOf(data)`.
+                        add(CaptureSectionState(0, sectionEntryFormat ?: formatOf(sectionInitData)).apply {
                             seed = sectionInitData
                             data = sectionInitData
                             mood = sectionInitData.moodOf()

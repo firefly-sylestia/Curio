@@ -2040,28 +2040,49 @@ private fun FilterSheet(
 
             Spacer(Modifier.height(14.dp))
 
-            // ── Apply button ──────────────────────────────────────────
-            Button(
+            // ── Apply / Show all — a full-width pill in the SAME family as
+            //    the filter chips (v113): the old Material Button read flat
+            //    next to the raised chip pills. Same construction as
+            //    [CompactChip]'s selected state — accent fill, 4dp lift,
+            //    One UI glass edge + inner glow, full pill shape.
+            val applyShape = RoundedCornerShape(50)
+            Surface(
                 onClick = { onApply(draftFilters, draftSubtypes) },
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = cat.themedButtonFill(),
-                    contentColor = cat.themedButtonInk()
-                ),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                shape = applyShape,
+                // v113 — the SOLID accent fill (the chip's selected state);
+                // the accent's readable ink keeps the check + label crisp.
+                color = cat.themedButtonFill(),
+                shadowElevation = 4.dp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
+                    .curioDarkGlow(4.dp, applyShape)
+                    .curioGlassEdge(applyShape)
+                    .curioInnerGlow(applyShape, cat.themedAccent(), strength = 0.12f)
+                    .clip(applyShape)
             ) {
-                CurioIcon(CurioIcons.Check, null, tint = cat.themedButtonInk(), size = 20.dp)
-                Spacer(Modifier.width(7.dp))
-                Text(
-                    text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.ExtraBold
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CurioIcon(
+                        CurioIcons.Check, null,
+                        tint = cat.themedButtonInk(),
+                        size = 19.dp
                     )
-                )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = cat.themedButtonInk()
+                    )
+                }
             }
         }
         }

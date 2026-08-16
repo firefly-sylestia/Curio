@@ -20,6 +20,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Resume draft: a draft written on a non-default take (e.g. a Journal take on a Voice category) now restores onto that take instead of the page's default one.
+- Filter sheet: the Apply / Show all button is now a raised pill that matches the filter chips instead of a flat button.
 - Launcher icon: the cosmic card art now comes straight from the designer's PNG and is sized so the whole card fits the launcher shape — the frame, stars and waves are no longer cut off.
 - Detail: the explore-session duration no longer repeats twice — it lives once in the Date · Mood · Session · Type card, and the old pill above it is gone.
 - Filter page: the Type · Genres · Era · Origin · Franchise group icons now show in light mode — inactive group pills use a deep ink instead of the pale pastel that vanished on the tinted fill.

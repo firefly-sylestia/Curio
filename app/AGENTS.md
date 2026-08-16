@@ -401,6 +401,23 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v113 — resume-draft take fix + filter-sheet Apply pill family.** (1)
+  **Resume draft restores the draft's OWN take:** `SaveCaptureScreen`'s
+  single-section init seeded a resumed draft into a `defaultFormat` section
+  (`sectionEntryFormat ?: defaultFormat`), so resuming a draft written on a
+  non-default take (e.g. a Journal draft on a SoundBite-default category)
+  opened the default take's body with the wrong data and the draft looked
+  lost. The generic branch now uses `sectionEntryFormat ?:
+  formatOf(sectionInitData)` — edit mode keeps the saved entry's format,
+  new-capture resumes use the draft data's own format (the existing
+  Portfolio/OpenNotebook branches were already format-correct). (2)
+  **FilterSheet "Show all / Apply" pill matches the chips:** the bottom CTA
+  was a flat Material `Button` next to the raised chip pills; it's now the
+  same family as `CompactChip`'s selected state — `Surface(onClick)` with
+  `RoundedCornerShape(50)`, solid `themedButtonFill()` accent, 4dp
+  elevation + `curioDarkGlow`/`curioGlassEdge`/`curioInnerGlow(accent
+  0.12)` + clip, and the chip's 18sp ExtraBold label / 19dp glyph / 20·13
+  padding.
 - **v113 — detail pill de-dupe, filter-page icons, icon glyph clipping,
   pet-designer hero mid-screen float.** (1) **Detail hero: the explore-
   session duration no longer duplicates** — the "explored 12m" pill above
