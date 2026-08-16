@@ -133,13 +133,15 @@ fallback clamped to the very bottom (over Next); an empty Cabinet was
 worse (no landmark at all → the bubble floated over the pet wherever
 the reveal step had parked it, near the bottom). Fixes in
 `CurioFloatingPet.kt`: new `TOUR_DOCK_BAND` (96dp + nav inset); the
-bubble's top is capped above it, landmarks that reach the screen edge
-pin the bubble to the TOP of the screen, the pet's tour-walk target is
-floored above the band, a landmark-less stop parks the pet top-center,
-and the no-landmark bubble fallback is clamped on-screen/above the
-dock. `CabinetScreen.kt` now registers the `grid` landmark on the
-empty branch too, so the tour always has an anchor. Committed and
-pushed together with the port.
+bubble's top is capped above it, landmarks that span the screen (the
+Cabinet grid) anchor the bubble just above the landmark's CENTER
+(upper-middle — follow-up fix: the original pin-to-top floated over
+the hero, "too above lol"), the pet's tour-walk target is floored
+above the band, a landmark-less stop parks the pet top-center, and
+the no-landmark bubble fallback is clamped on-screen/above the dock.
+`CabinetScreen.kt` now registers the `grid` landmark on the empty
+branch too, so the tour always has an anchor. Committed and pushed
+together with the port.
 
 ## Previous request — COMPLETED: Home avatar pill + drawer sections + Support update link (`a3a9f94`)
 

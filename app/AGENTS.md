@@ -495,14 +495,15 @@ app/src/main/java/com/curio/app/
   was worse: no landmark at all, so the bubble floated over the pet
   wherever the previous step had parked it). Fixes in
   `CurioFloatingPet.kt`: the tour bubble is capped above a new
-  `TOUR_DOCK_BAND` (96dp + nav inset); landmarks reaching the screen
-  edge pin the bubble to the TOP of the screen instead; the pet's tour
-  walk target is floored above the same band so it never stands on the
-  dock; a landmark-less stop parks the guide top-center; and the
-  no-landmark bubble fallback is clamped on-screen/above the dock. And
-  in `CabinetScreen.kt` the EMPTY state now registers the same `grid`
-  landmark the filled grid does, so the tour always has an anchor on
-  the Cabinet stop.
+  `TOUR_DOCK_BAND` (96dp + nav inset); landmarks that span the screen
+  (the Cabinet grid) anchor the bubble just above the landmark's CENTER
+  (upper-middle — v120 fix, the original pin-to-top floated over the
+  hero); the pet's tour walk target is floored above the same band so
+  it never stands on the dock; a landmark-less stop parks the guide
+  top-center; and the no-landmark bubble fallback is clamped
+  on-screen/above the dock. And in `CabinetScreen.kt` the EMPTY state
+  now registers the same `grid` landmark the filled grid does, so the
+  tour always has an anchor on the Cabinet stop.
 - **v120 — pet games reworked + the dialogue actually gets spoken.**
   (1) CHATTER: the pet now says a passive mood line (`CurioPet.lineFor`)
   every ~20-40s of idle — the mood pools are heard, not just the event

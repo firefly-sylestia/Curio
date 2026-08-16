@@ -2121,9 +2121,12 @@ fun CurioFloatingPet(
             val y = when {
                 aboveY >= marginPx && aboveY <= maxBubbleTop -> aboveY
                 belowY <= maxBubbleTop -> belowY
-                // Landmark reaches the screen edge — pin the bubble to the
-                // top instead of hovering over the dock.
-                localBounds.top <= marginPx -> marginPx
+                // A landmark that spans the screen (e.g. the Cabinet grid)
+                // can't fit a bubble above or below it — anchor it just
+                // above the landmark's CENTER instead of hugging the screen
+                // edge or hovering over the dock.
+                localBounds.top <= marginPx -> (localBounds.center.y - tourBubbleHeightPx - tourBubbleGapPx)
+                    .coerceIn(marginPx, maxBubbleTop)
                 else -> maxBubbleTop
             }
             IntOffset(x.roundToInt(), y.roundToInt())
