@@ -1,8 +1,35 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: cosmic icon from the designer PNG + detail/filter/icon/pet-hero polish
+## Current request — COMPLETED: draft recovery keeps its take + filter Apply pill matches chips
 
-All of this session's work is done, committed and pushed (`258f533`).
+All of this session's work is done, committed and pushed (`e297f91`).
+
+### 1. Draft recovery restored the WRONG take (SaveCaptureScreen)
+When "Express yourself" opened with a default take (sound bite, etc.), the
+user switched takes, typed, discarded, then tapped "Recover your draft" —
+the draft was recreated with `defaultFormat` instead of the take the draft
+was actually written in, so it never restored the other take's draft.
+- **Fix:** the resume path now uses the draft's own format
+  (`draft.format ?: defaultFormat`), so recovery restores the exact take
+  the draft belonged to. Verified `CaptureData.format` is the source of
+  truth for the take.
+
+### 2. Filter sheet "Show all" pill didn't match the filter chips (SpinScreen)
+The bottom "Show all" button used a stock Material3 `Button` while the
+filter chips use the custom `CurioCategoryChip` treatment.
+- **Fix:** restyled the "Show all" pill to match the chip look —
+  rounded-pill shape, accent-tinted fill with deep same-hue ink, the
+  chip's tap/press affordances — so the sheet reads as one family.
+  Existing imports (Button/ButtonDefaults/PaddingValues) are still used
+  elsewhere in the file, so nothing was orphaned.
+
+### Validation
+`git diff` reviewed; no Gradle locally (env rule) — CI validates on push.
+Pushed to `main`.
+
+## Previous session — COMPLETED: cosmic icon from the designer PNG + detail/filter/icon/pet-hero polish
+
+All of that session's work is done, committed and pushed (`258f533`).
 
 ### 1. Launcher icon — reapplied from the designer's PNG (v113)
 The user rejected the earlier hand-converted VECTOR icon ("the design is
