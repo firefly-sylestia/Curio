@@ -503,6 +503,34 @@ app/src/main/java/com/curio/app/
   in `CabinetScreen.kt` the EMPTY state now registers the same `grid`
   landmark the filled grid does, so the tour always has an anchor on
   the Cabinet stop.
+- **v120 — pet games reworked + the dialogue actually gets spoken.**
+  (1) CHATTER: the pet now says a passive mood line (`CurioPet.lineFor`)
+  every ~20-40s of idle — the mood pools are heard, not just the event
+  lines. (2) GAMES RUN TO COMPLETION: the three games became suspend
+  functions (`playHideSeek`/`playChameleon`/`playStarGame`) dispatched
+  at the top of the wander loop; `gameActive` gates the mood loop,
+  typing reaction, idle/time custom actions, auto-nap and the chatter
+  so NOTHING overrides a round (the old probabilistic inline game
+  blocks + per-game cooldown vars are gone). (3) GAME MODE: long-press
+  no longer sends the pet home — it arms game mode (pet stays put,
+  autonomy paused); the next tap OR drag starts ONE random game, then
+  game mode ends. Drag the pet onto its flower bed to send it home
+  (unchanged). (4) HIDE-AND-SEEK: the pet POOFS out and teleports to a
+  random corner, just a sliver visible; tap the sliver to win; miss it
+  and after up to 5s it poofs back with a sad face (`EyeStyle.CLOSED` +
+  `MouthStyle.O` via `reactionFace`) + `missedMeLine()`. Chameleon's
+  find window is also 5s, and both teleports burst a new `PoofOverlay`
+  (puffs at the RECORDED position). (5) STAR-CATCH: a 10s round of
+  stars falling slowly from above (`FallingStar` list, spawned every
+  ~500-850ms) — the pet NEVER chases on its own; tap a star and it
+  dashes over to catch it, or drag the pet onto a falling star; the
+  score is spoken in a bubble at the end. (6) IDLE ROAM: the wander
+  beat dropped from 2.8-7s to 2-3.2s so an untouched pet roams again
+  quickly. (7) AUTO-FLOW: a scheduler effect requests a RANDOM game at
+  random 20-50s intervals (scaled by the game-frequency setting),
+  honoring `GAME_MIN_SPACING_MS`. Dead state/constants removed
+  (`sparkTarget`/`sparkKey`/`sparkWon`/`lastHideSeekAt`/`lastChameleonAt`/
+  `lastSparkAt` + the three per-game cooldowns).
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

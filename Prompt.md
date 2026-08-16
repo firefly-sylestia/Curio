@@ -1,6 +1,68 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: pet dialogue fully ported to the canonical dialog doc (`6f7c9cb`)
+## Current request — COMPLETED: pet games reworked + dialogue actually spoken (`e0d3e97`)
+
+All of this session's work is done, committed and pushed.
+
+The user: "Also according to the dialogs many things are not like i havent
+seen it speak the dialogs, and also when it plays a game why it gets
+overide with another idle ation. let it complete the game, like if its
+hiding let it hide and stays in place for upto 5 seconds and then it
+poofs back ith its dialog, same with hide and seek and the star catch.
+and instead of putting it back into home when i tap and hold it make it
+enter game mode, and it stays on game mode and finishes after one game
+is played. and only touch interactions ill happen but it will remeber to
+play the game, and the star game make it play for 5 secs with contant
+stars popping u randomly and it doesnt go up to the star on itself make
+the star fall slowly from above and when user taps the star then the pet
+goes and cathes it or drags the pet to catch it and when its done sho
+the score. and how about let it run for 10 sec. and when user doesnt tap
+it for 2 or 3 sec then let it roam around idle and on its on and let the
+automatic game flow on its own too with random time and random games,"
+
+Clarified via ask_user: game mode → "Pet waits for your touch first"
+(long-press arms it; the next tap or drag starts ONE game); star score →
+speech bubble after the round; hide-and-seek → the pet poofs and goes to
+a corner with just a little visible, tap to find, sad face +
+disappointment on fail, poof animations both ways; chatter → Chatty
+(every ~20-40s idle).
+
+### What shipped (all in `CurioFloatingPet.kt`)
+1. **Chatter** — a new effect speaks `CurioPet.lineFor(mood, …)` every
+   ~20-40s idle (EXCITED/PROUD excluded — their events own them).
+2. **Games complete** — the three games became suspend fns
+   (`playHideSeek` / `playChameleon` / `playStarGame`) dispatched at the
+   top of the wander loop; `gameActive` gates the mood loop, typing
+   reaction, idle/time custom actions, auto-nap and chatter, so nothing
+   can override a round. The old probabilistic inline game blocks + the
+   per-game cooldown state/constants were deleted.
+3. **Game mode** — long-press no longer sends the pet home (drag it onto
+   its flower bed instead): it arms game mode (pet stays put, autonomy
+   paused), the next tap or drag queues `gameRequest`, ONE random game
+   plays, then game mode ends.
+4. **Hide-and-seek** — poof out where it stands, teleport to a random
+   corner (a tappable sliver), up to 5s to be found; found = victory;
+   missed = poof back + sad face (`PetFace(EyeStyle.CLOSED,
+   MouthStyle.O)` via `reactionFace`) + `missedMeLine()`. Chameleon's
+   find window also 5s; both teleports burst the new `PoofOverlay` at
+   the recorded position.
+5. **Star catch** — a 10s round (`starRound`/`stars`/`starScore`/
+   `starCatchTarget`): stars spawn every ~500-850ms near the top and
+   fall slowly; the pet never chases on its own — tap a star and it
+   dashes over to catch it, or drag the pet onto a falling star; the
+   score is spoken in a bubble at the end.
+6. **Idle roam + auto flow** — wander beat shortened 2.8-7s → 2-3.2s, and
+   a scheduler effect requests a RANDOM game at random 20-50s intervals
+   (scaled by the game-frequency setting, honoring GAME_MIN_SPACING_MS).
+
+### Validation
+Brace balance depth 0; dead-ref sweep clean (sparkTarget/sparkWon/
+sparkKey/lastHideSeekAt/lastChameleonAt/lastSparkAt + the three per-game
+cooldown constants removed); `git diff --check` clean; `.entries`
+confirmed against Kotlin 2.3.21; no Gradle locally (env rule) — CI
+validates compile on push.
+
+## Previous request — COMPLETED: pet dialogue fully ported to the canonical dialog doc (`6f7c9cb`)
 
 All of this session's work is done, committed and pushed.
 
