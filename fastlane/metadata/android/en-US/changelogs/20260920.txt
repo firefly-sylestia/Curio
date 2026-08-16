@@ -4,7 +4,7 @@ ADD
 - Auto backup: pick a save location once and Curio backs up your captures and settings there automatically about once a day (opt-in).
 - Dark mode reimagined: pitch-black pages, dark same-hue heroes, reversed buttons and One UI-style inner glow on pills, plus the Light / Dark / System theme picker.
 - Paper stat cards on by default across Home, Profile and the detail page.
-- Edit profile: name and tagline in one dialog, plus a profile photo picker.
+- Edit profile: name and tagline in one dialog, a profile photo picker, and a manual crop editor — photos are auto-cropped to a square from the middle, so portrait shots fit perfectly.
 - Category picker: Original/New tabs and quick-mix presets ride the tear hero; the filter sheet search matches the Cabinet hero search.
 - Music service icons: the explore "Watch in" / "Listen in" pill and the Music service picker show the real brand logos (Apple Music, Spotify, YouTube, YouTube Music).
 - Spin: weighted shuffle deck (tiered picks, liked topics 2×), peek cards, 3D shuffle, category mixes and quick presets.
@@ -21,6 +21,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Profile photo: portrait and tall images no longer get squished — every pick is auto-cropped to a square from the middle, and you can adjust the crop by hand (pan + pinch) before saving.
+- Edit profile dialog: bigger avatar with a crop badge and pill-style photo actions instead of the plain text buttons.
 - Detail screen: the torn hero's edge now runs out cleanly at the screen edges — some entries' tears used to notch the hero's corners and look cut.
 - Detail screen: the quick-fact box is a proper theme-aware plate now (no more washed-out white box in light or bright sheet in dark), and the "…more / …less" words became a tidy "…" toggle that still expands and folds the fact.
 - Updates page: the release notes are now saved on your device, so they show instantly when you open the page instead of reloading from the internet — and they render properly (headers, bullets, bold) instead of raw text.

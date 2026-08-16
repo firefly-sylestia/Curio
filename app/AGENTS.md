@@ -401,6 +401,29 @@ app/src/main/java/com/curio/app/
   several." / "Tap to toggle decks · Done to spin together") is deleted.
   The deck-status chip stays. (`maxLines = 1` was removed with the
   manual newline or the second line would have ellipsized away.)
+- **v116 — profile avatar crop: manual crop editor + auto center-square
+  crop, redesigned Edit profile dialog.** (1) **Picking a photo no longer
+  squishes portraits**: `ProfileScreen` now DECODES the picked image
+  EXIF-correctly (`decodeAvatarSource` — ImageDecoder 28+ bounded to
+  2048px with its own EXIF pass disabled, BitmapFactory sample 26-27;
+  framework `ExifInterface` rotation applied manually so both paths agree)
+  and saves a **CENTER-SQUARE crop from the middle** (`centerSquareCrop`,
+  `scaleToMax` → 512px) as the avatar, with the editable SOURCE kept
+  beside it as `profile_avatar_src_*.png`. (2) **Manual crop editor:** new
+  `ui/components/AvatarCropDialog.kt` — a fixed SQUARE crop window with
+  the photo panning/pinching behind it (drag to move, pinch to zoom,
+  never smaller than cover-fit, reset returns to the center crop); Apply
+  hands back the exact source-pixel `IntRect` (`currentCropRect`) which is
+  re-cropped and re-saved. No crop library — plain Compose gestures, the
+  app's dialog styling. Opens from the Edit profile dialog; composed
+  AFTER it so the crop window stacks on top; canceling the edit dialog
+  also clears the crop state. (3) **Edit profile dialog redesigned:** the
+  64dp preview grew to 84dp with an accent **crop/photo badge** on the
+  corner (tap the avatar to adjust when set, else pick); the flat stock
+  TextButtons became the app's **pill actions** (`DialogPillAction` —
+  accent Add/Change photo, Adjust, destructive Remove); the caption now
+  explains the auto square crop. `loadAvatarSource` falls back to the
+  current square avatar for pre-v116 avatars (no source was kept then).
 - **v114 — CurioIcon glyphs stay vertically centered (no bottom cut) at every
   font scale.** Root cause was the icon Text's `includeFontPadding = false` +
   `LineHeightStyle.Trim.Both` + `lineHeight = 1.0em` combo: trimming the

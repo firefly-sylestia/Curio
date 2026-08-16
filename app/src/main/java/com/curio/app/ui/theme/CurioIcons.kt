@@ -76,6 +76,9 @@ object CurioIcons {
     const val DragHandle  = "drag_handle"      // ⋮ — manage categories drag
     const val Info        = "info"
     const val Edit        = "edit"
+    // v115 — the avatar crop editor badge (glyph verified in the bundled
+    // Material Symbols subset).
+    const val Crop        = "crop"
     const val Share       = "share"
     const val Lightbulb   = "lightbulb"        // 💡 — curiosity/fact teaser (v35)
     const val Delete      = "delete"
