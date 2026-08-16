@@ -46,7 +46,7 @@ app/src/main/java/com/curio/app/
 │       ├── CurioHeroCard.kt        # ~40% vertical hero Spin card on Home
 │       └── CurioStreakPill.kt      # streak indicator pill + CurioSecondaryAction helper
 └── features/
-    ├── splash/SplashScreen.kt      # §13.1 splash — angular signal-portal mark + "Curio" + 3-dot pulse, 800ms → HOME
+    ├── splash/SplashScreen.kt      # §13.1 splash — cosmic mark (ic_launcher_foreground) + "Curio" + 3-dot pulse, 800ms → HOME
     ├── home/HomeScreen.kt          # §3 home — top bar, greeting, streak, hero, chips, recently explored empty state
     └── PlaceholderScreens.kt       # ONE file containing 11 stubs: Spin, Cabinet, CategoryPicker, TopicReveal, SaveCapture, EntryDetail, Settings, Onboarding, ManageCategories, TopicHistory, Lightbox. Each uses a shared `PlaceholderScaffold` with back arrow + glyph + title + subtitle + "Design phase · logic comes later". Real implementations replace these one-by-one in later phases.
 ```
@@ -58,7 +58,7 @@ app/src/main/java/com/curio/app/
 - `app/src/main/res/values/strings.xml` — Curio app name + screen titles + category display names
 - `app/src/main/res/values/themes.xml` — `Theme.Curio` (M3 DayNight no-actionbar, Midnight Signal bootstrap surface)
 - `app/src/main/res/values/colors.xml` — Midnight Signal XML resources used at the OS-level splash/background before Compose takes over
-- `app/src/main/res/drawable/ic_launcher_{background,foreground,monochrome}.xml` — angular open-portal launcher mark with midnight background, electric-blue frame, mint aperture, orange spark, and themed monochrome mask
+- `app/src/main/res/drawable/ic_launcher_{background,foreground,monochrome}.xml` — the v113 COSMIC launcher mark (user-supplied SVG, 1024 viewport): mint planet + pink moon over layered pink/gold waves on a midnight navy→magenta sky, inside a rounded card with a white frame; `ic_launcher_background` is the full-bleed sky + stars, `ic_launcher_foreground` carries the whole scene (also rendered by the splash), `ic_launcher_monochrome` is the planet+moon silhouette; `ic_notification` is the same mark at 24dp
 - `app/src/main/res/mipmap-anydpi-v26/ic_launcher{,_round}.xml` — adaptive-icon declarations referencing the colored and monochrome layers above
 - `app/src/main/assets/topics/` — Curio topic data files and schema reference (one per ready category; see Content authoring below)
 
@@ -68,7 +68,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.0.1"` (default, bumped by 0.1 in v34 per user request; the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260919` (date-based; unchanged by tags)
+- `versionName = "1.1.0"` (default; bumped to 1.1.0 in v113 for the cosmic-icon release — the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260920` (date-based, +1 over the previous 20260919; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` + `lora.ttf` (v35 — the Lora editorial serif, OFL, variable wght 400–700, ~212KB) directly in `app/src/main/res/font/`; none depend on another module or source tree
@@ -426,6 +426,21 @@ app/src/main/java/com/curio/app/
   offset); callers pass the frozen extent (inline editor), the saved
   layouts' maxX/maxY (saved card), boardW/fit.scale (expanded dialog) and
   maxX/maxY (export).
+- **v113 — new COSMIC launcher icon + 1.1.0 version bump.** (1) **Icon:**
+  the user-supplied `svgviewer-output (3).svg` (a mint planet with a pink
+  moon over layered pink/gold waves on a midnight navy→magenta sky, inside a
+  rounded card with a white frame) replaces the old angular open-portal
+  mark. `ic_launcher_background` = full-bleed sky + stars; `ic_launcher_foreground`
+  = the whole clipped scene + white frame (vector viewport 1024×1024 = the
+  SVG 1:1; the SVG's feDropShadow/feGaussianBlur filters don't exist in
+  VectorDrawable, so the white planet/moon/wave strokes carry the
+  separation); `ic_launcher_monochrome` = planet + moon silhouette;
+  `ic_notification` = the same mark at 24dp. The splash (SplashScreen.kt)
+  renders `ic_launcher_foreground` directly, so it picks up the new art
+  automatically. (2) **Version:** `versionName` 1.0.1 → **1.1.0** and
+  `versionCode` 20260919 → **20260920** (the bump missed on the previous
+  feature releases); the store changelog moved to
+  `fastlane/.../changelogs/20260920.txt` (the 20260919 draft is gone).
 - **v112 — Updates sub-page + opt-in update checker, auto-backup, top-right
   update pill.** (1) **Updates page** (`features/updates/UpdatesScreen.kt`,
   route `UPDATES`, Settings hub row + Support & diagnostics "Open Updates"

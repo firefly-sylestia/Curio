@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Adaptive-icon declaration for Curio (API 26+).
-    Background = midnight ink (#081B33), foreground = the centered angular
-    signal-portal composition in ic_launcher_foreground.xml. The
-    adaptive-icon framework composites these two layers per the launcher's
-    chosen mask shape (circle/squircle/teardrop/etc.) and handles
-    foreground parallax for Pixel-style launchers.
+    Background = the full-bleed midnight sky + stars, foreground = the
+    v113 cosmic scene (mint planet, pink moon, gold waves, white card
+    frame) in ic_launcher_foreground.xml. The adaptive-icon framework
+    composites these two layers per the launcher's chosen mask shape
+    (circle/squircle/teardrop/etc.) and handles foreground parallax for
+    Pixel-style launchers.
 
     For pre-API-26 launchers (which minSdk=26 in this app excludes — see
     app/build.gradle.kts), PNG fallbacks under mipmap-{density}/ would be

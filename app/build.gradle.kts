@@ -57,9 +57,11 @@ android {
         applicationId = "com.curio.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 20260919
-        // v34 — bumped by 0.1 per request (release tags still override via env).
-        versionName = envReleaseVersion ?: "1.0.1"
+        // v113 — 1.1.0: new cosmic launcher icon + the accumulated feature
+        // releases (Updates page, auto backup, dark mode, …). versionCode is
+        // date-based; 20260920 is the +1 bump over the previous 20260919.
+        versionCode = 20260920
+        versionName = envReleaseVersion ?: "1.1.0"
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.

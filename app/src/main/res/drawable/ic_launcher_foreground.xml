@@ -1,48 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Curio gradient-card launcher mark — warm pastel palette.
-
-    A rounded-rectangle card with a gradient from deep maroon through
-    soft pink, peach, and butter yellow.  A subtle centre-line divide
-    hints at the "card" shape.  Everything stays inside the adaptive
-    safe zone (y=28..80).
+    v113 — Curio's new cosmic launcher mark (the user-supplied SVG, 1:1 from
+    the 1024×1024 source): a mint planet with a pink moon over layered pink
+    and gold waves, on a midnight navy→magenta sky, inside a rounded card
+    with a white frame. Rendered by the launcher as the adaptive foreground
+    AND by the splash screen (SplashScreen.kt renders this drawable
+    directly), so the full scene lives here. The SVG's drop-shadow/glow
+    filters don't exist in VectorDrawable — the white planet/moon/wave
+    strokes carry the separation instead. viewport 1024×1024 mirrors the
+    source; the vector scales to 108dp.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
 
-    <!-- Rounded-rect card outline — soft white stroke for definition -->
+    <!-- ── Clipped scene: everything inside the rounded card ─────────── -->
+    <group>
+        <clip-path android:pathData="M82,40 h860 a155,155 0 0,1 155,155 v590 a155,155 0 0,1 -155,155 h-860 a155,155 0 0,1 -155,-155 v-590 a155,155 0 0,1 155,-155 z" />
+
+        <!-- Midnight sky (clipped to the card). -->
+        <path android:pathData="M0,0 H1024 V1024 H0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="0"
+                    android:startY="0"
+                    android:endX="0"
+                    android:endY="1024">
+                    <item android:offset="0.0" android:color="#FF10184F" />
+                    <item android:offset="0.62" android:color="#FF24164F" />
+                    <item android:offset="1.0" android:color="#FFA51C68" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Subtle cosmic ribbons. -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#7250B4"
+            android:strokeAlpha="0.14"
+            android:strokeWidth="30"
+            android:pathData="M65,260 C210,285 270,410 380,355 S650,285 965,430" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#B93D9C"
+            android:strokeAlpha="0.13"
+            android:strokeWidth="28"
+            android:pathData="M55,430 C200,455 280,590 405,520 S710,470 975,590" />
+
+        <!-- Four-point sparkle stars (cream). -->
+        <path
+            android:fillColor="#FFF7CE"
+            android:pathData="M200,130 l5,16 16,5 -16,5 -5,16 -5,-16 -16,-5 16,-5 z
+                M870,195 l5,16 16,5 -16,5 -5,16 -5,-16 -16,-5 16,-5 z
+                M745,330 l5,17 17,5 -17,5 -5,17 -5,-17 -17,-5 17,-5 z
+                M230,470 l5,16 16,5 -16,5 -5,16 -5,-16 -16,-5 16,-5 z" />
+
+        <!-- Small white stars. -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M210,172 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M390,146 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+                M530,77 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M760,151 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+                M900,327 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M160,296 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+                M345,337 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M690,337 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M825,516 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+                M510,537 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M280,502 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z" />
+
+        <!-- Warm gold stars. -->
+        <path
+            android:fillColor="#FFCF5A"
+            android:pathData="M275,221 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+                M480,187 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M790,286 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+                M590,512 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+                M440,387 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z" />
+
+        <!-- Main planet — mint gradient with a top-left sheen. -->
+        <path
+            android:strokeColor="#D9FFF3"
+            android:strokeWidth="8"
+            android:pathData="M380,198 a122,122 0 1,0 0,244 a122,122 0 1,0 0,-244 z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="258"
+                    android:startY="198"
+                    android:endX="502"
+                    android:endY="442">
+                    <item android:offset="0.0" android:color="#FFB8F6DF" />
+                    <item android:offset="0.72" android:color="#FF54D5CA" />
+                    <item android:offset="1.0" android:color="#FF16A9BD" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <!-- Planet sheen (the SVG's rotated highlight ellipse). -->
+        <group
+            android:rotation="-24"
+            android:pivotX="344"
+            android:pivotY="262">
+            <path
+                android:fillColor="#EAFFF7"
+                android:fillAlpha="0.72"
+                android:pathData="M304,262 a40,17 0 1,0 80,0 a40,17 0 1,0 -80,0 z" />
+        </group>
+
+        <!-- Small moon — pink gradient with a sheen. -->
+        <path
+            android:strokeColor="#FFD0D7"
+            android:strokeWidth="7"
+            android:pathData="M650,445 a55,55 0 1,0 0,110 a55,55 0 1,0 0,-110 z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="595"
+                    android:startY="445"
+                    android:endX="705"
+                    android:endY="555">
+                    <item android:offset="0.0" android:color="#FFFF8393" />
+                    <item android:offset="1.0" android:color="#FFDF176E" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <!-- Moon sheen. -->
+        <group
+            android:rotation="-28"
+            android:pivotX="632"
+            android:pivotY="480">
+            <path
+                android:fillColor="#FFF1F2"
+                android:fillAlpha="0.8"
+                android:pathData="M613,480 a19,8 0 1,0 38,0 a19,8 0 1,0 -38,0 z" />
+        </group>
+
+        <!-- Layered waves — pink, deeper pink, gold. -->
+        <path
+            android:strokeColor="#FFD0A5"
+            android:strokeWidth="8"
+            android:pathData="M60,550 C205,475 300,690 420,650 C570,600 660,690 790,650 C870,635 939,520 970,630 L970,940 L60,940 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="60"
+                    android:startY="475"
+                    android:endX="970"
+                    android:endY="940">
+                    <item android:offset="0.0" android:color="#FFFF8393" />
+                    <item android:offset="1.0" android:color="#FFDF176E" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:strokeColor="#FFE4A7"
+            android:strokeWidth="8"
+            android:pathData="M60,660 C205,570 315,790 455,745 C610,695 700,785 830,745 C900,724 945,725 970,750 L970,940 L60,940 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="60"
+                    android:startY="570"
+                    android:endX="970"
+                    android:endY="940">
+                    <item android:offset="0.0" android:color="#FFFF9A8D" />
+                    <item android:offset="1.0" android:color="#FFEF3978" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path
+            android:strokeColor="#FFF09B"
+            android:strokeWidth="8"
+            android:pathData="M60,800 C205,685 320,895 470,850 C610,815 745,900 875,855 C920,840 950,840 970,850 L970,940 L60,940 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="60"
+                    android:startY="685"
+                    android:endX="970"
+                    android:endY="940">
+                    <item android:offset="0.0" android:color="#FFFFE36C" />
+                    <item android:offset="1.0" android:color="#FFFF8B24" />
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+
+    <!-- ── The card's white frame (drawn on top, not clipped) ─────────── -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.5"
-        android:pathData="M38,28 L70,28 A12,12 0 0,1 82,40 L82,72 A12,12 0 0,1 70,84 L38,84 A12,12 0 0,1 26,72 L26,40 A12,12 0 0,1 38,28 Z" />
-
-    <!-- Top third — deep maroon / warm plum -->
-    <path
-        android:fillColor="#4B1522"
-        android:pathData="M26,40 L26,52 L82,52 L82,40 A12,12 0 0,0 70,28 L38,28 A12,12 0 0,0 26,40 Z" />
-
-    <!-- Middle band — soft pink coral -->
-    <path
-        android:fillColor="#FF8FA3"
-        android:pathData="M26,52 L82,52 L82,64 L26,64 Z" />
-
-    <!-- Bottom third — warm peach / butter blend -->
-    <path
-        android:fillColor="#FFD97D"
-        android:pathData="M26,64 L82,64 L82,72 A12,12 0 0,1 70,84 L38,84 A12,12 0 0,1 26,72 Z" />
-
-    <!-- Tiny sparkle dot — mint aperture accent -->
-    <path
-        android:fillColor="#8FE3CF"
-        android:pathData="M50,38 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z" />
-
-    <!-- Small sparkle dot 2 -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:fillAlpha="0.6"
-        android:pathData="M62,46 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0 Z" />
+        android:strokeAlpha="0.8"
+        android:strokeWidth="10"
+        android:pathData="M82,40 h860 a155,155 0 0,1 155,155 v590 a155,155 0 0,1 -155,155 h-860 a155,155 0 0,1 -155,-155 v-590 a155,155 0 0,1 155,-155 z" />
 </vector>

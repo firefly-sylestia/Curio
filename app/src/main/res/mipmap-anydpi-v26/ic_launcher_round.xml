@@ -2,7 +2,8 @@
 <!--
     Round-launcher variant of the Curio adaptive icon (API 26+).
     The adaptive-icon framework treats this declaration as identical to
-    ic_launcher.xml (same layers); only the launcher mask differs.
+    ic_launcher.xml (the same v113 cosmic layers); only the launcher mask
+    differs.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/ic_launcher_background" />

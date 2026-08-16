@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Curio notification icon: small pastel gradient card mark. -->
+<!--
+    v113 — Curio notification small icon: the new cosmic mark (planet +
+    moon) as a compact alpha silhouette. Notification small icons are drawn
+    as alpha masks (the system tints them), so a single white fill is
+    correct.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Top band: deep maroon -->
+
+    <!-- Planet. -->
     <path
-        android:fillColor="#4B1522"
-        android:pathData="M9,5 L15,5 A3,3 0 0,1 18,8 L18,12 L6,12 L6,8 A3,3 0 0,1 9,5 Z" />
-    <!-- Bottom band: soft pink coral -->
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10,7.5 a5.5,5.5 0 1,0 0,11 a5.5,5.5 0 1,0 0,-11 z" />
+
+    <!-- Moon. -->
     <path
-        android:fillColor="#FF8FA3"
-        android:pathData="M6,12 L18,12 L18,16 A3,3 0 0,1 15,19 L9,19 A3,3 0 0,1 6,16 Z" />
-    <!-- White hairline divider -->
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="0.5"
-        android:pathData="M7,12 L17,12" />
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M17.5,5.2 a2.8,2.8 0 1,0 0,5.6 a2.8,2.8 0 1,0 0,-5.6 z" />
 </vector>

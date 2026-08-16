@@ -1,11 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pastel launcher background: deep maroon. -->
+<!--
+    v113 — Curio's new cosmic launcher mark (the user-supplied SVG: a mint
+    planet, pink moon and gold waves over a midnight sky). This layer is the
+    full-bleed backdrop: the sky gradient + stars fill the whole mask so the
+    adaptive icon reads as a seamless cosmic scene around the card art in
+    ic_launcher_foreground.xml (which carries the rounded card + planet +
+    moon + waves). viewport 1024×1024 mirrors the source SVG 1:1.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- Midnight sky — deep navy → purple → magenta (the SVG's sky gradient). -->
+    <path android:pathData="M0,0 H1024 V1024 H0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="0"
+                android:endY="1024">
+                <item android:offset="0.0" android:color="#FF10184F" />
+                <item android:offset="0.62" android:color="#FF24164F" />
+                <item android:offset="1.0" android:color="#FFA51C68" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Four-point sparkle stars (cream). -->
     <path
-        android:fillColor="#3B0A17"
-        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+        android:fillColor="#FFF7CE"
+        android:pathData="M200,130 l5,16 16,5 -16,5 -5,16 -5,-16 -16,-5 16,-5 z
+            M870,195 l5,16 16,5 -16,5 -5,16 -5,-16 -16,-5 16,-5 z
+            M745,330 l5,17 17,5 -17,5 -5,17 -5,-17 -17,-5 17,-5 z
+            M230,470 l5,16 16,5 -16,5 -5,16 -5,-16 -16,-5 16,-5 z" />
+
+    <!-- Small white stars. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M210,172 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M390,146 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+            M530,77 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M760,151 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+            M900,327 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M160,296 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+            M345,337 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M690,337 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M825,516 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+            M510,537 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M280,502 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z" />
+
+    <!-- Warm gold stars. -->
+    <path
+        android:fillColor="#FFCF5A"
+        android:pathData="M275,221 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+            M480,187 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M790,286 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z
+            M590,512 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z
+            M440,387 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 z" />
 </vector>
