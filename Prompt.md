@@ -1,6 +1,47 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: profile avatar crop editor + auto center-square crop + Edit profile dialog redesign
+## Current request — COMPLETED: Home avatar pill + drawer sections + Support update link
+
+The user: "show the avatr in home screen profile icon, and in drawer make
+the profile avatar a little bigger and also the text. make the topic
+history manage category and topic browser together with inline collapse
+under Your Curiosity, and merge Support and diagnostics and replay into a
+section dont know hat to call give me suggestion."
+
+Clarified via ask_user: section name → the user picked **About** (and
+added: "also in support and disnostics page add the update link to open
+the update page"); collapse default → **both collapsed**.
+
+### 1 — Home top-bar profile pill shows the avatar
+`TopBarPill` gained an optional `avatarPath`: the profile pill on the
+Home sticky bar shows the avatar photo (the Surface clips it to the
+circle; the animated `rim` border ring draws on top so the frosted
+scroll morph still reads) and falls back to the Person glyph. Fresh pref
+read per composition, same as the drawer.
+
+### 2 — Drawer avatar + text bigger
+Avatar 48 → 56dp; CURIO labelSmall → labelMedium; "Hi name"
+headlineSmall → headlineMedium; the tagline bodySmall → bodyMedium.
+
+### 3 — Drawer collapsible sections (both collapsed by default)
+- **"Your Curiosity"** (AutoAwesome header) → Topic History, Manage
+  Categories, Browse Topics.
+- **"About"** (Info header) → Support & diagnostics, Replay intro.
+New `DrawerSectionHeader` composable (leading icon chip + ▼ collapsed /
+▲ open chevron — the filter-sheet convention); state via
+`rememberSaveable` so rotation keeps it.
+
+### 4 — Support & diagnostics update link
+An "Updates" row (Download icon) at the top of the page's Updates card
+opens the dedicated Updates sub-page (Settings → Updates); the v116
+de-dupe stays intact — exactly one link, no duplicate header.
+
+### Validation
+`git diff --check` clean; imports added (`border`, `rememberSaveable`)
+and verified used; no leftover glyph-only pill path; no Gradle locally
+(env rule) — CI validates compile on push. Pushed to `main`.
+
+## Previous request — COMPLETED: profile avatar crop editor + auto center-square crop + Edit profile dialog redesign
 
 All of this session's work is done, committed and pushed (`0f846cd`).
 

@@ -1,4 +1,5 @@
 ADD
+- Drawer: the topic-browsing rows (Topic History, Manage Categories, Browse Topics) fold under a collapsible "Your Curiosity" section, and Support & diagnostics + Replay intro group under "About" — both collapsed by default.
 - New Curio icon: a cosmic mark — a mint planet with a pink moon over gold waves on a midnight sky (launcher, round, themed and notification icons, plus the splash).
 - Updates page: a dedicated sub-page (Settings → Updates) with your version, a check for updates with release notes, direct APK download & install, and the opt-in Update checker toggle — the background check is off by default to save data.
 - Auto backup: pick a save location once and Curio backs up your captures and settings there automatically about once a day (opt-in).
@@ -21,6 +22,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Home: the profile button on the top bar now shows your avatar photo, and the drawer's avatar and greeting text are bigger.
+- Support & diagnostics: a direct "Updates" row opens the update page (check, release notes & install).
 - Support & diagnostics: the Updates entry moved to the bottom of the page and is no longer repeated — the duplicate "Open Updates" row and its placeholder header are gone.
 - Dark mode dialogs now match the settings cards — the dialog background is the same near-black option-card glass as the rest of the theme.
 - Profile photo: portrait and tall images no longer get squished — every pick opens a crop editor first, so you frame the square (pan + pinch) before it saves.

@@ -422,8 +422,15 @@ app/src/main/java/com/curio/app/
   adjust when set, else pick); the flat stock TextButtons became the
   app's **pill actions** (`DialogPillAction` — accent Add/Change photo,
   Adjust, destructive Remove); the caption now explains the auto square
-  crop. `loadAvatarSource` falls back to the current square avatar for
-  pre-v116 avatars (no source was kept then).
+  crop. `loadAvatarSource` falls back to the  current square avatar for pre-v116 avatars (no source was kept then).
+  (4) **Dark dialogs match the settings option cards**: the dark branch of
+  `curioDialogContainerColor` (CurioTheme.kt) now uses the SAME fill as
+  `CurioSettingsCard` — `lerp(surfaceContainerLow, tintLift, 0.30f)` with
+  the dark tint lift `lerp(Color.Black, curioRoseInk(), 0.20f)` (the
+  neutral rose, since a dialog floats over any page) — instead of the old
+  `lerp(surfaceContainerHigh, background, 0.55f)` grey slab, so every
+  AlertDialog (edit profile, crop, two-step, etc.) reads as black
+  option-card glass on the black page.
 - **v117 — crop-before-apply + decluttered Edit profile dialog.** (1)
   **Picking a photo now opens the crop editor FIRST** — the pick no
   longer applies the center crop immediately: `avatarPicker` hands the
@@ -439,14 +446,24 @@ app/src/main/java/com/curio/app/
   pill next to the accent Apply pill (was a flat TextButton next to a
   lone filled pill); unused `TextButton` / `curioDialogActionButtonColors`
   imports removed.
-  (4) **Dark dialogs match the settings option cards**: the dark branch of
-  `curioDialogContainerColor` (CurioTheme.kt) now uses the SAME fill as
-  `CurioSettingsCard` — `lerp(surfaceContainerLow, tintLift, 0.30f)` with
-  the dark tint lift `lerp(Color.Black, curioRoseInk(), 0.20f)` (the
-  neutral rose, since a dialog floats over any page) — instead of the old
-  `lerp(surfaceContainerHigh, background, 0.55f)` grey slab, so every
-  AlertDialog (edit profile, crop, two-step, etc.) reads as black
-  option-card glass on the black page.
+- **v118 — drawer sections + Home avatar pill + Support update link.**
+  (1) **Home profile pill wears the avatar:** `TopBarPill` gained an
+  optional `avatarPath` — the profile pill on the Home sticky bar shows
+  the avatar photo (the Surface clips to the circle; the animated `rim`
+  ring draws on top so the frosted scroll morph still reads) and falls
+  back to the Person glyph; fresh pref read each composition, like the
+  drawer. (2) **Drawer declutter — collapsible sections:** the drawer
+  groups rows into two collapsible sections, BOTH collapsed by default
+  (user request): **"Your Curiosity"** (AutoAwesome header → Topic
+  History, Manage Categories, Browse Topics) and **"About"** (Info
+  header → Support & diagnostics, Replay intro — the user picked the
+  name). New `DrawerSectionHeader` (leading icon chip + ▼/▲ chevron,
+  the filter-sheet convention); state via `rememberSaveable`. The drawer
+  avatar also grew 48 → 56dp and the greeting text stepped up (CURIO
+  labelMedium, "Hi name" headlineMedium, tagline bodyMedium).
+  (3) **Support & diagnostics gained an Updates row** (Download icon)
+  that opens the dedicated Updates sub-page — the v116 de-dupe stays
+  intact (exactly one link, no duplicate header).
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

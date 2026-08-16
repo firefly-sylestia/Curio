@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +55,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -69,6 +71,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -1141,7 +1145,11 @@ fun HomeScreen(navController: NavController) {
                     bg = pillBg,
                     rim = pillRim,
                     iconTint = pillIcon,
-                    elevation = 6.dp * frostShift
+                    elevation = 6.dp * frostShift,
+                    // v118 — the profile pill wears the avatar photo when
+                    // one is set (fresh pref read each composition, like the
+                    // drawer) and falls back to the Person glyph otherwise.
+                    avatarPath = AppPreferences.getProfileAvatarPath(context)
                 )
             }
         }
@@ -1275,7 +1283,10 @@ private fun TopBarPill(
     bg: Color,
     rim: Color,
     iconTint: Color,
-    elevation: Dp
+    elevation: Dp,
+    // v118 — when set, the avatar photo replaces the glyph; the pill's
+    // animated rim still draws on top so the frosted scroll morph reads.
+    avatarPath: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
@@ -1297,18 +1308,36 @@ private fun TopBarPill(
             )
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            CurioIcon(
-                name = glyph,
-                contentDescription = contentDescription,
-                tint = iconTint,
-                size = 22.dp,
-                // The shared icon renderer centers the ink in the natural
-                // line box, but the menu/person glyphs' optical weight still
-                // reads a hair low inside the small 42dp pill — nudge it up
-                // (v115: deepened -0.5dp -> -1.5dp -> -2dp — the glyphs were
-                // still a touch low after the v114 centering fix).
-                modifier = Modifier.offset(y = (-2f).dp)
-            )
+            if (!avatarPath.isNullOrBlank()) {
+                // Avatar photo fills the pill (the Surface clips to the
+                // shape); the rim ring rides on top so the pill keeps its
+                // frosted-rim look while scrolling.
+                ProfileAvatarImage(
+                    avatarPath,
+                    Modifier
+                        .fillMaxSize()
+                        // Keep the button's label when the glyph is hidden.
+                        .semantics { this.contentDescription = contentDescription }
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(1.5.dp, rim, shape)
+                )
+            } else {
+                CurioIcon(
+                    name = glyph,
+                    contentDescription = contentDescription,
+                    tint = iconTint,
+                    size = 22.dp,
+                    // The shared icon renderer centers the ink in the natural
+                    // line box, but the menu/person glyphs' optical weight still
+                    // reads a hair low inside the small 42dp pill — nudge it up
+                    // (v115: deepened -0.5dp -> -1.5dp -> -2dp — the glyphs were
+                    // still a touch low after the v114 centering fix).
+                    modifier = Modifier.offset(y = (-2f).dp)
+                )
+            }
         }
     }
 }
@@ -1830,6 +1859,12 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
         HomeHeroPair(biasX = 0.56f, biasY = -0.52f, size = 38.dp, rotation = 8f, alpha = 0.08f),
         HomeHeroPair(biasX = 0.92f, biasY = 0.08f, size = 42.dp, rotation = 14f, alpha = 0.08f)
     )
+    // v118 — the drawer groups rows into collapsible sections, BOTH
+    // COLLAPSED by default (user request): "Your Curiosity" hides the
+    // topic-browsing rows, "About" hides Support & diagnostics + Replay
+    // intro. rememberSaveable keeps the state across rotation/recomposition.
+    var curiosityExpanded by rememberSaveable { mutableStateOf(false) }
+    var aboutExpanded by rememberSaveable { mutableStateOf(false) }
 
     ModalDrawerSheet(
         modifier = Modifier.width(320.dp),
@@ -1859,44 +1894,69 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         iconTint = curioGoldInk()
                     ) { onNavigate(CurioRoutes.QUESTS) }
                 }
-                item("history") {
-                    DrawerNavItem(
-                        icon = CurioIcons.History,
-                        label = "Topic History",
-                        iconTint = CurioColors.DustyBlue
-                    ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
+                // v118 — "Your Curiosity": Topic History + Manage Categories
+                // + Browse Topics fold under one collapsible header (collapsed
+                // by default per the user's request).
+                item("curiosity") {
+                    DrawerSectionHeader(
+                        icon = CurioIcons.AutoAwesome,
+                        label = "Your Curiosity",
+                        expanded = curiosityExpanded,
+                        onToggle = { curiosityExpanded = !curiosityExpanded }
+                    )
                 }
-                item("manage") {
-                    DrawerNavItem(
-                        icon = CurioIcons.DragHandle,
-                        label = "Manage Categories",
-                        iconTint = curioSageInk()
-                    ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
+                if (curiosityExpanded) {
+                    item("history") {
+                        DrawerNavItem(
+                            icon = CurioIcons.History,
+                            label = "Topic History",
+                            iconTint = CurioColors.DustyBlue
+                        ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
+                    }
+                    item("manage") {
+                        DrawerNavItem(
+                            icon = CurioIcons.DragHandle,
+                            label = "Manage Categories",
+                            iconTint = curioSageInk()
+                        ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
+                    }
+                    item("database") {
+                        DrawerNavItem(
+                            icon = CurioIcons.Database,
+                            label = "Browse Topics",
+                            iconTint = CurioColors.CategorySky
+                        ) { onNavigate(CurioRoutes.DATABASE) }
+                    }
                 }
-                item("database") {
-                    DrawerNavItem(
-                        icon = CurioIcons.Database,
-                        label = "Browse Topics",
-                        iconTint = CurioColors.CategorySky
-                    ) { onNavigate(CurioRoutes.DATABASE) }
+                // v118 — "About": Support & diagnostics + Replay intro
+                // (user picked the name; also collapsed by default).
+                item("about") {
+                    DrawerSectionHeader(
+                        icon = CurioIcons.Info,
+                        label = "About",
+                        expanded = aboutExpanded,
+                        onToggle = { aboutExpanded = !aboutExpanded }
+                    )
                 }
-                item("support") {
-                    DrawerNavItem(
-                        icon = CurioIcons.SupportAgent,
-                        label = "Support & diagnostics",
-                        iconTint = curioRoseInk()
-                    ) { onNavigate(CurioRoutes.SUPPORT) }
-                }
-                item("replay") {
-                    DrawerNavItem(
-                        icon = CurioIcons.Replay,
-                        label = "Replay intro",
-                        iconTint = CurioColors.HomeRosewood
-                    ) {
-                        // Re-show the welcome screens: reset the completed
-                        // flag, then open onboarding like Settings' replay.
-                        CurioOnboardingState.reset(context)
-                        onNavigate(CurioRoutes.ONBOARDING)
+                if (aboutExpanded) {
+                    item("support") {
+                        DrawerNavItem(
+                            icon = CurioIcons.SupportAgent,
+                            label = "Support & diagnostics",
+                            iconTint = curioRoseInk()
+                        ) { onNavigate(CurioRoutes.SUPPORT) }
+                    }
+                    item("replay") {
+                        DrawerNavItem(
+                            icon = CurioIcons.Replay,
+                            label = "Replay intro",
+                            iconTint = CurioColors.HomeRosewood
+                        ) {
+                            // Re-show the welcome screens: reset the completed
+                            // flag, then open onboarding like Settings' replay.
+                            CurioOnboardingState.reset(context)
+                            onNavigate(CurioRoutes.ONBOARDING)
+                        }
                     }
                 }
             }
@@ -1984,9 +2044,13 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 .padding(start = 24.dp, end = 24.dp, bottom = 28.dp)
                         ) {
                             val avatarPath = AppPreferences.getProfileAvatarPath(context)
+                            // v118 — the avatar grew 48 → 56dp and the
+                            // greeting text stepped up (CURIO labelMedium,
+                            // name headlineMedium, tagline bodyMedium) per
+                            // the user's "a little bigger" request.
                             Box(
                                 modifier = Modifier
-                                    .size(48.dp)
+                                    .size(56.dp)
                                     .shadow(2.dp, CircleShape)
                                     .clip(CircleShape)
                                     .background(heroFill),
@@ -2005,7 +2069,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(
                                     "CURIO",
-                                    style = MaterialTheme.typography.labelSmall.copy(
+                                    style = MaterialTheme.typography.labelMedium.copy(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 2.sp
                                     ),
@@ -2013,7 +2077,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 )
                                 Text(
                                     "Hi $displayName",
-                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                    style = MaterialTheme.typography.headlineMedium.copy(
                                         fontWeight = FontWeight.ExtraBold
                                     ),
                                     color = drawerInk,
@@ -2022,7 +2086,7 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 )
                                 Text(
                                     "Spin it. Explore it. Capture it.",
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = drawerInk.copy(alpha = 0.78f),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -2054,6 +2118,60 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
+        }
+    }
+}
+
+/** One collapsible section header inside the drawer (v118) — a label row
+ *  with a leading icon chip and a trailing chevron (▼ collapsed / ▲ open,
+ *  the filter-sheet convention). Tap toggles the section's rows inline. */
+@Composable
+private fun DrawerSectionHeader(
+    icon: String,
+    label: String,
+    expanded: Boolean,
+    onToggle: () -> Unit
+) {
+    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        onClick = onToggle,
+        shape = RoundedCornerShape(16.dp),
+        color = Color.Transparent,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = ink.copy(alpha = 0.10f),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    CurioIcon(
+                        icon, null,
+                        tint = ink,
+                        size = 22.dp,
+                        modifier = Modifier.offset(y = (-1f).dp)
+                    )
+                }
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = ink,
+                modifier = Modifier.weight(1f)
+            )
+            CurioIcon(
+                if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                null,
+                tint = ink.copy(alpha = 0.5f),
+                size = 20.dp
+            )
         }
     }
 }

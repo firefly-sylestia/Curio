@@ -63,9 +63,10 @@ import kotlinx.coroutines.delay
  *    here from the old Settings → About page).
  *  - Updates (LAST): v112 — the update flow (check / release notes /
  *    download / install) moved to its OWN sub-page (Settings → Updates).
- *    This page keeps ONLY the version readout (five-tap diagnostic →
- *    Experiments) at the end — no duplicate Updates entry or placeholder
- *    header (v116).
+ *    This page keeps the version readout (five-tap diagnostic →
+ *    Experiments) plus an "Updates" row that OPENS that sub-page (v118 —
+ *    the user asked for a direct update link here; the v116 de-dupe stays
+ *    intact because there is exactly ONE link, not a duplicate header).
  */
 @Composable
 fun SupportScreen(navController: NavController) {
@@ -188,6 +189,16 @@ fun SupportScreen(navController: NavController) {
                     // transparent rows floating on the backdrop.
                     CurioSettingsCard(shadowElevation = 0.dp) {
                     Column(modifier = Modifier.fillMaxWidth()) {
+                        // v118 — the user asked for an update link right here:
+                        // one row that opens the dedicated Updates sub-page.
+                        CurioSettingsRow(
+                            CurioIcons.Download,
+                            "Updates",
+                            "Check for updates, release notes & install"
+                        ) {
+                            navController.navigate(CurioRoutes.UPDATES) { launchSingleTop = true }
+                        }
+                        CurioSettingsDivider()
                         // Version — tappable: five taps TOGGLE promo mode
                         // (on → off, off → on); the promo page then shows
                         // the resulting state. Subtitle hints while counting
