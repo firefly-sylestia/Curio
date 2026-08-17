@@ -16105,5 +16105,614 @@
       "1950s"
     ],
     "tier": 1
+  },
+  {
+    "id": "artw-great-masturbator-1929",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Great Masturbator (1929)",
+    "teaser": "A giant distorted head in a desert landscape — nose on the ground, a grasshopper clinging to its mouth, a woman's face emerging from its skull — Dalí's most personal painting, made at the height of his fame. The title is deliberate provocation; the imagery is about desire, fear and his own psyche. It is the painting that made Surrealism's most notorious artist.",
+    "imageUrl": "",
+    "byline": "Salvador Dalí",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Great Masturbator (1929) symbols",
+      "durationMinutes": 8,
+      "instruction": "Look at the woman's face inside the head — desire embedded in the skull. Then find the grasshopper: Dalí was terrified of them, and painted his fear in."
+    },
+    "tags": [
+      "Surrealism",
+      "Painting",
+      "1920s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-disquieting-muses-1917",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Disquieting Muses (1917)",
+    "teaser": "Two mannequin-like figures and a classical statue in a shadowed piazza — the unsettling stillness that founded Metaphysical painting, the movement Surrealism grew out of. De Chirico's empty squares and faceless figures made ordinary architecture feel haunted. The title says it: the muses are here, and they are not comforting.",
+    "imageUrl": "",
+    "byline": "Giorgio de Chirico",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Disquieting Muses (1917) the mannequins",
+      "durationMinutes": 8,
+      "instruction": "Look at the faceless figures — bodies without heads, heads without faces. Then notice the shadow: long, wrong, from a sun that isn't in the painting."
+    },
+    "tags": [
+      "Metaphysical",
+      "Painting",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-elephant-celebes-1921",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Elephant Celebes (1921)",
+    "teaser": "A huge mechanical elephant — part boiler, part beast — squatting in a strange room, a headless mannequin reaching toward it. Ernst built it from a photograph of a Sudanese grain store, collaged and repainted into a monster. It is the first great painting of Surrealism, made before the movement had its name.",
+    "imageUrl": "",
+    "byline": "Max Ernst",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Elephant Celebes (1921) the creature",
+      "durationMinutes": 8,
+      "instruction": "Look at the creature's trunk — it's a hose, not a nose. Then notice the room: no floor, no sense of scale, everything built to unsettle."
+    },
+    "tags": [
+      "Surrealism",
+      "Painting",
+      "1920s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-birth-of-the-world-1925",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Birth of the World (1925)",
+    "teaser": "A field of abstract colour — red sky, blue ground, a black triangle, a drifting star and a single line — Miró's vision of creation as pure chance. He made it by letting paint drip and pool, then adding the few decisive signs. It is the painting where his style was born: few elements, infinite space.",
+    "imageUrl": "",
+    "byline": "Joan Miró",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Birth of the World (1925) the signs",
+      "durationMinutes": 8,
+      "instruction": "Look at the bare canvas showing through — Miró left most of it empty, which is the point. Then find the star and the triangle: two signs in a universe of nothing."
+    },
+    "tags": [
+      "Surrealism",
+      "Painting",
+      "1920s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-over-the-town-1918",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Over the Town (1918)",
+    "teaser": "A man and woman flying over their hometown — the painter himself and his bride Bella, floating above the rooftops of Vitebsk. Chagall painted love as a physical force: gravity gives up. The little village below, the fiddler on the roof, the upside-down lovers — it is the happiest painting in the history of art.",
+    "imageUrl": "",
+    "byline": "Marc Chagall",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Over the Town (1918) the lovers",
+      "durationMinutes": 8,
+      "instruction": "Look at the lovers — they float without wings, held up by nothing but each other. Then notice the town below: Chagall kept flying back to it in paint for the rest of his life."
+    },
+    "tags": [
+      "Expressionism",
+      "Painting",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-improvisation-28-1912",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Improvisation 28 (1912)",
+    "teaser": "A storm of colour and line that Kandinsky called 'the inner sound' — painted before abstract art had a name, when he was still calling his pictures improvisations on a theme. Hidden in the swirl are a charging horseman and cannons, echoes of the war coming. It is the moment painting began to let go of the world.",
+    "imageUrl": "",
+    "byline": "Wassily Kandinsky",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Improvisation 28 (1912) the forms",
+      "durationMinutes": 8,
+      "instruction": "Look for the shapes — a rider, a cannon, a tower, all dissolving into colour. Then step back: the picture works as pure music, which is what Kandinsky wanted."
+    },
+    "tags": [
+      "Abstract Art",
+      "Painting",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-ad-parnassum-1932",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Ad Parnassum (1932)",
+    "teaser": "A mountain of mosaic squares — thousands of tiny rectangles building a sun and a peak, painted after Klee visited Egypt and was dazzled by its light. The title means 'to Parnassus', the mountain of the muses. It is Klee's most famous painting and his most pointillist: the whole picture vibrates like a mosaic seen through heat.",
+    "imageUrl": "",
+    "byline": "Paul Klee",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Ad Parnassum (1932) the mosaic",
+      "durationMinutes": 8,
+      "instruction": "Look at the squares — every one is a decision, thousands of them building the mountain. Then find the sun: it glows through the grid like a window."
+    },
+    "tags": [
+      "Abstract Art",
+      "Painting",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-newborn-1915",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Newborn (1915)",
+    "teaser": "A baby's head reduced to a polished oval with a single line for a mouth — Brancusi's sculpture of the first breath of life, so simplified it is almost abstract. The mouth is open, mid-cry or mid-dream. Brancusi polished his bronzes to a mirror finish because he wanted light to be part of the form. It is one of the most tender objects in modern art.",
+    "imageUrl": "",
+    "byline": "Constantin Brancusi",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Newborn (1915) the form",
+      "durationMinutes": 8,
+      "instruction": "Look at the head — an egg with a mouth, nothing more, and somehow a whole baby. Then notice the shine: Brancusi polished it so the light itself becomes the skin."
+    },
+    "tags": [
+      "Modern Sculpture",
+      "Sculpture",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-sleeping-muse-1910",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Sleeping Muse (1910)",
+    "teaser": "An oval head on a tilted plane, eyes closed, features barely marked — Brancusi's first great sculpture and the beginning of his lifelong obsession with the head as an egg. The muse sleeps with her face half-erased, like a memory of a face. It is stillness made solid.",
+    "imageUrl": "",
+    "byline": "Constantin Brancusi",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Sleeping Muse (1910) the profile",
+      "durationMinutes": 8,
+      "instruction": "Look at the profile — the features are nearly gone, reduced to a few lines. Then notice the tilt of the head: the whole sculpture is a single pose of rest."
+    },
+    "tags": [
+      "Modern Sculpture",
+      "Sculpture",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-king-and-queen-1953",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "King and Queen (1953)",
+    "teaser": "A seated king and queen in bronze, their heads hollowed into crowns and profiles — royalty reduced to monumental simplicity. Moore made the pair with the holes and hollows that became his signature, spaces that make the sculpture belong to the landscape around it. The king and queen sit forever, looking out over the hills.",
+    "imageUrl": "",
+    "byline": "Henry Moore",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "King and Queen (1953) the hollows",
+      "durationMinutes": 8,
+      "instruction": "Look at the heads — hollowed out, so the sky shows through the crowns. Then notice the pose: seated, patient, monumental, built for an open field."
+    },
+    "tags": [
+      "Modern Sculpture",
+      "Sculpture",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-single-form-1963",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Single Form (1963)",
+    "teaser": "A towering bronze abstract in the United Nations plaza — Hepworth's memorial to Dag Hammarskjöld, the UN Secretary-General who died in a plane crash. The form suggests a figure, a flame, a prayer. Hepworth said it was about 'the single form of man' against the world. It stands in New York, an abstract monument to peace.",
+    "imageUrl": "",
+    "byline": "Barbara Hepworth",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Single Form (1963) the silhouette",
+      "durationMinutes": 8,
+      "instruction": "Look at the silhouette — it shifts as you walk, now figure, now flame, now void. Then know the occasion: Hepworth made it for a man who died trying to make peace."
+    },
+    "tags": [
+      "Modern Sculpture",
+      "Sculpture",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-walking-man-1961",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Walking Man I (1961)",
+    "teaser": "A gaunt, elongated figure striding forward — Giacometti's most famous sculpture, the image of humanity as a thin flame of existence. He worked for years trying to capture the figure as it is seen at a distance: stripped, uncertain, moving. A cast sold for $104 million in 2010, then the most expensive sculpture ever.",
+    "imageUrl": "",
+    "byline": "Alberto Giacometti",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Walking Man I (1961) the stride",
+      "durationMinutes": 8,
+      "instruction": "Look at the roughness — the bronze retains every thumbprint of the modelling. Then look at the stride: no muscle, no detail, just motion — the whole of a walk in one stride."
+    },
+    "tags": [
+      "Modern Sculpture",
+      "Sculpture",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-nose-1947",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Nose (1947)",
+    "teaser": "A giant disembodied nose hanging in a cage, its long form pointing downward like a question — Giacometti's unsettling object, inspired by Gogol's story of a man who lost his nose. It is a head without a face, a face reduced to its most absurd feature. It hangs, it dangles, it refuses to be anything but itself.",
+    "imageUrl": "",
+    "byline": "Alberto Giacometti",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Nose (1947) the cage",
+      "durationMinutes": 8,
+      "instruction": "Look at the cage — the nose is trapped, like a specimen. Then notice the length: Giacometti stretched it past anatomy into something comic and horrible at once."
+    },
+    "tags": [
+      "Modern Sculpture",
+      "Sculpture",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-look-mickey-1961",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Look Mickey (1961)",
+    "teaser": "Mickey Mouse and Donald Duck at a fishing pond, Donald hooked by his own line — the painting that launched Pop Art, made from a children's book illustration and blown up to gallery scale. Lichtenstein painted the dots by hand, mimicking printing. The cartoon joke became the founding image of a movement.",
+    "imageUrl": "",
+    "byline": "Roy Lichtenstein",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Look Mickey (1961) the dots",
+      "durationMinutes": 8,
+      "instruction": "Look at the dots — painted by hand, row after row, imitating a printing press. Then read Donald's panic: 'Look Mickey, I've hooked one!' — the caption makes it art about art."
+    },
+    "tags": [
+      "Pop Art",
+      "Painting",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-gold-marilyn-1962",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Gold Marilyn Monroe (1962)",
+    "teaser": "Marilyn Monroe's face in gold over a flat gold background, painted weeks after her death — Warhol's first Marilyn and his most solemn. The gold makes her an icon, a saint, a product. The face is printed from a publicity photo, the flaws of the print left in. It is the image of celebrity as religion.",
+    "imageUrl": "",
+    "byline": "Andy Warhol",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Gold Marilyn Monroe (1962) the gold",
+      "durationMinutes": 8,
+      "instruction": "Look at the gold field — it turns Marilyn into a Byzantine icon. Then notice the imperfect printing: Warhol left the smudges of the silkscreen in, because she was mass-produced too."
+    },
+    "tags": [
+      "Pop Art",
+      "Painting",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-target-four-faces-1955",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Target with Four Faces (1955)",
+    "teaser": "A bullseye target painted in wax, four faces stacked above it in boxes, one covered by a flap — Johns's meditation on seeing and the things we look at without seeing. The target is a shape the mind completes instantly; the faces repeat it like a question. It made Johns the bridge between Abstract Expressionism and Pop.",
+    "imageUrl": "",
+    "byline": "Jasper Johns",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Target with Four Faces (1955) the target",
+      "durationMinutes": 8,
+      "instruction": "Look at the target — a thing so familiar you stop seeing it, which is Johns's point. Then notice the faces: identical, mute, and one hidden behind a flap you can't lift."
+    },
+    "tags": [
+      "Pop Art",
+      "Painting",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-canyon-1959",
+    "categoryId": "ARTWORKS",
+    "subtype": "Assemblage",
+    "name": "Canyon (1959)",
+    "teaser": "A stuffed bald eagle, a pillow, a photograph, a street sign and oil paint fused into one object — Rauschenberg's 'combine', part painting, part sculpture. The eagle made the work illegal to sell (protected species), and for decades it could only be lent, never traded. It is the moment painting and sculpture gave up their separate rooms.",
+    "imageUrl": "",
+    "byline": "Robert Rauschenberg",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Canyon (1959) the combine",
+      "durationMinutes": 8,
+      "instruction": "Look at the eagle — real, stuffed, staring out of a painting. Then notice everything else: the pillow, the photo, the paint. Rauschenberg called these 'combines' because they refuse to choose a medium."
+    },
+    "tags": [
+      "Pop Art",
+      "Assemblage",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-study-innocent-x-1953",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Study after Velázquez's Portrait of Pope Innocent X (1953)",
+    "teaser": "The pope from Velázquez's portrait, screaming — his mouth torn open, his body dissolving into vertical brushstrokes, the golden throne turned into a cage of lines. Bacon painted the most famous portrait in history as a nightmare. He never saw the original, only reproductions; he said he was haunted by it.",
+    "imageUrl": "",
+    "byline": "Francis Bacon",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Study after Velázquez's Portrait of Pope Innocent X (1953) the scream",
+      "durationMinutes": 8,
+      "instruction": "Look at the mouth — open in a scream that makes no sound, the cage of lines around it closing in. Then know: Bacon painted the same pope twenty times, each one a little more undone."
+    },
+    "tags": [
+      "Expressionism",
+      "Painting",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-girl-white-dog-1952",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Girl with a White Dog (1952)",
+    "teaser": "Freud's first wife lying on a bed, one hand on a white dog — painted with the thick, unflattering attention that made him the century's great portraitist of flesh. The pose is intimate and watchful at once. He painted her over many sittings, and the paint itself is like skin. It is the painting that announced his method.",
+    "imageUrl": "",
+    "byline": "Lucian Freud",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Girl with a White Dog (1952) the flesh",
+      "durationMinutes": 8,
+      "instruction": "Look at the paint — thick, worked, built like flesh rather than imitating it. Then notice the dog's gaze: it watches the viewer as steadily as the woman does."
+    },
+    "tags": [
+      "Expressionism",
+      "Portrait",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-movement-in-squares-1961",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Movement in Squares (1961)",
+    "teaser": "A grid of black and white squares that seems to ripple and bulge — the painting that made Op Art a movement. Riley arranged identical squares and altered their spacing so the flat canvas appears to move, to breathe, to buckle. It is a painting that argues with your eyes and wins.",
+    "imageUrl": "",
+    "byline": "Bridget Riley",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Movement in Squares (1961) the grid",
+      "durationMinutes": 8,
+      "instruction": "Look at the grid — the squares are identical, only the gaps change, and the surface appears to swell. Then step back: the illusion holds, and that is the whole work."
+    },
+    "tags": [
+      "Op Art",
+      "Painting",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-untitled-96-1981",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Untitled #96 (1981)",
+    "teaser": "A woman in a red sweater lying on a floor, clutching a personal ad from a newspaper — one of Sherman's Untitled Film Stills, photographs that mimic the look of 1950s movie publicity. The woman is Sherman herself, playing a character who is playing a role. It sold for $3.9 million in 2011, then the most expensive photograph ever.",
+    "imageUrl": "",
+    "byline": "Cindy Sherman",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Untitled #96 (1981) the pose",
+      "durationMinutes": 8,
+      "instruction": "Look at the woman's expression — longing, staged, borrowed from a hundred forgotten films. Then notice the ad in her hand: the image is about women performing what they're told to want."
+    },
+    "tags": [
+      "Photography",
+      "1980s",
+      "Conceptual Art"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-child-toy-grenade-1962",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Child with Toy Hand Grenade in Central Park (1962)",
+    "teaser": "A boy in the park, one hand clawed, the other holding a toy grenade — his face a mix of menace and plea. Arbus photographed strangers on the edge of the ordinary and found the strangeness in it. This is her most famous portrait, a child performing threat and helplessness at once. She said her subjects 'never told me a secret'.",
+    "imageUrl": "",
+    "byline": "Diane Arbus",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Child with Toy Hand Grenade in Central Park (1962) the face",
+      "durationMinutes": 8,
+      "instruction": "Look at the boy's face — both claws and begs. Then notice the background: an ordinary park, which makes the pose stranger, not less."
+    },
+    "tags": [
+      "Photography",
+      "1960s",
+      "Portrait"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-horse-in-motion-1878",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "The Horse in Motion (1878)",
+    "teaser": "The photograph that settled a bet: whether a galloping horse ever has all four hooves off the ground. Muybridge rigged twelve cameras along a track, each tripped by the horse's own motion, and the resulting sequence proved it — and invented motion pictures in the process. The bet was settled; cinema was born.",
+    "imageUrl": "",
+    "byline": "Eadweard Muybridge",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Horse in Motion (1878) the sequence",
+      "durationMinutes": 8,
+      "instruction": "Look at the twelve frames — the answer to a centuries-old argument in a strip of images. Then notice what it made possible: every film ever made descends from this horse."
+    },
+    "tags": [
+      "Photography",
+      "1870s",
+      "History"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-dovima-elephants-1955",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Dovima with Elephants (1955)",
+    "teaser": "A model in a Dior evening gown posed between two circus elephants in Paris — the most famous fashion photograph ever taken, and the last day Dovima worked with Avedon. The elephants were borrowed from a circus; they were meant to be trained to pose, but Avedon just shot. The elegance of the dress against the grey hide is the whole image.",
+    "imageUrl": "",
+    "byline": "Richard Avedon",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Dovima with Elephants (1955) the contrast",
+      "durationMinutes": 8,
+      "instruction": "Look at the contrast — silk against hide, posture against bulk. Then know the story: the elephants weren't trained for the shot; Avedon improvised it in minutes, and it outlived every planned photograph."
+    },
+    "tags": [
+      "Photography",
+      "1950s",
+      "Fashion"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-noire-et-blanche-1926",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Noire et Blanche (1926)",
+    "teaser": "A model's face beside an African mask — two faces, one pale and one dark, one living and one carved, in near-identical profile. Man Ray's most famous photograph plays with resemblance and difference: the mask and the face are almost the same shape. The composition is pure geometry; the meanings are not.",
+    "imageUrl": "",
+    "byline": "Man Ray",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Noire et Blanche (1926) the two faces",
+      "durationMinutes": 8,
+      "instruction": "Look at the two profiles — the mask and the face mirror each other so closely they seem to be one form split. Then notice the model's closed eyes: she is as still as the mask."
+    },
+    "tags": [
+      "Photography",
+      "1920s",
+      "Surrealism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-hyeres-1932",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Hyères (1932)",
+    "teaser": "A man cycling past a spiral staircase, the curved rail echoing his motion — the photograph that defined 'the decisive moment', Cartier-Bresson's phrase for catching reality at the instant it composes itself. He waited hours at this corner for the geometry to align. The bicycle, the spiral and the shadows lock into a single frozen chord.",
+    "imageUrl": "",
+    "byline": "Henri Cartier-Bresson",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Hyères (1932) the geometry",
+      "durationMinutes": 8,
+      "instruction": "Look at the spiral staircase — the cyclist's curve rhymes with its curve, one motion in two materials. Then know the method: Cartier-Bresson called photography 'the decisive moment', and this is the proof."
+    },
+    "tags": [
+      "Photography",
+      "1930s",
+      "History"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-kiss-hotel-de-ville-1950",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Kiss by the Hôtel de Ville (1950)",
+    "teaser": "A couple kissing on a busy Paris street, passers-by oblivious — the most famous kiss in photography, and the subject of a decades-long legal battle: the couple turned out to be hired models, and the photo was staged. Doisneau admitted it in 1992 when sued. The image remains the dream of Paris that the staging made real.",
+    "imageUrl": "",
+    "byline": "Robert Doisneau",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Kiss by the Hôtel de Ville (1950) the staging",
+      "durationMinutes": 8,
+      "instruction": "Look at the kiss — set against the blur of the street, everyone else moving, the lovers frozen. Then know the twist: the lovers were models, hired by Doisneau, which made the dream a product."
+    },
+    "tags": [
+      "Photography",
+      "1950s",
+      "Paris"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-pepper-no-30-1930",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Pepper No. 30 (1930)",
+    "teaser": "A single green pepper photographed so closely it becomes a landscape of curves and shadows — Weston's most famous image, made in a tin funnel in his studio over many hours. He saw in the pepper 'the same forms as the human body'. The vegetable became monumental: folds like a torso, a hollow like a grotto.",
+    "imageUrl": "",
+    "byline": "Edward Weston",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Pepper No. 30 (1930) the forms",
+      "durationMinutes": 8,
+      "instruction": "Look at the folds — the pepper reads as body, as mountain, as sculpture. Then know the setup: a tin funnel, a dark room, and hours of waiting for the light to be right."
+    },
+    "tags": [
+      "Photography",
+      "1930s",
+      "Still Life"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-snake-charmer-1907",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Snake Charmer (1907)",
+    "teaser": "A dark-skinned flautist in a jungle at night, snakes writhing toward the music — painted by Rousseau, a customs clerk who never left France and painted his jungles from the botanical gardens and picture books. The moonlight, the black water and the hypnotic snakes make it his most mysterious work. Picasso bought it and kept it for life.",
+    "imageUrl": "",
+    "byline": "Henri Rousseau",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Snake Charmer (1907) the jungle",
+      "durationMinutes": 8,
+      "instruction": "Look at the moonlight — flat, green, dreamlike, like nothing on Earth. Then know the artist: Rousseau painted this jungle from Paris's botanical garden, and never saw a real snake charmer."
+    },
+    "tags": [
+      "Naïve Art",
+      "Painting",
+      "1900s"
+    ],
+    "tier": 1
   }
 ]
