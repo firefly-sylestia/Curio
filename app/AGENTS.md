@@ -822,6 +822,28 @@ app/src/main/java/com/curio/app/
   transitions and wide gutters). LESSON: when a Scaffold is removed, its
   `containerColor = colorScheme.background` fill must be replaced
   explicitly or the window bootstrap color shows through fades.
+- **v132 — Topic Reveal: no Scaffold band + floating Like/Dislike pill +
+  tags under the hero + ticket-matching hero pills.** (1) **The reveal's
+  bottom band is GONE** — `RevealBottomBarHeight` (TopicRevealScreen's
+  80dp strip) and the NavHost's matching `RevealBottomBarPlaceholderHeight`
+  reservation were both removed; the reveal now runs full-bleed like the
+  tabs (the old reserved slot made the page stop 80dp short). (2)
+  **Like/Dislike now ride a floating capsule** mirroring the bottom nav's
+  pill bar (raised `surfaceContainerHigh` + 6dp shadow,
+  `navigationBarsPadding` + 12dp air gap): it HIDES while scrolling down
+  and slides back in on scroll-up — direction tracked via `snapshotFlow`
+  on the page's `ScrollState` (3px dead-band), and it stays hidden in
+  Browse-Topics mode (read-only; the old band's `browseMode` gate
+  preserved). (3) **Tags moved back into the scroll body**, directly below
+  the hero (hero → tags → actions → teaser → prompt); the action row drops
+  to a 16dp gap when tags are present, else keeps the old progress-pill
+  clearance. (4) **Hero pills now match the Spin ticket EXACTLY**: the
+  action badge, byline and subtype swap the old opaque `pillGlass` for the
+  ticket's `ink.copy(alpha = 0.18f)` recipe, so the reveal hero reads as
+  the same card in light AND dark (the frosted glass read as white blobs
+  next to the ticket's subtle tint). LESSON: the reveal hero and the Spin
+  ticket morph from the SAME shared element — keep them on ONE pill
+  recipe or the morph visibly changes color mid-expansion.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

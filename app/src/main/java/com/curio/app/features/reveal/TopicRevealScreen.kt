@@ -13,10 +13,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,13 +26,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -59,12 +57,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -139,8 +137,6 @@ import com.curio.app.ui.theme.brandRes
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
-import com.curio.app.ui.theme.curioPillLift
-import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -164,8 +160,8 @@ import com.curio.app.ui.theme.themedButtonInk
  *  - Hero shows the action you need to take immediately — the verb +
  *    duration badge sits on the ticket, not buried under the body copy.
  *  - Bigger, eye-catching topic name (uses the geom typography).
- *  - Tags chips in the bottom band — instant context for genres / eras
- *    (e.g. "1970s · British · Art Rock") without cluttering the body.
+ *  - Tags chips directly below the hero — instant context for genres /
+ *    eras (e.g. "1970s · British · Art Rock") without cluttering the body.
  *  - Existing teaser card + explore-action prompt card are preserved.
  *  - Refined spacing — top padding tight (statusBarsPadding + 8dp.
  *
@@ -176,19 +172,15 @@ import com.curio.app.ui.theme.themedButtonInk
  *   ~260 dp    Hero card (gradient ticket: watermark glyph + badges +
  *              the topic NAME — the title lives on the card so the
  *              shared-element morph grows it in place, v8.25)
- *   20 dp      gap
+ *   ~auto     Tags chips (directly below the hero)
+ *   ~auto     Inline actions (Start exploring + Already …)
  *   ~auto     "One quirky fact to get you curious" card
  *   16 dp      gap
  *   ~auto     "{verb} {target}" action prompt card + "~N min"
- *   24 dp      content breathing room
- *   below hero  inline actions (Start exploring + Already …)
+ *   100 dp     bottom clearance for the floating Like/Dislike pill
+ *   floating  Like/Dislike capsule — slides away while scrolling down,
+ *             back in on scroll-up (v132)
  */
-
-// The reveal renders its OWN plain bottom band (at navbar height) instead
-// of the bottom navigation bar (see CurioNavHost.showBottomBar): a flat
-// theme-aware strip that carries the tags row and keeps the page's fixed
-// footprint — the NavHost reserves the same 80dp slot the bar would use.
-private val RevealBottomBarHeight = 80.dp
 
 /** v49 — ONE editorial paragraph voice for the reveal's long-form copy: the
  *  quick fact and the action instruction share this exact style — matched
@@ -570,17 +562,30 @@ fun TopicRevealScreen(
         // Wide windows: the NavHost's full-bleed collage replaces the page's
         // own backdrop so there is ONE continuous collage, not a double.
         if (!windowWidthSizeClass().isWide) {
-            // The NavHost reserves a navbar-height placeholder for Reveal,
-            // so this backdrop can fill the same content bounds as the Spin
-            // tab. Keeping the whole destination's bounds stable fixes both
-            // the watermark level and the shared-card morph target.
+            // v132 — no reserved navbar slot (the bottom band is gone): the
+            // backdrop fills the reveal's own full content bounds now.
             CurioWatermarkBackdrop(activeCat = cat)
+        }
+
+        // v132 — the sentiment pill floats over the page (the bottom band
+        // is gone): it hides while the user scrolls DOWN and slides back in
+        // on scroll-up so it never covers the content being read.
+        val revealScroll = rememberScrollState()
+        var sentimentPillHidden by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            var last = revealScroll.value
+            snapshotFlow { revealScroll.value }.collect { value ->
+                val delta = value - last
+                last = value
+                if (delta > 3f) sentimentPillHidden = true
+                else if (delta < -3f) sentimentPillHidden = false
+            }
         }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(revealScroll)
         ) {
         // ── 1. Top bar (category chip + pin bookmark + close ✕) ────────
         Row(
@@ -706,14 +711,29 @@ fun TopicRevealScreen(
                     )
                 }
 
-                            // ── 2.5 Action row — Express yourself / Explore ─────────
-                // v8.57 — the actions moved OUT of the bottom dock to sit
-                // right below the hero card: always visible, no scaffold.
+                            // ── 2.5 Tags row — directly below the hero ──────────
+                // v132 — the tags moved out of the (now removed) bottom band
+                // back into the scroll body, right below the hero card:
+                // hero → tags → actions → teaser → prompt.
                 // v29 — when the topic carries reading/watching progress
                 // (books: pages, anime: episodes) the floating progress
-                // button straddles the hero's bottom edge, so the action
-                // row drops a little lower to stay clear of it.
+                // button straddles the hero's bottom edge, so the tags row
+                // drops a little lower to stay clear of it.
+                val hasTags = !resolved?.tags.isNullOrEmpty()
                 val progressFloatGap = if (resolved?.progressTarget != null) 40.dp else 16.dp
+                if (hasTags) {
+                    RevealContentEntrance(delayMillis = 40) {
+                        TagsRow(
+                            cat = cat,
+                            tags = resolved?.tags,
+                            modifier = Modifier.padding(top = progressFloatGap)
+                        )
+                    }
+                }
+
+                // ── 2.6 Action row — Express yourself / Explore ──────────────
+                // v8.57 — the actions moved OUT of the bottom dock to sit
+                // right below the hero card: always visible, no scaffold.
                 RevealContentEntrance(delayMillis = 40) {
                     RevealActionRow(
                         cat = cat,
@@ -721,7 +741,7 @@ fun TopicRevealScreen(
                         resolved = latestResolved,
                         onExplore = latestOnExplore,
                         onAlready = latestOnAlready,
-                        modifier = Modifier.padding(top = progressFloatGap)
+                        modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
                     )
                 }
 
@@ -754,136 +774,46 @@ fun TopicRevealScreen(
                     }
                 }
 
-                // v49 — the Like/dislike pair moved OUT of the scroll body
-                // into the bottom band (below the tags row) — see the band
-                // section at the bottom of the screen.
-
-                // Bottom clearance — the bottom band (at navbar height)
-                // overlays the very bottom of the scroll area, so the last
-                // row clears the band when fully scrolled down.
-                Spacer(Modifier.height(RevealBottomBarHeight + 24.dp))
+                // Bottom clearance — the floating Like/Dislike pill overlays
+                // the bottom of the page, so the last card clears it when
+                // scrolled to the end (the pill is hidden while scrolling
+                // down, but slides back in on the way up).
+                Spacer(Modifier.height(100.dp))
             }
 
         }
 
-        // ── Bottom band — replaces the bottom navigation bar ─────────────
-        // The reveal paints its own PLAIN, theme-aware band at the bottom of
-        // the screen (at navbar height) instead of the Scaffold's navigation
-        // bar (see CurioNavHost.showBottomBar): a flat rectangle with no
-        // torn seam or ragged edge — the tags row sits on it.
-        // v9.x — the band is fully opaque and follows the active appearance.
-        // v39 — the band now wears the SAME page wash as the reveal body
-        // (the old categorySurface strip resolved to a lighter tint that
-        // read as a separate white/creamy slab at the bottom — most visible
-        // during the open fade, right behind the tags). With the band
-        // matching the page, the reveal reads as one continuous surface and
-        // only the tags chips stand out.
-        val bandPaper = cat.categoryBackgroundWash()
-        val bandInk = MaterialTheme.colorScheme.onSurface
-        // v9.x — NavHost reserves the missing navbar footprint for Reveal
-        // without drawing the actual bar. This band is painted down into
-        // that reserved 80dp slot plus the system nav inset, ending flush at
-        // the physical screen bottom — it starts where the real navbar would
-        // start on Spin, keeping the page bounds, watermark and shared hero
-        // morph at the same level.
-        val navInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .offset(y = RevealBottomBarHeight + navInset)
-                .fillMaxWidth()
-                .height(RevealBottomBarHeight + navInset)
-                .background(bandPaper)
-        )
-
-        // Compact context row: tags live in the reserved footer now, keeping
-        // the reveal body focused without changing the footer's fixed height.
-        // v11 — the chips sit a little LOWER (24dp inset) so they clear the
-        // plain band's top edge with breathing room, and each chip caps at a
-        // third of the row width with ellipsis so the row never runs off
-        // small screens.
-        if (!resolved?.tags.isNullOrEmpty()) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = RevealBottomBarHeight + navInset)
-                    .fillMaxWidth()
-                    .height(RevealBottomBarHeight + navInset)
-                    // v49 — nudged up (24 → 14dp inset) so the like/dislike
-                    // row below has room INSIDE the same strip height.
-                    // v52b — raised further (14 → 10dp) so the tag chips
-                    // clear the like/dislike row with no overlap.
-                    // v60 — raised once more (10 → 6dp): the tags can still
-                    // sit a little higher, giving the sentiment row below
-                    // clear breathing room at larger font scales.
-                    .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = navInset + 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.Top
-            ) {
-                resolved.tags.take(3).forEach { tag ->
-                    Surface(
-                        modifier = Modifier.weight(1f, fill = false),
-                        shape = RoundedCornerShape(50),
-                        // v27n — opaque tinted fill (was 22% alpha, which let
-                        // the elevation shadow bleed through).
-                        // v51 — the tinted fill carries more of the lane's
-                        // accent (22 → 32%) so the chips stop reading whitish
-                        // against the pastel page wash in light mode.
-                        color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.32f),
-                        shadowElevation = 2.dp
-                    ) {
-                        Text(
-                            text = tag,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = bandInk,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-        // ── Like / dislike — the band's lower slot (v49) ────────────────
-        // Moved down from the scroll body into the strip, BELOW the tags,
-        // filling the band's previously-empty lower space — the strip's
-        // height stays the fixed navbar height (80dp + inset). Hidden in
-        // Browse-Topics mode: reading from the database must not shape the
-        // shuffle (pure read-only).
+        // ── Floating Like/Dislike pill (v132) ────────────────────────────
+        // The bottom band is gone (no Scaffold / reserved navbar slot — see
+        // CurioNavHost): the sentiment pair now rides a floating capsule
+        // over the page, mirroring the bottom nav's floating pill bar. It
+        // slides out of the way while the user scrolls DOWN and slides back
+        // in on scroll-up. Hidden in Browse-Topics mode: reading from the
+        // database must not shape the shuffle (pure read-only).
         if (!browseMode && resolved != null) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = RevealBottomBarHeight + navInset)
-                    .fillMaxWidth()
-                    .height(RevealBottomBarHeight + navInset)
-                    .padding(start = 16.dp, end = 16.dp, bottom = navInset + 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.Bottom
+            AnimatedVisibility(
+                visible = !sentimentPillHidden,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = slideInVertically(
+                    animationSpec = tween(220, easing = FastOutSlowInEasing)
+                ) { it } + fadeIn(animationSpec = tween(220)),
+                exit = slideOutVertically(
+                    animationSpec = tween(180, easing = FastOutSlowInEasing)
+                ) { it } + fadeOut(animationSpec = tween(180))
             ) {
-                SentimentButton(
-                    icon = CurioIcons.ThumbDown,
-                    label = "Dislike",
-                    active = sentiment == AppPreferences.SENTIMENT_DISLIKE,
+                RevealSentimentPill(
+                    sentiment = sentiment,
                     accent = cat.themedAccent(),
                     ink = cat.onAccent(),
-                    onClick = {
+                    onDislike = {
                         AppPreferences.setTopicSentiment(
                             context, cat.id, resolved.id,
                             if (sentiment == AppPreferences.SENTIMENT_DISLIKE)
                                 AppPreferences.SENTIMENT_NONE
                             else AppPreferences.SENTIMENT_DISLIKE
                         )
-                    }
-                )
-                SentimentButton(
-                    icon = CurioIcons.ThumbUp,
-                    label = "Like",
-                    active = sentiment == AppPreferences.SENTIMENT_LIKE,
-                    accent = cat.themedAccent(),
-                    ink = cat.onAccent(),
-                    onClick = {
+                    },
+                    onLike = {
                         AppPreferences.setTopicSentiment(
                             context, cat.id, resolved.id,
                             if (sentiment == AppPreferences.SENTIMENT_LIKE)
@@ -1642,24 +1572,11 @@ private fun HeroCard(
     // the same card expanding: pastel → pastelFillInk, else → onAccent.
     val ink = if (AppPreferences.pastelColorsState) pastelFillInk(accent) else cat.onAccent()
 
-    // v37 — the hero pill glass (action badge, byline, subtype): a frosted
-    // glass off the hero accent instead of the old washed `ink.copy(alpha)`
-    // tint, so the pills stay crisp on any hero gradient.
-    // v43 — retuned so the pills never read as stark white blobs (the old
-    // 92% white lift); all three states are OPAQUE fills that carry the
-    // accent hue — theme aware, never transparent, never flat white.
-    // v51 — light mode still read whitish: pastel light now leans only 60%
-    // toward white (a real accent-kiss — the lane's tint clearly shows
-    // through the frost) and non-pastel light deepens to 42%.
-    val pillGlass = if (isCurioDarkTheme()) {
-        // v81 — reversed: a dark same-hue jewel glass so the light twin /
-        // white ink reads on it (never the light frost on the black page).
-        lerp(accent, Color.Black, 0.45f)
-    } else if (AppPreferences.pastelColorsState) {
-        lerp(accent, Color.White, 0.60f)
-    } else {
-        lerp(accent, Color.White, 0.42f)
-    }
+    // v132 — the hero pills (action badge, byline, subtype) wear the SAME
+    // recipe as the Spin main card's pills: the card ink at 18% over the
+    // gradient, so the reveal hero reads as the same card in light AND dark
+    // (the old opaque frosted glass read as white blobs next to the
+    // ticket's subtle tint).
 
     // ── Gradient brush — match the Spin ticket's formula so the card
     //    reads as the same surface during the morph. When heroGradientOn
@@ -1804,7 +1721,7 @@ private fun HeroCard(
                 if (action != null) {
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = pillGlass,
+                        color = ink.copy(alpha = 0.18f),
                         shadowElevation = 0.dp
                     ) {
                         Row(
@@ -1880,7 +1797,7 @@ private fun HeroCard(
                     if (byline != null && bylineLabel != null) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = pillGlass,
+                            color = ink.copy(alpha = 0.18f),
                             shadowElevation = 0.dp,
                             modifier = Modifier.weight(1f, fill = false)
                         ) {
@@ -1912,7 +1829,7 @@ private fun HeroCard(
                     if (subtype != null) {
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = pillGlass,
+                            color = ink.copy(alpha = 0.18f),
                             shadowElevation = 0.dp
                         ) {
                             Text(
@@ -1961,6 +1878,47 @@ private fun HeroCard(
         } // BoxWithConstraints
     } // HeroCard Surface
     } // HeroCard floating Box
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Tags row — directly below the hero (v132, restored to the scroll body)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Compact tag chips directly under the hero card — instant context for
+ *  genres / eras (e.g. "1970s · British · Art Rock"). Same chip recipe the
+ *  bottom band used: an opaque accent-tinted surface with a 2dp lift; each
+ *  chip caps at a third of the row width with ellipsis so the row never
+ *  runs off small screens. */
+@Composable
+private fun TagsRow(
+    cat: com.curio.app.data.CurioCategory,
+    tags: List<String>?,
+    modifier: Modifier = Modifier
+) {
+    if (tags.isNullOrEmpty()) return
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        tags.take(3).forEach { tag ->
+            Surface(
+                modifier = Modifier.weight(1f, fill = false),
+                shape = RoundedCornerShape(50),
+                color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.32f),
+                shadowElevation = 2.dp
+            ) {
+                Text(
+                    text = tag,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                )
+            }
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2141,60 +2099,82 @@ private fun verbIcon(verb: String): String = when (verb.lowercase().trim()) {
     else -> "auto_awesome"
 }
 
-/** Compact pill like/dislike toggle for the reveal's bottom band — active
- *  state fills with the category accent. Slimmed (v49) so the pair fits the
- *  strip's lower slot below the tags without growing the band. */
+/** The reveal's floating Like/Dislike capsule (v132) — mirrors the bottom
+ *  nav's floating pill bar: a raised capsule carrying the two sentiment
+ *  segments. The active segment fills with the category accent (the v27q
+ *  solid-selection rule); inactive segments stay transparent on the
+ *  capsule. */
 @Composable
-private fun SentimentButton(
+private fun RevealSentimentPill(
+    sentiment: String?,
+    accent: Color,
+    ink: Color,
+    onDislike: () -> Unit,
+    onLike: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .padding(bottom = 12.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = 6.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                SentimentSegment(
+                    icon = CurioIcons.ThumbDown,
+                    label = "Dislike",
+                    active = sentiment == AppPreferences.SENTIMENT_DISLIKE,
+                    accent = accent,
+                    ink = ink,
+                    onClick = onDislike
+                )
+                SentimentSegment(
+                    icon = CurioIcons.ThumbUp,
+                    label = "Like",
+                    active = sentiment == AppPreferences.SENTIMENT_LIKE,
+                    accent = accent,
+                    ink = ink,
+                    onClick = onLike
+                )
+            }
+        }
+    }
+}
+
+/** One segment inside [RevealSentimentPill]: the active state fills with the
+ *  category accent + on-accent ink — the same solid-selection contract as
+ *  the nav pill bar's active indicator. */
+@Composable
+private fun SentimentSegment(
     icon: String,
     label: String,
     active: Boolean,
     accent: Color,
-    ink: Color = Color.White,
+    ink: Color,
     onClick: () -> Unit
 ) {
-    // v60 — the active state POPS so a liked/disliked topic reads at a
-    // glance: the pill scales up on a fast ease, wears the category glow,
-    // and the label flips to ExtraBold, all on top of the accent fill +
-    // white ink. Inactive stays the quiet tinted glass.
-    val pillScale by animateFloatAsState(
-        targetValue = if (active) 1.08f else 1f,
-        animationSpec = tween(160, easing = FastOutSlowInEasing),
-        label = "sentimentScale"
-    )
     Surface(
         onClick = onClick,
-        shape = CircleShape,
-        // v52b — theme-aware inactive fill: the color-tinted rose glass
-        // instead of the generic surfaceVariant.
-        // v86 — DARK: the near-white rose lift + light-grey onSurfaceVariant
-        // text washed out on the black band, so inactive flips to a dark
-        // raised glass with the light text crisp on it.
-        color = if (active) accent
-                else if (isCurioDarkTheme()) lerp(
-                    MaterialTheme.colorScheme.surfaceContainerHigh,
-                    accent,
-                    0.25f
-                )
-                else curioPillTintLift(),
-        // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = 2.dp,
-        modifier = Modifier
-            .scale(pillScale)
-            // v60 — active wears a category glow so the selection is
-            // unmistakable even where the accent is pale.
-            .curioDarkGlow(if (active) 4.dp else 0.dp, CircleShape)
+        shape = RoundedCornerShape(50),
+        color = if (active) accent else Color.Transparent
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CurioIcon(
                 name = icon,
                 contentDescription = label,
                 tint = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = if (active) 17.dp else 15.dp
+                size = 17.dp
             )
             Text(
                 text = label,

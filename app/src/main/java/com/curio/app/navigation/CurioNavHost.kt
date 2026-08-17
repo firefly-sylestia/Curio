@@ -119,10 +119,6 @@ import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
 
-// Must match TopicRevealScreen's RevealBottomBarHeight: the hidden
-// navbar slot that the reveal paints with its plain bottom band.
-private val RevealBottomBarPlaceholderHeight = 80.dp
-
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
  * unpaired surrogates fall back to the raw value instead of crashing
@@ -204,8 +200,8 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * All routes are flat. The bottom nav is a floating overlay bar
  * (v129 — no Scaffold slot; see [CurioFloatingNavBar]) and is
  * conditionally visible based on the current route (see
- * [CurioRoutes.bottomNavRoutes]). Topic Reveal renders its own plain
- * bottom band at navbar height instead of the bar (see TopicRevealScreen);
+ * [CurioRoutes.bottomNavRoutes]). Topic Reveal hides the bar and floats
+ * its own Like/Dislike pill over the page (see TopicRevealScreen);
  * other push destinations like Picker/Capture/Detail/Settings/Lightbox
  * omit it.
  *
@@ -244,19 +240,13 @@ fun CurioNavHost(
     // content exactly as before. Always-on — no Settings toggle.
     val wide = windowWidthSizeClass().isWide
 
-    // Topic Reveal renders its OWN plain bottom band at the bottom (at
-    // navbar height) instead of the bottom navigation bar — both from the
-    // Spin main card and from the topic browser, the reveal never shows
-    // the bar (see TopicRevealScreen's bottom band).
+    // Topic Reveal hides the bottom navigation bar — both from the Spin
+    // main card and from the topic browser, the reveal never shows the bar
+    // (it floats its own Like/Dislike pill instead, see
+    // TopicRevealScreen).
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
     val showBottomBar =
         routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
-    // Reveal intentionally hides the actual nav bar, but its content still
-    // reserves the same 80dp app-bar footprint. The reveal screen paints a
-    // plain band into that reserved slot, so the watermark coordinate space
-    // and shared hero target stay aligned with the Spin tab instead of
-    // stretching downward when the nav bar disappears.
-    val revealBottomBarPlaceholder = if (isRevealRoutePrefix && !wide) RevealBottomBarPlaceholderHeight else 0.dp
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -392,8 +382,7 @@ fun CurioNavHost(
                     .then(
                         if (showBottomBar && !wide) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-                    )
-                    .padding(bottom = revealBottomBarPlaceholder),
+                    ),
                 contentAlignment = Alignment.Center
             ) {
         // Wide windows (tablet / landscape / desktop): ONE continuous

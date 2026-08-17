@@ -201,6 +201,30 @@ fun SoundBiteFormat(
         }
     }
 
+    /**
+     * v131 — commits a finished utterance into [dictatedText]. Each break
+     * becomes a full stop: utterances join with a period (always on, per
+     * user), and the next sentence starts capitalized. Declared BEFORE
+     * startDictation because the RecognitionListener inside it calls this
+     * (Kotlin local functions can't be forward-referenced — v131 CI fix).
+     */
+    fun commitUtterance(text: String) {
+        val t = text.trim()
+        if (t.isBlank()) {
+            speechEnded = false
+            return
+        }
+        val sentence = if (dictatedText.isNotBlank()) t.replaceFirstChar { it.uppercase() } else t
+        if (dictatedText.isBlank()) {
+            dictatedText = sentence
+        } else {
+            val prevEndsPunct = dictatedText.lastOrNull()?.let { it == '.' || it == '?' || it == '!' } == true
+            dictatedText = if (!prevEndsPunct) "$dictatedText. $sentence" else "$dictatedText $sentence"
+        }
+        partialTranscript = ""
+        speechEnded = false
+    }
+
     fun startDictation() {
         if (!voiceToTextEnabled) return
         val recognizer = speechRecognizer ?: run {
@@ -297,28 +321,6 @@ fun SoundBiteFormat(
     fun stopListening() {
         runCatching { speechRecognizer?.cancel() }
         listening = false
-    }
-
-    /**
-     * v131 — commits a finished utterance into [dictatedText]. Each break
-     * becomes a full stop: utterances join with a period (always on, per
-     * user), and the next sentence starts capitalized.
-     */
-    fun commitUtterance(text: String) {
-        val t = text.trim()
-        if (t.isBlank()) {
-            speechEnded = false
-            return
-        }
-        val sentence = if (dictatedText.isNotBlank()) t.replaceFirstChar { it.uppercase() } else t
-        if (dictatedText.isBlank()) {
-            dictatedText = sentence
-        } else {
-            val prevEndsPunct = dictatedText.lastOrNull()?.let { it == '.' || it == '?' || it == '!' } == true
-            dictatedText = if (!prevEndsPunct) "$dictatedText. $sentence" else "$dictatedText $sentence"
-        }
-        partialTranscript = ""
-        speechEnded = false
     }
 
     /** The dialog preview — committed utterances plus the live partial. */

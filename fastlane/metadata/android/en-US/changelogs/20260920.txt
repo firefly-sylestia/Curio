@@ -28,6 +28,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Topic Reveal: the Like/Dislike pair now floats in a pill over the page — it slides out of the way while you scroll down and slides back in when you scroll up (the old fixed bottom strip is gone).
+- Topic Reveal: the tag chips sit directly below the hero again, and the hero's pills (verb + duration, author, subtype) now match the Spin card's pills in light and dark.
 - Dictation: taking a pause no longer wipes what you already said — the transcript keeps building, and each pause becomes a full stop (so speak, pause, speak again flows as two sentences).
 - Dictation: the floating mic now sits in the note box's own tool row above the field, so it stays visible above the keyboard instead of hiding below the page.
 - Dark mode: the option-card row labels on Profile, Settings and every settings sub-page (plus Support, Updates, Experiments, Quests, Backup and onboarding cards) were black and unreadable on the dark cards — they now render in the theme's readable ink.

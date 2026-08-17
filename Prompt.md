@@ -1,50 +1,55 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: bigger nav pill + solid indicator + the page-switch "dim flash"
+## Current request — COMPLETED: reveal screen band → floating sentiment pill + tags under hero + CI compile fix
 
-The user: "increas the pill size a little and its legth and improve its indicator
-color. also why switching between pages now shows a dim look like dim flash or something
-or maybe something else. but it wasnt like this before? fix it"
+The user asked: remove the reveal's bottom scaffold/band, add a floating Like/Dislike
+pill that hides on scroll and reappears, move the tags back below the header, match the
+hero pill color with the main shuffle card in dark mode and the author pill in light
+mode — plus a CI compile failure (`commitUtterance` unresolved reference) to fix and push.
 
-### 1 — Bigger pill + longer (CurioBottomNav)
-The floating pill bar grew a little: `FloatingPillHeight` 48 → 52dp,
-`FloatingPillIconWidth` 48 → 52dp, `FloatingPillExpandedWidth` 96 → 112dp, icons
-22 → 24dp, row padding 6 → 7dp, spacing 4 → 6dp. The tab pages' pill clearances grew
-with it so content never hides under the bigger bar: Home's final spacer 92 → 100dp,
-Spin's phone Column bottom padding 76 → 84dp, Cabinet's 76 → 84dp (0 wide).
+### 1 — CI compile fix (SoundBiteFormat.kt)
+CI failed: `commitUtterance` is a LOCAL function referenced from the dictation
+listener inside `startDictation`, which was declared BEFORE it — Kotlin local functions
+are scoped from their declaration point onward (same class of error as the v126 note).
+`commitUtterance` moved above `startDictation`; resolved.
 
-### 2 — Indicator color (CurioBottomNav)
-The active pill used the translucent `secondaryContainer` overlay + `onSecondaryContainer`
-ink (washed out, especially in dark). Per the app's own v27q selection contract (SOLID
-accent fill + on-accent content, never a translucent lerp), the active pill is now a SOLID
-`secondary` fill with `onSecondary` ink — a defined amber capsule with dark ink in light,
-bright amber with dark-brown ink in dark. The wide `CurioNavigationRail` uses the same
-pair (selected icon/label `onSecondary`, indicator `secondary`) for coherence. Stale
-v124 doc comment updated.
+### 2 — Reveal bottom band removed (TopicRevealScreen + CurioNavHost)
+- `RevealBottomBarHeight = 80.dp` (TopicRevealScreen) and the NavHost's matching
+  `RevealBottomBarPlaceholderHeight` reservation + `.padding(bottom = ...)` are gone.
+  The reveal now runs full-bleed like the tab pages (no Scaffold slot, no painted band,
+  no 80dp dead strip at the bottom).
 
-### 3 — The dim flash on page switches (CurioNavHost)
-Root cause found in the v129 Scaffold removal: the M3 `Scaffold` paints
-`containerColor = colorScheme.background` behind its content. After v129 replaced it
-with a bare root `Box`, the root became TRANSPARENT — and the Activity's window
-background is the hardcoded dark-navy bootstrap `curio_deep_plum` (#081B33, themes.xml).
-Every NavHost page transition (tab crossfades + push/pop center-pop fades) leaves both
-pages semi-transparent mid-fade, so the navy window flashed through — the "dim flash"
-the user saw (it existed before too in dark mode, but the Scaffold's black background
-hid it; in light mode it was a clear new regression).
+### 3 — Floating Like/Dislike pill (hide on scroll-down, reappear on scroll-up)
+- `RevealSentimentPill` mirrors the bottom nav's floating pill bar: raised
+  `surfaceContainerHigh` capsule (6dp shadow, `navigationBarsPadding` + 12dp air gap)
+  with two `SentimentSegment`s; the active segment fills with the category accent +
+  on-accent ink (v27q solid-selection contract).
+- Scroll direction is tracked with `snapshotFlow` over the page's hoisted
+  `ScrollState` (3px dead-band): scrolling down hides the pill, scrolling up brings it
+  back. `AnimatedVisibility` slides it out/in.
+- Kept the old band's gates: hidden in Browse-Topics mode (`browseMode`, read-only),
+  only rendered once the topic resolves. Bottom spacer in the scroll body: 100dp so the
+  last card clears the pill. Old `SentimentButton` (band version) removed.
 
-Fix: the root Box paints `MaterialTheme.colorScheme.background` again
-(`Modifier.background(...)` before the pet pointer tracker). Invisible in practice —
-every page paints its own full-bleed background; it only shows during transitions and
-wide gutters, restoring the pre-v129 look. LESSON (recorded in AGENTS.md v131 follow-up):
-removing a Scaffold must replace its containerColor fill explicitly.
+### 4 — Tags back below the hero
+- Tags moved out of the (removed) band into the scroll body directly below the hero:
+  hero → tags → actions → teaser → prompt. New `TagsRow` composable reuses the band's
+  chip recipe (accent-tinted surface @32%, 2dp lift, weight-capped thirds).
+- The action row takes a 16dp gap when tags are present, else the old progress-pill
+  clearance (`progressFloatGap`).
+
+### 5 — Hero pills match the Spin ticket
+- The hero's opaque `pillGlass` (frosted/jewel glass, theme-varied) is replaced by the
+  Spin main card's exact pill recipe `ink.copy(alpha = 0.18f)` for the action badge,
+  byline ("Author · …") and subtype pills — in BOTH light and dark, so the shared-element
+  morph reads as the same card and the reveal hero stops looking like white blobs next to
+  the ticket's subtle tint. Dead `pillGlass` block + unused imports removed.
 
 ### Files touched
-- `app/src/main/java/com/curio/app/navigation/CurioNavHost.kt` — root background (dim-flash fix)
-- `app/src/main/java/com/curio/app/ui/components/CurioBottomNav.kt` — pill sizes + solid indicator (bar + rail)
-- `app/src/main/java/com/curio/app/features/home/HomeScreen.kt` — clearance 92 → 100dp
-- `app/src/main/java/com/curio/app/features/spin/SpinScreen.kt` — clearance 76 → 84dp
-- `app/src/main/java/com/curio/app/features/cabinet/CabinetScreen.kt` — clearance 76 → 84dp
-- `app/AGENTS.md` — v131 follow-up bullet
+- `app/src/main/java/com/curio/app/features/capture/formats/SoundBiteFormat.kt` — CI fix (commitUtterance order)
+- `app/src/main/java/com/curio/app/features/reveal/TopicRevealScreen.kt` — band removal, floating pill + scroll-hide, TagsRow, hero pill color
+- `app/src/main/java/com/curio/app/navigation/CurioNavHost.kt` — reveal placeholder reservation removed
+- `app/AGENTS.md` — v132 bullet
 - `fastlane/metadata/android/en-US/changelogs/20260920.txt` — FIX bullets
 
 Not done: no Gradle build here (env forbids it) — CI validates on push.
