@@ -853,6 +853,16 @@ fun TopicRevealScreen(
         // in on scroll-up. Hidden in Browse-Topics mode: reading from the
         // database must not shape the shuffle (pure read-only).
         if (!browseMode && resolved != null) {
+            // v151 — the sentiment pill is the shared-element TARGET of the
+            // nav-pill-bar morph: the bar (source) remembers its state with
+            // the same key inside the same SharedTransitionLayout, so opening
+            // the reveal morphs the bar's capsule into this pill. Null-
+            // guarded — outside the NavHost layout (deep links/tests) there's
+            // no source to morph from, so the pill just renders in place.
+            val morphScope = LocalRevealSharedScope.current
+            val morphVisibilityScope = LocalRevealVisibilityScope.current
+            val sentimentMorphState =
+                morphScope?.rememberSharedContentState(SentimentSharedElementKey)
             AnimatedVisibility(
                 visible = !sentimentPillHidden,
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -869,13 +879,15 @@ fun TopicRevealScreen(
                     ink = cat.onAccent(),
                     // v151 — the shared-element target: the pill's bounds
                     // morph out of the bottom nav bar's capsule.
-                    modifier = sharedTransitionScope.run {
-                        Modifier.sharedElement(
-                            sentimentSharedState,
-                            animatedVisibilityScope,
-                            boundsTransform = NavPillBoundsTransform
-                        )
-                    },
+                    modifier = if (morphScope != null && morphVisibilityScope != null && sentimentMorphState != null) {
+                        morphScope.run {
+                            Modifier.sharedElement(
+                                sentimentMorphState,
+                                morphVisibilityScope,
+                                boundsTransform = NavPillBoundsTransform
+                            )
+                        }
+                    } else Modifier,
                     onDislike = {
                         AppPreferences.setTopicSentiment(
                             context, cat.id, resolved.id,
@@ -1609,12 +1621,6 @@ private fun HeroCard(
     val sharedTransitionScope = LocalRevealSharedScope.current ?: return
     val animatedVisibilityScope = LocalRevealVisibilityScope.current ?: return
     val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
-    // v151 — the nav-pill → sentiment-pill morph: the floating Like/Dislike
-    // pill is the TARGET of the shared element whose source is the bottom
-    // nav bar (the bar stays composed through the reveal's entrance, then
-    // leaves). Both sit at bottom-center, so the bar's capsule collapses
-    // into the sentiment pair when the reveal opens.
-    val sentimentSharedState = sharedTransitionScope.rememberSharedContentState(SentimentSharedElementKey)
 
     val action = resolved?.exploreAction
     // v28 — the reveal hero uses the SAME accent source as the Spin ticket

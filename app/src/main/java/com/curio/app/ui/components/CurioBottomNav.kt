@@ -1,7 +1,7 @@
 package com.curio.app.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.SharedContentState
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -246,7 +246,7 @@ fun CurioFloatingNavBar(
     // removes it — instead of the bar vanishing and the Like/Dislike pill
     // sliding up as a separate element. Both sit at bottom-center, so the
     // bar's capsule collapses into the sentiment pair.
-    sharedElementState: SharedContentState? = null,
+    sharedElementState: SharedTransitionScope.SharedContentState? = null,
     visible: Boolean = true,
     interactive: Boolean = true
 ) {
@@ -273,7 +273,7 @@ fun CurioFloatingNavBar(
     val sharedModifier = if (sharedElementState != null && sharedScope != null) {
         sharedScope.run {
             Modifier.sharedElementWithCallerManagedVisibility(
-                state = sharedElementState,
+                sharedContentState = sharedElementState,
                 visible = visible,
                 boundsTransform = NavPillBoundsTransform
             )
