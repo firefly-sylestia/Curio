@@ -1648,6 +1648,35 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v184 — nav pill: calmer morph/collapse, wider+higher pill, more
+  inactive spacing, Changa One labels.** User: "make the nav pill morph
+  and collape animation even smoother and calmer. and give the inactive
+  buttons a little more space. and use a new bond font for the tet of
+  nav pill maybe this one, Changa One" — then "also make it a little
+  wide like just a little heigh the pill" — then "also just like it
+  expands when i come back to home screen make it collapse when i go to
+  other screen from home screen for smoother look."
+  - SPRINGS: `PillWidth/Motion/Color/ExpandSpring` stiffness 400 → 240
+    (still damping 1.0 critically damped — zero overshoot/bounce). ~40%
+    slower settle, lockstep preserved (all four specs identical). The
+    collapse ALREADY mirrored the expand (both directions animate via
+    the same springs since v162) — the slowdown applies to BOTH, so
+    leaving a screen now glides closed exactly as returning glides open.
+    Fixed the stale v125 function KDoc that claimed the label exit is
+    "instant" (it's animated since v162).
+  - SIZE: pill "a little wide" + "a little high" — icon pills 60 → 64dp,
+    expanded 128 → 136dp, height 48 → 52dp.
+  - SPACING: bar inner padding 7 → 8dp, pill gap 6 → 10dp (inactive
+    buttons breathe).
+  - FONT: new bundled `changa_one_regular.ttf` (Changa One v1.003, OFL
+    with Reserved Font Name "Changa" — license at
+    `app/third_party/changa_one_OFL.txt`) + `ChangaOneFontFamily` in
+    CurioTypography.kt (SINGLE-entry like PatrickHand: Changa One has no
+    bold TTF, so pair with `FontWeight.Normal` or Bold requests trigger
+    fake-bold synthesis). Nav pill + rail labels use it at 13sp (12sp
+    geom Bold → 13sp Changa One keeps the same visual weight). Note:
+    the OFL text must NOT live in `res/font/` (typed dir — AAPT rejects
+    non-fonts); it sits at `app/third_party/`.
 - **v183 — Spin Filter badge only shows when filters are selected.**
   User: "in spin page the filter always shows the count, make it only
   show when filters are selected."

@@ -60,6 +60,20 @@ val PatrickHandFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * Changa One — the chunky display face for the bottom nav pill labels
+ * (v184). Google Fonts ships Changa One as a SINGLE Regular file (it has
+ * no Bold/Italic TTF — the face IS the heavy weight), so like
+ * [PatrickHandFontFamily] this is a single-entry family: a Bold request
+ * would trigger fake-bold synthesis, so callers pair it with
+ * `FontWeight.Normal` (the glyphs are already display-heavy). OFL
+ * (Reserved Font Name "Changa") — license text at
+ * `app/third_party/changa_one_OFL.txt`.
+ */
+val ChangaOneFontFamily: FontFamily = FontFamily(
+    Font(R.font.changa_one_regular)
+)
+
+/**
  * Lora — the editorial serif voice (OFL). A variable font (wght 400–700)
  * bundled at `res/font/lora.ttf` (v35). Used for long-form reading text —
  * the Topic Reveal teaser/quick-fact, action-card instructions, and intro

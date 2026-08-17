@@ -41,12 +41,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.curio.app.data.AppPreferences
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.fromHsl
@@ -217,9 +219,11 @@ object CurioBottomNavItems {
 // v159 — the pill got SLIMMER: same 60/128dp widths (the length is what
 // the user wanted kept) but the height dropped 60 → 48dp so the bar reads
 // shorter; the 26dp icon still breathes inside.
-private val FloatingPillIconWidth = 60.dp
-private val FloatingPillExpandedWidth = 128.dp
-private val FloatingPillHeight = 48.dp
+// v184 — the user asked for the pill "a little wide" and "a little
+// higher": icon pills 60 → 64dp, expanded 128 → 136dp, height 48 → 52dp.
+private val FloatingPillIconWidth = 64.dp
+private val FloatingPillExpandedWidth = 136.dp
+private val FloatingPillHeight = 52.dp
 
 // v162 — ONE spring family drives EVERY animated property of the pill
 // (width, active fill, icon tint, label expand/shrink). Before, the width
@@ -239,10 +243,14 @@ private val FloatingPillHeight = 48.dp
 // width/fill/label glide to rest with ZERO overshoot or bounce: smooth,
 // never violent. Same physics across all four specs keeps the v162/v165
 // lockstep (every element finishes with the pill).
-private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
-private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
-private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 400f)
-private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
+// v184 — "even smoother and calmer": stiffness 400 → 240 (~40% slower
+// settle). Still critically damped (damping 1.0 = zero overshoot, zero
+// bounce) — the calmest glide a spring can give; identical physics across
+// all four specs keeps the lockstep.
+private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 240f)
+private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 240f)
+private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 240f)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 240f)
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -299,9 +307,12 @@ fun CurioFloatingNavBar(
             shadowElevation = 6.dp
         ) {
             Row(
-                modifier = Modifier.padding(7.dp),
+                // v184 — more breathing room: bar padding 7 → 8dp and pill
+                // gap 6 → 10dp so the inactive pills sit with a little more
+                // space between them.
+                modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 CurioBottomNavItems.all.forEach { destination ->
                     // The hierarchy walk handles nested-graph destinations;
@@ -343,8 +354,11 @@ fun CurioFloatingNavBar(
  * spring: the deselected pill shrinks at exactly the rate the newly
  * selected one grows, so the bar's total width never dips and it never
  * re-centers (the "squeeze" the old snap-close + springy-open caused).
- * The label exit stays instant (the closing pill's text vanishes, per
- * v125: "only the active pill text has the morph open animation").
+ * v184 — the collapse mirrors the expand: the outgoing pill's width
+ * shrinks and its label slides back into the icon on the SAME springs as
+ * the incoming pill's growth (the "instant label exit" of v125 is long
+ * gone — v162 routed the label through the shared spring family, so the
+ * closing pill glides closed exactly as the opening one glides open).
  */
 @Composable
 private fun FloatingNavPill(
@@ -428,10 +442,17 @@ private fun FloatingNavPill(
             ) {
                 Text(
                     text = destination.label,
-                    // v164 — the tab labels wear the Material text style at
-                    // BOLD weight (was SemiBold) — the bolder label reads
-                    // proper inside the big pill.
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    // v184 — the tab labels now wear the bundled Changa One
+                    // display face (chunky single-weight — pair it with
+                    // Normal so no fake-bold synthesis; the glyphs are
+                    // already display-heavy). Size nudged 12 → 13sp so the
+                    // wide face reads at the same visual weight as the old
+                    // geom Bold.
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 13.sp
+                    ),
                     color = activeInk,
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)
@@ -508,8 +529,13 @@ fun CurioNavigationRail(
                     label = {
                         Text(
                             text = destination.label,
-                            // v164 — matches the pill bar's bolder tab labels.
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                            // v184 — matches the pill bar's Changa One tab
+                            // labels (Normal — the single-weight display face
+                            // needs no fake bold).
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontFamily = ChangaOneFontFamily,
+                                fontWeight = FontWeight.Normal
+                            )
                         )
                     },
                     colors = NavigationRailItemDefaults.colors(
