@@ -618,6 +618,11 @@ fun PetDesignerScreen(navController: NavController) {
         // FIRST ITEM (see below), so the tear rides away with the content
         // when the user scrolls — no overlay translation anymore.
         val listState = rememberLazyListState()
+        // v179 — the banner bleeds FULL-WIDTH: the list's edge padding used
+        // to inset the first item, cutting the tear at both sides. The hero
+        // item cancels that padding with a negative offset so it reaches the
+        // screen edges while the rows below stay in the padded column.
+        val edgePad = wideContentEdgePadding()
         Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
@@ -625,8 +630,8 @@ fun PetDesignerScreen(navController: NavController) {
                 .weight(1f),
             state = listState,
             contentPadding = PaddingValues(
-                start = wideContentEdgePadding(),
-                end = wideContentEdgePadding(),
+                start = edgePad,
+                end = edgePad,
                 bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -638,12 +643,21 @@ fun PetDesignerScreen(navController: NavController) {
             //    the top of the screen, so it stays while the banner rides
             //    away under it.
             item {
-                SettingsHeroHeader(
-                    title = "Pet designer",
-                    subtitle = "Draw your own Curie",
-                    onBack = { navController.popBackStack() },
-                    compact = wide
-                )
+                // v179 — full-bleed banner: negative side padding cancels
+                // the list's content padding for THIS item only, so the
+                // tear reaches both screen edges (was cut 16dp+ each side).
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = -edgePad)
+                ) {
+                    SettingsHeroHeader(
+                        title = "Pet designer",
+                        subtitle = "Draw your own Curie",
+                        onBack = { navController.popBackStack() },
+                        compact = wide
+                    )
+                }
             }
 
             // ── Editor page: picker trigger / Editing header (v8.56) ──
@@ -1362,8 +1376,10 @@ fun PetDesignerScreen(navController: NavController) {
  * tabs render icon-only at rest, the ACTIVE tab springs wider and slides
  * its label out (same spring width morph + label slide-out), and the
  * previously active pill collapses back to an icon — the "collapse"
- * animation the user meant by "unify the style". Same solid secondary
- * fill + onSecondary ink on the active pill.
+ * animation the user meant by "unify the style". v179 — the active pill
+ * wears the same plain-page fill as the main nav bar (muted
+ * `secondaryContainer` + its ink, light/dark aware) instead of the stale
+ * solid secondary the bar mirrored before v161.
  */
 @Composable
 private fun PetStudioBottomNav(
@@ -1453,14 +1469,18 @@ private fun RowScope.PetStudioTab(
         animationSpec = StudioWidthSpring,
         label = "studioPillWidth"
     )
-    val activeInk = MaterialTheme.colorScheme.onSecondary
+    // v179 — theme-aware active pill: the studio bar still wore the stale
+    // solid `secondary` (the butter the main nav bar dropped in v161); it
+    // now uses the same plain-page language as the nav bar — the muted
+    // `secondaryContainer` + its proper ink, both light/dark aware.
+    val activeInk = MaterialTheme.colorScheme.onSecondaryContainer
     Box(
         modifier = Modifier
             .width(pillWidth)
             .height(StudioPillHeight)
             .clip(RoundedCornerShape(50))
             .background(
-                if (selected) MaterialTheme.colorScheme.secondary
+                if (selected) MaterialTheme.colorScheme.secondaryContainer
                 else Color.Transparent
             )
             .clickable(onClick = onClick),
@@ -5255,8 +5275,9 @@ private fun CustomPetCard(
 private fun EditorPickPrompt(onOpenPicker: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        // v27n — opaque fill (was 55% alpha).
-        color = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primaryContainer, 0.55f),
+        // v179 — solid elevated container (the old lerp tint read as a
+        // translucent plate over the page wash — now clearly opaque).
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 2.dp,
         onClick = onOpenPicker,
         modifier = Modifier.fillMaxWidth()

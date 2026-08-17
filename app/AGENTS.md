@@ -1567,6 +1567,31 @@ app/src/main/java/com/curio/app/
     `ContentScale`, `AsyncImage`, `SvgDecoder`, `ImageRequest`, `R`;
     `Canvas`/`Offset`/`Random`/`lerp` stay (CategoryConstellation still
     draws).
+- **v179 — Pet Designer theme-aware studio pill + opaque edit prompt +
+  full-bleed hero.** User: "make the pet desinger gets the theme aware as
+  well. and make the what do you want to edit box non trasparent. and fix
+  its header tear hero too as its cut from sides." Clarified via
+  ask_user: "the floating nav pill doesnt and also fix its hero banner
+  side cut" — the theme issue is the STUDIO pill bar, not the page (the
+  page is already MaterialTheme-driven).
+  - STUDIO PILL (`PetStudioTab`): the ACTIVE tab still wore the stale
+    solid `secondary` + `onSecondary` (the butter the main nav bar
+    dropped in v161 for the accent system). It now uses the nav bar's
+    plain-page language: `secondaryContainer` + `onSecondaryContainer`
+    (both light/dark aware). The v147b doc comment updated to match.
+  - EDIT PROMPT (`EditorPickPrompt`): the "What do you want to edit?"
+    card's fill `lerp(surface, primaryContainer, 0.55f)` read as a
+    TRANSLUCENT plate over the page's lane wash; replaced with the solid
+    `surfaceContainerHigh` (same elevated container as DialogScrim) so
+    it's clearly opaque. `lerp` still used elsewhere (2321, 4559).
+  - HERO SIDE CUT: `SettingsHeroHeader` is the FIRST LazyColumn item and
+    the list's `contentPadding(start/end = wideContentEdgePadding())`
+    inset it 16dp+ each side — the tear looked cut. Fix: compute
+    `val edgePad = wideContentEdgePadding()` once, use it in
+    contentPadding, and wrap the hero item in
+    `Box(Modifier.fillMaxWidth().padding(horizontal = -edgePad))` so the
+    banner bleeds to BOTH screen edges (content below stays padded).
+    Works on wide screens too (larger edgePad cancels fully).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

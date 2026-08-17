@@ -1,4 +1,6 @@
 ADD
+- Pet Designer: the studio's bottom pill bar is theme-aware now — the active tab wears the same muted container + ink as the main nav bar (the old solid butter read as a stray yellow), and the "What do you want to edit?" card is a solid opaque container instead of a translucent tint.
+- Pet Designer: the header's torn banner now bleeds full-width — the list padding used to inset it, cutting the tear at both sides.
 - Stats: the "Your Curiosity" page's header banner is now the same sky artwork as the drawer hero — the night sky in dark mode, the day sky in light mode (the header's design is unchanged, only the banner art).
 - Drawer: the curiosity map's constellation lines and stars are clearly visible in light mode now — deeper slate inks on white instead of the faint blue that vanished — and every star is linked into a connected grid web so the constellation reads as one mesh.
 - Drawer: tap the moon in the night sky (or the sun in the day sky) on the hero to flip the theme between light and dark.
