@@ -5,8 +5,17 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONObject
 import org.vosk.Model
 import org.vosk.Recognizer
@@ -135,44 +144,171 @@ object VoskModels {
         modelDir(context, id) != null
 
     fun deleteModel(context: Context, id: String) {
-        modelDir(context, id)?.deleteRecursively()
+        // v137 — guard: only ever delete THIS model's subdir, never the
+        // shared models root (a mis-resolved path would wipe every model).
+        val dir = File(modelsDir(context), id)
+        if (dir.parentFile?.name == "vosk-models" && dir.name.isNotBlank()) {
+            dir.deleteRecursively()
+        }
+        // Drop the cached (possibly partial) zip so a re-download starts
+        // clean instead of resuming from a stale file.
+        File(context.cacheDir, "$id.zip").delete()
         AppPreferences.bumpOfflineModelVersion()
+    }
+}
+
+/**
+ * v137 — app-scoped model download manager.
+ *
+ * Downloads used to run inside the picker dialog's `rememberCoroutineScope`,
+ * so swiping the sheet away (or the dialog leaving composition) CANCELLED
+ * the transfer mid-download. State now lives here on an application-lifetime
+ * scope, so a download keeps running after the picker closes; rows observe
+ * [states] and can pause / resume / cancel per model, and several models
+ * download at once (each has its own job). Pausing keeps the partial zip in
+ * cache; resuming continues with an HTTP Range request where the server
+ * supports it (and restarts cleanly where it doesn't).
+ */
+object VoskModelDownloads {
+
+    enum class Status { Idle, Downloading, Paused, Failed }
+
+    data class State(
+        val status: Status = Status.Idle,
+        val progress: Float = 0f,
+        val error: String? = null
+    )
+
+    /** Per-model download state, keyed by model id. */
+    val states: StateFlow<Map<String, State>> = _states
+    private val _states = MutableStateFlow<Map<String, State>>(emptyMap())
+
+    // App-lifetime scope — surviving the picker dialog is the whole point.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val jobs = ConcurrentHashMap<String, Job>()
+    private val connections = ConcurrentHashMap<String, HttpURLConnection>()
+    // Pause gates: while a model is Paused its download loop awaits this
+    // gate; resume() completes it so the loop continues where it stopped.
+    private val pauseGates = ConcurrentHashMap<String, CompletableDeferred<Unit>>()
+
+    /** Aborts a transfer cleanly on pause — the partial zip is kept. */
+    private class PauseRequested : Exception()
+
+    /** Starts (or retries) a download. No-op while one is already active. */
+    fun start(context: Context, info: Info) {
+        val existing = jobs[info.id]
+        if (existing != null && existing.isActive) return
+        val job = scope.launch {
+            update(info.id) { it.copy(status = Status.Downloading, progress = 0f, error = null) }
+            val ok = downloadWithPause(context, info)
+            if (ok) {
+                update(info.id) { State(Status.Idle) }
+                AppPreferences.setOfflineModelId(context, info.id)
+                AppPreferences.bumpOfflineModelVersion()
+            } else {
+                update(info.id) {
+                    it.copy(status = Status.Failed, error = "Download failed. Check your connection and try again.")
+                }
+            }
+        }
+        job.invokeOnCompletion {
+            // Only clear the entry if it still refers to THIS job — a fresh
+            // start() after a cancel must not have its entry removed by the
+            // dying job's cleanup.
+            if (jobs[info.id] === job) jobs.remove(info.id)
+            pauseGates.remove(info.id)?.complete(Unit)
+        }
+        jobs[info.id] = job
+    }
+
+    fun pause(id: String) {
+        if (_states.value[id]?.status != Status.Downloading) return
+        update(id) { it.copy(status = Status.Paused) }
+    }
+
+    fun resume(id: String) {
+        if (_states.value[id]?.status != Status.Paused) return
+        update(id) { it.copy(status = Status.Downloading) }
+        pauseGates.remove(id)?.complete(Unit)
+    }
+
+    /** Stops a download and drops the partial zip (a deliberate cancel). */
+    fun cancel(context: Context, id: String) {
+        update(id) { State(Status.Idle) }
+        jobs.remove(id)?.cancel()
+        connections.remove(id)?.disconnect()
+        pauseGates.remove(id)?.complete(Unit)
+        File(context.cacheDir, "$id.zip").delete()
+    }
+
+    private fun update(id: String, transform: (State) -> State) {
+        _states.update { it + (id to transform(it[id] ?: State())) }
     }
 
     /**
-     * Downloads [info]'s zip to cache and extracts it into
-     * `filesDir/vosk-models/<id>/` (the zip's single root folder is
-     * stripped). [onProgress] reports 0..1 across the DOWNLOAD phase only
-     * (unzipping is quick relative to a 40MB transfer). Returns true only
-     * on a complete, verified extract; false on any failure.
+     * The pausable transfer: downloads [info]'s zip into cache (resuming
+     * from a partial file via Range where supported), then extracts it into
+     * `filesDir/vosk-models/<id>/` (the zip's single root folder stripped).
+     * Returns true only on a complete, verified extract.
      */
-    suspend fun download(context: Context, info: Info, onProgress: (Float) -> Unit): Boolean =
+    private suspend fun downloadWithPause(context: Context, info: Info): Boolean =
         withContext(Dispatchers.IO) {
             val zipFile = File(context.cacheDir, "${info.id}.zip")
             try {
-                // ── Download ────────────────────────────────────────────
-                val conn = URL(info.url).openConnection() as HttpURLConnection
-                try {
-                    conn.connectTimeout = 15_000
-                    conn.readTimeout = 20_000
-                    conn.instanceFollowRedirects = true
-                    if (conn.responseCode != HttpURLConnection.HTTP_OK) return@withContext false
-                    val total = conn.contentLengthLong
-                    zipFile.outputStream().use { out ->
-                        conn.inputStream.use { input ->
-                            val buf = ByteArray(64 * 1024)
-                            var received = 0L
-                            while (true) {
-                                val n = input.read(buf)
-                                if (n < 0) break
-                                out.write(buf, 0, n)
-                                received += n
-                                onProgress(if (total > 0) (received.toFloat() / total).coerceIn(0f, 1f) else 0f)
+                var received = zipFile.length()
+                var fullSize = 0L
+                var done = false
+                while (!done) {
+                    // ── Wait while paused ───────────────────────────────
+                    while (_states.value[info.id]?.status == Status.Paused) {
+                        pauseGates.computeIfAbsent(info.id) { CompletableDeferred() }.await()
+                    }
+                    // ── (Re)open — a resumed transfer asks for the rest ─
+                    val conn = URL(info.url).openConnection() as HttpURLConnection
+                    try {
+                        conn.connectTimeout = 15_000
+                        conn.readTimeout = 20_000
+                        conn.instanceFollowRedirects = true
+                        if (received > 0) conn.setRequestProperty("Range", "bytes=$received-")
+                        when (conn.responseCode) {
+                            HttpURLConnection.HTTP_OK -> {
+                                if (received > 0) {
+                                    // Server ignored Range — start over.
+                                    zipFile.delete()
+                                    received = 0
+                                }
+                                fullSize = conn.contentLengthLong
+                            }
+                            HttpURLConnection.HTTP_PARTIAL -> {
+                                if (fullSize <= 0) fullSize = received + conn.contentLengthLong
+                            }
+                            else -> return@withContext false
+                        }
+                        connections[info.id] = conn
+                        zipFile.outputStream(received > 0).use { out ->
+                            conn.inputStream.use { input ->
+                                val buf = ByteArray(64 * 1024)
+                                while (true) {
+                                    if (_states.value[info.id]?.status == Status.Paused) throw PauseRequested()
+                                    val n = input.read(buf)
+                                    if (n < 0) break
+                                    out.write(buf, 0, n)
+                                    received += n
+                                    if (fullSize > 0) {
+                                        update(info.id) {
+                                            it.copy(progress = (received.toFloat() / fullSize).coerceIn(0f, 1f))
+                                        }
+                                    }
+                                }
                             }
                         }
+                        done = true
+                    } catch (_: PauseRequested) {
+                        // Partial kept — the loop waits on the gate above.
+                    } finally {
+                        connections.remove(info.id)
+                        conn.disconnect()
                     }
-                } finally {
-                    conn.disconnect()
                 }
                 // ── Extract ─────────────────────────────────────────────
                 val dest = File(modelsDir(context), info.id)
@@ -198,6 +334,7 @@ object VoskModels {
                         entry = zip.nextEntry
                     }
                 }
+                zipFile.delete()
                 if (extracted == 0 || !File(dest, "am").isDirectory) {
                     dest.deleteRecursively()
                     return@withContext false
@@ -208,8 +345,6 @@ object VoskModels {
             } catch (_: Exception) {
                 zipFile.delete()
                 false
-            } finally {
-                zipFile.delete()
             }
         }
 }

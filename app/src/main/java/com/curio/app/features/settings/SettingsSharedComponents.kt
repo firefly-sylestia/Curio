@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -29,12 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -46,6 +42,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioQuality
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
+import com.curio.app.data.VoskModelDownloads
 import com.curio.app.data.VoskModels
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.components.curioDarkGlow
@@ -56,7 +53,6 @@ import com.curio.app.ui.theme.brandRes
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
-import kotlinx.coroutines.launch
 
 /**
  * v27q — content ink that reads on the SOLID [curioDialogActionColor]
@@ -301,10 +297,10 @@ fun OfflineModelDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var downloadingId by remember { mutableStateOf<String?>(null) }
-    var downloadProgress by remember { mutableFloatStateOf(0f) }
-    var downloadError by remember { mutableStateOf<String?>(null) }
+    // v137 — download state lives in the app-scoped VoskModelDownloads
+    // manager, so a transfer keeps running after this sheet closes; the
+    // rows below observe it for per-model progress / pause / resume.
+    val downloadStates by VoskModelDownloads.states.collectAsState()
     // v125 — the offline model version is bumped by download/delete, so
     // re-reading the installed state below recomposes with fresh data.
     AppPreferences.offlineModelVersionState
@@ -353,19 +349,11 @@ fun OfflineModelDialog(
                 }
             }
             Text(
-                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large and Full models are much more accurate but are heavy downloads that need real storage and memory. No internet needed while it runs.",
+                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large and Full models are much more accurate but are heavy downloads that need real storage and memory. Downloads keep running if you close this screen — pause or cancel them anytime, and several can download at once. No internet needed while it runs.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
             )
-            if (downloadError != null) {
-                Text(
-                    downloadError.orEmpty(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 6.dp)
-                )
-            }
             // The model list — scrolls within the full-height sheet (the
             // old dialog capped the height and clipped the bottom rows).
             LazyColumn(
@@ -378,7 +366,10 @@ fun OfflineModelDialog(
                 items(VoskModels.CATALOG, key = { it.id }) { model ->
                     val downloaded = VoskModels.isDownloaded(context, model.id)
                     val selected = downloaded && model.id == currentModelId
-                    val isDownloading = downloadingId == model.id
+                    val dl = downloadStates[model.id]
+                    val isDownloading = dl?.status == VoskModelDownloads.Status.Downloading
+                    val isPaused = dl?.status == VoskModelDownloads.Status.Paused
+                    val failed = dl?.status == VoskModelDownloads.Status.Failed
                     Surface(
                         onClick = { if (downloaded && !isDownloading) AppPreferences.setOfflineModelId(context, model.id) },
                         enabled = downloaded && !isDownloading,
@@ -425,9 +416,9 @@ fun OfflineModelDialog(
                                     color = if (selected) dialogRowSelectedInk().copy(alpha = 0.8f)
                                            else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                if (isDownloading) {
+                                if (isDownloading || isPaused) {
                                     LinearProgressIndicator(
-                                        progress = { downloadProgress },
+                                        progress = { dl?.progress ?: 0f },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 6.dp),
@@ -436,23 +427,61 @@ fun OfflineModelDialog(
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant
                                     )
                                 }
+                                if (failed) {
+                                    Text(
+                                        text = dl?.error.orEmpty(),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
                             }
                             when {
-                                isDownloading -> {
+                                isDownloading || isPaused -> {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        CircularProgressIndicator(
-                                            strokeWidth = 2.dp,
-                                            color = if (selected) dialogRowSelectedInk()
-                                                    else curioDialogActionColor(),
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Spacer(Modifier.width(4.dp))
                                         Text(
-                                            "${(downloadProgress * 100).toInt()}%",
+                                            "${((dl?.progress ?: 0f) * 100).toInt()}%",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = if (selected) dialogRowSelectedInk()
                                                    else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+                                        Spacer(Modifier.width(6.dp))
+                                        // Pause ⇄ Resume — resume continues from the partial file.
+                                        Surface(
+                                            onClick = {
+                                                if (isPaused) VoskModelDownloads.resume(model.id)
+                                                else VoskModelDownloads.pause(model.id)
+                                            },
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = if (selected) dialogRowSelectedInk().copy(alpha = 0.18f)
+                                                   else MaterialTheme.colorScheme.surfaceVariant
+                                        ) {
+                                            CurioIcon(
+                                                name = if (isPaused) CurioIcons.PlayArrow else CurioIcons.Pause,
+                                                contentDescription = if (isPaused) "Resume ${model.displayName}" else "Pause ${model.displayName}",
+                                                tint = if (selected) dialogRowSelectedInk()
+                                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                size = 16.dp,
+                                                modifier = Modifier.padding(6.dp)
+                                            )
+                                        }
+                                        Spacer(Modifier.width(6.dp))
+                                        // Cancel — the only thing that stops a download for good;
+                                        // closing this sheet keeps it running in the background.
+                                        Surface(
+                                            onClick = { VoskModelDownloads.cancel(context, model.id) },
+                                            shape = RoundedCornerShape(8.dp),
+                                            color = if (selected) dialogRowSelectedInk().copy(alpha = 0.18f)
+                                                   else MaterialTheme.colorScheme.surfaceVariant
+                                        ) {
+                                            CurioIcon(
+                                                name = CurioIcons.Close,
+                                                contentDescription = "Cancel download ${model.displayName}",
+                                                tint = if (selected) dialogRowSelectedInk()
+                                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                size = 16.dp,
+                                                modifier = Modifier.padding(6.dp)
+                                            )
+                                        }
                                     }
                                 }
                                 downloaded -> {
@@ -486,23 +515,21 @@ fun OfflineModelDialog(
                                         }
                                     }
                                 }
+                                failed -> {
+                                    TextButton(
+                                        onClick = { VoskModelDownloads.start(context, model) },
+                                        contentPadding = PaddingValues(horizontal = 8.dp)
+                                    ) {
+                                        Text(
+                                            "Retry",
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (selected) dialogRowSelectedInk() else curioDialogActionColor()
+                                        )
+                                    }
+                                }
                                 else -> {
                                     TextButton(
-                                        onClick = {
-                                            downloadError = null
-                                            scope.launch {
-                                                downloadingId = model.id
-                                                downloadProgress = 0f
-                                                val ok = VoskModels.download(context, model) { downloadProgress = it }
-                                                downloadingId = null
-                                                if (ok) {
-                                                    AppPreferences.setOfflineModelId(context, model.id)
-                                                    AppPreferences.bumpOfflineModelVersion()
-                                                } else {
-                                                    downloadError = "Download failed. Check your connection and try again."
-                                                }
-                                            }
-                                        },
+                                        onClick = { VoskModelDownloads.start(context, model) },
                                         contentPadding = PaddingValues(horizontal = 8.dp)
                                     ) {
                                         Text(

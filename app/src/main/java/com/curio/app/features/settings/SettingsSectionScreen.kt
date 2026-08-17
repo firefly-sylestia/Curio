@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +62,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
+import com.curio.app.data.VoskModelDownloads
 import com.curio.app.data.VoskModels
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioColors
@@ -590,7 +592,19 @@ private fun RecordingSection(highlightKey: String? = null) {
     AppPreferences.offlineModelVersionState
     val offlineModelId = AppPreferences.offlineModelIdState
     val offlineModel = VoskModels.byId(offlineModelId)
+    // v137 — the download manager outlives the picker sheet, so the row's
+    // subtitle reports a background transfer still running (with %).
+    val downloadStates by VoskModelDownloads.states.collectAsState()
+    val activeDownload = downloadStates.entries.firstOrNull { (_, s) ->
+        s.status == VoskModelDownloads.Status.Downloading || s.status == VoskModelDownloads.Status.Paused
+    }
     val offlineModelSubtitle = when {
+        activeDownload != null -> {
+            val m = VoskModels.byId(activeDownload.key)
+            val pct = (activeDownload.value.progress * 100).toInt()
+            if (m != null) "Downloading ${m.displayName} · $pct%"
+            else "Downloading a model · $pct%"
+        }
         offlineModel != null && VoskModels.isDownloaded(context, offlineModelId) ->
             "${offlineModel.displayName} · ${offlineModel.sizeLabel}"
         else -> "Offline model for pre-recorded voice-to-text"

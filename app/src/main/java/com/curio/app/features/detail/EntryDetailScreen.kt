@@ -1753,13 +1753,12 @@ private fun SoundBiteRender(
                 )
             }
 
-            // ── Offline transcript (v125) — sits right below the audio
-            // player. No transcript yet: a Transcribe button (needs the
-            // downloaded offline model from Settings → Recording). With one:
-            // a collapsible box that shows a few lines by default with an
-            // Expand button for the full text, plus re-transcribe + clear.
+            // ── Offline transcript (v137) — only when the take HAS audio:
+            // a note-only Sound Bite (no recording) has nothing to
+            // transcribe, so the Transcribe button and the transcript box
+            // stay hidden entirely.
             val transcript = data.transcript?.takeIf { it.isNotBlank() }
-            if (transcript == null) {
+            if (transcript == null && !data.audioFilePath.isNullOrBlank()) {
                 if (offlineModelDownloaded) {
                     Surface(
                         onClick = { startOfflineTranscription() },
@@ -1825,7 +1824,7 @@ private fun SoundBiteRender(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-            } else {
+            } else if (transcript != null && !data.audioFilePath.isNullOrBlank()) {
                 // ── Transcript box — collapsed to a few lines with an
                 // Expand button for the full text ──
                 Column(

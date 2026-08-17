@@ -815,6 +815,42 @@ app/src/main/java/com/curio/app/
   fixed max height and clips long lists — a scrolling list belongs in a
   bottom sheet or a `LazyColumn` inside a custom dialog, never a bare
   `Column` in an AlertDialog `text` slot.
+- **v137 — CI compile: drawer collapsible groups need a Column host.**
+  The v135 drawer put `AnimatedVisibility` (a `ColumnScope` extension)
+  directly inside `LazyColumn` `item {}` blocks — `LazyItemScope` has no
+  `ColumnScope` receiver, so `compileDebugKotlin` failed with "cannot be
+  called in this context with an implicit receiver". Each group now wraps
+  its `AnimatedVisibility` in a plain `Column`. LESSON: `AnimatedVisibility`
+  is a `ColumnScope` extension — inside a `LazyColumn` item it must be
+  hosted by an explicit `Column` (or use `Modifier.animateContentSize`).
+- **v138 — offline model downloads: app-scoped manager (pause/resume/
+  cancel/multi) + delete hardening + transcribe gating.** (1) **New
+  `VoskModelDownloads` object** (OfflineTranscriber.kt): downloads used to
+  run in the picker dialog's `rememberCoroutineScope`, so swiping the
+  sheet away CANCELLED the transfer. State now lives on an
+  application-lifetime `CoroutineScope(SupervisorJob() + Main.immediate)`
+  as a `StateFlow<Map<modelId, State>>`; each model gets its own `Job`, so
+  several download at once, and closing the sheet leaves them running.
+  **Pause** aborts the transfer cleanly (`PauseRequested` thrown inside
+  the loop, partial zip kept) and the loop awaits a per-model
+  `CompletableDeferred` gate; **resume** completes the gate and re-opens
+  the connection with `Range: bytes=<received>-` (206 → append; 200 →
+  restart from scratch). **Cancel** cancels the job, disconnects the live
+  connection, drops the partial zip and resets the row. `start()` guards
+  on `existing.isActive` and `invokeOnCompletion` removes the job entry
+  only `if (jobs[id] === job)` so a fresh start after a cancel isn't
+  clobbered. (2) **Delete hardened** (`VoskModels.deleteModel`): only
+  deletes `filesDir/vosk-models/<id>` when the parent is exactly
+  `vosk-models` (a mis-resolved path can never wipe the root), and also
+  clears the cached zip. (3) **Transcribe gating** (EntryDetailScreen
+  `SoundBiteRender`): the Transcribe button + transcript box previously
+  rendered on ANY Sound Bite — including note-only takes with no audio
+  file. Both branches are now gated on `!data.audioFilePath.isNullOrBlank()`
+  (`if (transcript == null && hasAudio)` / `else if (transcript != null &&
+  hasAudio)`). (4) **Visible background downloads**: the Settings →
+  Recording "Offline model" row subtitle shows "Downloading <model> ·
+  N%" while a transfer runs after the sheet closes; the picker intro copy
+  now tells the user downloads survive closing the screen.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read
