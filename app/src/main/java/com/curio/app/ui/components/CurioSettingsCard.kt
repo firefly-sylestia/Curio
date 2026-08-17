@@ -69,6 +69,14 @@ fun CurioSettingsCard(
             settingsCardTintLift(),
             0.30f
         ),
+        // v131 — explicit content ink. The card fill is a CUSTOM lerp (not a
+        // scheme token), and the row titles inside rely on LocalContentColor:
+        // the default contentColorFor(customFill) resolved BLACK in dark mode,
+        // making every uncolored row label (CurioSettingsRow titles, switch /
+        // segmented labels, card headers) invisible on the near-black card.
+        // Pinning it to the theme's onSurface keeps dark plum in light mode
+        // and renders crisp cream in dark mode.
+        contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 3.dp,
         shadowElevation = shadowElevation,
         modifier = modifier

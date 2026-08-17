@@ -688,15 +688,13 @@ private fun ProfileDialogs(
                             }
                         }
                         Column(modifier = Modifier.weight(1f)) {
+                            // v130 — no redundant "change photo to re-crop"
+                            // chatter: the label plus the Add/Change/Remove
+                            // pill actions say it all. Photos are always
+                            // square-cropped before saving.
                             Text(
                                 "Profile photo",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                            )
-                            Text(
-                                if (avatarPath.isNotBlank()) "Square photo — Change photo to re-crop."
-                                else "Pick a photo — you can crop it to a square before saving.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

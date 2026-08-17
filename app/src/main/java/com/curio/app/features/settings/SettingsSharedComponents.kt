@@ -307,7 +307,7 @@ fun OfflineModelDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "The offline model turns pre-recorded voice notes into text on your device. Download one to enable transcription — no internet needed while it runs.",
+                    "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large and Full models are much more accurate but are heavy downloads that need real storage and memory. No internet needed while it runs.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -1,6 +1,7 @@
 ADD
 - Offline voice-to-text: recorded voice notes transcribe straight on your device (Vosk) — a Transcribe button on the entry page and the transcript lives in its own box below the recording with an Expand button for the full text.
 - Offline model: Settings → Recording lets you pick a model by quality and size (English / multilingual / Indian English), download it in-app with a progress bar, and delete it anytime — no internet needed while transcribing.
+- Offline model: four bigger models to choose from in Settings → Recording — Large English (~128 MB), Full English (~1.8 GB), the newest Gigaspeech English (~2.3 GB) and Full Indian English (~1 GB) — more accuracy when you're willing to download more.
 - Dictation: one floating mic now appears above the keyboard when you open the large text box in Save your take — tap it to dictate in a dialog with a live preview, tap Stop when you're done, and Insert drops the text into your note (still editable). It only stops when you say so.
 - Quick title: the title field is a clean plain input now (no more paper/tear slip), and on the saved entry it sits right below the quick fact on a neat pill.
 - Navigation: the bottom bar is now a floating pill — the tabs show as icons, and the active tab smoothly expands to reveal its label (the indicator covers the whole pill) in every theme, including dark and AMOLED.
@@ -27,6 +28,9 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Dictation: taking a pause no longer wipes what you already said — the transcript keeps building, and each pause becomes a full stop (so speak, pause, speak again flows as two sentences).
+- Dictation: the floating mic now sits in the note box's own tool row above the field, so it stays visible above the keyboard instead of hiding below the page.
+- Dark mode: the option-card row labels on Profile, Settings and every settings sub-page (plus Support, Updates, Experiments, Quests, Backup and onboarding cards) were black and unreadable on the dark cards — they now render in the theme's readable ink.
 - Data: the ~55 books that appeared twice in the Books lane (e.g. The Odyssey listed with and without its year, Moby-Dick under two titles) are now single entries — each keeps the richer description, merges both tag sets, and stays marquee where it was.
 - App icon: the launcher icon is no longer a tiny card inside the icon — the art fills the icon properly now, matching the bigger splash logo, and the splash dropped the old white border (both use the new cosmic mark).
 - Progress: tap the count in the progress dialog to fix the total — the pages/episodes target is editable per topic now, so a wrong total stays corrected everywhere (the pill, the cards and the editor).

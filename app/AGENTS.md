@@ -769,6 +769,38 @@ app/src/main/java/com/curio/app/
   nav-bar inset the Scaffold used to deliver (content Box applies
   `windowInsetsPadding(navigationBars)` whenever the pill is hidden).
   The reveal's 80dp placeholder is unchanged (it paints its own band).
+- **v131 — offline models, dictation fixes + the settings-card ink fix.**
+  (1) **Offline model catalog expanded** (`VoskModels.CATALOG`): four
+  bigger tiers join the three smalls — `vosk-model-en-us-0.22-lgraph`
+  (Large · English US, ~128 MB), `vosk-model-en-us-0.22` (Full · English
+  US, ~1.8 GB), `vosk-model-en-us-0.42-gigaspeech` (Full · Gigaspeech,
+  ~2.3 GB) and `vosk-model-en-in-0.5` (Full · English India, ~1 GB),
+  sizes from the alphacephei.com model page; the picker copy warns that
+  the big models are heavy downloads needing real storage + memory.
+  (2) **The floating dictation mic moved INTO the note box's tool dock**
+  (`RichTextEditor.trailingAction`, the slot designed for "a small
+  dictation button"): it renders above the field (still gated on
+  `noteFocused && !dictationOpen && voiceToTextEnabled`) instead of in
+  the scroll flow below the editor, so it never hides behind the
+  keyboard. (3) **Dictation no longer wipes earlier text on a pause, and
+  a break = a full stop** (always on, per user): the transcript now
+  ACCUMULATES — `dictatedText` holds committed utterances, `partialTranscript`
+  is only the live words; `onResults` APPENDS (never replaces), blank
+  partials during a pause no longer clear the preview, and a fresh
+  partial after `onEndOfSpeech` commits the previous utterance first
+  (prefix-match guards against same-utterance refinements). Committed
+  utterances join with a period (`. `) and the next sentence is
+  capitalized; Insert drops the whole transcript (committed + live
+  partial) into the note. (4) **Settings-card row labels were BLACK in
+  dark mode** (`CurioSettingsCard`): the card fill is a CUSTOM lerp, and
+  the uncolored row titles rely on `LocalContentColor` — the default
+  `contentColorFor(customFill)` resolved black on the near-black card,
+  making every row label invisible (subtitles were fine — they set
+  explicit `onSurfaceVariant`). `CurioSettingsCard` now pins
+  `contentColor = MaterialTheme.colorScheme.onSurface` (dark plum in
+  light, cream in dark), fixing Profile, the Settings hub, every settings
+  sub-page, Support, Updates, Experiments, Quests, Backup and Onboarding
+  cards in one edit.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

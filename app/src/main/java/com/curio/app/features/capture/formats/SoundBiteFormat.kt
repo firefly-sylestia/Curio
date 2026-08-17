@@ -180,7 +180,17 @@ fun SoundBiteFormat(
     var noteFocused by remember { mutableStateOf(false) }
     var dictationOpen by remember { mutableStateOf(false) }
     var listening by remember { mutableStateOf(false) }
+    // v131 — the transcript ACCUMULATES across pauses: `dictatedText` holds
+    // every committed utterance (each break becomes a full stop), while
+    // `partialTranscript` is only the LIVE words of the current utterance.
+    // Before this, every new partial replaced the whole preview, so a pause
+    // wiped everything you had already said.
+    var dictatedText by remember { mutableStateOf("") }
     var partialTranscript by remember { mutableStateOf("") }
+    // A pause (onEndOfSpeech) seen since the last commit — a fresh partial
+    // after it belongs to a NEW utterance, so the old partial must be
+    // committed first (for engines that never fire onResults per utterance).
+    var speechEnded by remember { mutableStateOf(false) }
     var transcribeError by remember { mutableStateOf<String?>(null) }
     var dictationRequested by remember { mutableStateOf(false) }
     val speechRecognizer = remember(context, voiceToTextEnabled) {
@@ -199,7 +209,9 @@ fun SoundBiteFormat(
         }
         listening = true
         transcribeError = null
+        dictatedText = ""
         partialTranscript = ""
+        speechEnded = false
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
@@ -220,7 +232,15 @@ fun SoundBiteFormat(
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
             override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
+            override fun onEndOfSpeech() {
+                // A pause mid-session — the current partial is a finished
+                // utterance. If the engine never fires onResults for it (it
+                // keeps the session open and streams a fresh partial for the
+                // next utterance), the next partial commits this one first
+                // (see onPartialResults), so the break still becomes a full
+                // stop and the words are never lost.
+                speechEnded = true
+            }
             override fun onError(error: Int) {
                 listening = false
                 transcribeError = when (error) {
@@ -239,12 +259,35 @@ fun SoundBiteFormat(
                 // v7.25 — some engines finish with an EMPTY RESULTS list but
                 // deliver the text as the final partial — keep it so the
                 // dialog can still offer it for Insert.
-                partialTranscript = matches?.firstOrNull { it.isNotBlank() }
+                val final = matches?.firstOrNull { it.isNotBlank() }
                     ?: partialTranscript.takeIf { it.isNotBlank() }.orEmpty()
+                // v131 — commit, never replace: the finished utterance is
+                // APPENDED, so a pause + re-speak no longer wipes the
+                // earlier text (and the break becomes a full stop).
+                commitUtterance(final)
             }
             override fun onPartialResults(partialResults: Bundle?) {
                 val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                partialTranscript = matches?.firstOrNull().orEmpty()
+                val partial = matches?.firstOrNull().orEmpty()
+                // v131 — a blank partial during a pause must NOT clear the
+                // live preview; keep the last words on screen.
+                if (partial.isBlank()) return
+                // A partial right after a pause: if the previous utterance was
+                // never finalized (no onResults), decide whether this is a
+                // NEW utterance (commit the old one first — the break becomes
+                // a full stop and the words are kept) or a same-utterance
+                // REFINEMENT (the engine polished the wording — just update
+                // the live partial and stay armed).
+                if (speechEnded && partialTranscript.isNotBlank()) {
+                    if (partial == partialTranscript) return
+                    if (partial.startsWith(partialTranscript) || partialTranscript.startsWith(partial)) {
+                        partialTranscript = partial
+                        return
+                    }
+                    commitUtterance(partialTranscript)
+                }
+                speechEnded = false
+                partialTranscript = partial
             }
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
@@ -256,15 +299,48 @@ fun SoundBiteFormat(
         listening = false
     }
 
+    /**
+     * v131 — commits a finished utterance into [dictatedText]. Each break
+     * becomes a full stop: utterances join with a period (always on, per
+     * user), and the next sentence starts capitalized.
+     */
+    fun commitUtterance(text: String) {
+        val t = text.trim()
+        if (t.isBlank()) {
+            speechEnded = false
+            return
+        }
+        val sentence = if (dictatedText.isNotBlank()) t.replaceFirstChar { it.uppercase() } else t
+        if (dictatedText.isBlank()) {
+            dictatedText = sentence
+        } else {
+            val prevEndsPunct = dictatedText.lastOrNull()?.let { it == '.' || it == '?' || it == '!' } == true
+            dictatedText = if (!prevEndsPunct) "$dictatedText. $sentence" else "$dictatedText $sentence"
+        }
+        partialTranscript = ""
+        speechEnded = false
+    }
+
+    /** The dialog preview — committed utterances plus the live partial. */
+    fun dictationPreview(): String = buildString {
+        append(dictatedText)
+        if (partialTranscript.isNotBlank()) {
+            if (dictatedText.isNotBlank()) append(' ')
+            append(partialTranscript)
+        }
+    }.trim()
+
     /** Inserts the transcript at the end of the note; the box stays editable. */
     fun insertDictation() {
-        val text = partialTranscript.trim()
+        val text = dictationPreview()
         if (text.isNotBlank()) {
             note = if (note.isBlank()) text else "$note\n$text"
         }
         stopListening()
         dictationOpen = false
+        dictatedText = ""
         partialTranscript = ""
+        speechEnded = false
         transcribeError = null
     }
 
@@ -310,7 +386,9 @@ fun SoundBiteFormat(
             dictationRequested = false
             dictationOpen = false
             listening = false
+            dictatedText = ""
             partialTranscript = ""
+            speechEnded = false
             transcribeError = null
         }
     }
@@ -637,38 +715,32 @@ fun SoundBiteFormat(
             paperColor = noteColor,
             onPaperColorChange = { noteColor = it },
             paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
-            // v125 — the format knows when the large note box is focused so
-            // it can float the dictation mic above the keyboard.
-            onFocusChanged = { noteFocused = it }
-        )
-
-        // ── Floating dictation mic (v125) — appears ONLY while the large
-        // note box is focused (not the title); tap to dictate into it. The
-        // dialog owns the stop/insert controls, so the mic itself is hidden
-        // while the dialog is up.
-        if (voiceToTextEnabled && noteFocused && !dictationOpen) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Surface(
-                    onClick = { onFloatMicTap() },
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    shadowElevation = 6.dp,
-                    modifier = Modifier.size(52.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CurioIcon(
-                            name = CurioIcons.Mic,
-                            contentDescription = "Dictate note",
-                            tint = pastelFillInk(MaterialTheme.colorScheme.tertiary),
-                            size = 26.dp
-                        )
+            // v131 — the dictation mic rides the note box's own tool dock
+            // (above the field), so it never hides below the page behind the
+            // keyboard. It appears only while the note is focused (not the
+            // title) and is hidden while the dialog is up.
+            trailingAction = {
+                if (voiceToTextEnabled && noteFocused && !dictationOpen) {
+                    Surface(
+                        onClick = { onFloatMicTap() },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                name = CurioIcons.Mic,
+                                contentDescription = "Dictate note",
+                                tint = MaterialTheme.colorScheme.onTertiary,
+                                size = 18.dp
+                            )
+                        }
                     }
                 }
-            }
-        }
+            },
+            onFocusChanged = { noteFocused = it }
+        )
 
         // ── Dictation dialog (v125) — floating-mic flow: live preview at
         // the bottom, Stop to end listening, Insert to drop the transcript
@@ -677,7 +749,7 @@ fun SoundBiteFormat(
             DictationDialog(
                 accent = MaterialTheme.colorScheme.tertiary,
                 listening = listening,
-                partial = partialTranscript,
+                partial = dictationPreview(),
                 error = transcribeError,
                 onStop = {
                     stopListening()
@@ -687,7 +759,9 @@ fun SoundBiteFormat(
                 onDismiss = {
                     stopListening()
                     dictationOpen = false
+                    dictatedText = ""
                     partialTranscript = ""
+                    speechEnded = false
                     transcribeError = null
                 }
             )

@@ -75,6 +75,42 @@ object VoskModels {
             sizeLabel = "~40 MB",
             sizeBytes = 40_400_000L,
             url = "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip"
+        ),
+        // v131 — the bigger tiers: Large (~128 MB, phone-friendly, notably
+        // more accurate than the smalls) and the Full server-grade models
+        // (~1-2.3 GB — most accurate, but heavy downloads that need real
+        // storage + memory). Sizes from the alphacephei.com model page.
+        Info(
+            id = "vosk-model-en-us-0.22-lgraph",
+            displayName = "Large · English (US)",
+            langLabel = "Higher accuracy with a dynamic graph",
+            sizeLabel = "~128 MB",
+            sizeBytes = 128_000_000L,
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip"
+        ),
+        Info(
+            id = "vosk-model-en-us-0.22",
+            displayName = "Full · English (US)",
+            langLabel = "Most accurate US English — large download, needs real storage & memory",
+            sizeLabel = "~1.8 GB",
+            sizeBytes = 1_800_000_000L,
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip"
+        ),
+        Info(
+            id = "vosk-model-en-us-0.42-gigaspeech",
+            displayName = "Full · English (US) — Gigaspeech",
+            langLabel = "Newest accurate model — best on podcasts & clear speech",
+            sizeLabel = "~2.3 GB",
+            sizeBytes = 2_300_000_000L,
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.42-gigaspeech.zip"
+        ),
+        Info(
+            id = "vosk-model-en-in-0.5",
+            displayName = "Full · English (India)",
+            langLabel = "Higher accuracy for Indian accents — large download",
+            sizeLabel = "~1 GB",
+            sizeBytes = 1_000_000_000L,
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-in-0.5.zip"
         )
     )
 
