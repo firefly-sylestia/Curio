@@ -81,7 +81,7 @@ app/src/main/java/com/curio/app/
 
 ### UI
 - **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
-- **Theme styles (Settings → Appearance):** three mutually exclusive styles — **Curio** (default: warm cream palette + category tints), **AMOLED** (forced dark, pure-black surfaces, tints off), **Material** (the device's Material You dynamic palette for surfaces/backgrounds/controls; category accents stay the true researched colors so cards/heroes/gradients stay vivid, tints off). Persisted as `AppPreferences.themeStyleState`; the wash helpers gate on `AppPreferences.tintWashEffective()`. All category-accent fills/ink read `themedAccent()` so the Material style shades them app-wide.
+- **M3 theme system (v185, Settings → Appearance):** two INDEPENDENT opt-in toggles, both default OFF (the current Curio look is the default — nothing changes until a toggle is on). **1) "Material theme"** (`AppPreferences.materialThemeState`) redoes the COLOR system per M3 guidelines: the whole `ColorScheme` becomes `materialColorScheme()` (dynamic Material You on Android 12+, seeded brand-coral baseline fallback — `ui/theme/MaterialColorSchemes.kt`), and the 36 lane accents collapse to **6 muted hue families** (`MaterialFamilies.kt`: rose→scheme.secondary, green→scheme.tertiary, amber/blue/purple/neutral → tonal tones of the family hue) — M3's multi-color guideline is restraint: neutral surfaces, ONE primary, muted accents, never a rainbow per lane. The category choke points (`themedAccent()`, `categoryInk()`, `onAccent()`, `headerAccent()`, `categoryBackgroundWash()` → neutral background, `categorySurface()/categoryChipSurface()` → neutral containers, `CurioGradients.cardGradient/heroBlendGradient`, `CurioMixedDeck.*`) all gate on `materialThemeOn` so every screen repaints. **2) "Material guidelines"** (`AppPreferences.materialGuidelinesState`) layers full M3 on the CURRENT style (works on Curio colors too): `MaterialTypography` (default M3 type scale), `MaterialShapes` (4/8/12/16/24), `CurioSpacing` tokens. The **"Material chrome"** sub-option (`AppPreferences.materialChromeFullState`, only read when guidelines are on) swaps the floating pill nav for the standard M3 `NavigationBar` and drops the Changa One display face from nav labels; off keeps the Curio brand chrome. The v78-era AMOLED/Material STYLES are long gone — do not resurrect them; the v185 toggles are the only Material system.
 - **Always-on companions & onboarding setup (v23):** the floating pet, the pet brain, and auto-open landed topic have NO Settings toggles — they are always on (their Appearance toggles were removed; the `AppPreferences` APIs remain, defaults ON). Custom reaction lines are permanently off (no toggle; the reactions editor is unreachable). The explore-bubble opt-in row in the Explore dialog is hidden by default — a Notifications toggle (`AppPreferences.showBubbleOptInDialogState`) re-shows it as a single text line (no subtext). Onboarding includes a dedicated Search step that picks the explore search engine (`AppPreferences.searchEngineState`; changeable anytime in Settings) and the bubble opt-in row inside the "Display over other apps" permission card.
 - **3D shuffle button (v24):** always on by default — its toggle was removed from Settings → Experiments → Deck & controls (the `threeDButtonState` pref API stays, default true; SpinScreen reads it unchanged).
 - **Closed experiments (v24) — hardcoded OFF:** dual-accent hero gradient (ugly golden blend), deck card shadows (weird look while cards animate), tail-fade peek motion, and Smart Spin layout (always natural deck sizing) had their toggles removed from Experiments and their reads in SpinScreen/TopicRevealScreen hardcoded to false. The Layout & input section was removed from Experiments (Voice-to-text still lives in Settings → Recording; Smart density keeps its stored pref but has no UI).
@@ -1648,6 +1648,55 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v185 — proper M3 theme system (2 opt-in toggles), on branch Alpha.**
+  User: "go to alpha branch and sync it with main (alpha was so much
+  behind)… read everything [m3.material.io color system overview +
+  get-started + full guideline]… we will be adding 2 new toggle. with one
+  beaigh a proper material theme with category colors either getting
+  nothing or maybe a one color from the material color… and another test
+  full material guideline text spacing boxes layout evrything… it will be
+  a new extra sytem as a toggle without chnaging anything thats in our
+  current app and look… make the proper plan and follow it untill its
+  done." Synced Alpha (was 251 behind) → fast-forwarded to main a127f10 +
+  pushed. Clarified via ask_user: (1) "clear the current material style
+  and fully redo it" — the old partial Material style was ALREADY removed
+  in v78, so this is a from-scratch rebuild; (2) category colors = "one
+  color per family, muted" (6 families); (3) the guidelines toggle is
+  INDEPENDENT of the Material theme (works on Curio colors); (4) brand
+  chrome = "give both as an option, all opt-in, no default on" (full M3
+  chrome vs keep Curio chrome sub-option).
+  - M3 research: color system = 5 key colors × 13-tone palettes; the
+    multi-color guideline is RESTRAINT (neutral surfaces, ONE primary,
+    secondary/tertiary for muted accents — never a rainbow per section);
+    dynamic color (Material You) on Android 12+; typography = 15-style
+    scale; shapes 4/8/12/16/24; elevation = tonal overlays.
+  - PHASE A — prefs + UI: `materialThemeState` / `materialGuidelinesState`
+    / `materialChromeFullState` (all default OFF) + 3 Appearance rows in
+    SettingsSectionScreen.kt (chrome row only shows when guidelines on).
+  - PHASE B — Material color: `MaterialColorSchemes.kt` (dynamic light/
+    dark on API 31+, `MaterialBaselineLight/DarkScheme` seeded from the
+    brand coral via a `materialTone(hue, sat, tone)` M3 tone→lightness
+    ladder for older devices); `MaterialFamilies.kt` (6 families by hue,
+    near-achromatic → NEUTRAL; family fill T40 light/T80 dark, ink
+    T100/T20; rose→secondary + green→tertiary map to the scheme's own
+    roles; non-composable `*For(dark)` twins for remember-block paths);
+    choke-point wiring in CategoryInk.kt (themedAccent/categoryInk/
+    onAccent/headerAccent/backgroundWash→neutral/surfaces→neutral/
+    InkFor+AccentFor twins) + CurioColors.kt (cardGradient/heroBlendGradient/
+    mixedDeckAccent/mixedDeckGradient/mixedDeckWash→neutral) + CurioTheme
+    (curioColorScheme → materialColorScheme).
+  - PHASE C — guidelines: `MaterialGuidelines.kt` (MaterialTypography =
+    default Typography() = the M3 scale; MaterialShapes = 4/8/12/16/24;
+    CurioSpacing 4/8/12/16/24/32/48 tokens; gates materialGuidelinesOn /
+    materialChromeFullOn); CurioTheme swaps typography+shapes; CurioBottomNav
+    renders the standard M3 NavigationBar when materialChromeFullOn and
+    drops the Changa One display face from pill/rail labels when guidelines
+    on. NOTE: per-screen hardcoded paddings/radii remain Curio-branded
+    under "keep chrome" — the spacing/layout sweep of every screen is a
+    follow-up; the system-level tokens are in place.
+  - LESSON: extension functions on an enum type (`MaterialFamily.forAccent`)
+    need a receiver INSTANCE — a factory-style helper must be a plain
+    top-level function (`materialFamilyFor`).
 - **v184 — nav pill: calmer morph/collapse, wider+higher pill, more
   inactive spacing, Changa One labels.** User: "make the nav pill morph
   and collape animation even smoother and calmer. and give the inactive

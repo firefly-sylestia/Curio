@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
@@ -51,6 +54,8 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.materialChromeFullOn
+import com.curio.app.ui.theme.materialGuidelinesOn
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
@@ -292,6 +297,57 @@ fun CurioFloatingNavBar(
     // (published via [CurioNavTint]); null on plain pages → secondary.
     val pageAccent = curioNavActiveAccent(selectedRoute)
 
+    // v185 — full M3 chrome (guidelines on + chrome option): the standard
+    // M3 NavigationBar replaces the floating pill bar (M3 navigation spec
+    // — a NavigationBar for ≤5 destinations). The container keeps the
+    // page-wash tint (neutral under the Material theme); indicator + ink
+    // are pure M3 roles.
+    if (materialChromeFullOn) {
+        NavigationBar(
+            modifier = modifier.navigationBarsPadding(),
+            containerColor = curioNavContainerColor(routePrefix),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            CurioBottomNavItems.all.forEach { destination ->
+                val selected = selectedRoute == destination.route ||
+                    navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
+                        routeEntry.route?.substringBefore("/") == destination.route
+                    } == true
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = {
+                        if (selectedRoute != destination.route) {
+                            navController.navigateToTab(destination.route)
+                        }
+                    },
+                    icon = {
+                        CurioIcon(
+                            name = if (selected) destination.selectedIcon else destination.icon,
+                            contentDescription = destination.label,
+                            tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 26.dp
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = destination.label,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+        }
+        return
+    }
+
     Box(
         modifier = modifier
             .navigationBarsPadding()
@@ -448,7 +504,10 @@ private fun FloatingNavPill(
                     // already display-heavy). Size nudged 12 → 13sp so the
                     // wide face reads at the same visual weight as the old
                     // geom Bold.
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    // v185 — full M3 chrome drops the display face for the
+                    // M3 label style (the guidelines' own typography).
+                    style = if (materialGuidelinesOn) MaterialTheme.typography.labelMedium
+                    else MaterialTheme.typography.labelMedium.copy(
                         fontFamily = ChangaOneFontFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 13.sp
@@ -532,7 +591,9 @@ fun CurioNavigationRail(
                             // v184 — matches the pill bar's Changa One tab
                             // labels (Normal — the single-weight display face
                             // needs no fake bold).
-                            style = MaterialTheme.typography.labelMedium.copy(
+                            // v185 — full M3 chrome drops the display face.
+                            style = if (materialGuidelinesOn) MaterialTheme.typography.labelMedium
+                            else MaterialTheme.typography.labelMedium.copy(
                                 fontFamily = ChangaOneFontFamily,
                                 fontWeight = FontWeight.Normal
                             )

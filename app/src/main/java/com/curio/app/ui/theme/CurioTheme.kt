@@ -205,8 +205,11 @@ fun CurioTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography  = CurioTypography,
-        shapes      = CurioShapes,
+        // v185 — the Material guidelines toggle swaps the WHOLE type scale
+        // (M3 Roboto) and shape scale (4/8/12/16/24) app-wide; off = the
+        // Curio brand typography/shapes.
+        typography  = if (materialGuidelinesOn) MaterialTypography else CurioTypography,
+        shapes      = if (materialGuidelinesOn) MaterialShapes else CurioShapes,
         content     = content
     )
 }
