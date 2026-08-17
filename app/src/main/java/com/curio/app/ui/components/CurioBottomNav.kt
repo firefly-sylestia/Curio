@@ -400,7 +400,10 @@ private fun FloatingNavPill(
             ) {
                 Text(
                     text = destination.label,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    // v164 — the tab labels wear the Material text style at
+                    // BOLD weight (was SemiBold) — the bolder label reads
+                    // proper inside the big pill.
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = activeInk,
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)
@@ -477,7 +480,8 @@ fun CurioNavigationRail(
                     label = {
                         Text(
                             text = destination.label,
-                            style = MaterialTheme.typography.labelMedium
+                            // v164 — matches the pill bar's bolder tab labels.
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                         )
                     },
                     colors = NavigationRailItemDefaults.colors(

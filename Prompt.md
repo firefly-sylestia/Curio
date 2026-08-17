@@ -1,6 +1,14 @@
 # Prompt.md — Request log
 
-## Current request (completed) — smoother dialog/sheet opens + quest badge icon fix
+## Current request (completed) — bolder navbar tab labels
+
+User: "use new bold fonts for navbar texts material text". The floating
+pill bar's tab labels (and the rail, reveal Like/Dislike, pet studio)
+were labelMedium SemiBold — now labelMedium Bold (Geom has a real Bold
+face). Four copies bumped together. Docs: changelog FIX line, AGENTS.md
+v164, this file. Committed + pushed.
+
+## Earlier completed request — smoother dialog/sheet opens + quest badge icon fix
 
 User: "more smoother open aniations of things and fix the badge icon just
 the quest badge icons". ask_user clarified: badge = CLIPPED/SQUISHED;

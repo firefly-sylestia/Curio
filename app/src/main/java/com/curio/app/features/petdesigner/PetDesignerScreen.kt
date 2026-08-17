@@ -1480,7 +1480,9 @@ private fun RowScope.PetStudioTab(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    // v164 — bolder label to match the main nav bar (was
+                    // SemiBold).
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = activeInk,
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)

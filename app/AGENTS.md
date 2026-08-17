@@ -1057,6 +1057,16 @@ app/src/main/java/com/curio/app/
   shouldn't zoom, 0.96 for the floating quote card. Wrapped all three
   raw Dialog sites. LESSON: audit the raw `Dialog(` call sites — they're
   the only pop-in-instantly windows; M3's own dialogs/sheets animate.
+- **v164 — navbar tab labels bumped SemiBold → Bold (Material text style).**
+  User: "use new bold fonts for navbar texts material text". The floating
+  pill bar's tab labels (Home · Spin · Cabinet) rendered
+  `labelMedium.copy(SemiBold)`; they're now `labelMedium.copy(Bold)` —
+  the bolder label reads proper inside the big 60/128dp pill. Same bump
+  applied to the wide-window rail labels, the reveal Like/Dislike labels
+  and the pet studio tab labels so every pill-family label matches.
+  Geom (the app's display font) declares a real Bold face, so no fake-
+  bold synthesis. LESSON: the pill label weight lives in FOUR copies
+  (pill, rail, sentiment, studio) — bump them together.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view
