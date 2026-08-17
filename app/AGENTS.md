@@ -867,11 +867,30 @@ app/src/main/java/com/curio/app/
   "more accurate" / "most accurate") added to `Info` (set per catalog
   entry). Each picker row now shows a compact tinted badge between the
   name and the subtitle — "Small · fast & light" etc — colored with the
-  existing theme-aware inks (`curioSageInk` / `curioGoldInk` /
+  existing theme-aware inks (  `curioSageInk` / `curioGoldInk` /
   `curioRoseInk`), so the accuracy ladder reads at a glance in both
   light and dark; selected rows flip to white-on-amber. LESSON: reuse the
   theme's ink helpers for tier/category color coding instead of raw
   `CurioColors` constants — they stay readable on dark AND light fills.
+- **v141 — reveal morph: byline+year pill row on BOTH the ticket and the
+  hero.** The reveal hero's top-left used to wear the ACTION badge
+  ("Watch for ~25 min") while the Spin ticket's top-left wore the byline
+  ("Director · Nolan") — so during the shared-element morph the pill
+  content swapped position/content and visibly jumped. (1) The reveal
+  hero's top-left now wears the SAME byline pill row as the ticket
+  (identical recipe: `ink.copy(alpha = 0.18f)`, RoundedCornerShape(50),
+  labelMedium bold, h12/v6 — the reveal's old Person-icon variant
+  dropped), and the action badge moved DOWN to the bottom pill row next
+  to the subtype. (2) **Year out of the title**: new
+  `CurioTopic.titleAndYearQualifier()` splits a trailing " (…)" / " — …"
+  qualifier ("Moby-Dick (1851)" → "Moby-Dick" + "1851"); both the
+  ticket title and the hero title render the BASE name, and the year is a
+  small `Schedule`-icon pill in the top-left row on BOTH — so the titles
+  and pills read identical during the morph. The reveal's decade tag chip
+  (v135) is untouched. LESSON: shared-element morphs only look smooth
+  when content in the SAME position has the SAME content on both ends —
+  matching the card's bounds alone isn't enough if pills/titles swap
+  inside it.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

@@ -1734,34 +1734,70 @@ private fun HeroCard(
                     .fillMaxSize()
                     .padding(20.dp)
             ) {
-                // ── Top — action badge (verb + duration) ────────────────
-                // v35 — the plain dot is now the action's own verb icon
-                // (headphones / play / book / restaurant…) for instant charm.
-                // v36 — the frosted pill fill is the same opaque glass as
-                // the hero action pills (lifted toward the page background)
-                // so the badge reads crisp instead of washed.
-                if (action != null) {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = ink.copy(alpha = 0.18f),
-                        shadowElevation = 0.dp
+                // ── Top — byline + year pills (v141) — the SAME top-left
+                // row the Spin ticket wears, so the shared-element morph
+                // reads as the pills staying put while the card grows. The
+                // year qualifier comes OUT of the title ("Moby-Dick (1851)"
+                // → "Moby-Dick" + an "1851" pill), and the action badge
+                // moved down to the bottom pill row. Same pill recipe as the
+                // ticket (ink at 18%, labelMedium bold, h12/v6 padding) so
+                // the morph is pixel-identical.
+                val byline = resolved?.byline?.takeIf { it.isNotBlank() }
+                val bylineLabel = when (cat.id) {
+                    CategoryId.ALBUMS -> "Artist"
+                    CategoryId.BOOKS -> "Author"
+                    CategoryId.FILMS -> "Director"
+                    CategoryId.ARTWORKS -> "Painter"
+                    CategoryId.DISCOVERIES -> "Discovered by"
+                    else -> null
+                }
+                val (_, yearQual) = resolved?.titleAndYearQualifier() ?: (null to null)
+                if ((byline != null && bylineLabel != null) || !yearQual.isNullOrBlank()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            CurioIcon(
-                                name = verbIcon(action.verb),
-                                contentDescription = null,
-                                tint = ink,
-                                size = 14.dp
-                            )
-                            Text(
-                                text = "${action.verb} for ~${action.durationMinutes} min",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = ink
-                            )
+                        if (byline != null && bylineLabel != null) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = ink.copy(alpha = 0.18f),
+                                shadowElevation = 0.dp
+                            ) {
+                                Text(
+                                    text = "$bylineLabel · $byline",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ink,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                        if (!yearQual.isNullOrBlank()) {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = ink.copy(alpha = 0.18f),
+                                shadowElevation = 0.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.Schedule,
+                                        contentDescription = null,
+                                        tint = ink,
+                                        size = 14.dp
+                                    )
+                                    Text(
+                                        text = yearQual,
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = ink
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1777,7 +1813,10 @@ private fun HeroCard(
                 // already shows the category chip, so the hero title stands
                 // alone (no duplicate category inside the card).
                 Text(
-                    text = resolved?.name ?: fallbackName.ifBlank { cat.displayName },
+                    // v141 — same as the ticket: a trailing year qualifier
+                    // lives in the top-corner pill, not the title, so the
+                    // two titles read identical during the morph.
+                    text = resolved?.titleAndYearQualifier()?.first ?: fallbackName.ifBlank { cat.displayName },
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontSize = 34.sp,
                         lineHeight = 38.sp,
@@ -1795,28 +1834,19 @@ private fun HeroCard(
                 )
                 Spacer(Modifier.weight(1f))
 
-                // ── Bottom — byline + subtype pills, one per corner ─────
-                val byline = resolved?.byline?.takeIf { it.isNotBlank() }
-                val bylineLabel = when (cat.id) {
-                    CategoryId.ALBUMS -> "Artist"
-                    CategoryId.BOOKS -> "Author"
-                    CategoryId.FILMS -> "Director"
-                    CategoryId.ARTWORKS -> "Painter"
-                    CategoryId.DISCOVERIES -> "Discovered by"
-                    else -> null
-                }
+                // ── Bottom — action + subtype pills, one per corner ─────
+                // v141 — the action badge (verb + duration) lives here now;
+                // the top-left corner wears the byline pill that matches the
+                // Spin ticket for a 1:1 morph.
                 val subtype = resolved?.subtype?.takeIf { it.isNotBlank() }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left slot — byline pill (or a blank spacer so a lone
-                    // subtype still pins to the right corner). weight(1f,
-                    // fill = false) bounds the pill to the space left after
-                    // the subtype, so a long byline ellipsizes instead of
-                    // overflowing the row on narrow screens.
-                    if (byline != null && bylineLabel != null) {
+                    // Left slot — action pill (or a blank spacer so a lone
+                    // subtype still pins to the right corner).
+                    if (action != null) {
                         Surface(
                             shape = RoundedCornerShape(50),
                             color = ink.copy(alpha = 0.18f),
@@ -1826,16 +1856,16 @@ private fun HeroCard(
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 CurioIcon(
-                                    name = CurioIcons.Person,
+                                    name = verbIcon(action.verb),
                                     contentDescription = null,
                                     tint = ink,
                                     size = 14.dp
                                 )
                                 Text(
-                                    text = "$bylineLabel · $byline",
+                                    text = "${action.verb} for ~${action.durationMinutes} min",
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     color = ink,
                                     maxLines = 1,
@@ -1847,7 +1877,7 @@ private fun HeroCard(
                         Spacer(Modifier)
                     }
                     // Right slot — subtype pill (blank spacer keeps the
-                    // byline on its left corner when there's no subtype).
+                    // action pill on its left corner when there's no subtype).
                     if (subtype != null) {
                         Surface(
                             shape = RoundedCornerShape(50),

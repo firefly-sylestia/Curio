@@ -3068,23 +3068,60 @@ private fun HeroTicketCard(
                         CategoryId.DISCOVERIES -> "Discovered by"
                         else -> null
                     }
-                    if (byline != null && bylineLabel != null) {
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = ink.copy(alpha = 0.18f),
-                            shadowElevation = 0.dp,
+                    // v141 — the top-left corner is a pill ROW: the byline
+                    // plus the topic's year qualifier ("Moby-Dick (1851)"
+                    // shows "Moby-Dick" in the title and "1851" here), so
+                    // the reveal hero's matching top row morphs 1:1.
+                    val (_, yearQual) = topic?.titleAndYearQualifier() ?: (null to null)
+                    if ((byline != null && bylineLabel != null) || !yearQual.isNullOrBlank()) {
+                        Row(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
-                                .padding(20.dp)
+                                .padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = "$bylineLabel · $byline",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = ink,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
+                            if (byline != null && bylineLabel != null) {
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = ink.copy(alpha = 0.18f),
+                                    shadowElevation = 0.dp
+                                ) {
+                                    Text(
+                                        text = "$bylineLabel · $byline",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = ink,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
+                                }
+                            }
+                            if (!yearQual.isNullOrBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = ink.copy(alpha = 0.18f),
+                                    shadowElevation = 0.dp
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        CurioIcon(
+                                            name = CurioIcons.Schedule,
+                                            contentDescription = null,
+                                            tint = ink,
+                                            size = 14.dp
+                                        )
+                                        Text(
+                                            text = yearQual,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = ink
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -3137,7 +3174,12 @@ private fun HeroTicketCard(
                         ) { currentTopic ->
                         Column {
                             Text(
-                                text = currentTopic?.name ?: "Ready when you are",
+                                // v141 — the title drops a trailing year
+                                // qualifier ("Moby-Dick (1851)" →
+                                // "Moby-Dick"); the year reads as its own
+                                // pill in the top corner instead — matching
+                                // the reveal hero, so the morph is seamless.
+                                text = currentTopic?.titleAndYearQualifier()?.first ?: "Ready when you are",
                                 // v7.16 — enhanced typography is now the
                                 // shipped default: a true display treatment —
                                 // ExtraBold geom at 34sp with negative

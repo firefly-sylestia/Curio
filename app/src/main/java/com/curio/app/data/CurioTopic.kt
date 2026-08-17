@@ -259,6 +259,24 @@ fun CurioTopic.publicationYear(): Int? {
 }
 
 /**
+ * v141 — splits a topic's name into its base title and a trailing date
+ * qualifier: "Moby-Dick (1851)" → ("Moby-Dick", "1851"), "The Odyssey
+ * (c. 8th century BCE)" → ("The Odyssey", "c. 8th century BCE"), "Sgt.
+ * Pepper's Lonely Hearts Club Band" → ("Sgt. Pepper's Lonely Hearts Club
+ * Band", null). The Spin ticket and reveal hero show the base title and
+ * render the year as its own pill in the same top-corner slot on BOTH, so
+ * the shared-element morph reads as one unit (the title no longer changes
+ * mid-morph). Only a TRAILING " (…)" / " — …" qualifier is cut.
+ */
+fun CurioTopic.titleAndYearQualifier(): Pair<String, String?> {
+    val cut = name.substringBefore(" (").substringBefore(" — ").trim().removeSuffix(";")
+    if (cut.isBlank() || cut.length == name.length) return name to null
+    val qualifier = name.removePrefix(cut).removePrefix(" (").removePrefix(" — ")
+        .trim().removeSuffix(")").trim()
+    return cut to qualifier.ifBlank { null }
+}
+
+/**
  * v135 — the reveal's decade tag chip: "1941" → "1940s". Null when no
  * year is recoverable, or when the topic already carries that decade as a
  * tag (no duplicate chip).
