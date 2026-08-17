@@ -1,6 +1,34 @@
 # Prompt.md — Request log
 
-## Current request — drawer curiosity map = plain-surface constellation of ALL lanes + new flat cropped footer (DONE)
+## Current request — tap the moon/sun on the drawer hero to flip the theme (DONE)
+
+User: "make it so when i tap the moon or the sun the theme switch between
+light and dark"
+
+### Clarifications (ask_user)
+- Always-on per the user (no Settings toggle) — new-feature question asked
+  per AGENTS.md, answered "Always-on".
+
+### Changes
+- HomeScreen.kt, drawer hero sky Box (`HomeDrawerContent`): a 48dp
+  INVISIBLE hit-circle (`Box` with `.offset(x = 268.8.dp - 24.dp,
+  y = 52.08.dp - 24.dp).size(48.dp).clip(CircleShape).clickable {...}`)
+  sits exactly on the moon/sun. Both celestial bodies live at (268.8,
+  52.08) in their SVGs and the artwork is 320×186dp — 1:1 with the hero
+  box, so `ContentScale.Crop` maps positions directly.
+- The tap calls `AppPreferences.setThemeMode(context, if
+  (isCurioDarkTheme()) THEME_LIGHT else THEME_DARK)` — flips to the
+  opposite of the current EFFECTIVE theme (System resolves first, then
+  forces light/dark). `themeModeState` is a `mutableStateOf`, so the app
+  rethemes instantly and the hero SVG crossfades (`crossfade(true)`).
+- Changelog (20260920.txt) ADD bullet + app/AGENTS.md v177 notes added.
+
+No compile/test possible in this env (CI validates on push) — the change
+is a pure-modifier addition (no new imports needed: AppPreferences,
+isCurioDarkTheme, clip, CircleShape, clickable, offset, size all already
+in use in the file; `context` in scope from HomeDrawerContent).
+
+## Previous request — drawer curiosity map = plain-surface constellation of ALL lanes + new flat cropped footer (DONE, shipped ccf2fae)
 
 User (two messages): "and then remove the box behind your curiocity, and
 show the mind connection constellation map with inactive glow stars. and
@@ -25,68 +53,36 @@ the end no scaffholding as well" (with the uploaded
    look like it's floating.
 
 ### Changes
-- `DrawerCuriosityMap` (HomeScreen.kt): the boxed card, the "Your
-  Curiosity Map" title and the "This Week ˅" selector are GONE. The map
-  is a Column on the plain drawer surface (whole-map tap still opens
-  Stats). Data comes straight from `CurioPassport.allProgress` — all-time
-  per-lane spins/reveals/explores/saves/lastAt (no repo, no
-  `CurioQuests`, no `StatsRange` imports).
-- `DrawerLaneConstellation`: EVERY visible lane is a star. Explored lanes
-  = solid `themedAccent` chips (34dp) with their `onAccent` icon + glow,
-  tappable → opens a richer panel (lane icon, accent-tinted surface,
-  last-explored relative time, `DrawerMapStat` panes for spins / peeked /
-  explores / saved, close button). Inactive lanes = solid 14dp dots
-  (muted blue-grey, no alpha) — differentiated by size + color. 16 seeded
-  extra tiny stars + faint neighbour-connecting lines. Deterministic grid
-  scatter + `Random(id.name.hashCode())` jitter; 196dp tall so all 36
-  lanes fit.
-- `DrawerFooter`: `res/raw/drawer_footer.svg` replaced with the user's
-  cropped `curio_planet_cropped_bottom_264.svg` (1536×760). Footer is a
-  flat 210dp Box at the very bottom — `ContentScale.Crop` bottom-anchored
-  art, no shadow/box/scaffolding; a 110dp vertical gradient fades the art
-  into the drawer surface and the version + "Made with curiosity" row
-  (warm tan ink, nav-bars-padded) sits inside the fade. LazyColumn
-  `contentPadding.bottom` 20dp → 0dp so the art touches the bottom edge.
+- `DrawerCuriosityMap`: boxed card, title and "This Week ˅" selector
+  GONE; Column on the plain drawer surface (whole-map tap still opens
+  Stats); data straight from `CurioPassport.allProgress` (all-time
+  spins/reveals/explores/saves/lastAt — no repo, no `CurioQuests`, no
+  `StatsRange`).
+- `DrawerLaneConstellation`: EVERY visible lane is a star; explored =
+  solid `themedAccent` chips (34dp) + `onAccent` icon + glow, tappable →
+  richer panel (icon, accent surface, last-explored time, `DrawerMapStat`
+  panes, close button); inactive = solid 14dp muted dots (no alpha);
+  16 seeded extra stars + neighbour lines; deterministic grid scatter +
+  `Random(id.name.hashCode())` jitter; 196dp tall.
+- `DrawerFooter`: `drawer_footer.svg` replaced with the user's cropped
+  `curio_planet_cropped_bottom_264.svg` (1536×760); flat 210dp Box at the
+  very bottom (Crop bottom-anchored, no shadow/box), 110dp bottom fade
+  into the surface, version + "Made with curiosity" inside the fade;
+  LazyColumn bottom padding 20dp → 0dp.
 - Imports: `CurioQuests` → `CurioPassport`; removed `StatsRange*`,
-  `filterForRange`, and the now-unused `Modifier.alpha`. Changelog
-  (20260920.txt) + app/AGENTS.md v176 notes updated.
+  `filterForRange`, unused `Modifier.alpha`. Changelog + AGENTS.md v176
+  notes updated. Committed `ccf2fae` and pushed (carried the unpushed
+  `04efc1e` chore).
 
-No compile/test possible in this env (CI validates on push) — changes
-follow COMPILE-SAFETY rules (no sed, checked every import/reference,
-`Dp * Float` ordering per the earlier CI lesson, accents resolved in
-composition not inside Canvas).
-
-## Previous request — drawer hero sky = user's SVG artwork; revert 6300f774 (DONE, shipped)
+## Previous request — drawer hero sky = user's SVG artwork; revert 6300f774 (DONE, shipped bff5809)
 
 User: "i uploaded a new svg for the night sky use that and also remove the
 watermarks from the backgroud drawer hero" → then, via ask_user: "i want you
-to fully revert that <github.com/firefly-sylestia/Curio/commit/6300f774>
-this commit revert it fully. also for light mode use another svg i just
-uploaded."
-
-### Clarifications (ask_user)
-1. Theme use: dark mode shows the uploaded night-sky SVG; light mode shows the
-   separately uploaded day-sky SVG (`curio_day_sky_fixed(1).svg`) — the hero
-   sky is ALWAYS artwork now, theme-picked.
-2. Galaxy panel question skipped — the full revert removes the constant-galaxy
-   panel anyway (drawer returns to the boxed real-data curiosity map).
-
-### Changes
-- Reverted `6300f774` (constant galaxy, flat opaque footer, opaque buttons,
-  lifetime totals + badges) and its CI follow-up `91b4375` (RowScope fix for
-  the deleted `DrawerLifetimePane`) via `git revert --no-commit` — drawer back
-  to the v174e/v174f sky-tear design. Changelog + AGENTS.md additions from
-  that commit reverted with it.
-- Drawer hero: procedural `DrawerCelestialSky` (stars/grain/constellation/
-  sparkles/moon) and the mirrored watermark glyph collage
-  (`heroSymbols`/`heroPairs`) DELETED. The banner now loads the user's SVG via
-  Coil `SvgDecoder`: dark → `res/raw/drawer_hero_sky_dark.svg` (uploaded
-  `svgviewer-output (11).svg`), light → `res/raw/drawer_hero_sky_light.svg`
-  (uploaded `curio_day_sky_fixed(1).svg`). Theme gradient kept as the loading
-  backdrop; greeting + avatar unchanged.
-- Dead code removed: `DrawerCelestialSky`, `SkyStar`/`SkyLink`/`SkySparkle`,
-  `drawSparkle`, `Path`/`DrawScope` imports.
-- Committed as `bff5809` (revert + hero SVGs) and `04efc1e` (chore: committed
-  the full icon-font backup `tools/fonts/material_symbols_outlined_full.ttf`
-  + `tools/gen_drawer_banner_svg.py`; deleted the empty package.json /
-  package-lock.json stubs — NOT pushed, rides with the next real change).
+to fully revert that <6300f774>... also for light mode use another svg i just
+uploaded." Reverted `6300f774` + its CI follow-up `91b4375`; deleted
+procedural `DrawerCelestialSky` + watermark glyphs; hero now loads the
+user's SVGs via Coil (dark → `drawer_hero_sky_dark.svg`, light →
+`drawer_hero_sky_light.svg`). Changelog + AGENTS.md v175 updated.
+Committed `bff5809`; also `04efc1e` (chore: full icon-font backup +
+SVG generator committed, empty package.json stubs deleted — not pushed on
+its own, rode up with ccf2fae).

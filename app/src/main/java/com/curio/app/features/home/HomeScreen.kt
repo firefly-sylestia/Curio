@@ -2114,6 +2114,26 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
+                    // v177 — tap the moon (dark sky) / sun (light sky) to
+                    // flip the theme. The artwork is exactly 320x186dp —
+                    // 1:1 with the hero box — and both celestial bodies sit
+                    // at (268.8, 52.08) in their SVG, so a 48dp invisible
+                    // hit-circle there toggles the theme mode directly.
+                    // Always-on per the user (no Settings toggle).
+                    val sunMoonTap = 48.dp
+                    Box(
+                        modifier = Modifier
+                            .offset(x = 268.8.dp - sunMoonTap / 2, y = 52.08.dp - sunMoonTap / 2)
+                            .size(sunMoonTap)
+                            .clip(CircleShape)
+                            .clickable {
+                                AppPreferences.setThemeMode(
+                                    context,
+                                    if (isCurioDarkTheme()) AppPreferences.THEME_LIGHT
+                                    else AppPreferences.THEME_DARK
+                                )
+                            }
+                    )
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Brand + greeting (with the profile avatar) pinned
                         // just above the tear. v103 — the avatar photo (or the

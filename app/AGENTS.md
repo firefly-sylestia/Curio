@@ -1516,10 +1516,23 @@ app/src/main/java/com/curio/app/
     same planet art bottom-cropped). The footer is now a flat 210dp Box
     at the very bottom: `ContentScale.Crop` bottom-anchored art, no
     shadow/box/scaffolding; a 110dp vertical gradient fades the art into
-    the drawer surface so it doesn't look floating, and the version +
-    "Made with curiosity" row sits inside that fade (nav-bars-padded,
+    the drawer surface so it doesn't look floating, and the version    + "Made with curiosity" row sits inside that fade (nav-bars-padded,
     warm tan ink). The LazyColumn's `contentPadding.bottom` dropped
     20dp → 0 so the art truly touches the drawer's bottom edge.
+- **v177 — tap the moon/sun on the drawer hero to flip the theme.**
+  User: "make it so when i tap the moon or the sun the theme switch
+  between light and dark". Always-on per ask_user (no Settings toggle).
+  Both celestial bodies sit at (268.8, 52.08) in their SVGs and the
+  artwork is exactly 320×186dp (1:1 with the hero box, `ContentScale.Crop`
+  is a no-op), so a 48dp INVISIBLE hit-circle (`Box` with offset +
+  `CircleShape` clip + `clickable`) sits right on top of the moon/sun in
+  the hero's sky Box. Tapping it calls
+  `AppPreferences.setThemeMode(context, if (isCurioDarkTheme())
+  THEME_LIGHT else THEME_DARK)` — toggles to the OPPOSITE of the current
+  effective theme (so System mode resolves first, then flips to a forced
+  light/dark). `themeModeState` is a `mutableStateOf`, so the whole app
+  rethemes instantly and the hero SVG crossfades via the existing
+  `crossfade(true)`.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

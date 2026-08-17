@@ -1,4 +1,5 @@
 ADD
+- Drawer: tap the moon in the night sky (or the sun in the day sky) on the hero to flip the theme between light and dark.
 - Drawer: the hero's sky is now hand-drawn artwork — a night sky with stars and a crescent moon in dark mode, a day sky with sun, clouds and birds in light mode (no watermark glyphs on the banner).
 - Drawer: the curiosity map now lives on the plain drawer surface — no card box, title or range selector. ALL your lanes show as solid stars; explored lanes glow with their icon, and tapping one opens that lane's real passport data (spins, peeked, explores, saved, last explored).
 - Drawer: the banner's sky now runs all the way to the torn edge (a sky tear), and the stars/moon are visible in light mode too.
