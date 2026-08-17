@@ -1,6 +1,17 @@
 # Prompt.md — Request log
 
-## Current request — revert the nav-bar → sentiment-pill shared morph, keep the bigger bottom pill
+## Current request — reveal Like/Dislike pill matches the bigger 60dp nav-bar pill
+
+Follow-up to the morph revert: "Make the reveal Like/Dislike pill match the
+bigger 60dp nav-bar pill size."
+
+- `RevealSentimentIconWidth` 52→60dp, `RevealSentimentExpandedWidth` 96→128dp,
+  `RevealSentimentHeight` 48→60dp, segment icon 20→26dp; the pill's inner Row
+  now uses the nav bar's exact padding/spacing (7dp / 6dp). The reveal
+  sentiment segments are now identical in geometry to the nav bar pills.
+- Changelog FIX line updated. Committed + pushed.
+
+## Earlier completed request — revert the nav-bar → sentiment-pill shared morph, keep the bigger bottom pill
 
 User (GitHub commit `55ebc74` "feat: bigger bottom pill (60dp/128dp) + nav bar morphs into the reveal Like/Dislike pill via a shared element"): "revert this just keep the size large but revert the shared morph one".
 

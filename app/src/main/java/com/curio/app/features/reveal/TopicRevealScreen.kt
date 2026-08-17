@@ -2213,9 +2213,9 @@ private fun RevealSentimentPill(
             shadowElevation = 6.dp
         ) {
             Row(
-                modifier = Modifier.padding(6.dp),
+                modifier = Modifier.padding(7.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 SentimentSegment(
                     icon = CurioIcons.ThumbDown,
@@ -2238,14 +2238,15 @@ private fun RevealSentimentPill(
     }
 }
 
-// v149 — sentiment segment geometry, mirroring the nav bar's pill sizes
-// (slightly shorter since these are compact sentiment chips).
-private val RevealSentimentIconWidth = 52.dp
-private val RevealSentimentExpandedWidth = 96.dp
-private val RevealSentimentHeight = 48.dp
+// v149 — sentiment segment geometry, mirroring the nav bar's pill sizes.
+// v154 — bumped to EXACTLY the nav bar's sizes (60dp/128dp/60dp + 26dp
+// icon) so the reveal Like/Dislike pill matches the bigger bottom pill.
+private val RevealSentimentIconWidth = 60.dp
+private val RevealSentimentExpandedWidth = 128.dp
+private val RevealSentimentHeight = 60.dp
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
- *  nav bar's expand-on-active pill: icons at rest (52dp), the ACTIVE
+ *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
  *  segment springs wider and slides its label out (same spring + label
  *  slide-out, exit instant), the deselected one collapses back to its
  *  icon. Active fill = the category accent (v27q solid-selection) +
@@ -2284,7 +2285,7 @@ private fun SentimentSegment(
                 name = icon,
                 contentDescription = label,
                 tint = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 20.dp
+                size = 26.dp
             )
             // v149 — the nav bar recipe: label slides out for the active
             // segment, vanishes instantly when deselected.

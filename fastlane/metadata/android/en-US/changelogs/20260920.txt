@@ -28,7 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
-- Navigation: the bottom pill bar is bigger (60dp pills, 128dp expanded) so the tabs read proper and the active label has real room.
+- Navigation: the bottom pill bar is bigger (60dp pills, 128dp expanded) so the tabs read proper and the active label has real room — the Topic Reveal Like/Dislike pill matches the same 60dp size now.
 - Navigation: the floating pill bar is now theme-aware and dynamic — the bar's container follows each page's tint (the Spin lane's wash, the Cabinet's filter wash, Home's rose) and the active tab wears the page's category color with readable ink; in dark mode the bar draws a hairline rim so it reads elevated on the near-black pages.
 - Tour + Pet Designer: the tour Skip/Next dock and the Pet Designer studio bar share the same dynamic container and dark-mode rim as the nav bar.
 - Topic Reveal: the floating Like/Dislike pill now animates like the nav bar — both rest as icons, and the active segment springs wider and slides its label out (like/unlike) while the other collapses back.
