@@ -984,6 +984,31 @@ app/src/main/java/com/curio/app/
   the Spin one — a pattern sweep (`grep BorderStroke` for the
   `White.copy(alpha = 0.10f)` signature) catches every copy before
   claiming "all gone".
+- **v161 — nav collapse smoothed for real + Cabinet "All" yellow pill
+  fixed (primary fallback) + rail/pet-studio audit.** User: "the collapse
+  animation of buttom nav pill is still bad and also why its yello in
+  cabinet all. fix that and do more audit". (1) COLLAPSE: the v155
+  smoothing missed the two real culprits — the label EXIT was
+  `fadeOut(tween(0))` (the closing pill's text vaporized while the pill
+  took ~1s to deflate: a dead empty box shrinking) and the width spring's
+  `StiffnessMediumLow` dragged the 128→60dp collapse out a full second.
+  Now: exit fades 160ms FastOutSlowIn with the shrink, stiffness
+  MediumLow → Medium (damping stays 0.9 — near-critical, no overshoot),
+  applied to `FloatingNavPill`, the reveal `SentimentSegment`, AND the
+  pet studio `PetStudioTab` (audit catch: it still ran the OLD v124
+  recipe — damping 0.75, which overshot and bounced, plus the instant
+  vanish). (2) CABINET YELLOW: `FloatingNavPill` fell back to
+  `colorScheme.secondary` (ButterYellow) whenever the page published no
+  accent — Cabinet "All" publishes none (plain page) → stray yellow pill.
+  Fallback is now the theme PRIMARY (coral, the app's brand color, with
+  `onPrimary` ink). (3) AUDIT: the wide-window `CurioNavigationRail` had
+  the SAME yellow (hard-coded `secondary` indicator) AND never wore page
+  accents — it now resolves `curioNavActiveAccent(selectedRoute)` like
+  the pill bar (page accent or primary fallback). The pet studio bar's
+  amber active fill is INTENTIONAL (pet brand) and untouched. LESSON:
+  "smoother animation" fixes need to target the exit spec + spring
+  stiffness, not just damping; and every sibling that copies a recipe
+  (rail / pet studio / sentiment) must be swept when the recipe changes.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view

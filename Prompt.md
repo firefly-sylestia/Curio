@@ -1,6 +1,28 @@
 # Prompt.md — Request log
 
-## Current request (completed) — remove the remaining dark-mode hairline rims (all 5 sites)
+## Current request (completed) — nav collapse smoothing (real fix) + Cabinet "All" yellow pill + audit
+
+User: "the collapse animation of buttom nav pill is still bad and also why
+its yello in cabinet all. fix that and do more audit".
+
+1. Collapse: the label exit was fadeOut(tween(0)) (vaporize) + the width
+   spring dragged ~1s (StiffnessMediumLow). Fixed: exit 160ms
+   FastOutSlowIn glide with the shrink; stiffness MediumLow → Medium
+   (damping 0.9 kept). Applied to FloatingNavPill, reveal SentimentSegment
+   AND pet studio PetStudioTab (audit catch — it still ran the old
+   damping-0.75 + instant-vanish recipe).
+2. Cabinet yellow: active pill fell back to colorScheme.secondary (butter)
+   on pages that publish no accent (Cabinet "All"). Fallback → primary
+   (coral) + onPrimary ink in FloatingNavPill.
+3. Audit: CurioNavigationRail had the same yellow (hard-coded secondary)
+   AND never wore page accents — now resolves curioNavActiveAccent like
+   the pill bar (page accent or primary fallback). Pet studio's amber is
+   intentional (untouched).
+
+Docs: changelog FIX lines, AGENTS.md v161, this file. Committed only —
+user still holds the push.
+
+## Earlier completed request — remove the remaining dark-mode hairline rims (all 5 sites)
 
 User: "remove the same darkmode hairline that u mentioned exosist in more
 elements" — the v157 follow-up.

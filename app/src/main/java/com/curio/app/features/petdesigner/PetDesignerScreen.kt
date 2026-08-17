@@ -1435,9 +1435,12 @@ private fun RowScope.PetStudioTab(
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (selected) StudioPillExpandedWidth else StudioPillIconWidth,
+        // v161 — same recipe as the nav bar: near-critical damping 0.9 (the
+        // old 0.75 overshot and bounced) + Medium stiffness (the collapse
+        // no longer drags for a second).
         animationSpec = spring(
-            dampingRatio = 0.75f,
-            stiffness = Spring.StiffnessMediumLow
+            dampingRatio = 0.9f,
+            stiffness = Spring.StiffnessMedium
         ),
         label = "studioPillWidth"
     )
@@ -1465,12 +1468,13 @@ private fun RowScope.PetStudioTab(
                 size = 22.dp
             )
             // Enter keeps the slide-out morph for the newly active pill;
-            // exit is tween(0) so the label VANISHES the moment its pill is
-            // deselected (no closing shrink animation) — the nav bar recipe.
+            // v161 — the exit now glides out (160ms) with the shrink instead
+            // of vaporizing instantly (the nav bar recipe update).
             AnimatedVisibility(
                 visible = selected,
                 enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) +
+                    fadeOut(tween(160, easing = FastOutSlowInEasing))
             ) {
                 Text(
                     text = label,

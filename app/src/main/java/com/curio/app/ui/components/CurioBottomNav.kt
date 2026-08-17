@@ -323,7 +323,8 @@ private fun FloatingNavPill(
     destination: CurioBottomDestination,
     selected: Boolean,
     // v149 — the current page's category accent (see [curioNavActiveAccent]);
-    // null → the theme's secondary (butter) with onSecondary ink.
+    // null → the theme's PRIMARY (coral) with onPrimary ink (v161: the old
+    // secondary/butter fallback read as a stray yellow on Cabinet "All").
     activeAccent: Color?,
     onClick: () -> Unit
 ) {
@@ -331,19 +332,24 @@ private fun FloatingNavPill(
         targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
         // v155 — damping 0.75 → 0.9: the old spring overshot and bounced on
         // settle ("clanky"); near-critical damping glides to rest.
+        // v161 — stiffness MediumLow → Medium: the collapse (128 → 60dp)
+        // used to drag for a full second; Medium settles crisply with no
+        // overshoot at the same near-critical damping.
         animationSpec = spring(
             dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMediumLow
+            stiffness = Spring.StiffnessMedium
         ),
         label = "floatingNavPillWidth"
     )
     // v149 — the active indicator follows the PAGE: when the page publishes
     // a category accent (Spin lane / Cabinet filter / Home rose) the active
-    // pill wears it with the theme-aware fill-ink contract; plain pages fall
-    // back to the solid secondary (v131). Never a translucent container.
-    val activeFill = activeAccent ?: MaterialTheme.colorScheme.secondary
+    // pill wears it with the theme-aware fill-ink contract; plain pages
+    // (Cabinet "All") fall back to the theme's PRIMARY (coral) — v161: the
+    // old secondary fallback (butter yellow) looked like a stray yellow
+    // pill on the plain Cabinet page. Never a translucent container.
+    val activeFill = activeAccent ?: MaterialTheme.colorScheme.primary
     val activeInk = if (activeAccent != null) pastelFillInk(activeAccent)
-                    else MaterialTheme.colorScheme.onSecondary
+                    else MaterialTheme.colorScheme.onPrimary
     // v155 — the fill fades in/out (alpha) synced to the width spring
     // instead of snapping on/off, and the icon tint crossfades — no hard
     // color pops on tab switch.
@@ -387,7 +393,13 @@ private fun FloatingNavPill(
             AnimatedVisibility(
                 visible = selected,
                 enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(240, easing = FastOutSlowInEasing)),
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
+                // v161 — the collapse used to VAPORIZE the label
+                // (fadeOut(tween(0))) while the pill took a second to
+                // shrink — a dead empty box deflating. The exit now glides
+                // out (160ms) with the shrink so the deselected pill reads
+                // as one smooth motion.
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) +
+                    fadeOut(tween(160, easing = FastOutSlowInEasing))
             ) {
                 Text(
                     text = destination.label,
@@ -422,6 +434,13 @@ fun CurioNavigationRail(
     } else {
         routePrefix
     }
+    // v161 — the rail's active indicator mirrors the phone pill bar: the
+    // current page's category accent when published, else the theme PRIMARY
+    // (the old hard-coded secondary read as a stray yellow on Cabinet "All").
+    val pageAccent = curioNavActiveAccent(selectedRoute)
+    val railActiveFill = pageAccent ?: MaterialTheme.colorScheme.primary
+    val railActiveInk = if (pageAccent != null) pastelFillInk(pageAccent)
+                        else MaterialTheme.colorScheme.onPrimary
 
     NavigationRail(
         modifier = modifier,
@@ -451,12 +470,10 @@ fun CurioNavigationRail(
                         CurioIcon(
                             name = if (selected) destination.selectedIcon else destination.icon,
                             contentDescription = destination.label,
-                            // v131 — solid secondary indicator + on-secondary
-                            // ink, matching the phone pill bar.
-                            tint = if (selected)
-                                MaterialTheme.colorScheme.onSecondary
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            // v161 — active ink follows the page accent /
+                            // primary fallback, matching the phone pill bar.
+                            tint = if (selected) railActiveInk
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
                             size = 24.dp
                         )
                     },
@@ -467,9 +484,9 @@ fun CurioNavigationRail(
                         )
                     },
                     colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        selectedIconColor = railActiveInk,
+                        selectedTextColor = railActiveInk,
+                        indicatorColor = railActiveFill,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -531,7 +548,9 @@ internal fun curioFloatingNavContainer(routePrefix: String?): Color {
  * v149 — the floating bar's ACTIVE pill color: the current page's category
  * accent (published by the tab screens via [CurioNavTint] — the Spin
  * lane's accent, the Cabinet's active-filter accent, Home's rose). Null on
- * plain pages (and non-tab routes) so the pill falls back to secondary.
+ * plain pages (and non-tab routes) so the pill falls back to the theme
+ * PRIMARY (v161 — was secondary/butter, which read as a stray yellow on
+ * Cabinet "All").
  */
 @Composable
 private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePrefix) {

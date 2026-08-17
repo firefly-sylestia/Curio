@@ -2261,9 +2261,11 @@ private fun SentimentSegment(
     val pillWidth by animateDpAsState(
         targetValue = if (active) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
         // v155 — same near-critical damping as the nav bar: no settle bounce.
+        // v161 — same stiffness bump as the nav bar: Medium settles the
+        // collapse crisply instead of dragging for a second.
         animationSpec = spring(
             dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMediumLow
+            stiffness = Spring.StiffnessMedium
         ),
         label = "revealSentimentWidth"
     )
@@ -2306,7 +2308,10 @@ private fun SentimentSegment(
             AnimatedVisibility(
                 visible = active,
                 enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(240, easing = FastOutSlowInEasing)),
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
+                // v161 — same glide-out exit as the nav bar (was an instant
+                // vaporize while the segment slowly deflated).
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) +
+                    fadeOut(tween(160, easing = FastOutSlowInEasing))
             ) {
                 Text(
                     text = label,
