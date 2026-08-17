@@ -919,6 +919,23 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v144 — tour controls are a floating pill bar; the nav bar yields
+  during the tour.** (1) **The tour's Skip/Next dock** was the last
+  full-width opaque bottom band in the app (a v9.x `Surface`
+  `fillMaxWidth` + `tonalElevation` covering the whole strip) —
+  converted to the v124/v129 floating pill recipe: rounded-50
+  `surfaceContainerHigh` capsule, 6dp shadow, `navigationBarsPadding()`
+  + 12dp air gap, content-sized 52dp capsule buttons inside (Skip =
+  soft `surfaceVariant` secondary, Next/Done = solid primary CTA),
+  7dp row padding / 6dp spacing. The dead `fillMaxWidth` import was
+  removed (the file still uses `windowInsetsPadding` for push routes).
+  (2) **The main `CurioFloatingNavBar` now YIELDS while the tour runs**
+  (`TourController.currentStep == null` added to the v135 drawer gate):
+  the tour pill floats at the same bottom-center spot on tab stops, and
+  the old opaque dock covered the bar anyway — the bar must not show
+  behind/around the tour pill. LESSON: a floating control that replaces
+  a docked band must also inherit the band's occlusion behavior (the
+  bar it sits over must hide), or the two pills stack at the same spot.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

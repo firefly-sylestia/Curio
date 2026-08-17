@@ -23,9 +23,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -780,7 +780,11 @@ fun CurioNavHost(
         // v135 — the bar YIELDS while the Home drawer is open: the drawer
         // covers the whole screen and must sit above the navbar (HomeScreen
         // publishes its open state via [CurioDrawerState]).
-        if (!wide && showBottomBar && !CurioDrawerState.isOpen) {
+        // v144 — the bar also YIELDS while the tour is running: the tour's
+        // floating pill dock now floats at the same bottom-center spot, and
+        // the old opaque dock covered the bar anyway, so the bar must not
+        // show behind/around the tour pill on tab stops.
+        if (!wide && showBottomBar && !CurioDrawerState.isOpen && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
                 modifier = Modifier.align(Alignment.BottomCenter)
@@ -826,28 +830,29 @@ fun CurioNavHost(
                     indication = null
                 ) { advanceTourAndNavigate() }
         )
-        // v9.x — a solid full-width dock: an opaque background that reaches
-        // under the system nav inset (covering the app's bottom bar and the
-        // gesture strip) so the tour controls never float over raw content.
-        // Bigger, clearly tappable buttons.
+        // v144 — the tour controls are now a FLOATING PILL BAR, the same
+        // recipe as CurioFloatingNavBar: a rounded-50 surfaceContainerHigh
+        // capsule floating above the gesture bar (12dp air gap) instead of a
+        // full-width opaque dock — the page shows through around it. The
+        // buttons are content-sized capsules inside (Skip = soft secondary,
+        // Next/Done = solid primary CTA). The full-screen tap-to-advance
+        // layer below is untouched.
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth(),
+                .navigationBarsPadding()
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(50),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 3.dp,
-            shadowElevation = 8.dp
+            shadowElevation = 6.dp
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .padding(horizontal = 20.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(7.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Button(
                     onClick = { TourController.skip() },
-                    modifier = Modifier.weight(1f).height(54.dp),
+                    modifier = Modifier.height(52.dp),
                     // v114 — full capsule to match the app's pill language
                     // (the old 16dp boxy corners read stock M3 next to the
                     // custom pill/chip family).
@@ -867,7 +872,7 @@ fun CurioNavHost(
                 // it properly closes the tour instead of silently stopping.
                 Button(
                     onClick = { advanceTourAndNavigate() },
-                    modifier = Modifier.weight(1f).height(54.dp),
+                    modifier = Modifier.height(52.dp),
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
