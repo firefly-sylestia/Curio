@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.StreakTracker
@@ -79,23 +80,32 @@ fun StatsScreen(navController: NavController) {
     val (levelProgress, nextThreshold) = CurioQuests.xpProgress(xp)
     val lifetime = CurioQuests.lifetimeState
 
-    // Saved entries per lane (+ recency for the "recent discovery" glow).
-    var laneCounts by remember { mutableStateOf<Map<CategoryId, Int>>(emptyMap()) }
-    var laneRecent by remember { mutableStateOf<Map<CategoryId, Long>>(emptyMap()) }
+    // v174d — the active time window (set from the drawer map's selector or
+    // the pill on this card) filters the entry-based constellation stats.
+    val range = StatsRangeState.selected
+    var allEntries by remember { mutableStateOf<List<CurioEntry>>(emptyList()) }
     LaunchedEffect(Unit) {
-        runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull()?.let { entries ->
-            laneCounts = entries.groupingBy { it.topic.categoryId }.eachCount()
-            laneRecent = entries.groupBy { it.topic.categoryId }
-                .mapValues { (_, es) -> es.maxOf { it.capturedAtMillis } }
-        }
+        allEntries = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
+    }
+    // Saved entries per lane INSIDE the window (+ recency for the glow).
+    val filteredEntries = remember(allEntries, range) { allEntries.filterForRange(range) }
+    val laneCounts = remember(filteredEntries) {
+        filteredEntries.groupingBy { it.topic.categoryId }.eachCount()
+    }
+    val laneRecent = remember(filteredEntries) {
+        filteredEntries.groupBy { it.topic.categoryId }
+            .mapValues { (_, es) -> es.maxOf { it.capturedAtMillis } }
     }
 
-    // Explored lanes = saved-entry lanes ∪ lanes the user has spun/quested.
+    // Explored lanes = saved-entry lanes in the window ∪ (All Time only)
+    // lanes the user has spun/quested — quest history has no timestamps.
     val knownNames = remember { CurioCategories.all.map { it.id.name }.toSet() }
-    val explored = remember(laneCounts, CurioQuests.categoriesState) {
-        val fromQuests = CurioQuests.categoriesState
-            .filter { it in knownNames }
-            .mapNotNull { runCatching { CategoryId.valueOf(it) }.getOrNull() }
+    val explored = remember(laneCounts, range, CurioQuests.categoriesState) {
+        val fromQuests = if (range == StatsRange.ALL) {
+            CurioQuests.categoriesState
+                .filter { it in knownNames }
+                .mapNotNull { runCatching { CategoryId.valueOf(it) }.getOrNull() }
+        } else emptyList()
         (laneCounts.keys + fromQuests).distinct().sortedBy { it.ordinal }
     }
 
@@ -153,6 +163,13 @@ fun StatsScreen(navController: NavController) {
             onBack = { navController.popBackStack() }
         )
     }
+}
+
+/** v174d — keep only entries captured inside [StatsRange]'s window. */
+private fun List<CurioEntry>.filterForRange(range: StatsRange): List<CurioEntry> {
+    val days = range.days ?: return this
+    val cutoff = System.currentTimeMillis() - days * 24L * 3600 * 1000
+    return filter { it.capturedAtMillis >= cutoff }
 }
 
 /** v174c — the stats page's celestial palette (mirrors the drawer's sky). */
@@ -330,17 +347,24 @@ private fun StatsConstellationCard(
 
     StatsCard {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    "Your Constellation",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = ink
-                )
-                Text(
-                    "Every star is a lane you've explored — bigger means more saved there.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = muted
-                )
+            Row(verticalAlignment = Alignment.Top) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        "Your Constellation",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink
+                    )
+                    Text(
+                        "Every star is a lane you've explored — bigger means more saved ${StatsRangeState.selected.label.lowercase()}.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                }
+                // v174d — the live window selector (shared with the drawer map).
+                StatsRangeSelectorPill()
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

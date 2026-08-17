@@ -120,6 +120,7 @@ import com.curio.app.data.formatSessionShort
 import com.curio.app.data.openSearchUrl
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.features.stats.StatsRangeSelectorPill
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
@@ -2556,27 +2557,15 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
                         color = muted
                     )
                 }
-                // Period selector — decorative per the design ("This Week ˅");
-                // the chevron after it signals the card opens the full stats
-                // page (v174c).
+                // v174d — the "This Week ˅" selector is now LIVE: it sets
+                // the stats time window (shared with the stats page). The
+                // chevron after it signals the card opens the full stats page.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(top = 2.dp)
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
-                        ) {
-                            Text("This Week", style = MaterialTheme.typography.labelSmall, color = muted)
-                            CurioIcon(CurioIcons.KeyboardArrowDown, null, tint = muted, size = 14.dp)
-                        }
-                    }
+                    StatsRangeSelectorPill()
                     CurioIcon(CurioIcons.ChevronRight, null, tint = muted, size = 16.dp)
                 }
             }

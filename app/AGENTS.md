@@ -1334,6 +1334,22 @@ app/src/main/java/com/curio/app/
     (androidx.compose.foundation.layout.ColumnScope). LESSON: `X.() ->
     Unit` receivers need a real TYPE (ColumnScope / RowScope / BoxScope),
     never the layout function name.
+- **v174d — the drawer map's "This Week ˅" selector is now LIVE and
+  filters the stats constellation.** User: "Make the stats constellation
+  filter to a time range via the 'This Week' selector on the drawer
+  map". New `features/stats/StatsRange.kt`: `StatsRange` enum (WEEK 7 /
+  MONTH 30 / ALL null days) + `StatsRangeState` singleton (mutableStateOf,
+  private set — same pattern as CurioNavTint) + the shared
+  `StatsRangeSelectorPill` (DropdownMenu with bold current choice). The
+  decorative drawer pill is replaced by it (chevron hint kept); the stats
+  constellation card header gets the same pill. StatsScreen now loads ALL
+  entries once, filters via `filterForRange` (capturedAtMillis >=
+  cutoff), and derives laneCounts/laneRecent/explored from the WINDOW
+  (explored ∪ quest categoriesState only for All Time — quest history has
+  no timestamps). Subtitle reflects the window
+  ("saved this week/month/all time"). In-memory state (not persisted).
+  LESSON: only entry-based stats are time-bucketed; lifetime counters and
+  quest history can't be filtered — union quest lanes only on All Time.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

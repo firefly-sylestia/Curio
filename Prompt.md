@@ -36,7 +36,24 @@ CI FIX ("fix this and push"): StatsScreen.kt "Unresolved reference
 receiver TYPE. Fixed to ColumnScope (import added). LESSON: receiver
 scopes are ColumnScope / RowScope / BoxScope, never the composable name.
 
-Docs: changelog ADD, AGENTS.md v174c, this file. PUSH.
+## Completed request — stats time-range filter from the drawer selector
+
+User: "Make the stats constellation filter to a time range via the 'This
+Week' selector on the drawer map".
+
+- New features/stats/StatsRange.kt: StatsRange enum (WEEK/MONTH/ALL),
+  StatsRangeState singleton (mutableStateOf, private set — CurioNavTint
+  pattern), StatsRangeSelectorPill (DropdownMenu, bold current).
+- Drawer map: decorative pill → the live selector (kept the ChevronRight
+  stats-page hint). Stats constellation card header: same pill.
+- StatsScreen: loads all entries once, filterForRange (capturedAtMillis
+  within days), laneCounts/laneRecent/explored derive from the window;
+  quest-category union only on All Time (no timestamps); subtitle shows
+  the window. In-memory state.
+
+Docs: changelog ADD, AGENTS.md v174d, this file. PUSHED (no "dont push").
+
+## Completed request — new Stats page + CI fix
 
 ## Completed request — drawer redesigned as a tiny personal observatory
 
