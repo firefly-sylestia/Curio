@@ -339,9 +339,10 @@ fun CurioProgressEditorDialog(
                 //    are gone — the count now lives here, one number only.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.End,
+                    // v174b CI fix — Row uses horizontalARRANGEMENT (the
+                    // count field + replay icon group sits at the top-right).
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
                     if (editingValue) {
                         BasicTextField(

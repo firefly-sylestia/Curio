@@ -94,6 +94,7 @@ import com.curio.app.features.managecategories.ManageCategoriesScreen
 import com.curio.app.features.onboarding.OnboardingScreen
 import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
+import com.curio.app.features.stats.StatsScreen
 import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
@@ -751,6 +752,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.QUESTS) {
                 QuestsScreen(navController = navController)
+            }
+            composable(CurioRoutes.STATS) {
+                StatsScreen(navController = navController)
             }
             composable(CurioRoutes.SETTINGS) {
                 SettingsHubScreen(navController = navController)

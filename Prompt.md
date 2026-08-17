@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — drawer redesigned as a tiny personal observatory
+## Current request — new Stats page + CI fix
+
+User: "ask me for with suggestions for the new stat page" → ask_user
+answers: centerpiece = interactive constellation brain map; sections =
+ALL (streak+level, lifetime totals, per-category, quests & badges);
+reached from drawer AND Profile; style = observatory; PLUS fix the CI
+failure (CurioProgressPill.kt:342 "No parameter with name
+'horizontalAlignment'" — v168 wrote a Column param on a Row →
+Arrangement.spacedBy(8.dp, Alignment.End)) and push.
+
+StatsScreen.kt (new, CurioRoutes.STATS):
+- StatsSkyHeader: celestial band (mirrors drawer sky colors), stars,
+  crescent, back pill, title.
+- StreakLevelCard: streak + best streak; level + xpProgress bar to next.
+- StatsConstellationCard + CategoryConstellation: per-lane stars — two
+  lobe arc layout, deterministic jitter (CategoryId.name.hashCode),
+  radius by saved count, glow when active this week, tap selects within
+  34dp (detectTapGestures), empty tap clears; selection chip shows name /
+  count / active-this-week. themedAccent resolved in composition (NOT the
+  draw lambda — @Composable).
+- LifetimeTotalsCard: 8 counters in a 2-col grid.
+- JourneyCard: stages done + medals row (CurioBadgeMedal 40dp) + Quests
+  link.
+- LanesBreakdownCard: per-lane rows (tap selects in the constellation).
+- Data: repo.getAll() grouped by topic.categoryId ∪ categoriesState;
+  StreakTracker; CurioQuests counters + xpProgress + levelTitle.
+
+Entry points: drawer map card onClick + "Stats & insights" sub-row;
+Profile ProgressAndAchievementsCard onOpenStats pill.
+
+Docs: changelog ADD, AGENTS.md v174c, this file. PUSH.
+
+## Completed request — drawer redesigned as a tiny personal observatory
 
 User pasted a full design spec (celestial header, "Your Curiosity Map"
 constellation-brain, 3 clean nav rows, illustrated planetary footer) and

@@ -1296,6 +1296,37 @@ app/src/main/java/com/curio/app/
   - LESSON: SVG-at-runtime = coil-svg (keep the artist's file as-is); a
     332KB hand-drawn SVG is NOT safe as a VectorDrawable (aapt2 path
     blob). Pastel fills under shadows must be opaque lerps (rule 11).
+- **v174c — new Stats page ("Your Curiosity") + CI fix.** ask_user on the
+  stat-page design: centerpiece = interactive constellation brain;
+  sections = ALL (streak+level, lifetime totals, per-category, quests &
+  badges); reachable from drawer AND Profile; style = observatory.
+  - CI FIX: CurioProgressPill.kt:342 — the v168 progress-dialog rework
+    wrote `horizontalAlignment = Alignment.End` on a ROW (that's a Column
+    param). Row uses horizontalARRANGEMENT — fixed to
+    `Arrangement.spacedBy(8.dp, Alignment.End)`. LESSON: Row = horizontal-
+    Arrangement + vertical-Alignment; Column = horizontal-Alignment +
+    vertical-Arrangement — the v168 rename flipped them.
+  - NEW FILE app/src/main/java/com/curio/app/features/stats/StatsScreen.kt:
+    StatsScreen(navController) registered as CurioRoutes.STATS ("stats")
+    in NavHost. Celestial sky header (StatsSkyHeader, mirrors the drawer
+    palette), StreakLevelCard (streak/best + level + xpProgress bar),
+    StatsConstellationCard (INTERACTIVE CategoryConstellation Canvas:
+    one star per explored lane, two-lobe arc layout with deterministic
+    jitter seeded by CategoryId.name.hashCode, radius 5.5+min(count,60)*
+    0.30dp, glow on lanes saved this week, tap within 34dp selects via
+    detectTapGestures, empty tap clears; accents resolved in COMPOSITION
+    — themedAccent is @Composable and CANNOT run in the draw lambda),
+    LifetimeTotalsCard (2-col grid of the 8 lifetime counters),
+    JourneyCard (stages progress + CurioBadgeMedal row + Quests link),
+    LanesBreakdownCard (per-lane rows). Data: repo.getAll() grouped by
+    topic.categoryId ∪ CurioQuests.categoriesState (CategoryId.valueOf in
+    runCatching), StreakTracker, xpProgress. StatsCard shell = same
+    opaque pastel card as the drawer map.
+  - ENTRY POINTS: drawer — DrawerCuriosityMap got onClick (whole card
+    opens stats; chevron hint added) + a "Stats & insights" sub-row
+    (glyph "monitoring") in the Your Curiosity group; Profile —
+    ProgressAndAchievementsCard gained onOpenStats + a compact Stats pill
+    in the XP header row.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

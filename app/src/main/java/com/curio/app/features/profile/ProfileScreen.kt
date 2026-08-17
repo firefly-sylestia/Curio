@@ -448,6 +448,9 @@ fun ProfileScreen(navController: NavController) {
                             isMaxLevel = level >= CurioQuests.maxLevel,
                             onOpenQuests = {
                                 navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
+                            },
+                            onOpenStats = {
+                                navController.navigate(CurioRoutes.STATS) { launchSingleTop = true }
                             }
                         )
                     }
@@ -1357,7 +1360,9 @@ private fun ProgressAndAchievementsCard(
     progress: Float,
     nextThreshold: Int,
     isMaxLevel: Boolean,
-    onOpenQuests: () -> Unit
+    onOpenQuests: () -> Unit,
+    // v174c — opens the Curiosity Stats page (observatory constellation).
+    onOpenStats: () -> Unit
 ) {
     val currentQuest = CurioQuests.currentQuest()
     val allStages = CurioQuests.allStages()
@@ -1398,6 +1403,25 @@ private fun ProgressAndAchievementsCard(
                 softWrap = false,
                 overflow = TextOverflow.Ellipsis
             )
+            // v174c — a compact Stats pill into the observatory stats page.
+            Surface(
+                onClick = onOpenStats,
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                ) {
+                    CurioIcon("monitoring", null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                    Text(
+                        "Stats",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
         LinearProgressIndicator(
             progress = { progress.coerceIn(0f, 1f) },

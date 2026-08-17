@@ -1933,7 +1933,9 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                 // brain with the user's REAL stats orbiting it ("Your
                 // Curiosity Map").
                 item("curiosityMap") {
-                    DrawerCuriosityMap()
+                    // v174c — the map is the stats page's summary: tapping it
+                    // opens the full observatory stats screen.
+                    DrawerCuriosityMap(onClick = { onNavigate(CurioRoutes.STATS) })
                 }
                 item("quests") {
                     DrawerNavRow(
@@ -1980,6 +1982,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
                                     .padding(vertical = 2.dp)
                             ) {
+                                DrawerNavItem(
+                                    icon = "monitoring",
+                                    label = "Stats & insights",
+                                    iconTint = Color(0xFF9B7BB8)
+                                ) { onNavigate(CurioRoutes.STATS) }
                                 DrawerNavItem(
                                     icon = CurioIcons.History,
                                     label = "Topic History",
@@ -2473,7 +2480,7 @@ private fun DrawerRollingHorizon(modifier: Modifier = Modifier) {
  *  Shared) keep the design's placeholder numbers — per the user's choice.
  *  Overall Curiosity is the sum of the six orbiting stats. */
 @Composable
-private fun DrawerCuriosityMap() {
+private fun DrawerCuriosityMap(onClick: () -> Unit) {
     val context = LocalContext.current
     val lifetime = CurioQuests.lifetimeState
     val learned = 128
@@ -2518,6 +2525,7 @@ private fun DrawerCuriosityMap() {
     val ink = MaterialTheme.colorScheme.onSurface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = if (isCurioDarkTheme())
             lerp(MaterialTheme.colorScheme.surface, Color(0xFF1B3A40), 0.55f)
@@ -2548,20 +2556,28 @@ private fun DrawerCuriosityMap() {
                         color = muted
                     )
                 }
-                // Period selector — decorative per the design ("This Week ˅").
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                // Period selector — decorative per the design ("This Week ˅");
+                // the chevron after it signals the card opens the full stats
+                // page (v174c).
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(top = 2.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
                     ) {
-                        Text("This Week", style = MaterialTheme.typography.labelSmall, color = muted)
-                        CurioIcon(CurioIcons.KeyboardArrowDown, null, tint = muted, size = 14.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                        ) {
+                            Text("This Week", style = MaterialTheme.typography.labelSmall, color = muted)
+                            CurioIcon(CurioIcons.KeyboardArrowDown, null, tint = muted, size = 14.dp)
+                        }
                     }
+                    CurioIcon(CurioIcons.ChevronRight, null, tint = muted, size = 16.dp)
                 }
             }
             Spacer(Modifier.height(12.dp))

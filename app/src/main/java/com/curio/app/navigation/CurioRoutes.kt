@@ -167,6 +167,9 @@ object CurioRoutes {
     // ── Push destinations (no bottom nav)
     const val PROFILE = "profile"
     const val QUESTS = "quests"
+    // v174c — the Curiosity Stats page (observatory constellation + all
+    // lifetime stats), reachable from the drawer and Profile.
+    const val STATS = "stats"
     const val ENTRY_DETAIL = "detail/{entryId}"
     const val EDIT_MOODBOARD = "edit-moodboard/{entryId}"
     const val EDIT_ENTRY = "edit-entry/{entryId}"
