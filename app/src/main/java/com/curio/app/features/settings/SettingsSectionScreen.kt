@@ -61,6 +61,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
+import com.curio.app.data.VoskModels
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.adaptive.isWide
@@ -86,7 +87,7 @@ enum class SettingsPage(val title: String, val subtitle: String) {
     // control: the daily shuffle reminder + hour chips and the explore
     // dialog's bubble opt-in row (the Notifications section is gone).
     PREFERENCES("Preferences", "Search, explore, and pet behavior"),
-    RECORDING("Recording", "Voice-note quality and dictation"),
+    RECORDING("Recording", "Voice-note quality, dictation and offline transcription"),
     DATA("Backup & restore", "Keep your captures safe")
 }
 
@@ -581,6 +582,19 @@ private fun RecordingSection(highlightKey: String? = null) {
     val context = LocalContext.current
     var quality by remember { mutableStateOf(AudioQualitySettings.get(context)) }
     var showQualityDialog by remember { mutableStateOf(false) }
+    var showModelDialog by remember { mutableStateOf(false) }
+    // v125 — the selected offline model's subtitle ("Small · English (US) ·
+    // ~40 MB", or a prompt to download one). Reads the reactive state + the
+    // model-version bump so it updates right after a download/delete/select
+    // inside the dialog.
+    AppPreferences.offlineModelVersionState
+    val offlineModelId = AppPreferences.offlineModelIdState
+    val offlineModel = VoskModels.byId(offlineModelId)
+    val offlineModelSubtitle = when {
+        offlineModel != null && VoskModels.isDownloaded(context, offlineModelId) ->
+            "${offlineModel.displayName} · ${offlineModel.sizeLabel}"
+        else -> "Offline model for pre-recorded voice-to-text"
+    }
     Column(modifier = Modifier.fillMaxWidth()) {
         SettingsRowPulse(highlightKey == "recording-quality") {
             CurioSettingsRow(CurioIcons.Mic, "Audio quality", quality.label) {
@@ -589,8 +603,14 @@ private fun RecordingSection(highlightKey: String? = null) {
         }
         CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "recording-voice") {
-            CompactSwitchRow("Voice-to-text", "Dictation buttons on voice-note fields", AppPreferences.voiceToTextEnabledState) {
+            CompactSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
                 AppPreferences.setVoiceToTextEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "recording-offline-model") {
+            CurioSettingsRow(CurioIcons.Download, "Offline model", offlineModelSubtitle) {
+                showModelDialog = true
             }
         }
     }
@@ -603,6 +623,12 @@ private fun RecordingSection(highlightKey: String? = null) {
                 AudioQualitySettings.set(context, it)
                 showQualityDialog = false
             }
+        )
+    }
+    if (showModelDialog) {
+        OfflineModelDialog(
+            currentModelId = AppPreferences.offlineModelIdState,
+            onDismiss = { showModelDialog = false }
         )
     }
 }

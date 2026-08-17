@@ -1,6 +1,75 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: floating pill nav bar (phones)
+## Current request — COMPLETED: Vosk offline transcription + floating dictation mic + plain quick title
+
+The user: "okay lets keep os recognistion, and add whisper.cpp for
+recorded voice to text transcription in detail page, and remove that
+mic button from every field. and dont use the main voice recording icon
+to show the voice recording, use a floating button which appears when
+user opens the text box to type, in large text box not title, and also
+remove paper and tear style note style from title and also in detail
+page, show that title just below the quick fact with proper hierarchy
+and size. with its background pill. and when user taps the floating mic
+it starts the transcription in a dialog style with preview at the
+bottom, with confirm and it wont stop unless user taps again, and user
+can edit that text after recording."
+
+Clarified via ask_user (2 rounds): (1) model delivery = download option
+in Settings → Recording with size + quality, marked as the offline
+model for pre-recorded voice-to-text, in-app download; (2) remove ALL
+dictation mics; the new mic is ONLY in Save your take on the large text
+box; the detail view gets transcription of the ALREADY-recorded audio
+with a new text box below it + expand button; the paper/tear removal
+is ONLY for the quick title. (3) **ENGINE SWAP — the user approved
+Vosk** after I verified whisper.cpp has NO Android artifact:
+`io.github.givimad:whisper-jni` (the only Maven-Central whisper.cpp
+binding) is DESKTOP-ONLY (Windows/Linux/macOS .so — no Android .so),
+and no reliable whisper.cpp Android AAR exists (checked Maven Central +
+JitPack). Vosk's published AAR (`com.alphacephei:vosk-android:0.3.47`,
+.so for every ABI) ships the same offline UX.
+
+### What shipped
+1. **New `data/OfflineTranscriber.kt`** — `VoskModels` catalog (Small
+   English-US ~40MB / Multilingual ~45MB / Indian English ~40MB) with
+   in-app download (HttpURLConnection → cache zip → ZipInputStream
+   extract to `filesDir/vosk-models/<id>/`, `am/` completeness check),
+   delete; and `OfflineTranscriber.transcribe()` = MediaExtractor +
+   MediaCodec decode of the AAC m4a → 16-bit PCM → downmix to mono +
+   linear-interp resample to 16kHz → `org.vosk.Recognizer` fed in 5s
+   chunks on Dispatchers.Default.
+2. **Settings → Recording → "Offline model" row + `OfflineModelDialog`**
+   (radio pick, Download with live progress %, delete, In-use label).
+   New prefs: `offlineModelIdState` + `offlineModelVersionState`.
+3. **All per-field dictation mics REMOVED** — Sound Bite title+note mic
+   buttons, the detail page's "Transcribe note" chip, and the whole
+   `allowTranscribe` plumbing (FormatBody/SoundBiteRender/
+   PortfolioRender/OpenNotebookRender signatures cleaned).
+4. **Floating dictation mic (Save your take only)** — `RichTextEditor`
+   gained `onFocusChanged`; the mic appears only while the large note
+   box is focused, tap opens a dialog with the live preview pinned at
+   the BOTTOM, Stop ends listening (generous 2.5s/1.5s silence windows —
+   it only stops when the user taps), Insert commits into the note
+   (editable).
+5. **Detail page offline transcription** — "Transcribe voice note"
+   button (only when a model is downloaded; else a Settings hint row);
+   result persists to `CaptureData.SoundBite.transcript`; renders as a
+   collapsible box below the player (3 lines + Expand, Re-transcribe,
+   clear).
+6. **Quick title de-papered** — `PaperLineField` gained `paper:
+   Boolean`; the title is a plain rounded input with no style/color
+   toggles; the detail page shows it as a `titleMedium` pill just below
+   the quick fact (torn-paper slip removed from the body).
+
+### Validation
+`git diff --check` clean; grep sweeps confirm zero leftover refs
+(TranscribeTarget / DictateFieldButton / TranscribePanel / allowTranscribe /
+noteRecognizer / startNoteTranscription); imports swept (unused
+speech/dictation imports removed, needed ones added); Vosk API
+(org.vosk.Model/Recognizer, acceptWaveForm byte[] + len) verified
+against the published binding. No Gradle locally (env rule) — CI
+validates compile on push (incl. the new vosk-android dependency).
+
+## Previous request — COMPLETED: floating pill nav bar (phones)
 
 The user: "lets add a floating nav bar in pill size with animation like
 first it will just be icons and when that page is active that page gets

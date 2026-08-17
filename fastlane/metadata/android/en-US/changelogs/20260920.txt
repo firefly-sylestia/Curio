@@ -1,4 +1,8 @@
 ADD
+- Offline voice-to-text: recorded voice notes transcribe straight on your device (Vosk) — a Transcribe button on the entry page and the transcript lives in its own box below the recording with an Expand button for the full text.
+- Offline model: Settings → Recording lets you pick a model by quality and size (English / multilingual / Indian English), download it in-app with a progress bar, and delete it anytime — no internet needed while transcribing.
+- Dictation: one floating mic now appears above the keyboard when you open the large text box in Save your take — tap it to dictate in a dialog with a live preview, tap Stop when you're done, and Insert drops the text into your note (still editable). It only stops when you say so.
+- Quick title: the title field is a clean plain input now (no more paper/tear slip), and on the saved entry it sits right below the quick fact on a neat pill.
 - Navigation: the bottom bar is now a floating pill — the tabs show as icons, and the active tab smoothly expands to reveal its label (the indicator covers the whole pill) in every theme, including dark and AMOLED.
 - Drawer: the topic-browsing rows (Topic History, Manage Categories, Browse Topics) fold under a collapsible "Your Curiosity" section, and Support & diagnostics + Replay intro group under "About" — both collapsed by default.
 - New Curio icon: a cosmic mark — a mint planet with a pink moon over gold waves on a midnight sky (launcher, round, themed and notification icons, plus the splash).
@@ -23,6 +27,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- The tiny dictation mic buttons on individual fields are gone — dictation now lives in one place: the floating mic on the note box in Save your take.
 - Tour: skipping the tour on the Spin page no longer breaks the Home tab — the tour's tab stops now navigate like real tab switches, so Home works right after a skip.
 - Drawer: the "Spin it. Explore it. Capture it." line is gone — your full name reads there instead, first name in the greeting and the middle + last names on their own lines below.
 - Curie: random long teleports now burst a poof instead of snapping, the chameleon game poofs and hops to a fresh spot before camouflaging, and the idle auto-flow only starts hide-and-seek or chameleon (no surprise 10-second star rounds).

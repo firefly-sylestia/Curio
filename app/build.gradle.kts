@@ -194,6 +194,10 @@ dependencies {
     // Gson for JSON serialization (CaptureData -> Room blob)
     implementation(libs.com.google.code.gson.gson)
 
+    // Vosk — on-device speech-to-text for pre-recorded sound bites (offline
+    // transcription in the entry detail page; model downloaded in Settings).
+    implementation(libs.com.alphacephei.vosk.android)
+
 
     testImplementation(libs.junit)
     debugImplementation(libs.androidx.ui.tooling)

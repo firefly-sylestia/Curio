@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,11 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import java.util.Locale
@@ -68,7 +68,6 @@ import com.curio.app.ui.components.LiveWaveform
 import com.curio.app.ui.components.TrimWaveform
 import com.curio.app.ui.components.WaveformExtractor
 import com.curio.app.ui.components.formatRecordingTime
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.rememberPulseScale
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -78,17 +77,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/**
- * Which note field a dictation session lands its transcript in.
- */
-private enum class TranscribeTarget(val label: String) {
-    TITLE("the title"),
-    NOTE("the note")
-}
-
-// v7.18 — how many silent re-listens before a NO_MATCH / SPEECH_TIMEOUT is
-// surfaced as an error (a mid-thought pause shouldn't end dictation early).
-private const val TRANSCRIBE_MAX_RETRIES = 2
+// v125 — dictation lives behind ONE floating mic on the large note box: no
+// more per-field mic buttons. The mic appears only while the note is focused;
+// tapping it opens a dictation dialog with a live preview; the session only
+// ends when the user taps Stop (the OS recognizer gets generous silence
+// windows so a mid-thought pause doesn't cut it off), and Insert commits the
+// transcript into the note — which stays fully editable afterwards.
 
 /**
  * Sound Bite format body — CURIO_SPEC §8.1 (Music / Artists).
@@ -176,22 +170,19 @@ fun SoundBiteFormat(
     var endTrim by remember { mutableFloatStateOf(1f) }
     var trimInProgress by remember { mutableStateOf(false) }
 
-    // ── Voice-to-text (v7.17) ───────────────────────────────────────────
-    // The same RECORD_AUDIO permission powers both recording and dictation.
-    // `transcribeRequested` disambiguates a grant: the launcher starts the
-    // recognizer when the user asked for transcription, the recorder when
+    // ── Voice-to-text (v125) ───────────────────────────────────────────
+    // One floating mic on the LARGE note box (not the title): it appears only
+    // while the note is focused and opens a dictation dialog with a live
+    // preview. The same RECORD_AUDIO permission powers recording and
+    // dictation; `dictationRequested` disambiguates a grant: the launcher
+    // opens the dialog when the user asked to dictate, the recorder when
     // they asked for a voice note.
-    //
-    // v7.18 — dictation targets a FIELD (the title slip or the note), is
-    // reachable in ANY state (idle OR after recording), and retries when the
-    // recognizer gives up on a mid-thought pause — so a take can hold BOTH a
-    // voice note and its text, and dictation doesn't stop too early.
-    var transcribing by remember { mutableStateOf(false) }
+    var noteFocused by remember { mutableStateOf(false) }
+    var dictationOpen by remember { mutableStateOf(false) }
+    var listening by remember { mutableStateOf(false) }
     var partialTranscript by remember { mutableStateOf("") }
     var transcribeError by remember { mutableStateOf<String?>(null) }
-    var transcribeRequested by remember { mutableStateOf(false) }
-    var transcribeTarget by remember { mutableStateOf(TranscribeTarget.NOTE) }
-    var transcribeRetries by remember { mutableIntStateOf(0) }
+    var dictationRequested by remember { mutableStateOf(false) }
     val speechRecognizer = remember(context, voiceToTextEnabled) {
         if (voiceToTextEnabled && SpeechRecognizer.isRecognitionAvailable(context)) {
             SpeechRecognizer.createSpeechRecognizer(context)
@@ -200,118 +191,92 @@ fun SoundBiteFormat(
         }
     }
 
-    /** Lands a final transcript in the field the dictation targeted. */
-    fun commitTranscript(final: String) {
-        when (transcribeTarget) {
-            TranscribeTarget.TITLE ->
-                title = if (title.isBlank()) final else "$title $final"
-            TranscribeTarget.NOTE ->
-                note = if (note.isBlank()) final else "$note\n$final"
-        }
-    }
-
-    fun startTranscription(target: TranscribeTarget = TranscribeTarget.NOTE) {
+    fun startDictation() {
         if (!voiceToTextEnabled) return
         val recognizer = speechRecognizer ?: run {
             transcribeError = "Speech recognition isn't available on this device."
             return
         }
-        transcribing = true
+        listening = true
         transcribeError = null
         partialTranscript = ""
-        transcribeRetries = 0
-        transcribeTarget = target
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-            // v7.18 — generous silence windows so a natural pause mid-thought
-            // doesn't end the dictation early (the defaults give up after
-            // roughly half a second of quiet). OEMs vary in honoring these,
-            // hence the retry loop in onError too.
+            // v125 — generous silence windows so a natural pause mid-thought
+            // doesn't end the dictation early; the session only ends when
+            // the user taps Stop.
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2_500)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1_500)
         }
-        fun beginListening() {
-            // v7.25 — a recognizer reused across sessions (second dictation,
-            // or a retry after NO_MATCH) can throw IllegalStateException /
-            // silently never call back on many devices unless the previous
-            // session is cancelled first.
-            runCatching { recognizer.cancel() }
-            recognizer.setRecognitionListener(object : RecognitionListener {
-                override fun onReadyForSpeech(params: Bundle?) {}
-                override fun onBeginningOfSpeech() {}
-                override fun onRmsChanged(rmsdB: Float) {}
-                override fun onBufferReceived(buffer: ByteArray?) {}
-                override fun onEndOfSpeech() {}
-                override fun onError(error: Int) {
-                    // A short pause between sentences makes some engines end
-                    // the session with NO_MATCH / SPEECH_TIMEOUT even though
-                    // the user is mid-thought — silently re-listen a couple
-                    // of times before surfacing an error.
-                    if ((error == SpeechRecognizer.ERROR_NO_MATCH ||
-                            error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) &&
-                        transcribeRetries < TRANSCRIBE_MAX_RETRIES
-                    ) {
-                        transcribeRetries++
-                        beginListening()
-                        return
-                    }
-                    transcribing = false
-                    transcribeError = when (error) {
-                        SpeechRecognizer.ERROR_NO_MATCH ->
-                            "No speech heard. Try again."
-                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT ->
-                            "Listening timed out. Try again."
-                        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ->
-                            "Microphone access is needed to transcribe."
-                        SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT ->
-                            "Speech service unreachable. Check your connection."
-                        SpeechRecognizer.ERROR_CLIENT ->
-                            "Speech recognition isn't available on this device."
-                        else -> "Couldn't transcribe. Try again."
-                    }
-                    partialTranscript = ""
+        // v7.25 — a recognizer reused across sessions (second dictation) can
+        // throw IllegalStateException / silently never call back on many
+        // devices unless the previous session is cancelled first.
+        runCatching { recognizer.cancel() }
+        recognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {}
+            override fun onError(error: Int) {
+                listening = false
+                transcribeError = when (error) {
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech heard. Try again."
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Listening timed out. Try again."
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone access is needed to transcribe."
+                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT ->
+                        "Speech service unreachable. Check your connection."
+                    SpeechRecognizer.ERROR_CLIENT -> "Speech recognition isn't available on this device."
+                    else -> "Couldn't transcribe. Try again."
                 }
-                override fun onResults(results: Bundle?) {
-                    transcribing = false
-                    val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    // v7.25 — some engines finish with an EMPTY RESULTS list
-                    // but deliver the transcript as the final partial (or the
-                    // first match is blank) — fall back to the last partial we
-                    // already showed so a finished session never lands nothing.
-                    val final = matches?.firstOrNull { it.isNotBlank() }
-                        ?: partialTranscript.takeIf { it.isNotBlank() }.orEmpty()
-                    partialTranscript = ""
-                    if (final.isNotBlank()) {
-                        commitTranscript(final)
-                    } else if (transcribeRetries < TRANSCRIBE_MAX_RETRIES) {
-                        // No text at all — same recovery as a NO_MATCH: re-
-                        // listen a couple of times before surfacing an error.
-                        transcribeRetries++
-                        transcribing = true
-                        beginListening()
-                    } else {
-                        transcribing = false
-                        transcribeError = "No speech heard. Try again."
-                    }
-                }
-                override fun onPartialResults(partialResults: Bundle?) {
-                    val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    partialTranscript = matches?.firstOrNull().orEmpty()
-                }
-                override fun onEvent(eventType: Int, params: Bundle?) {}
-            })
-            recognizer.startListening(intent)
-        }
-        beginListening()
+            }
+            override fun onResults(results: Bundle?) {
+                listening = false
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                // v7.25 — some engines finish with an EMPTY RESULTS list but
+                // deliver the text as the final partial — keep it so the
+                // dialog can still offer it for Insert.
+                partialTranscript = matches?.firstOrNull { it.isNotBlank() }
+                    ?: partialTranscript.takeIf { it.isNotBlank() }.orEmpty()
+            }
+            override fun onPartialResults(partialResults: Bundle?) {
+                val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                partialTranscript = matches?.firstOrNull().orEmpty()
+            }
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+        recognizer.startListening(intent)
     }
 
-    fun stopTranscription() {
-        speechRecognizer?.cancel()
-        transcribing = false
+    fun stopListening() {
+        runCatching { speechRecognizer?.cancel() }
+        listening = false
+    }
+
+    /** Inserts the transcript at the end of the note; the box stays editable. */
+    fun insertDictation() {
+        val text = partialTranscript.trim()
+        if (text.isNotBlank()) {
+            note = if (note.isBlank()) text else "$note\n$text"
+        }
+        stopListening()
+        dictationOpen = false
         partialTranscript = ""
+        transcribeError = null
+    }
+
+    fun onFloatMicTap() {
+        if (!voiceToTextEnabled || dictationOpen) return
+        if (hasMicrophonePermission()) {
+            dictationOpen = true
+            startDictation()
+        } else {
+            dictationRequested = true
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
     }
 
     // Runtime permission launcher — shared by recording AND dictation.
@@ -320,14 +285,15 @@ fun SoundBiteFormat(
     ) { granted ->
         if (granted) {
             permissionDenied = false
-            if (transcribeRequested) {
+            if (dictationRequested) {
                 // Consume a pending dictation grant even if the user turned
                 // the experiment off while Android's permission dialog was
                 // open. Never fall through to ordinary recording in that
                 // case; recording was not what this permission request meant.
-                transcribeRequested = false
+                dictationRequested = false
                 if (voiceToTextEnabled) {
-                    startTranscription(transcribeTarget)
+                    dictationOpen = true
+                    startDictation()
                 }
             } else {
                 try {
@@ -342,8 +308,8 @@ fun SoundBiteFormat(
         } else {
             permissionDenied = true
             // Denied for dictation — drop the pending flag so a later grant
-            // from the RECORD path can't accidentally start transcription.
-            transcribeRequested = false
+            // from the RECORD path can't accidentally open the dialog.
+            dictationRequested = false
         }
     }
 
@@ -352,8 +318,9 @@ fun SoundBiteFormat(
     LaunchedEffect(voiceToTextEnabled) {
         if (!voiceToTextEnabled) {
             speechRecognizer?.cancel()
-            transcribeRequested = false
-            transcribing = false
+            dictationRequested = false
+            dictationOpen = false
+            listening = false
             partialTranscript = ""
             transcribeError = null
         }
@@ -424,11 +391,11 @@ fun SoundBiteFormat(
 
     // ── Report busy state (recording OR dictation in progress) so the
     // universal picker can confirm before switching format on a live take ──
-    LaunchedEffect(recordingState, transcribing) {
+    LaunchedEffect(recordingState, listening) {
         onBusyChange(
             recordingState == AudioRecorder.State.RECORDING ||
                 recordingState == AudioRecorder.State.PAUSED ||
-                transcribing
+                listening
         )
     }
 
@@ -485,24 +452,6 @@ fun SoundBiteFormat(
     fun hasMicrophonePermission(): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
-
-    // v7.18 — per-field dictation: a small mic button sits on the title
-    // slip and the note field. Enabled in every non-recording state, so a
-    // take can pair a voice note with text (dictate after recording too).
-    val dictateEnabled = voiceToTextEnabled && !transcribing &&
-        recordingState != AudioRecorder.State.RECORDING &&
-        recordingState != AudioRecorder.State.PAUSED
-
-    fun requestDictation(target: TranscribeTarget) {
-        if (!voiceToTextEnabled) return
-        if (hasMicrophonePermission()) {
-            startTranscription(target)
-        } else {
-            transcribeTarget = target
-            transcribeRequested = true
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
-    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -637,26 +586,6 @@ fun SoundBiteFormat(
             }
         }
 
-        // ── Voice-to-text panel (v7.18) — shown while dictating or after an
-        // error, in ANY state (idle OR after recording): a take can hold a
-        // voice note AND its text alongside each other. The per-field mic
-        // buttons below start it; the panel shows the live partials + the
-        // stop control. Stays up while an error is displayed (errors flip
-        // transcribing off, so a bare `if (transcribing)` would silently
-        // drop the message).
-        if (voiceToTextEnabled && (transcribing || transcribeError != null)) {
-            TranscribePanel(
-                accent = accent,
-                partial = partialTranscript,
-                error = transcribeError,
-                target = transcribeTarget,
-                onStop = {
-                    stopTranscription()
-                    transcribeError = null
-                }
-            )
-        }
-
         // ── Permission denied hint ───────────────────────────────────────
         if (permissionDenied) {
             Text(
@@ -668,31 +597,17 @@ fun SoundBiteFormat(
         }
 
         // ── Optional title field — show always, disabled during trim ─────
-        // Wears the note-paper slip like the other text boxes. Its small mic
-        // button dictates straight into the title.
+        // v125 — the quick title is a PLAIN input now (no paper/tear slip,
+        // no per-field style/color toggles); its paper styling was removed
+        // per the user and the detail page shows it as a clean pill below
+        // the quick fact instead.
         PaperLineField(
             value = title,
             onValueChange = { title = it },
             label = "Add a quick title (optional)",
             enabled = recordingState != AudioRecorder.State.RECORDING,
             imeAction = ImeAction.Next,
-            paperStyle = titleStyle,
-            onPaperStyleChange = { titleStyle = it },
-            paperColor = titleColor,
-            onPaperColorChange = { titleColor = it },
-            // v58 — the quick title starts collapsed: its paper style/color
-            // options only appear once the user taps the slip to write.
-            paperOptionsOnFocus = true,
-            trailingAction = if (voiceToTextEnabled) {
-                {
-                    DictateFieldButton(
-                        accent = accent,
-                        enabled = dictateEnabled,
-                        contentDescription = "Dictate title",
-                        onClick = { requestDictation(TranscribeTarget.TITLE) }
-                    )
-                }
-            } else null
+            paper = false
         )
 
         // Rich-text note — formatting behind a small toggle. The toolbar
@@ -719,19 +634,61 @@ fun SoundBiteFormat(
             paperColor = noteColor,
             onPaperColorChange = { noteColor = it },
             paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
-            // v7.18 — the small mic button on the note field's toolbar row
-            // dictates into the note (works before OR after recording).
-            trailingAction = if (voiceToTextEnabled) {
-                {
-                    DictateFieldButton(
-                        accent = MaterialTheme.colorScheme.tertiary,
-                        enabled = dictateEnabled,
-                        contentDescription = "Dictate note",
-                        onClick = { requestDictation(TranscribeTarget.NOTE) }
-                    )
-                }
-            } else null
+            // v125 — the format knows when the large note box is focused so
+            // it can float the dictation mic above the keyboard.
+            onFocusChanged = { noteFocused = it }
         )
+
+        // ── Floating dictation mic (v125) — appears ONLY while the large
+        // note box is focused (not the title); tap to dictate into it. The
+        // dialog owns the stop/insert controls, so the mic itself is hidden
+        // while the dialog is up.
+        if (voiceToTextEnabled && noteFocused && !dictationOpen) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Surface(
+                    onClick = { onFloatMicTap() },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    shadowElevation = 6.dp,
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            name = CurioIcons.Mic,
+                            contentDescription = "Dictate note",
+                            tint = pastelFillInk(MaterialTheme.colorScheme.tertiary),
+                            size = 26.dp
+                        )
+                    }
+                }
+            }
+        }
+
+        // ── Dictation dialog (v125) — floating-mic flow: live preview at
+        // the bottom, Stop to end listening, Insert to drop the transcript
+        // into the note (the box stays editable).
+        if (dictationOpen) {
+            DictationDialog(
+                accent = MaterialTheme.colorScheme.tertiary,
+                listening = listening,
+                partial = partialTranscript,
+                error = transcribeError,
+                onStop = {
+                    stopListening()
+                    transcribeError = null
+                },
+                onInsert = { insertDictation() },
+                onDismiss = {
+                    stopListening()
+                    dictationOpen = false
+                    partialTranscript = ""
+                    transcribeError = null
+                }
+            )
+        }
 
         // ── Quote cards — the SHARED hand-placed paper notecard section ──
         // Frozen while actively recording (the cards need the keyboard).
@@ -849,131 +806,110 @@ private fun TrimSection(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Live voice-to-text panel (v7.17) — shown while [SpeechRecognizer] is
- * listening. Live partial results stream in; a pulsing mic + stop control
- * mirror the recording state's visual language so dictation reads as the
- * sibling of a voice note. Errors render in place.
- *
- * v7.18 — [target] names the field the transcript will land in, and the
- * panel is reachable from every state (not just idle), so a voice note and
- * its text can live alongside each other in one take.
+ * v125 — the floating-mic dictation dialog. Opens when the user taps the
+ * floating mic on the large note box; the live partial transcript streams
+ * into the preview pinned at the BOTTOM of the dialog. The session only
+ * ends when the user taps Stop (the recognizer gets generous silence
+ * windows so a mid-thought pause doesn't cut it off); Insert commits the
+ * transcript into the note, which stays fully editable afterwards.
  */
 @Composable
-private fun TranscribePanel(
+private fun DictationDialog(
     accent: Color,
+    listening: Boolean,
     partial: String,
     error: String?,
-    target: TranscribeTarget,
-    onStop: () -> Unit
+    onStop: () -> Unit,
+    onInsert: () -> Unit,
+    onDismiss: () -> Unit
 ) {
-    val pulseScale = rememberPulseScale(active = true)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            // v27n — opaque accent-tinted fill (was 10% alpha, which let the
-            // elevation shadow bleed through).
-            color = lerp(MaterialTheme.colorScheme.surface, accent, 0.10f),
-            shadowElevation = 2.dp,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Pulsing mic — same ring language as live recording.
-                Box(
-                    modifier = Modifier.size(64.dp),
-                    contentAlignment = Alignment.Center
+    val pulseScale = rememberPulseScale(active = listening)
+    AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = RoundedCornerShape(28.dp),
+        onDismissRequest = onDismiss,
+        title = { Text("Dictate note", fontWeight = FontWeight.SemiBold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                // ── Status row — pulsing mic + what's happening ─────────
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = accent.copy(alpha = 0.2f),
-                        modifier = Modifier
-                            .size(64.dp)
-                            .scale(pulseScale)
-                    ) {}
-                    Surface(
-                        shape = CircleShape,
-                        color = accent,
-                        modifier = Modifier.size(48.dp)
+                    Box(
+                        modifier = Modifier.size(48.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            CurioIcon(
-                                name = CurioIcons.Mic,
-                                contentDescription = null,
-                                tint = pastelFillInk(accent),
-                                size = 24.dp
-                            )
+                        Surface(
+                            shape = CircleShape,
+                            color = accent.copy(alpha = 0.2f),
+                            modifier = Modifier
+                                .size(48.dp)
+                                .scale(pulseScale)
+                        ) {}
+                        Surface(
+                            shape = CircleShape,
+                            color = accent,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                CurioIcon(
+                                    name = if (listening) CurioIcons.Mic else CurioIcons.MicNone,
+                                    contentDescription = null,
+                                    tint = pastelFillInk(accent),
+                                    size = 20.dp
+                                )
+                            }
                         }
                     }
-                }
-                Text(
-                    text = if (error != null) error
-                           else "Listening… speak now (into ${target.label})",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (error != null) MaterialTheme.colorScheme.error else accent,
-                    textAlign = TextAlign.Center
-                )
-                if (partial.isNotBlank()) {
                     Text(
-                        text = partial,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
+                        text = when {
+                            error != null -> error
+                            listening -> "Listening… speak now"
+                            partial.isBlank() -> "Nothing heard yet"
+                            else -> "Ready — review the preview below"
+                        },
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                        color = if (error != null) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.onSurface
                     )
                 }
-                // Error panel needs its own dismissal (transcribing is off,
-                // so the plain button below would otherwise stay hidden and
-                // the message would be stuck on screen).
-                TextButton(
-                    onClick = onStop,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                // ── Live preview pinned to the BOTTOM of the dialog ─────
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 72.dp, max = 160.dp)
                 ) {
                     Text(
-                        text = if (error != null) "Dismiss" else "Stop transcription",
-                        color = if (error != null) MaterialTheme.colorScheme.error else accent
+                        text = partial.ifBlank { "Your words will appear here while you speak…" },
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontStyle = if (partial.isBlank()) androidx.compose.ui.text.font.FontStyle.Italic
+                                       else androidx.compose.ui.text.font.FontStyle.Normal
+                        ),
+                        color = if (partial.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant
+                                else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(12.dp)
                     )
                 }
             }
+        },
+        confirmButton = {
+            if (listening) {
+                TextButton(onClick = onStop) {
+                    Text("Stop", fontWeight = FontWeight.Bold, color = accent)
+                }
+            } else {
+                TextButton(onClick = onInsert, enabled = partial.isNotBlank()) {
+                    Text("Insert", fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
-    }
-}
-
-/** The small mic chip that sits on each note field — dictates into that
- *  field. Disabled while recording or dictating. */
-@Composable
-private fun DictateFieldButton(
-    accent: Color,
-    enabled: Boolean,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(8.dp),
-        // v27n — opaque accent-tinted fill (was 10% alpha).
-        color = if (enabled) lerp(MaterialTheme.colorScheme.surface, accent, 0.10f)
-                else MaterialTheme.colorScheme.surfaceVariant,
-        shadowElevation = 2.dp
-    ) {
-        CurioIcon(
-            name = CurioIcons.Mic,
-            contentDescription = contentDescription,
-            // v86 — dark mode: the raw accent is a deep jewel tone on a
-            // dark tinted chip → dark-on-dark. Flips to the bright light
-            // twin so the mic reads on the dark surface.
-            tint = if (enabled) {
-                if (isCurioDarkTheme()) lerp(accent, Color.White, 0.85f) else accent
-            } else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            size = 16.dp,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
-        )
-    }
+    )
 }
 
 @Composable

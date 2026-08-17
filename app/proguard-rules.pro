@@ -31,3 +31,16 @@
 -keep class com.curio.app.data.CurioDatabase { *; }
 -keep class com.curio.app.data.CurioDatabase_Impl { *; }
 -keep @androidx.room.Database class * { *; }
+
+# JNA (transitively pulled in by vosk-android for the offline voice-to-text
+# model): JNA binds native functions reflectively at runtime, so R8 must not
+# strip/obfuscate its classes (the standard JNA Android keep rules).
+-keep class com.sun.jna.** { *; }
+-keepclassmembers class * extends com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.Callback { *; }
+-keepclassmembers class * implements com.sun.jna.Callback { *; }
+-keepclassmembers class * implements com.sun.jna.Structure { *; }
+
+# Vosk's own binding classes extend com.sun.jna.PointerType and are resolved
+# through JNA reflection — keep them whole too.
+-keep class org.vosk.** { *; }

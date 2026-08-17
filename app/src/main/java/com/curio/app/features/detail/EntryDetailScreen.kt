@@ -1,18 +1,9 @@
 package com.curio.app.features.detail
 
-import android.Manifest
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Bundle
 import org.json.JSONArray
 import org.json.JSONObject
-import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -49,9 +40,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -98,7 +92,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.AdaptiveImageGallery
@@ -156,6 +149,8 @@ import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.OfflineTranscriber
+import com.curio.app.data.VoskModels
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -711,6 +706,30 @@ fun EntryDetailScreen(
                         cat = cat,
                         teaser = resolvedEntry.topic.teaser
                     )
+
+                    // ── Saved quick title (v125) — the user's OWN title from
+                    // Save your take, shown just below the quick fact on a
+                    // clean background pill (the old torn-paper slip inside
+                    // the body is gone). SoundBite entries carry it.
+                    val soundBiteTitle = (resolvedEntry.captureData as? CaptureData.SoundBite)
+                        ?.title?.takeIf { it.isNotBlank() }
+                    if (soundBiteTitle != null) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            // v27n — opaque accent-tinted pill.
+                            color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.accent, 0.10f),
+                            shadowElevation = 2.dp
+                        ) {
+                            Text(
+                                text = soundBiteTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = cat.categoryInk(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
 
                     // ── Custom tags (v7.17) — the labels added on the save
                     // page, rendered as small #chips (the captured-at line
@@ -1403,12 +1422,7 @@ private fun FrostedSegment(
 private fun FormatBody(
     entry: CurioEntry,
     category: CurioCategory,
-    navController: NavController,
-    // v7.18 — whether a SoundBite body may persist dictation straight to
-    // Room. False for synthesized sub-entries (Portfolio sections /
-    // OpenNotebook takes share the parent entry's id — a save there would
-    // overwrite the whole entry with just that section).
-    allowTranscribe: Boolean = true
+    navController: NavController
 ) {
     // Multi-section entries render a compact section switcher that flips
     // between the individual format bodies (never merged into one page).
@@ -1417,7 +1431,7 @@ private fun FormatBody(
         return
     }
     when (entry.format) {
-        CaptureFormat.SoundBite -> SoundBiteRender(entry, category, allowTranscribe)
+        CaptureFormat.SoundBite -> SoundBiteRender(entry, category)
         CaptureFormat.ReelNotes -> ReelNotesRender(entry, category)
         CaptureFormat.Marginalia -> MarginaliaRender(entry, category, navController)
         CaptureFormat.GalleryWall -> GalleryWallRender(entry, category, navController)
@@ -1592,9 +1606,9 @@ private fun PortfolioRender(entry: CurioEntry, category: CurioCategory, navContr
             title = section.title ?: entry.title,
             capturedAtMillis = entry.capturedAtMillis
         )
-        // Synthesized section entry — must NOT persist dictation (it shares
-        // the parent entry's id; a save would overwrite the whole portfolio).
-        FormatBody(entry = subEntry, category = category, navController = navController, allowTranscribe = false)
+        // Synthesized section entry shares the parent entry's id; it is
+        // rendered read-only (no save-affecting actions on a sub-entry).
+        FormatBody(entry = subEntry, category = category, navController = navController)
     }
 }
 
@@ -1603,115 +1617,62 @@ private fun PortfolioRender(entry: CurioEntry, category: CurioCategory, navContr
 @Composable
 private fun SoundBiteRender(
     entry: CurioEntry,
-    category: CurioCategory,
-    allowTranscribe: Boolean = true
+    category: CurioCategory
 ) {
     val data = entry.captureData as? CaptureData.SoundBite ?: return
-    val voiceToTextEnabled = AppPreferences.voiceToTextEnabledState
 
-    // ── Transcribe on the saved note (v7.18) — a small mic chip lets a
-    // saved voice note grow its text afterwards: dictation lands in the
-    // entry's note field and is persisted to Room, so a take can hold BOTH
-    // the voice recording and its text alongside each other.
+    // ── Offline transcription (v125) — turns the RECORDING itself into
+    // text using the downloaded Vosk model (Settings → Recording → Offline
+    // model). Runs fully on-device; the transcript is persisted to Room so
+    // it survives revisits and shows in a collapsible box below the player.
     val detailContext = LocalContext.current
     val detailScope = rememberCoroutineScope()
-    var noteTranscribing by remember { mutableStateOf(false) }
-    var notePartial by remember { mutableStateOf("") }
-    var noteError by remember { mutableStateOf<String?>(null) }
-    val noteRecognizer = remember(detailContext, voiceToTextEnabled) {
-        if (voiceToTextEnabled && SpeechRecognizer.isRecognitionAvailable(detailContext)) {
-            SpeechRecognizer.createSpeechRecognizer(detailContext)
-        } else {
-            null
-        }
-    }
-    fun startNoteTranscription() {
-        if (!voiceToTextEnabled) return
-        val recognizer = noteRecognizer ?: run {
-            noteError = "Speech recognition isn't available on this device."
-            return
-        }
-        noteTranscribing = true
-        noteError = null
-        notePartial = ""
-        // v7.25 — cancel any prior session before starting a new one (a
-        // reused recognizer can throw / go silent otherwise).
-        runCatching { recognizer.cancel() }
-        recognizer.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
-            override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onError(error: Int) {
-                noteTranscribing = false
-                noteError = when (error) {
-                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech heard. Try again."
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Listening timed out. Try again."
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone access is needed to transcribe."
-                    SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT ->
-                        "Speech service unreachable. Check your connection."
-                    SpeechRecognizer.ERROR_CLIENT -> "Speech recognition isn't available on this device."
-                    else -> "Couldn't transcribe. Try again."
+    var transcribing by remember { mutableStateOf(false) }
+    var transcribeProgress by remember { mutableFloatStateOf(0f) }
+    var transcribeError by remember { mutableStateOf<String?>(null) }
+    var transcriptExpanded by remember { mutableStateOf(false) }
+    // Re-read the model state every composition (and after a Settings
+    // download/delete bumps the version) so the Transcribe affordance
+    // appears the moment a model is available.
+    AppPreferences.offlineModelVersionState
+    val offlineModelId = AppPreferences.offlineModelIdState
+    val offlineModelDownloaded = VoskModels.isDownloaded(detailContext, offlineModelId)
+
+    fun startOfflineTranscription() {
+        if (transcribing) return
+        val modelId = AppPreferences.getOfflineModelId(detailContext)
+        if (!VoskModels.isDownloaded(detailContext, modelId)) return
+        transcribing = true
+        transcribeError = null
+        transcribeProgress = 0f
+        detailScope.launch {
+            val text = OfflineTranscriber.transcribe(
+                context = detailContext,
+                audioPath = data.audioFilePath,
+                modelId = modelId
+            ) { transcribeProgress = it }
+            transcribing = false
+            if (text != null) {
+                // REPLACE by id — the detail flow refreshes reactively.
+                runCatching {
+                    CurioRepositoryHolder.repo.save(
+                        entry.copy(captureData = data.copy(transcript = text))
+                    )
                 }
-                notePartial = ""
+            } else {
+                transcribeError = "Couldn't transcribe this recording. Check the audio and try again."
             }
-            override fun onResults(results: Bundle?) {
-                noteTranscribing = false
-                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                // v7.25 — some engines finish with an empty RESULTS list but
-                // deliver the text as the final partial — fall back to it so
-                // a finished session never lands nothing in the note.
-                val final = matches?.firstOrNull { it.isNotBlank() }
-                    ?: notePartial.takeIf { it.isNotBlank() }.orEmpty()
-                notePartial = ""
-                if (final.isNotBlank()) {
-                    // Append to the saved note and persist the updated entry
-                    // (REPLACE by id — the detail flow refreshes reactively).
-                    detailScope.launch {
-                        val merged = if (data.note.isNullOrBlank()) final else "${data.note}\n$final"
-                        runCatching {
-                            CurioRepositoryHolder.repo.save(
-                                entry.copy(captureData = data.copy(note = merged))
-                            )
-                        }
-                    }
-                }
-            }
-            override fun onPartialResults(partialResults: Bundle?) {
-                val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                notePartial = matches?.firstOrNull().orEmpty()
-            }
-            override fun onEvent(eventType: Int, params: Bundle?) {}
-        })
-        recognizer.startListening(
-            Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
-                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-                // Same generous silence windows as the editor's dictation.
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2_500)
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1_500)
-            }
-        )
-    }
-    val notePermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) startNoteTranscription()
-        else noteError = "Microphone access is needed to transcribe."
-    }
-    LaunchedEffect(voiceToTextEnabled) {
-        if (!voiceToTextEnabled) {
-            noteRecognizer?.cancel()
-            noteTranscribing = false
-            notePartial = ""
-            noteError = null
         }
     }
-    DisposableEffect(noteRecognizer) {
-        onDispose { noteRecognizer?.destroy() }
+
+    fun clearTranscript() {
+        detailScope.launch {
+            runCatching {
+                CurioRepositoryHolder.repo.save(
+                    entry.copy(captureData = data.copy(transcript = null))
+                )
+            }
+        }
     }
 
     // v7.42 — no box: the voice note, note, and quotes sit directly on the
@@ -1792,117 +1753,166 @@ private fun SoundBiteRender(
                 )
             }
 
-            // ── Saved title — its own paper slip (v26), OUTSIDE the audio
-            //    gate so a typed-only voice note (title without a recording)
-            //    still shows it. Mirrors the editor's title field: same
-            //    paper style + color, seeded per entry so it never re-tears.
-            if (!data.title.isNullOrBlank()) {
-                val titleSheet = data.titleColor ?: NotePaperColor.CREAM
-                NotePaperCard(
-                    style = data.titleStyle ?: data.paperStyle ?: NotePaperStyle.RULED,
-                    seed = noteSeed(entry.id, 30),
-                    paperColor = titleSheet,
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
-                    corner = 10.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 26.dp, end = 6.dp)
-                ) {
+            // ── Offline transcript (v125) — sits right below the audio
+            // player. No transcript yet: a Transcribe button (needs the
+            // downloaded offline model from Settings → Recording). With one:
+            // a collapsible box that shows a few lines by default with an
+            // Expand button for the full text, plus re-transcribe + clear.
+            val transcript = data.transcript?.takeIf { it.isNotBlank() }
+            if (transcript == null) {
+                if (offlineModelDownloaded) {
+                    Surface(
+                        onClick = { startOfflineTranscription() },
+                        enabled = !transcribing,
+                        shape = RoundedCornerShape(50),
+                        // v27n — opaque accent-tinted fill.
+                        color = if (transcribing) MaterialTheme.colorScheme.surfaceVariant
+                                else lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.12f),
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (transcribing) {
+                                CircularProgressIndicator(
+                                    strokeWidth = 2.dp,
+                                    color = category.categoryInk(),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            } else {
+                                CurioIcon(
+                                    name = CurioIcons.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = category.categoryInk(),
+                                    size = 18.dp
+                                )
+                            }
+                            Text(
+                                text = if (transcribing) "Transcribing… ${(transcribeProgress * 100).toInt()}%"
+                                       else "Transcribe voice note",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = category.categoryInk()
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Download,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 16.dp
+                        )
+                        Text(
+                            text = "Download an offline model in Settings → Recording to transcribe this voice note.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                if (transcribeError != null) {
                     Text(
-                        text = data.title,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = notePaperInk(titleSheet),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = transcribeError.orEmpty(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
-            }
-
-            // ── Transcribe the saved note (v7.18) — small mic chip that
-            // dictates straight into the entry's note (persisted to Room).
-            // Hidden for synthesized sub-entries (Portfolio/OpenNotebook
-            // sections — a save there would overwrite the parent entry).
-            if (allowTranscribe && voiceToTextEnabled) {
-                Row(
+            } else {
+                // ── Transcript box — collapsed to a few lines with an
+                // Expand button for the full text ──
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    if (noteTranscribing || noteError != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Mic,
+                            contentDescription = null,
+                            tint = category.categoryInk(),
+                            size = 16.dp
+                        )
+                        Text(
+                            text = "Transcript",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = category.categoryInk()
+                        )
+                        Spacer(Modifier.weight(1f))
+                        // Re-transcribe (uses the downloaded model again).
                         Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            // v27n — opaque accent-tinted fill (was 10% alpha,
-                            // which let the elevation shadow bleed through).
-                            color = lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.10f),
-                            shadowElevation = 2.dp,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    // noteError is a delegated var → no smart
-                                    // cast; Elvis keeps the arg non-null.
-                                    text = noteError ?: "Listening… speak now",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                                    color = if (noteError != null) MaterialTheme.colorScheme.error
-                                            else category.categoryInk()
-                                )
-                                if (notePartial.isNotBlank()) {
-                                    Text(
-                                        text = notePartial,
-                                        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-                        }
-                        Surface(
-                            onClick = {
-                                noteRecognizer?.cancel()
-                                noteTranscribing = false
-                                notePartial = ""
-                                noteError = null
-                            },
+                            onClick = { startOfflineTranscription() },
+                            enabled = !transcribing,
                             shape = RoundedCornerShape(8.dp),
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             CurioIcon(
-                                name = CurioIcons.Close,
-                                contentDescription = "Stop transcribing",
+                                name = CurioIcons.Refresh,
+                                contentDescription = "Re-transcribe",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 size = 16.dp,
                                 modifier = Modifier.padding(6.dp)
                             )
                         }
-                    } else {
+                        // Clear the transcript.
                         Surface(
-                            onClick = {
-                                val granted = ContextCompat.checkSelfPermission(
-                                    detailContext, Manifest.permission.RECORD_AUDIO
-                                ) == PackageManager.PERMISSION_GRANTED
-                                if (voiceToTextEnabled && granted) startNoteTranscription()
-                                else if (voiceToTextEnabled) notePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                            },
+                            onClick = { clearTranscript() },
                             shape = RoundedCornerShape(8.dp),
-                            // v27n — opaque accent-tinted fill (was 10% alpha).
-                            color = lerp(MaterialTheme.colorScheme.surface, category.themedAccent(), 0.10f),
-                            shadowElevation = 2.dp
+                            color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            CurioIcon(
+                                name = CurioIcons.Close,
+                                contentDescription = "Remove transcript",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 16.dp,
+                                modifier = Modifier.padding(6.dp)
+                            )
+                        }
+                    }
+                    if (transcribing) {
+                        LinearProgressIndicator(
+                            progress = { transcribeProgress },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = category.themedAccent(),
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isCurioDarkTheme()) {
+                            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, category.categoryInk(), 0.08f)
+                        } else {
+                            lerp(MaterialTheme.colorScheme.surfaceContainerLow, category.categoryInk(), 0.05f)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = transcript,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = category.categoryInk(),
+                                maxLines = if (transcriptExpanded) Int.MAX_VALUE else 3,
+                                overflow = if (transcriptExpanded) TextOverflow.Visible else TextOverflow.Ellipsis
+                            )
+                            TextButton(
+                                onClick = { transcriptExpanded = !transcriptExpanded },
+                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                             ) {
-                                CurioIcon(
-                                    name = CurioIcons.Mic,
-                                    contentDescription = null,
-                                    tint = category.categoryInk(),
-                                    size = 16.dp
-                                )
                                 Text(
-                                    text = "Transcribe note",
+                                    text = if (transcriptExpanded) "Collapse" else "Expand",
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = category.categoryInk()
                                 )
@@ -3987,9 +3997,9 @@ private fun OpenNotebookRender(entry: CurioEntry, category: CurioCategory, navCo
             format = data.subFormat,
             captureData = data.subData
         )
-        // Synthesized sub-entry — must NOT persist dictation (shares the
-        // parent entry's id; a save would overwrite the whole OpenNotebook).
-        FormatBody(entry = subEntry, category = category, navController = navController, allowTranscribe = false)
+        // Synthesized sub-entry shares the parent entry's id; rendered
+        // read-only (no save-affecting actions on a sub-entry).
+        FormatBody(entry = subEntry, category = category, navController = navController)
     }
 }
 

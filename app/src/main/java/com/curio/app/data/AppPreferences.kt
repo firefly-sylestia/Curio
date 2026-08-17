@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -123,6 +124,8 @@ object AppPreferences {
     // Experimental voice-to-text/dictation. Default OFF so microphone
     // transcription never appears or starts until the user opts in.
     private const val KEY_VOICE_TO_TEXT_ENABLED = "voice_to_text_enabled"
+    // v125 — the selected offline transcription model id (Vosk catalog id).
+    private const val KEY_OFFLINE_MODEL = "offline_model_id"
     // v8.5 — the Curio pet companion (spec §10): the pixel pet + its
     // rule-based dialogue + the category passport/discovery features on
     // Quests and Home. Default ON; a user-facing Appearance toggle gates
@@ -462,6 +465,17 @@ object AppPreferences {
     var voiceToTextEnabledState by mutableStateOf(false)
         private set
 
+    // v125 — the OFFLINE transcription model for pre-recorded sound bites
+    // (Vosk). "" = none downloaded/selected; the value is the model id from
+    // [VoskModels.CATALOG]. Dictation (live OS recognizer) is unaffected —
+    // this only gates the recorded-audio → text flow on the detail page.
+    var offlineModelIdState by mutableStateOf("")
+        private set
+    // Bumped by download/delete so screens reading [VoskModels.isDownloaded]
+    // recompose with the fresh state when they regain focus.
+    var offlineModelVersionState by mutableIntStateOf(0)
+        private set
+
     /**
      * Curio pet companion state (v8.5) — gates the pixel pet sprite, its
      * rule-based dialogue, and the passport/discovery companion layer on
@@ -616,6 +630,7 @@ object AppPreferences {
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
+        offlineModelIdState = getOfflineModelId(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
@@ -1230,6 +1245,21 @@ object AppPreferences {
     fun setVoiceToTextEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_VOICE_TO_TEXT_ENABLED, enabled).apply()
         voiceToTextEnabledState = enabled
+    }
+
+    // ── Offline transcription model (v125) ─────────────────────────────
+    /** The selected offline model id ("" = none). */
+    fun getOfflineModelId(context: Context): String =
+        prefs(context).getString(KEY_OFFLINE_MODEL, "").orEmpty()
+
+    fun setOfflineModelId(context: Context, id: String) {
+        prefs(context).edit().putString(KEY_OFFLINE_MODEL, id).apply()
+        offlineModelIdState = id
+    }
+
+    /** Forces screens that read [VoskModels.isDownloaded] to re-check. */
+    fun bumpOfflineModelVersion() {
+        offlineModelVersionState++
     }
 
     /**

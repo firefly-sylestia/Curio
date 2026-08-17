@@ -50,6 +50,8 @@ composeMultiplatform = "1.11.1"
 # version bundled with Compose Multiplatform 1.11.1.
 composeMaterial3 = "1.11.0-alpha07"
 kotlinxSerializationJson = "1.8.0"
+# Offline voice-to-text for pre-recorded sound bites (Vosk — on-device ASR).
+vosk = "0.3.47"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -98,6 +100,7 @@ com-squareup-retrofit2-converter-gson = { group = "com.squareup.retrofit2", name
 com-squareup-okhttp3-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 com-squareup-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 com-google-code-gson-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+com-alphacephei-vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 org-jetbrains-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 org-jetbrains-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }

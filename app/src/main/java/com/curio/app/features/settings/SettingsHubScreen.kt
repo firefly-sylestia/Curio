@@ -1113,7 +1113,7 @@ private val SettingsSections = listOf(
                     // (daily reminder, live notification, explore bubble)
                     // lives in Preferences now.
                     SettingsRowEntry(CurioIcons.Tune, "Preferences", "Search engine, explore, and pet behavior", CurioRoutes.SETTINGS_PREFERENCES),
-                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality and dictation", CurioRoutes.SETTINGS_RECORDING),
+                    SettingsRowEntry(CurioIcons.Mic, "Recording", "Voice-note quality, dictation and offline transcription", CurioRoutes.SETTINGS_RECORDING),
                     SettingsRowEntry(CurioIcons.Pets, "Pet designer", "Draw your own Curie", CurioRoutes.PET_DESIGNER),
                     // v26 — Experiments is hidden from Settings (it opens via
                     // the five-tap version trick in Support); these two moved
@@ -1198,7 +1198,8 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.BubbleChart, "Explore bubble option in Explore dialog", "Show the bubble choice in the Explore now dialog", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-bubble-dialog"),
     // ── Recording ────────────────────────────────────────────────────
     SettingsDeepRow(CurioIcons.Mic, "Audio quality", "Voice-note recording quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
-    SettingsDeepRow(CurioIcons.Edit, "Voice-to-text", "Dictation buttons on voice-note fields", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
+    SettingsDeepRow(CurioIcons.Edit, "Voice-to-text", "Live dictation while typing, and transcription of recordings", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
+    SettingsDeepRow(CurioIcons.Download, "Offline model", "Offline model for pre-recorded voice-to-text", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-offline-model"),
     // ── Backup & restore (own screen — no row pulse) ─────────────────
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),

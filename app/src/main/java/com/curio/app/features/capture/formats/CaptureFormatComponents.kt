@@ -443,7 +443,12 @@ fun PaperLineField(
      *  field is tapped (focused) — a cleaner collapsed look; they appear the
      *  moment the user starts writing. Default false keeps the controls
      *  always visible for all other callers. */
-    paperOptionsOnFocus: Boolean = false
+    paperOptionsOnFocus: Boolean = false,
+    /** v125 — when false, the field drops the note-paper slip entirely and
+     *  renders as a plain rounded input (used by the quick-title field, which
+     *  the user asked to strip of paper/tear styling). The paper style/color
+     *  controls never render in plain mode regardless of the other params. */
+    paper: Boolean = true
 ) {
     // v58 — track focus so the paper options can reveal only while the
     // user is actually writing in the field.
@@ -472,8 +477,9 @@ fun PaperLineField(
         // styles + the rules chip overflow a phone-width label row (Rows
         // don't wrap), so the chips scroll instead of pushing the label off.
         // v58 — a field with paperOptionsOnFocus hides both controls until
-        // it's tapped; everything else renders them always.
-        if (onPaperStyleChange != null && (!paperOptionsOnFocus || focused)) {
+        // it's tapped; everything else renders them always. v125 — a plain
+        // (non-paper) field never shows the paper controls.
+        if (paper && onPaperStyleChange != null && (!paperOptionsOnFocus || focused)) {
             NotePaperStyleToggle(
                 style = paperStyle,
                 onStyleChange = onPaperStyleChange,
@@ -482,7 +488,7 @@ fun PaperLineField(
             )
         }
         // The color swatches live on their OWN row behind a toggle chip.
-        if (onPaperColorChange != null && (!paperOptionsOnFocus || focused)) {
+        if (paper && onPaperColorChange != null && (!paperOptionsOnFocus || focused)) {
             NotePaperColorToggle(
                 color = paperColor,
                 onColorChange = onPaperColorChange,
@@ -492,43 +498,84 @@ fun PaperLineField(
         // Ink follows the chosen sheet color so text stays readable on every
         // pastel — resolved in the composable scope, then passed in.
         val ink = notePaperInk(paperColor)
-        // NotePaperCard dispatches EVERY style (ruled / torn / torn+rules /
-        // coffee / folded / red-margin) so the single-line field wears the
-        // same paper look as the rich-text fields — one source of truth.
-        NotePaperCard(
-            style = paperStyle,
-            modifier = Modifier.fillMaxWidth(),
-            paperColor = paperColor,
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
-        ) {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                enabled = enabled,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    fontFamily = PatrickHandFontFamily,
-                    color = ink
-                ),
-                cursorBrush = SolidColor(accent),
-                keyboardOptions = KeyboardOptions(imeAction = imeAction),
-                decorationBox = { innerTextField ->
-                    Box {
-                        if (value.isEmpty() && placeholder.isNotEmpty()) {
-                            Text(
-                                text = placeholder,                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            fontFamily = PatrickHandFontFamily,
-                                            color = ink.copy(alpha = 0.45f)
-                                        )
-                            )
+        // v125 — the plain (non-paper) quick-title field renders as a simple
+        // rounded input on the theme surface; the paper path keeps the
+        // NotePaperCard slip (one source of truth for every style).
+        if (!paper) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    enabled = enabled,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    cursorBrush = SolidColor(accent),
+                    keyboardOptions = KeyboardOptions(imeAction = imeAction),
+                    decorationBox = { innerTextField ->
+                        Box {
+                            if (value.isEmpty() && placeholder.isNotEmpty()) {
+                                Text(
+                                    text = placeholder,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { focused = it.isFocused }
-            )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { focused = it.isFocused }
+                        .padding(horizontal = 14.dp, vertical = 12.dp)
+                )
+            }
+        } else {
+            // NotePaperCard dispatches EVERY style (ruled / torn / torn+rules /
+            // coffee / folded / red-margin) so the single-line field wears the
+            // same paper look as the rich-text fields — one source of truth.
+            NotePaperCard(
+                style = paperStyle,
+                modifier = Modifier.fillMaxWidth(),
+                paperColor = paperColor,
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp)
+            ) {
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    enabled = enabled,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = PatrickHandFontFamily,
+                        color = ink
+                    ),
+                    cursorBrush = SolidColor(accent),
+                    keyboardOptions = KeyboardOptions(imeAction = imeAction),
+                    decorationBox = { innerTextField ->
+                        Box {
+                            if (value.isEmpty() && placeholder.isNotEmpty()) {
+                                Text(
+                                    text = placeholder,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontFamily = PatrickHandFontFamily,
+                                        color = ink.copy(alpha = 0.45f)
+                                    )
+                                )
+                            }
+                            innerTextField()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { focused = it.isFocused }
+                )
+            }
         }
     }
 }

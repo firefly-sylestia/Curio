@@ -599,6 +599,50 @@ app/src/main/java/com/curio/app/
   `CurioNavigationRail` (user decision). Label width is FIXED (48↔96dp)
   so the bar's total width is constant and the morph is stable. The
   page-wash tint (`CurioNavTint`) now applies to the rail only.
+- **v125 — offline transcription (Vosk) + floating dictation mic + plain
+  quick title.** (1) **ENGINE CHOICE — Vosk, not whisper.cpp:** the user
+  originally asked for whisper.cpp, but whisper.cpp has NO published
+  Android binding (the Maven-Central `io.github.givimad:whisper-jni`
+  jar is DESKTOP-only: Windows/Linux/macOS .so/.dll — verified on its
+  README; no reliable Android AAR exists anywhere). Vendoring the C++
+  source + NDK/CMake build was rejected (heavy, unverifiable in this
+  env). The user approved Vosk instead: `com.alphacephei:vosk-android`
+  AAR bundles .so for every ABI and ships the same offline
+  model+transcribe UX. RULE: before promising a native/ML library,
+  verify it has an ANDROID artifact — "Java JNI wrapper" ≠ "Android".
+  (2) **New `data/OfflineTranscriber.kt`:** `VoskModels` (catalog of
+  downloadable models id/name/lang/size/url; `download()` = plain
+  HttpURLConnection to alphacephei.com + ZipInputStream extract into
+  `filesDir/vosk-models/<id>/` with an `am/` completeness check;
+  `modelDir`/`isDownloaded`/`deleteModel`) + `OfflineTranscriber`
+  (MediaExtractor+MediaCodec decode of the AAC m4a → 16-bit PCM →
+  downmix-to-mono + linear-interpolation resample to 16kHz → feed
+  `org.vosk.Recognizer` in 5s chunks on Dispatchers.Default; returns
+  trimmed text). (3) **Settings → Recording → "Offline model" row**
+  (`OfflineModelDialog` in SettingsSharedComponents): pick quality/size,
+  in-app download with live progress, delete — labeled as the model for
+  pre-recorded voice-to-text. New prefs: `offlineModelIdState` +
+  `offlineModelVersionState` (bumped on download/delete so detail
+  recomposes). (4) **Per-field dictation mics REMOVED everywhere** (Sound
+  Bite title+note buttons, the detail page's "Transcribe note" chip, the
+  `allowTranscribe` plumbing). Replaced by ONE floating mic in Save your
+  take: it appears only while the LARGE note box (`RichTextEditor` gains
+  an `onFocusChanged` hook) is focused, and opens a dictation dialog
+  with the live preview pinned at the BOTTOM + Stop/Insert — the session
+  only ends when the user taps Stop (generous 2.5s/1.5s silence
+  windows), Insert commits the text (box stays editable). (5) **Quick
+  title de-papered:** the "Add a quick title" field is now a PLAIN
+  rounded input (`PaperLineField` gains `paper: Boolean`; no slip, no
+  style/color toggles) and the detail page shows the title as a pill
+  JUST BELOW the quick fact (`titleMedium` SemiBold on an opaque
+  accent-tinted capsule) instead of a torn paper slip in the body.
+  (6) **Transcript persistence:** `CaptureData.SoundBite.transcript`
+  (nullable String) — detail-page Transcribe button (only when the
+  model is downloaded; otherwise a Settings hint row) decodes +
+  transcribes + saves via `repo.save`; the transcript renders as a
+  collapsible box (3 lines + Expand button, Re-transcribe + clear).
+  Vosk on a sound bite uses a NEW `Recognizer` per call (Model load ~1s)
+  — never reuse one across audio files.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

@@ -229,7 +229,11 @@ sealed class CaptureData {
         val paperStyle: NotePaperStyle? = null,
         // Mood — picked in the editor, shown in the saved entry's meta
         // card. Legacy entries omit it (Gson → null) → no mood.
-        val mood: JournalMood? = null
+        val mood: JournalMood? = null,
+        // v125 — the OFFLINE voice-to-text transcript of the recording
+        // (Vosk, detail page). Null until the user transcribes; persisted
+        // to Room so it survives revisits.
+        val transcript: String? = null
     ) : CaptureData()
 
     /** Reel Notes (§8.2): review with rating, text, and attached images. */

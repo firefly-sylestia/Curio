@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.SolidColor
@@ -410,6 +411,9 @@ fun RichTextEditor(
     /** Optional trailing action (e.g. a small dictation button) rendered at
      *  the END of the field's own toolbar row, opposite the format toggle. */
     trailingAction: (@Composable () -> Unit)? = null,
+    /** v125 — reports the field's focus state to the caller (e.g. to show a
+     *  floating dictation mic only while the user is typing in this box). */
+    onFocusChanged: ((Boolean) -> Unit)? = null,
     /** v7.19 — hides the note-paper COLOR swatch picker behind the paper
      *  style toggle (the mood board's quote boxes keep the color tool
      *  hidden while text formatting + paper style stay available). */
@@ -866,6 +870,7 @@ fun RichTextEditor(
                             .fillMaxWidth()
                             .heightIn(min = minHeight)
                             .padding(effectiveFieldPadding)
+                            .onFocusChanged { onFocusChanged?.invoke(it.isFocused) }
                     )
                 }
 
