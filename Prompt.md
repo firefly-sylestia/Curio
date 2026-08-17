@@ -29,8 +29,22 @@ Implementation (HomeScreen.kt HomeDrawerContent):
    into the surface, "v{version} · Made with curiosity ♥" on the
    landscape; old pinned footer removed.
 
-Docs: changelog ADD bullet, AGENTS.md v174, this file. PUSH (no "dont
-push" in the request).
+CONTINUATION ("continue the plan") — the brief's behavior concept, grain
+and thin borders:
+1. Constellation is DATA-DRIVEN now: per-node weights from real lifetime
+   counters (likes→left hemisphere, saves→right, pins→inner, spins→top,
+   explores→brainstem) scale radius + glow; fissure bridges appear
+   progressively from relationshipScore = quotes+pins+likes (>0→1,
+   >5→2, >20→3, >60→4, >150→6 bridges); the 2 centre-fissure nodes keep
+   the "recent discovery" glow.
+2. Sky grain: 52 ultra-faint micro-dots (alpha 0.05-0.13, seeded
+   HOME_DRAWER_TEAR_SEED+17) drawn under the stars.
+3. Map card "thin border": 1dp seafoam hairline (0xFF9FCFC3 @45%) in
+   LIGHT mode only — dark stays borderless (v157 hairline rule).
+
+Docs: changelog ADD lines, AGENTS.md v174b note, this file. PUSH.
+
+## Completed request — drawer redesigned as a tiny personal observatory
 
 ## Completed request — pill morph slower again + Cabinet "All" wears the Spin accent
 

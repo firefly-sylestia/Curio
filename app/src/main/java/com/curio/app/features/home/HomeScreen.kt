@@ -2352,6 +2352,19 @@ private fun DrawerCelestialSky(
             )
         }
     }
+    // v174b — "extremely subtle grain": a cloud of ultra-faint micro-dots
+    // so the sky has a soft papery texture without reading as noise.
+    val grain = remember {
+        val rnd = Random(HOME_DRAWER_TEAR_SEED + 17)
+        List(52) {
+            SkyStar(
+                x = rnd.nextFloat(),
+                y = rnd.nextFloat(),
+                r = 0.35f + rnd.nextFloat() * 0.45f,
+                a = 0.05f + rnd.nextFloat() * 0.08f
+            )
+        }
+    }
     // A tiny fixed constellation drifting across the banner (a small
     // dipper-like figure, low contrast so the greeting stays the focus).
     val links = remember {
@@ -2380,6 +2393,14 @@ private fun DrawerCelestialSky(
                 start = Offset(l.x1 * w, l.y1 * h),
                 end = Offset(l.x2 * w, l.y2 * h),
                 strokeWidth = 1.dp.toPx()
+            )
+        }
+        // Grain first (under the stars), so it reads as texture not clutter.
+        grain.forEach { g ->
+            drawCircle(
+                color = starTint.copy(alpha = g.a),
+                radius = g.r.dp.toPx(),
+                center = Offset(g.x * w, g.y * h)
             )
         }
         stars.forEach { s ->
@@ -2464,6 +2485,36 @@ private fun DrawerCuriosityMap() {
     val streak = StreakTracker.getStreak(context)
     val overall = learned + explored + topics + questions + saved + shared
 
+    // v174b — the constellation's BEHAVIOUR is real: each node's size and
+    // glow scales with actual activity (likes on the left hemisphere, saves
+    // on the right, pins in the inner nodes, spins up top, explore sessions
+    // down the brainstem) — "more activity = brighter/larger star". More
+    // relationships (quotes + pins + likes) draws more fissure bridges —
+    // "more relationships = more connecting lines".
+    val leftAct = (lifetime.likes / 200f).coerceIn(0f, 1f)
+    val rightAct = (lifetime.saves / 200f).coerceIn(0f, 1f)
+    val innerAct = (lifetime.pins / 120f).coerceIn(0f, 1f)
+    val topAct = (lifetime.spins / 500f).coerceIn(0f, 1f)
+    val stemAct = (lifetime.explores / 120f).coerceIn(0f, 1f)
+    val weights = listOf(
+        leftAct, leftAct, leftAct, leftAct, leftAct, leftAct, leftAct,
+        innerAct, innerAct,
+        rightAct, rightAct, rightAct, rightAct, rightAct, rightAct, rightAct,
+        innerAct, innerAct,
+        topAct,
+        maxOf(innerAct, rightAct),
+        stemAct, stemAct
+    )
+    val relationshipScore = lifetime.quotes + lifetime.pins + lifetime.likes
+    val crossLinks = when {
+        relationshipScore > 150 -> 6
+        relationshipScore > 60 -> 4
+        relationshipScore > 20 -> 3
+        relationshipScore > 5 -> 2
+        relationshipScore > 0 -> 1
+        else -> 0
+    }
+
     val ink = MaterialTheme.colorScheme.onSurface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
@@ -2472,6 +2523,11 @@ private fun DrawerCuriosityMap() {
             lerp(MaterialTheme.colorScheme.surface, Color(0xFF1B3A40), 0.55f)
         else
             lerp(MaterialTheme.colorScheme.surface, Color(0xFFCFE9E2), 0.45f),
+        // v174b — the brief's "thin borders": a barely-there seafoam hairline
+        // in LIGHT mode only (dark keeps the borderless elevated fill — the
+        // v157 hairline-removal rule).
+        border = if (isCurioDarkTheme()) null
+                 else BorderStroke(1.dp, Color(0xFF9FCFC3).copy(alpha = 0.45f)),
         shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -2527,7 +2583,9 @@ private fun DrawerCuriosityMap() {
                     ConstellationBrain(
                         modifier = Modifier.fillMaxSize(),
                         gold = Color(0xFFD9A85C),
-                        blue = Color(0xFF7FAFD8)
+                        blue = Color(0xFF7FAFD8),
+                        weights = weights,
+                        crossLinks = crossLinks
                     )
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -2581,18 +2639,24 @@ private fun MapStat(icon: String, label: String, value: Int, tint: Color) {
     }
 }
 
-/** v174 — the curiosity constellation: an abstract brain built from glowing
- *  star nodes and thin connections, warm gold on the left drifting to pale
- *  blue on the right. Bigger nodes read as important interests; the softly
- *  glowing pair in the middle reads as recent discoveries. */
+/** v174/v174b — the curiosity constellation: an abstract brain built from
+ *  glowing star nodes and thin connections, warm gold on the left drifting
+ *  to pale blue on the right. Its behaviour is DATA-DRIVEN: each node's
+ *  size and glow scales with [weights] (real activity per region), and
+ *  [crossLinks] fissure bridges are drawn per the relationship score —
+ *  "more activity = brighter/larger star, more relationships = more lines".
+ *  The two centre-fissure nodes keep a soft "recent discovery" glow. */
 @Composable
 private fun ConstellationBrain(
     modifier: Modifier = Modifier,
     gold: Color,
-    blue: Color
+    blue: Color,
+    weights: List<Float>,
+    crossLinks: Int
 ) {
     // Normalized node positions sketching a brain: two hemisphere rings, a
     // few inner nodes, the centre fissure and a short brainstem below.
+    // Index order matches the caller's [weights] list.
     val nodes = remember {
         listOf(
             Offset(0.30f, 0.32f), Offset(0.26f, 0.46f), Offset(0.30f, 0.60f),
@@ -2605,25 +2669,29 @@ private fun ConstellationBrain(
             Offset(0.50f, 0.80f), Offset(0.48f, 0.90f)
         )
     }
-    val edges = remember {
+    // Ring + inner + brainstem edges always draw; the fissure BRIDGES appear
+    // progressively as the user's relationship score grows.
+    val coreEdges = remember {
         listOf(
             0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 5, 5 to 6, 6 to 0,
             6 to 7, 7 to 8, 8 to 5,
             9 to 10, 10 to 11, 11 to 12, 12 to 13, 13 to 14, 14 to 15, 15 to 9,
             15 to 16, 16 to 17, 17 to 13,
-            6 to 18, 15 to 18, 18 to 5, 18 to 14,
             5 to 8, 14 to 17, 8 to 17,
             19 to 20, 20 to 21
         )
     }
-    // Bigger "important interest" stars + glowing "recent discovery" nodes.
+    val bridges = remember {
+        listOf(6 to 18, 15 to 18, 18 to 5, 18 to 14, 5 to 14, 17 to 8)
+    }
+    val drawnBridges = bridges.take(crossLinks.coerceIn(0, bridges.size))
+    // Larger "important interest" stars.
     val big = remember { setOf(18, 1, 10, 4, 13) }
-    val hot = remember { setOf(5, 14) }
     Canvas(modifier = modifier) {
         val w = size.width
         val h = size.height
         val pts = nodes.map { Offset(it.x * w, it.y * h) }
-        edges.forEach { (a, b) ->
+        (coreEdges + drawnBridges).forEach { (a, b) ->
             val ca = pts[a]
             val cb = pts[b]
             val midX = ((ca.x + cb.x) / 2f / w).coerceIn(0f, 1f)
@@ -2638,10 +2706,14 @@ private fun ConstellationBrain(
         pts.forEachIndexed { i, p ->
             val n = nodes[i]
             val color = lerp(gold, blue, n.x)
-            val r = (if (i in big) 3.6f else 2.2f).dp.toPx()
+            val wgt = weights.getOrElse(i) { 0f }.coerceIn(0f, 1f)
+            val r = ((if (i in big) 3.0f else 1.9f) + wgt * 2.4f).dp.toPx()
+            // The two centre-fissure nodes carry the "recent discovery" glow.
+            val recent = i == 5 || i == 14
+            val glow = if (recent) 0.22f else 0.07f + wgt * 0.15f
             drawCircle(
-                color = color.copy(alpha = if (i in hot) 0.20f else 0.10f),
-                radius = r * (if (i in hot) 3.6f else 2.8f),
+                color = color.copy(alpha = glow),
+                radius = r * (if (recent) 3.4f else 2.6f),
                 center = p
             )
             drawCircle(color = color, radius = r, center = p)

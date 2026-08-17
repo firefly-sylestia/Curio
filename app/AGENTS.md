@@ -1282,6 +1282,17 @@ app/src/main/java/com/curio/app/
     ("fading look"); "v{version} · Made with curiosity ♥" sits on the
     landscape (footerInk warm tan #7E6E50). Old pinned footer Column
     removed.
+  - v174b ("continue the plan"): the constellation's BEHAVIOUR is now
+    data-driven — per-node `weights` (0..1 per region: likes → left
+    hemisphere, saves → right, pins → inner, spins → top, explores →
+    brainstem) scale each star's radius (1.9+2.4w / 3.0+2.4w big) and
+    glow (0.07+0.15w); fissure `bridges` draw progressively from the
+    relationship score (quotes+pins+likes: >0→1, >5→2, >20→3, >60→4,
+    >150→6); the two centre-fissure nodes keep the "recent discovery"
+    glow. Sky got "extremely subtle grain" (52 micro-dots, alpha
+    0.05-0.13, seed+17). Map card got the brief's "thin borders": a
+    1dp seafoam hairline in LIGHT mode only — dark stays borderless
+    (v157 hairline rule).
   - LESSON: SVG-at-runtime = coil-svg (keep the artist's file as-is); a
     332KB hand-drawn SVG is NOT safe as a VectorDrawable (aapt2 path
     blob). Pastel fills under shadows must be opaque lerps (rule 11).

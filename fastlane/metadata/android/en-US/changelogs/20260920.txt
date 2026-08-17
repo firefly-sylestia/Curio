@@ -29,6 +29,7 @@ ADD
 
 ADD
 - Drawer: redesigned as a tiny personal observatory — the hero banner is a dreamy pre-dawn sky (pale seafoam gradient, scattered stars, a crescent moon, faint constellation lines and a soft cream rolling horizon under your profile), a new "Your Curiosity Map" shows a constellation shaped like a brain with your REAL stats orbiting it (streak, saved, explored, topics, questions and overall curiosity score), the three nav rows got soft tinted icon chips with subtitles, and a hand-drawn planetary landscape with a telescope now sits at the bottom behind the version + "Made with curiosity".
+- Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
 - Navigation: the pill bar's morph is even slower and calmer now — the tab pills glide at half the previous pace (still zero bounce), and the Topic Reveal Like/Dislike pill and the Pet Designer studio bar move with the exact same slowed motion.
