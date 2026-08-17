@@ -1420,6 +1420,13 @@ private val StudioPillIconWidth = 52.dp
 private val StudioPillExpandedWidth = 112.dp
 private val StudioPillHeight = 52.dp
 
+// v162 — same ONE-spring-family fix as the nav bar: the studio tab's width
+// and its label expand/shrink share identical spring params so the label
+// moves with the pill (before, the label ran its own 160ms tweens and
+// finished ~4x early). The fill stays a deliberate solid snap (v156 design).
+private val StudioWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val StudioMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+
 /**
  * One capsule tab in the studio pill bar — mirrors [CurioFloatingNavBar]'s
  * pill exactly: icon-only while inactive, the selected tab springs wider
@@ -1436,13 +1443,8 @@ private fun RowScope.PetStudioTab(
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (selected) StudioPillExpandedWidth else StudioPillIconWidth,
-        // v161 — same recipe as the nav bar: near-critical damping 0.9 (the
-        // old 0.75 overshot and bounced) + Medium stiffness (the collapse
-        // no longer drags for a second).
-        animationSpec = spring(
-            dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMedium
-        ),
+        // v162 — shared [StudioWidthSpring], identical to the label spring.
+        animationSpec = StudioWidthSpring,
         label = "studioPillWidth"
     )
     val activeInk = MaterialTheme.colorScheme.onSecondary
@@ -1468,14 +1470,13 @@ private fun RowScope.PetStudioTab(
                 tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 22.dp
             )
-            // Enter keeps the slide-out morph for the newly active pill;
-            // v161 — the exit now glides out (160ms) with the shrink instead
-            // of vaporizing instantly (the nav bar recipe update).
+            // v162 — the label expands/shrinks + fades on the SAME spring
+            // as the pill width (its own 160ms tweens finished ~4x early,
+            // leaving the pill to deflate around a dead box).
             AnimatedVisibility(
                 visible = selected,
-                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) +
-                    fadeOut(tween(160, easing = FastOutSlowInEasing))
+                enter = expandHorizontally(StudioMotionSpring, expandFrom = Alignment.Start) + fadeIn(StudioMotionSpring),
+                exit = shrinkHorizontally(StudioMotionSpring, shrinkTowards = Alignment.Start) + fadeOut(StudioMotionSpring)
             ) {
                 Text(
                     text = label,

@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request (completed) — CI compile fix + pushed EVERYTHING
+## Current request (completed) — tune the pill tab-switch motion to one spring family (v162)
+
+User: "Record the tab-switch motion and tune the pill spring/fade until
+the collapse reads perfectly smooth". No device/screen-recording possible
+in this env (no Gradle, no emulator) — did a spec-level audit instead.
+
+Audit found the real residual jank: v161 only fixed the WIDTH spring. The
+fill still ran the old MediumLow spring (lagged), the icon tint ran
+tween(200) and the label ran its own tween(240/160) — all out of step
+with the pill width (label finished ~3x early; fill still catching up
+after the pill settled).
+
+Fix — one spring family per pill, identical params (0.9 damping, Medium
+stiffness) for EVERY property:
+- CurioBottomNav: `PillWidthSpring` (spring<Dp>) + `PillMotionSpring`
+  (spring<Float>) used by width, fill, icon tint and label enter/exit;
+  expand/shrink get the spec too (their default is damping 1.0).
+- TopicRevealScreen SentimentSegment: same (Reveal*Spring vals).
+- PetDesignerScreen PetStudioTab: same (Studio*Spring vals); its fill
+  stays a deliberate solid snap (v156).
+
+Removed FastOutSlowInEasing import from CurioBottomNav (unused now;
+tween still used for the container fade). Committed + pushed (CI
+validates — no local Gradle).
+
+## Earlier completed request — CI compile fix + pushed EVERYTHING
 
 User pasted CI failure: `Unresolved reference 'align'` at
 PetDesignerScreen.kt:1516. Root cause: the v156 StudioFloatingToolbar pins

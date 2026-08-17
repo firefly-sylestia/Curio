@@ -2243,6 +2243,13 @@ private val RevealSentimentIconWidth = 60.dp
 private val RevealSentimentExpandedWidth = 128.dp
 private val RevealSentimentHeight = 48.dp
 
+// v162 — same ONE-spring-family fix as the nav bar: width, fill, icon tint
+// and the label expand/shrink all run identical spring params so the
+// segment moves in lockstep (before, the fill lagged on MediumLow and the
+// label/icon finished early on their own tweens).
+private val RevealWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val RevealMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
  *  segment springs wider and slides its label out (same spring + label
@@ -2260,27 +2267,21 @@ private fun SentimentSegment(
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (active) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
-        // v155 — same near-critical damping as the nav bar: no settle bounce.
-        // v161 — same stiffness bump as the nav bar: Medium settles the
-        // collapse crisply instead of dragging for a second.
-        animationSpec = spring(
-            dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMedium
-        ),
+        // v162 — shared [RevealWidthSpring], identical to the fill / icon /
+        // label springs so the segment stays in lockstep.
+        animationSpec = RevealWidthSpring,
         label = "revealSentimentWidth"
     )
-    // v155 — fill + icon tint fade like the nav bar (no hard color snaps).
+    // v162 — fill + icon tint fade on the SAME spring as the width (before:
+    // fill lagged on MediumLow, icon finished in 200ms — out of step).
     val fillColor by animateColorAsState(
         targetValue = accent.copy(alpha = if (active) 1f else 0f),
-        animationSpec = spring(
-            dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMediumLow
-        ),
+        animationSpec = RevealMotionSpring,
         label = "revealSentimentFill"
     )
     val iconTint by animateColorAsState(
         targetValue = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        animationSpec = RevealMotionSpring,
         label = "revealSentimentIconTint"
     )
     Surface(
@@ -2302,16 +2303,13 @@ private fun SentimentSegment(
                 tint = iconTint,
                 size = 26.dp
             )
-            // v149 — the nav bar recipe: label slides out for the active
-            // segment, vanishes instantly when deselected. v155 — the fade
-            // tracks the segment's expansion (240ms FastOutSlowIn).
+            // v162 — the label expands/shrinks + fades on the SAME spring
+            // as the segment width (its own tweens used to finish ~3x early,
+            // so the label was done while the segment was still mid-flight).
             AnimatedVisibility(
                 visible = active,
-                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(240, easing = FastOutSlowInEasing)),
-                // v161 — same glide-out exit as the nav bar (was an instant
-                // vaporize while the segment slowly deflated).
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) +
-                    fadeOut(tween(160, easing = FastOutSlowInEasing))
+                enter = expandHorizontally(RevealMotionSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
+                exit = shrinkHorizontally(RevealMotionSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
             ) {
                 Text(
                     text = label,

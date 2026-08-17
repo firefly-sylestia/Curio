@@ -1009,6 +1009,29 @@ app/src/main/java/com/curio/app/
   "smoother animation" fixes need to target the exit spec + spring
   stiffness, not just damping; and every sibling that copies a recipe
   (rail / pet studio / sentiment) must be swept when the recipe changes.
+- **v162 — tab-switch motion runs on ONE spring family; all pill parts now
+  move in lockstep.** User: "Record the tab-switch motion and tune the pill
+  spring/fade until the collapse reads perfectly smooth". (No screen
+  recording / device available in this env — the tune is a spec-level
+  audit of the animation timeline.) AUDIT FINDINGS: v161 had only fixed
+  the WIDTH spring — the fill `animateColorAsState` still ran the old
+  `StiffnessMediumLow` spring (lagged the pill), the icon tint ran a
+  `tween(200)` and the label AnimatedVisibility ran its own `tween(240/
+  160)` — all three finished or lingered OUT OF STEP with the pill width
+  (the label was fully in/out while the pill was still mid-flight; the
+  fill was still catching up after the pill settled). FIX: one shared
+  spring family per pill — `PillWidthSpring` (`spring<Dp>(0.9, Medium)`)
+  for the width and `PillMotionSpring` (`spring<Float>(0.9, Medium)`) for
+  the fill, icon tint and the label's `expandHorizontally`/`shrink
+  Horizontally`/`fadeIn`/`fadeOut` (the expand/shrink ALSO got the spec
+  — their default is damping 1.0, a different shape than ours). Identical
+  params from the same start frame = identical trajectories = perfect
+  lockstep. Applied to `FloatingNavPill`, the reveal `SentimentSegment`
+  and the pet studio `PetStudioTab` (its fill stays a deliberate solid
+  snap, v156 design). LESSON: "sync everything to the same spring" is
+  the fix for perceived jank in multi-part morphs — check EVERY animated
+  property (width, fill, icon, label) for its own spec, and pass the
+  spring to expand/shrink, not just fade.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view

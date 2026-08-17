@@ -2,7 +2,6 @@ package com.curio.app.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -38,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -216,6 +216,16 @@ private val FloatingPillIconWidth = 60.dp
 private val FloatingPillExpandedWidth = 128.dp
 private val FloatingPillHeight = 48.dp
 
+// v162 — ONE spring family drives EVERY animated property of the pill
+// (width, active fill, icon tint, label expand/shrink). Before, the width
+// ran Medium while the FILL still ran the old MediumLow and the label /
+// icon tint ran their own 240/160ms tweens — the fill lagged the width
+// and the label finished ~3x early, which is what still read as janky
+// after v161. Identical spring params = identical trajectories from the
+// same start frame = perfect lockstep.
+private val PillWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val PillMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
  *
@@ -330,15 +340,9 @@ private fun FloatingNavPill(
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
-        // v155 — damping 0.75 → 0.9: the old spring overshot and bounced on
-        // settle ("clanky"); near-critical damping glides to rest.
-        // v161 — stiffness MediumLow → Medium: the collapse (128 → 60dp)
-        // used to drag for a full second; Medium settles crisply with no
-        // overshoot at the same near-critical damping.
-        animationSpec = spring(
-            dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMedium
-        ),
+        // v162 — the shared [PillWidthSpring] (near-critical 0.9 + Medium),
+        // identical to the fill/icon/label springs so they stay in lockstep.
+        animationSpec = PillWidthSpring,
         label = "floatingNavPillWidth"
     )
     // v149 — the active indicator follows the PAGE: when the page publishes
@@ -350,20 +354,19 @@ private fun FloatingNavPill(
     val activeFill = activeAccent ?: MaterialTheme.colorScheme.primary
     val activeInk = if (activeAccent != null) pastelFillInk(activeAccent)
                     else MaterialTheme.colorScheme.onPrimary
-    // v155 — the fill fades in/out (alpha) synced to the width spring
-    // instead of snapping on/off, and the icon tint crossfades — no hard
-    // color pops on tab switch.
+    // v162 — the fill fades with the SAME spring as the width (before v162
+    // it still ran the old MediumLow spring and lagged the pill), and the
+    // icon tint crossfades on the same spring too (it used to finish in
+    // 200ms while the pill kept moving) — no hard pops, no out-of-step
+    // elements.
     val fillColor by animateColorAsState(
         targetValue = activeFill.copy(alpha = if (selected) 1f else 0f),
-        animationSpec = spring(
-            dampingRatio = 0.9f,
-            stiffness = Spring.StiffnessMediumLow
-        ),
+        animationSpec = PillMotionSpring,
         label = "floatingNavPillFill"
     )
     val iconTint by animateColorAsState(
         targetValue = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        animationSpec = PillMotionSpring,
         label = "floatingNavPillIconTint"
     )
     Box(
@@ -385,21 +388,15 @@ private fun FloatingNavPill(
                 tint = iconTint,
                 size = 26.dp
             )
-            // Enter keeps the slide-out morph for the newly active pill;
-            // v155 — the label fade now tracks the pill's expansion
-            // (tween 240 + FastOutSlowIn) instead of popping in at 160ms;
-            // exit stays instant per v125 (the closing pill's text vanishes
-            // the moment its pill is deselected).
+            // v162 — the label's expand/shrink + fade run the SAME spring
+            // as the pill width (AnimatedVisibility's own tweens used to
+            // finish 3x early, so the label was fully in/out while the pill
+            // was still mid-flight). Now the slide-out, the fade and the
+            // width all move as ONE piece.
             AnimatedVisibility(
                 visible = selected,
-                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(240, easing = FastOutSlowInEasing)),
-                // v161 — the collapse used to VAPORIZE the label
-                // (fadeOut(tween(0))) while the pill took a second to
-                // shrink — a dead empty box deflating. The exit now glides
-                // out (160ms) with the shrink so the deselected pill reads
-                // as one smooth motion.
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) +
-                    fadeOut(tween(160, easing = FastOutSlowInEasing))
+                enter = expandHorizontally(PillMotionSpring, expandFrom = Alignment.Start) + fadeIn(PillMotionSpring),
+                exit = shrinkHorizontally(PillMotionSpring, shrinkTowards = Alignment.Start) + fadeOut(PillMotionSpring)
             ) {
                 Text(
                     text = destination.label,
