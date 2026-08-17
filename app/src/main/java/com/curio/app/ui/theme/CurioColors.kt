@@ -514,7 +514,10 @@ object CurioGradients {
         // accent family per lane — no vivid per-lane gradients).
         if (materialThemeOn) {
             val dark = isCurioDarkTheme()
-            val familyStart = accent.materialAccentFor(dark)
+            // accent is a raw Color here (not a CurioCategory) — resolve its
+            // muted family tone directly (the CI fix: materialAccentFor is a
+            // CurioCategory extension and won't take a Color receiver).
+            val familyStart = materialFamilyFor(accent).fill(dark)
             val start = lerp(familyStart, Color.Black, if (dark) 0.08f else 0.03f)
             val end = MaterialTheme.colorScheme.background
             return listOf(start, lerp(start, end, 0.30f))
@@ -565,7 +568,8 @@ object CurioGradients {
         // neutral scheme background (no golden companion, no vivid crown).
         if (materialThemeOn) {
             val dark = isCurioDarkTheme()
-            val family = accent.materialAccentFor(dark)
+            // accent is a raw Color — see cardGradient's material branch.
+            val family = materialFamilyFor(accent).fill(dark)
             val crown = lerp(family, Color.White, if (dark) 0.05f else 0.10f)
             return listOf(crown, family, MaterialTheme.colorScheme.background)
         }

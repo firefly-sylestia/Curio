@@ -88,10 +88,10 @@ internal fun CurioCategory.materialAccentFor(dark: Boolean): Color {
 }
 
 internal fun CurioCategory.materialOnAccentFor(dark: Boolean): Color =
-    MaterialFamily.forAccent(accent).onFill(dark)
+    materialFamilyFor(accent).onFill(dark)
 
 internal fun CurioCategory.materialInkFor(dark: Boolean): Color =
-    MaterialFamily.forAccent(accent).ink(dark)
+    materialFamilyFor(accent).ink(dark)
 
 /**
  * The family a lane belongs to, resolved through the ACTIVE M3 scheme
