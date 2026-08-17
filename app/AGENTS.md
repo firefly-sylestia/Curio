@@ -851,6 +851,17 @@ app/src/main/java/com/curio/app/
   Recording "Offline model" row subtitle shows "Downloading <model> ·
   N%" while a transfer runs after the sheet closes; the picker intro copy
   now tells the user downloads survive closing the screen.
+- **v139 — offline model picker: real storage usage + big-download
+  confirm.** (1) Downloaded rows now show their REAL on-disk size —
+  `VoskModels.modelSizeBytes` (walks the model dir) rendered via a new
+  GB-aware `formatModelSize` (the app's `formatFileSize` caps at MB; the
+  Full tiers run 1–2.3 GB) — e.g. "Downloaded · 41.2 MB". (2) Tapping
+  Download on a model ≥ `BIG_MODEL_BYTES` (100 MB — the Large/Full tiers)
+  or one bigger than the free space (`VoskModels.availableStorageBytes`,
+  `StatFs` on `filesDir`) opens a confirm AlertDialog showing required vs
+  free size — red when it won't fit ("Only X free — the download will
+  likely fail") — before `VoskModelDownloads.start` runs. Small models
+  with plenty of room still start instantly.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

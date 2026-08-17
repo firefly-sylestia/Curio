@@ -2,6 +2,7 @@ package com.curio.app.data
 
 import android.content.Context
 import android.media.MediaCodec
+import android.os.StatFs
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import kotlinx.coroutines.CancellationException
@@ -142,6 +143,27 @@ object VoskModels {
 
     fun isDownloaded(context: Context, id: String?): Boolean =
         modelDir(context, id) != null
+
+    /** Real on-disk size of a downloaded model (0 when not installed). */
+    fun modelSizeBytes(context: Context, id: String?): Long {
+        val dir = modelDir(context, id) ?: return 0L
+        return dir.walkBottomUp().sumOf { it.length() }
+    }
+
+    /** Free bytes in the app's file storage (where models install). */
+    fun availableStorageBytes(context: Context): Long =
+        runCatching { StatFs(context.filesDir.absolutePath).availableBytes }.getOrDefault(0L)
+
+    /**
+     * B / KB / MB / GB — the catalog's ~size labels cap at MB, but the
+     * Full tiers run 1–2.3 GB, so picker rows and confirmations need GB.
+     */
+    fun formatModelSize(bytes: Long): String = when {
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+        bytes < 1024L * 1024 * 1024 -> "%.1f MB".format(bytes.toDouble() / (1024 * 1024))
+        else -> "%.2f GB".format(bytes.toDouble() / (1024L * 1024 * 1024))
+    }
 
     fun deleteModel(context: Context, id: String) {
         // v137 — guard: only ever delete THIS model's subdir, never the

@@ -30,7 +30,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -61,6 +63,9 @@ import com.curio.app.ui.theme.curioDialogContainerColor
  */
 @Composable
 private fun dialogRowSelectedInk(): Color = Color.White
+
+/** v138 — models at/above this size confirm the download first (~Large tier). */
+private const val BIG_MODEL_BYTES = 100L * 1024 * 1024
 
 @Composable
 fun AudioQualityDialog(
@@ -301,6 +306,9 @@ fun OfflineModelDialog(
     // manager, so a transfer keeps running after this sheet closes; the
     // rows below observe it for per-model progress / pause / resume.
     val downloadStates by VoskModelDownloads.states.collectAsState()
+    // v138 — the model waiting on the storage confirmation before a big
+    // download starts (required size vs free space).
+    var pendingBigDownload by remember { mutableStateOf<VoskModels.Info?>(null) }
     // v125 — the offline model version is bumped by download/delete, so
     // re-reading the installed state below recomposes with fresh data.
     AppPreferences.offlineModelVersionState
@@ -366,6 +374,9 @@ fun OfflineModelDialog(
                 items(VoskModels.CATALOG, key = { it.id }) { model ->
                     val downloaded = VoskModels.isDownloaded(context, model.id)
                     val selected = downloaded && model.id == currentModelId
+                    // v138 — the real on-disk usage of an installed model
+                    // (vs the catalog's ~label), shown on the trailing chip.
+                    val realSize = if (downloaded) VoskModels.modelSizeBytes(context, model.id) else 0L
                     val dl = downloadStates[model.id]
                     val isDownloading = dl?.status == VoskModelDownloads.Status.Downloading
                     val isPaused = dl?.status == VoskModelDownloads.Status.Paused
@@ -487,7 +498,7 @@ fun OfflineModelDialog(
                                 downloaded -> {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            if (selected) "In use" else "Downloaded",
+                                            (if (selected) "In use" else "Downloaded") + " · " + VoskModels.formatModelSize(realSize),
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                             color = if (selected) dialogRowSelectedInk()
                                                    else MaterialTheme.colorScheme.onSurfaceVariant
@@ -529,7 +540,17 @@ fun OfflineModelDialog(
                                 }
                                 else -> {
                                     TextButton(
-                                        onClick = { VoskModelDownloads.start(context, model) },
+                                        onClick = {
+                                            // v138 — big models (and any model
+                                            // too large for the free space) confirm
+                                            // first with the required vs free sizes.
+                                            val free = VoskModels.availableStorageBytes(context)
+                                            if (model.sizeBytes >= BIG_MODEL_BYTES || free < model.sizeBytes) {
+                                                pendingBigDownload = model
+                                            } else {
+                                                VoskModelDownloads.start(context, model)
+                                            }
+                                        },
                                         contentPadding = PaddingValues(horizontal = 8.dp)
                                     ) {
                                         Text(
@@ -545,6 +566,47 @@ fun OfflineModelDialog(
                 }
             }
             Spacer(Modifier.height(20.dp))
+
+            // v138 — storage confirmation before a big download starts:
+            // required size vs free space (red when it won't fit).
+            pendingBigDownload?.let { model ->
+                val free = VoskModels.availableStorageBytes(context)
+                val enough = free >= model.sizeBytes
+                AlertDialog(
+                    onDismissRequest = { pendingBigDownload = null },
+                    containerColor = curioDialogContainerColor(),
+                    shape = CurioDialogShape,
+                    title = { Text("Download ${model.displayName}?", fontWeight = FontWeight.ExtraBold) },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                "This model needs ${VoskModels.formatModelSize(model.sizeBytes)} of storage.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                if (enough) "You have ${VoskModels.formatModelSize(free)} free — go ahead."
+                                else "Only ${VoskModels.formatModelSize(free)} free — the download will likely fail. Free up space first.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (enough) MaterialTheme.colorScheme.onSurfaceVariant
+                                        else MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                pendingBigDownload = null
+                                VoskModelDownloads.start(context, model)
+                            },
+                            colors = curioDialogActionButtonColors()
+                        ) { Text("Download", fontWeight = FontWeight.Bold) }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { pendingBigDownload = null }) { Text("Cancel") }
+                    }
+                )
+            }
         }
     }
 }
