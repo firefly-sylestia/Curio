@@ -1,8 +1,8 @@
 ADD
 - Drawer: the hero's sky is now hand-drawn artwork — a night sky with stars and a crescent moon in dark mode, a day sky with sun, clouds and birds in light mode (no watermark glyphs on the banner).
-- Drawer: the curiosity map is now real — a constellation of your explored lanes with rounded lane icons (tap a dot for that lane's stats), no placeholder numbers, and an empty state until you've explored something.
+- Drawer: the curiosity map now lives on the plain drawer surface — no card box, title or range selector. ALL your lanes show as solid stars; explored lanes glow with their icon, and tapping one opens that lane's real passport data (spins, peeked, explores, saved, last explored).
 - Drawer: the banner's sky now runs all the way to the torn edge (a sky tear), and the stars/moon are visible in light mode too.
-- Drawer: new background-less footer illustration, placed lower and more transparent so the version + credits read clearly.
+- Drawer: the footer is a new hand-drawn planet illustration that sits FLAT at the very bottom edge of the drawer (no box or shadow) and fades into the surface, with the version + "Made with curiosity" reading inside the fade.
 - Stats: the "Your Curiosity" header's stars/moon are tuned for light mode.
 - Offline voice-to-text: recorded voice notes transcribe straight on your device (Vosk) — a Transcribe button on the entry page and the transcript lives in its own box below the recording with an Expand button for the full text.
 - Offline model: Settings → Recording lets you pick a model by quality and size (English / multilingual / Indian English), download it in-app with a progress bar, and delete it anytime — no internet needed while transcribing.

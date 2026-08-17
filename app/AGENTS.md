@@ -1480,10 +1480,46 @@ app/src/main/java/com/curio/app/
     position 0.84/0.28, clouds, birds). The theme gradient stays as the
     loading backdrop; greeting + avatar read as the sky's scenery.
   - DEAD CODE: `DrawerCelestialSky`, `SkyStar`/`SkyLink`/`SkySparkle`,
-    `drawSparkle` and the `Path`/`DrawScope` imports deleted (only the
+    `drawSparkle` and the `Path`/`DrawScope` imports deleted (    only the
     hero used them). LESSON: when a commit is reverted, its CI-only
     follow-up fixes must go too or the revert conflicts on the code they
     patched.
+- **v176 — drawer curiosity map = plain-surface constellation of ALL
+  lanes + new flat bottom footer.** User: "remove the box behind your
+  curiocity, and show the mind connection constellation map with inactive
+  glow stars... show more available data... not the hero banner or just a
+  drawing. so ask me properly" (clarified: remove box + text + dropdown
+  entirely, all-time data in drawer; ALL lanes as stars, explored glow
+  + icon on tap, inactive solid but smaller + muted, extra tiny stars;
+  hero unchanged) and "i also added a new cropped footer place this and
+  place it much below from the end of the footer, dont give it shadow...
+  no scaffolding" (clarified: very bottom end, keep credits, add a
+  bottom fade so it doesn't look floating).
+  - MAP (`DrawerCuriosityMap`): the boxed card, the "Your Curiosity Map"
+    title and the "This Week ˅" range selector are GONE. The map is now
+    a `Column` on the plain drawer surface (whole-map tap still opens
+    Stats). All-time data comes straight from `CurioPassport.allProgress`
+    (spins/reveals/explores/saves/lastAt per visible lane — no repo,
+    no `CurioQuests`, no `StatsRange` import). `DrawerLaneConstellation`
+    renders EVERY visible lane: explored lanes are solid accent chips
+    (34dp, `themedAccent` fill, `onAccent` icon, glow, tappable) and
+    inactive lanes are solid 14dp dots (muted blue-grey, NOT alpha —
+    differentiated by size + color per the user), plus 16 seeded extra
+    tiny stars and faint neighbour-connecting lines. Deterministic grid
+    scatter + per-lane `Random(id.name.hashCode())` jitter so all lanes
+    fit and the constellation reads as a whole. Tapping an explored star
+    opens a richer panel (`DrawerMapStat` panes: spins / peeked /
+    explores / saved) with the lane icon, accent-tinted surface, last-
+    explored relative time and a close button.
+  - FOOTER (`DrawerFooter`): `res/raw/drawer_footer.svg` replaced with
+    the user's cropped `curio_planet_cropped_bottom_264.svg` (1536×760,
+    same planet art bottom-cropped). The footer is now a flat 210dp Box
+    at the very bottom: `ContentScale.Crop` bottom-anchored art, no
+    shadow/box/scaffolding; a 110dp vertical gradient fades the art into
+    the drawer surface so it doesn't look floating, and the version +
+    "Made with curiosity" row sits inside that fade (nav-bars-padded,
+    warm tan ink). The LazyColumn's `contentPadding.bottom` dropped
+    20dp → 0 so the art truly touches the drawer's bottom edge.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin
