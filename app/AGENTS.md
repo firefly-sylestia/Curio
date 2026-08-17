@@ -919,6 +919,43 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v145 — mood board: quote cards independent per view; real resize
+  (proportional height + 60% size limit); PNG/expanded dialog keep exact
+  card sizes; Clear board wipes quotes; Quote chip moves up on content.**
+  (1) **Quote cards are now INDEPENDENT between the small and full-screen
+  boards** (per user, confirmed): positions were already separate
+  (quotePositions vs quotePositionsFull) but the full-screen resize
+  handler ALSO wrote the SHARED `quoteCards.setWidth`, and the full-screen
+  move handler pulled the shared inline width in (`widths.getOrElse`) —
+  so resizing a card in full-screen changed the small board too ("why is
+  the quote card the same in both small and full screen"). v145:
+  `onResizeQuoteOverride` writes ONLY `fullQuotePositions[i].w` (no
+  `quoteCards.setWidth`), and `onMoveQuoteOverride` preserves the full
+  placement's OWN width. The full-screen board seeds from
+  `quotePositionsFull` with a legacy fallback to the inline spots (mirrors
+  `fullTiles`' tileLayoutsFull→tileLayouts fallback — old boards keep
+  their single arrangement until rearranged). (2) **Resize is a real
+  resize, quote cards only**: `MoodBoardFloatingCards` derives the card
+  HEIGHT from its width at the slot's paper aspect (`cardH = cardW ×
+  slot.h/slot.w`), so a wider card grows taller instead of stretching
+  flat; the resize grip's `maxW` is now capped at 60% of the visible
+  board (was `boardW - x` — a card could span the whole collage). (3)
+  **PNG export + expanded dialog pass `rawSpace = true`**: the export's
+  canvas mirrors the board's aspect (raw × scale), so the old 40% display
+  cap bound `displayScale` against the RAW board width (canvasWPx = maxX)
+  and shrank resized cards in the saved PNG ("gets small / wrongly
+  placed"); the expanded dialog capped cards at 40% of the displayed
+  board while the full-screen editor showed the exact width — now both
+  render exact raw widths, matching the editor. The INLINE editor + saved
+  small card keep the 40% cap (v60/v108 look). (4) **Clear board clears
+  quote cards too**: the confirm dialog counts quotes ("Remove all N
+  images and M quote cards?") and the action wipes them via
+  `removeCard(0)` in a loop (fires onCardRemoved → fullQuotePositions
+  stays aligned). (5) **Quote chip position**: a `boardHasContent` flag
+  (tiles OR quotes) drives both the chip's bottom padding (16dp when
+  empty, 88dp once content — the Clear button appears at 16dp and the
+  chip must sit above it) and the Clear button's visibility (was
+  tiles-only, so a quotes-only board couldn't be cleared).
 - **v144 — tour controls are a floating pill bar; the nav bar yields
   during the tour.** (1) **The tour's Skip/Next dock** was the last
   full-width opaque bottom band in the app (a v9.x `Surface`

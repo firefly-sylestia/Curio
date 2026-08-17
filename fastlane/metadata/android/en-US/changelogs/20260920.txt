@@ -28,6 +28,12 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Mood board (full-screen): quote cards are now fully independent from the small board — rearranging or resizing a card in the full-screen editor never changes the small board's cards (and vice versa), so each view keeps its own arrangement.
+- Mood board: resizing a quote card now scales the whole note (height follows width at the paper aspect) instead of just stretching it wider, with a size limit — a card can't balloon past 60% of the board.
+- Mood board PNG: saved/shared images keep quote cards at their exact size and spot now — the old render shrank resized cards and sat them out of place against the collage.
+- Mood board: the full-screen view shows resized quote cards at their real size too (it used the small card's shrink cap, so what you arranged wasn't what you saw).
+- Mood board: the Clear board button now also removes every quote card (on-board and below-board) with a confirm that says so — one action resets the whole board.
+- Mood board: on an empty full-screen board the Quote chip sits at the bottom, and once you add content it moves up above the Clear board button.
 - Tour: the Skip/Next controls are now a floating pill bar (rounded capsule hovering above the gesture bar) instead of the old full-width opaque dock — the page shows through around them, matching the app's bottom nav; the main nav bar hides while the tour is up so the two pills never stack.
 - Pet Designer: the studio's bottom bar is now the app's floating pill bar (rounded elevated container, solid amber active tab with readable ink — the old stock Material bar is gone), and the page opens with the same smooth fade as the Topic Reveal instead of the mechanical zoom.
 - Manage Categories: the page runs full-bleed to the bottom edge now — no reserved strip under the content, it clears the gesture bar itself (same treatment as the Topic Reveal).

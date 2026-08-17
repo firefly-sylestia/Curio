@@ -561,7 +561,14 @@ private fun MoodBoardShareCard(
                             // v113 — deterministic slots in RAW space (the
                             // export's canvas IS the raw board already).
                             boardMaxX = maxX,
-                            boardMaxY = maxY
+                            boardMaxY = maxY,
+                            // v145 — the export renders the board at exact
+                            // raw × scale (its canvas mirrors the board's
+                            // aspect), so quote cards must keep their exact
+                            // raw widths too — the old 40% display cap shrank
+                            // resized cards in the PNG ("the quote card gets
+                            // small / wrongly placed when saving").
+                            rawSpace = true
                         )
                     }
                 }

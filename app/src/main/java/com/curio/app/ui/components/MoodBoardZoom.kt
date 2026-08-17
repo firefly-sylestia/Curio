@@ -746,6 +746,12 @@ fun MoodBoardFloatingCards(
         // v42 — a resized card (saved.w >= 0) keeps its custom WIDTH; cards
         // never resized use the deterministic slot width as before.
         val cardW = if (saved.w >= 0f) saved.w else slot.w
+        // v145 — RESIZING scales the whole note, not just its width: the
+        // height follows the width at the slot's paper aspect, so a wider
+        // card grows taller (and a narrower one shrinks) instead of
+        // stretching flat at the old slot height. Never-resized cards keep
+        // the exact slot dimensions (cardW == slot.w → cardH == slot.h).
+        val cardH = if (slot.w > 0f) cardW * (slot.h / slot.w) else slot.h
         // v60/v108 — cap EVERY card's DISPLAY size on a scaled-up board.
         // The slot width is ~41% of the raw board; when the collage is
         // smaller than the canvas it zooms to fill (scale > 1), and the raw
@@ -766,7 +772,7 @@ fun MoodBoardFloatingCards(
             x = placed.x * scale + offsetX,
             y = placed.y * scale + offsetY,
             w = cardW * displayScale,
-            h = slot.h * displayScale,
+            h = cardH * displayScale,
             // v113 — the drag/resize clamps bound the VISIBLE display space:
             // the card for the inline editor is canvasWPx × canvasHPx, NOT
             // canvas × scale — the old formula let a card be dragged off the
@@ -848,7 +854,10 @@ private fun MoodBoardFloatingCard(
     // grip gesture reads the LATEST clamps (a dragged/resized card moves
     // them).
     val minW = (w * 0.5f).coerceAtLeast(48f)
-    val maxW = (boardW - x).coerceAtLeast(minW)
+    // v145 — a SIZE LIMIT on resizing: a card can grow to at most 60% of
+    // the visible board (still respecting the space to its right), so a
+    // stretched note can't balloon across the whole collage.
+    val maxW = ((boardW - x).coerceAtMost(boardW * 0.60f)).coerceAtLeast(minW)
     val currentMinW by rememberUpdatedState(minW)
     val currentMaxW by rememberUpdatedState(maxW)
     val renderW = (w + resizeDelta).coerceIn(currentMinW, currentMaxW)

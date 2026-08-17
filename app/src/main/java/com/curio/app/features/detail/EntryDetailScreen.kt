@@ -3592,6 +3592,13 @@ private fun ExpandedMoodBoardDialog(
                             // scaled board ÷ the fit scale back to raw).
                             boardMaxX = boardW / fit.scale,
                             boardMaxY = boardH / fit.scale,
+                            // v145 — the expanded dialog is the full-screen
+                            // view: cards keep their exact raw width × the
+                            // board fit (same as the full-screen editor), so
+                            // what you arranged in full-screen is what shows
+                            // here — the old 40% display cap shrank resized
+                            // cards against the inline board's look.
+                            rawSpace = true,
                             // v7.37 — stable per-entry seed so the on-board
                             // paper slips never re-roll their tears. The
                             // dialog carries its entry-derived [seed] (no

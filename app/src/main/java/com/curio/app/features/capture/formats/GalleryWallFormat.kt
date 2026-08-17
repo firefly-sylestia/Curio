@@ -225,9 +225,15 @@ fun GalleryWallFormat(
     )
     var boardExpanded by remember { mutableStateOf(false) }
     // v57 — the FULL-SCREEN quote placements (the expanded board's own
-    // pixel space), aligned 1:1 with the shared cards by index. Text,
-    // style, tilt and WIDTH stay shared — only where each card sits differs
-    // per view. Padded as cards are added; the remove hook keeps it aligned.
+    // pixel space), aligned 1:1 with the shared cards by index. Text and
+    // style stay shared, but WHERE each card sits AND its WIDTH are now
+    // per-view (v145): rearranging/resizing in the full-screen board never
+    // touches the small board's cards ("why is the quote card the same in
+    // both small and full screen" — it isn't anymore). Legacy entries fall
+    // back to the inline spots exactly like fullTiles falls back to the
+    // inline tiles, so old boards keep their single arrangement until the
+    // user rearranges in full-screen. Padded as cards are added; the
+    // remove hook keeps it aligned.
     val fullQuotePositions = remember(initialData) {
         mutableStateListOf<CaptureData.QuotePos>().apply {
             val src = initialData?.quotePositionsFull
@@ -512,23 +518,24 @@ fun GalleryWallFormat(
                     // v7.22 — the board chip's quotes float ON the board.
                     onAddQuote = { quoteCards.addCard(captionStyle, captionColor, onBoard = true) },
                     // v57 — quotes sit at their FULL-SCREEN placements here.
+                    // v145 — the full-screen board is INDEPENDENT: a move
+                    // preserves the full placement's own width (never pulls
+                    // the shared inline width in), and a resize writes ONLY
+                    // the full placement's .w — the small board's cards are
+                    // untouched.
                     quotePositionsOverride = fullQuotePositions.toList(),
                     onMoveQuoteOverride = { i, x, y ->
                         while (fullQuotePositions.size <= i) {
                             fullQuotePositions.add(CaptureData.QuotePos(-1f, -1f))
                         }
-                        val w = quoteCards.widths.getOrElse(i) { -1f }
-                        fullQuotePositions[i] = CaptureData.QuotePos(x, y, w)
+                        val ownW = fullQuotePositions[i].w
+                        fullQuotePositions[i] = CaptureData.QuotePos(x, y, ownW)
                     },
                     onResizeQuoteOverride = { i, w ->
-                        // Widths are shared between the views; mirror the
-                        // shared setWidth so the full-screen placement's own
-                        // .w stays in sync (the card reads it on render).
-                        quoteCards.setWidth(i, w)
                         while (fullQuotePositions.size <= i) {
                             fullQuotePositions.add(CaptureData.QuotePos(-1f, -1f))
                         }
-                        val p = fullQuotePositions.getOrElse(i) { CaptureData.QuotePos(-1f, -1f) }
+                        val p = fullQuotePositions[i]
                         fullQuotePositions[i] = CaptureData.QuotePos(p.x, p.y, w)
                     }
                 )
@@ -1001,6 +1008,13 @@ private fun MoodBoardCanvas(
                     )
                 }
 
+                // v145 — "something on the board" drives BOTH the Quote
+                // chip's position and the Clear-board button's visibility:
+                // empty board → the chip sits at the Clear-board spot (16dp),
+                // and once content is added the Clear button appears there
+                // and the chip moves up above it (88dp).
+                val boardHasContent = tiles.isNotEmpty() || quoteState?.quotes?.isNotEmpty() == true
+
                 // ── Floating "Add quote" chip — bottom-left, mirroring
                 // the Add-images button on the right. ────────────────────
                 if (quoteState != null) {
@@ -1015,7 +1029,10 @@ private fun MoodBoardCanvas(
                             // also lives at BottomStart; keep the Quote chip
                             // above it so both stay reachable (inline: 16dp).
                             .then(if (fullScreen) Modifier.navigationBarsPadding() else Modifier)
-                            .padding(start = 16.dp, end = 16.dp, bottom = if (fullScreen) 88.dp else 16.dp)
+                            .padding(
+                                start = 16.dp, end = 16.dp,
+                                bottom = if (fullScreen && boardHasContent) 88.dp else 16.dp
+                            )
                             .zIndex(60f)
                     ) {
                         Row(
@@ -1110,7 +1127,9 @@ private fun MoodBoardCanvas(
                 }
 
                 // ── Clear board (expanded editor only, hidden when empty) ──
-                if (fullScreen && tiles.isNotEmpty()) {
+                // v145 — visible whenever the board has ANY content (images
+                // or quote cards), and clears BOTH when confirmed.
+                if (fullScreen && boardHasContent) {
                     Surface(
                         onClick = { showClearConfirm = true },
                         shape = RoundedCornerShape(50),
@@ -1195,10 +1214,24 @@ private fun MoodBoardCanvas(
             shape = CurioDialogShape,
             onDismissRequest = { showClearConfirm = false },
             title = { Text("Clear mood board?") },
-            text = { Text("Remove all ${tiles.size} images? This can't be undone.") },
+            text = {
+                val quoteCount = quoteState?.quotes?.size ?: 0
+                Text(
+                    if (quoteCount > 0)
+                        "Remove all ${tiles.size} image${if (tiles.size == 1) "" else "s"} and $quoteCount quote card${if (quoteCount == 1) "" else "s"}? This can't be undone."
+                    else
+                        "Remove all ${tiles.size} image${if (tiles.size == 1) "" else "s"}? This can't be undone."
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     tiles.clear()
+                    // v145 — Clear board also wipes every quote card (the
+                    // on-board floating ones AND the below-board boxes): the
+                    // whole mood board resets in one action. removeCard fires
+                    // the onCardRemoved hook, keeping fullQuotePositions
+                    // aligned.
+                    quoteState?.let { qs -> while (qs.quotes.isNotEmpty()) qs.removeCard(0) }
                     showClearConfirm = false
                 }) {
                     Text("Clear", color = MaterialTheme.colorScheme.error)
