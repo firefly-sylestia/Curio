@@ -1,6 +1,33 @@
 # Prompt.md — Request log
 
-## Current request — category picker Manage pill: floating + theme-aware + text-only; filters Show-all tick removed — commit only, NO push
+## Current request — Edit profile dialog restructure: Your name + Bio sections, tagline removed — commit only, NO push
+
+User: "now in edit profile dialog, make the your name and the line under
+it text ith Your name and in bold and larger text then below Bio similiar
+way, remove the tagline text, and remove the automatic tagline option and
+also the leave the tagline empty to use the automatic streak one that tet
+too. and make the profile photo text a little bigger, and fix the page
+margin and hirarcy and maybe add icons etc and dont push."
+
+ProfileScreen.kt ProfileDialogs:
+- Helper text "Your name and the line under it." → section heading
+  "Your name" (titleMedium ExtraBold + Person icon); name field label
+  "Display name" removed (placeholder "Your name").
+- New "Bio" heading (same style + Note icon) over the tagline field —
+  the tagline field IS the bio (no bio data model; the "line under the
+  name" is the custom streak tagline). Its "Tagline" label removed
+  (placeholder "Keep the spark going today.").
+- Removed: "Use automatic tagline" TextButton + onResetTagline param +
+  caller wiring; both helper texts. Empty field still falls back to the
+  automatic streak line (unchanged).
+- "Profile photo" label labelLarge → titleMedium ExtraBold + Image icon;
+  sections 16dp apart with 8dp heading→field gaps; new EditSectionLabel
+  helper.
+
+Docs: changelog FIX line, AGENTS.md v170, this file. COMMITTED ONLY —
+"dont push" (v168/v169 also unpushed).
+
+## Earlier completed request — category picker Manage pill: floating + theme-aware + text-only; filters Show-all tick removed — commit only, NO push
 
 User: "in category picker the manage category option there a scafhold or
 strip behind the button make it proper floating, and theme aware and

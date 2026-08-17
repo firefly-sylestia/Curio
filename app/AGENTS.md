@@ -1188,6 +1188,35 @@ app/src/main/java/com/curio/app/
     LESSON: "scafhold or strip" = a full-width bottom action read as a
     bar; "proper floating" = the content-sized centered capsule language;
     "tick mark" = the leading glyph in the pill row.
+- **v170 — Edit profile dialog restructured: "Your name" + "Bio"
+  sections (bold, larger, icon per heading), tagline field becomes the
+  Bio, tagline label + automatic-tagline button + helper texts removed.**
+  User: "now in edit profile dialog, make the your name and the line
+  under it text ith Your name and in bold and larger text then below Bio
+  similiar way, remove the tagline text, and remove the automatic tagline
+  option and also the leave the tagline empty to use the automatic streak
+  one that tet too. and make the profile photo text a little bigger, and
+  fix the page margin and hirarcy and maybe add icons etc and dont push".
+  ProfileScreen.kt ProfileDialogs:
+  - The helper "Your name and the line under it." became a section
+    heading **"Your name"** (titleMedium ExtraBold + Person icon); below
+    it the name field (label "Display name" removed → placeholder
+    "Your name"). Below that a **"Bio"** heading (same style + Note
+    icon) over the tagline field — the tagline field IS the bio (the
+    app has NO bio data model; the "line under the name" is the custom
+    streak tagline). Its "Tagline" label is gone → placeholder "Keep
+    the spark going today.".
+  - REMOVED: the "Use automatic tagline" TextButton (+ onResetTagline
+    param + caller wiring) and both helper texts. Leaving the field
+    empty still falls back to the automatic streak line (unchanged
+    behavior — getCustomStreakTagline.ifBlank { taglineForStreak }).
+  - "Profile photo" label bumped labelLarge → titleMedium ExtraBold +
+    an Image icon; sections spaced 16dp with 8dp heading→field gaps
+    ("fix the page margin and hierarchy"). New EditSectionLabel helper.
+  - COMMIT ONLY — "dont push" (v168 + v169 also unpushed). LESSON: the
+    "line under the name" = the custom streak tagline — the user calls
+    it "Bio"; no bio model exists, so the tagline field is renamed, not
+    a new field.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`

@@ -358,10 +358,6 @@ fun ProfileScreen(navController: NavController) {
         onCropDismiss = { cropSource = null },
         taglineInput = taglineInput,
         onTaglineInputChange = { taglineInput = it },
-        onResetTagline = {
-            // Clears the tagline field — Save persists the automatic line.
-            taglineInput = ""
-        },
         onDismiss = {
             showNameDialog = false
             cropSource = null
@@ -369,7 +365,8 @@ fun ProfileScreen(navController: NavController) {
         onSave = {
             displayName = nameInput.trim().ifBlank { "Curious Explorer" }
             AppPreferences.setDisplayName(context, displayName)
-            // v97 — the tagline saves with the same Edit profile dialog.
+            // v97 — the tagline (the Bio) saves with the same Edit profile
+            // dialog; an empty value keeps the automatic streak line.
             AppPreferences.setCustomStreakTagline(context, taglineInput)
             taglineRevision++
             showNameDialog = false
@@ -647,9 +644,11 @@ private fun ProfileDialogs(
     onCropDismiss: () -> Unit,
     // v97 — the tagline (the line under the name) edits in the SAME
     // "Edit profile" dialog — the separate tagline dialog is gone.
+    // v170 — the field is presented as the "Bio" now; leaving it empty
+    // still falls back to the automatic streak line (the "Use automatic
+    // tagline" button + helper texts are gone).
     taglineInput: String,
     onTaglineInputChange: (String) -> Unit,
-    onResetTagline: () -> Unit,
     onDismiss: () -> Unit,
     onSave: () -> Unit
 ) {
@@ -660,87 +659,102 @@ private fun ProfileDialogs(
             onDismissRequest = onDismiss,
             title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // v117 — a clean preview with NO badge and no tap-to-
-                    // crop: every pick opens the crop editor BEFORE anything
-                    // is saved, so the avatar is always framed by the user
-                    // (the old Adjust pill, tap-avatar and crop badge are
-                    // gone — Change photo is the only way in).
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(84.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                            contentAlignment = Alignment.Center
+                // v170 — section hierarchy: Profile photo (bigger label +
+                // icon), Your name, Bio. The tagline field IS the Bio — the
+                // "Tagline" label, the "Use automatic tagline" button and
+                // both helper texts are gone (leaving it empty still falls
+                // back to the automatic streak line on the hero).
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // ── Profile photo ──
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        // v117 — a clean preview with NO badge and no tap-to-
+                        // crop: every pick opens the crop editor BEFORE anything
+                        // is saved, so the avatar is always framed by the user
+                        // (the old Adjust pill, tap-avatar and crop badge are
+                        // gone — Change photo is the only way in).
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
-                            if (avatarPath.isNotBlank()) {
-                                ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
-                            } else {
-                                Text(
-                                    nameInput.firstOrNull()?.uppercase().orEmpty(),
-                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            Box(
+                                modifier = Modifier
+                                    .size(84.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (avatarPath.isNotBlank()) {
+                                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                                } else {
+                                    Text(
+                                        nameInput.firstOrNull()?.uppercase().orEmpty(),
+                                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                // v130 — no redundant "change photo to re-crop"
+                                // chatter: the label plus the Add/Change/Remove
+                                // pill actions say it all. Photos are always
+                                // square-cropped before saving. v170 — the
+                                // label is a touch bigger now with a photo
+                                // icon, matching the section headings.
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    CurioIcon(
+                                        CurioIcons.Image, null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 18.dp
+                                    )
+                                    Text(
+                                        "Profile photo",
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                                    )
+                                }
                             }
                         }
-                        Column(modifier = Modifier.weight(1f)) {
-                            // v130 — no redundant "change photo to re-crop"
-                            // chatter: the label plus the Add/Change/Remove
-                            // pill actions say it all. Photos are always
-                            // square-cropped before saving.
-                            Text(
-                                "Profile photo",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            DialogPillAction(
+                                label = if (avatarPath.isNotBlank()) "Change photo" else "Add photo",
+                                accent = true,
+                                onClick = onPickAvatar
                             )
+                            if (avatarPath.isNotBlank()) {
+                                DialogPillAction(label = "Remove", destructive = true, onClick = onRemoveAvatar)
+                            }
                         }
                     }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        DialogPillAction(
-                            label = if (avatarPath.isNotBlank()) "Change photo" else "Add photo",
-                            accent = true,
-                            onClick = onPickAvatar
+
+                    // ── Your name ──
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EditSectionLabel(icon = CurioIcons.Person, text = "Your name")
+                        OutlinedTextField(
+                            value = nameInput,
+                            onValueChange = onNameInputChange,
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            placeholder = { Text("Your name") },
+                            modifier = Modifier.fillMaxWidth()
                         )
-                        if (avatarPath.isNotBlank()) {
-                            DialogPillAction(label = "Remove", destructive = true, onClick = onRemoveAvatar)
-                        }
                     }
-                    Text(
-                        "Your name and the line under it.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    OutlinedTextField(
-                        value = nameInput,
-                        onValueChange = onNameInputChange,
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        label = { Text("Display name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = taglineInput,
-                        onValueChange = onTaglineInputChange,
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        label = { Text("Tagline") },
-                        placeholder = { Text("Keep the spark going today.") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        "Leave the tagline empty to use the automatic streak one.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    TextButton(
-                        onClick = onResetTagline,
-                        contentPadding = PaddingValues(horizontal = 0.dp)
-                    ) {
-                        Text("Use automatic tagline", fontWeight = FontWeight.Bold)
+
+                    // ── Bio ──
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EditSectionLabel(icon = CurioIcons.Note, text = "Bio")
+                        OutlinedTextField(
+                            value = taglineInput,
+                            onValueChange = onTaglineInputChange,
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            placeholder = { Text("Keep the spark going today.") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             },
@@ -760,6 +774,29 @@ private fun ProfileDialogs(
             bitmap = src,
             onConfirm = onCropApply,
             onDismiss = onCropDismiss
+        )
+    }
+}
+
+/** v170 — a section heading in the Edit profile dialog: a small glyph +
+ *  bold titleMedium label, so "Profile photo · Your name · Bio" read as a
+ *  clear hierarchy instead of a wall of helper text. */
+@Composable
+private fun EditSectionLabel(icon: String, text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        CurioIcon(
+            name = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 16.dp
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
