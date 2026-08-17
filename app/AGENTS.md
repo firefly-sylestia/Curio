@@ -1533,6 +1533,40 @@ app/src/main/java/com/curio/app/
   light/dark). `themeModeState` is a `mutableStateOf`, so the whole app
   rethemes instantly and the hero SVG crossfades via the existing
   `crossfade(true)`.
+- **v178 — constellation audit (light-mode visibility + grid web) and the
+  Stats "Your Curiosity" header banner now matches the drawer hero.**
+  User: "do a proper audit that the constelations lines and star colors
+  are right and visible in light mode and each stars in connected somehow
+  and now use the day one view in drawer hero in your curiocity hero too,
+  dont chnage the design just the banner style of the header". Stats
+  header sky = theme-picked like the drawer per ask_user.
+  - AUDIT (`DrawerLaneConstellation`): the old `#7FAFD8 @ 0.20` lines and
+    `@ 0.30` tiny stars VANISHED on the white drawer surface in light
+    mode, and the `#AFC9D4` idle dots were near-invisible. Inks are now
+    resolved in COMPOSITION (they call `isCurioDarkTheme`, so they can't
+    live inside the Canvas draw lambda): `linkColor` = #7FAFD8@0.30 dark
+    / #5F7E9A@0.55 light, `tinyStarColor` = #7FAFD8@0.35 / #5F7E9A@0.50,
+    `idleDotColor` = #4A5F6E / #7E9CB0 (steel slate, reads on white).
+    Explored chips were already right (solid `themedAccent` + `onAccent`).
+  - CONNECTIVITY: the old closed zigzag chain (i → (i+1)%n) was replaced
+    with a GRID WEB — each node links to its RIGHT (col < c-1) and DOWN
+    (row < r-1) grid neighbours (c/r recomputed in-canvas with the same
+    formula as the layout). Every star gets 2–4 visible links; the
+    constellation reads as a connected mesh instead of one invisible
+    chain whose links hid under the 34dp explored chips.
+  - STATS HEADER (`StatsSkyHeader` in StatsScreen.kt): the procedural
+    gradient + 22 seeded stars + carved crescent moon are GONE. The band
+    now loads the SAME theme-picked SVG as the drawer hero
+    (`R.raw.drawer_hero_sky_dark` / `drawer_hero_sky_light`) via Coil
+    `SvgDecoder` with `ContentScale.Crop`, over the theme gradient as the
+    loading backdrop. The design is untouched: rounded 30dp bottom tear,
+    the warm-white back pill (skyInk glyph) and the "Your Curiosity" /
+    "Stats, streaks & insights" title still read on the art. The sky SVGs
+    are 320×186 (1dp/unit) so the band's 148dp height is a center-crop
+    slice — the celestial body sits near the top edge. Added imports:
+    `ContentScale`, `AsyncImage`, `SvgDecoder`, `ImageRequest`, `R`;
+    `Canvas`/`Offset`/`Random`/`lerp` stay (CategoryConstellation still
+    draws).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

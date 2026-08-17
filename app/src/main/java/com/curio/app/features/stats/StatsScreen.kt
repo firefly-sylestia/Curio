@@ -43,11 +43,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
+import com.curio.app.R
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
@@ -177,8 +182,10 @@ private fun statsSkyColors(): Triple<Color, Color, Color> {
 
 private val StatsHeaderHeight = 148.dp
 
-/** v174c — the fixed sky band: gradient, seeded stars, a crescent moon and
- *  the page title with a back pill. */
+/** v178 — the fixed sky band: the SAME theme-picked sky artwork as the
+ *  drawer hero (night sky in dark mode, day sky in light) behind the page
+ *  title + back pill. The design (rounded tear, pill, ink) is unchanged —
+ *  only the banner's art style changed. */
 @Composable
 private fun StatsSkyHeader(
     skyTop: Color,
@@ -186,42 +193,35 @@ private fun StatsSkyHeader(
     skyInk: Color,
     onBack: () -> Unit
 ) {
-    // v174e — light mode uses the deep seafoam INK for the celestial bits so
-    // the stars/moon stay visible on the pale dawn sky (warm white vanishes).
-    val starTint = if (isCurioDarkTheme()) Color(0xFFFFFDF4) else Color(0xFF2C5A53)
-    val stars = remember {
-        val rnd = Random(0xD2A7E + 41)
-        List(22) {
-            Offset(rnd.nextFloat(), rnd.nextFloat())
-        }
+    val context = LocalContext.current
+    // v178 — theme-picked drawer-hero sky SVG (dark → night, light → day).
+    val heroSkyRes = if (isCurioDarkTheme()) R.raw.drawer_hero_sky_dark else R.raw.drawer_hero_sky_light
+    val heroSkyModel = remember(context, heroSkyRes) {
+        ImageRequest.Builder(context)
+            .data(heroSkyRes)
+            .decoderFactory(SvgDecoder.Factory())
+            .crossfade(true)
+            .build()
     }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(StatsHeaderHeight)
             .clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp))
-            .background(Brush.verticalGradient(listOf(skyTop, skyBottom)))
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
-            stars.forEachIndexed { i, s ->
-                drawCircle(
-                    color = starTint.copy(alpha = 0.30f + (i % 5) * 0.10f),
-                    radius = (0.7f + (i % 3) * 0.5f).dp.toPx(),
-                    center = Offset(s.x * w, s.y * h)
-                )
-            }
-            // Crescent moon toward the right.
-            val mc = Offset(w * 0.84f, h * 0.34f)
-            val mr = 11.dp.toPx()
-            drawCircle(color = starTint.copy(alpha = 0.80f), radius = mr, center = mc)
-            drawCircle(
-                color = lerp(skyTop, skyBottom, 0.34f),
-                radius = mr,
-                center = Offset(mc.x + mr * 0.55f, mc.y - mr * 0.38f)
-            )
-        }
+        // Theme gradient behind the art as the loading backdrop (same as the
+        // drawer hero).
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(skyTop, skyBottom)))
+        )
+        AsyncImage(
+            model = heroSkyModel,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),

@@ -1,4 +1,6 @@
 ADD
+- Stats: the "Your Curiosity" page's header banner is now the same sky artwork as the drawer hero — the night sky in dark mode, the day sky in light mode (the header's design is unchanged, only the banner art).
+- Drawer: the curiosity map's constellation lines and stars are clearly visible in light mode now — deeper slate inks on white instead of the faint blue that vanished — and every star is linked into a connected grid web so the constellation reads as one mesh.
 - Drawer: tap the moon in the night sky (or the sun in the day sky) on the hero to flip the theme between light and dark.
 - Drawer: the hero's sky is now hand-drawn artwork — a night sky with stars and a crescent moon in dark mode, a day sky with sun, clouds and birds in light mode (no watermark glyphs on the banner).
 - Drawer: the curiosity map now lives on the plain drawer surface — no card box, title or range selector. ALL your lanes show as solid stars; explored lanes glow with their icon, and tapping one opens that lane's real passport data (spins, peeked, explores, saved, last explored).

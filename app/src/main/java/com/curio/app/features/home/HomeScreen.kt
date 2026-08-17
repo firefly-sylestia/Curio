@@ -2474,6 +2474,15 @@ private fun DrawerLaneConstellation(
     // can't run inside the Canvas draw lambda; recomputing the small map per
     // recomposition is cheap).
     val accents = lanes.associateWith { CurioCategories.byId(it).themedAccent() }
+    // v178 — theme-aware constellation inks (audit fix: the old steel-blue
+    // at 0.20 alpha vanished on the white drawer surface in light mode).
+    // Dark: light blue on near-black. Light: a deeper slate so the lines
+    // and tiny stars actually read on white.
+    val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.30f)
+                    else Color(0xFF5F7E9A).copy(alpha = 0.55f)
+    val tinyStarColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.35f)
+                        else Color(0xFF5F7E9A).copy(alpha = 0.50f)
+    val idleDotColor = if (isCurioDarkTheme()) Color(0xFF4A5F6E) else Color(0xFF7E9CB0)
 
     BoxWithConstraints(modifier = modifier) {
         val w = maxWidth
@@ -2484,23 +2493,39 @@ private fun DrawerLaneConstellation(
             // Extra tiny stars first (under everything).
             extras.forEach { s ->
                 drawCircle(
-                    color = Color(0xFF7FAFD8).copy(alpha = 0.30f),
+                    color = tinyStarColor,
                     radius = 1.2.dp.toPx(),
                     center = Offset(s.x * pw, s.y * ph)
                 )
             }
-            // Connecting lines between neighbouring lanes (grid order =
-            // neighbours, so the constellation reads as a connected web).
-            val pts = nodes.map { (_, n) -> Offset(n.x * pw, n.y * ph) }
+            // Grid web (v178): connect each node to its RIGHT + DOWN grid
+            // neighbours so EVERY star is visibly linked (the old single
+            // zigzag chain hid links under the explored chips and read as
+            // unconnected in light mode). Interior stars get 4 links, edge
+            // stars 2–3 — the constellation reads as a connected mesh.
+            val n = nodes.size
+            val c = kotlin.math.ceil(kotlin.math.sqrt(n.toFloat())).toInt().coerceAtLeast(1)
+            val r = (n + c - 1) / c
+            val pts = nodes.map { (_, nd) -> Offset(nd.x * pw, nd.y * ph) }
             nodes.indices.forEach { i ->
-                val a = pts[i]
-                val b = pts[(i + 1) % nodes.size]
-                drawLine(
-                    color = Color(0xFF7FAFD8).copy(alpha = 0.20f),
-                    start = a,
-                    end = b,
-                    strokeWidth = 1.dp.toPx()
-                )
+                val col = i % c
+                val row = i / c
+                if (col < c - 1) {
+                    drawLine(
+                        color = linkColor,
+                        start = pts[i],
+                        end = pts[i + 1],
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+                if (row < r - 1) {
+                    drawLine(
+                        color = linkColor,
+                        start = pts[i],
+                        end = pts[i + c],
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
             }
         }
         nodes.forEach { (id, n) ->
@@ -2534,9 +2559,7 @@ private fun DrawerLaneConstellation(
                         .offset(x = w * n.x - dot / 2, y = h * n.y - dot / 2)
                         .size(dot)
                         .clip(CircleShape)
-                        .background(
-                            if (isCurioDarkTheme()) Color(0xFF4A5F6E) else Color(0xFFAFC9D4)
-                        )
+                        .background(idleDotColor)
                 )
             }
         }
