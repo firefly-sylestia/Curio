@@ -1648,6 +1648,38 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v182 — crash fixes: drawer grid-web OOB + Pet Designer negative
+  padding, and the FilterSheet Apply pill floats like the picker's
+  Mix/Cancel.** User: "fix this app crah on drawer open and also in
+  category picker theres still soemthing at the button and do the same
+  with filters tooof spin screen" + a crash report
+  (`IndexOutOfBoundsException: Index 29 out of bounds for length 29`,
+  at draw, drawer open), then a second crash
+  (`IllegalArgumentException: Padding must be non-negative`, Pet
+  Designer UI).
+  - DRAWER CRASH: `DrawerLaneConstellation`'s grid web (v178) drew
+    right/down links guarded only by `col < c - 1` / `row < r - 1` —
+    with a NON-rectangular grid (29 lanes → 6×5, last row 5) the last
+    node of a short row indexed `pts[i+1]`/`pts[i+c]` PAST the array
+    end. Fixed with length guards `i + 1 < n` / `i + c < n`. LESSON:
+    array-index guards in DrawScope loops must check BOTH the grid
+    position AND the array length — grid math and list length diverge
+    whenever the lane count isn't a perfect rectangle.
+  - PET DESIGNER CRASH: the v179 full-bleed banner used
+    `padding(horizontal = -edgePad)` — **Compose forbids negative
+    padding** ("Padding must be non-negative", thrown at layout).
+    Replaced with the standard full-bleed trick: `BoxWithConstraints`
+    → `offset(x = -edgePad)` + `requiredWidth(maxWidth + edgePad * 2)`
+    so the tear still reaches both screen edges. LESSON: NEVER emit
+    negative `padding()` — use offset + requiredWidth instead.
+  - FILTER SHEET ("do the same with filters"): the Apply / Show all
+    button is no longer a full-width bar below the chips — it FLOATS
+    over the sheet content (`align(BottomCenter)`, bottom 26dp) as the
+    same raised accent pill (fill/glow/glass unchanged), and the chips
+    column's bottom padding is now 88dp so the pill never covers the
+    last row. The category picker's bottom was already clean in current
+    code (the v180 rework removed the footer — the user's crash build
+    predated it).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

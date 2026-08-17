@@ -1,70 +1,37 @@
-# Prompt.md — Request log
+# Current Request — crash fixes (drawer OOB, Pet Designer negative padding) + FilterSheet floating Apply
 
-## Current request — fix CI compile error + connect the stars on the Stats page (DONE)
+## Status: DONE — committed and pushed
 
-User: "lets improve more of the your curiosity page" → ask_user answered
-"Connect the stars" + pasted the CI failure: `HomeScreen.kt:2132:41
-@Composable invocations can only happen from the context of a @Composable
-function` — "fix this too".
+## Request
+User: "fix this app crah on drawer open and also in category picker theres still soemthing at the button and do the same with filters tooof spin screen" — with a crash report (`IndexOutOfBoundsException: Index 29 out of bounds for length 29`, at draw, drawer open). Then: "another crash in pet designer ui" — `IllegalArgumentException: Padding must be non-negative`.
 
-### Changes
-- **CI FIX (HomeScreen.kt:2132)**: the v177 moon/sun tap called
-  `isCurioDarkTheme()` INSIDE the `.clickable {}` lambda — a @Composable
-  call in a non-composable context (COMPILE-SAFETY rule 3 violation).
-  Fixed: `val isDarkNow = isCurioDarkTheme()` resolved in composition
-  before the clickable; the lambda reads `isDarkNow`. Grepped all four
-  files touched this session (`-B2 -A2` around isCurioDarkTheme /
-  themedAccent / themedButton* / headerAccent / heroHeaderInk) — no other
-  violations.
-- **STATS WEB (StatsScreen.kt `CategoryConstellation`)**: the old
-  lane-order chain + single gold fissure used `#7FAFD8 @ 0.22` — the same
-  light-mode invisibility the drawer map had. Stars are now linked as a
-  NEAREST-NEIGHBOUR web: every star connects to its 2 closest stars
-  (deduped pairs via `LinkedHashSet<Pair<Int,Int>>`, kotlin.collections
-  typealias — auto-imported), with theme-aware inks resolved in
-  composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
-  `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (gold fissure
-  still bridges the two hemispheres).
-- Changelog (20260920.txt) + app/AGENTS.md v181 notes added (incl. the
-  LESSON: CI runs async, so grep-based checks must explicitly eyeball
-  composable helpers inside lambdas).
+## Root causes
+1. **Drawer crash** — `DrawerLaneConstellation` (HomeScreen.kt) grid web: right/down link guards checked only grid position (`col < c-1`, `row < r-1`), not the array length. With 29 lanes → 6×5 grid (last row 5 nodes), the last node of a short row drew `pts[i+1]`/`pts[i+c]` past the end → OOB at draw on drawer open.
+2. **Pet Designer crash** — v179 full-bleed hero used `padding(horizontal = -edgePad)`; Compose throws "Padding must be non-negative" at layout.
+3. **FilterSheet** — "do the same with filters": Apply was a full-width bar below the chips; now floats like the picker's Mix/Cancel.
+4. **Category picker bottom** — already clean in current code (v180 rework removed the footer; user's crash build predated it).
 
-No compile/test possible in this env (CI validates on push) — edits are
-brace-balanced, no imports changed, theme colors resolved in composition.
+## Fixes
+- HomeScreen.kt: length guards `i + 1 < n` / `i + c < n` added to both link draw branches.
+- PetDesignerScreen.kt: negative padding replaced with `BoxWithConstraints` → `offset(x = -edgePad)` + `requiredWidth(maxWidth + edgePad * 2)`; added `requiredWidth` import (BoxWithConstraints/offset already imported).
+- SpinScreen.kt FilterSheet: Apply/Surface moved out of the Column, now `align(BottomCenter)` + `padding(bottom = 26.dp)` floating pill (same accent fill/glow/glass); chips scroll column bottom padding 20dp → 88dp so the pill never covers the last row. Braces verified balanced (2066 closes Column, 2102 Box, 2103 ModalBottomSheet, 2104 function).
 
-## Previous request — Spin category picker: no footer, floating no-background Mix/Cancel, hero watermark placement (DONE, shipped 0eeebed)
+## Lesson learned (written to app/AGENTS.md v182)
+- DrawScope grid-web loops must guard BOTH grid position AND array length (`i + c < n`), not just `col < c-1` — grid math and list length diverge for non-rectangular counts.
+- NEVER emit negative `padding()` in Compose — use offset + requiredWidth for full-bleed.
 
-Removed the Manage categories pill (and `onBrowseAll` + its navigation +
-now-unused imports); Mix/Cancel float over the grid as nav-bar-style
-controls with no background capsule (grid gains bottom clearance in
-multi-select); hero watermark glyphs repositioned (small twin was under
-the status bar — added statusBarsPadding — large one was tear-clipped/
-hidden behind presets — raised to bottom 58dp, stronger alpha).
+## Docs updated
+- fastlane changelog: 3 FIX bullets (drawer crash, pet designer crash, floating filter Apply).
+- app/AGENTS.md: v182 entry.
+- Prompt.md: this summary.
 
-## Previous request — Pet Designer theme-aware studio pill, opaque edit prompt, full-bleed hero (DONE, shipped b454c67)
+## Files changed
+- app/src/main/java/com/curio/app/features/home/HomeScreen.kt
+- app/src/main/java/com/curio/app/features/petdesigner/PetDesignerScreen.kt
+- app/src/main/java/com/curio/app/features/spin/SpinScreen.kt
+- fastlane/metadata/android/en-US/changelogs/20260920.txt
+- app/AGENTS.md
+- Prompt.md
 
-`PetStudioTab` active pill → secondaryContainer/onSecondaryContainer;
-`EditorPickPrompt` → solid surfaceContainerHigh; hero full-bleed via
-negative edge-padding wrapper.
-
-## Previous request — constellation audit + Stats hero banner matches the drawer (DONE, shipped 2bf548d)
-
-Theme-aware constellation inks + right/down grid web in the drawer map;
-StatsSkyHeader loads the theme-picked sky SVG (design unchanged).
-
-## Previous request — tap the moon/sun on the drawer hero to flip the theme (DONE, shipped 1aadf44)
-
-Invisible 48dp hit-circle at (268.8, 52.08); setThemeMode flips to the
-opposite effective theme. Always-on.
-
-## Previous request — drawer curiosity map + new flat cropped footer (DONE, shipped ccf2fae)
-
-Plain-surface constellation of ALL lanes + new cropped planet footer flat
-at the bottom edge with a fade + credits.
-
-## Previous request — drawer hero sky = user's SVG artwork; revert 6300f774 (DONE, shipped bff5809)
-
-Reverted `6300f774` + `91b4375`; deleted procedural DrawerCelestialSky +
-watermark glyphs; hero loads the user's SVGs via Coil. Also `04efc1e`
-(chore: icon-font backup + SVG generator committed, package.json stubs
-deleted).
+## Follow-ups
+- Watch CI for the v182 push — the two crashes were runtime bugs CI can't catch; the previous compile fixes are already in.

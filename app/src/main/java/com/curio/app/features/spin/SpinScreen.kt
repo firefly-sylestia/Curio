@@ -1951,7 +1951,9 @@ private fun FilterSheet(
                         .verticalScroll(rememberScrollState())
                         // v70 — tight top margin: the divider is gone, so the
                         // accordion sits right under the search field.
-                        .padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 4.dp),
+                        // v181 — extra bottom clearance so the floating
+                        // Apply pill never covers the last row of chips.
+                        .padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 88.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // ── Group pills row ───────────────────────────────
@@ -2061,48 +2063,40 @@ private fun FilterSheet(
                 }
             }
 
-            Spacer(Modifier.height(14.dp))
-
-            // ── Apply / Show all — a full-width pill in the SAME family as
-            //    the filter chips (v113): the old Material Button read flat
-            //    next to the raised chip pills. Same construction as
-            //    [CompactChip]'s selected state — accent fill, 4dp lift,
-            //    One UI glass edge + inner glow, full pill shape.
-            val applyShape = RoundedCornerShape(50)
-            Surface(
-                onClick = { onApply(draftFilters, draftSubtypes) },
-                shape = applyShape,
-                // v113 — the SOLID accent fill (the chip's selected state);
-                // the accent's readable ink keeps the check + label crisp.
-                color = cat.themedButtonFill(),
-                shadowElevation = 4.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .curioDarkGlow(4.dp, applyShape)
-                    .curioGlassEdge(applyShape)
-                    .curioInnerGlow(applyShape, cat.themedAccent(), strength = 0.12f)
-                    .clip(applyShape)
+        }
+        // v181 — Apply / Show all now FLOATS over the content as a nav-
+        // style pill (same treatment as the picker's Mix/Cancel): the
+        // full-width bar below the chips is gone. The chips column above
+        // got extra bottom clearance so the pill never covers the last row.
+        val applyShape = RoundedCornerShape(50)
+        Surface(
+            onClick = { onApply(draftFilters, draftSubtypes) },
+            shape = applyShape,
+            // v113 — the SOLID accent fill (the chip's selected state);
+            // the accent's readable ink keeps the label crisp.
+            color = cat.themedButtonFill(),
+            shadowElevation = 4.dp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 26.dp)
+                .curioDarkGlow(4.dp, applyShape)
+                .curioGlassEdge(applyShape)
+                .curioInnerGlow(applyShape, cat.themedAccent(), strength = 0.12f)
+                .clip(applyShape)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                // v168 — TEXT ONLY: the leading check tick is gone (the
-                // user asked for just the label, same as the category
-                // picker's Manage pill).
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 13.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = cat.themedButtonInk()
-                    )
-                }
+                Text(
+                    text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = cat.themedButtonInk()
+                )
             }
         }
         }

@@ -2514,7 +2514,12 @@ private fun DrawerLaneConstellation(
             nodes.indices.forEach { i ->
                 val col = i % c
                 val row = i / c
-                if (col < c - 1) {
+                // v181 — length guards: with a NON-rectangular grid (e.g. 29
+                // lanes → 6×5 with the last row holding 5), the last node of a
+                // short row has no right/down neighbour — pts[i+1]/pts[i+c]
+                // indexed past the end and crashed the drawer open
+                // (IndexOutOfBounds 29/29 on draw).
+                if (col < c - 1 && i + 1 < n) {
                     drawLine(
                         color = linkColor,
                         start = pts[i],
@@ -2522,7 +2527,7 @@ private fun DrawerLaneConstellation(
                         strokeWidth = 1.dp.toPx()
                     )
                 }
-                if (row < r - 1) {
+                if (row < r - 1 && i + c < n) {
                     drawLine(
                         color = linkColor,
                         start = pts[i],

@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -643,20 +644,26 @@ fun PetDesignerScreen(navController: NavController) {
             //    the top of the screen, so it stays while the banner rides
             //    away under it.
             item {
-                // v179 — full-bleed banner: negative side padding cancels
-                // the list's content padding for THIS item only, so the
-                // tear reaches both screen edges (was cut 16dp+ each side).
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = -edgePad)
-                ) {
-                    SettingsHeroHeader(
-                        title = "Pet designer",
-                        subtitle = "Draw your own Curie",
-                        onBack = { navController.popBackStack() },
-                        compact = wide
-                    )
+                // v181 — full-bleed banner WITHOUT negative padding (Compose
+                // forbids it: the v179 `padding(horizontal = -edgePad)`
+                // crashed with "Padding must be non-negative"). The item is
+                // measured with the PADDED width, so measure it, offset the
+                // hero left by the edge padding and force its width to the
+                // full viewport — the tear reaches both screen edges.
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val viewportWidth = maxWidth + edgePad * 2
+                    Box(
+                        modifier = Modifier
+                            .offset(x = -edgePad)
+                            .requiredWidth(viewportWidth)
+                    ) {
+                        SettingsHeroHeader(
+                            title = "Pet designer",
+                            subtitle = "Draw your own Curie",
+                            onBack = { navController.popBackStack() },
+                            compact = wide
+                        )
+                    }
                 }
             }
 

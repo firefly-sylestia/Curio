@@ -47,6 +47,9 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Drawer: opening it no longer crashes on devices with 29 lanes — the constellation web's link guards now respect the actual node count (the last row of a non-rectangular grid was indexing past the end).
+- Pet Designer: the header's full-bleed banner no longer crashes with "Padding must be non-negative" — the full-width bleed is done with an offset + forced width instead of illegal negative padding.
+- Spin filters: the Apply / Show all button now floats over the sheet as the same raised accent pill (no full-width bar below the chips), with extra bottom clearance so it never covers the last row of chips.
 - Backup & restore: your profile photo now survives a restore — the avatar file is bundled into the backup (previously only its path was, so a restored app pointed at a file that didn't exist and showed a blank avatar).
 - Navigation: the pill bar's morph is even slower and calmer now — the tab pills glide at half the previous pace (still zero bounce), and the Topic Reveal Like/Dislike pill and the Pet Designer studio bar move with the exact same slowed motion.
 - Navigation: Cabinet's "All" tab no longer turns yellow — the active pill now wears the same accent as the Spin screen ("whatever the spin screen color have set"), falling back to the coral brand when Spin hasn't been opened yet.
