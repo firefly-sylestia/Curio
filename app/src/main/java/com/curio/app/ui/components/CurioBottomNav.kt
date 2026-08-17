@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -387,13 +389,22 @@ private fun FloatingNavPill(
         animationSpec = PillColorSpring,
         label = "floatingNavPillIconTint"
     )
+    // v167 — NO tap ripple: the pill's click uses a null indication, so
+    // tapping a tab never flashes the grey ripple circle (the user called
+    // it "the touch shadow in nav bar"). The interactionSource is still
+    // remembered so the semantics/click remain fully functional.
+    val pillInteraction = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .width(pillWidth)
             .height(FloatingPillHeight)
             .clip(RoundedCornerShape(50))
             .background(fillColor)
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = pillInteraction,
+                indication = null,
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -557,9 +568,20 @@ private fun curioNavContainerColor(routePrefix: String?): Color {
  * page.
  */
 @Composable
-internal fun curioFloatingNavContainer(routePrefix: String?): Color {
+internal fun curioFloatingNavContainer(routePrefix: String?): Color =
+    curioFloatingNavContainerFor(curioNavContainerColor(routePrefix))
+
+/**
+ * v167 — the floating capsule color for an EXPLICIT page wash (the reveal
+ * Like/Dislike pill passes the reveal page's own category wash, which the
+ * route-keyed [curioFloatingNavContainer] can't reach — the reveal isn't a
+ * tab route). Same lift rule as the nav bar: light mode lifts the wash 30%
+ * toward the elevated surface so the pill follows the page tint while
+ * staying readable; dark keeps the elevated surface (near-black pages).
+ */
+@Composable
+internal fun curioFloatingNavContainerFor(wash: Color): Color {
     if (isCurioDarkTheme()) return MaterialTheme.colorScheme.surfaceContainerHigh
-    val wash = curioNavContainerColor(routePrefix)
     return lerp(wash, MaterialTheme.colorScheme.surfaceContainerHigh, 0.30f)
 }
 

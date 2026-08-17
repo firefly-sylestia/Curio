@@ -1118,6 +1118,26 @@ app/src/main/java/com/curio/app/
     `paperControlAccent`, paper-derived borders) — the M3 defaults were
     painting light text over the bright cream (invisible-text bug).
     Light mode keeps the cream paper exactly.
+- **v167 — reveal Like/Dislike pill wears the dynamic page tint; nav
+  pill tap ripple removed.** User: "the like and unlike button pill doesnt
+  get the backgroud tint with dynamic theme fix it. and dont add the
+  touch shado in nav bar".
+  - Reveal pill container was a STATIC `surfaceContainerHigh` — it never
+    picked up the page tint the nav bar capsule gets. Split
+    `curioFloatingNavContainer(routePrefix)` into a shared lift helper
+    `curioFloatingNavContainerFor(wash)` (light: wash lifted 30% toward
+    surfaceContainerHigh; dark: surfaceContainerHigh) and the reveal
+    pill now passes `cat.categoryBackgroundWash()` — the reveal page's
+    own tint — so the capsule matches the page like the nav bar does.
+    (The route-keyed version can't reach the reveal's wash; the reveal
+    isn't a tab route.)
+  - "touch shado" = the tap RIPPLE (ask_user confirmed: "Remove the tap
+    ripple"). FloatingNavPill's clickable now passes `indication = null`
+    with a remembered `MutableInteractionSource`, so tapping a tab never
+    flashes the grey ripple circle. The 6dp drop shadow under the bar
+    stays (user picked ripple only). LESSON: "touch shadow" in this
+    project's user-speak = the press ripple — ask rather than assume
+    which shadow.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`

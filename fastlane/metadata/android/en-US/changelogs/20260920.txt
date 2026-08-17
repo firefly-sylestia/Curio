@@ -28,6 +28,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Topic Reveal: the Like/Dislike pill's capsule now wears the page's dynamic tint like the nav bar — it follows the topic's category wash in light mode instead of sitting on a static grey plate.
+- Navigation: tapping a nav pill no longer flashes the grey ripple circle — the tabs respond without the touch "shadow" effect.
 - Navigation: the pill bar's collapse is calmer now — the tab pills glide at a slower, critically damped pace (no snap, no bounce), and the exact same motion runs on the Topic Reveal Like/Dislike pill and the Pet Designer studio bar so every animated pill moves as one.
 - Navigation: the active tab's bright accent colors are muted — the pill wears a softened same-hue tone instead of the loud saturated lane colors, and on plain pages (Cabinet's "All" view) the active pill uses the theme's default soft container instead of the bright pink/coral (the old fallback matched the spin shuffle brand pink).
 - Dark mode: the Shared session note editor in Save your take is no longer a bright cream sheet on the black page — it renders on a dark elevated sheet with readable light text, and the typed text, placeholder and borders always show clearly in both themes.

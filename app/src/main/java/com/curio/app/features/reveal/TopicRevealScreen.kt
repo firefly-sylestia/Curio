@@ -132,6 +132,7 @@ import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
@@ -867,6 +868,11 @@ fun TopicRevealScreen(
                     sentiment = sentiment,
                     accent = cat.themedAccent(),
                     ink = cat.onAccent(),
+                    // v167 — the pill's capsule wears the reveal page's own
+                    // dynamic tint (same lift rule as the nav bar capsule),
+                    // instead of a static surface color that ignored the
+                    // page tint in light mode.
+                    container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
                     onDislike = {
                         AppPreferences.setTopicSentiment(
                             context, cat.id, resolved.id,
@@ -2196,6 +2202,9 @@ private fun RevealSentimentPill(
     sentiment: String?,
     accent: Color,
     ink: Color,
+    // v167 — the dynamic page-tinted capsule (see the call site) — the
+    // static surfaceContainerHigh never picked up the reveal page's tint.
+    container: Color,
     onDislike: () -> Unit,
     onLike: () -> Unit
 ) {
@@ -2206,7 +2215,7 @@ private fun RevealSentimentPill(
     ) {
         Surface(
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = container,
             // v160 — the v149 dark-mode hairline rim is gone (see v157);
             // the elevated fill alone defines the pill.
             shadowElevation = 6.dp

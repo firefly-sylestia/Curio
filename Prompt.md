@@ -1,6 +1,25 @@
 # Prompt.md — Request log
 
-## Current request — calmer nav collapse (same for all pills), muted colors (Cabinet "All" not pink), dark-mode session note, calmer page openings
+## Current request — reveal Like/Dislike pill dynamic tint + remove the nav pill tap ripple
+
+User: "the like and unlike button pill doesnt get the backgroud tint with
+ dynamic theme fix it. and dont add the touch shado in nav bar".
+
+1. Reveal pill container was a STATIC surfaceContainerHigh. Split
+   `curioFloatingNavContainer(routePrefix)` → shared lift helper
+   `curioFloatingNavContainerFor(wash)` (light: wash lifted 30% toward
+   surfaceContainerHigh; dark: surfaceContainerHigh) in CurioBottomNav;
+   RevealSentimentPill now receives `container =
+   curioFloatingNavContainerFor(cat.categoryBackgroundWash())` so the
+   capsule wears the reveal page's own dynamic tint like the nav bar.
+2. "touch shado" — ask_user confirmed it's the tap RIPPLE. FloatingNavPill
+   clickable now passes indication = null + a remembered
+   MutableInteractionSource (no ripple on tab taps; the 6dp drop shadow
+   under the bar stays — user picked ripple only).
+
+Docs: changelog FIX lines, AGENTS.md v167, this file. Committed + pushed.
+
+## Earlier completed request — calmer nav collapse (same for all pills), muted colors (Cabinet "All" not pink), dark-mode session note, calmer page openings
 
 User: "make the nav bar collapse animation slower a little not violent and
 smoother. and also chnage the bright colors to use muted colors and in
