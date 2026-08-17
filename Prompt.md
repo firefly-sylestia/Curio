@@ -1,6 +1,29 @@
 # Prompt.md — Request log
 
-## Current request — Pet Designer layout rework (compact nav, floating top actions, tear scrolls away) — commit only, NO push
+## Current request — remove dark-mode hairline rims (floating nav bar + detail quick-fact box) — commit only, NO push
+
+User: "why in dark mode the navbar floating one have borders? remove that and
+still hold the push", plus "i notices in detail view theres border in quick
+fact box".
+
+### Changes
+1. `CurioFloatingNavBar` (CurioBottomNav.kt): removed the v149 dark-mode
+   `BorderStroke(1.dp, White@10%)` capsule rim — the elevated fill alone
+   defines the capsule now. `BorderStroke` import removed (was the only use).
+2. `QuickFactCard` (EntryDetailScreen.kt): removed the v115 dark-mode
+   `Modifier.border(1.dp, ink@18%)` on the quick-fact plate — the lifted
+   fill alone defines it. `foundation.border` import removed (was the only
+   use).
+
+### Not touched (same dark rim exists, offered to the user)
+- Tour dock (CurioNavHost), reveal Like/Dislike pill (TopicRevealScreen),
+  pet studio bar + floating action capsule (PetDesignerScreen).
+
+### Git state
+Committed only — user said hold the push (piles up with the pet designer
+rework commit d6bda78, also unpushed).
+
+## Earlier completed request — Pet Designer layout rework (compact nav, floating top actions, tear scrolls away) — commit only, NO push
 
 User: "the pet designer floating nav is stretched all the way fix that. and
 place the save undo redo save and share at the top and sticky, and make the

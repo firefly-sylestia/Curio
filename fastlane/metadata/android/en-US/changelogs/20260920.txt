@@ -28,10 +28,11 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Dark mode: the hairline borders on the floating nav bar and the detail page's quick-fact plate are gone — the surfaces now read defined by their own fill (no more thin outline in dark mode).
 - Pet Designer: the studio bottom bar is a compact centered capsule now (the old full-width capsule read stretched), the Save / Undo / Redo / Share actions float in one pill pinned to the top of the screen (it stays while you scroll), and the torn rose banner is part of the scrolling page — the tear rides away as you scroll down.
 - Navigation: the floating pill bar's background now actually shows the page's tint in light mode (the old lifted capsule washed it out to a plain parchment), and the tab pills glide smoother — the active fill fades in with the pill's expansion instead of snapping, the icon tint crossfades, and the width spring no longer bounces on settle.
 - Navigation: the bottom pill bar is bigger (60dp pills, 128dp expanded) so the tabs read proper and the active label has real room — the Topic Reveal Like/Dislike pill matches the same 60dp size now.
-- Navigation: the floating pill bar is now theme-aware and dynamic — the bar's container follows each page's tint (the Spin lane's wash, the Cabinet's filter wash, Home's rose) and the active tab wears the page's category color with readable ink; in dark mode the bar draws a hairline rim so it reads elevated on the near-black pages.
+- Navigation: the floating pill bar is now theme-aware and dynamic — the bar's container follows each page's tint (the Spin lane's wash, the Cabinet's filter wash, Home's rose) and the active tab wears the page's category color with readable ink.
 - Tour + Pet Designer: the tour Skip/Next dock and the Pet Designer studio bar share the same dynamic container and dark-mode rim as the nav bar.
 - Topic Reveal: the floating Like/Dislike pill now animates like the nav bar — both rest as icons, and the active segment springs wider and slides its label out (like/unlike) while the other collapses back.
 - Category picker: "Manage categories" is now a floating pill over the sheet's bottom (rounded, elevated capsule) instead of a flat full-width button.

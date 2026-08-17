@@ -919,6 +919,20 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v157 — dark-mode hairline rims removed from the floating nav bar and
+  the detail quick-fact plate.** User: "why in dark mode the navbar
+  floating one have borders? remove that", plus "i notices in detail view
+  theres border in quick fact box". The v149 dark-mode
+  `BorderStroke(1.dp, White@10%)` capsule rim on `CurioFloatingNavBar` is
+  GONE (the elevated fill alone defines the capsule), and the v115
+  `Modifier.border(1.dp, ink@18%)` on `QuickFactCard`'s plate is GONE too
+  (its lifted fill alone defines the plate) — the `BorderStroke` /
+  `foundation.border` imports followed. NOTE: the same dark rim still
+  lives on the tour dock (CurioNavHost), the reveal Like/Dislike pill
+  (TopicRevealScreen), the pet studio bar and the floating action capsule
+  (PetDesignerScreen) — not touched, offered to the user. LESSON: the
+  hairline-rim "elevation" trick in dark mode is a look the user may not
+  want on every floating surface; ask rather than blanket-apply.
 - **v156 — Pet Designer layout rework (user-confirmed): compact bottom
   nav, floating top action capsule, tear scrolls away in-flow.** User:
   "the pet designer floating nav is stretched all the way fix that. and

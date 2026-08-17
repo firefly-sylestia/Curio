@@ -11,7 +11,6 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -263,13 +262,9 @@ fun CurioFloatingNavBar(
             shape = RoundedCornerShape(50),
             // v149 — the container follows the page tint dynamically
             // (animated, theme-aware) while staying elevated.
+            // v157 — the dark-mode hairline rim is GONE (the user asked):
+            // the capsule stays defined by its elevated fill alone.
             color = curioFloatingNavContainer(routePrefix),
-            // v149 — dark-mode elevation: the black shadow is invisible on
-            // the near-black pages, so dark mode draws a hairline rim that
-            // defines the capsule's edge (light mode: none).
-            border = if (isCurioDarkTheme())
-                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
-            else null,
             shadowElevation = 6.dp
         ) {
             Row(

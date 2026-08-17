@@ -11,7 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -1493,8 +1492,8 @@ private fun QuickFactCard(
     // the old translucent white @38% washed out against the tinted page wash
     // in light and glowed like a bright sheet in dark mode. The scheme's
     // surface is lifted toward the category ink (a whisper of the entry's
-    // color, like the settings cards), and dark mode adds a hairline rim so
-    // the plate reads defined on the black page.
+    // color, like the settings cards). v157 — the dark-mode hairline rim is
+    // GONE (the user asked); the plate reads defined by its fill alone.
     val paneFill = if (isCurioDarkTheme()) {
         lerp(MaterialTheme.colorScheme.surfaceContainerHigh, ink, 0.10f)
     } else {
@@ -1524,12 +1523,6 @@ private fun QuickFactCard(
                 .fillMaxWidth()
                 .clip(paneShape)
                 .background(paneFill)
-                .then(
-                    // Dark mode: a hairline rim in the category ink so the
-                    // plate reads as a defined surface on the black page.
-                    if (isCurioDarkTheme()) Modifier.border(1.dp, ink.copy(alpha = 0.18f), paneShape)
-                    else Modifier
-                )
                 .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Column {
