@@ -279,14 +279,19 @@ object TopicJsonLoader {
         count
     }
 
-    // ── Prebuilt Topic Database index (v29) ───────────────────────────────
-    // scripts/build_topic_index.py merges every assets/topics/*.json into
-    // one topic_index.json with the search keys (lowercased) and the sort
-    // YEAR precomputed at BUILD time. The Topic Database reads this single
-    // file — parsed once and prewarmed at app start — so it renders with
-    // ZERO loading and the per-topic runtime work (lowercasing, year regexes)
-    // stays flat as the catalog grows past 20k. Falls back to the live
-    // per-category load when the asset is absent.
+    // ── Topic Database index ──────────────────────────────────────────────
+    // v29 — scripts/build_topic_index.py used to merge every
+    // assets/topics/*.json into one prebuilt topic_index.json with the
+    // search keys (lowercased) and the sort YEAR precomputed at BUILD time.
+    // v174f — that 23MB merged asset no longer ships in the APK (the
+    // per-category files already carry every topic — it was a full
+    // duplicate), so when it's absent [loadIndex] builds the SAME merged
+    // index at runtime from the per-category pools (see
+    // [buildIndexFromCatalog]) — parsed once, cached, and prewarmed at app
+    // start — so the Topic Database still renders with ZERO loading and
+    // the per-topic runtime work (lowercasing, year regexes) stays flat as
+    // the catalog grows past 20k. The prebuilt asset path is kept as a
+    // fallback for anyone who regenerates it with the script.
     private const val INDEX_ASSET = "topic_index.json"
 
     @Volatile private var indexCache: List<TopicIndexEntry>? = null
@@ -296,10 +301,13 @@ object TopicJsonLoader {
     private val indexMutex = Mutex()
 
     /**
-     * Loads (once) and caches the prebuilt database index. Null when the
-     * asset is missing or malformed — callers fall back to per-category
-     * loads. Suspends on [Dispatchers.IO]. Concurrent callers (the app
-     * prewarm + a screen) share a single parse.
+     * Loads (once) and caches the merged database index. The prebuilt
+     * topic_index.json asset is parsed when present; otherwise the same
+     * index is built at runtime from the per-category pools (v174f — the
+     * 23MB asset no longer ships). Null only when the whole build fails
+     * — callers fall back to per-category loads. Suspends on
+     * [Dispatchers.IO]. Concurrent callers (the app prewarm + a screen)
+     * share a single parse.
      */
     suspend fun loadIndex(): List<TopicIndexEntry>? = withContext(Dispatchers.IO) {
         indexCache?.let { return@withContext it }
@@ -307,38 +315,83 @@ object TopicJsonLoader {
             indexCache?.let { return@withContext it }
             val am = assets ?: return@withContext null
             val entries = runCatching {
-                val root = JSONObject(
-                    am.open(INDEX_ASSET).bufferedReader().use { it.readText() }
-                )
-                val arr = root.getJSONArray("topics")
-                List(arr.length()) { i ->
-                    val obj = arr.getJSONObject(i)
-                    val topic = parseTopic(obj)
-                    val year = if (obj.has("year") && !obj.isNull("year"))
-                        obj.optInt("year", 0).takeIf { it > 0 } else null
-                    val keys = obj.optJSONObject("keys")
-                    fun key(name: String, fallback: String): String {
-                        val k = keys?.optString(name, "")?.takeIf { it.isNotEmpty() }
-                        return k ?: fallback.lowercase()
-                    }
-                    val tagsArr = keys?.optJSONArray("tags")
-                    val tagKeys = if (tagsArr != null)
-                        List(tagsArr.length()) { j -> tagsArr.getString(j) }
-                    else topic.tags.map(String::lowercase)
-                    TopicIndexEntry(
-                        topic = topic,
-                        year = year,
-                        nameKey = key("name", topic.name),
-                        subtypeKey = key("subtype", topic.subtype),
-                        bylineKey = key("byline", topic.byline),
-                        teaserKey = key("teaser", topic.teaser),
-                        tagKeys = tagKeys
+                if (am.list("")?.contains(INDEX_ASSET) == true) {
+                    // v29 prebuilt path — scripts/build_topic_index.py.
+                    val root = JSONObject(
+                        am.open(INDEX_ASSET).bufferedReader().use { it.readText() }
                     )
+                    val arr = root.getJSONArray("topics")
+                    List(arr.length()) { i ->
+                        val obj = arr.getJSONObject(i)
+                        val topic = parseTopic(obj)
+                        val year = if (obj.has("year") && !obj.isNull("year"))
+                            obj.optInt("year", 0).takeIf { it > 0 } else null
+                        val keys = obj.optJSONObject("keys")
+                        fun key(name: String, fallback: String): String {
+                            val k = keys?.optString(name, "")?.takeIf { it.isNotEmpty() }
+                            return k ?: fallback.lowercase()
+                        }
+                        val tagsArr = keys?.optJSONArray("tags")
+                        val tagKeys = if (tagsArr != null)
+                            List(tagsArr.length()) { j -> tagsArr.getString(j) }
+                        else topic.tags.map(String::lowercase)
+                        TopicIndexEntry(
+                            topic = topic,
+                            year = year,
+                            nameKey = key("name", topic.name),
+                            subtypeKey = key("subtype", topic.subtype),
+                            bylineKey = key("byline", topic.byline),
+                            teaserKey = key("teaser", topic.teaser),
+                            tagKeys = tagKeys
+                        )
+                    }
+                } else {
+                    buildIndexFromCatalog()
                 }
             }.getOrNull()
             indexCache = entries
             entries
         }
+    }
+
+    /** v174f — runtime mirror of scripts/build_topic_index.py. The prebuilt
+     *  merged index stopped shipping (the per-category files duplicate it),
+     *  so this builds the same search index once, at runtime, from the
+     *  per-category pools: routes through [load] so the parses are SHARED
+     *  with the per-category caches (never double-parsed), computes the
+     *  lowercased keys + sort year exactly like the build script, and reads
+     *  wildcard.json directly ([load] of WILDCARD would merge every lane).
+     *  Cached by [loadIndex]; the app prewarm runs it once at startup, so
+     *  the Topic Database still renders with zero loading. */
+    private suspend fun buildIndexFromCatalog(): List<TopicIndexEntry> {
+        val seen = HashSet<String>()
+        val out = ArrayList<TopicIndexEntry>()
+        fun add(topic: CurioTopic) {
+            if (!seen.add(topic.id)) return
+            out += TopicIndexEntry(
+                topic = topic,
+                year = topic.publicationYear(),
+                nameKey = topic.name.lowercase(),
+                subtypeKey = topic.subtype.lowercase(),
+                bylineKey = topic.byline.lowercase(),
+                teaserKey = topic.teaser.lowercase(),
+                tagKeys = topic.tags.map(String::lowercase)
+            )
+        }
+        for (id in CategoryId.values()) {
+            if (id == CategoryId.WILDCARD) continue
+            // A failed lane is skipped, never fatal (same as the database's
+            // per-category fallback) — the rest of the catalog still indexes.
+            runCatching { load(id) }.getOrElse {
+                android.util.Log.w("TopicJsonLoader", "index build: ${id.routeSlug} skipped: ${it.message}")
+                emptyList()
+            }.forEach { add(it) }
+        }
+        // Hand-curated wildcard curiosities (load(WILDCARD) merges every lane).
+        runCatching {
+            parseAsset("$ASSET_DIR/${CategoryId.WILDCARD.routeSlug}.json", CategoryId.WILDCARD)
+        }.getOrNull()?.forEach { add(it) }
+        return out
     }
 
     /** Synchronous accessor — null until [loadIndex] first succeeds. */

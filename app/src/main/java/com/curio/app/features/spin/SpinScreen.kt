@@ -4579,7 +4579,7 @@ private fun CategoryPickerSheet(
                                 when (page) {
                                     0 -> LazyVerticalGrid(
                                         columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 20.dp),
                                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier.fillMaxSize()
@@ -4610,7 +4610,7 @@ private fun CategoryPickerSheet(
                                     }
                                     else -> LazyVerticalGrid(
                                         columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 20.dp),
                                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier.fillMaxSize()
@@ -4651,7 +4651,7 @@ private fun CategoryPickerSheet(
                         }
                     }
 
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     // ── Browse all link, or Mix row in multi-select ──
                     if (multiSelectMode) {
@@ -4717,7 +4717,10 @@ private fun CategoryPickerSheet(
                             onClick = onBrowseAll,
                             shape = RoundedCornerShape(50),
                             color = curioFloatingNavContainerFor(currentCat.categoryBackgroundWash()),
-                            shadowElevation = 6.dp,
+                            // v174f — the elevation is a whisper now (6dp
+                            // shadow bled up into the grid's last row and
+                            // read as a band behind the pill).
+                            shadowElevation = 3.dp,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(vertical = 4.dp)

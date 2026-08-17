@@ -1415,6 +1415,47 @@ app/src/main/java/com/curio/app/
     it; `remember {}` is `@DisallowComposableCalls` so resolve
     `themedAccent()` maps OUTSIDE remember (the associateWith pattern the
     stats page uses).
+- **v174f — APK slimming: ship only `topics/*.json` (index built at
+  runtime) + icon font subset (11MB → ~0.3MB).** User: "ship only topics
+  json, trim the icon font but keep the full font as a backup outside of
+  the app for future additions" — after the app hit ~55MB: `assets/
+  topic_index.json` (23MB) was a FULL duplicate of every topic in
+  `assets/topics/*.json` (16MB), and the bundled Material Symbols font
+  (11MB, all 6,566 glyphs) dwarfed everything else.
+  - TOPICS: `app/src/main/assets/topic_index.json` DELETED. v29's
+    build-time merged index (search keys + sort year precomputed by
+    `scripts/build_topic_index.py`) was only a faster-loading mirror of
+    the per-category files — it never added data, just 23MB of APK.
+    `TopicJsonLoader.loadIndex()` now checks for the asset and, when
+    absent, builds the SAME merged index at runtime via the new
+    `buildIndexFromCatalog()`: iterates every lane through the shared
+    `load(id)` (parses are shared with the per-category caches — never
+    double-parsed), computes keys (lowercased) + year
+    (`CurioTopic.publicationYear()`, identical precedence to the Python
+    script), dedupes by id (verified: zero cross-file dupes today), and
+    reads wildcard.json directly (`load(WILDCARD)` would merge every
+    lane). One parse, cached, prewarmed at app start — the Topic Database
+    still renders with zero loading. The prebuilt-asset path stays as a
+    fallback if someone re-runs the script.
+  - ICON FONT: `res/font/material_symbols_outlined.ttf` subset from
+    11MB → 297KB with fonttools (`--no-layout-closure` is the key flag —
+    the default ligature closure retains ALL 4,250 icon ligatures because
+    every name shares the a–z/underscore/digit source glyphs). The 201
+    used glyphs were found by decoding the font's ligature table (note:
+    components are per-letter with `_` → "underscore" and digits →
+    "digit_one/two/…" glyphs) and cross-referencing every snake_case
+    string literal in the app. ALL variable axes kept (wght powers the
+    Normal/Bold `FontFamily` entries). FULL font backed up at
+    `tools/fonts/material_symbols_outlined_full.ttf` — when adding an
+    icon, subset again from there (command in the CurioIcons.kt header
+    doc). LESSON: check the font's actual ligature encoding before
+    trusting icon names — `format_underline` doesn't exist in this font
+    (only `format_underlined`; the const is unused) while `inventory_2`
+    IS a ligature (digit spelled out).
+  - Also: the category-picker "Manage categories" pill (v168 capsule)
+    read as overlapping the grid's last row — the sliced row + 6dp
+    shadow formed a band behind the button. Fixed: grid bottom
+    contentPadding 4→20dp, gap 8→16dp, pill shadow 6→3dp.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin
@@ -3612,23 +3653,22 @@ app/src/main/java/com/curio/app/
   `MainActivity.onResume` re-seeds the in-memory progress map from prefs so
   a killed-in-background process heals on return instead of waiting for a
   restart.
-- **v29 — Topic Database opens with ZERO loading (prebuilt index).**
-  `scripts/build_topic_index.py` (LOCAL tool, gitignored per the
-  `/scripts/*.py` rule — run `python3 scripts/build_topic_index.py` after
-  ANY topic edit) merges every `assets/topics/*.json` into ONE
-  `app/src/main/assets/topic_index.json` (`{"version":1,"topics":[…]}`, ~0.8MB
-  APK delta after asset compression) with the lowercased search keys and
-  the sort YEAR precomputed at BUILD time (same precedence as the DB's
+- **v29 — Topic Database opens with ZERO loading (prebuilt index → runtime
+  build since v174f).** `TopicJsonLoader.loadIndex()` merges every
+  `assets/topics/*.json` into one cached `List<TopicIndexEntry>` with
+  lowercased search keys and the sort YEAR precomputed (same precedence as
   `topicYear`: name paren → targetName paren → teaser year → instruction
-  year → decade tag). `TopicJsonLoader.loadIndex()` parses it once
-  (reusing `parseTopic`, cached, `cachedIndex()` sync accessor) and
-  `MainActivity` prewarms it in the background at cold start. The Topic
-  Database renders from the index when present (grouped per lane, wildcard
-  lane = wildcard.json originals only) — no per-category parses, no runtime
-  lowercase/year work — and gracefully falls back to the live per-category
-  load when the asset is missing. Scaling note for 20k+: the same
-  precompute-at-build idea is the path — a SQLite/FTS5 or FlatBuffers index
-  would keep instant queries at any size (see Prompt.md).
+  year → decade tag). `MainActivity` prewarms it at cold start.
+  - v174f: the build-time asset (`scripts/build_topic_index.py` →
+    `assets/topic_index.json`, 23MB, a FULL duplicate of every topic)
+    STOPPED SHIPPING. `loadIndex()` now checks for the asset and, when
+    absent, builds the same merged index at runtime via
+    `buildIndexFromCatalog()` (routes through `load(id)` so parses are
+    shared, wildcard.json read directly). The prebuilt script stays as a
+    backup. The Topic Database renders from the cached index when
+    present (no per-category parses, no runtime work) and falls back to
+    the live per-category load only on a cold start before prewarm
+    completes.
 - **v28 — scrolling pets look UP/DOWN in a line, never a circle.** The v27v
   "roll" played a FULL 2π CIRCLE of the eyes on every scroll — it read as
   the pet's eyes spinning whenever you scrolled. Replaced with a vertical

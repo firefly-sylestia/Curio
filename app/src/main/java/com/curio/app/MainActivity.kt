@@ -92,10 +92,11 @@ class MainActivity : ComponentActivity() {
         // (reveal / Cabinet / detail) reads it.
         TopicProgressStore.seed(this)
         // v29 — prewarm the topic catalog in the background so the Topic
-        // Database opens with ZERO loading: the prebuilt index (search keys
-        // + years precomputed at build time) is parsed once here, and the
-        // per-category pools land in the loader cache while the user does
-        // anything else. Both are cached, so screens read them instantly.
+        // Database opens with ZERO loading: the merged index (search keys +
+        // years; v174f builds it at runtime from the per-category pools —
+        // the 23MB prebuilt asset no longer ships) is built once here, and
+        // the per-category pools land in the loader cache while the user
+        // does anything else. Both are cached, so screens read them instantly.
         // v55 — NonCancellable: a rotation (activity destroy) mid-warmup
         // used to cancel loadIndex and restart the whole parse; the warm-up
         // now runs to completion regardless (parses are bounded by the

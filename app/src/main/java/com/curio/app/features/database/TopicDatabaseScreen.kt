@@ -191,13 +191,15 @@ fun TopicDatabaseScreen(navController: NavController) {
             TopicJsonLoader.cached(cat.id)?.let { topics -> cat to laneTopics(cat, topics) }
         }
     }
-    // v29 — the PREBUILT index path: scripts/build_topic_index.py merges
-    // every topic into one topic_index.json with the search keys + year
-    // PRE-COMPUTED, prewarmed at app start. When present, the browser
-    // renders from it INSTANTLY (one file read — no per-category parses,
-    // no runtime lowercase/year work) and stays flat as the catalog grows
-    // past 20k. Falls back to the live per-category load when the asset is
-    // missing (or still warming on a cold start).
+    // v29 — the merged index path: the prebuilt topic_index.json (search
+    // keys + year precomputed by scripts/build_topic_index.py) is parsed
+    // when present; v174f — it no longer ships, so TopicJsonLoader builds
+    // the same index at runtime from the per-category pools, prewarmed at
+    // app start. Either way the browser renders from ONE merged list
+    // INSTANTLY (no per-category parses, no runtime lowercase/year work)
+    // and stays flat as the catalog grows past 20k. Falls back to the live
+    // per-category load when the index is missing (or still warming on a
+    // cold start).
     val indexEntries by produceState<List<TopicIndexEntry>?>(
         initialValue = TopicJsonLoader.cachedIndex(),
         AppPreferences.hiddenCategoriesState,

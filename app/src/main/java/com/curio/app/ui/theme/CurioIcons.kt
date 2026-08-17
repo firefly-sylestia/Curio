@@ -36,6 +36,15 @@ import androidx.compose.material3.Text
  * variable font bundled directly in Curio at
  * `app/src/main/res/font/material_symbols_outlined.ttf`.
  *
+ * v174f — the bundled font is SUBSET to the glyphs Curio actually uses
+ * (11MB → ~0.3MB; every icon below is a verified ligature). When adding a
+ * new icon, subset again with fonttools and keep the FULL font at
+ * `tools/fonts/material_symbols_outlined_full.ttf` for future additions:
+ *
+ *     python3 -m fontTools.subset tools/fonts/material_symbols_outlined_full.ttf \
+ *       --text-file=<icon names> --unicodes=<icon codepoints> --no-layout-closure \
+ *       --glyph-names --symbol-cmap --name-IDs='*' -o app/src/main/res/font/material_symbols_outlined.ttf
+ *
  * Icons are rendered as Text composables using the ligature names from the
  * Material Symbols glyph catalog. The font is bound to [MaterialSymbolsFontFamily]
  * (see CurioTypography.kt).
