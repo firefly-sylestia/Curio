@@ -26,11 +26,15 @@ plausible interpretation and run with it. A wrong guess wastes a full cycle
 (edit → review → commit → push → CI → revert) and can ship an unwanted
 change.
 
-**Durable user preference:** Before removing an existing feature, behavior,
-UI element, or code path, ask the user for confirmation first. Refinements
-may change implementation details only when the existing user-visible
-behavior is preserved; if removal is part of the proposed fix, pause and ask. When in doubt, use the ask_user tool to clarify the request, and
-only proceed once the user confirms.
+**Durable user preference — always ask before DELETING or REPLACING
+anything:** Before removing an existing feature, behavior, UI element, or
+code path — and before deleting, replacing, or overwriting ANY file, data
+entry, or content (topic JSON entries, strings, assets, docs) — ask the
+user for confirmation first. Refinements may change implementation
+details only when the existing user-visible behavior is preserved; if
+removal or replacement is part of the proposed fix, pause and ask. When
+in doubt, use the ask_user tool to clarify the request, and only proceed
+once the user confirms.
 
 This rule covers ambiguous phrasing, missing context, conflicting
 instructions, and any request where multiple readings would lead to
@@ -126,6 +130,12 @@ ending the task — including Kotlin fixes, documentation updates, and changes
 to agent instructions. Do not leave a completed fix uncommitted or wait for
 another request to ask for the commit.
 
+**Exception — text/docs-only changes are committed but NOT pushed on their
+own:** a change that is purely text or documentation (including edits to
+agent instructions / AGENTS.md / master.md / Prompt.md) is committed but
+pushed only together with the next real change — see "📝 TEXT-ONLY / DOCS
+CHANGES" below.
+
 Use this git workflow:
 
 1. **Stage changes:** `git add -A` (or specific files)
@@ -139,20 +149,19 @@ Follow conventional commit format: `feat:`, `fix:`, `refactor:`, `docs:`, `style
 AI/tool attribution) lines. Commit messages are plain conventional-format
 text only.
 
-### 📝 SMALL TEXT-ONLY CHANGES — DO NOT PUSH
+### 📝 TEXT-ONLY / DOCS CHANGES — COMMIT, BUT PUSH ONLY WITH THE NEXT REAL CHANGE
 
-Small text-only changes that do **not** affect app functionality — comment
-rewordings, doc tweaks, formatting fixes, dead-comment cleanups — must
-**NOT** be committed and pushed on their own. They add noise to git history
-and trigger a CI build for zero behavior change. Leave them uncommitted in
-the working tree so they ride along with the next real change (or get
-dropped). This does NOT apply to:
-
-- Changes to agent instructions (AGENTS.md files, master.md) or the
-  Prompt.md request log — those MUST be committed and pushed so every
-  agent sees them.
-- Changes to user-visible text (strings, What's New, changelogs).
-- Any change that alters behavior, layout, or compiled output.
+Text-only and documentation changes — comment rewordings, doc tweaks,
+formatting fixes, dead-comment cleanups, and edits to agent instructions
+(AGENTS.md files, master.md) or the Prompt.md request log — are always
+COMMITTED (they stay in git history), but are **never pushed on their
+own**. They ride along with the next real change (a commit that alters
+behavior, layout, or compiled output) or a user-visible change (strings,
+What's New, changelogs — which ship as part of the feature commit they
+describe). A docs-only push triggers a CI build for zero behavior change
+and leaves the repo ahead of origin with nothing shipped. When a task
+produces ONLY text/doc edits: commit them, and leave the push until a
+functional change lands (or the user explicitly asks to push).
 
 ### 🆕 NEW FEATURES — ASK THE USER: TOGGLEABLE OR NOT?
 
@@ -199,6 +208,10 @@ applies to settings-gated experiments.
 
 ## General Workflow
 
+0. **git pull FIRST** — run `git pull` before starting any work in a
+   session, before the first edit. Always sync with origin first so you
+   build on the latest remote state (other agents/sessions may have
+   pushed while you were away). Never start editing on a stale checkout.
 1. **Read DOX chain** — `master.md` → `AGENTS.md` → child AGENTS.md along every path you touch
 2. **Read Prompt.md** — check for existing context or half-finished work
 3. **Gather context** — read relevant files, search codebase, research APIs before making changes
@@ -206,9 +219,10 @@ applies to settings-gated experiments.
 5. **Implement** — make targeted, minimal changes
 6. **Review** — spawn code-reviewer-deepseek-flash for non-trivial changes
 7. **DOX pass** — update nearest owning AGENTS.md if change affects purpose, ownership, contracts, workflows, or structure (see `master.md` "Update After Editing")
-8. **Commit & push** — stage, commit with descriptive message, push (skip
-   for small text-only changes that don't affect app functionality — see
-   "SMALL TEXT-ONLY CHANGES — DO NOT PUSH" above)
+8. **Commit & push** — stage, commit with descriptive message, push (for
+   text/docs-only changes: commit but push only with the next real change
+   — see "TEXT-ONLY / DOCS CHANGES — COMMIT, BUT PUSH ONLY WITH THE NEXT
+   REAL CHANGE" above)
 9. **Update Prompt.md** — with completion summary and any follow-up notes
 
 ## Updating "What's New" (Release Notes)
