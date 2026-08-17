@@ -1,6 +1,81 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: floating pill bar follow-up (page-wash slot + active-only morph)
+## Current request — COMPLETED: editable progress target + topic data audit + alternate-edition pill
+
+The user: "add a feature to edit the number of pages and episode number
+when tapping the number in the dialog box. also many anime series etc
+and book pages are wrong, many anime total episode gets merged even
+though the entry is for s1" — then, in answer to the book-scope
+question, pasted the CI failure log + "fix this and push then audit all
+books and anime and series for accurate episode and page count. and if
+its varied in books add maybe extra pill for maybe another editon if
+only the page differnce is huge."
+
+### 0 — CI compile failures from the v125/v124 work (fixed + pushed first)
+The CI log surfaced three compile errors in the previous session's work
+(pushed as `71bf509`):
+1. `CurioBottomNav.kt` — `FloatingNavPill` used `remember` without the
+   import (the `remember` import had been dropped in an import sweep).
+2. `SoundBiteFormat.kt` — `onFloatMicTap()` referenced
+   `permissionLauncher` (a local val) and `hasMicrophonePermission()` (a
+   local fun) declared LATER in the composable body; Kotlin local
+   declarations can't be forward-referenced. Moved `onFloatMicTap` after
+   both.
+3. `OfflineTranscriber.kt` — `mono.getOrElse(i0 + 1) { s0 }` type
+   mismatch (`ShortArray.getOrElse` lambda must return Short, closed
+   over the raw Short not the Int) + deprecated `Float.toShort()` →
+   `.roundToInt().toShort()` with the import.
+LESSON recorded (v126): local funs/vals in a @Composable body can't be
+forward-referenced — order them before use.
+
+### 1 — Editable target in the progress dialog
+`CurioProgressEditorDialog`'s target was LOCKED to the topic JSON
+(`progressTarget`). Now the count line under the ring ("value / target
+unit") is tappable: it swaps to an inline numeric field (✓ commits),
+and the corrected total persists per-topic via the new
+`TopicProgressStore.setTarget` / `targetOverrides` map (prefs key
+`topic_target_overrides_v1`, seeded in `seed()`).
+`TopicProgressStore.getTarget(topicId, default)` makes the override win
+in `CurioProgressPill` (text + fraction), `CurioTopicCard` (progress
+line) and the editor (slider/steppers). Save writes the override only
+when it differs from the baked-in value (`clearTarget` otherwise), and
+a corrected total also clamps the current progress down.
+
+### 2 — Topic data audit
+- **anime.json:** the season-1 entries carried MERGED multi-season
+  totals. 15 entries fixed to their season-1 counts (verified against
+  sources): Mob Psycho 100 37→12, One Punch Man 24→12, Spy x Family
+  37→25, March Comes in Like a Lion 44→22, Slime 48→24, Re:Zero 50→25,
+  Konosuba 31→10, Mushoku Tensei 48→23, Jujutsu Kaisen 47→24, Demon
+  Slayer 55→26, Vinland Saga 48→24, Promised Neverland 23→12, Haikyuu
+  85→25, Attack on Titan 89→25, My Hero Academia 159→13.
+- **books.json:** scanned all 500 page counts — they're standard
+  paperback counts (novellas/poems <140, long classics 1200+ are all
+  plausible). NOTE: ~55 books appear TWICE under different ids (e.g.
+  "The Odyssey" + "The Odyssey (c. 8th century BCE)") with matching
+  counts — a separate dedup issue, not a count bug; left untouched
+  (removal needs user confirmation).
+
+### 3 — Alternate-edition pill (books, huge gap only)
+`CurioTopic` gains `altPageCount: Int?` + `altPageLabel: String`
+(loader parses `altPageCount`/`altPageLabel`; SCHEMA.md documents
+both). `CurioProgressPill` renders a second quieter pill ("or 574
+Lombardo") beside the main one when the gap is ≥20% of the primary;
+tapping it opens the editor pre-set to that count (`initialTarget`
+param — the main pill passes null, so the two pills can't cross-wire;
+nothing persists until Save). Verified alt data: The Iliad (704 → 574
+Lombardo), War and Peace (1392 → 1104 Wordsworth), Moby-Dick (635 →
+720 Penguin Classics, both entries), Ulysses (732 → 649 Corrected
+text), The Count of Monte Cristo (1276 → 1462 Modern Library).
+
+### Validation
+`git diff --check` clean; both JSON files re-parse; anime diff touches
+only the 15 episodeCount lines; books diff only adds the alt fields;
+no other CurioProgressEditorDialog callers; desktop/web have no
+progress-pill mirror (grep). No Gradle locally (env rule) — CI
+validates compile on push.
+
+## Previous request — COMPLETED: floating pill bar follow-up (page-wash slot + active-only morph)
 
 The user: "why theres a black or white strip behind the floating
 navigation pill remove that and only the active pill text have the

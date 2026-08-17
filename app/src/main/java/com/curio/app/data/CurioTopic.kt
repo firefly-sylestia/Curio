@@ -63,7 +63,19 @@ data class CurioTopic(
      * topics without the field. Powers the per-topic watching progress
      * (episodes watched / total episodes).
      */
-    val episodeCount: Int? = null
+    val episodeCount: Int? = null,
+    /**
+     * v126 — Books only: a second common edition's page count (e.g. a
+     * Norton Critical Edition vs the Penguin paperback). Edition page
+     * counts vary wildly (translations, annotated editions, print size),
+     * so books with a HUGE edition gap carry the alternative here; the
+     * detail page shows it as an extra pill ("or 720 pp · Penguin
+     * Classics") and tapping it applies that count as the progress
+     * target. Null when editions don't differ enough to matter.
+     */
+    val altPageCount: Int? = null,
+    /** Short edition label for [altPageCount], e.g. "Penguin Classics". */
+    val altPageLabel: String = ""
 ) {
     /**
      * Progress target for this topic: pages for books, episodes for anime/

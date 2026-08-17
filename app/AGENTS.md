@@ -662,6 +662,34 @@ app/src/main/java/com/curio/app/
   collapsible box (3 lines + Expand button, Re-transcribe + clear).
   Vosk on a sound bite uses a NEW `Recognizer` per call (Model load ~1s)
   — never reuse one across audio files.
+- **v126 — editable progress target + corrected topic totals + alternate-
+  edition pill.** (1) **The dialog's number is now TAPPABLE to fix the
+  total pages/episodes.** Before, the editor's target was locked to the
+  topic JSON (`progressTarget`), so wrong baked-in totals (see (2))
+  couldn't be corrected in-app. The count line under the ring ("value /
+  target unit") now opens an inline numeric field (✓ commits); the
+  corrected target persists per-topic via `TopicProgressStore.setTarget`
+  (new `targetOverrides` map, prefs key `topic_target_overrides_v1`,
+  seeded in `seed()`), and `getTarget(topicId, default)` makes the
+  override win everywhere — `CurioProgressPill` (pill text, fraction),
+  `CurioTopicCard` (progress line) and the editor's own slider/steppers.
+  Save writes the override only when it differs from the baked-in value
+  (`clearTarget` otherwise). (2) **Topic-data corrections:** the anime
+  season-1 entries carried the MERGED multi-season episode total (Mob
+  Psycho 100 was 37 = S1+S2+S3, One Punch Man 24 = S1+S2, Attack on
+  Titan 89 = S1–S4, My Hero Academia 159 = S1–S7, etc.) — 15 entries in
+  `anime.json` corrected to their season-1 counts (verified: Mushoku
+  Tensei 23, Spy x Family 25, MHA 13, etc.). (3) **Alternate-edition
+  pill (books):** `CurioTopic` gains `altPageCount: Int?` +
+  `altPageLabel: String` (loader-parse `altPageCount`/`altPageLabel`;
+  SCHEMA.md documents both). Books whose common editions differ HUGEly
+  (≥20% of the primary) now render a second, quieter pill beside the
+  progress pill ("or 574 Lombardo") — tapping it opens the editor
+  pre-set to that edition's count (`initialTarget` param; nothing
+  persists until Save). Data added for the verified cases: The Iliad
+  (704 Fagles / 574 Lombardo), War and Peace (1392 / 1104 Wordsworth),
+  Moby-Dick (635 / 720 Penguin Classics), Ulysses (732 / 649 Corrected
+  text), The Count of Monte Cristo (1276 / 1462 Modern Library).
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

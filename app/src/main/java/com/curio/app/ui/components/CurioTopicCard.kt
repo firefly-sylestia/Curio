@@ -190,10 +190,14 @@ fun CurioEntryCard(
                 //    editor and never changes the card's shape — it reads
                 //    the same TopicProgressStore as the reveal + detail
                 //    heroes.
-                val progressTarget = entry.topic.progressTarget
-                if (progressTarget != null && progressTarget > 0) {
-                    val current = TopicProgressStore.get(entry.topic.id)
-                    val fraction = (current.toFloat() / progressTarget).coerceIn(0f, 1f)
+                // v126 — the card's progress line uses the EFFECTIVE target
+                // (the user's dialog-corrected total when set, else the
+                // baked-in one) so a corrected total and the pill agree.
+                val bakedTarget = entry.topic.progressTarget
+                if (bakedTarget != null && bakedTarget > 0) {
+                    val target = TopicProgressStore.getTarget(entry.topic.id, bakedTarget)
+                    val current = TopicProgressStore.get(entry.topic.id).coerceIn(0, target)
+                    val fraction = (current.toFloat() / target).coerceIn(0f, 1f)
                     // v52b — the ACCENT fills the line, not `onAccent()`:
                     // onAccent resolves near-white on light heroes, so the
                     // old line was white-on-cream (invisible). The faint

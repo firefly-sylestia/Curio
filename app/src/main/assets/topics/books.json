@@ -19,7 +19,9 @@
       "Ancient"
     ],
     "tier": 1,
-    "pageCount": 704
+    "pageCount": 704,
+    "altPageCount": 574,
+    "altPageLabel": "Lombardo"
   },
   {
     "id": "book-odyssey",
@@ -261,7 +263,9 @@
       "19th Century"
     ],
     "tier": 2,
-    "pageCount": 1392
+    "pageCount": 1392,
+    "altPageCount": 1104,
+    "altPageLabel": "Wordsworth"
   },
   {
     "id": "book-crime-and-punishment",
@@ -349,7 +353,9 @@
       "19th Century"
     ],
     "tier": 1,
-    "pageCount": 635
+    "pageCount": 635,
+    "altPageCount": 720,
+    "altPageLabel": "Penguin Classics"
   },
   {
     "id": "book-leaves-of-grass",
@@ -459,7 +465,9 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 732
+    "pageCount": 732,
+    "altPageCount": 649,
+    "altPageLabel": "Corrected text"
   },
   {
     "id": "book-mrs-dalloway",
@@ -3054,7 +3062,9 @@
       "Epic"
     ],
     "tier": 2,
-    "pageCount": 635
+    "pageCount": 635,
+    "altPageCount": 720,
+    "altPageLabel": "Penguin Classics"
   },
   {
     "id": "book-anna-karenina-1877-229",
@@ -4837,7 +4847,9 @@
       "Revenge"
     ],
     "tier": 1,
-    "pageCount": 1276
+    "pageCount": 1276,
+    "altPageCount": 1462,
+    "altPageLabel": "Modern Library"
   },
   {
     "id": "book-candide",

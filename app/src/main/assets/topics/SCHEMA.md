@@ -84,7 +84,9 @@ There is **no root wrapper object**. The file is a bare JSON array. The
 | `exploreAction.durationMinutes` | int | ✅ | Realistic human time-to-engage. ≤ 60 unless the artifact genuinely demands more. |
 | `exploreAction.instruction` | string | ✅ | ≤ 600 chars (matches the `validateTopics` Gradle task cap). Must pass the **quality bar** below. |
 | `tags` | string[] | ❌ | Free-form tags for the Spin screen's dynamic filter chip row. Default `[]`. Tags are category-specific: Artists might use `["Rock", "1970s"]`, Films might use `["Drama", "1990s"]`, Painters might use `["Impressionism", "Oil"]`. Films + Directors use the industry-region tags `Hollywood` (US studio system, replaces the plain `American` origin tag on those two categories) and `Bollywood` (Hindi cinema) — `SpinScreen` buckets both into the filter sheet's Origin group. Franchise tags (`MCU`, `Star Wars`, `DC`, `Harry Potter`, `Lord of the Rings`, `Pixar`, `Studio Ghibli`, `Disney`) are bucketed into their own **Franchise** filter row — see `FranchiseTags` in `SpinScreen.kt` (`scripts/add_franchise_tags.py` maintains them on `films.json`/`anime.json`). |
-| `tier` | int 1–3 | ❌ | Quality tier. 1 = human-curated marquee (highest quality, surfaces most often). 2 = AI-curated long-tail (still good). 3 = draft / placeholder. Default 1 if omitted. |
+| `tier` | int 1 | ❌ | Quality tier. 1 = human-curated marquee (highest quality, surfaces most often). 2 = AI-curated long-tail (still good). 3 = draft / placeholder. Default 1 omitted. |
+| `altPageCount` | int | ❌ | **Books only** (v126). A second common edition's page count when editions differ hugely (translations / annotated editions / print size). Powers the alternate-edition pill beside the progress pill — tapping it pre-fills the editor with that count. Default omitted. |
+| `altPageLabel` | string | ❌ | **Books only** (v126). Short label for `altPageCount` — the edition name (`"Lombardo"`, `"Wordsworth"`, `"Modern Library"`, `"Penguin Classics"`, `"Corrected text"`). Default `""`. |
 
 ---
 
@@ -96,7 +98,7 @@ Every `instruction` field must pass all four checks:
 2. **Specific** — names the actual album / film / book / painting / paper. Not "explore music from 1995."
 3. **Time-bounded** — ≤ 60 minutes unless the topic genuinely demands more. `"Read chapter 1"`, not `"read the whole thing."`
 4. **Curiously-framed** — invites the user to notice something they wouldn't notice casually. Not "listen to Vespertine" but "Notice how the beats hit your chest vs your head — that's intentional."
-
+5. **Try in small batches of 20 to 40**
 ---
 
 ## Validation
@@ -106,7 +108,7 @@ The `CurioTopic` constructor (`CurioTopic.kt:init`) validates every loaded topic
 - `id` not blank
 - `name` not blank
 - `teaser` not blank
-- `tier` in 1..3
+- `tier` in 1
 
 A failure throws `IllegalArgumentException` and aborts the parse, surfacing
 as a `TopicLoadException` from `TopicJsonLoader`.
@@ -125,7 +127,7 @@ into `preBuild` automatically when JSON files exist.
 3. **Fill in the rest** (`teaser`, `exploreAction.verb`, `targetName`, `durationMinutes`, `tags`).
 4. **Set `imageUrl` to `""`** (image strategy deferred).
 5. **Pick an ID** using the `{subtype-prefix}-{slug}` convention. If the ID already exists in another category file, change the slug.
-6. **For LLM-drafted topics**, set `tier: 2`. For human-curated marquee content, set `tier: 1`.
+6.  For human-curated marquee content, set `tier: 1`.
 
 For the full LLM authoring prompt template, see `master.md`'s Phase 4 plan.
 

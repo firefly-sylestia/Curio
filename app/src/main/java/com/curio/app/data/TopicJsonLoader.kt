@@ -435,6 +435,10 @@ object TopicJsonLoader {
         // anime carries `episodeCount` (absent/null → no progress tracking).
         val pageCount = if (obj.has("pageCount")) obj.optInt("pageCount", 0).takeIf { it > 0 } else null
         val episodeCount = if (obj.has("episodeCount")) obj.optInt("episodeCount", 0).takeIf { it > 0 } else null
+        // v126 — books with a HUGE edition page gap carry the alternative
+        // edition's count + label (extra pill on the detail page).
+        val altPageCount = if (obj.has("altPageCount")) obj.optInt("altPageCount", 0).takeIf { it > 0 } else null
+        val altPageLabel = obj.optString("altPageLabel", "")
         return CurioTopic(
             id            = id,
             categoryId    = categoryId,
@@ -447,7 +451,9 @@ object TopicJsonLoader {
             tier          = tier,
             byline        = byline,
             pageCount     = pageCount,
-            episodeCount  = episodeCount
+            episodeCount  = episodeCount,
+            altPageCount  = altPageCount,
+            altPageLabel  = altPageLabel
         )
     }
 }

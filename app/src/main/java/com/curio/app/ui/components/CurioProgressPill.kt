@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,10 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +50,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.components.curioInnerGlow
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
@@ -56,6 +61,11 @@ import kotlin.math.roundToInt
  * Tap opens the redesigned [CurioProgressEditorDialog] — ring, −/+ steppers,
  * stepped slider, Finish/Save only (no Reset, no Cancel). Writes to
  * [TopicProgressStore]; every surface shares the same topic progress.
+ *
+ * v126 — the target (pages/episodes total) is the topic's baked-in
+ * `progressTarget` UNLESS the user corrected it in the editor dialog
+ * (wrong baked-in totals — merged anime seasons, edition-dependent book
+ * page counts), in which case [TopicProgressStore.getTarget] wins.
  *
  * @param accent the category accent — used for the progress bar / progress
  *   arc.
@@ -81,74 +91,125 @@ fun CurioProgressPill(
     // light twin in dark) so the dialog is category-colored AND readable.
     dialogContentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
-    val target = topic.progressTarget ?: return
-    if (target <= 0) return
+    val bakedTarget = topic.progressTarget ?: return
+    if (bakedTarget <= 0) return
+    val target = TopicProgressStore.getTarget(topic.id, bakedTarget)
     val unit = topic.progressUnitLabel
-    val current = TopicProgressStore.get(topic.id)
+    val current = TopicProgressStore.get(topic.id).coerceIn(0, target)
     val fraction = (current.toFloat() / target).coerceIn(0f, 1f)
     var showEditor by remember { mutableStateOf(false) }
+    // v126 — which pill opened the editor: the MAIN pill opens with the
+    // current target, the alternate-edition pill pre-fills the alternate
+    // count (nothing persists until Save, so a Cancel leaves everything
+    // untouched).
+    var editorPrefill by remember { mutableStateOf<Int?>(null) }
+    // v126 — an alternate-edition pill (books): when the topic data carries
+    // a second common edition with a HUGE page gap, a small "or N pp ·
+    // Edition" pill renders beside the main one. Tapping it opens the
+    // editor pre-set to that count (Save applies it). Only shown when the
+    // gap is genuinely large (≥ 20% of the primary target).
+    val altCount = topic.altPageCount
+    val altGapHuge = altCount != null && altCount > 0 &&
+        abs(altCount - bakedTarget) >= (bakedTarget * 0.20).toInt()
 
     if (showEditor) {
         CurioProgressEditorDialog(
             topic = topic,
             contentColor = dialogContentColor,
+            // v126 — the alternate pill pre-fills its count; the main pill
+            // passes null (current target).
+            initialTarget = editorPrefill,
             onDismiss = { showEditor = false }
         )
     }
 
-    Surface(
-        onClick = { showEditor = true },
-        shape = RoundedCornerShape(50),
-        color = background,
-        shadowElevation = 2.dp,
-        // v29 — dark mode elevation visibility (glow).
-        modifier = modifier
-            .curioDarkGlow(2.dp, RoundedCornerShape(50))
-            // v81 — One UI 9.5: the colorful pill carries a soft radial
-            // glow of the accent's light twin, reflected inside the pill
-            // (dark mode only).
-            .curioInnerGlow(RoundedCornerShape(50), accent, strength = 0.14f)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // v86 — fuller pill: the 7dp vertical padding made the pill a slim
-        // strip (especially the reveal's count-only badge), so the v81 inner
-        // glow's radial (radius = width) washed over the whole sliver and
-        // read as a glow bleeding past the pill. 11dp vertical + 14dp
-        // horizontal gives it a proper pill body the glow can live inside.
-        // v98 — WIDER still: 14 → 18dp horizontal so the pill reads as a
-        // proper pill (the slim strip let the shadow/glow show around it).
-        Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 11.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        Surface(
+            onClick = {
+                editorPrefill = null
+                showEditor = true
+            },
+            shape = RoundedCornerShape(50),
+            color = background,
+            shadowElevation = 2.dp,
+            // v29 — dark mode elevation visibility (glow).
+            modifier = Modifier
+                .curioDarkGlow(2.dp, RoundedCornerShape(50))
+                // v81 — One UI 9.5: the colorful pill carries a soft radial
+                // glow of the accent's light twin, reflected inside the pill
+                // (dark mode only).
+                .curioInnerGlow(RoundedCornerShape(50), accent, strength = 0.14f)
         ) {
-            Text(
-                text = "$current / $target $unit",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = ink,
-                maxLines = 1
-            )
-            if (showBar) {
-                // v66 — visible in pastel light mode: [accent] resolves to a
-                // light pastel twin that washes out against the tinted pill,
-                // so the bar fill uses the deep category ink (hue-preserving,
-                // readable). v78 — light only (the dark accent fill is gone).
-                val barFill = ink
-                // Slim progress bar — the category accent fills on the pill.
-                Box(
-                    modifier = Modifier
-                        .width(64.dp)
-                        .height(5.dp)
-                        .clip(CircleShape)
-                        .background(barFill.copy(alpha = 0.30f))
-                ) {
+            // v86 — fuller pill: the 7dp vertical padding made the pill a slim
+            // strip (especially the reveal's count-only badge), so the v81 inner
+            // glow's radial (radius = width) washed over the whole sliver and
+            // read as a glow bleeding past the pill. 11dp vertical + 14dp
+            // horizontal gives it a proper pill body the glow can live inside.
+            // v98 — WIDER still: 14 → 18dp horizontal so the pill reads as a
+            // proper pill (the slim strip let the shadow/glow show around it).
+            Row(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 11.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "$current / $target $unit",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = ink,
+                    maxLines = 1
+                )
+                if (showBar) {
+                    // v66 — visible in pastel light mode: [accent] resolves to a
+                    // light pastel twin that washes out against the tinted pill,
+                    // so the bar fill uses the deep category ink (hue-preserving,
+                    // readable). v78 — light only (the dark accent fill is gone).
+                    val barFill = ink
+                    // Slim progress bar — the category accent fills on the pill.
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(fraction)
+                            .width(64.dp)
                             .height(5.dp)
                             .clip(CircleShape)
-                            .background(barFill)
-                    )
+                            .background(barFill.copy(alpha = 0.30f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction)
+                                .height(5.dp)
+                                .clip(CircleShape)
+                                .background(barFill)
+                        )
+                    }
                 }
+            }
+        }
+        // v126 — alternate-edition pill: a quieter sibling showing the other
+        // common edition's page count; tapping it pre-fills the editor with
+        // that count (Save applies it as the target override).
+        if (altGapHuge) {
+            Surface(
+                onClick = {
+                    editorPrefill = altCount
+                    showEditor = true
+                },
+                shape = RoundedCornerShape(50),
+                color = background.copy(alpha = 0.55f),
+                modifier = Modifier.curioDarkGlow(2.dp, RoundedCornerShape(50))
+            ) {
+                Text(
+                    text = buildString {
+                        append("or ").append(altCount).append(" ")
+                        append(if (topic.altPageLabel.isNotBlank()) topic.altPageLabel else unit)
+                    },
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ink.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp)
+                )
             }
         }
     }
@@ -167,20 +228,37 @@ fun CurioProgressPill(
  * deep accent in light mode / light twin in dark), the steppers tint a
  * 14% wash of it instead of solid circles, and the Save button pairs it
  * against the theme surface so the label always contrasts.
+ *
+ * v126 — the TARGET is no longer locked to the topic data: tapping the
+ * count (the "value / target unit" line under the ring) opens an inline
+ * number field to correct the total pages/episodes (wrong baked-in totals
+ * — merged anime seasons, edition-dependent book page counts). The
+ * corrected target persists per-topic via [TopicProgressStore.setTarget]
+ * and overrides the baked-in count everywhere the pill/card shows it.
  */
 @Composable
 fun CurioProgressEditorDialog(
     topic: CurioTopic,
     contentColor: Color,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    // v126 — the alternate-edition pill pre-fills the editor with another
+    // common edition's page count; nothing persists until Save.
+    initialTarget: Int? = null
 ) {
-    val target = topic.progressTarget ?: return
-    if (target <= 0) return
+    val bakedTarget = topic.progressTarget ?: return
+    if (bakedTarget <= 0) return
     val unit = topic.progressUnitLabel
+    val context = LocalContext.current
+    var target by remember {
+        mutableIntStateOf(initialTarget ?: TopicProgressStore.getTarget(topic.id, bakedTarget))
+    }
     val start = TopicProgressStore.get(topic.id).coerceIn(0, target)
     var value by remember { mutableIntStateOf(start) }
-    val context = LocalContext.current
     val fraction = (value.toFloat() / target).coerceIn(0f, 1f)
+    // v126 — tapping the count under the ring swaps it for an inline
+    // numeric field to correct the total (pages / episodes).
+    var editingTarget by remember { mutableStateOf(false) }
+    var targetText by remember { mutableStateOf(target.toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -240,11 +318,81 @@ fun CurioProgressEditorDialog(
                             ),
                             color = contentColor
                         )
-                        Text(
-                            text = "$value / $target $unit",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = contentColor.copy(alpha = 0.85f)
-                        )
+                        // v126 — the count is TAPPABLE: tapping it opens an
+                        // inline field to correct the total pages/episodes
+                        // (the baked-in data is often wrong — merged anime
+                        // seasons, edition-dependent book page counts).
+                        if (editingTarget) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                BasicTextField(
+                                    value = targetText,
+                                    onValueChange = { targetText = it.filter { c -> c.isDigit() }.take(5) },
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = contentColor
+                                    ),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    cursorBrush = SolidColor(contentColor),
+                                    modifier = Modifier
+                                        .width(56.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(contentColor.copy(alpha = 0.12f))
+                                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                                )
+                                Text(
+                                    text = "/ $target $unit",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = contentColor.copy(alpha = 0.85f)
+                                )
+                                // ✓ commit the corrected total.
+                                Surface(
+                                    onClick = {
+                                        val corrected = targetText.toIntOrNull()
+                                        if (corrected != null && corrected > 0) {
+                                            target = corrected
+                                            value = value.coerceAtMost(corrected)
+                                        } else {
+                                            targetText = target.toString()
+                                        }
+                                        editingTarget = false
+                                    },
+                                    shape = CircleShape,
+                                    color = contentColor.copy(alpha = 0.14f),
+                                    modifier = Modifier.size(30.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        CurioIcon(
+                                            name = CurioIcons.Check,
+                                            contentDescription = "Set total $unit",
+                                            tint = contentColor,
+                                            size = 16.dp
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            // Tappable count — the whole "value / target
+                            // unit" line opens the target editor.
+                            Surface(
+                                onClick = {
+                                    targetText = target.toString()
+                                    editingTarget = true
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color.Transparent
+                            ) {
+                                Text(
+                                    text = "$value / $target $unit",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = contentColor.copy(alpha = 0.85f),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -311,6 +459,14 @@ fun CurioProgressEditorDialog(
                         val v = value
                         if (v <= 0) TopicProgressStore.clear(context, topic.id)
                         else TopicProgressStore.set(context, topic.id, v, target)
+                        // v126 — persist the corrected total when it differs
+                        // from the baked-in data; clear it when the user put
+                        // it back to the data value.
+                        if (target != bakedTarget) {
+                            TopicProgressStore.setTarget(context, topic.id, target)
+                        } else {
+                            TopicProgressStore.clearTarget(context, topic.id)
+                        }
                         onDismiss()
                     },
                     shape = RoundedCornerShape(50),
