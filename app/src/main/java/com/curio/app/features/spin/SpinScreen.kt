@@ -1324,8 +1324,14 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         BottomCta(
             cat = deckCat,
             mixedCount = if (isMixedDeck) mixedTopicCount else 1,
-            // v83 — the total topics matching the selected filters.
-            filterActiveCount = filteredPool.size,
+            // v183 — the badge is null (plain "Filter") until filters are
+            // actually SELECTED: the old code passed the always-non-zero
+            // filteredPool.size, so `hasFilters` was always true and the
+            // count showed permanently even with zero chips ticked. When
+            // chips ARE selected the count keeps the v83 design — the total
+            // topics matching them (the filtered pool size).
+            filterActiveCount = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
+                filteredPool.size else null,
             vertical = extraCompact,
             onCategories = { showCategoryPicker = true },
             onFilter = { showFilters = true }
@@ -3973,12 +3979,16 @@ private fun OpeningPulseDot(tint: Color = Color.White) {
 private fun BottomCta(
     cat: CurioCategory,
     mixedCount: Int = 1,
-    filterActiveCount: Int,
+    // v183 — null when NO filter chips are selected (the pill reads plain
+    // "Filter"); the matching-topic count when filters are active. The old
+    // non-null `filteredPool.size` was always > 0, so the badge showed
+    // permanently.
+    filterActiveCount: Int?,
     onCategories: () -> Unit,
     onFilter: () -> Unit,
     vertical: Boolean = false
 ) {
-    val hasFilters = filterActiveCount > 0
+    val hasFilters = filterActiveCount != null
 
     // Anchored paper tray. v6.2 — it wore the SAME category-tint wash as
     // the page background; now transparent so the Categories/Filter buttons

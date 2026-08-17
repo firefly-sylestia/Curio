@@ -1648,6 +1648,19 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v183 — Spin Filter badge only shows when filters are selected.**
+  User: "in spin page the filter always shows the count, make it only
+  show when filters are selected."
+  - ROOT CAUSE: `BottomCta` computed `hasFilters = filterActiveCount > 0`
+    but the call site passed `filterActiveCount = filteredPool.size` —
+    the always-non-zero MATCHING-TOPICS count — so the badge
+    ("Filter · N") showed permanently even with zero chips ticked. The
+    wide/tablet right-rail button (line ~1206) was already gated
+    correctly on `activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()`.
+  - FIX: `filterActiveCount` is now `Int?` — null until chips are
+    selected (pill reads plain "Filter"), and when selected it keeps the
+    v83 design (the total topics matching the filters). Labels guarded by
+    `hasFilters` smart-cast it to non-null.
 - **v182 — crash fixes: drawer grid-web OOB + Pet Designer negative
   padding, and the FilterSheet Apply pill floats like the picker's
   Mix/Cancel.** User: "fix this app crah on drawer open and also in
