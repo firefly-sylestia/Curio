@@ -17,6 +17,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -1498,7 +1499,9 @@ private fun RowScope.PetStudioTab(
  * pill just below the capsule (auto-cleared by the caller).
  */
 @Composable
-private fun StudioFloatingToolbar(
+// BoxScope receiver: the capsule pins itself to the screen's top-end via
+// Modifier.align (the caller renders it inside the screen's root Box).
+private fun BoxScope.StudioFloatingToolbar(
     design: PetDesign,
     dirty: Boolean,
     toast: String?,
