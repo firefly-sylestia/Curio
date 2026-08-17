@@ -12431,5 +12431,965 @@
    "20th century"
   ],
   "tier": 1
+ },
+ {
+  "id": "author-nnedi-okorafor",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Nnedi Okorafor",
+  "teaser": "The Nigerian-American writer of Africanfuturism — a term she coined — whose Who Fears Death inspired the HBO series and whose Binti novella won the Hugo and Nebula. She writes science fiction and fantasy rooted in Nigerian Igbo culture, with girls and women at the center. She was a PhD student in insect ecology when a spinal condition pushed her to writing; her worlds are full of flight, spiders and transformation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Who Fears Death — the novel of the girl who changes the world",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters and feel the desert — Okorafor's novel is set in a future Sudan and follows a girl born of violence who learns to shape the world. The HBO adaptation changed much; the book is the thing."
+  },
+  "tags": [
+   "Science Fiction",
+   "Africanfuturism",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-kim-stanley-robinson",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Kim Stanley Robinson",
+  "teaser": "The science fiction writer of climate and Mars — his Mars trilogy (Red Mars, Green Mars, Blue Mars) is the definitive terraforming epic, and his New York 2140 and The Ministry for the Future are the great climate-fiction novels. He writes hard science with utopian hope, and his work is read by scientists and policymakers as seriously as by SF fans. He won the Hugo, Nebula and Locus awards multiple times.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Ministry for the Future — the novel of the climate emergency",
+   "durationMinutes": 360,
+   "instruction": "Read the opening chapters — a heat wave in India kills millions, and the novel follows the ministry created to give the future a voice. Robinson writes policy as adventure, and the book has been called the most important novel of the decade."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-lois-mcmaster-bujold",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Lois McMaster Bujold",
+  "teaser": "The science fiction novelist of character — her Vorkosigan saga, following the brilliant disabled diplomat Miles Vorkosigan, has won more Hugo Awards than any other series in history (four best-novel Hugos plus others). She writes military SF that is really about people, families and ethics. Her fantasy (The Curse of Chalion, Penric's Demon) is equally loved. She has been called the best living writer of SF adventure.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Shards of Honor and the Vorkosigan saga",
+   "durationMinutes": 300,
+   "instruction": "Read Shards of Honor first — the series' opening romance-war story — then Warrior's Apprentice, where Miles debuts. Bujold's Miles is the most beloved hero in modern SF."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-connie-willis",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Connie Willis",
+  "teaser": "The science fiction writer of comedy and time travel — her Doomsday Book (1992) sends a historian to the Black Death and won both the Hugo and Nebula; To Say Nothing of the Dog is a Victorian comedy. She has won 11 Hugo Awards, more than any other writer, and her work is funny, humane and deeply researched. She taught English and wrote her first story in a class where the teacher said women couldn't write SF.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Doomsday Book — the novel of the historian in the plague",
+   "durationMinutes": 300,
+   "instruction": "Read the opening — the time traveler arrives in 1320 instead of 1320 by accident, and the two timelines (past and present) run in parallel. Willis researched the plague for years, and the novel is history as empathy."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-dan-simmons",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Dan Simmons",
+  "teaser": "The novelist of Hyperion — his Hugo-winning space opera retells Chaucer's Canterbury Tales in a far-future pilgrimage to a murderous time-shifting creature called the Shrike. He also wrote the horror classic The Terror (about the Franklin expedition) and Carrion Comfort, about psychic vampires. He is one of the few writers equally acclaimed in SF, horror and historical fiction. He was an elementary school teacher for 18 years before writing full time.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Hyperion — the novel of the pilgrimage to the Shrike",
+   "durationMinutes": 360,
+   "instruction": "Read the opening frame — seven pilgrims tell their stories on the way to the Time Tombs. Each story is a different genre, and the novel is a mosaic of the whole history of SF."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-iain-m-banks",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Iain M. Banks",
+  "teaser": "The Scottish writer who signed his literary novels 'Iain Banks' and his space operas 'Iain M. Banks' — his Culture series, beginning with Consider Phlebas, imagines a utopian post-scarcity civilization run by benevolent AIs. The Wasp Factory, his debut literary novel, is one of the most shocking first novels ever published. He was a giant of both registers, and died of cancer in 2013, aged 59, weeks after marrying.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Consider Phlebas — the novel of the Culture at war",
+   "durationMinutes": 300,
+   "instruction": "Read the opening — the war between the Culture and the Idirans is already underway, and the narrator is on the losing side. Banks's utopia is the most argued-about civilization in SF."
+  },
+  "tags": [
+   "Science Fiction",
+   "Scottish",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-china-mieville",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "China Miéville",
+  "teaser": "The British writer of 'new weird' fantasy — Perdido Street Station (2000) set a city of impossible races and industries at the heart of modern fantasy, and won the Arthur C. Clarke Award. He is a Marxist and a former MP candidate, and his essays on genre are as sharp as his fiction. His novels (The City & the City, Embassytown) each invent a world and a political question. He is the most intellectually restless fantasist of his generation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Perdido Street Station — the novel of the city of New Crobuzon",
+   "durationMinutes": 360,
+   "instruction": "Read the opening and feel the city — Miéville's New Crobuzon is Dickens crossed with Kafka, full of steam, magic and misery. The novel's monster is one of the strangest in fantasy."
+  },
+  "tags": [
+   "Fantasy",
+   "British",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jeff-vandermeer",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jeff VanderMeer",
+  "teaser": "The writer of the Southern Reach trilogy — Annihilation (2014) became the film with Natalie Portman — about an expedition into a coastal zone being transformed by an incomprehensible force. He writes ecological fiction that is genuinely weird, and his nonfiction (Wonderbook) is the best guide to writing fantasy. He lives in Florida, and his novels are full of swamps, fungi and the uncanny.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Annihilation — the novel of Area X",
+   "durationMinutes": 180,
+   "instruction": "Read the first chapters and surrender to the unease — the biologist narrator is unreliable, the zone is beautiful and wrong, and the tower with its writing is one of the great mysteries of modern fiction."
+  },
+  "tags": [
+   "Science Fiction",
+   "New Weird",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-john-scalzi",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "John Scalzi",
+  "teaser": "The science fiction writer of Old Man's War — his military SF debut made him a star, and his snarky, accessible voice has made him one of the genre's most popular writers. He was a critic and blogger who became a full-time novelist, then president of the Science Fiction and Fantasy Writers of America. His Redshirts (2012) won the Hugo. He writes fast, funny books that make SF welcoming.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Old Man's War — the novel of the elderly soldiers",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters — 75-year-olds join the interstellar army by getting new cloned bodies. Scalzi's premise is comic and his execution is both funny and genuinely moving."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-brandon-sanderson",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Brandon Sanderson",
+  "teaser": "The most prolific and popular fantasy writer of his generation — his Cosmere universe spans Mistborn, The Stormlight Archive and dozens of novels, and he finished Robert Jordan's Wheel of Time after Jordan died. He writes magic systems with hard rules ('Sanderson's Laws'), publishes enormous books at a pace that amazes, and gives away his lectures on writing for free online. He has sold tens of millions of copies.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Mistborn — the novel of the metal-burning magic",
+   "durationMinutes": 360,
+   "instruction": "Read the opening and meet Kelsier's crew — Sanderson's magic system (metals granting powers) is the most mechanically satisfying in fantasy, and his twists are legendary. His 'Sanderlanche' endings are a genre phenomenon."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-patrick-rothfuss",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Patrick Rothfuss",
+  "teaser": "The author of The Name of the Wind (2007) — a fantasy debut so beloved it made him famous overnight, and whose sequel and unfinished trilogy have kept readers waiting for a decade. His hero Kvothe is a legend telling his own story, framed as a tavern confession. Rothfuss is also a streamer and philanthropist. His prose is the most quoted in modern fantasy, and his fans' patience is legendary.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Name of the Wind — the novel of the legendary Kvothe",
+   "durationMinutes": 360,
+   "instruction": "Read the opening frame — an innkeeper with a secret tells his story to a scribe. Rothfuss's magic is musical, and the book is a love letter to storytelling itself."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-robin-hobb",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Robin Hobb",
+  "teaser": "The pen name of Megan Lindholm, author of the Realm of the Elderlings — the Farseer, Liveship and Tawny Man trilogies follow the assassin FitzChivalry Farseer through a life of duty, pain and loyalty. Her books are the most emotionally devastating in epic fantasy; readers genuinely grieve. She writes character-first fantasy where the magic is the cost. She lives in Washington state and has written fantasy for 40 years.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Assassin's Apprentice — the novel of the royal bastard",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet Fitz, the royal bastard raised in the stables — Hobb's first-person narration makes his sorrows the reader's own. The series gets more devastating with every book."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-robert-jordan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Robert Jordan",
+  "teaser": "The author of The Wheel of Time — one of the longest and most beloved fantasy series ever written, 14 volumes plus a prequel, which he began in 1990 and was completing when he died in 2007. He was a nuclear physicist and a Vietnam veteran. His world has its own logic, magic system and prophecies, and his female characters and their politics were controversial and influential. Brandon Sanderson finished the series from his notes.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Eye of the World — the first volume of the Wheel of Time",
+   "durationMinutes": 360,
+   "instruction": "Read the opening and meet Rand, Mat and Perrin in the Two Rivers — the series' slow-burn epic begins in a village that refuses to believe the world is ending. The TV series covers the same ground faster."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-terry-goodkind",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Terry Goodkind",
+  "teaser": "The author of the Sword of Truth series, beginning with Wizard's First Rule (1994) — a bestselling epic fantasy that he insisted was not fantasy but 'a story about human nature'. His novels sold 25 million copies, and the series was adapted into the TV show Legend of the Seeker. His Ayn Rand-influenced philosophy made him a divisive figure in the genre, but his readership was enormous.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Wizard's First Rule — the first novel of the Sword of Truth",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet Richard Cypher — the wizard's rules that give the series its name are introduced as maxims. Goodkind's books are big, dark and unapologetically didactic."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-david-eddings",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "David Eddings",
+  "teaser": "The author of The Belgariad (1982) — a five-book epic fantasy of prophecy and quest that became one of the best-selling fantasy series ever, praised for its humor and pacing. He wrote it with his wife Leigh (the 'Eddings' byline was both of them) after years of writing textbook prose. The Malloreon continued the story. His books are the classic 'gateway fantasy' that a generation read at 12.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Pawn of Prophecy — the first book of the Belgariad",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and meet Garion, the farm boy who doesn't know he's the chosen one — Eddings's formula (farm boy, prophecy, wise old man, quest) became the genre's default, and he did it best."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-raymond-feist",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Raymond E. Feist",
+  "teaser": "The author of Magician (1982), the fantasy debut that made him a star — the story of two boys from a frontier town, one who becomes a warrior and one who becomes a magician, spans a war between worlds. Feist wrote his first novel in 1977 and went on to build the Riftwar Cycle of 30 books. He wrote with warmth and momentum, and his novels sold millions worldwide.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Magician — the novel of the apprentice and the warrior",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters in Crydee — the raid that changes everything comes early. Feist's two-protagonist structure (Pug and Tomas) gives the reader two books in one."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-tad-williams",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Tad Williams",
+  "teaser": "The author of Memory, Sorrow, and Thorn — the fantasy trilogy (begun 1988) that inspired George R.R. Martin's approach to epic fantasy, with its realistic politics and slow-burn quest. Williams's Otherland series was an early portal to the virtual world, and his epic of the dragon Osten Ard, The Last King of Osten Ard, continues the story decades later. He is a master of the long, immersive series.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Dragonbone Chair — the first book of Memory, Sorrow, and Thorn",
+   "durationMinutes": 360,
+   "instruction": "Read the opening in the castle of Hayholt — Williams takes his time, and the slow start is the point. Martin has said this trilogy was a direct influence on A Song of Ice and Fire."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-guy-gavriel-kay",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Guy Gavriel Kay",
+  "teaser": "The Canadian fantasy writer of 'history with a quarter-turn to the fantastic' — Tigana, The Lions of Al-Rassan and Under Heaven are set in worlds that are clearly Renaissance Italy, Moorish Spain and Tang China, with one magical twist. He worked on the Silmarillion with Christopher Tolkien, and his prose is considered the finest in modern fantasy. His books are beloved for their beauty and their grief.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tigana — the novel of the erased name",
+   "durationMinutes": 360,
+   "instruction": "Read the opening and feel the magic — a sorcerer has erased the name of a country so no one can speak it. The novel is about memory, music and revenge, and its ending is devastating."
+  },
+  "tags": [
+   "Fantasy",
+   "Canadian",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-joe-abercrombie",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Joe Abercrombie",
+  "teaser": "The British writer of 'grimdark' fantasy — The First Law trilogy (begun 2006) features torturers, cripples and cynical kings, and is the most acclaimed example of the subgenre he helped define. He was a film editor before writing, which shows in his set pieces. His characters — Logen Ninefingers, Glokta the torturer — are memorably awful and beloved. His later Age of Madness trilogy confirmed he is the genre's sharpest wit.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Blade Itself — the first book of the First Law",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet Glokta, the crippled torturer who is the most sympathetic character in the book — Abercrombie's moral inversion is the whole point. The trilogy's ending is a masterpiece of anticlimax."
+  },
+  "tags": [
+   "Fantasy",
+   "British",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-steven-erikson",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Steven Erikson",
+  "teaser": "The author of the Malazan Book of the Fallen — ten volumes of epic fantasy (begun 1999) with a cast of hundreds, an archaeologist's eye for civilization, and no hand-holding for the reader. He was an archaeologist and anthropologist in Canada, which shows in his treatment of history, war and empire. His novels are dense, brutal and rewarding, and his fan community is famously devoted. He also writes crime fiction with Ian Cameron Esslemont.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Gardens of the Moon — the first book of the Malazan Book of the Fallen",
+   "durationMinutes": 360,
+   "instruction": "Read the opening and surrender to the immersion — Erikson drops you into a war and a magic system without explanation. The series is the most ambitious epic fantasy ever attempted."
+  },
+  "tags": [
+   "Fantasy",
+   "Canadian",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-roger-zelazny",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Roger Zelazny",
+  "teaser": "The science fantasy writer of Lord of Light and the Amber series — he won the Hugo six times and the Nebula three, and his prose is the most poetic in the genre's history. Lord of Light (1967) tells of men who seized godhood in a Hindu-inspired world; Nine Princes in Amber (1970) begins the series about a royal family who can walk between parallel worlds. He died in 1995 at 58, and his work influenced everything from Sandman to The Matrix.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Lord of Light — the novel of the false gods",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapter and surrender to the style — Zelazny's language is fire. The novel's Buddhism and gunfights and god-war made it the most influential SF novel of its decade."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-gene-wolfe",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Gene Wolfe",
+  "teaser": "The writer SF critics call the greatest living author in the genre — his Book of the New Sun (1980-83) is a masterpiece narrated by an unreliable torturer's apprentice in a far-future dying Earth. Wolfe's work rewards re-reading: every narration hides a different truth. He was an engineer who edited Plant Engineering magazine and wrote fiction at night. He won the World Fantasy Award for lifetime achievement and is often compared to Borges.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Shadow of the Torturer — the first book of the New Sun",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and distrust the narrator — Severian claims to remember everything, which is the clue. Wolfe's prose is beautiful and his puzzles are infinite; the series is the most rewarding in SF."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-harlan-ellison",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Harlan Ellison",
+  "teaser": "The angry man of science fiction — his short stories ('I Have No Mouth, and I Must Scream', 'A Boy and His Dog', 'Repent, Harlequin!') won more awards than almost any writer's, and his essays and feuds were legendary. He wrote the classic Star Trek episode 'The City on the Edge of Forever'. He was brilliant, belligerent and prolific, publishing over 1,700 stories. He died in 2018, still the genre's most quoted contrarian.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "I Have No Mouth, and I Must Scream — the stories of Harlan Ellison",
+   "durationMinutes": 180,
+   "instruction": "Read the title story — five people trapped inside a murderous supercomputer for eternity. Ellison's darkness is the point: the genre's angriest writer made its most unforgiving stories."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-alfred-bester",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alfred Bester",
+  "teaser": "The writer who showed science fiction what style could be — his The Demolished Man (1953), about a murder in a world of telepaths, won the first Hugo Award, and The Stars My Destination (1956) is a revenge epic often called the genre's best novel. He was a comic book writer and radio scriptwriter who brought pace and punch to SF. He stopped writing SF for decades, and returned in the 70s. His influence on cyberpunk is acknowledged by Gibson himself.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Stars My Destination — the novel of the revenge of Gully Foyle",
+   "durationMinutes": 240,
+   "instruction": "Read the opening — Gully Foyle, a common sailor, survives a wreck alone and vows revenge on the ship that passed him by. Bester's pyrotechnic style is the genre's most exhilarating read."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-olaf-stapledon",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Olaf Stapledon",
+  "teaser": "The philosopher of science fiction — Last and First Men (1930) tells the entire future history of humanity across two billion years and 18 species; Star Maker (1937) goes further, to the birth of the cosmos. He was a Liverpool philosopher who wrote SF as thought experiments, and his scale made him the genre's only true visionary of the deep time. Arthur C. Clarke called Star Maker the greatest work of imagination ever written.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Star Maker — the novel of the creation of the universe",
+   "durationMinutes": 300,
+   "instruction": "Read the opening — a man gazes at the stars and his mind detaches to travel through space. Stapledon's novel encompasses every civilization, and the 'Star Maker' of the title is the book's final revelation."
+  },
+  "tags": [
+   "Science Fiction",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mervyn-peake",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mervyn Peake",
+  "teaser": "The author of the Gormenghast trilogy — Titus Groan (1946) and Gormenghast (1950) are a gothic masterpiece set in a vast castle of ritual and decay, written in prose of extraordinary richness. Peake was also a painter and war artist who drew the Blitz; his novels are the strangest classics in English fantasy. He died in 1968 of a neurological disease, leaving the trilogy unfinished. His influence runs from Moorcock to the present.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Titus Groan — the novel of the castle of Gormenghast",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and feel the castle — Peake's Gormenghast is a character, a machine of ritual in which the infant Titus is born. The prose is the most ornate in fantasy, and it is worth every word."
+  },
+  "tags": [
+   "Fantasy",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-madeleine-lengle",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Madeleine L'Engle",
+  "teaser": "The author of A Wrinkle in Time (1962) — the Newbery-winning novel of Meg Murry traveling through space-time to rescue her father, which was rejected by 26 publishers and is now a classic and a film. L'Engle wrote science fantasy rooted in Christian faith and family love. She published more than 60 books, including the rest of the Time Quintet. Her journals and essays about writing are beloved by writers.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Wrinkle in Time — the novel of the tesseract",
+   "durationMinutes": 180,
+   "instruction": "Read the first chapters and meet Meg — the awkward girl who saves the universe by loving. L'Engle's novel made quantum physics a children's adventure and changed children's literature."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-beatrix-potter",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Beatrix Potter",
+  "teaser": "The author and illustrator of The Tale of Peter Rabbit (1902) — the best-selling children's book of all time, written as a picture letter to a sick child. Potter was a naturalist who drew fungi and sheep, and her picture letters became the first books to combine text and image perfectly. She bought a farm in the Lake District with her royalties and became a prize-winning sheep breeder and conservationist. She died in 1943, leaving her land to the National Trust.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Tale of Peter Rabbit — the picture letter that became a classic",
+   "durationMinutes": 60,
+   "instruction": "Read it as a picture letter — the book began as a letter to a five-year-old. Potter's economy (text and image on every page) invented the modern picture book."
+  },
+  "tags": [
+   "Children",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-michael-ende",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Michael Ende",
+  "teaser": "The German author of The Neverending Story (1979) — the novel of a boy who reads a book that reads back, which became a global phenomenon and a film. Ende wrote fantasy with philosophical depth; Momo (1973), about a girl who fights the time thieves, is his other masterpiece. He disliked the film adaptation of his book, and his work is a quiet rebellion against the modern worship of efficiency. He died in 1995.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Neverending Story — the novel of the book that reads back",
+   "durationMinutes": 240,
+   "instruction": "Read the opening — Bastian steals into a bookshop and opens a book printed in two colors, and the reader's own reading becomes the plot. Ende's novel is about the imagination's survival."
+  },
+  "tags": [
+   "Fantasy",
+   "German",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-michael-moorcock",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Michael Moorcock",
+  "teaser": "The British writer who modernized fantasy — his Elric of Melniboné (the albino emperor with the soul-stealing sword) and the Eternal Champion cycle made him the most influential fantasy writer of the 60s and 70s. He was also the editor of New Worlds magazine, where he published the New Wave of SF. He is a musician who played in the band Hawkwind. He has won the Nebula and the World Fantasy lifetime award, and his influence is everywhere in modern fantasy.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Elric of Melniboné — the novel of the albino emperor",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters and meet Elric — the sickly albino who wields the demonic sword Stormbringer. Moorcock's anti-hero invented the morally grey fantasy protagonist decades before the term existed."
+  },
+  "tags": [
+   "Fantasy",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-robert-e-howard",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Robert E. Howard",
+  "teaser": "The creator of Conan the Barbarian — his pulp fiction of the 1930s invented sword and sorcery, and his death at 30 by suicide cut short one of the most original voices in popular fiction. He wrote thousands of pages of adventure, horror and history, set in his invented Hyborian Age. Conan's first appearance, 'The Phoenix on the Sword', appeared in Weird Tales in 1932. His other creations include Solomon Kane and Kull. He wrote from Cross Plains, Texas, his whole life.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Phoenix on the Sword and the Conan stories",
+   "durationMinutes": 180,
+   "instruction": "Read the first Conan story — 'The Phoenix on the Sword' — and feel the genre being born. Howard's prose is a charge of adrenaline, and his Conan is far more than the film versions."
+  },
+  "tags": [
+   "Fantasy",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ross-macdonald",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ross Macdonald",
+  "teaser": "The psychological detective novelist — his Lew Archer novels (The Galton Case, The Chill) turned the hard-boiled form toward family secrets and California's past, and are considered by many critics the finest American detective fiction. He was a Canadian who worked as a social worker, which shaped his sympathy. His plots are dense with buried history; his style is lean and precise. He died in 1983, praised by Faulkner and Camus.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Galton Case — the novel of the missing heir",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and meet Lew Archer — the detective who listens. Macdonald's theme is that the past is never buried, and his California is a landscape of secrets."
+  },
+  "tags": [
+   "Crime",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-james-m-cain",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "James M. Cain",
+  "teaser": "The author of The Postman Always Rings Twice (1934) and Double Indemnity — the twin peaks of noir, both made into classic films. Cain was a journalist and screenwriter whose novels of murder, money and desire are short, brutal and perfect. He wrote about ordinary people who kill, and his prose is stripped to the bone. He died in 1977, and his novels are the purest American noir.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Postman Always Rings Twice — the novel of the drifter and the wife",
+   "durationMinutes": 150,
+   "instruction": "Read the first chapter and feel the heat — the drifter and the wife of the diner owner are doomed from page one. Cain's novel is 120 pages of perfect tension, and the films made it famous."
+  },
+  "tags": [
+   "Crime",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ruth-rendell",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ruth Rendell",
+  "teaser": "The British crime writer who won four Edgars and the Diamond Dagger — her Inspector Wexford series (From Doon with Death, 1964) ran for 50 years, and her psychological thrillers under her own name are among the darkest in the genre. As Barbara Vine she wrote the psychological masterpiece A Favor for a Child. She was made a life peer and served in the House of Lords. She died in 2015, leaving 70 novels of unease.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "From Doon with Death — the first Wexford novel",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters and meet Inspector Wexford — Rendell's series began with a missing housewife and ran half a century. Her psychological novels are darker and stranger than the series."
+  },
+  "tags": [
+   "Crime",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-pd-james",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "P.D. James",
+  "teaser": "The queen of British crime — her Adam Dalgliesh novels (Cover Her Face, 1962) and her standalone thrillers (Innocent Blood, The Children of Men) are crime fiction as literature. She worked in the NHS and the Home Office before writing full time, and was made a life peer. She wrote about evil with theological seriousness and prose of great control. She published her last novel at 88 and died in 2014 at 94.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Children of Men — the novel of the sterile future",
+   "durationMinutes": 240,
+   "instruction": "Read the opening — humanity has been sterile for 25 years, and the last generation is aging out. James's dystopia is quiet, English and devastating, and the film adaptation changed its ending."
+  },
+  "tags": [
+   "Crime",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-colin-dexter",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Colin Dexter",
+  "teaser": "The creator of Inspector Morse — the Oxford detective whose novels (Last Bus to Woodstock, 1975) and the long-running TV series made him a national treasure. Dexter was a classics teacher who wrote crossword puzzles before novels; Morse's love of opera, beer and cryptic clues reflects his creator. He won two Edgars and the Diamond Dagger, and died in 2017. His last Morse novel was published in 1999, the year before the series ended.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Last Bus to Woodstock — the first Morse novel",
+   "durationMinutes": 180,
+   "instruction": "Read the first chapters and meet Morse in Oxford — the detective who solves puzzles in a city of them. Dexter's crossword structure (every clue matters) is the series' signature."
+  },
+  "tags": [
+   "Crime",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ian-rankin",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ian Rankin",
+  "teaser": "Scotland's crime novelist — his Inspector Rebus series (Knots and Crosses, 1987) has run for 30 years and made Edinburgh a crime fiction capital. Rankin was a PhD student who wrote songs before novels; Rebus is a flawed, whisky-drinking detective in the Chandler tradition. He has won the Edgar, the Diamond Dagger and the CWA's Cartier Diamond Dagger. He was made an OBE and now lives between Edinburgh and London.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Knots and Crosses — the first Rebus novel",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters and meet John Rebus in Edinburgh — the detective with a past he can't escape. Rankin's series has aged its hero in real time, and Rebus is one of crime fiction's great characters."
+  },
+  "tags": [
+   "Crime",
+   "Scottish",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-tana-french",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Tana French",
+  "teaser": "The Irish crime novelist of the Dublin Murder Squad — In the Woods (2007) won the Edgar for best first novel, and her books (The Likeness, Broken Harbor, The Trespasser) follow detectives who are as damaged as the cases. She trained as an actor at Trinity College Dublin before writing. Her prose is literary, her police are human, and her Dublin is a character. She is the most acclaimed crime writer of her generation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "In the Woods — the novel of the detective and his past",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet Rob Ryan — the detective whose childhood trauma returns with the case. French's novel is a police procedural that is also a novel of memory, and it changed Irish crime fiction."
+  },
+  "tags": [
+   "Crime",
+   "Irish",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-dennis-lehane",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Dennis Lehane",
+  "teaser": "The American crime novelist of Mystic River, Gone Baby Gone and Shutter Island — all filmed, all set in his native Boston. He began with the Kenzie-Gennaro private eye series and became a literary novelist who happens to write crime. He also wrote for The Wire and Boardwalk Empire. His prose is tough and tender at once, and his sense of place (Boston's working class) is the best in the genre. He lives in California now.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Mystic River — the novel of the three childhood friends",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and feel Boston — the three boys' childhood trauma comes home with a murder. Lehane's novel is a tragedy disguised as a mystery, and the film with Sean Penn kept its power."
+  },
+  "tags": [
+   "Crime",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-michael-connelly",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Michael Connelly",
+  "teaser": "The best-selling crime novelist of the modern era — his Harry Bosch series (The Black Echo, 1992) and the Lincoln Lawyer series have sold 80 million copies and become TV shows. Connelly was a crime reporter in Los Angeles, which gives his police procedurals their authenticity. Bosch is named for Hieronymus Bosch and is as relentless as the painter's hells. Connelly has won the Edgar four times and is the genre's most reliable master.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Black Echo — the first Harry Bosch novel",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters and meet Harry Bosch — the LAPD detective who follows the case into the tunnels and the past. Connelly's procedural detail is the genre's gold standard."
+  },
+  "tags": [
+   "Crime",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-lee-child",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Lee Child",
+  "teaser": "The creator of Jack Reacher — the drifter who wanders America righting wrongs, who debuted in Killing Floor (1997) and has appeared in 28 novels, selling 100 million copies. Child was a British television director who was laid off and wrote the first Reacher book in two weeks. Reacher is a hobo knight: no phone, no home, one toothbrush. Tom Cruise played him in two films; Alan Ritchson plays him in the TV series. Child handed the series to his brother Andrew in 2020.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Killing Floor — the first Jack Reacher novel",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and meet Reacher in Margrave, Georgia — the drifter who arrives in a town and finds a body. Child's formula (Reacher arrives, trouble follows, justice happens) is the most successful in thriller fiction."
+  },
+  "tags": [
+   "Thriller",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-john-grisham",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "John Grisham",
+  "teaser": "The legal thriller writer who sold 300 million copies — A Time to Kill (1989), The Firm (1991) and The Pelican Brief made the courtroom a bestseller. Grisham was a Mississippi lawyer and state legislator who wrote his first novel at dawn before work. His books have been adapted into dozens of films. He also writes baseball fiction and Christmas stories. He is the best-selling American novelist of his generation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Firm — the novel of the young lawyer in danger",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and meet Mitch McDeere — the Harvard law graduate who takes the job that will trap him. Grisham's novel made the legal thriller the genre of the 90s."
+  },
+  "tags": [
+   "Thriller",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-gillian-flynn",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Gillian Flynn",
+  "teaser": "The author of Gone Girl (2012) — the psychological thriller that became a phenomenon, a film and a cultural reset for the genre. She was a television critic who wrote crime novels at night; her first two books (Sharp Objects, Dark Places) preceded the smash. Her work is known for its unreliable narrators and its fury. She has written screenplays, including the adaptation of Gone Girl directed by David Fincher. She is the most influential thriller writer of her decade.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Gone Girl — the novel of the missing wife",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and trust nothing — Flynn's split-narrative (the husband's diary, the wife's journal) is a machine for misdirection. The twist is the book's engine, and the ending is the argument."
+  },
+  "tags": [
+   "Thriller",
+   "American",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jo-nesbo",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jo Nesbø",
+  "teaser": "Norway's crime king — his Harry Hole series (The Redbreast, The Snowman, Knife) has sold 55 million copies, and his standalone thriller Headhunters became a hit film. Nesbø was a footballer, a rock musician and an economist before writing; he has kept playing music with his band Di Derre. Hole is a brilliant, self-destructive detective in the classic mold. Nesbø also writes children's books about Doctor Proctor. He is the most successful Norwegian author since Ibsen.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Snowman — the novel of the serial killer",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and feel the Oslo winter — Nesbø's Harry Hole is the most damaged great detective in crime fiction. The Snowman is the series' most famous entry and its most chilling."
+  },
+  "tags": [
+   "Crime",
+   "Norwegian",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-georges-simenon",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Georges Simenon",
+  "teaser": "The Belgian creator of Inspector Maigret — 75 novels and 28 short stories about the pipe-smoking Paris detective, making him the most translated francophone author ever. Simenon wrote with extraordinary speed (a Maigret in a week) and also wrote 400 psychological novels under his own name. He said he wrote to understand people, not to solve crimes. He died in 1989 at 86, having written 400 million copies' worth of books.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Maigret novels — the detective of understanding",
+   "durationMinutes": 180,
+   "instruction": "Read Pietr the Latvian, the first Maigret novel — Simenon's detective solves by empathy, not deduction. The books are short, atmospheric and the most humane in crime fiction."
+  },
+  "tags": [
+   "Crime",
+   "Belgian",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ken-follett",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ken Follett",
+  "teaser": "The Welsh novelist of the epic — The Pillars of the Earth (1989), about the building of a cathedral in 12th-century England, sold 27 million copies and spawned sequels and a video game. He began with thrillers (Eye of the Needle, 1978) and moved to history with a thriller's engine. His Century Trilogy covers the 20th century in three novels. He is one of the best-selling novelists in the world, with 178 million copies sold.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Pillars of the Earth — the novel of the cathedral",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and feel the medieval world — Follett's cathedral builders are heroes, villains and lovers in a story that took him three years to research. The book made historical fiction a bestseller genre again."
+  },
+  "tags": [
+   "Historical Fiction",
+   "British",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-robert-ludlum",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Robert Ludlum",
+  "teaser": "The thriller writer of the Bourne novels — The Bourne Identity (1980), about an amnesiac assassin, became the film franchise with Matt Damon. Ludlum was an actor and producer who wrote his first novel at 43. His books — The Osterman Weekend, The Chancellor Manuscript — sold over 300 million copies, and his formula (the lone operative against the conspiracy) defined the modern thriller. He died in 2001; the Bourne series continues with other writers.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Bourne Identity — the novel of the man without a memory",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and meet the man pulled from the sea — Ludlum's amnesiac agent is the modern thriller's founding character. The films are faster; the book is denser and darker."
+  },
+  "tags": [
+   "Thriller",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-tom-clancy",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Tom Clancy",
+  "teaser": "The author of The Hunt for Red October (1984) — the submarine thriller that made him the best-selling thriller writer in America. Clancy was an insurance salesman who wrote military techno-thrillers with obsessive technical detail; his Jack Ryan novels (Patriot Games, Clear and Present Danger) defined the genre and the films. He also founded the video game series Rainbow Six and Splinter Cell. He died in 2013, having sold over 100 million books.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Hunt for Red October — the novel of the submarine",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and feel the machinery — Clancy's novel of a Soviet submarine captain defecting is a technical manual that happens to be a thriller. The film with Sean Connery is a classic."
+  },
+  "tags": [
+   "Thriller",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
  }
 ]
