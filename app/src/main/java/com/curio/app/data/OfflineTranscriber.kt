@@ -50,6 +50,17 @@ import java.util.zip.ZipInputStream
  */
 object VoskModels {
 
+    /**
+     * Quality tier — drives the picker's badge + accuracy hint (v140).
+     * Small = fast & light, Large = a real accuracy step up, Full = the
+     * flagship server-grade models.
+     */
+    enum class Tier(val label: String, val hint: String) {
+        SMALL("Small", "fast & light"),
+        LARGE("Large", "more accurate"),
+        FULL("Full", "most accurate")
+    }
+
     /** One downloadable offline model. */
     data class Info(
         val id: String,
@@ -57,7 +68,8 @@ object VoskModels {
         val langLabel: String,
         val sizeLabel: String,
         val sizeBytes: Long,
-        val url: String
+        val url: String,
+        val tier: Tier
     )
 
     /** The catalog offered in Settings → Recording → Offline model. */
@@ -68,7 +80,8 @@ object VoskModels {
             langLabel = "English — best accuracy on clear US speech",
             sizeLabel = "~40 MB",
             sizeBytes = 40_600_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",
+            tier = Tier.SMALL
         ),
         Info(
             id = "vosk-model-small-0.22",
@@ -76,7 +89,8 @@ object VoskModels {
             langLabel = "Many languages, lighter accuracy",
             sizeLabel = "~45 MB",
             sizeBytes = 45_800_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-small-0.22.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-small-0.22.zip",
+            tier = Tier.SMALL
         ),
         Info(
             id = "vosk-model-small-en-in-0.4",
@@ -84,7 +98,8 @@ object VoskModels {
             langLabel = "English tuned for Indian accents",
             sizeLabel = "~40 MB",
             sizeBytes = 40_400_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip",
+            tier = Tier.SMALL
         ),
         // v131 — the bigger tiers: Large (~128 MB, phone-friendly, notably
         // more accurate than the smalls) and the Full server-grade models
@@ -96,7 +111,8 @@ object VoskModels {
             langLabel = "Higher accuracy with a dynamic graph",
             sizeLabel = "~128 MB",
             sizeBytes = 128_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip",
+            tier = Tier.LARGE
         ),
         Info(
             id = "vosk-model-en-us-0.22",
@@ -104,7 +120,8 @@ object VoskModels {
             langLabel = "Most accurate US English — large download, needs real storage & memory",
             sizeLabel = "~1.8 GB",
             sizeBytes = 1_800_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip",
+            tier = Tier.FULL
         ),
         Info(
             id = "vosk-model-en-us-0.42-gigaspeech",
@@ -112,7 +129,8 @@ object VoskModels {
             langLabel = "Newest accurate model — best on podcasts & clear speech",
             sizeLabel = "~2.3 GB",
             sizeBytes = 2_300_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.42-gigaspeech.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.42-gigaspeech.zip",
+            tier = Tier.FULL
         ),
         Info(
             id = "vosk-model-en-in-0.5",
@@ -120,7 +138,8 @@ object VoskModels {
             langLabel = "Higher accuracy for Indian accents — large download",
             sizeLabel = "~1 GB",
             sizeBytes = 1_000_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-in-0.5.zip"
+            url = "https://alphacephei.com/vosk/models/vosk-model-en-in-0.5.zip",
+            tier = Tier.FULL
         )
     )
 

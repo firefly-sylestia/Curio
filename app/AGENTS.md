@@ -859,9 +859,19 @@ app/src/main/java/com/curio/app/
   Download on a model ≥ `BIG_MODEL_BYTES` (100 MB — the Large/Full tiers)
   or one bigger than the free space (`VoskModels.availableStorageBytes`,
   `StatFs` on `filesDir`) opens a confirm AlertDialog showing required vs
-  free size — red when it won't fit ("Only X free — the download will
+  free size —  red when it won't fit ("Only X free — the download will
   likely fail") — before `VoskModelDownloads.start` runs. Small models
   with plenty of room still start instantly.
+- **v140 — offline model picker: quality-tier badges.** `VoskModels.Tier`
+  enum (SMALL/LARGE/FULL with `label` + `hint` — "fast & light" /
+  "more accurate" / "most accurate") added to `Info` (set per catalog
+  entry). Each picker row now shows a compact tinted badge between the
+  name and the subtitle — "Small · fast & light" etc — colored with the
+  existing theme-aware inks (`curioSageInk` / `curioGoldInk` /
+  `curioRoseInk`), so the accuracy ladder reads at a glance in both
+  light and dark; selected rows flip to white-on-amber. LESSON: reuse the
+  theme's ink helpers for tier/category color coding instead of raw
+  `CurioColors` constants — they stay readable on dark AND light fills.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

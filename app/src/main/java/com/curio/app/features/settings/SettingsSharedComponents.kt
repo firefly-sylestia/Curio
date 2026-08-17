@@ -49,6 +49,9 @@ import com.curio.app.data.VoskModels
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.brandRes
@@ -419,8 +422,28 @@ fun OfflineModelDialog(
                                     size = 22.dp
                                 )
                             }
-                            Column(modifier = Modifier.weight(1f)) {
+                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                 Text(model.displayName, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+                                // v140 — quality-tier badge: tier label + accuracy hint,
+                                // tinted per tier (sage = small/fast, gold = large,
+                                // rose = full/most accurate).
+                                val tierInk = when (model.tier) {
+                                    VoskModels.Tier.SMALL -> curioSageInk()
+                                    VoskModels.Tier.LARGE -> curioGoldInk()
+                                    VoskModels.Tier.FULL -> curioRoseInk()
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = if (selected) dialogRowSelectedInk().copy(alpha = 0.18f)
+                                            else tierInk.copy(alpha = 0.16f)
+                                ) {
+                                    Text(
+                                        "${model.tier.label} · ${model.tier.hint}",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                        color = if (selected) dialogRowSelectedInk() else tierInk,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                    )
+                                }
                                 Text(
                                     "${model.langLabel} · ${model.sizeLabel}",
                                     style = MaterialTheme.typography.bodySmall,

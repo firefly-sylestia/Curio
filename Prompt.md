@@ -1,32 +1,24 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: offline model picker storage usage + big-download confirm (v139)
+## Current request — COMPLETED: offline model picker quality-tier badges (v140)
 
-Follow-up to the download-manager work: the user picked the "Storage info" suggestion —
-show installed-model storage usage in the picker and warn about storage requirements
-before big downloads.
+The user picked the "Tier badges" suggestion: add a Small / Large / Full quality-tier
+badge with accuracy hints to each row of the offline model picker.
 
 ### Changes
-- **`VoskModels` (OfflineTranscriber.kt)** — three new helpers:
-  - `modelSizeBytes(context, id)` — real on-disk usage of a downloaded model (walks the
-    model dir; 0 when not installed).
-  - `availableStorageBytes(context)` — free bytes via `StatFs(filesDir)` (runCatching,
-    0 on failure).
-  - `formatModelSize(bytes)` — B / KB / MB / **GB** formatter. The existing
-    `formatFileSize` (EntryDetailScreen) caps at MB, but the Full tiers are 1–2.3 GB.
-- **Picker rows (SettingsSharedComponents `OfflineModelDialog`)**:
-  - The trailing "In use"/"Downloaded" label now shows real usage: "In use · 41.2 MB".
-  - Download button: a model ≥ `BIG_MODEL_BYTES` (100 MB — the Large/Full tiers) OR one
-    larger than the free space opens a confirm AlertDialog first (required vs free size,
-    red when it won't fit — "Only X free — the download will likely fail. Free up space
-    first."); confirming calls `VoskModelDownloads.start`. Small models with room still
-    start instantly. `pendingBigDownload` state re-added (mutableStateOf/setValue imports
-    restored after v138 removed them).
-- No change to the manager itself — pause/resume/cancel/multi and background-survival
-  from v138 stand.
+- **`VoskModels.Tier` enum** (OfflineTranscriber.kt) — `SMALL("Small", "fast & light")`,
+  `LARGE("Large", "more accurate")`, `FULL("Full", "most accurate")`; added as a
+  required `tier` field on `Info` and set per catalog entry (3 smalls → SMALL,
+  en-us-0.22-lgraph → LARGE, the three Full models → FULL). No other Info construction
+  sites; Info isn't serialized so Gson/backup are unaffected.
+- **Picker rows** (SettingsSharedComponents `OfflineModelDialog`) — between the model
+  name and the langLabel·sizeLabel subtitle, each row now shows a compact tinted badge:
+  "Small · fast & light" / "Large · more accurate" / "Full · most accurate", colored with
+  the existing theme-aware inks — `curioSageInk()` (green), `curioGoldInk()` (amber),
+  `curioRoseInk()` (rose) — fill = ink at 16% alpha; selected rows flip to white on the
+  solid amber fill. Name column got `verticalArrangement = spacedBy(3.dp)`.
 
 ### Verification
 No Gradle build in this environment (project rule — CI validates on push). On-device:
-open Settings → Recording → Offline model; a downloaded row should show real usage; tap
-Download on a Large/Full model → confirm dialog with sizes (red when low); small models
-still start immediately.
+open Settings → Recording → Offline model — each row should show its tinted tier badge,
+readable in light and dark, and white-on-amber on the selected row.

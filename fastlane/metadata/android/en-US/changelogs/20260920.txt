@@ -28,6 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Offline model picker: every model carries a quality-tier badge with an accuracy hint — Small · fast & light, Large · more accurate, Full · most accurate — tinted per tier (green / gold / rose) so the accuracy ladder reads at a glance.
 - Offline model picker: downloaded models show their real on-disk usage (e.g. "Downloaded · 41.2 MB"), and a big download (Large/Full tiers) confirms first — the dialog shows the storage it needs vs what's free, in red when it won't fit.
 - Offline model downloads: leaving the picker no longer cancels a download — transfers keep running in the background (the Settings row shows the progress), you can pause / resume a model anytime (it continues from where it stopped) or cancel it for good, and several models can download at once.
 - Offline model downloads: deleting a model removes only that model and its cached file — the others stay put (with a safety guard so the shared model folder can never be wiped).
