@@ -9351,5 +9351,3085 @@
    "Women"
   ],
   "tier": 3
+ },
+ {
+  "id": "author-aeschylus",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Aeschylus",
+  "teaser": "The father of Greek tragedy — he added a second actor to what was a one-man chorus, inventing drama as dialogue. His Oresteia is the only surviving trilogy from the ancient stage, and it takes revenge, law and mercy from myth into politics. He fought at Marathon and asked that his gravestone mention only that.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Oresteia — the trilogy that invents justice",
+   "durationMinutes": 150,
+   "instruction": "Read Agamemnon first and notice how the chorus slows everything down — that's the oldest layer of drama, the single voice that tragedy grew out of. Then watch how Aeschylus hands the story to actors and never looks back."
+  },
+  "tags": [
+   "Ancient",
+   "Greek",
+   "Tragedy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sophocles",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sophocles",
+  "teaser": "The middle of the three great tragedians, the one who perfected the form — he added the third actor and wrote Oedipus Rex, the play Aristotle called the perfect tragedy. He won the Dionysia festival more than any other playwright, at least 24 times. He also served as a general and a priest, and lived to 90 in a city that barely made old bones.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Oedipus Rex — the tragedy that defines tragedy",
+   "durationMinutes": 120,
+   "instruction": "Read Oedipus knowing the ending — the power is not the surprise but the structure, every clue a nail in the trap. Aristotle used this play to define what tragedy is, and nobody has improved the definition."
+  },
+  "tags": [
+   "Ancient",
+   "Greek",
+   "Tragedy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-euripides",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Euripides",
+  "teaser": "The iconoclast of Greek tragedy — he put women, slaves and doubt on the stage, and Athens booed him for it. His Medea kills her children onstage; his Trojan Women is a war-crime indictment; his Bacchae is a horror movie. He won the festival only five times, died in Macedonia, and after his death his plays outdrew everyone's.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Medea — the tragedy of the woman who refuses to be a victim",
+   "durationMinutes": 120,
+   "instruction": "Read Medea and notice how Euripides makes the monster the most sympathetic voice in the room. That's his whole project: taking the myth and asking what the villain was feeling."
+  },
+  "tags": [
+   "Ancient",
+   "Greek",
+   "Tragedy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-aristophanes",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Aristophanes",
+  "teaser": "The great comic playwright of Athens — crude, brilliant, and surgically political. Lysistrata has the women of Greece withhold sex to end the Peloponnesian War; The Clouds savages Socrates; The Frogs brings Aeschylus and Euripides back from the dead to duel. His comedies are the only complete picture we have of how ordinary Athenians talked and joked.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Lysistrata — the sex strike that ends a war",
+   "durationMinutes": 90,
+   "instruction": "Read Lysistrata for the jokes, then for the politics — the profanity is the point. Aristophanes could get away with mocking the city's leaders onstage because comedy was Athens's civic safety valve."
+  },
+  "tags": [
+   "Ancient",
+   "Greek",
+   "Comedy"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sappho",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sappho",
+  "teaser": "The tenth Muse, as Plato called her — a poet of Lesbos whose lyrics about love are so intense that the word 'sapphic' derives from her. Only fragments survive: one complete poem out of nine books, yet those shards are among the most loved lines in all of literature. She ran a circle of young women for whom she wrote marriage songs and love poems. The ancients ranked her with Homer.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The fragments of Sappho — the most famous broken poems in the world",
+   "durationMinutes": 60,
+   "instruction": "Read the fragments aloud — the sounds carry the feeling even where the sense breaks off. Sappho's 'He seems to me equal to the gods' is a whole philosophy of jealousy in seven lines."
+  },
+  "tags": [
+   "Ancient",
+   "Greek",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-virgil",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Virgil",
+  "teaser": "Rome's national poet — he spent eleven years on the Aeneid, the epic that gave Rome a past, a destiny and Aeneas, the founder-hero who carries his father on his back. He asked for the poem to be burned when he died; Augustus overruled him. Dante made Virgil his guide through hell, which is the highest compliment literature has ever paid.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Aeneid — Rome's founding epic",
+   "durationMinutes": 180,
+   "instruction": "Read Book II first — the fall of Troy — where Virgil's sympathy for the losers undermines his epic of winners. That tension is why the poem still lives."
+  },
+  "tags": [
+   "Ancient",
+   "Roman",
+   "Epic"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ovid",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ovid",
+  "teaser": "The poet of transformation — his Metamorphoses is a compendium of every myth in which someone becomes something else: a girl becomes a laurel, a boy becomes a flower, a weaver becomes a spider. Exiled by Augustus to the Black Sea for reasons he never dared state, he spent his last years writing poems of complaint. Shakespeare read him; everyone read him.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Metamorphoses — the book of changes",
+   "durationMinutes": 180,
+   "instruction": "Read the opening cosmogony then jump to any myth you know — Daphne, Narcissus, Pygmalion. Ovid's storytelling is the source for half of Western art's plots."
+  },
+  "tags": [
+   "Ancient",
+   "Roman",
+   "Mythology"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-horace",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Horace",
+  "teaser": "The poet of moderation — 'golden mean', 'seize the day', 'poetry is sweet and useful': his phrases are Latin proverbs we still quote. The son of a freedman, he rose to be the friend of Augustus and the emperor's poet, yet his best poems are about small pleasures: a farm, a friend, a jar of wine. His Odes are the most polished verse in Latin.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Odes of Horace — the poetry of the golden mean",
+   "durationMinutes": 120,
+   "instruction": "Read the 'Carpe diem' ode (1.11) then the Soracte ode (1.9) — winter, fire, and the shortness of life. Horace's advice is 2000 years old and still the best available."
+  },
+  "tags": [
+   "Ancient",
+   "Roman",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-catullus",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Catullus",
+  "teaser": "The first Roman poet of private feeling — he wrote about his affair with 'Lesbia' (a real married woman) in poems that swing from ecstasy to contempt, sometimes in the same line. His poem 5, 'Let us live, my Lesbia, and love', is the most famous love poem in Latin. He also wrote the rudest verse in the classical canon. He died at 30.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The poems of Catullus — Rome's first love letters",
+   "durationMinutes": 90,
+   "instruction": "Read poem 5 aloud, then poem 101, written at his brother's grave — the tenderness next to the profanity is the whole Catullus."
+  },
+  "tags": [
+   "Ancient",
+   "Roman",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-chaucer",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Geoffrey Chaucer",
+  "teaser": "The father of English poetry — he wrote The Canterbury Tales when English was still a peasant language and Latin and French were the tongues of literature. His pilgrims — the Wife of Bath, the Miller, the Pardoner — are the first real characters in English fiction. He was a courtier, diplomat and customs official; the Tales were his side project that outlived the court.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Canterbury Tales — England's first great book",
+   "durationMinutes": 240,
+   "instruction": "Start with the General Prologue and meet the pilgrims — Chaucer gives each one a face, a flaw and a story. Then read the Wife of Bath's tale, the most modern thing written before 1700."
+  },
+  "tags": [
+   "Medieval",
+   "English",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-milton",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "John Milton",
+  "teaser": "The blind poet who wrote Paradise Lost — the last great epic in the European tradition, dictated to his daughters after he went blind at 44. His Satan is the most seductive villain in literature, and his God the hardest to like; readers have argued about which side Milton was on for 350 years. He also wrote the pamphlet that argued for freedom of the press, Areopagitica.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Paradise Lost — the epic of the fallen angel",
+   "durationMinutes": 240,
+   "instruction": "Read Book I and meet Satan on the burning lake — the speech 'Better to reign in Hell than serve in Heaven' is the most famous defiance in literature. Then decide whether Milton admires him."
+  },
+  "tags": [
+   "English",
+   "Epic",
+   "17th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-donne",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "John Donne",
+  "teaser": "The metaphysical poet — he wrote love poems that argue like sermons and sermons that burn like love poems. 'No man is an island', 'for whom the bell tolls', 'death, thou shalt die': his lines are the English language's most quoted. He was a brilliant young rake who became an Anglican priest and the most famous preacher of his age. His Holy Sonnets are addressed to God with terrifying intimacy.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Holy Sonnets and love poems of John Donne",
+   "durationMinutes": 120,
+   "instruction": "Read 'The Flea' for the wit, then 'Death be not proud' for the defiance — Donne never writes one feeling when he can stack three arguments and a pun on top of it."
+  },
+  "tags": [
+   "English",
+   "Poetry",
+   "17th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-alexander-pope",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alexander Pope",
+  "teaser": "The poet of the Augustan age — tiny, sickly, Catholic in Protestant England, and the sharpest wit of his century. His Essay on Criticism gave us 'fools rush in where angels fear to tread'; his Dunciad is a masterpiece of literary revenge; his translation of Homer paid for a villa. He wrote in heroic couplets that click like a clock.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Rape of the Lock — the mock-epic of a stolen curl",
+   "durationMinutes": 90,
+   "instruction": "Read The Rape of the Lock, where a hair theft becomes a war of gods and sylphs — Pope invented the mock-epic to make a social slight eternal."
+  },
+  "tags": [
+   "English",
+   "Poetry",
+   "18th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-wordsworth",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "William Wordsworth",
+  "teaser": "The poet who made nature a religion — his Lyrical Ballads with Coleridge in 1798 is usually dated as the start of English Romanticism. He walked the Lake District for decades and wrote about daffodils, leeches and the growth of a poet's mind. He said poetry is 'emotion recollected in tranquillity'. He became poet laureate and grew conservative, which his admirers never forgave.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Lyrical Ballads — the book that started Romanticism",
+   "durationMinutes": 150,
+   "instruction": "Read 'Tintern Abbey' slowly — it is the poem where Wordsworth explains what nature did to him, and what he fears losing. Then 'I Wandered Lonely as a Cloud', which everyone knows and no one has read properly."
+  },
+  "tags": [
+   "English",
+   "Romantic",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-coleridge",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Samuel Taylor Coleridge",
+  "teaser": "The poet of the supernatural — Kubla Khan came to him in an opium dream and broke off mid-line when a visitor interrupted; The Rime of the Ancient Mariner is the greatest ballad in English. With Wordsworth he wrote Lyrical Ballads. His opium addiction and his failed marriage shadowed a mind that might have been the most original of the age. His criticism invented close reading.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Rime of the Ancient Mariner — the ballad of guilt and the albatross",
+   "durationMinutes": 120,
+   "instruction": "Read the Mariner aloud for the music — 'water, water, every where' — then read the marginal gloss Coleridge added, a second voice arguing with the poem."
+  },
+  "tags": [
+   "English",
+   "Romantic",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-byron",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Lord Byron",
+  "teaser": "The first celebrity poet — 'mad, bad, and dangerous to know', as his lover put it. He swam the Hellespont, fought for Greek independence, had a scandalous affair with his half-sister, and died of fever in Greece at 36. His Childe Harold made the brooding 'Byronic hero' the template for every romantic antihero since. His Don Juan is a comic epic that mocks everything, including himself.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Childe Harold's Pilgrimage — the poem that made Byron a celebrity",
+   "durationMinutes": 150,
+   "instruction": "Read the first canto and meet the weary wanderer — Byron's invention of himself. Then read Don Juan's first canto, where the hero of feeling turns out to be a joke."
+  },
+  "tags": [
+   "English",
+   "Romantic",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-shelley",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Percy Bysshe Shelley",
+  "teaser": "The most radical of the Romantics — atheist, vegetarian, republican, expelled from Oxford for a pamphlet against religion. His Ozymandias mocks empire in fourteen lines; his Prometheus Unbound rewrites the Greek myth as revolution. He drowned at 29 in a storm off Italy. His heart was snatched from the funeral pyre and kept by his wife Mary; it is buried in a different grave from his body.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ozymandias and the odes of Shelley",
+   "durationMinutes": 90,
+   "instruction": "Read Ozymandias three times — it is the most efficient demolition of tyrants ever written. Then 'To a Skylark' to hear the poet of radical hope."
+  },
+  "tags": [
+   "English",
+   "Romantic",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-keats",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "John Keats",
+  "teaser": "The poet who died at 25 and became the symbol of beauty's brevity — 'a thing of beauty is a joy forever'. A doctor's apprentice who chose poetry, he wrote his greatest odes in one astonishing year, then died of tuberculosis in Rome, asking that his grave read only 'Here lies one whose name was writ in water'. His letters are the most beloved in English.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The odes of Keats — to autumn, to a nightingale, to a Grecian urn",
+   "durationMinutes": 120,
+   "instruction": "Read 'Ode on a Grecian Urn' and stop at the last two lines — 'Beauty is truth, truth beauty' — then decide whether the poem believes itself. Keats called this his 'negative capability', the art of being in doubt."
+  },
+  "tags": [
+   "English",
+   "Romantic",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-tennyson",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alfred Lord Tennyson",
+  "teaser": "The voice of the Victorian age — poet laureate for 42 years, the longest ever. In Memoriam mourns his best friend with such precision that it became the age's book of grief; The Charge of the Light Brigade made a military blunder into national honor; Ulysses gives old age its most stirring speech. His poems were memorized in every schoolroom in Britain.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "In Memoriam — the poem that taught Victorians to grieve",
+   "durationMinutes": 150,
+   "instruction": "Read Ulysses first — 'to strive, to seek, to find, and not to yield' — then the opening of In Memoriam, where doubt and faith argue stanza by stanza."
+  },
+  "tags": [
+   "English",
+   "Victorian",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-robert-browning",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Robert Browning",
+  "teaser": "The poet of the dramatic monologue — he invented the form where a speaker reveals himself while talking about something else, and it changed poetry forever. 'My Last Duchess' is a murderer explaining himself; 'Fra Lippo Lippi' is a monk defending art. He eloped with Elizabeth Barrett and lived in Italy, where his poetry got sun. Difficult, brilliant, and deeply loved by those who crack him.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "My Last Duchess and the dramatic monologues of Browning",
+   "durationMinutes": 120,
+   "instruction": "Read 'My Last Duchess' twice — the duke tells you he killed his wife while sounding perfectly reasonable. Browning's trick is that the speaker always convicts himself."
+  },
+  "tags": [
+   "English",
+   "Victorian",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-elizabeth-barrett",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Elizabeth Barrett Browning",
+  "teaser": "The most famous woman poet of the Victorian age — an invalid who wrote Sonnets from the Portuguese, a sequence of love poems to the man who eloped with her, Robert Browning. 'How do I love thee? Let me count the ways' is the most quoted love line in English. She out-wrote her husband in fame during their lifetime, and campaigned against slavery and child labor.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sonnets from the Portuguese — the love sonnets she hid from her husband",
+   "durationMinutes": 90,
+   "instruction": "Read sonnet 43 — 'How do I love thee' — then sonnet 1, where she confesses she is writing them. The sequence is a diary of falling in love against all odds."
+  },
+  "tags": [
+   "English",
+   "Victorian",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-matthew-arnold",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Matthew Arnold",
+  "teaser": "The poet of Victorian doubt — 'Dover Beach' is the great poem of faith retreating, the 'melancholy, long, withdrawing roar' of the sea of belief. He was a school inspector by day and a critic by night; his essays defined what culture meant for the age. He wrote little, and that little is the age's conscience: beauty at the edge of the dark.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Dover Beach — the poem of faith's retreat",
+   "durationMinutes": 60,
+   "instruction": "Read 'Dover Beach' at dusk and listen for the withdrawing sea — Arnold wrote the Victorian crisis of faith as a sound. Then read his essay 'Culture and Anarchy', the other half of his mind."
+  },
+  "tags": [
+   "English",
+   "Victorian",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-hopkins",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Gerard Manley Hopkins",
+  "teaser": "The Jesuit priest who invented sprung rhythm — a meter so physical it sounds like drums, and so strange that his poems were published only after his death, in 1918. 'The Windhover' praises a kestrel and, secretly, Christ; 'Pied Beauty' glorifies a world of dappled, freckled, folded things. He burned his early poems when he joined the priesthood, then couldn't stop writing.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Windhover and the poems of Gerard Manley Hopkins",
+   "durationMinutes": 90,
+   "instruction": "Read 'The Windhover' aloud and let the rhythm knock — 'the achieve of, the mastery of the thing'. Hopkins's sprung rhythm is the most physical poetry in English."
+  },
+  "tags": [
+   "English",
+   "Victorian",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-housman",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "A.E. Housman",
+  "teaser": "The classicist who wrote A Shropshire Lad — a book of 63 poems about young men dying, soldiers, lovers and suicide, published in 1896 and still in print. He was a professor of Latin who refused to discuss his own poems, and his verses are simple on the surface and desolate underneath. 'When I was one-and-twenty' is the most quoted of them. He never explained why the lads keep dying.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Shropshire Lad — the poems of doomed young men",
+   "durationMinutes": 90,
+   "instruction": "Read 'When I was one-and-twenty' and feel the rhyme clicking shut like a trap. Housman's simplicity is a mask; every happy line has a graveyard under it."
+  },
+  "tags": [
+   "English",
+   "Poetry",
+   "Victorian"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-yeats",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "W.B. Yeats",
+  "teaser": "Ireland's great poet — he moved from Celtic twilight mysticism to the hard, bone-dry poetry of old age without losing a drop of magic. 'The Second Coming' — 'things fall apart; the centre cannot hold' — became the twentieth century's favorite prophecy. He loved Maud Gonne for a lifetime and made unrequited love into a poetic system. He was a senator, a mystic, and a Nobel laureate.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Second Coming and the poems of W.B. Yeats",
+   "durationMinutes": 120,
+   "instruction": "Read 'The Second Coming' and notice it was written in 1919, before the century confirmed it. Then read 'Sailing to Byzantium', the old poet's farewell to the sensual world."
+  },
+  "tags": [
+   "Irish",
+   "Poetry",
+   "Modern"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-wh-auden",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "W.H. Auden",
+  "teaser": "The poet of the age — he wrote 'Musée des Beaux-Arts', about suffering's indifference, and 'Funeral Blues' ('stop all the clocks'), the poem from Four Weddings and a Funeral. He moved from England to America on the eve of World War II and rewrote his early poems for the rest of his life, as if nothing was ever finished. His 'September 1, 1939' has 'we must love one another or die', which he later disowned.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Musée des Beaux-Arts and the poems of W.H. Auden",
+   "durationMinutes": 120,
+   "instruction": "Read 'Musée des Beaux-Arts' next to Bruegel's Fall of Icarus — Auden wrote the poem about the painting, and the painting is about everything. Then 'Funeral Blues', the saddest party poem ever."
+  },
+  "tags": [
+   "English",
+   "Modern",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-dylan-thomas",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Dylan Thomas",
+  "teaser": "The Welsh poet of intoxication — 'Do not go gentle into that good night' is the most quoted poem about dying, written for his dying father. His Under Milk Wood is a play for voices about a Welsh village; his voice was so famous he became a radio star. He drank himself to death in New York at 39, after his reading tour made him an American legend. His prose-poem A Child's Christmas in Wales is a holiday classic.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Do Not Go Gentle — and the poems of Dylan Thomas",
+   "durationMinutes": 90,
+   "instruction": "Read 'Do Not Go Gentle' aloud — the villanelle's repeated lines are a chant against death. Then read 'Fern Hill', the poem of childhood's green light."
+  },
+  "tags": [
+   "Welsh",
+   "Modern",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-philip-larkin",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Philip Larkin",
+  "teaser": "The poet of the mundane made permanent — he worked as a librarian in Hull for 30 years and wrote about Sundays, ambulances, and the moment after love. 'This Be The Verse' ('they fuck you up, your mum and dad') is his most famous; 'The Whitsun Weddings' his best. He turned down the laureateship, saying it would be 'a terrible idea'. His poems are funny, bleak, and exactly true.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Whitsun Weddings — the poems of ordinary England",
+   "durationMinutes": 90,
+   "instruction": "Read 'The Whitsun Weddings' and watch a train journey become a national portrait. Then 'An Arundel Tomb', where 'what will survive of us is love' — note the small print."
+  },
+  "tags": [
+   "English",
+   "Modern",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-seamus-heaney",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Seamus Heaney",
+  "teaser": "The poet of bogs, digging and memory — Northern Ireland's great voice, who won the Nobel for poems that turn farm work, violence and language into each other. 'Digging' is his calling card: pen in hand, his father's spade in the earth. He translated Beowulf into a modern classic and his essays are the best criticism of his generation. He is buried in his home parish of Bellaghy.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Digging and the poems of Seamus Heaney",
+   "durationMinutes": 120,
+   "instruction": "Read 'Digging' first — the poem that announces his whole project. Then 'The Grauballe Man', where a bog body becomes the Troubles, becomes myth."
+  },
+  "tags": [
+   "Irish",
+   "Modern",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-wilfred-owen",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Wilfred Owen",
+  "teaser": "The war poet who wrote the anti-war poems of World War I — 'Dulce et Decorum Est' describes a gas attack with a horror no one had put on paper. 'Anthem for Doomed Youth' counts the dead. He was killed in action a week before the armistice, at 25; his mother received the telegram on Armistice Day itself. His poetry was published posthumously and changed how war is written about.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Dulce et Decorum Est — the poem that ended the old way of war poetry",
+   "durationMinutes": 90,
+   "instruction": "Read 'Dulce et Decorum Est' and then read the Latin tag at the end — Owen is answering Horace's lie with the truth. Then 'Strange Meeting', his poem from the dead."
+  },
+  "tags": [
+   "English",
+   "War",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sassoon",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Siegfried Sassoon",
+  "teaser": "The war poet who said it in prose and verse — he survived the trenches, won the Military Cross, then threw the medal into a river and wrote a public protest against the war. His poem 'They' strips the glory from dying for England; his Memoirs of George Sherston fictionalize his own story. He outlived the war by half a century and kept writing about the men who didn't.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The war poems of Siegfried Sassoon",
+   "durationMinutes": 90,
+   "instruction": "Read 'The General' — fourteen lines that indict the staff officers who sent men to die — then 'Everyone Sang', his one poem of joy after the armistice."
+  },
+  "tags": [
+   "English",
+   "War",
+   "Poetry"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-tobias-smollett",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Tobias Smollett",
+  "teaser": "The picaresque novelist of Georgian Britain — Roderick Random and Humphry Clinker send their heroes through a Britain of inns, ships, gaols and highwaymen, narrated with a sailor's bluntness. He was a ship's surgeon, a Scot in London, and a furious polemicist. Humphry Clinker, his last novel, is a comic masterpiece in letters that sends a family around Britain and ends in happiness.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Humphry Clinker — the novel of a family tour of Britain",
+   "durationMinutes": 240,
+   "instruction": "Read the first letters and meet the family — each correspondent sees the same events differently, which is the whole comic engine. Smollett's Scots accent is the first dialect comedy in the novel."
+  },
+  "tags": [
+   "English",
+   "Novel",
+   "18th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-walter-scott",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Walter Scott",
+  "teaser": "The inventor of the historical novel — his Waverley (1814) created the form and made him the most famous novelist in Europe, so popular that his publishers went bankrupt and he spent his last years writing to pay them off. Ivanhoe gave us the romantic Middle Ages; Rob Roy gave Scotland its hero. He almost single-handedly made Scotland a tourist destination. His books outsold everyone but Byron.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ivanhoe — the novel that invented the Middle Ages",
+   "durationMinutes": 300,
+   "instruction": "Read the opening tournament scenes and feel the genre being born — nobody had put history this vividly on the page. Then read Rob Roy for the Scotland behind the romance."
+  },
+  "tags": [
+   "Scottish",
+   "Historical Novel",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-george-meredith",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "George Meredith",
+  "teaser": "The novelist of psychological comedy — The Egoist (1879) dissects a man so in love with himself that courtship becomes vivisection. He was a poet, novelist and editor who championed Hardy when Hardy was unknown. His prose is dense, his wit is dry, and his 'egoist' Sir Willoughby Patterne is one of the great comic monsters of fiction. Virginia Woolf called him a master of the unsaid.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Egoist — the comedy of the perfect gentleman",
+   "durationMinutes": 240,
+   "instruction": "Read the opening where Meredith introduces his hero as 'a gentleman of such eminent good sense' — the irony is the whole book. Then watch Clara Middleton learn to say no."
+  },
+  "tags": [
+   "English",
+   "Novel",
+   "Victorian"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-heinlein",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Robert A. Heinlein",
+  "teaser": "The dean of science fiction — Starship Troopers, Stranger in a Strange Land and The Moon Is a Harsh Mistress made him the genre's most influential mind. He wrote the first sci-fi novel to hit the bestseller lists seriously, and his ideas — libertarian, contrarian, always arguing — are still being fought over. He also wrote the classic juveniles that recruited a generation into the genre.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Moon Is a Harsh Mistress — the novel of revolution on the moon",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapter and meet Mike, the computer who wakes up — Heinlein's politics are in every sentence. Then Stranger in a Strange Land, the book that gave the 60s a vocabulary."
+  },
+  "tags": [
+   "Science Fiction",
+   "American",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-dean-koontz",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Dean Koontz",
+  "teaser": "The thriller writer who has sold over 500 million books — Watchers, Intensity and Odd Thomas mix horror, suspense and a stubborn optimism. He wrote his first novel as a young man and for years was compared to Stephen King; his voice is warmer, his monsters more often human. He has written over 100 books and still produces several a year from his California home.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Watchers — the thriller about the dog, the monster and the spy",
+   "durationMinutes": 240,
+   "instruction": "Read the opening chapters and meet Einstein the dog, who is the best character Koontz ever made. The novel is a chase, a love story and a warning about genetic meddling."
+  },
+  "tags": [
+   "Thriller",
+   "Horror",
+   "American"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-clive-barker",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Clive Barker",
+  "teaser": "The horror writer who wanted to be the next William Blake — his Books of Blood (1984) announced a new voice in horror, and his Hellraiser films came from his own novella The Hellbound Heart. He writes horror as dark fantasy, lush and philosophical, and has also directed films and painted. His Imajica is a portal fantasy of staggering invention. Stephen King called him 'the future of horror'.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Hellbound Heart and the Books of Blood",
+   "durationMinutes": 180,
+   "instruction": "Read The Hellbound Heart — the novella that became Hellraiser — and notice the beauty inside the horror. Barker's monsters are always after something philosophical."
+  },
+  "tags": [
+   "Horror",
+   "Fantasy",
+   "English"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-washington-irving",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Washington Irving",
+  "teaser": "The father of American literature — Rip Van Winkle and The Legend of Sleepy Hollow gave the young United States its first enduring myths, published in 1819. He invented the American short story, the American humorous essay, and the pen name 'Diedrich Knickerbocker'. He was America's first international literary celebrity, feted in London and Madrid. His history of New York invented a comic past for the city.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Rip Van Winkle and The Legend of Sleepy Hollow",
+   "durationMinutes": 120,
+   "instruction": "Read Rip Van Winkle and notice the politics hidden in the sleep — Rip sleeps through the Revolution and wakes in a country he doesn't recognize. Irving made the American myth and the American joke at once."
+  },
+  "tags": [
+   "American",
+   "Short Story",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-james-fenimore-cooper",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "James Fenimore Cooper",
+  "teaser": "The first great American novelist — The Last of the Mohicans (1826) invented the frontier adventure and the character of the scout, Natty Bumppo. He wrote the Leatherstocking Tales to give America a past, and in doing so created the Western. Mark Twain hated his prose and wrote a famous parody; generations of readers loved him anyway. He also wrote The Pilot, founding the sea novel.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Last of the Mohicans — the novel that invented the frontier",
+   "durationMinutes": 240,
+   "instruction": "Read the chase through the wilderness — Cooper's action set-pieces are the DNA of every Western and action movie. Then read Twain's 'Fenimore Cooper's Literary Offenses' for the funniest literary takedown ever."
+  },
+  "tags": [
+   "American",
+   "Adventure",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-william-dean-howells",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "William Dean Howells",
+  "teaser": "The dean of American letters — as editor of the Atlantic Monthly and Harper's, he championed realism when America wanted romance, publishing Twain, James and Crane. His own novels, The Rise of Silas Lapham and A Hazard of New Fortunes, are quiet masterpieces about money and conscience. He defined 'the American novel' for a generation and fought for realism as a moral duty.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Rise of Silas Lapham — the novel of the self-made man",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and watch Howells build a businessman from the inside — he was the first American novelist to take money seriously as a subject."
+  },
+  "tags": [
+   "American",
+   "Realism",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-stephen-crane",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Stephen Crane",
+  "teaser": "The boy wonder of American letters — The Red Badge of Courage, written when he was 23 and had never seen a battle, is the great novel of the Civil War, told from inside a soldier's fear. He was a war correspondent, a poet and a short-story writer who died of tuberculosis at 28. His story 'The Open Boat' is the finest account of shipwreck in English, based on his own experience of being shipwrecked.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Red Badge of Courage — the novel of fear in battle",
+   "durationMinutes": 180,
+   "instruction": "Read the first chapter and feel the dread before the battle — Crane wrote the psychology of war without ever having seen one. Then 'The Open Boat', where the sea is the subject."
+  },
+  "tags": [
+   "American",
+   "War",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-thomas-wolfe",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Thomas Wolfe",
+  "teaser": "The giant of American autobiography — Look Homeward, Angel (1929) poured his North Carolina childhood into a novel so enormous his editor had to cut it in half. You Can't Go Home Again gave the title phrase to American speech. He wrote in a flood, revised in a flood, and died at 37 of tuberculosis. His prose is huge, hungry and romantic; Faulkner called him the greatest talent of their generation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Look Homeward, Angel — the novel of the boy who must leave",
+   "durationMinutes": 300,
+   "instruction": "Read the opening — Wolfe's prose is an appetite, and the book is a feast. Then the last pages, where the hero walks away from the mountain town that made him."
+  },
+  "tags": [
+   "American",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-joseph-heller",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Joseph Heller",
+  "teaser": "The author of Catch-22 — the novel whose title became a phrase, a logic trap, and a diagnosis of bureaucracy. Published in 1961, it made war absurd and absurdity a literary mode. Heller was a bombardier in World War II; his novel took seven years and nearly broke him. His later novels never matched it, but one book of this rank is a life's work.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Catch-22 — the novel that named the trap",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and let the repetitions pile up — the book is built like the trap it describes. The phrase 'catch-22' never appears in the book; the logic does."
+  },
+  "tags": [
+   "American",
+   "War",
+   "Satire"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-richard-ford",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Richard Ford",
+  "teaser": "The chronicler of the American West and its men — his Frank Bascombe novels (The Sportswriter, Independence Day, The Lay of the Land, Let Me Be Frank With You) follow a real-estate agent through middle age with a prose of almost unbearable patience. Independence Day won the Pulitzer. His short stories are considered among the best of his generation. He edited The Granta Book of the American Short Story.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Independence Day — the novel of the American ordinary",
+   "durationMinutes": 300,
+   "instruction": "Read the opening and surrender to Bascombe's voice — Ford's genius is making a man talking to himself as gripping as any plot."
+  },
+  "tags": [
+   "American",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jane-smiley",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jane Smiley",
+  "teaser": "The novelist of American farms, horses and families — A Thousand Acres (1991), her King Lear retelling set on an Iowa farm, won the Pulitzer. Her history of American fiction, and her novel of the equestrian world, Horse Heaven, show a mind that takes huge subjects seriously. She writes with a sociologist's curiosity and a novelist's warmth. Her Moo is a campus satire with a pig at its center.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Thousand Acres — King Lear on an Iowa farm",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and feel the farm — Smiley makes the land a character. Then watch the Lear story arrive in the tractor sheds and county dinners."
+  },
+  "tags": [
+   "American",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sei-shonagon",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sei Shōnagon",
+  "teaser": "The court lady who invented the list — her Pillow Book, written around 1000 AD in Heian Japan, is a collection of lists ('Things that make one's heart beat faster'), observations, and gossip from the imperial court. It is one of the first great works of women's writing, playful, sharp and entirely personal. She served Empress Teishi and recorded her world with an eye that misses nothing.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Pillow Book — the world's first great list-maker",
+   "durationMinutes": 120,
+   "instruction": "Read the lists — 'Hateful Things', 'Splendid Things' — and feel the intimacy of a woman writing for herself a thousand years ago. Her voice is modern because it never tries to be."
+  },
+  "tags": [
+   "Japanese",
+   "Classical",
+   "Essay"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-the-brothers-grimm",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "The Brothers Grimm",
+  "teaser": "Jacob and Wilhelm Grimm collected German folk tales to save them from extinction — their Household Tales (1812) gave us Cinderella, Snow White, Rapunzel and Hansel and Gretel. The original versions are darker than the Disney retellings: the evil stepsisters' eyes are pecked out, the witch is burned. They were also pioneering linguists; Jacob's law of sound change is the foundation of historical linguistics.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Grimm's Fairy Tales — the stories before Disney",
+   "durationMinutes": 180,
+   "instruction": "Read the originals and notice what Disney removed — the violence is the point, a warning system for children in a dangerous world. Then read their introduction, the manifesto of folk tale collecting."
+  },
+  "tags": [
+   "German",
+   "Folk Tales",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-heinrich-heine",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Heinrich Heine",
+  "teaser": "The German poet of wit and exile — 'Die Lorelei' and his love lyrics were set to music by Schumann and Schubert; his prose made German satire sing. He converted from Judaism to Christianity, called it his 'ticket into European culture', and was mocked for it. His health collapsed and he spent his last eight years in a 'mattress grave' in Paris, still writing. The Nazis banned his books; the Lorelei was attributed to 'unknown'.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The poems and prose of Heinrich Heine",
+   "durationMinutes": 120,
+   "instruction": "Read 'Die Lorelei' — the poem of the siren on the Rhine — then his letters from the mattress grave, where the wit never dies even as the body does."
+  },
+  "tags": [
+   "German",
+   "Poetry",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-rousseau",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jean-Jacques Rousseau",
+  "teaser": "The philosopher who made modern feeling — his Confessions invented the memoir as self-examination; his Social Contract gave the French Revolution its slogan ('Man is born free, and everywhere he is in chains'); his Emile rethought childhood. He was a Geneva watchmaker's son who became the most controversial thinker of the Enlightenment, turning against his own friends. He died in 1778; his ideas helped light 1789.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Social Contract and the Confessions",
+   "durationMinutes": 180,
+   "instruction": "Read the opening of the Social Contract, then the first page of the Confessions — 'I have resolved on an enterprise that has no precedent'. Rousseau invented the modern self, and it is him."
+  },
+  "tags": [
+   "French",
+   "Philosophy",
+   "18th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-racine",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jean Racine",
+  "teaser": "The greatest of French tragedians — Phèdre, Andromaque and Britannicus compress Greek myth into verse of terrifying precision, where a woman's confession of love is also her death sentence. He was Louis XIV's favorite playwright, retired at the height of his fame to become royal historiographer, and wrote only two more plays after the age of 40. French actors still learn their craft on his alexandrines.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Phèdre — the tragedy of the queen who loves her stepson",
+   "durationMinutes": 150,
+   "instruction": "Read Phèdre's confession scene — Racine's alexandrines are the most controlled expression of uncontrollable feeling ever written. Every line is a trap closing."
+  },
+  "tags": [
+   "French",
+   "Tragedy",
+   "17th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mme-de-la-fayette",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mme de La Fayette",
+  "teaser": "The author of The Princess of Cleves (1678), often called the first modern novel — a court lady's story of marriage, duty and a love she refuses, told with psychological precision that feels centuries ahead of its time. Published anonymously, it scandalized and fascinated Versailles. La Fayette was a confidante of the court and wrote her masterpiece from inside the world it describes.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Princess of Cleves — the first modern novel",
+   "durationMinutes": 180,
+   "instruction": "Read the scene where the princess confesses her love to her husband — a scene no one had written before, of unbearable honesty. The novel's restraint is its power."
+  },
+  "tags": [
+   "French",
+   "Novel",
+   "17th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-alain-robbe-grillet",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alain Robbe-Grillet",
+  "teaser": "The theorist of the nouveau roman — his novels (The Erasers, Jealousy, In the Labyrinth) describe objects with obsessive precision and people barely at all. His manifesto 'For a New Novel' declared that plot, character and psychology were obsolete. He also wrote the screenplay for Last Year at Marienbad. Dense, experimental and controversial, he was the most argued-about French novelist of the 1950s and 60s.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Jealousy — the novel of the watching husband",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and notice what is described — a table, a terrace, a banana tree — and what is not: the wife's affair is built entirely from the arrangement of objects."
+  },
+  "tags": [
+   "French",
+   "Experimental",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-solzhenitsyn",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alexander Solzhenitsyn",
+  "teaser": "The writer who broke the silence of the Gulag — One Day in the Life of Ivan Denisovich (1962) described a single day in a Soviet labor camp with such plainness that it was allowed to be published, then banned. The Gulag Archipelago, his massive history of the camp system, cost him his citizenship. He won the Nobel in 1970, was exiled in 1974, returned after the USSR fell, and became a prophet of Russia's suffering.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "One Day in the Life of Ivan Denisovich — one day in the Gulag",
+   "durationMinutes": 180,
+   "instruction": "Read the first hours of the day — the cold, the bread, the count — and feel how one ordinary day contains the whole system. Solzhenitsyn's plainness is the most powerful weapon he had."
+  },
+  "tags": [
+   "Russian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-andrei-bely",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Andrei Bely",
+  "teaser": "The symbolist novelist whose Petersburg (1913) is often called the most important Russian novel of the century after Ulysses — a city, a family and a bomb plot told in prose that shimmers between verse and music. Bely was also a poet and critic who influenced everyone from Nabokov to the Futurists. Petersburg is difficult, gorgeous and prophetic: the city itself is the protagonist.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Petersburg — the novel of the city as a nervous system",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and let the prose wash over you — Bely's sentences are musical. The plot is a bomb, but the book is about the city's fever."
+  },
+  "tags": [
+   "Russian",
+   "Modernist",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-maxim-gorky",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Maxim Gorky",
+  "teaser": "The founder of socialist realism and the voice of the Russian poor — his memoir trilogy (Childhood, In the World, My Universities) is the great autobiography of poverty. He rose from orphanhood and wandering to be Lenin's friend and the Soviet Union's literary patron; his later enthusiasm for the regime that crushed his countrymen is the tragedy of his life. His play The Lower Depths is a masterpiece of the dispossessed.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "My Childhood — the autobiography of poverty",
+   "durationMinutes": 180,
+   "instruction": "Read the first chapters and meet the grandfather whose violence shaped Gorky — the memoir is the origin story of the revolution's favorite writer, and it is anything but propaganda."
+  },
+  "tags": [
+   "Russian",
+   "Memoir",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-vasily-grossman",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Vasily Grossman",
+  "teaser": "The chronicler of the Holocaust and the Soviet war — Life and Fate, his novel of the Battle of Stalingrad, was seized by the KGB in 1961 and smuggled out; it is often called the Soviet War and Peace. He was a war correspondent who filed the first eyewitness report of a Nazi extermination camp. His Everything Flows, written in secret at the end of his life, indicts the Soviet system itself.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Life and Fate — the Soviet War and Peace",
+   "durationMinutes": 360,
+   "instruction": "Read the opening chapters set in Stalingrad — Grossman writes war as a physical fact. Then the sections in the German camp, where the novel becomes a meditation on evil."
+  },
+  "tags": [
+   "Russian",
+   "War",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-unamuno",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Miguel de Unamuno",
+  "teaser": "The Spanish existentialist before existentialism — his Tragic Sense of Life argues that the hunger for immortality is the core of human feeling, and that reason cannot satisfy it. His novel Mist (Niebla) has the protagonist argue with his author about whether he exists. He was a Basque rector of Salamanca, exiled by the dictator Primo de Rivera, and his 'I do not want to die' defined the Spanish temperament in philosophy.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Mist — the novel where the character argues with his author",
+   "durationMinutes": 180,
+   "instruction": "Read the moment when Augusto discovers he is a character — the conversation with Unamuno is the most dizzying scene in Spanish fiction."
+  },
+  "tags": [
+   "Spanish",
+   "Philosophy",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-gabriela-mistral",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Gabriela Mistral",
+  "teaser": "The first Latin American to win the Nobel Prize in Literature (1945) — a Chilean poet of motherhood, grief and the landscape, writing in a voice of elemental simplicity. Her Sonnets of Death, written after her lover's suicide, made her famous at 25. She was a teacher who became a diplomat, and her poetry about children and loss is among the most beloved in Spanish. She raised a foster son who also died young.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sonnets of Death and the poems of Gabriela Mistral",
+   "durationMinutes": 90,
+   "instruction": "Read the Sonnets of Death and feel the grief made classical — Mistral's simplicity is earned. Then 'The Prayer of the Teacher', where her other vocation speaks."
+  },
+  "tags": [
+   "Chilean",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-paulo-coelho",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Paulo Coelho",
+  "teaser": "The Brazilian author of The Alchemist — a fable about following your Personal Legend that has sold over 65 million copies and been translated into more languages than almost any living writer's book. He was a songwriter and hippie who found his calling on a pilgrimage to Santiago de Compostela. His books blend mysticism, simplicity and self-help, beloved by millions and dismissed by critics, a combination he has come to enjoy.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Alchemist — the fable of the Personal Legend",
+   "durationMinutes": 120,
+   "instruction": "Read the opening pages as a fable, not a novel — the book's power is in its simplicity. The line 'when you want something, all the universe conspires' is the whole gospel."
+  },
+  "tags": [
+   "Brazilian",
+   "Fable",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-paulo-freire",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Paulo Freire",
+  "teaser": "The educator who changed how the world teaches the poor — his Pedagogy of the Oppressed (1968) argues that education is never neutral: it either liberates or domesticates. His method taught literacy by discussing the students' own reality, and it transformed adult education worldwide. He was a Brazilian who spent years in exile after the 1964 coup. His influence reached from Brazil's favelas to classrooms everywhere.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Pedagogy of the Oppressed — the book that changed education",
+   "durationMinutes": 180,
+   "instruction": "Read the first chapters and feel the argument building — Freire's 'banking model' of education is the term every teacher now uses. Then think about what it means that he wrote it in exile."
+  },
+  "tags": [
+   "Brazilian",
+   "Education",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-petrarch",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Petrarch",
+  "teaser": "The father of humanism — his sonnets to Laura invented the love poem that Europe would imitate for 400 years, and his rediscovery of Cicero's letters sparked the Renaissance. He climbed Mont Ventoux in 1336 and wrote about the view, which is sometimes called the first modern moment: a person experiencing nature for its own sake. His Canzoniere, 366 poems, made the sonnet the most durable form in European poetry.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Canzoniere — the sonnets that invented modern love poetry",
+   "durationMinutes": 120,
+   "instruction": "Read a handful of sonnets and feel the pattern of praise, absence and longing — Petrarch built the template for every love poem from Shakespeare to the present."
+  },
+  "tags": [
+   "Italian",
+   "Poetry",
+   "14th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-manzoni",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alessandro Manzoni",
+  "teaser": "The author of The Betrothed (I Promessi Sposi), the great Italian novel — a love story set in 17th-century Lombardy under Spanish rule, with plague, famine, a cowardly priest and a villain named The Unnamed. It made Italian national identity in the century before unification; Verdi's Requiem honors him. Manzoni spent decades revising it, obsessing over the Tuscan dialect that became modern Italian.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Betrothed — the novel that made Italy",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet Renzo and Lucia — then the plague chapters, which Manzoni researched from documents and which read like eyewitness reporting."
+  },
+  "tags": [
+   "Italian",
+   "Novel",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-grazia-deledda",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Grazia Deledda",
+  "teaser": "The Sardinian novelist who won the Nobel Prize in 1926 — the second woman ever to win it. Her novels of Sardinia — Canne al vento, The Mother — turn the island's poverty, superstition and landscape into tragedy of Greek weight. She was self-taught, wrote constantly from childhood, and made the island she never left a world literature. Her heroes struggle against fate with the tools of a peasant society.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Canne al vento — the novel of Sardinia and fate",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and feel the island — Deledda's Sardinia is a character, dry and ancient. Then watch the family curse unfold with the inevitability of myth."
+  },
+  "tags": [
+   "Italian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-leo-africanus",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Leo Africanus",
+  "teaser": "The Andalusian traveler who wrote Description of Africa — captured by Christian pirates in 1518 and presented to the pope, he converted and wrote the book that shaped Europe's image of Africa for centuries. Born al-Hasan al-Wazzan in Granada, raised in Fez, he traveled across the Sahara and West Africa as a diplomat and scholar. His book gave Europe its first detailed map of the continent's interior.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Description of Africa — the book that introduced Africa to Europe",
+   "durationMinutes": 180,
+   "instruction": "Read his account of Timbuktu — a city of scholars and gold that Europe had only heard of. Leo Africanus was writing from memory, in Italian, for a pope."
+  },
+  "tags": [
+   "Travel",
+   "History",
+   "16th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-amos-oz",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Amos Oz",
+  "teaser": "Israel's great novelist — A Tale of Love and Darkness is the memoir of his Jerusalem childhood and the founding of his country, and his novels (My Michael, The Same Sea) explore the personal inside the political. He was a founder of the Peace Now movement and argued for two states his whole life. His essays are among the sanest writing about the Middle East conflict. He died in 2018.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Tale of Love and Darkness — the memoir of a nation's birth",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and let the smells and streets of 1940s Jerusalem arrive — Oz writes memory as fiction and fiction as memory, and the two become one book."
+  },
+  "tags": [
+   "Israeli",
+   "Memoir",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-david-grossman",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "David Grossman",
+  "teaser": "The Israeli novelist of grief and politics — To the End of the Land follows a mother hiking the Galilee to keep her soldier son alive by not being home when the news comes. His son Uri was killed in the 2006 war, after the novel was written, and Grossman's later books (A Horse Walks into a Bar) carry that knowledge. He writes with a fury of tenderness about the cost of the conflict.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "To the End of the Land — the novel of a mother's vigil",
+   "durationMinutes": 360,
+   "instruction": "Read the opening — the mother's bargain with fate is the whole book. Grossman's prose is a storm; the novel is the most powerful thing written about the Israeli-Palestinian cost in years."
+  },
+  "tags": [
+   "Israeli",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-etgar-keret",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Etgar Keret",
+  "teaser": "The Israeli short-story writer of the absurd — his stories are two pages long, surreal, funny and devastating, often in the same paragraph. The Bus Driver Who Wanted to Be God and Suddenly, a Knock on the Door have made him one of the world's most translated contemporary writers. He also makes films with his wife; his parents were Holocaust survivors, which casts a strange light on his comedy.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Suddenly, a Knock on the Door — the stories of Etgar Keret",
+   "durationMinutes": 120,
+   "instruction": "Read 'What, of This Goldfish, Would You Wish?' — the story of a goldfish and a door-to-door wish collector that becomes about the Holocaust without ever saying so."
+  },
+  "tags": [
+   "Israeli",
+   "Short Stories",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-agnon",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "S.Y. Agnon",
+  "teaser": "The Hebrew novelist who won the Nobel Prize in 1966, sharing it with Nelly Sachs — the first Israeli to win. His novels (The Bridal Canopy, Only Yesterday) weave Jewish tradition, folktale and modern irony into a style all his own, and his story of the dog Balak in Only Yesterday is a masterpiece of satire. He lived in Jerusalem and wrote in Hebrew while the language was being reborn around him.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Only Yesterday — the novel of the land and the dog",
+   "durationMinutes": 300,
+   "instruction": "Read the sections from Balak the dog's point of view — the funniest and most savage animal narration in modern fiction, aimed at the pioneers who built the country."
+  },
+  "tags": [
+   "Israeli",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-kofi-awoonor",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Kofi Awoonor",
+  "teaser": "The Ghanaian poet and diplomat — his poetry (Rediscovery and Other Poems, Night of My Blood) carries the dirge rhythms of his Ewe people into English. He was Ghana's ambassador and a professor; his novel This Earth, My Brother is a lyric meditation on colonial and postcolonial Ghana. He was killed in the 2013 Nairobi mall attack while attending a literary festival. He was 78 and still writing.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Night of My Blood — the poems of Kofi Awoonor",
+   "durationMinutes": 90,
+   "instruction": "Read the dirges and hear the Ewe lament underneath the English — Awoonor said his poetry was a return to the songs of his people."
+  },
+  "tags": [
+   "Ghanaian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ayi-kwei-armah",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ayi Kwei Armah",
+  "teaser": "The Ghanaian novelist of postcolonial disillusion — The Beautyful Ones Are Not Yet Born (1968) follows an unnamed clerk in a corrupt Ghana, a moral witness in a country selling itself. It is the most famous African novel of its decade. Armah later turned to epic reimaginings of African history in Two Thousand Seasons. He has lived in Senegal, teaches, and remains one of the continent's most uncompromising voices.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Beautyful Ones Are Not Yet Born — the novel of corruption",
+   "durationMinutes": 180,
+   "instruction": "Read the opening night bus ride — the darkness is the country and the man's conscience at once. Armah's prose is stark, and the title's misspelling is deliberate."
+  },
+  "tags": [
+   "Ghanaian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mariama-ba",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mariama Bâ",
+  "teaser": "The Senegalese novelist whose So Long a Letter (1981) is a landmark of African feminism — a widow's letter to her best friend about polygamy, tradition and the price women pay. Written in French, it won the Noma Prize and has been translated worldwide. Bâ was a teacher, a mother of nine, and an activist who wrote her one novel and a novella before dying at 51. She wrote, she said, to give voice to the voiceless.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "So Long a Letter — the letter of the African widow",
+   "durationMinutes": 150,
+   "instruction": "Read the opening letter and feel the form — one woman writing to another, thirty years of friendship in one document. The restraint is the power."
+  },
+  "tags": [
+   "Senegalese",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-senghor",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Léopold Sédar Senghor",
+  "teaser": "The poet-president of Senegal and co-founder of Négritude, the movement that revalued Blackness in the face of colonialism. His poetry — Hosties noires, Ethiopiques — fuses French symbolist technique with African rhythm and orature. He served in the French army, was a prisoner of war, and in 1960 became Senegal's first president, stepping down voluntarily in 1980, rare among African leaders. He was the first African elected to the Académie française.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ethiopiques — the poetry of Négritude",
+   "durationMinutes": 90,
+   "instruction": "Read his poems aloud — Senghor said his poetry is a song before it is a text. The word 'Négritude' was born in a Paris café with Aimé Césaire."
+  },
+  "tags": [
+   "Senegalese",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ousmane-sembene",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ousmane Sembène",
+  "teaser": "The father of African cinema and a novelist first — his God's Bits of Wood (1960) is the novel of the 1947 railway strike in Senegal, told from a chorus of voices. Then he turned to film, making Mandabi, Xala and Moolaadé, and became the continent's greatest director. He said he made films because the majority of Africans could not read. He drove a taxi and worked as a docker to support himself before his art found him.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "God's Bits of Wood — the novel of the strike",
+   "durationMinutes": 240,
+   "instruction": "Read the opening chapters and hear the many voices — Sembène builds a community the way a film director builds a crowd. Then watch Moolaadé, his last film."
+  },
+  "tags": [
+   "Senegalese",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-cheikh-hamidou-kane",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Cheikh Hamidou Kane",
+  "teaser": "The Senegalese author of Ambiguous Adventure (1961), the classic novel of the colonial encounter — a Diallobé boy is sent to the French school and torn between his Islamic faith and the West's knowledge. It is the deepest African novel about education and identity, written while Kane was a colonial administrator who later ran Senegal's industries. The 'ambiguous adventure' is the title: every step forward is a loss.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ambiguous Adventure — the novel of the two schools",
+   "durationMinutes": 180,
+   "instruction": "Read the opening in the Diallobé village — the debate about sending children to the white school is the whole colonial question in one conversation."
+  },
+  "tags": [
+   "Senegalese",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-aminata-sow-fall",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Aminata Sow Fall",
+  "teaser": "The Senegalese novelist, the first woman from Black Africa to publish a novel (Le Revenant, 1976) — her work satirizes postcolonial society's hypocrisies with the lightness of comedy and the bite of indictment. The Beggars' Strike, her best-known novel, imagines the beggars of a capital city withdrawing their services, and the city collapses. She has worked in Senegal's Ministry of Culture and taught literature.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Beggars' Strike — the novel of the invisible economy",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and meet the beggars as a workforce — Fall imagines what happens when the poor go on strike, and the rich world stops working."
+  },
+  "tags": [
+   "Senegalese",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-alaa-al-aswany",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Alaa Al Aswany",
+  "teaser": "The Egyptian novelist and dentist whose The Yacoubian Building (2002) became the best-selling Arabic novel of its generation — a Cairo apartment building as a cross-section of Egypt, from the rooftop squatters to the senator. It was banned in parts of the Arab world and filmed. Aswany is a political novelist in the tradition of Dickens, and his essays and activism have made him a target as well as a celebrity.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Yacoubian Building — the novel of Cairo in one building",
+   "durationMinutes": 300,
+   "instruction": "Read the first chapters and meet the tenants — the building is Egypt, and every floor is a class. Aswany writes with Dickensian appetite and Egyptian sorrow."
+  },
+  "tags": [
+   "Egyptian",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ahdaf-soueif",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ahdaf Soueif",
+  "teaser": "The Egyptian-British novelist and essayist — her novel The Map of Love (1999) spans a century of Anglo-Egyptian history and was shortlisted for the Booker Prize. She is a sharp chronicler of the Arab world, from her memoir of the 2011 revolution, Cairo: My City, Our Revolution, to her essays on Palestine. She writes in English but thinks in Arabic, and her prose carries both worlds.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Map of Love — the novel of two worlds",
+   "durationMinutes": 300,
+   "instruction": "Read the opening letters between the American widow and the Egyptian woman — Soueif builds history from correspondence, and the love story is the history."
+  },
+  "tags": [
+   "Egyptian",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sadegh-hedayat",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sadegh Hedayat",
+  "teaser": "The father of the modern Iranian story — his novella The Blind Owl (1937) is one of the masterpieces of modernist fiction, a fever-dream of guilt, death and a woman's face painted on a pen-case. He wrote it in a style no Persian reader had seen, influenced by Kafka and Poe. He died by suicide in Paris in 1951; his grave in Père Lachaise is still visited by Iranians who make pilgrimages.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Blind Owl — the novella of the nightmare",
+   "durationMinutes": 150,
+   "instruction": "Read the first pages and surrender to the fever — Hedayat's narrator is confessing, and the confession is the whole book. The pen-case and the woman's face return and return."
+  },
+  "tags": [
+   "Iranian",
+   "Novella",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-forough-farrokhzad",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Forough Farrokhzad",
+  "teaser": "Iran's greatest woman poet — her four books (The Captive, The Wall, Rebellion, Another Birth) wrote female desire and rebellion in a Persian poetry that had never heard such a voice. She also directed the landmark documentary The House Is Black, about a leper colony. She died at 32 in a car accident; her poem 'Let Us Believe in the Beginning of the Cold Season' was published posthumously. Iran's literary modernism runs through her.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Another Birth — the poems of Forough Farrokhzad",
+   "durationMinutes": 90,
+   "instruction": "Read 'The Gift' and 'Another Birth' — Farrokhzad wrote the body, the street and the state of exile in a voice that made the tradition tremble."
+  },
+  "tags": [
+   "Iranian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mahmoud-darwish",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mahmoud Darwish",
+  "teaser": "Palestine's national poet — his poetry, from 'Identity Card' to the epic Memory for Forgetfulness, made exile and homeland a single ache. He was born in a village destroyed in 1948, spent decades in exile, and returned to Ramallah in 1995. His later poems, including the love poem to Israel's 'Rita', are among the most beloved in Arabic. He was the most translated Arab poet of his time and died in 2008 in Houston, of heart surgery complications.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Memory for Forgetfulness — the poem of Beirut under siege",
+   "durationMinutes": 150,
+   "instruction": "Read 'Identity Card' first, the poem that made him famous — 'Write down: I am an Arab'. Then the prose poem of the Beirut siege, coffee and bombs in one August morning."
+  },
+  "tags": [
+   "Palestinian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-adonis",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Adonis (Ali Ahmad Said)",
+  "teaser": "The Syrian poet who reinvented Arabic poetry — his modernism scandalized the tradition and his essays argued for poetry as revolution. Born Ali Ahmad Said, he took his pen name from the god of rebirth. He lived in exile in Paris and Beirut and was repeatedly named a Nobel contender. His Songs of Mihyar the Damascene, his first masterpiece, made him the most famous living Arab poet, with the arguments to prove it.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Songs of Mihyar the Damascene — the poems of the exile",
+   "durationMinutes": 150,
+   "instruction": "Read the opening songs and feel the language being remade — Adonis broke the Arabic poem's frame and let the desert and the god in."
+  },
+  "tags": [
+   "Syrian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-nizar-qabbani",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Nizar Qabbani",
+  "teaser": "The most popular Arab poet of the 20th century — his love poems, read aloud on radio and quoted at weddings, gave Arabic love poetry a modern voice. He was a Syrian diplomat who turned to verse, and his later poems of political fury ('Bread, Hashish and Moon') made him a national conscience. His office in London was bombed in 1995, killing his colleagues; he said he died then too. His Collected Works runs to volumes.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The love poems of Nizar Qabbani",
+   "durationMinutes": 120,
+   "instruction": "Read a dozen love poems and hear why every Arab wedding quotes him — then read his political poems, where the same voice turns to acid."
+  },
+  "tags": [
+   "Syrian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-kahlil-gibran",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Kahlil Gibran",
+  "teaser": "The author of The Prophet — the most translated book by an Arab writer, a collection of 26 prose poems on love, work and death that has sold over 100 million copies. Gibran was a Lebanese Maronite who emigrated to Boston and New York, wrote in English and Arabic, and became the voice of spiritual cosmopolitanism. The Prophet has been carried at weddings and funerals for a century. Critics sneer; readers keep reading.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Prophet — the book of 26 meditations",
+   "durationMinutes": 120,
+   "instruction": "Read 'On Love' and 'On Children' — the book is a series of speeches by a prophet leaving a city. Gibran's simplicity is the point; it is meant to be read at the turning points of a life."
+  },
+  "tags": [
+   "Lebanese",
+   "Prose Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-taha-hussein",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Taha Hussein",
+  "teaser": "The dean of Arabic literature — blind from age two, he became Egypt's greatest literary critic, its minister of education, and the author of The Days, the most beloved Arabic autobiography. His book On Pre-Islamic Poetry argued the Koran's Arabic could be dated by its language, and got him branded an apostate. He was a modernist who fought for education for all Egyptians; his autobiography is a triumph of will and style.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Days — the autobiography of the blind scholar",
+   "durationMinutes": 240,
+   "instruction": "Read the opening of the childhood volume — the blind boy in the village, the rote memorization, the hunger for books. Hussein wrote his own life as a novel, and it is one."
+  },
+  "tags": [
+   "Egyptian",
+   "Memoir",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-youssef-idris",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Youssef Idris",
+  "teaser": "The Egyptian short-story writer who reinvented the Arabic story — his 'The Cheapest Nights' and his plays (Al-Farafir) brought the Egyptian street, its humor and its pain, into high literature. He was a doctor who wrote about peasants, workers and the absurdity of officialdom with a voice at once earthy and experimental. He was jailed under Nasser, celebrated across the Arab world, and his stories are still taught as the model of the form.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Cheapest Nights — the stories of Youssef Idris",
+   "durationMinutes": 120,
+   "instruction": "Read 'The Cheapest Nights' — a man trying to afford a night with his wife in a Cairo of poverty and irony. Idris's humor is the doorway to his grief."
+  },
+  "tags": [
+   "Egyptian",
+   "Short Stories",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-emile-habibi",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Emile Habibi",
+  "teaser": "The Palestinian-Israeli novelist whose The Secret Life of Saeed, the Pessoptimist (1974) is the great comic novel of the Palestinian inside Israel — a narrator so naive, so unlucky and so ironically named that the satire writes itself. Habibi was a communist Knesset member for decades and a master of the absurd. The novel's title blends 'optimist' and 'pessimist'. He won the Israel Prize, which he said he accepted 'as a Palestinian'.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Secret Life of Saeed, the Pessoptimist — the novel of the inside exile",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and meet Saeed — the 'pessoptimist' who believes everything and understands nothing. The comedy is the tragedy, wearing a clown suit."
+  },
+  "tags": [
+   "Palestinian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-abdul-rahman-munif",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Abdul Rahman Munif",
+  "teaser": "The Saudi-born novelist of oil and desert — his Cities of Salt quintet, beginning in 1984, tells how the discovery of oil destroyed a Bedouin world, from the desert communities to the American oilmen. He was stripped of his Saudi citizenship for his politics and wrote in exile. His novels are among the most important Arab fiction of the century, an epic of dispossession told with the slowness of the desert.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Cities of Salt — the epic of the oil that swallowed a world",
+   "durationMinutes": 360,
+   "instruction": "Read the opening chapters in the desert town before the oil men come — Munif gives the old world its full weight so the arrival of the trucks feels like an invasion."
+  },
+  "tags": [
+   "Saudi",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-etel-adnan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Etel Adnan",
+  "teaser": "The Lebanese-American poet and painter of Sitt Marie Rose — a novel about the murder of a Lebanese woman during the civil war, told from multiple voices, which became a classic of Arabic and French literature. Adnan wrote in French, English and Arabic, painted small luminous landscapes, and at 90 became one of the most celebrated artists of her generation. Her poetry (The Arab Apocalypse) fuses the Lebanese war with cosmic vision.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sitt Marie Rose — the novel of the war's first victim",
+   "durationMinutes": 150,
+   "instruction": "Read the first section and feel the multiple voices — the novel is built like a testimony. Adnan wrote it in French; she said she needed the distance of a foreign language to tell the story."
+  },
+  "tags": [
+   "Lebanese",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-agha-shahid-ali",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Agha Shahid Ali",
+  "teaser": "The Kashmiri-American poet who brought the ghazal into English — his collections (The Half-Inch Himalayas, A Nostalgist's Map of America) mourn a homeland he could not return to. His late book The Country Without a Post Office is the great English-language poem of Kashmir. He died of brain cancer in 2001 at 52; his final volume was edited by his students. His essay 'The Ghazal in America' is the form's charter in English.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Country Without a Post Office — the poems of Kashmir",
+   "durationMinutes": 120,
+   "instruction": "Read the title poem and feel the ache of the letters that cannot be delivered — Ali made a whole country of the absence of mail."
+  },
+  "tags": [
+   "Kashmiri",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-vikram-chandra",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Vikram Chandra",
+  "teaser": "The Indian-American novelist of Bombay crime and Hindu epic — Sacred Games (2006), his 900-page novel of the Mumbai underworld, became a global bestseller and a hit Netflix series. His earlier Red Earth and Pouring Rain retells a life across centuries. He has said he thinks in Hindi, writes in English and dreams in both. He teaches at Berkeley, where he also works on computational storytelling.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sacred Games — the novel of the Bombay underworld",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet Sartaj Singh, the honest cop, and Ganesh Gaitonde, the gangster — the two voices of the novel are the two cities of Mumbai."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-rohinton-mistry",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Rohinton Mistry",
+  "teaser": "The Indian-Canadian novelist of Bombay — A Fine Balance (1995), his novel of four people struggling through the Emergency years, is often called the great Indian novel in English. Such a Long Journey and Family Matters complete a trilogy of the city. He writes in the Dickensian mode: huge casts, huge sympathies, huge sorrows. He emigrated to Canada in 1975 and writes slowly, with a perfectionist's care.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Fine Balance — the novel of four lives in Emergency India",
+   "durationMinutes": 360,
+   "instruction": "Read the opening and meet the tailor brothers, the student and the widow — Mistry builds his city one life at a time, and the balance of the title is both craft and fate."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-michael-ondaatje",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Michael Ondaatje",
+  "teaser": "The Sri Lankan-born Canadian novelist of The English Patient — the Booker-winning novel of war, love and the desert that became the Oscar-winning film. His prose is lyric and fractured; his earlier novels (Coming Through Slaughter, In the Skin of a Lion) and his memoir Running in the Family mix fact and imagination. He is also a poet, an editor and a documentary filmmaker. He moved to Canada as a teenager and never stopped moving in his work.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The English Patient — the novel of the burned man and the desert",
+   "durationMinutes": 240,
+   "instruction": "Read the opening in the Italian villa — four wounded people and a nurse, the war ending around them. Ondaatje writes memory like a wound that will not close."
+  },
+  "tags": [
+   "Canadian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-yann-martel",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Yann Martel",
+  "teaser": "The Canadian author of Life of Pi — the Booker-winning novel of a boy, a tiger and a lifeboat that sold over 15 million copies and became an Oscar-winning film. Martel wrote it after a period of frustration, wanting to write a story that would make him believe in God, and produced the great modern fable about stories themselves. His later novels (Beatrice and Virgil, The High Mountains of Portugal) continue to experiment with form.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Life of Pi — the novel of the boy and the tiger",
+   "durationMinutes": 240,
+   "instruction": "Read the opening framing — the author meeting the man who was the boy — then the lifeboat chapters, where the fable begins. The ending is the book; don't skip the animals."
+  },
+  "tags": [
+   "Canadian",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-meera-syal",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Meera Syal",
+  "teaser": "The British-Asian writer and performer — her novel Anita and Me (1996) is a coming-of-age story of a Punjabi girl in a Black Country mining village, warm and funny and exact. She co-wrote the groundbreaking sitcom Goodness Gracious Me and the film Bhaji on the Beach. She has written screenplays, plays and children's books, and her voice helped invent British-Asian comedy on television.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Anita and Me — the novel of the girl between two worlds",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and meet Meena in the village — Syal writes the comedy of identity without ever making the comedy the point."
+  },
+  "tags": [
+   "British",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-nadeem-aslam",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Nadeem Aslam",
+  "teaser": "The Pakistani-British novelist of extraordinary prose — his Season of the Rainbirds (shortlisted for the Booker) and The Wasted Vigil, about Afghanistan, are written in a style of jewelled, precise observation. Maps for Lost Lovers, his novel of honor killing, is his masterpiece of grief. He came to Britain as a child, was a biochemist, and writes slowly, one sentence at a time, with the patience of a watchmaker.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Maps for Lost Lovers — the novel of the vanished lovers",
+   "durationMinutes": 300,
+   "instruction": "Read the opening and feel the prose — Aslam describes a town, a family and an absence with the care of a man writing every sentence by hand."
+  },
+  "tags": [
+   "Pakistani",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-fatima-bhutto",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Fatima Bhutto",
+  "teaser": "The Pakistani writer and journalist — her memoir Songs of Blood and Sword tells of her family's political dynasty and the assassination of her father Murtaza; her novels The Runaways and The Splendour of Fearless Lives (New Kings of the World) chronicle young radicals and celebrity. She is a columnist and commentator whose family name opens doors that her writing keeps open on its own merits.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Songs of Blood and Sword — the memoir of the dynasty",
+   "durationMinutes": 240,
+   "instruction": "Read the opening chapters of the memoir — Bhutto writes her family's murders and myths with a journalist's clarity and a daughter's grief."
+  },
+  "tags": [
+   "Pakistani",
+   "Memoir",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-intizar-husain",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Intizar Husain",
+  "teaser": "The Pakistani novelist and short-story writer — his Basti is the great novel of partition and its aftermath, told through a man who carries the memory of the lost world. He was born in India, migrated to Pakistan in 1947, and spent a lifetime writing the migration over and over. He is considered the finest Urdu prose stylist of his generation, though he wrote little in his last years, and died in 2016.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Basti — the novel of the city that was lost",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and feel the memory — Husain's narrator carries the pre-partition town inside him. The novel is a flood of remembering, not a plot."
+  },
+  "tags": [
+   "Pakistani",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-krishna-sobti",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Krishna Sobti",
+  "teaser": "The Hindi novelist who broke every rule of the language — her fiction (Mitro Marajani, Zindaginama) writes women's desire and Punjabi speech with a ferocity no one had attempted in Hindi prose. Zindaginama is her epic of a Punjabi village through partition. She refused awards, lived her own terms, and died in 2019 at 93. Her style — colloquial, musical, unapologetic — changed Hindi fiction permanently.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Mitro Marajani — the novel of the woman who refuses",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and feel the language break its frame — Sobti wrote a woman's voice in a Hindi no novel had used. The translator's task is nearly impossible; the original is the point."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mahasweta-devi",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mahasweta Devi",
+  "teaser": "The Bengali writer and activist who spent her life with India's dispossessed — her stories of adivasis and tribals (Draupadi, The Breast Stories) are fierce, funny and unbearable. She worked as a journalist among the landless and wrote their struggles as literature, not sociology. She died in 2016 at 90, leaving the most politically charged body of fiction in modern India. Gayatri Spivak translated her with the warning that her work resists comfort.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Draupadi and the stories of Mahasweta Devi",
+   "durationMinutes": 150,
+   "instruction": "Read 'Draupadi' — the story of the tribal woman who defeats her torturer by naming herself — and feel the fury that is the engine of her work."
+  },
+  "tags": [
+   "Indian",
+   "Short Stories",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-kiran-nagarkar",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Kiran Nagarkar",
+  "teaser": "The bilingual Indian novelist (Marathi and English) of Ravan and Eddie and Cuckold — the latter, a historical novel about a Rajput prince married to the poet Mirabai, won the Sahitya Akademi Award. Nagarkar wrote with a bawdy, Rabelaisian energy that scandalized and delighted readers; his God's Little Soldier is a portrait of a religious fanatic. He lived in Mumbai, Berlin and New York, and died in 2019.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Cuckold — the novel of the prince who was a cuckold",
+   "durationMinutes": 300,
+   "instruction": "Read the opening and meet the prince — Nagarkar writes history as a marriage, and the marriage as a kingdom's fate."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-nirmal-verma",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Nirmal Verma",
+  "teaser": "The Hindi novelist of the interior — his fiction (The Red Tin Roof, A Rag Called Happiness) introduced Indian modernism, writing solitude and displacement with the precision of a European master. He translated Kafka and Hesse into Hindi, and his own stories feel haunted by them. He lived in Prague for years, and his Prague stories are among the finest short fiction in Hindi. He died in 2005.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Red Tin Roof — the stories of Nirmal Verma",
+   "durationMinutes": 120,
+   "instruction": "Read the title story and feel the quiet — Verma writes the ache of memory with a restraint that makes the ache louder."
+  },
+  "tags": [
+   "Indian",
+   "Short Stories",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sunil-gangopadhyay",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sunil Gangopadhyay",
+  "teaser": "The Bengali poet, novelist and editor who dominated Bengali letters for half a century — his poetry (Nira, Hata Nishida) and his novels (Purba-Paschim, the Sei Samay trilogy) chronicle Calcutta from the freedom struggle to the present. He founded the modernist poetry circle Krittibas and edited its magazine. He wrote more than 200 books, and his historical novel Sei Samay won the Sahitya Akademi Award. He died in 2012.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sei Samay — the novel of Calcutta in the 19th century",
+   "durationMinutes": 300,
+   "instruction": "Read the opening chapters and feel the city rising — Gangopadhyay's historical novel follows one family through a century of Calcutta's making."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sankha-ghosh",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sankha Ghosh",
+  "teaser": "The Bengali poet who was the conscience of his generation — his poems of political and personal crisis (Mukh Dheke Bichhaye, Babarer Pratham Phool) are taught in every Bengali school. He won the Jnanpith in 2016 and returned his Sahitya Akademi award in 2015 to protest the murder of writer M.M. Kalburgi, saying 'literature cannot remain silent'. He died in 2021, leaving a body of work that held a whole society accountable.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The poems of Sankha Ghosh",
+   "durationMinutes": 90,
+   "instruction": "Read his political poems and hear the calm fury — Ghosh's poetry is the conscience of a state in crisis, and he paid for it by returning his own awards."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jibanananda-das",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jibanananda Das",
+  "teaser": "The Bengali poet of the land — 'the greatest Bengali poet after Tagore', as critics say, whose Rupasi Bangla ('Bengal the Beautiful') is the most loved love poem to a land. His poetry is full of dew, paddy fields, owls and the dead. He was a professor who lived in obscurity and died in 1954 when he was hit by a tram — the same year the modernists discovered him. His notebooks revealed thousands of unpublished poems.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Rupasi Bangla — the poem of Bengal the beautiful",
+   "durationMinutes": 90,
+   "instruction": "Read 'Rupasi Bangla' and feel the dew on the paddy — Das wrote Bengal as a woman, a landscape and a grief. He died under a tram in 1954, the year fame found him."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-bibhutibhushan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Bibhutibhushan Bandyopadhyay",
+  "teaser": "The Bengali novelist of the natural world — his Pather Panchali, the novel of a boy's childhood in a Bengal village, became Satyajit Ray's debut film and the foundation of modern Indian cinema. Its sequel Aparajito and his later novels (Aranyer Din Ratri) continue the story of the earth and its people. He was a teacher who wrote about the poor with love and exactness. He died in 1950 at 56.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Pather Panchali — the novel of the song of the little road",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and feel the village — Bibhutibhushan writes childhood as the world's first experience. Ray filmed it word for word in feeling if not in plot."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sarat-chandra",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sarat Chandra Chattopadhyay",
+  "teaser": "The most read Bengali novelist after Tagore — his Devdas made the self-destructive lover a template for Indian cinema, and his Srikanta, Choritrohin and Datta write women with a sympathy rare for his time. He wrote about widows, peasants and the betrayed with a moral anger disguised as sentiment. The film industry has adapted his novels hundreds of times. He died in 1938, still the beloved of rural Bengal.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Devdas — the novel of the lover who destroys himself",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and meet Devdas — the man who cannot say yes. Sarat Chandra's novel is the ancestor of a hundred films, and the original is sharper than any of them."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-bankim-chandra",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Bankim Chandra Chatterjee",
+  "teaser": "The father of the Bengali novel — his Anandamath (1882) is the first great Indian political novel, and its song 'Vande Mataram' became India's national song. He wrote Durgeshnandini, Kapalkundala and Bishbriksha, founding the Bengali novel as a serious form. A district magistrate by day, he wrote novels that imagined a Hindu past and a national future. His work shaped the vocabulary of Indian nationalism itself.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Anandamath — the novel that gave India its national song",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and feel the famine that opens the novel — Bankim's story of monks and rebellion gave Bengal 'Vande Mataram', a song that outgrew the book."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-michael-madhusudan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Michael Madhusudan Dutt",
+  "teaser": "The Bengali poet who broke the rules — his Meghnad Badh Kavya (1861) rewrote the Ramayana from Ravana's side, the first truly modern epic in Bengali. He abandoned the classical meters and his readers, and died poor and sick in 1873, converting to Christianity and dying of a lung disease. His sonnets and his experiments with blank verse made him the bridge between Bengali tradition and European forms.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Meghnad Badh Kavya — the epic of the demon king",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and feel the heresy — Madhusudan made the demon Ravana the hero of the Ramayana, and Bengali poetry was never the same."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-vidyasagar",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ishwar Chandra Vidyasagar",
+  "teaser": "The Bengali reformer and writer who campaigned to legalize widow remarriage — his Sanskrit scholarship and his simple Bengali prose made education a mass movement. He founded schools for girls when it was scandalous, opened the first Bengali printing houses, and wrote textbooks that taught Bengal to read. He lived austerely and gave away his wealth. His fight for widows in 1856 changed Indian law and Indian hearts.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The writings of Ishwar Chandra Vidyasagar",
+   "durationMinutes": 90,
+   "instruction": "Read his biography of himself, and his textbook prose — Vidyasagar believed the plain sentence could reform a society, and he was right."
+  },
+  "tags": [
+   "Indian",
+   "Reform",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-bhisham-sahni",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Bhisham Sahni",
+  "teaser": "The Hindi novelist of partition — Tamas (1974), his novel of a single day's communal violence in 1947, is the great Hindi novel about the horror of partition, and its television adaptation caused riots. He was a Gandhian, an actor, and the brother of the actor Balraj Sahni. His stories of ordinary people in extraordinary times are the conscience of the form. He died in 2003, having written the wound that will not close.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tamas — the novel of the day the violence came",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and feel the ordinary morning — Sahni begins with a pig's carcass and ends with a city burning. The novel's restraint makes the horror unbearable."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-yashpal",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Yashpal",
+  "teaser": "The Hindi novelist of revolution — Jhutha Sach (The False Truth), his two-volume novel of partition and its aftermath, is the most comprehensive fictional account of 1947. He was a revolutionary who spent years in prison for his politics, then turned to fiction that put the era's betrayals on the page. His earlier stories are sharp, Marxist and unsentimental. He died in 1976.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Jhutha Sach — the novel of partition's aftermath",
+   "durationMinutes": 360,
+   "instruction": "Read the opening chapters and feel the momentum of history — Yashpal writes 1947 as lived by the people who paid for it. The novel's title says it all."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jainendra-kumar",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jainendra Kumar",
+  "teaser": "The Hindi novelist of the psychological — his Tyagpatra (The Resignation), about a woman's rejection of marriage, was banned for its feminism when it appeared in 1937. He was a Jain, a Gandhian and a modernist who put the inner life on the Hindi page decades before it was fashionable. His stories of women and conscience influenced the Nayi Kahani movement. He died in 1988.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tyagpatra — the novel of the woman who resigns",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and feel the defiance in the voice — Jainendra wrote a woman's refusal in 1937, and the novel was banned for it."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-phanishwar-nath-renu",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Phanishwar Nath Renu",
+  "teaser": "The Hindi novelist of the village — his Maila Aanchal (The Soiled Border, 1954) is the great 'regional novel' of Hindi, set in a Bihar village at the dawn of independence. Renu's style — dialect, gossip, songs, the whole life of a place — invented the regional voice in Hindi. He is the ancestor of every Hindi writer who has since put a real village on the page. He died in 1977.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Maila Aanchal — the novel of the village in 1947",
+   "durationMinutes": 300,
+   "instruction": "Read the opening and let the dialect wash over you — Renu wrote the village as a chorus. The translation loses the music; the original is the point."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mahadevi-verma",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mahadevi Varma",
+  "teaser": "The great Hindi poet of the Chhayavad movement and one of the four pillars of modern Hindi poetry — her verses of solitude and longing (Nihar, Rashmi, Sandhya-git) made her the voice of a generation. She was also a prose writer and an educator who ran a girls' college. Her memoir about the poet Suryakant Tripathi Nirala is a classic. She won the Jnanpith in 1982. Her poems are recited at every Hindi literary gathering.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The poems of Mahadevi Varma",
+   "durationMinutes": 90,
+   "instruction": "Read her early lyrics and feel the loneliness — Varma wrote the ache of the soul in a Hindi that was being born. She is called the Meera of the modern age."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-suryakant-tripathi-nirala",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Suryakant Tripathi Nirala",
+  "teaser": "The revolutionary Hindi poet — his Ram Ki Shakti Pooja and Saroj Smriti, written after his daughter's death, broke every rule of Hindi verse and are among the greatest poems in the language. He was a madman to his contemporaries and a god to the next generation. He lived in poverty, wrote in a fury, and died in 1961. The modern Hindi poem begins with him.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ram Ki Shakti Pooja — the poem of the war and the prayer",
+   "durationMinutes": 120,
+   "instruction": "Read the famous lines where the warriors stand in the rain — Nirala's language is a storm. Then his elegy for his daughter, the most moving Hindi poem of the century."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sumitranandan-pant",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sumitranandan Pant",
+  "teaser": "The Hindi poet of nature — his Veena (1927) made him the youngest of the Chhayavad quartet, and his later poetry turned toward the cosmic. He wrote of mountains, dawn and the soul's union with nature in a diction of delicate music. He won the Jnanpith in 1968. His verse is the closest Hindi has come to pure lyricism.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The poems of Sumitranandan Pant",
+   "durationMinutes": 90,
+   "instruction": "Read his early nature lyrics and feel the light — Pant wrote dawn like a musician. His poetry is the Chhayavad movement's purest song."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-harivansh-rai-bachchan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Harivansh Rai Bachchan",
+  "teaser": "The Hindi poet of Madhushala ('The House of Wine', 1935) — the book of 135 quatrains about wine that became the most popular Hindi poetry collection ever, memorized at every gathering. He was a professor who also wrote his autobiography in four volumes. His son is Amitabh Bachchan, who has recited his father's poems on television to millions. He died in 2003 at 95, still the most quoted Hindi poet of his age.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Madhushala — the poem of the house of wine",
+   "durationMinutes": 120,
+   "instruction": "Read the opening quatrains and feel the rhythm — Bachchan wrote wine as the symbol of all longing. Every Indian knows at least one verse of it by heart."
+  },
+  "tags": [
+   "Indian",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-dharamvir-bharati",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Dharamvir Bharati",
+  "teaser": "The Hindi novelist, poet and playwright — his novel Gunahon Ka Devta (1949) is the great Hindi love story, and his play Andha Yug, set after the Mahabharata war, is the classic of Hindi drama. He edited the magazine Dharmayug, shaping Hindi letters for decades. His prose and verse both carry the weight of dharma and desire in conflict. He died in 1997.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Gunahon Ka Devta — the novel of forbidden love",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and meet Chander and Sudha — Bharati's novel of a love that cannot be named is the most beloved Hindi novel of its generation."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mohan-rakesh",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mohan Rakesh",
+  "teaser": "The Hindi playwright who modernized Indian drama — his Ashadh Ka Ek Din (1958) about the poet Kalidasa, and Aadhe Adhure (1969), about a family and its absent father, are the landmarks of the new Hindi theatre. He was also a novelist and short-story writer of the Nayi Kahani movement. He died young, at 53, in 1972, leaving Hindi drama changed forever.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Aadhe Adhure — the play of the half-made family",
+   "durationMinutes": 150,
+   "instruction": "Read the opening scene and feel the absence — Rakesh's play is about a father who never appears and a family that is never whole."
+  },
+  "tags": [
+   "Indian",
+   "Drama",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-vijay-tendulkar",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Vijay Tendulkar",
+  "teaser": "The Marathi playwright of the uncomfortable — Ghashiram Kotwal (1972), his musical of political power and police terror, is the most performed Indian play of the century, and Sakharam Binder (1972) was banned for its frankness. He wrote about violence, caste and the cruelty of the ordinary with a fury that made audiences squirm. He died in 2008, having made the Indian stage face its own society.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Ghashiram Kotwal — the play of power and terror",
+   "durationMinutes": 150,
+   "instruction": "Read the opening songs and feel the rhythm — Tendulkar set his indictment of power to music. The play was banned and protested, and it is performed everywhere still."
+  },
+  "tags": [
+   "Indian",
+   "Drama",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-girish-karnad",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Girish Karnad",
+  "teaser": "The Kannada playwright who modernized Indian theatre — Tughlaq (1964), Hayavadana and Nagamandala draw on history and folk tales to stage the dilemmas of the modern Indian. He was also an actor, a director and a Rhodes Scholar who served as chairman of the Sangeet Natak Akademi. He died in 2019, leaving a body of plays that Indian theatre students still study as the form's foundation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Tughlaq — the play of the idealist king",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and meet the sultan — Karnad's play about the brilliant, disastrous 14th-century ruler is also a play about Nehru's India, and about every idealist since."
+  },
+  "tags": [
+   "Indian",
+   "Drama",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-badal-sircar",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Badal Sircar",
+  "teaser": "The Bengali playwright who took theatre out of the building — his Third Theatre movement performed in streets and parks, and his play Evam Indrajit (1963) is the classic of Indian existential drama. He was an engineer and urban planner by training who became the conscience of Bengali theatre. His plays about the middle-class search for meaning are still staged everywhere. He died in 2011.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Evam Indrajit — the play of the search",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and meet Indrajit — Sircar's anti-hero is every educated Indian trying to find a meaning. The play broke the fourth wall before the term was common."
+  },
+  "tags": [
+   "Indian",
+   "Drama",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mahesh-dattani",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mahesh Dattani",
+  "teaser": "India's first English-language playwright of note — his Final Solutions (1993), about communalism in a middle-class home, and Dance Like a Man (1989), about a male classical dancer, put taboo subjects on the Indian English stage. He won the Sahitya Akademi Award in 1998, the first English-language writer to do so. He also directs and has founded a theatre company in Bangalore. His plays are the modern Indian English drama's foundation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Final Solutions — the play of the two families",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and feel the tension — Dattani puts a Hindu family and a Muslim family in one room and lets history do the rest."
+  },
+  "tags": [
+   "Indian",
+   "Drama",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ruskin-bond",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ruskin Bond",
+  "teaser": "India's most beloved writer for children and adults — his stories of the Himalayan town of Landour (The Room on the Roof, Rusty and his friends) have been read by generations of Indians. He began writing at 21 and has published over 500 books, mostly about the mountains, the monsoon and the small kindnesses of small towns. He still lives in Landour, where he writes every morning, and his birthday is celebrated by readers across India.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Room on the Roof — the novel of the boy in the hills",
+   "durationMinutes": 150,
+   "instruction": "Read the opening and feel the hills — Bond writes childhood, friendship and the monsoon with a plainness that is the hardest craft of all."
+  },
+  "tags": [
+   "Indian",
+   "Children",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sudha-murty",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sudha Murty",
+  "teaser": "The Indian writer and philanthropist — her books of simple, true stories (How I Taught My Grandmother to Read, The Day I Stopped Drinking Milk) have made her one of India's most widely read authors. She was an engineer, the first woman to be hired by a major Indian auto company, and with her husband Narayana Murthy founded the Infosys Foundation, which has funded thousands of rural projects. Her writing is plain, warm and full of hard-earned wisdom.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "How I Taught My Grandmother to Read — the stories",
+   "durationMinutes": 120,
+   "instruction": "Read the title story — an old woman learning to read because her granddaughter is away. Murty writes the small moral of ordinary lives, and the small moral is the whole thing."
+  },
+  "tags": [
+   "Indian",
+   "Stories",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-chetan-bhagat",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Chetan Bhagat",
+  "teaser": "India's bestselling English novelist — Five Point Someone (2004), One Night @ the Call Center and The 3 Mistakes of My Life made him the voice of young urban India, and his novels have been adapted into blockbusters (3 Idiots, 2 States, Half Girlfriend). He writes about exams, careers, love and the IIT dream with a directness critics mock and millions read. He was an investment banker before he wrote his first book at 30.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Five Point Someone — the novel of the IIT roommates",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and meet the three roommates — Bhagat's novel about the pressure of Indian engineering college struck a nerve no one knew was there. The film adaptation is called 3 Idiots."
+  },
+  "tags": [
+   "Indian",
+   "Novel",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-amish-tripathi",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Amish Tripathi",
+  "teaser": "The Indian author who reinvented mythology for the mass market — his Shiva Trilogy (The Immortals of Meluha, The Secret of the Nagas, The Oath of the Vayuputras) has sold over 5 million copies, and his Ram Chandra series retells the Ramayana from a political angle. He was an investment banker who wrote his first novel at 37. His books' tagline — 'the myth is the message' — has made him the biggest-selling Indian English author of his generation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Immortals of Meluha — the novel that reinvented Shiva",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and meet Shiva as a tribal chief, not a god — Tripathi's trick is to make the myth historical. The trilogy made mythology India's biggest publishing trend."
+  },
+  "tags": [
+   "Indian",
+   "Mythology",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ashwin-sanghi",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Ashwin Sanghi",
+  "teaser": "The Indian thriller writer of the 'Indiana Jones' school — The Rozabal Line, Chanakya's Chant and The Krishna Key blend history, conspiracy and religion into page-turners that have sold millions. He publishes under his own name and the pen name Shawn Haigins. His novels were called 'the Indian Da Vinci Code' until reviewers realized they predate it. He writes with a historian's research and a thriller writer's pace.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Chanakya's Chant — the novel of the ancient strategist",
+   "durationMinutes": 240,
+   "instruction": "Read the opening and meet the two Chanakyas — one in 340 BC, one in the present, both plotting. Sanghi's counterpoint structure is his signature."
+  },
+  "tags": [
+   "Indian",
+   "Thriller",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-anuja-chauhan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Anuja Chauhan",
+  "teaser": "The Indian novelist of romance and advertising — The Zoya Factor (2008), Battle for Bittora and Those Pricey Thakur Girls brought Hindi-English slang ('Hinglish') into the Indian English novel with a freshness that made her an instant bestseller. She was a copywriter at JWT who wrote ads for Pepsi before turning to fiction. Her novels are funny, sharp and deeply Indian, and they made the desi romance a category.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Zoya Factor — the novel of the lucky mascot",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and meet Zoya — the advertising executive who becomes the cricket team's lucky charm. Chauhan's dialogue is the book's real subject."
+  },
+  "tags": [
+   "Indian",
+   "Romance",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-devdutt-pattanaik",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Devdutt Pattanaik",
+  "teaser": "The Indian mythologist who made mythology accessible — his books (Myth = Mithya, Jaya, Sita) decode Hindu myths for the modern reader with illustrations, wit and a comparative eye. A physician by training, he left medicine to write and lecture, and has become India's best-known public mythologist. His framework — that mythologies are cultural operating systems — has influenced business, education and design.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Myth = Mithya — the book that decodes Indian mythology",
+   "durationMinutes": 180,
+   "instruction": "Read the opening chapters on creation myths — Pattanaik's method is to ask what a myth is for, not what it means. The book changes how you see every myth afterward."
+  },
+  "tags": [
+   "Indian",
+   "Mythology",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jiddu-krishnamurti",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jiddu Krishnamurti",
+  "teaser": "The Indian philosopher who dissolved the organization founded for him — the Theosophical Society proclaimed him the World Teacher in 1911; he dissolved the Order in 1929, saying truth is a pathless land. His talks and books (Freedom from the Known, The First and Last Freedom) argue that all authority, including his own, is a cage. He spoke to packed halls for 60 years and refused every label. He died in 1986 in California.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Freedom from the Known — the book of the pathless land",
+   "durationMinutes": 150,
+   "instruction": "Read the opening chapters slowly — Krishnamurti's argument is that observation without the observer is the only freedom. He is trying to change how you read, not what you believe."
+  },
+  "tags": [
+   "Indian",
+   "Philosophy",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-swami-vivekananda",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Swami Vivekananda",
+  "teaser": "The monk who carried Hinduism to the West — his speech at the 1893 Parliament of Religions in Chicago ('Sisters and brothers of America') made him an instant celebrity. He was the chief disciple of Ramakrishna and founded the Ramakrishna Mission. His lectures and letters inspired a generation of Indians, including Gandhi and Subhas Chandra Bose. He died at 39, having spent his health in service.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The complete works of Swami Vivekananda",
+   "durationMinutes": 180,
+   "instruction": "Read his Chicago address, then his lectures on Raja Yoga — Vivekananda's voice is fire, and his 'each soul is potentially divine' remains the most quoted line in modern Hindu thought."
+  },
+  "tags": [
+   "Indian",
+   "Philosophy",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-paramahansa-yogananda",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Paramahansa Yogananda",
+  "teaser": "The yogi who brought kriya yoga to the West — his Autobiography of a Yogi (1946) has sold millions and is the most famous spiritual autobiography of the century. He moved to America in 1920 and spent 30 years lecturing, founding the Self-Realization Fellowship. Steve Jobs had copies of the book given to everyone at his memorial. Yogananda died in 1952; his body was said not to decay, which the press covered widely.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Autobiography of a Yogi — the spiritual classic",
+   "durationMinutes": 240,
+   "instruction": "Read the opening chapters on his childhood and his meeting with his guru — the book is full of miracles that the reader must weigh. Jobs gave it to everyone he cared about."
+  },
+  "tags": [
+   "Indian",
+   "Spirituality",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-apj-abdul-kalam",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "A.P.J. Abdul Kalam",
+  "teaser": "The missile man of India who became its president — his Wings of Fire, the memoir of India's space and missile programs, inspired a generation of young scientists. Born in a boat-building family in Rameswaram, he rose to lead India's nuclear and space efforts, then served as President 2002-07, spending his time with schoolchildren. He died in 2015, collapsing while lecturing to students — the death he would have chosen.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Wings of Fire — the autobiography of the missile man",
+   "durationMinutes": 240,
+   "instruction": "Read the opening chapters of his childhood in Rameswaram — Kalam writes his life as an instruction manual for young Indians. His death while teaching was the last lesson."
+  },
+  "tags": [
+   "Indian",
+   "Memoir",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-vikram-sarabhai",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Vikram Sarabhai",
+  "teaser": "The father of the Indian space program — he founded the Physical Research Laboratory and the Indian Space Research Organisation, arguing that India's rockets should serve development. He built the community science centre in Ahmedabad that bears his name and gave India its first satellite, Aryabhata. He died at 52 in 1971, and the moon's Sarabhai crater is named for him.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The life and letters of Vikram Sarabhai",
+   "durationMinutes": 180,
+   "instruction": "Read his 1962 proposal for the Indian space program — Sarabhai argued that satellites for weather and communication were not luxuries but necessities for a poor country. The argument won."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-homi-bhabha",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Homi J. Bhabha",
+  "teaser": "The architect of India's nuclear program — a Cambridge physicist who returned to India and founded the Tata Institute of Fundamental Research and the atomic energy program. His 'Bhabha scattering' is named for him. He died in the 1966 Air India crash over Mont Blanc, in which India lost its nuclear future at 56. The institute he built still leads Indian science.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The scientific papers of Homi Bhabha",
+   "durationMinutes": 120,
+   "instruction": "Read his 1944 letter to the Dorabji Tata Trust — the two-page proposal for a fundamental research institute became the blueprint for Indian science. He died in the 1966 crash that also killed his briefcase of secrets."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-srinivasa-ramanujan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Srinivasa Ramanujan",
+  "teaser": "The self-taught mathematician from Kumbakonam who astounded Cambridge — he sent 120 theorems to G.H. Hardy, who called them 'arrived at by intuition'. Hardy brought him to Trinity College; their collaboration produced the most beautiful results in number theory. Ramanujan died at 32 of tuberculosis, and his notebooks are still yielding theorems a century later. The number 1729, the taxicab number, is his most famous anecdote.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The notebooks and biography of Ramanujan",
+   "durationMinutes": 180,
+   "instruction": "Read about the letter to Hardy — 120 theorems from a clerk who had never seen a university. Then the story of 1729: 'No, it is a very interesting number; it is the smallest number expressible as the sum of two cubes in two different ways.'"
+  },
+  "tags": [
+   "Indian",
+   "Mathematics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-cv-raman",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "C.V. Raman",
+  "teaser": "The Indian physicist who won the Nobel Prize in 1930 for the Raman effect — the scattering of light that bears his name. He was the first Asian to win a Nobel in science. A Kolkata institute and the Raman Research Institute in Bangalore bear his name. He discovered the effect with a spectroscope and a mercury lamp, and announced it in 1928. He died in 1970; India celebrates National Science Day on the anniversary of his discovery.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Raman effect and the life of C.V. Raman",
+   "durationMinutes": 120,
+   "instruction": "Read about the 1928 experiment — Raman used sunlight and a telescope to discover that scattered light changes color. The Nobel came two years later. His curiosity was the instrument."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jc-bose",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jagadish Chandra Bose",
+  "teaser": "The Bengali polymath who proved plants feel — his experiments with a crescograph showed that plants respond to stimuli like animals, and his 1902 announcement of wireless signal transmission predates Marconi's patent claim. He built his own instruments, founded the Bose Institute in Kolkata, and wrote a pioneering science fiction story, 'The Runaway', in 1896. He was the first Indian scientist to be recognized internationally.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The life and experiments of Jagadish Chandra Bose",
+   "durationMinutes": 120,
+   "instruction": "Read about the crescograph — Bose measured a plant's pulse and showed it 'cries' when hurt. And his wireless work of 1895-1901, which history is still re-dating."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-meghnad-saha",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Meghnad Saha",
+  "teaser": "The Indian astrophysicist of the Saha ionization equation — the formula that explains the spectra of stars, published in 1920, which became the foundation of astrophysics. He was a radical who also worked on river engineering and founded the journal Science and Culture. The Saha Institute of Nuclear Physics in Kolkata bears his name. He died in 1956, and the equation that bears his name is still taught in every astrophysics course.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Saha equation and the life of Meghnad Saha",
+   "durationMinutes": 90,
+   "instruction": "Read about the 1920 paper — Saha derived, from a student's desk in Kolkata, the equation that lets astronomers read the temperature of stars from their light."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-satyendra-nath-bose",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Satyendra Nath Bose",
+  "teaser": "The physicist of the boson — in 1924 he sent Einstein a paper on the statistics of light quanta; Einstein translated and extended it, and the 'Bose-Einstein statistics' and the boson particle bear their names. Bose never got the Nobel, though the particle named for him did, in 2013. He worked in Dhaka and Kolkata, translating Einstein's papers and teaching physics to a generation. He died in 1974.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Bose-Einstein statistics and the life of S.N. Bose",
+   "durationMinutes": 90,
+   "instruction": "Read about the 1924 letter to Einstein — a paper rejected by one journal, sent to Einstein, translated and published. The particle named for Bose took 90 years to be confirmed, and the 2013 Nobel went to its discoverers, not to his name."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-prafulla-chandra-ray",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Prafulla Chandra Ray",
+  "teaser": "The father of Indian chemistry — his discovery of mercurous nitrite and his History of Hindu Chemistry made him a pioneer. He founded the Bengal Chemical and Pharmaceutical Works, the first Indian pharmaceutical company, and taught at Presidency College, Calcutta, for 42 years. His students included C.V. Raman and Meghnad Saha. He lived simply and donated his savings to famine relief. He died in 1944.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The life of Prafulla Chandra Ray",
+   "durationMinutes": 90,
+   "instruction": "Read about his 1896 discovery and his History of Hindu Chemistry — Ray proved Indian chemistry was ancient, and built its modern institutions. His philanthropy was as famous as his science."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-birbal-sahni",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Birbal Sahni",
+  "teaser": "The Indian botanist who founded paleobotany in India — his work on the fossil plants of the Rajmahal hills, including the discovery of the ancient plant Williamsonia sewardiana, built the Birbal Sahni Institute of Palaeobotany in Lucknow. He was a Cambridge-trained paleobotanist who returned to India and spent his life on fossils. He died in 1949 at 58, and the institute he founded still bears his name.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The fossils of Birbal Sahni",
+   "durationMinutes": 90,
+   "instruction": "Read about his fossil discoveries in the Rajmahal hills — Sahni found plants that grew 180 million years ago, when India was still part of Gondwana. His institute continues his dig."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-ms-swaminathan",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "M.S. Swaminathan",
+  "teaser": "The father of India's Green Revolution — his work bringing high-yield wheat varieties to India in the 1960s averted famine and won him the first World Food Prize in 1987. He was a plant geneticist who trained in Cambridge and worked with Norman Borlaug. He spent his later life on sustainable agriculture and farmer welfare, calling himself 'a scientist of the soil'. He died in 2023 at 98.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Green Revolution and the life of M.S. Swaminathan",
+   "durationMinutes": 120,
+   "instruction": "Read about the 1960s wheat program — Swaminathan's crossing of semi-dwarf varieties tripled India's harvest in a decade. He said the revolution must move from grain to farmers, which was his life's second act."
+  },
+  "tags": [
+   "Indian",
+   "Science",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-verghhese-kurien",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Verghese Kurien",
+  "teaser": "The milkman of India — he founded Amul and Operation Flood, the world's largest dairy development program, turning India from milk importer to the world's largest milk producer. He was a dairy engineer who fought the bureaucracy to build a cooperative movement of millions of farmers. His white revolution made India self-sufficient in milk. He won the World Food Prize in 1989 and died in 2012 at 90.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The white revolution and the life of Verghese Kurien",
+   "durationMinutes": 120,
+   "instruction": "Read about the Anand pattern — Kurien built cooperatives owned by the farmers, not the state. Operation Flood was called the world's largest development program, and it worked."
+  },
+  "tags": [
+   "Indian",
+   "Dairy",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-atal-bihari-vajpayee",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Atal Bihari Vajpayee",
+  "teaser": "The poet-politician who was India's prime minister three times — he made India a nuclear power in 1998, launched the golden quadrilateral highways and the peace bus to Lahore. A lifelong parliamentarian, he was the first non-Congress PM to serve a full term. He wrote Hindi poetry, was a mesmerizing orator, and was admired across party lines. He died in 2018; his birthday is now Good Governance Day.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The speeches and poems of Atal Bihari Vajpayee",
+   "durationMinutes": 120,
+   "instruction": "Read his 1998 speech after the nuclear tests and his Lahore bus speech — Vajpayee could be iron and silk in the same breath. His poem 'Kadam Milakar Chala' was sung at his funeral."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-lal-bahadur-shastri",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Lal Bahadur Shastri",
+  "teaser": "The small man who led India in its hardest hour — as prime minister during the 1965 war with Pakistan, he gave the slogan 'Jai Jawan Jai Kisan' (hail the soldier, hail the farmer) and led India to a ceasefire that restored the status quo. He was a Gandhi loyalist who resigned as minister twice on principle. He died in Tashkent in 1966, hours after signing the peace agreement — a death still debated.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The life of Lal Bahadur Shastri",
+   "durationMinutes": 120,
+   "instruction": "Read about the 1965 war and the Tashkent agreement — Shastri signed peace, then died in his sleep that night in Tashkent. The slogan he coined still frames Indian patriotism."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-jawaharlal-nehru",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Jawaharlal Nehru",
+  "teaser": "The first prime minister of India — a Cambridge-educated barrister who spent nine years in British prisons and then built a democratic, secular, industrial India. His Discovery of India, written in prison, shaped the nation's self-image; his letters to his daughter Indira became the classic Letters from a Father to His Daughter. He was a socialist, a democrat, and the architect of the non-aligned movement. He died in 1964.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Discovery of India — the book written in prison",
+   "durationMinutes": 300,
+   "instruction": "Read the opening chapters — Nehru wrote the book in prison in 1944, without notes, reconstructing Indian history from memory. The prose is the man: patient, luminous, inexhaustible."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sardar-patel",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sardar Vallabhbhai Patel",
+  "teaser": "The iron man of India who welded 565 princely states into one nation — as deputy prime minister after independence, he persuaded, pressured and annexed the states that Britain left behind. He was a barrister from Gujarat who organized the Bardoli satyagraha and was Gandhi's right hand. His statue of unity, the world's tallest, stands on the Narmada. He died in 1950, months after the constitution he helped write.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The life of Sardar Patel — the man who united India",
+   "durationMinutes": 180,
+   "instruction": "Read about the integration of the princely states — Patel faced 565 rulers with diplomacy and steel. He said he would 'liquidate' the states, and he did, in two years, without a war."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-subhas-chandra-bose",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Subhas Chandra Bose",
+  "teaser": "The revolutionary who raised an army to fight the British — Netaji escaped house arrest, went to Germany and then Japan, and led the Indian National Army in World War II. His slogan 'Give me blood, and I will give you freedom' and his call 'Jai Hind' remain part of Indian life. He reportedly died in a 1945 plane crash in Taiwan; the mystery of his death still fuels investigations and legend.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The speeches of Subhas Chandra Bose",
+   "durationMinutes": 150,
+   "instruction": "Read the 1944 'Give me blood' speech and the Azad Hind Radio broadcasts — Bose spoke to a nation he could not see, and his voice carried. His death in 1945 remains officially unresolved."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-bhagat-singh",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Bhagat Singh",
+  "teaser": "The revolutionary who died laughing at the gallows at 23 — he threw a bomb in the assembly to 'make the deaf hear', then used his trial as a platform, and his hunger strike in prison won rights for political prisoners. His last letters, written to his family, are among the most moving documents of the freedom struggle. He was hanged in 1931; his legend has only grown. His portrait hangs in millions of Indian homes.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The prison letters of Bhagat Singh",
+   "durationMinutes": 120,
+   "instruction": "Read his last letter to his brother — 'I have been arrested, not because I wanted to commit a crime, but because I wanted to serve my country.' He went to the gallows smiling."
+  },
+  "tags": [
+   "Indian",
+   "Revolution",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-br-ambedkar",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "B.R. Ambedkar",
+  "teaser": "The architect of the Indian constitution and the voice of the Dalits — born an untouchable, he studied at Columbia and the LSE, fought caste all his life, and wrote the constitution that banned untouchability. His Annihilation of Caste is the most radical book of Indian social thought, and his conversion to Buddhism with half a million followers in 1956 is a watershed. He died weeks later. His birthday is a national holiday.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Annihilation of Caste — the book that shook India",
+   "durationMinutes": 180,
+   "instruction": "Read the speech he was never allowed to deliver — Ambedkar's 1936 address attacks caste as a social system, not a spiritual one. The constitution he wrote banned the thing he spent his life fighting."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mother-teresa",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Mother Teresa",
+  "teaser": "The nun who became the saint of the streets of Calcutta — she founded the Missionaries of Charity in 1950 and spent 45 years serving the dying and the destitute. She won the Nobel Peace Prize in 1979 and was canonized in 2016. Her work was also criticized, and her sainthood debated; both the devotion and the debate are part of her story. She remains the most recognized face of charity in the modern world.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The writings and life of Mother Teresa",
+   "durationMinutes": 120,
+   "instruction": "Read her letters and the accounts of her work — the Nobel speech is a sermon on the 'poorest of the poor'. Her life was the argument, and the argument is still contested."
+  },
+  "tags": [
+   "Indian",
+   "Service",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-manmohan-singh",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Manmohan Singh",
+  "teaser": "The economist who opened India — as finance minister in 1991, his budget dismantled the license raj and set India on its high-growth path; as prime minister 2004-14, he presided over the boom. A Sikh economist from a village in Punjab, he was known as the 'accidental prime minister', soft-spoken and incorruptible. He died in 2024, having seen the economy he freed grow beyond all predictions.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The 1991 budget speech of Manmohan Singh",
+   "durationMinutes": 90,
+   "instruction": "Read the 1991 budget speech — the document that changed India's economy. Singh quoted Victor Hugo: 'No power on earth can stop an idea whose time has come.' The idea was reform."
+  },
+  "tags": [
+   "Indian",
+   "Politics",
+   "20th century"
+  ],
+  "tier": 1
  }
 ]
