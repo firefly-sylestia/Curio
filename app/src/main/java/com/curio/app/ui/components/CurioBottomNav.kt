@@ -10,6 +10,7 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -44,6 +46,8 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.pastelFillInk
 
 /**
  * Out-of-band handoff for the Spin page's category tint wash — published by
@@ -72,6 +76,16 @@ object CurioNavTint {
     // while Home is composed.
     var homeWash by mutableStateOf<Color?>(null)
         private set
+    // v149 — per-tab ACCENTS: the floating pill bar's ACTIVE pill wears the
+    // current page's category color (the Spin lane's accent, the Cabinet's
+    // active-filter accent, Home's rose) instead of the static secondary.
+    // Null = the page publishes none → the pill falls back to secondary.
+    var spinAccent by mutableStateOf<Color?>(null)
+        private set
+    var cabinetAccent by mutableStateOf<Color?>(null)
+        private set
+    var homeAccent by mutableStateOf<Color?>(null)
+        private set
 
     fun publishSpinWash(color: Color?) {
         spinWash = color
@@ -83,6 +97,18 @@ object CurioNavTint {
 
     fun publishHomeWash(color: Color?) {
         homeWash = color
+    }
+
+    fun publishSpinAccent(color: Color?) {
+        spinAccent = color
+    }
+
+    fun publishCabinetAccent(color: Color?) {
+        cabinetAccent = color
+    }
+
+    fun publishHomeAccent(color: Color?) {
+        homeAccent = color
     }
 }
 
@@ -222,6 +248,10 @@ fun CurioFloatingNavBar(
         routePrefix
     }
 
+    // v149 — the ACTIVE pill wears the current page's category color
+    // (published via [CurioNavTint]); null on plain pages → secondary.
+    val pageAccent = curioNavActiveAccent(selectedRoute)
+
     Box(
         modifier = modifier
             .navigationBarsPadding()
@@ -229,7 +259,15 @@ fun CurioFloatingNavBar(
     ) {
         Surface(
             shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            // v149 — the container follows the page tint dynamically
+            // (animated, theme-aware) while staying elevated.
+            color = curioFloatingNavContainer(routePrefix),
+            // v149 — dark-mode elevation: the black shadow is invisible on
+            // the near-black pages, so dark mode draws a hairline rim that
+            // defines the capsule's edge (light mode: none).
+            border = if (isCurioDarkTheme())
+                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
+            else null,
             shadowElevation = 6.dp
         ) {
             Row(
@@ -248,6 +286,7 @@ fun CurioFloatingNavBar(
                     FloatingNavPill(
                         destination = destination,
                         selected = selected,
+                        activeAccent = pageAccent,
                         onClick = {
                             // Compare the route PREFIX: the Shuffle tab is also
                             // the current screen when the deck was opened via a
@@ -283,6 +322,9 @@ fun CurioFloatingNavBar(
 private fun FloatingNavPill(
     destination: CurioBottomDestination,
     selected: Boolean,
+    // v149 — the current page's category accent (see [curioNavActiveAccent]);
+    // null → the theme's secondary (butter) with onSecondary ink.
+    activeAccent: Color?,
     onClick: () -> Unit
 ) {
     val pillWidth by animateDpAsState(
@@ -293,18 +335,20 @@ private fun FloatingNavPill(
         ),
         label = "floatingNavPillWidth"
     )
-    // v131 — the active indicator is a SOLID secondary fill with its on-color
-    // ink (the v27q selection contract — never a translucent container), so
-    // the active tab reads as a defined amber pill in light AND dark instead
-    // of the washed-out translucent container it wore before.
-    val activeInk = MaterialTheme.colorScheme.onSecondary
+    // v149 — the active indicator follows the PAGE: when the page publishes
+    // a category accent (Spin lane / Cabinet filter / Home rose) the active
+    // pill wears it with the theme-aware fill-ink contract; plain pages fall
+    // back to the solid secondary (v131). Never a translucent container.
+    val activeFill = activeAccent ?: MaterialTheme.colorScheme.secondary
+    val activeInk = if (activeAccent != null) pastelFillInk(activeAccent)
+                    else MaterialTheme.colorScheme.onSecondary
     Box(
         modifier = Modifier
             .width(pillWidth)
             .height(FloatingPillHeight)
             .clip(RoundedCornerShape(50))
             .background(
-                if (selected) MaterialTheme.colorScheme.secondary
+                if (selected) activeFill
                 else Color.Transparent
             )
             .clickable(onClick = onClick),
@@ -442,4 +486,35 @@ private fun curioNavContainerColor(routePrefix: String?): Color {
         animationSpec = tween(durationMillis = 420),
         label = "curioNavContainerColor"
     ).value
+}
+
+/**
+ * v149 — the FLOATING pill container (bottom nav bar, tour dock, pet
+ * studio bar): the current page's wash LIFTED toward the elevated surface
+ * so the pill follows the page tint dynamically while staying readable.
+ * The rail uses the RAW wash because it's edge-anchored and blends into
+ * the page; a floating pill that matched the page exactly would vanish
+ * into it. Dark mode keeps the elevated surface unchanged — the pages are
+ * near-black, so the wash adds nothing and the scheme's lightness steps
+ * already read as lift. Animated with the same 420ms tween as the rail.
+ */
+@Composable
+internal fun curioFloatingNavContainer(routePrefix: String?): Color {
+    if (isCurioDarkTheme()) return MaterialTheme.colorScheme.surfaceContainerHigh
+    val wash = curioNavContainerColor(routePrefix)
+    return lerp(wash, MaterialTheme.colorScheme.surfaceContainerHigh, 0.55f)
+}
+
+/**
+ * v149 — the floating bar's ACTIVE pill color: the current page's category
+ * accent (published by the tab screens via [CurioNavTint] — the Spin
+ * lane's accent, the Cabinet's active-filter accent, Home's rose). Null on
+ * plain pages (and non-tab routes) so the pill falls back to secondary.
+ */
+@Composable
+private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePrefix) {
+    CurioRoutes.SPIN -> CurioNavTint.spinAccent
+    CurioRoutes.CABINET -> CurioNavTint.cabinetAccent
+    CurioRoutes.HOME -> CurioNavTint.homeAccent
+    else -> null
 }

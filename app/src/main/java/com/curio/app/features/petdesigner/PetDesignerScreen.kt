@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -130,6 +131,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
 import com.curio.app.ui.theme.CurioColors
@@ -1393,7 +1395,14 @@ private fun PetStudioBottomNav(
     // consuming it again.
     Surface(
         shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        // v149 — same dynamic container as the floating nav bar (the pet
+        // page publishes no wash, so this resolves to the elevated surface
+        // with the theme-aware fallback) + a dark-mode hairline rim (the
+        // black shadow is invisible on the near-black pages).
+        color = curioFloatingNavContainer(null),
+        border = if (isCurioDarkTheme())
+            BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
+        else null,
         shadowElevation = 6.dp,
         modifier = Modifier
             .fillMaxWidth()

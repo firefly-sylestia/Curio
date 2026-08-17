@@ -286,8 +286,14 @@ fun CabinetScreen(navController: NavController) {
     // handoff — the bar lives outside the NavHost and can't read this
     // screen's state directly). Null on "All" so the bar stays plain.
     val cabinetWash = filterCat?.categoryBackgroundWash()
-    LaunchedEffect(cabinetWash) {
+    // v149 — the active filter's accent (resolved in composition —
+    // themedAccent is @Composable and can't run inside the effect).
+    val cabinetAccent = filterCat?.themedAccent()
+    LaunchedEffect(cabinetWash, cabinetAccent) {
         CurioNavTint.publishCabinetWash(cabinetWash)
+        // v149 — publish the active filter's accent so the floating nav
+        // bar's ACTIVE pill wears it on Cabinet (null on "All" → secondary).
+        CurioNavTint.publishCabinetAccent(cabinetAccent)
     }
     // The wash handoff is deliberately KEPT when the Cabinet leaves
     // composition (v8.36, mirroring Spin's publishSpinWash): while a

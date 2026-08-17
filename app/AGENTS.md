@@ -919,6 +919,28 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v150 — floating pills go THEME-AWARE + DYNAMIC (user-confirmed:
+  container follows the page tint, active pill follows the page color,
+  dark-mode elevation), plus the reveal Like/Dislike pill gets the nav-bar
+  expand/collapse animation and the picker's Manage categories floats.**
+  (1) `CurioNavTint` now also publishes per-tab ACCENTS (spin/cabinet/
+  home); `curioFloatingNavContainer(routePrefix)` lifts the page wash
+  toward the elevated surface (light mode; dark keeps surfaceContainerHigh
+  since the pages are near-black) and `curioNavActiveAccent` picks the
+  page's accent. `CurioFloatingNavBar` container = the dynamic tint
+  (animated 420ms), active pill = page accent + `pastelFillInk` (fallback
+  secondary/onSecondary), and every floating pill bar (nav, tour dock,
+  pet studio) draws a hairline `BorderStroke(1.dp, White@10%)` rim in
+  dark mode — the black shadow is invisible on the near-black pages
+  (`curioDarkGlow` was retired in v30, so a rim replaces the old glow).
+  (2) Reveal `SentimentSegment` mirrors `FloatingNavPill`: icons at rest
+  (52dp), active springs to 96dp with the label slide-out, same spring.
+  (3) Picker sheet's Manage categories TextButton → floating pill. Also
+  fixed the CI break: `boardHasContent` was declared INSIDE the collage
+  Box but read outside it (the Box closes before the pin zone) — hoisted
+  to the canvas top. LESSON: publish page COLORS (not just washes) when
+  an overlay pill should wear them; and a val used across sibling scopes
+  must live at the shared parent scope.
 - **v149 — (1) progress editor REVERTED to the ring design, keeping only
   the page-count EDITING improvement; (2) saved-entry SHARE gets a
   preview sheet.** The user: "revert the progress ui — i only meant you to

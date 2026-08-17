@@ -12,12 +12,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -2181,7 +2186,9 @@ private fun verbIcon(verb: String): String = when (verb.lowercase().trim()) {
  *  nav's floating pill bar: a raised capsule carrying the two sentiment
  *  segments. The active segment fills with the category accent (the v27q
  *  solid-selection rule); inactive segments stay transparent on the
- *  capsule. */
+ *  capsule. v149 — the segments animate EXACTLY like the nav bar's pills:
+ *  icons at rest, the ACTIVE segment springs wider and slides its label
+ *  out, the deselected one collapses back to its icon. */
 @Composable
 private fun RevealSentimentPill(
     sentiment: String?,
@@ -2198,6 +2205,11 @@ private fun RevealSentimentPill(
         Surface(
             shape = RoundedCornerShape(50),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            // v149 — dark-mode elevation: the black shadow is invisible on
+            // the near-black reveal pages, so dark mode draws a hairline rim.
+            border = if (isCurioDarkTheme())
+                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
+            else null,
             shadowElevation = 6.dp
         ) {
             Row(
@@ -2226,9 +2238,18 @@ private fun RevealSentimentPill(
     }
 }
 
-/** One segment inside [RevealSentimentPill]: the active state fills with the
- *  category accent + on-accent ink — the same solid-selection contract as
- *  the nav pill bar's active indicator. */
+// v149 — sentiment segment geometry, mirroring the nav bar's pill sizes
+// (slightly shorter since these are compact sentiment chips).
+private val RevealSentimentIconWidth = 52.dp
+private val RevealSentimentExpandedWidth = 96.dp
+private val RevealSentimentHeight = 48.dp
+
+/** One segment inside [RevealSentimentPill] — v149: mirrors the floating
+ *  nav bar's expand-on-active pill: icons at rest (52dp), the ACTIVE
+ *  segment springs wider and slides its label out (same spring + label
+ *  slide-out, exit instant), the deselected one collapses back to its
+ *  icon. Active fill = the category accent (v27q solid-selection) +
+ *  on-accent ink. */
 @Composable
 private fun SentimentSegment(
     icon: String,
@@ -2238,29 +2259,48 @@ private fun SentimentSegment(
     ink: Color,
     onClick: () -> Unit
 ) {
+    val pillWidth by animateDpAsState(
+        targetValue = if (active) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
+        animationSpec = spring(
+            dampingRatio = 0.75f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "revealSentimentWidth"
+    )
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (active) accent else Color.Transparent
+        color = if (active) accent else Color.Transparent,
+        modifier = Modifier
+            .width(pillWidth)
+            .height(RevealSentimentHeight)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
             CurioIcon(
                 name = icon,
                 contentDescription = label,
                 tint = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 17.dp
+                size = 20.dp
             )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = if (active) FontWeight.ExtraBold else FontWeight.SemiBold
-                ),
-                color = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // v149 — the nav bar recipe: label slides out for the active
+            // segment, vanishes instantly when deselected.
+            AnimatedVisibility(
+                visible = active,
+                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ink,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                )
+            }
         }
     }
 }

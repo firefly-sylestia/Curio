@@ -586,6 +586,14 @@ private fun MoodBoardCanvas(
     // the × must never silently throw away a saved image (same protection as
     // the take-tab × in the universal editor).
     var pendingRemoveTileId by remember { mutableStateOf<Int?>(null) }
+    // v145 — "something on the board" drives BOTH the Quote chip's position
+    // and the Clear-board button's visibility: empty board → the chip sits
+    // at the Clear-board spot (16dp), and once content is added the Clear
+    // button appears there and the chip moves up above it (88dp). Declared
+    // at the canvas top so the collage layer AND the Clear button — which
+    // live in SIBLING scopes (the collage Box closes before the pin zone) —
+    // can both read it.
+    val boardHasContent = tiles.isNotEmpty() || quoteState?.quotes?.isNotEmpty() == true
     // In-place tile zoom: double-tap springs the image up over the canvas —
     // no separate dialog page. Pinch/pan continue on the zoom overlay.
     // v7.19 — scale + pan animate inside [MoodBoardZoomOverlay] now
@@ -1007,13 +1015,6 @@ private fun MoodBoardCanvas(
                         }
                     )
                 }
-
-                // v145 — "something on the board" drives BOTH the Quote
-                // chip's position and the Clear-board button's visibility:
-                // empty board → the chip sits at the Clear-board spot (16dp),
-                // and once content is added the Clear button appears there
-                // and the chip moves up above it (88dp).
-                val boardHasContent = tiles.isNotEmpty() || quoteState?.quotes?.isNotEmpty() == true
 
                 // ── Floating "Add quote" chip — bottom-left, mirroring
                 // the Add-images button on the right. ────────────────────

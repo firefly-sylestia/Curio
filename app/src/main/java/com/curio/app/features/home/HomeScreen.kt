@@ -244,8 +244,11 @@ fun HomeScreen(navController: NavController) {
     // default) so the Scaffold-level bottom nav blends with Home even
     // without a lane — a plain-surface slot behind the floating pill read
     // as a visible strip (v125).
-    LaunchedEffect(homeBg) {
+    LaunchedEffect(homeBg, heroFill) {
         CurioNavTint.publishHomeWash(homeBg)
+        // v149 — publish Home's rose accent so the floating nav bar's ACTIVE
+        // pill wears it (falls back to secondary on pages without one).
+        CurioNavTint.publishHomeAccent(heroFill)
     }
     val displayName = remember { AppPreferences.getDisplayName(context) }
     // Saved-shelf unsave confirmation — set when the user taps the remove

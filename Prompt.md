@@ -47,7 +47,36 @@ quote cards at their true size and spot; (3) open the expanded saved board — s
 board on a board with images + quotes — confirm text mentions both, all wiped;
 (6) empty full-screen board — Quote chip at bottom; add an image — chip moves up.
 
-## Current request — v149: (1) revert the progress UI redesign, keep only better page-count editing; (2) new saved-entry share UI with preview
+## Current request — v150: theme-aware dynamic floating pills + reveal like/dislike animation + picker Manage-categories pill (+ CI fix)
+
+User: "fix that [CI: boardHasContent unresolved] and also theme aware dynamic floating
+nav pill and all floating pill. also make the manage category option in category picker
+screen floating pill too." Asked for clarification — user picked: (a) active pill follows
+the page's color, (b) dark-mode elevation glow, (c) pill container follows the page
+tint; scope = bottom pill bars AND the reveal like/dislike pill, which should animate
+like the home nav bar (expand-on-active collapse).
+
+### CI fix
+`GalleryWallFormat.kt:1132 boardHasContent` unresolved: the v145 val was declared
+INSIDE the collage Box (near the Quote chip) but the Clear-board usage sits AFTER the
+Box closes (line 1096 closes it before the pin zone). Hoisted the val to the canvas
+top (both usages are siblings under MoodBoardCanvas).
+
+### Changes
+- CurioBottomNav.kt: CurioNavTint +spinAccent/cabinetAccent/homeAccent publishers;
+  `curioFloatingNavContainer(routePrefix)` (light: lerp(wash, surfaceContainerHigh,
+  0.55); dark: surfaceContainerHigh — pages are near-black); `curioNavActiveAccent`;
+  bar container = dynamic tint, dark hairline rim (BorderStroke White@10% —
+  curioDarkGlow is a retired no-op), active pill = page accent + pastelFillInk.
+- Home/Spin/Cabinet publish their accents (Cabinet's themedAccent resolved in
+  composition — @Composable can't run inside LaunchedEffect).
+- CurioNavHost tour dock + PetDesigner studio bar: same dynamic container + dark rim.
+- TopicRevealScreen: SentimentSegment mirrors FloatingNavPill (52dp rest, 96dp active,
+  spring 0.75/MediumLow, label slide-out), capsule gets the dark rim.
+- SpinScreen: picker sheet's Manage categories TextButton → floating pill.
+
+## Earlier completed request (v149)
+(1) revert the progress UI redesign, keep only better page-count editing; (2) new saved-entry share UI with preview
 
 The user: "lets add a proper new share for saved entries with preview and a new share
 ui, also revert the progress ui and i only meant you to change the page count look and

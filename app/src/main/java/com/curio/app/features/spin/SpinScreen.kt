@@ -23,6 +23,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -765,8 +766,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // category's wash, so the page reads in the deck's mixed color story.
     val pageWash = if (isMixedDeck) CurioMixedDeck.mixedDeckWash(deckAccent)
                    else deckCat.categoryBackgroundWash()
-    LaunchedEffect(pageWash) {
+    LaunchedEffect(pageWash, deckAccent) {
         CurioNavTint.publishSpinWash(pageWash)
+        // v149 — publish the deck's accent so the floating nav bar's ACTIVE
+        // pill wears the lane color on Spin (mixed decks publish the blend).
+        CurioNavTint.publishSpinAccent(deckAccent)
     }
     // Keep the last published wash while the shared-element transition leaves
     // Spin. Clearing it here would make the Scaffold nav bar fall back to the
@@ -4701,22 +4705,42 @@ private fun CategoryPickerSheet(
                             }
                         }
                     } else {
-                        TextButton(
+                        // v149 — "Manage categories" floats as a pill over
+                        // the sheet's bottom: the app's pill language (rounded
+                        // 50, elevated surface, icon + label centered, dark
+                        // hairline rim) instead of a flat full-width TextButton.
+                        Surface(
                             onClick = onBrowseAll,
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            border = if (isCurioDarkTheme())
+                                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
+                            else null,
+                            shadowElevation = 6.dp,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
                         ) {
-                            CurioIcon(CurioIcons.DragHandle, null, tint = MaterialTheme.colorScheme.onSurface, size = 18.dp)
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                // v26 — renamed; now opens Manage Categories.
-                                // v90 — theme-aware neutral ink (the old scheme
-                                // primary read as a pale pink link on the sheet).
-                                text = "Manage categories",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CurioIcon(
+                                    CurioIcons.DragHandle, null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    size = 18.dp
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    // v26 — renamed; now opens Manage Categories.
+                                    // v90 — theme-aware neutral ink (the old scheme
+                                    // primary read as a pale pink link on the sheet).
+                                    text = "Manage categories",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
 
