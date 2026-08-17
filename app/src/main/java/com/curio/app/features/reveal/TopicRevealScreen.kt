@@ -11,6 +11,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -2262,16 +2263,31 @@ private fun SentimentSegment(
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (active) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
+        // v155 — same near-critical damping as the nav bar: no settle bounce.
         animationSpec = spring(
-            dampingRatio = 0.75f,
+            dampingRatio = 0.9f,
             stiffness = Spring.StiffnessMediumLow
         ),
         label = "revealSentimentWidth"
     )
+    // v155 — fill + icon tint fade like the nav bar (no hard color snaps).
+    val fillColor by animateColorAsState(
+        targetValue = accent.copy(alpha = if (active) 1f else 0f),
+        animationSpec = spring(
+            dampingRatio = 0.9f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "revealSentimentFill"
+    )
+    val iconTint by animateColorAsState(
+        targetValue = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        label = "revealSentimentIconTint"
+    )
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (active) accent else Color.Transparent,
+        color = fillColor,
         modifier = Modifier
             .width(pillWidth)
             .height(RevealSentimentHeight)
@@ -2284,14 +2300,15 @@ private fun SentimentSegment(
             CurioIcon(
                 name = icon,
                 contentDescription = label,
-                tint = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = iconTint,
                 size = 26.dp
             )
             // v149 — the nav bar recipe: label slides out for the active
-            // segment, vanishes instantly when deselected.
+            // segment, vanishes instantly when deselected. v155 — the fade
+            // tracks the segment's expansion (240ms FastOutSlowIn).
             AnimatedVisibility(
                 visible = active,
-                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
+                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(240, easing = FastOutSlowInEasing)),
                 exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
             ) {
                 Text(

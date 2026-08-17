@@ -919,6 +919,27 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v155 — light-mode nav capsule finally shows the page tint + pill
+  animations smoothed.** User: "the active indicator gets the theme
+  dynamic color but in light mode the background of it doesn't so make it
+  get the background tint", and the animations "feel clanky sometimes —
+  make it even more smoother". (1) `curioFloatingNavContainer`'s light-
+  mode lift was `lerp(wash, surfaceContainerHigh, 0.55)` — 55% toward the
+  parchment elevated surface washed the page tint out completely, so the
+  capsule read as a plain cream bar behind the colored pill; now 0.30 so
+  the tint shows while it still reads lifted (dark unchanged). LESSON:
+  a lerp "lift" toward the elevated surface can silently erase a subtle
+  page tint — the pill gets the color while the background loses it.
+  (2) Smoother pills (nav bar + reveal Like/Dislike, both the same
+  recipe): width spring damping 0.75 → 0.9 (the old one overshot and
+  bounced on settle); the active fill now FADES via
+  `animateColorAsState(activeFill.copy(alpha = …))` synced to the same
+  spring instead of snapping on/off; the icon tint crossfades
+  (tween 200 FastOutSlowIn); the label's fade tracks the pill's
+  expansion (tween 160 → 240 FastOutSlowIn; exit stays instant per
+  v125). LESSON: underdamped springs + hard color snaps read as
+  mechanical pops; fade the fill/tint with the same spec as the width
+  morph and near-critically damp the spring.
 - **v153 — nav-bar → reveal sentiment-pill morph REVERTED (the bigger
   pill stays).** User: "revert this just keep the size large but revert
   the shared morph one". The v151 shared-element morph (the nav bar's

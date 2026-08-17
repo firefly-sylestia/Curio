@@ -1,6 +1,30 @@
 # Prompt.md — Request log
 
-## Current request — reveal Like/Dislike pill matches the bigger 60dp nav-bar pill
+## Current request — light-mode nav capsule tint + smoother pill animations
+
+User: "the active indicator gets the theme dynamic color but in light mode the
+background of it doesn't so make it get the background tint. and also the
+animations feels clanky sometimes make it even more smother".
+
+### Background tint (light mode)
+`curioFloatingNavContainer` lifted the page wash 55% toward the light theme's
+parchment `surfaceContainerHigh`, which erased the tint — the capsule read as a
+plain cream bar behind the colored active pill. Now `lerp(wash, surfaceContainerHigh, 0.30)`
+so the page tint shows through while still lifted above the page. Dark mode
+unchanged (pages are near-black; wash adds nothing). Affects the bottom nav,
+tour dock and pet studio bars (all share the container function).
+
+### Smoother animations (nav bar pills + reveal Like/Dislike segments)
+- Width spring damping 0.75 → 0.9 (near-critical — no settle bounce).
+- Active fill fades via `animateColorAsState(activeFill.copy(alpha = …))`
+  synced to the width spring instead of snapping on/off.
+- Icon tint crossfades (tween 200 FastOutSlowIn).
+- Label fade tween 160 → 240 FastOutSlowIn so it tracks the pill's expansion
+  (exit stays instant per v125).
+
+Docs: changelog FIX line, AGENTS.md v155 note, Prompt.md. Committed + pushed.
+
+## Earlier completed request — reveal Like/Dislike pill matches the bigger 60dp nav-bar pill
 
 Follow-up to the morph revert: "Make the reveal Like/Dislike pill match the
 bigger 60dp nav-bar pill size."

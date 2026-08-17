@@ -2,6 +2,7 @@ package com.curio.app.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -330,8 +331,10 @@ private fun FloatingNavPill(
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+        // v155 — damping 0.75 → 0.9: the old spring overshot and bounced on
+        // settle ("clanky"); near-critical damping glides to rest.
         animationSpec = spring(
-            dampingRatio = 0.75f,
+            dampingRatio = 0.9f,
             stiffness = Spring.StiffnessMediumLow
         ),
         label = "floatingNavPillWidth"
@@ -343,15 +346,28 @@ private fun FloatingNavPill(
     val activeFill = activeAccent ?: MaterialTheme.colorScheme.secondary
     val activeInk = if (activeAccent != null) pastelFillInk(activeAccent)
                     else MaterialTheme.colorScheme.onSecondary
+    // v155 — the fill fades in/out (alpha) synced to the width spring
+    // instead of snapping on/off, and the icon tint crossfades — no hard
+    // color pops on tab switch.
+    val fillColor by animateColorAsState(
+        targetValue = activeFill.copy(alpha = if (selected) 1f else 0f),
+        animationSpec = spring(
+            dampingRatio = 0.9f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "floatingNavPillFill"
+    )
+    val iconTint by animateColorAsState(
+        targetValue = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        label = "floatingNavPillIconTint"
+    )
     Box(
         modifier = Modifier
             .width(pillWidth)
             .height(FloatingPillHeight)
             .clip(RoundedCornerShape(50))
-            .background(
-                if (selected) activeFill
-                else Color.Transparent
-            )
+            .background(fillColor)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -362,15 +378,17 @@ private fun FloatingNavPill(
             CurioIcon(
                 name = if (selected) destination.selectedIcon else destination.icon,
                 contentDescription = destination.label,
-                tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = iconTint,
                 size = 26.dp
             )
             // Enter keeps the slide-out morph for the newly active pill;
-            // exit is tween(0) so the label VANISHES the moment its pill is
-            // deselected (no closing shrink animation).
+            // v155 — the label fade now tracks the pill's expansion
+            // (tween 240 + FastOutSlowIn) instead of popping in at 160ms;
+            // exit stays instant per v125 (the closing pill's text vanishes
+            // the moment its pill is deselected).
             AnimatedVisibility(
                 visible = selected,
-                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
+                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(240, easing = FastOutSlowInEasing)),
                 exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
             ) {
                 Text(
@@ -498,12 +516,17 @@ private fun curioNavContainerColor(routePrefix: String?): Color {
  * into it. Dark mode keeps the elevated surface unchanged — the pages are
  * near-black, so the wash adds nothing and the scheme's lightness steps
  * already read as lift. Animated with the same 420ms tween as the rail.
+ * v155 — light mode was lifting 55% toward the elevated surface, which
+ * washed the tint out to a plain parchment capsule (the active pill got
+ * the dynamic color, the bar's background didn't). Now 30%, so the page
+ * tint shows through the capsule while it still reads lifted above the
+ * page.
  */
 @Composable
 internal fun curioFloatingNavContainer(routePrefix: String?): Color {
     if (isCurioDarkTheme()) return MaterialTheme.colorScheme.surfaceContainerHigh
     val wash = curioNavContainerColor(routePrefix)
-    return lerp(wash, MaterialTheme.colorScheme.surfaceContainerHigh, 0.55f)
+    return lerp(wash, MaterialTheme.colorScheme.surfaceContainerHigh, 0.30f)
 }
 
 /**
