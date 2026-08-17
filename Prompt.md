@@ -1,6 +1,55 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: launcher icon bigger + splash border removed + R8 JNA fix
+## Current request — COMPLETED: books.json deduped (500 → 444)
+
+The user: "Deduplicate the ~55 books that appear twice in books.json
+(e.g. The Odyssey listed with and without the year)" — the follow-up to
+the v126 note that the ~55 dup pairs were left untouched pending user
+confirmation.
+
+### What shipped
+1. **Audit** — normalized-name grouping (strips subtitle after `;:`,
+   trailing parenthetical years, trailing `c. YYYY` and punctuation)
+   found **54 dup groups / 56 duplicate entries** in `books.json` (52
+   pairs + 2 triples: Hitchhiker's Guide, Remains of the Day). All
+   pairs have MATCHING pageCounts; the duplication predates the
+   expansion commit `5ef5aac` (both members already existed at 215
+   entries — e.g. The Odyssey with and without the year, Moby-Dick;
+   or The Whale vs Moby-Dick (1851)).
+2. **Merge rule (per group, all 54 reviewed in a dry run):** the
+   RICHER entry wins (score = teaser + instruction + targetName
+   length — the year-suffixed names with scene-specific exploreAction
+   targets and ≤60 min durations, e.g. "Beloved (1987)" over
+   "Beloved", "The Odyssey (c. 8th century BCE)" over "The
+   Odyssey"). The dropped entry's TAGS are unioned into the keeper
+   (keeper order first, deduped — 52 merges), and `tier` takes the
+   better (1) of the pair (23 upgrades 2→1 — marquee classics keep
+   surfacing). Kept entries are otherwise BYTE-IDENTICAL: ids,
+   bylines, pageCounts, alt-edition fields (Moby-Dick retains its 720
+   Penguin Classics alt pill) untouched.
+3. **Verification** — old-vs-new diff by id: 500 → 444, exactly 56
+   removed, 0 added, ZERO field differences on kept ids beyond
+   tags/tier; no leftover dup groups; all ids unique; no repo
+   references to removed ids (grep across app/web/desktop/scripts);
+   required fields + instruction ≤600 caps still pass.
+4. **Web mirror** — `web/src/data/topics/books.json` (same 500-entry
+   content, older schema without pageCount) got the IDENTICAL dedup
+   (same keeper selection since teaser/instructions match; id sets of
+   app and web now match exactly). Desktop reads the app assets —
+   inherits automatically.
+
+### Left for later (NOT in this change)
+The same batch-duplication pattern exists in OTHER topic files
+(audit scan): astronomy 94 dup groups, plants 86, authors 38, songs
+36, biology 37, artworks 23, geology 20, manga 20, films 16, history
+16, anime 3… — only books were deduped per the request.
+
+### Validation
+`git diff --check` clean; JSON re-parses; app+web id sets match;
+kept-id field diff = zero; no Gradle locally (env rule) — CI
+validates on push.
+
+## Previous request — COMPLETED: launcher icon bigger + splash border removed + R8 JNA fix
 
 The user: "the app icon itself is placed inside the icon, like it looks
 small can u fix it and when opening the app icon looks bigger why the

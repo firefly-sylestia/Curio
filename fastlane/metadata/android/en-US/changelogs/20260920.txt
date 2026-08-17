@@ -27,6 +27,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Data: the ~55 books that appeared twice in the Books lane (e.g. The Odyssey listed with and without its year, Moby-Dick under two titles) are now single entries — each keeps the richer description, merges both tag sets, and stays marquee where it was.
 - App icon: the launcher icon is no longer a tiny card inside the icon — the art fills the icon properly now, matching the bigger splash logo, and the splash dropped the old white border (both use the new cosmic mark).
 - Progress: tap the count in the progress dialog to fix the total — the pages/episodes target is editable per topic now, so a wrong total stays corrected everywhere (the pill, the cards and the editor).
 - Data: anime season entries no longer show the whole series' episode count — season-1 entries now carry just their season (Mob Psycho 100 12, One Punch Man 12, Attack on Titan 25, My Hero Academia 13, and more), and books with wildly different editions (Iliad, War and Peace, Moby-Dick, Ulysses, Count of Monte Cristo) show a second "or N pages · Edition" pill you can tap to use that edition's count.

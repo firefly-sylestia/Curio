@@ -690,6 +690,23 @@ app/src/main/java/com/curio/app/
   (704 Fagles / 574 Lombardo), War and Peace (1392 / 1104 Wordsworth),
   Moby-Dick (635 / 720 Penguin Classics), Ulysses (732 / 649 Corrected
   text), The Count of Monte Cristo (1276 / 1462 Modern Library).
+- **v127 — books.json deduped (500 → 444).** Every duplicate book (54
+  normalized-name groups, 56 entries — e.g. "The Odyssey" + "The
+  Odyssey (c. 8th century BCE)", "Moby-Dick; or, The Whale" + "Moby-
+  Dick (1851)") collapses to ONE entry. Per pair the RICHER entry wins
+  (longer teaser + scene-specific `exploreAction` target, ≤60 min,
+  year-suffixed name), the dropped entry's tags are unioned into the
+  keeper (`tags` merge, deduped, keeper order first), and `tier` takes
+  the better (1) of the pair so marquee surfacing is preserved (23
+  upgrades 2→1). Kept entries are otherwise byte-identical — ids,
+  bylines, pageCounts, alt-edition fields (Moby-Dick retains 720
+  Penguin Classics) untouched. The web mirror
+  (`web/src/data/topics/books.json`) got the identical dedup (its
+  schema lacks pageCount, so keepers there just carry tags/tier); the
+  desktop port reads the app assets so it inherits the fix. NOTE: the
+  same batch-duplication pattern exists in other topic files (astronomy
+  94 groups, plants 86, authors 38, songs 36 — see the dedup scan) but
+  only books were deduped in this change.
 - **v126 — launcher icon no longer tiny + splash drops the old border +
   R8 JNA fix.** (1) **Launcher icon:** `ic_launcher_foreground.xml` inset
   28 → 18dp. The v115 inset drew the card at only ~44×47dp inside the

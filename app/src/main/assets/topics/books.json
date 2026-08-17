@@ -24,28 +24,6 @@
     "altPageLabel": "Lombardo"
   },
   {
-    "id": "book-odyssey",
-    "categoryId": "BOOKS",
-    "subtype": "Epic",
-    "name": "The Odyssey",
-    "teaser": "Ten years after Troy, Odysseus is trying to come home. The poem is the first novel written in Europe — and Homer uses sensory details ('wine-dark sea') as much as narrative.",
-    "imageUrl": "",
-    "byline": "Homer",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Books 5–8 (Calypso to Alcinoüs)",
-      "durationMinutes": 90,
-      "instruction": "These four books are the emotional center. Odysseus mourns on Calypso's island, shipwrecks, washes ashore, and is welcomed by the Phaeacians. Listen to the formulaic recursions — Homer is teaching you the song structure as he sings."
-    },
-    "tags": [
-      "Epic",
-      "Greek",
-      "Ancient"
-    ],
-    "tier": 1,
-    "pageCount": 560
-  },
-  {
     "id": "book-aeneid",
     "categoryId": "BOOKS",
     "subtype": "Epic",
@@ -110,28 +88,6 @@
     ],
     "tier": 1,
     "pageCount": 992
-  },
-  {
-    "id": "book-pride-and-prejudice",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Pride and Prejudice",
-    "teaser": "Austen's first mature novel (1813), originally drafted as 'First Impressions' in 1796. The book's opening line is in the top-ten most-quoted English-literature sentences.",
-    "imageUrl": "",
-    "byline": "Jane Austen",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Volume I (Chapters 1–23)",
-      "durationMinutes": 90,
-      "instruction": "Read the opening aloud. Notice Austen's free indirect style — she writes 'she felt' as if Darcy's nerves are inside Elizabeth's mind. By chapter 23, you've heard everyone say everything slightly wrong. That's Austen's technique — observe the social bright surface, and..."
-    },
-    "tags": [
-      "Regency",
-      "British",
-      "Novel"
-    ],
-    "tier": 1,
-    "pageCount": 279
   },
   {
     "id": "book-jane-eyre",
@@ -268,28 +224,6 @@
     "altPageLabel": "Wordsworth"
   },
   {
-    "id": "book-crime-and-punishment",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Crime and Punishment",
-    "teaser": "Dostoevsky's 1866 novel, written in 1866 to escape gambling debts. The novel became the prototype for the 'psychological thriller' — its protagonist is redeemed before the plot begins.",
-    "imageUrl": "",
-    "byline": "Fyodor Dostoevsky",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Crime and Punishment, Part I (the murder scene only)",
-      "durationMinutes": 60,
-      "instruction": "Read just the murder scene. The axe. The room. The footsteps from the upstairs tenant. Dostoevsky decides to show you the murder from inside the killer's mind — showing how a murderer thinks in advance, not in cold blood. The novel never forgets this perspective."
-    },
-    "tags": [
-      "Russian",
-      "Novel",
-      "19th Century"
-    ],
-    "tier": 2,
-    "pageCount": 672
-  },
-  {
     "id": "book-madame-bovary",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -332,30 +266,6 @@
     ],
     "tier": 1,
     "pageCount": 824
-  },
-  {
-    "id": "book-moby-dick",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Moby-Dick; or, The Whale",
-    "teaser": "Melville's 1851 novel of a whaling voyage and a one-legged captain mad enough to chase a white sperm whale around the world. The book sold 3,000 copies in life; 30 years later critics proclaimed it America's first great novel.",
-    "imageUrl": "",
-    "byline": "Herman Melville",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Moby-Dick, Chapter 1 (Loomings) and Chapter 42 (\"The Whiteness of the Whale\")",
-      "durationMinutes": 90,
-      "instruction": "Read the opening chapter. Then jump straight to chapter 42. The novel's voice is established in the first — Ishmael decides that everyone who goes to sea becomes 'insane.' The middle chapter turns whiteness into an existential problem. The novel never returns to either..."
-    },
-    "tags": [
-      "American",
-      "Novel",
-      "19th Century"
-    ],
-    "tier": 1,
-    "pageCount": 635,
-    "altPageCount": 720,
-    "altPageLabel": "Penguin Classics"
   },
   {
     "id": "book-leaves-of-grass",
@@ -536,28 +446,6 @@
     "pageCount": 96
   },
   {
-    "id": "book-brave-new-world",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Brave New World",
-    "teaser": "Huxley's 1932 dystopian novel. The opening paragraph queues 11 cloned embryos into a continuous conveyor belt. The novel is structured around a long tour through a perfect society — and the question whether perfect is enough.",
-    "imageUrl": "",
-    "byline": "Aldous Huxley",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Brave New World, Chapters 1–6",
-      "durationMinutes": 90,
-      "instruction": "Read the first six chapters. The Hatchery tour is the novel's most quoted section. Then read chapters 9–12. Huxley wrote the book in three months during a 1931 trip to the United States. The novel notices that felt-pleasure and freedom are not the same thing."
-    },
-    "tags": [
-      "Dystopian",
-      "British",
-      "Novel"
-    ],
-    "tier": 1,
-    "pageCount": 288
-  },
-  {
     "id": "book-1984",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -578,94 +466,6 @@
     ],
     "tier": 1,
     "pageCount": 328
-  },
-  {
-    "id": "book-the-catcher-in-the-rye",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Catcher in the Rye",
-    "teaser": "Salinger's 1951 novel — Holden Caulfield narrates three days in NYC after being expelled from prep school. The novel became the most popular coming-of-age novel in American high-school English curricula.",
-    "imageUrl": "",
-    "byline": "J.D. Salinger",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Catcher in the Rye, Chapters 1–7",
-      "durationMinutes": 90,
-      "instruction": "Read the first 70 pages aloud. Salinger's gift is Holden's consciousness — he never finishes thoughts and never stops starting new ones. Now read the same chapters silently. Then read a chapter where Holden is angry. Notice which word Salinger repeats for emphasis."
-    },
-    "tags": [
-      "American",
-      "Novel",
-      "Mid-20th"
-    ],
-    "tier": 1,
-    "pageCount": 277
-  },
-  {
-    "id": "book-beloved",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Beloved",
-    "teaser": "Morrison's 1987 novel, based on the true story of Margaret Garner, an enslaved woman who killed her daughter rather than return her to bondage. Morrison won the Pulitzer the year after.",
-    "imageUrl": "",
-    "byline": "Toni Morrison",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Beloved, opening 30 pages",
-      "durationMinutes": 60,
-      "instruction": "Read the opening: 124 Bluestone Road is haunted. Morrison's first sentence is too famous to discuss — read it again. Then watch how the present and the past stack. The novel is a ghost story that has nothing to do with haunting and everything to do with what you'd need..."
-    },
-    "tags": [
-      "American",
-      "Novel",
-      "Modern"
-    ],
-    "tier": 1,
-    "pageCount": 324
-  },
-  {
-    "id": "book-one-hundred-years-of-solitude",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "One Hundred Years of Solitude",
-    "teaser": "Márquez's 1967 novel, the founding work of magical realism. The novel traces seven generations of the Buendía family in the fictional town of Macondo over a hundred years. Márquez wrote it in 18 months.",
-    "imageUrl": "",
-    "byline": "Gabriel García Márquez",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "One Hundred Years of Solitude, opening 30 pages",
-      "durationMinutes": 60,
-      "instruction": "Read the opening: a man faces a firing squad, goes back in memory to his village, his grandfather takes him to see ice. The novel's time-machine is the family. Márquez wrote it in nine months while living in Mexico City. Read until you understand 'solitude' as the..."
-    },
-    "tags": [
-      "Magical Realism",
-      "Colombian",
-      "Novel"
-    ],
-    "tier": 1,
-    "pageCount": 417
-  },
-  {
-    "id": "book-if-on-a-winters-night-a-traveler",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "If on a winter's night a traveler",
-    "teaser": "Calvino's 1979 novel — a book where each even-numbered chapter is the first page of a different novel that ends, and each odd-numbered chapter is about you, the reader, trying to read the missing novels.",
-    "imageUrl": "",
-    "byline": "Italo Calvino",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "\"If on a winter's night a traveler\" — Chapters 1–5 of each kind",
-      "durationMinutes": 60,
-      "instruction": "Read carefully. The novel alternates between an embedded-novel opening and a real-world frame. The trick is that the embedded novel always breaks. By chapter 10, you'll be reading like the protagonist: looking at the next-new story with a small frustration that's also..."
-    },
-    "tags": [
-      "Postmodern",
-      "Italian",
-      "Novel"
-    ],
-    "tier": 2,
-    "pageCount": 276
   },
   {
     "id": "book-house-of-leaves",
@@ -754,28 +554,6 @@
     ],
     "tier": 2,
     "pageCount": 212
-  },
-  {
-    "id": "book-the-god-of-small-things",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The God of Small Things",
-    "teaser": "Roy's 1997 debut novel (Booker Prize 1997) about an Indian family in Kerala. The novel layers caste, family, and the consequences of small gestures across time jumps that are tighter than Faulkner.",
-    "imageUrl": "",
-    "byline": "Arundhati Roy",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The God of Small Things, opening 30 pages",
-      "durationMinutes": 60,
-      "instruction": "Read the opening carefully. Roy tells you the ending in the first 10 pages — then circles back to show you how everyone got there. Notice the small things: a touch on skin, a sound at night, a smell of food. They're the actual mechanism. Notice the 'Love Laws' passage..."
-    },
-    "tags": [
-      "Indian",
-      "Novel",
-      "Late 20th"
-    ],
-    "tier": 2,
-    "pageCount": 340
   },
   {
     "id": "book-the-left-hand-of-darkness",
@@ -1014,7 +792,10 @@
     "tags": [
       "Indian",
       "Magic Realism",
-      "Postcolonial"
+      "Postcolonial",
+      "Magical Realism",
+      "Historical",
+      "20th Century"
     ],
     "tier": 2,
     "pageCount": 560
@@ -1036,9 +817,11 @@
     "tags": [
       "Science Fiction",
       "Cyberpunk",
-      "1980s"
+      "1980s",
+      "American",
+      "Hugo Nebula"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 288
   },
   {
@@ -1058,9 +841,11 @@
     "tags": [
       "American",
       "Literary",
-      "Slavery"
+      "Slavery",
+      "Novel",
+      "Modern"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 324
   },
   {
@@ -1146,9 +931,11 @@
     "tags": [
       "Science Fiction",
       "Cyberpunk",
-      "1990s"
+      "1990s",
+      "American",
+      "Satire"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 480
   },
   {
@@ -1212,7 +999,9 @@
     "tags": [
       "Indian",
       "Literary",
-      "Family"
+      "Family",
+      "Novel",
+      "Late 20th"
     ],
     "tier": 2,
     "pageCount": 340
@@ -1234,7 +1023,10 @@
     "tags": [
       "British",
       "Comedy",
-      "Multicultural"
+      "Multicultural",
+      "Fiction",
+      "Contemporary",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 464
@@ -1256,7 +1048,10 @@
     "tags": [
       "British",
       "Literary",
-      "WWII"
+      "WWII",
+      "Fiction",
+      "Historical",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 368
@@ -1306,28 +1101,6 @@
     "pageCount": 544
   },
   {
-    "id": "book-the-road-2006-149",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Road (2006)",
-    "teaser": "McCarthy's Pulitzer winner is a father-and-son journey through an ash-grey post-apocalyptic America, written in stripped prose with no quotation marks. The father's only creed — 'carry the fire' — is never explained, which is the book's power: the boy asks what the fire is, and the father says he doesn't know either.",
-    "imageUrl": "",
-    "byline": "Cormac McCarthy",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Road (2006) — the opening and the ending",
-      "durationMinutes": 42,
-      "instruction": "Read the first page and notice what McCarthy withholds: no cause for the apocalypse, no names, no history — just 'the road' and the pushcart. Then read the ending, where the father's death leaves the boy with strangers. The final lines resolve nothing and everything: the fire passes on, unproven."
-    },
-    "tags": [
-      "American",
-      "Post-Apocalyptic",
-      "Literary"
-    ],
-    "tier": 2,
-    "pageCount": 304
-  },
-  {
     "id": "book-wolf-hall-2009-150",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -1350,28 +1123,6 @@
     "pageCount": 672
   },
   {
-    "id": "book-a-visit-from-the-151",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "A Visit from the Goon Squad (2010)",
-    "teaser": "Jennifer Egan's Pulitzer winner is 13 linked stories about music-industry people orbiting one record producer — told in different genres across decades, culminating in a chapter written entirely as a PowerPoint presentation by a 12-year-old. The title's 'goon squad' is time: 'the goon squad... at your back as you age.'.",
-    "imageUrl": "",
-    "byline": "Jennifer Egan",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "A Visit from the Goon Squad (2010) — 'Found Objects' and the PowerPoint chapter",
-      "durationMinutes": 41,
-      "instruction": "Read the first story, 'Found Objects,' and the last, 'Pure Language,' as a pair — the same characters bookend the book 40 years apart. Then read the PowerPoint chapter: Egan uses the form's awkwardness on purpose, and its emotional payload lands because the format is so reductive. Notice how every story connects through one girl's lost bracelet."
-    },
-    "tags": [
-      "American",
-      "Experimental",
-      "Music"
-    ],
-    "tier": 2,
-    "pageCount": 288
-  },
-  {
     "id": "book-gone-girl-2012-152",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -1392,28 +1143,6 @@
     ],
     "tier": 2,
     "pageCount": 432
-  },
-  {
-    "id": "book-americanah-2013-153",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Americanah (2013)",
-    "teaser": "Adichie's novel follows Ifemelu, a Nigerian woman who emigrates to America, becomes a successful blogger on race, and returns to Lagos — a story told against the immigrant's central question: which country is home? Its blog posts ('A Homogenized World of Racism for Dummies') are threaded through the novel verbatim.",
-    "imageUrl": "",
-    "byline": "Chimamanda Ngozi Adichie",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Americanah (2013) — the hair salon opening and a full blog post",
-      "durationMinutes": 42,
-      "instruction": "Read the opening — Ifemelu in a Baltimore hair salon, getting her hair braided before returning to Nigeria — and notice how the scene sets up the book's thesis: hair, like race, is a system of judgment she can navigate but never escape. Then read one full blog post, which Adichie includes word for word: the novel's sharpest social analysis is meta-fictional."
-    },
-    "tags": [
-      "Nigerian",
-      "Literary",
-      "Immigration"
-    ],
-    "tier": 2,
-    "pageCount": 496
   },
   {
     "id": "book-between-the-world-and-154",
@@ -1460,28 +1189,6 @@
     "pageCount": 368
   },
   {
-    "id": "book-normal-people-2018-156",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Normal People (2018)",
-    "teaser": "Rooney's second novel traces Connell and Marianne from a small Irish town through Trinity College Dublin — a love story told almost entirely in what they don't say to each other, and rendered in a prose style so stripped it made 'Rooney realism' a genre. It won the Costa Novel Award and became a TV series.",
-    "imageUrl": "",
-    "byline": "Sally Rooney",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Normal People (2018) — the first chapter and a Trinity dialogue scene",
-      "durationMinutes": 20,
-      "instruction": "Read the first chapter — the teenagers' secret relationship in school — and notice how Rooney withholds interiority: the narration stays close to both characters but never lets them know each other's minds, which is the whole tragedy. Then read the 'conversation' chapters at Trinity, where their miscommunications are structured like dialogue that always arrives a beat too late."
-    },
-    "tags": [
-      "Irish",
-      "Literary",
-      "Romance"
-    ],
-    "tier": 2,
-    "pageCount": 288
-  },
-  {
     "id": "book-the-testaments-2019-157",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -1504,50 +1211,6 @@
     "pageCount": 448
   },
   {
-    "id": "book-klara-and-the-sun-158",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Klara and the Sun (2021)",
-    "teaser": "Ishiguro's Nobel-winning follow-up to Never Let Me Go is narrated by Klara, an 'Artificial Friend' — a solar-powered robot companion — who watches the world from a shop window and makes bargains with the Sun. The novel is a study of love and sacrifice told from outside the human experience of them.",
-    "imageUrl": "",
-    "byline": "Kazuo Ishiguro",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Klara and the Sun (2021) — the shop window opening and the Sun bargain",
-      "durationMinutes": 28,
-      "instruction": "Read the opening — Klara in the store window, dividing the world into grid squares — and notice how Ishiguro renders her perception as a machine's, then lets it shade into something else. Then read the chapter where Klara negotiates with the Sun to save her human: the book's emotional peak depends on you not knowing whether her sacrifice is real or a delusion."
-    },
-    "tags": [
-      "British",
-      "Literary",
-      "Science Fiction"
-    ],
-    "tier": 2,
-    "pageCount": 320
-  },
-  {
-    "id": "book-demon-copperhead-2022-159",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Demon Copperhead (2022)",
-    "teaser": "Kingsolver's Pulitzer winner transplants David Copperfield to the mountains of southwest Virginia, where orphaned Demon grows up inside the opioid crisis — Dickens's Victorian poverty reimagined as modern Appalachia's. Kingsolver spent two decades planning the transposition and works in Dickens's plot beats chapter by chapter.",
-    "imageUrl": "",
-    "byline": "Barbara Kingsolver",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Demon Copperhead (2022) — the opening and the morphine economy chapters",
-      "durationMinutes": 25,
-      "instruction": "Read the opening — Demon's birth, the death of his mother, the 'copperhead' family — and notice how Kingsolver maps Dickens's characters onto new names. Then read the chapters where Demon discovers the morphine economy: the novel's thesis is that Dickens's world of debt, orphanhood, and addiction survived two centuries to become rural America."
-    },
-    "tags": [
-      "American",
-      "Literary",
-      "Appalachia"
-    ],
-    "tier": 2,
-    "pageCount": 560
-  },
-  {
     "id": "book-chain-gang-all-stars-2023-160",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -1568,28 +1231,6 @@
     ],
     "tier": 2,
     "pageCount": 384
-  },
-  {
-    "id": "book-yellowface-2023-161",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Yellowface (2023)",
-    "teaser": "Kuang's novel is a satire of the publishing industry's race politics: white author June Hayward inherits a brilliant manuscript from her dead Asian-American friend, publishes it under the ethnically ambiguous pen name 'Juniper Song,' and watches it become a bestseller — while the truth sits in her desk drawer.",
-    "imageUrl": "",
-    "byline": "R.F. Kuang",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Yellowface (2023) — the opening theft and the cancellation chapters",
-      "durationMinutes": 28,
-      "instruction": "Read the opening — the death of Athena Liu, June's 'friend' and rival, in a freak accident — and notice how Kuang makes you complicit before you've judged: June's voice is so plausible that the theft feels almost reasonable. Then read the internet-cancelation chapters, where the novel dramatizes how Twitter verdicts and book deals move at the same speed."
-    },
-    "tags": [
-      "American",
-      "Satire",
-      "Publishing"
-    ],
-    "tier": 2,
-    "pageCount": 336
   },
   {
     "id": "book-north-woods-2023-162",
@@ -1700,28 +1341,6 @@
     ],
     "tier": 2,
     "pageCount": 880
-  },
-  {
-    "id": "book-the-vaster-wilds-2023-167",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Vaster Wilds (2023)",
-    "teaser": "Lauren Groff's novel is a survival story set in 1609 colonial Virginia: a servant girl flees the Jamestown fort during a starvation winter and walks north through a hostile wilderness that is also a wonder. Groff wrote it as a deliberate counter-narrative to the myth of American origin — the story of one anonymous girl who escapes rather than conquers.",
-    "imageUrl": "",
-    "byline": "Lauren Groff",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Vaster Wilds (2023) — the escape and the abandoned village",
-      "durationMinutes": 37,
-      "instruction": "Read the opening — the girl's escape from the fort — and notice how Groff renders the wilderness as both threat and sanctuary, alternating terror with awe. Then read the chapter where she finds the abandoned indigenous village: the novel's argument — that the land was already a country with its own history — lands in that empty clearing."
-    },
-    "tags": [
-      "American",
-      "Historical",
-      "Literary"
-    ],
-    "tier": 2,
-    "pageCount": 416
   },
   {
     "id": "book-western-lane-2023-168",
@@ -1871,9 +1490,11 @@
     "tags": [
       "British",
       "Classic",
-      "Romance"
+      "Romance",
+      "Regency",
+      "Novel"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 279
   },
   {
@@ -1893,7 +1514,9 @@
     "tags": [
       "Russian",
       "Classic",
-      "Psychology"
+      "Psychology",
+      "Novel",
+      "19th Century"
     ],
     "tier": 2,
     "pageCount": 672
@@ -1915,9 +1538,11 @@
     "tags": [
       "British",
       "Classic",
-      "Colonialism"
+      "Colonialism",
+      "Colonial",
+      "Novella"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 112
   },
   {
@@ -1937,9 +1562,11 @@
     "tags": [
       "British",
       "Modernist",
-      "Literary"
+      "Literary",
+      "Modernism",
+      "Classic"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 209
   },
   {
@@ -1959,32 +1586,11 @@
     "tags": [
       "American",
       "Classic",
-      "Depression"
+      "Depression",
+      "Pulitzer"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 464
-  },
-  {
-    "id": "book-1984-1949-179",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "1984 (1949)",
-    "teaser": "Orwell's novel gave the world Big Brother, Newspeak, and doublethink — the vocabulary of totalitarianism itself — and it remains the best-selling dystopia ever written. Winston Smith's rebellion lasts exactly as long as it takes the Party to catch him, and the ending, in which he finds he loves Big Brother, is the bleakest in the canon.",
-    "imageUrl": "",
-    "byline": "George Orwell",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "1984 (1949) — the opening and the Room 101 scene",
-      "durationMinutes": 39,
-      "instruction": "Read the opening — the telescreen's 'Big Brother is watching you' — and then the appendix, which is written in standard English and dated years after the novel's events: the appendix quietly argues that Newspeak failed, which changes the ending's meaning. Then read the torture scene in Room 101 and decide whether the novel allows any hope at all."
-    },
-    "tags": [
-      "British",
-      "Dystopian",
-      "Classic"
-    ],
-    "tier": 2,
-    "pageCount": 328
   },
   {
     "id": "book-invisible-man-1952-180",
@@ -2003,9 +1609,11 @@
     "tags": [
       "American",
       "Classic",
-      "Race"
+      "Race",
+      "National Book Award",
+      "Identity"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 608
   },
   {
@@ -2025,9 +1633,10 @@
     "tags": [
       "British",
       "Classic",
-      "Allegory"
+      "Allegory",
+      "Nobel"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 224
   },
   {
@@ -2047,7 +1656,9 @@
     "tags": [
       "Nigerian",
       "Classic",
-      "Postcolonial"
+      "Postcolonial",
+      "Historical Fiction",
+      "20th Century"
     ],
     "tier": 2,
     "pageCount": 224
@@ -2069,9 +1680,10 @@
     "tags": [
       "American",
       "Satire",
-      "WWII"
+      "WWII",
+      "War"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 464
   },
   {
@@ -2091,54 +1703,11 @@
     "tags": [
       "American",
       "Classic",
-      "Mental Health"
+      "Mental Health",
+      "Confessional"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 288
-  },
-  {
-    "id": "book-slaughterhouse-five-1969-185",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Slaughterhouse-Five (1969)",
-    "teaser": "Vonnegut's anti-war novel is built from his own experience as a POW in Dresden during the firebombing — he survived in a slaughterhouse, which is the book's title and its setting. Billy Pilgrim has 'come unstuck in time,' and the novel's response to mass death is the refrain 'So it goes.'.",
-    "imageUrl": "",
-    "byline": "Kurt Vonnegut",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Slaughterhouse-Five (1969) — the frame chapter and the Dresden chapters",
-      "durationMinutes": 44,
-      "instruction": "Read the first chapter — Vonnegut as himself, trying to write the book for 23 years — and notice how it breaks the novel's frame before the novel starts. Then read the Dresden chapters, where the horror is delivered in the same flat tone as the jokes: the novel's method is the point, and 'So it goes' is not resignation but a refusal to dignify death with narrative."
-    },
-    "tags": [
-      "American",
-      "WWII",
-      "Anti-War"
-    ],
-    "tier": 2,
-    "pageCount": 288
-  },
-  {
-    "id": "book-the-bluest-eye-1970-186",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Bluest Eye (1970)",
-    "teaser": "Morrison's debut is narrated over the frame of the Dick and Jane schoolbook primer, which it dismembers sentence by sentence — because the story is the anti-primer: Pecola Breedlove, an 11-year-old Black girl in 1940s Ohio, believes she will be loved only if she has blue eyes. It is a novel about how standards of beauty are taught, and who pays.",
-    "imageUrl": "",
-    "byline": "Toni Morrison",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Bluest Eye (1970) — the primer frame and the Cholly chapter",
-      "durationMinutes": 11,
-      "instruction": "Read the primer passages that open each section — 'Here is the house...' — and notice how Morrison's version of the sentences degrades as the book proceeds, mirroring what the ideal does to Pecola. Then read the chapter where Pecola's father rapes her, narrated in the same lyrical register as the novel's beauty: the horror is that Morrison refuses to separate the tenderness from the violation."
-    },
-    "tags": [
-      "American",
-      "Classic",
-      "Race"
-    ],
-    "tier": 2,
-    "pageCount": 224
   },
   {
     "id": "book-the-gulag-archipelago-1973-187",
@@ -2163,50 +1732,6 @@
     "pageCount": 480
   },
   {
-    "id": "book-the-hitchhikers-guide-to-188",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Hitchhiker's Guide to the Galaxy (1979)",
-    "teaser": "Douglas Adams's novel began as a radio series and answers the ultimate question of life, the universe, and everything with the number 42 — then reveals that the question itself was lost when Earth was demolished to make way for a hyperspace bypass. The Guide's advice on towels and the 'Don't Panic' cover made it a cult object before it was a bestseller.",
-    "imageUrl": "",
-    "byline": "Douglas Adams",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Hitchhiker's Guide to the Galaxy (1979) — the opening and Deep Thought",
-      "durationMinutes": 32,
-      "instruction": "Read the opening — Arthur Dent's house being demolished for a bypass, the prelude to Earth's demolition — and notice how Adams sets the novel's rule: the mundane and the cosmic run on the same absurd logic. Then read the scene where the supercomputer Deep Thought announces 42 after 7.5 million years of computation: the joke is that the answer is useless without the question."
-    },
-    "tags": [
-      "British",
-      "Science Fiction",
-      "Comedy"
-    ],
-    "tier": 2,
-    "pageCount": 224
-  },
-  {
-    "id": "book-the-color-purple-1982-189",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Color Purple (1982)",
-    "teaser": "Alice Walker's Pulitzer winner is written entirely as letters — first to God, then to her sister — from Celie, a poor Black woman in rural Georgia whose letters begin after she is married off at 14. It was the first novel by a Black woman to win the Pulitzer, and its frankness about abuse made it one of the most banned books of the 1980s.",
-    "imageUrl": "",
-    "byline": "Alice Walker",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Color Purple (1982) — the opening letters and the Shug chapters",
-      "durationMinutes": 16,
-      "instruction": "Read the first three letters and notice what Celie does not say: the abuse is reported in the same flat register as the weather, and the letters to God are her only privacy. Then read the letters after Celie meets Shug Avery, where the novel's radical claim — that love can be a way out — begins to take hold. The epistolary form is the point: the book is about who gets to have a voice."
-    },
-    "tags": [
-      "American",
-      "Epistolary",
-      "Classic"
-    ],
-    "tier": 2,
-    "pageCount": 304
-  },
-  {
     "id": "book-the-handmaids-tale-1985-190",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -2223,7 +1748,10 @@
     "tags": [
       "Canadian",
       "Dystopian",
-      "Classic"
+      "Classic",
+      "Feminist",
+      "20th Century",
+      "1980s"
     ],
     "tier": 2,
     "pageCount": 336
@@ -2267,9 +1795,13 @@
     "tags": [
       "British",
       "Literary",
-      "Memory"
+      "Memory",
+      "Fiction",
+      "Historical",
+      "20th Century",
+      "Booker"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 258
   },
   {
@@ -2293,28 +1825,6 @@
     ],
     "tier": 2,
     "pageCount": 416
-  },
-  {
-    "id": "book-the-virgin-suicides-1993-194",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Virgin Suicides (1993)",
-    "teaser": "Eugenides's debut is narrated by a collective 'we' — the neighborhood boys who never stop investigating the Lisbon sisters, five girls who kill themselves one by one in 1970s suburban Detroit. The novel is told entirely in retrospect, from the boys' obsession, and it never explains the suicides, which is the point.",
-    "imageUrl": "",
-    "byline": "Jeffrey Eugenides",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Virgin Suicides (1993) — the opening and the diaries ending",
-      "durationMinutes": 12,
-      "instruction": "Read the opening — Cecilia's first attempt, the party where she jumps — and notice how Eugenides withholds the sisters' interiority: the 'we' narrator can observe everything and understand nothing. Then read the ending, where the boys recover the sisters' diaries, journals, and records: the archive is all they ever had, and the novel's grief is that the explanation is in it and unreachable at once."
-    },
-    "tags": [
-      "American",
-      "Literary",
-      "Suburbia"
-    ],
-    "tier": 2,
-    "pageCount": 272
   },
   {
     "id": "book-trainspotting-1993-195",
@@ -2399,7 +1909,10 @@
     "tags": [
       "South African",
       "Literary",
-      "Booker"
+      "Booker",
+      "Fiction",
+      "Nobel",
+      "20th Century"
     ],
     "tier": 2,
     "pageCount": 220
@@ -2487,7 +2000,9 @@
     "tags": [
       "British",
       "Literary",
-      "Science Fiction"
+      "Science Fiction",
+      "Dystopian",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 304
@@ -2509,7 +2024,10 @@
     "tags": [
       "Dominican-American",
       "Literary",
-      "Pulitzer"
+      "Pulitzer",
+      "Fiction",
+      "Contemporary",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 352
@@ -2559,28 +2077,6 @@
     "pageCount": 336
   },
   {
-    "id": "book-the-goldfinch-2013-206",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Goldfinch (2013)",
-    "teaser": "Donna Tartt's Pulitzer winner opens with a terrorist bomb in a museum that kills Theo Decker's mother and leaves him with a stolen painting — Carel Fabritius's The Goldfinch — which he keeps for the rest of the novel, across decades of grief, crime, and obsession. The novel is 771 pages about what art is for, disguised as a thriller.",
-    "imageUrl": "",
-    "byline": "Donna Tartt",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Goldfinch (2013) — the museum opening and the ending",
-      "durationMinutes": 20,
-      "instruction": "Read the opening — the museum, the bomb, the painting's chain being broken — and notice how Tartt makes the theft almost involuntary: Theo walks out with the painting because he can't put it down. Then read the ending, where Theo, having lost everything, delivers the book's thesis about art ('a great sorrow, and one that we... can transform'): the whole novel is an argument for why we keep beautiful things."
-    },
-    "tags": [
-      "American",
-      "Literary",
-      "Art"
-    ],
-    "tier": 2,
-    "pageCount": 784
-  },
-  {
     "id": "book-all-the-light-we-207",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -2619,7 +2115,10 @@
     "tags": [
       "American",
       "Historical",
-      "Slavery"
+      "Slavery",
+      "Historical Fiction",
+      "Speculative",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 336
@@ -2685,7 +2184,9 @@
     "tags": [
       "British",
       "Fantasy",
-      "Mystery"
+      "Mystery",
+      "Literary",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 272
@@ -2773,7 +2274,10 @@
     "tags": [
       "Irish",
       "Literary",
-      "Family"
+      "Family",
+      "Fiction",
+      "Contemporary",
+      "21st Century"
     ],
     "tier": 2,
     "pageCount": 592
@@ -3059,34 +2563,14 @@
     "tags": [
       "American",
       "Classic",
-      "Epic"
+      "Epic",
+      "Novel",
+      "19th Century"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 635,
     "altPageCount": 720,
     "altPageLabel": "Penguin Classics"
-  },
-  {
-    "id": "book-anna-karenina-1877-229",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Anna Karenina (1877)",
-    "teaser": "Tolstoy's novel opens with the sentence that makes marriages tremble — 'All happy families are alike; each unhappy family is unhappy in its own way' — and follows Anna's adulterous love affair to its destruction while the landowner Levin searches for meaning in work, faith, and love. The novel's two plots run side by side, and Tolstoy's point is that they're the same story.",
-    "imageUrl": "",
-    "byline": "Leo Tolstoy",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Anna Karenina (1877) — the opening and Anna's final chapters",
-      "durationMinutes": 15,
-      "instruction": "Read the opening — the Oblonsky household in crisis, and the train where Anna first meets Vronsky — and notice how Tolstoy seeds the ending in the first chapters: the railway is the novel's symbol of the modern world that will destroy her."
-    },
-    "tags": [
-      "Russian",
-      "Classic",
-      "Literary"
-    ],
-    "tier": 2,
-    "pageCount": 864
   },
   {
     "id": "book-the-great-gatsby-1925-230",
@@ -3127,9 +2611,10 @@
     "tags": [
       "British",
       "Dystopian",
-      "Classic"
+      "Classic",
+      "Novel"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 288
   },
   {
@@ -3149,9 +2634,10 @@
     "tags": [
       "American",
       "Classic",
-      "Race"
+      "Race",
+      "Protest"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 544
   },
   {
@@ -3171,9 +2657,11 @@
     "tags": [
       "American",
       "Classic",
-      "Coming of Age"
+      "Coming of Age",
+      "Novel",
+      "Mid-20th"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 277
   },
   {
@@ -3193,9 +2681,11 @@
     "tags": [
       "American",
       "Dystopian",
-      "Science Fiction"
+      "Science Fiction",
+      "Dystopia",
+      "Classic"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 256
   },
   {
@@ -3221,28 +2711,6 @@
     "pageCount": 352
   },
   {
-    "id": "book-to-kill-a-mockingbird-236",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "To Kill a Mockingbird (1960)",
-    "teaser": "Harper Lee's only novel for most of her life is narrated by Scout, six years old, in Maycomb, Alabama, during the Depression — as her father Atticus defends a Black man falsely accused of rape. The title names the novel's moral: 'it's a sin to kill a mockingbird' — killing what harms nothing, like Tom Robinson, or like Boo Radley, the recluse who saves the children.",
-    "imageUrl": "",
-    "byline": "Harper Lee",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "To Kill a Mockingbird (1960) — the opening and the trial chapters",
-      "durationMinutes": 29,
-      "instruction": "Read the opening — Scout's first day of school, the Finch household — and notice how Lee renders adult moral crisis through a child's perfectly literal narration."
-    },
-    "tags": [
-      "American",
-      "Classic",
-      "Race"
-    ],
-    "tier": 2,
-    "pageCount": 336
-  },
-  {
     "id": "book-one-flew-over-the-237",
     "categoryId": "BOOKS",
     "subtype": "Book",
@@ -3259,9 +2727,10 @@
     "tags": [
       "American",
       "Classic",
-      "Counterculture"
+      "Counterculture",
+      "Institution"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 320
   },
   {
@@ -3281,34 +2750,12 @@
     "tags": [
       "Colombian",
       "Magic Realism",
-      "Classic"
+      "Classic",
+      "Magical Realism",
+      "Novel"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 417
-  },
-  {
-    "id": "book-the-handmaids-tale",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Handmaid's Tale (1985)",
-    "teaser": "Margaret Atwood wrote this dystopia in West Berlin during the Cold War — every detail was based on something that had actually happened somewhere in history. The handmaids' red robes? Biblical. The ceremonial rape? Enslaved women in the American South. The book has been banned more than any other in American schools.",
-    "imageUrl": "",
-    "byline": "Margaret Atwood",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Handmaid's Tale, chapters 1-5",
-      "durationMinutes": 35,
-      "instruction": "Read the first five chapters. Offred narrates in present tense from a single room, describing how she got here through fragments. Notice the shop signs are pictures — handmaids aren't allowed to read. The power of the novel is what she doesn't say: her real name is never revealed."
-    },
-    "tags": [
-      "Canadian",
-      "Dystopian",
-      "Feminist",
-      "20th Century",
-      "1980s"
-    ],
-    "tier": 2,
-    "pageCount": 336
   },
   {
     "id": "book-if-on-a-winters-night",
@@ -3328,56 +2775,11 @@
       "Italian",
       "Postmodern",
       "Metafiction",
-      "20th Century"
+      "20th Century",
+      "Novel"
     ],
     "tier": 2,
     "pageCount": 276
-  },
-  {
-    "id": "book-the-remains-of-the-day",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Remains of the Day (1989)",
-    "teaser": "Kazuo Ishiguro's novel about a butler on a road trip through the English countryside, looking back on his decades of perfect service at Darlington Hall. The butler, Stevens, is so repressed that his narration is a study in self-deception — you understand what he's feeling by what he refuses to say. Won the Booker Prize. Ishiguro wrote it in 4 weeks.",
-    "imageUrl": "",
-    "byline": "Kazuo Ishiguro",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Remains of the Day, first 50 pages",
-      "durationMinutes": 40,
-      "instruction": "Read the opening section — Stevens's diary of his motoring trip. He keeps digressing into his definition of a 'great butler' and you slowly realize every anecdote hides some humiliation he can't admit. Notice his prose — formal, precise, unable to name emotions but somehow making you feel them anyway."
-    },
-    "tags": [
-      "British",
-      "Fiction",
-      "Historical",
-      "20th Century"
-    ],
-    "tier": 2,
-    "pageCount": 258
-  },
-  {
-    "id": "book-pachinko",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Pachinko (2017)",
-    "teaser": "Min Jin Lee's multi-generational saga of a Korean family in Japan from 1910 to the 1980s. Koreans in Japan — Zainichi — were treated as permanent foreigners even after generations. The novel was rejected by every major publisher in New York before it became a National Book Award finalist and a bestseller.",
-    "imageUrl": "",
-    "byline": "Min Jin Lee",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Pachinko, Book I: Gohyang/Hometown 1910-1933",
-      "durationMinutes": 45,
-      "instruction": "Read Book I. Sunja, a teenager in a Korean fishing village, becomes pregnant by a married yakuza and is saved by a minister who offers to marry her and take her to Japan. Notice how Lee embeds the history of colonization in the smallest domestic moments — a bowl of rice, a boarding house, a pachinko parlor."
-    },
-    "tags": [
-      "Korean-American",
-      "Historical Fiction",
-      "Contemporary",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 496
   },
   {
     "id": "book-the-name-of-the-rose",
@@ -3401,144 +2803,6 @@
     ],
     "tier": 2,
     "pageCount": 560
-  },
-  {
-    "id": "book-never-let-me-go",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Never Let Me Go (2005)",
-    "teaser": "Kazuo Ishiguro's dystopia that hides its dystopia — the narrator, Kathy H., is a carer at a boarding school, and the horror of what the school is for only dawns on you slowly. Ishiguro said he wanted to write about mortality, and cloning was just the vehicle. The novel never uses the word 'clone.'.",
-    "imageUrl": "",
-    "byline": "Kazuo Ishiguro",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Never Let Me Go, Part One",
-      "durationMinutes": 35,
-      "instruction": "Read Part One. Kathy describes Hailsham, her old school, in nostalgic detail — the guardians, the art classes, the mysterious 'donations.' Something is wrong but Ishiguro makes you feel it through what Kathy doesn't say. She's a carer, but she's also a 'donor.' The word 'clone' never appears. The tragedy is that Kathy never questions her purpose."
-    },
-    "tags": [
-      "British",
-      "Science Fiction",
-      "Dystopian",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 304
-  },
-  {
-    "id": "book-things-fall-apart",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Things Fall Apart (1958)",
-    "teaser": "Chinua Achebe wrote this novel specifically because he was tired of how Africans were portrayed in English literature — Conrad's 'Heart of Darkness' in particular. The novel follows Okonkwo, a respected Igbo warrior, as his world is dismantled by British colonialism and Christian missionaries. It's the most-read African novel in history.",
-    "imageUrl": "",
-    "byline": "Chinua Achebe",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Things Fall Apart, Part One",
-      "durationMinutes": 30,
-      "instruction": "Read Part One. Achebe writes in English but the cadence is Igbo — proverbs structure the narration, and the novel feels oral even on the page. Okonkwo is a great man who beats his wives and kills his adopted son because the village demands it. Notice how Achebe makes colonialism a tragedy, not a rescue — and Okonkwo is its tragic hero."
-    },
-    "tags": [
-      "Nigerian",
-      "Historical Fiction",
-      "Postcolonial",
-      "20th Century"
-    ],
-    "tier": 2,
-    "pageCount": 224
-  },
-  {
-    "id": "book-midnights-children",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Midnight's Children (1981)",
-    "teaser": "Salman Rushdie's novel about Saleem Sinai, born at the exact moment of India's independence — and magically connected to the 1,000 other children born in that same hour. Won the Booker Prize in 1981 and then the 'Booker of Bookers' for the best winner in 25 years. Rushdie narrates in a voice that never stops, never pauses, never apologizes.",
-    "imageUrl": "",
-    "byline": "Salman Rushdie",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Midnight's Children, Book One",
-      "durationMinutes": 42,
-      "instruction": "Read Book One. Saleem narrates his own life story to Padma, his companion. But he also narrates India's story — partition, language riots, war — because his fate is bound to the nation's. Notice how Rushdie makes history personal: the 1947 partition is not a political event but a family tragedy told through a perforated sheet."
-    },
-    "tags": [
-      "Indian",
-      "Magical Realism",
-      "Historical",
-      "20th Century"
-    ],
-    "tier": 2,
-    "pageCount": 560
-  },
-  {
-    "id": "book-disgrace",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Disgrace (1999)",
-    "teaser": "J.M. Coetzee's novel about David Lurie, a Cape Town professor who loses everything after an affair with a student — and then loses more on his daughter's farm. Won the Booker Prize. The novel was so controversial in South Africa that the ANC called it racist during a parliamentary debate about Coetzee's work.",
-    "imageUrl": "",
-    "byline": "J.M. Coetzee",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Disgrace, the whole novel",
-      "durationMinutes": 50,
-      "instruction": "Read the whole novel — it's lean at 220 pages. Lurie is a man who refuses to apologize and then discovers what he should have apologized for. Coetzee's prose is brutally restrained. Notice how the novel shifts from personal disgrace to post-apartheid reckoning — the violence on Lucy's farm is never fully explained, only endured."
-    },
-    "tags": [
-      "South African",
-      "Fiction",
-      "Nobel",
-      "20th Century"
-    ],
-    "tier": 2,
-    "pageCount": 220
-  },
-  {
-    "id": "book-white-teeth",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "White Teeth (2000)",
-    "teaser": "Zadie Smith's debut novel, written while she was a Cambridge student. It follows two wartime friends — Archie Jones (English) and Samad Iqbal (Bangladeshi) — and their families in multicultural London at the turn of the millennium. Smith was 24 when it was published and won every debut prize available.",
-    "imageUrl": "",
-    "byline": "Zadie Smith",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "White Teeth, Part One",
-      "durationMinutes": 40,
-      "instruction": "Read Part One. Archie tries to gas himself in his car but is saved by a halal butcher. Smith writes London as a collision of accents, religions, and histories that somehow coexist. Notice how she refuses to moralize — every character is flawed, funny, and trying their best. The novel's energy comes from its conviction that multiculturalism is normal, not a problem."
-    },
-    "tags": [
-      "British",
-      "Fiction",
-      "Contemporary",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 464
-  },
-  {
-    "id": "book-atonement",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Atonement (2001)",
-    "teaser": "Ian McEwan's novel about a 13-year-old girl who makes a false accusation that destroys two lives — and then spends her entire life trying to atone through writing. The novel contains a novel within it, and the famous twist at the end reinterprets everything you've read. McEwan researched WWII Dunkirk evacuation for 2 years.",
-    "imageUrl": "",
-    "byline": "Ian McEwan",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Atonement, Part One",
-      "durationMinutes": 35,
-      "instruction": "Read Part One. On a hot summer day in 1935, Briony Tallis witnesses a series of events at her family's country house and misinterprets everything. McEwan writes each scene twice — once from Briony's perspective and once from the truth. Notice how the novel itself is Briony's atonement: she wrote it. The whole book is her confession."
-    },
-    "tags": [
-      "British",
-      "Fiction",
-      "Historical",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 368
   },
   {
     "id": "book-the-house-of-the-spirits",
@@ -3581,7 +2845,8 @@
       "American",
       "Fiction",
       "Classic",
-      "20th Century"
+      "20th Century",
+      "Race"
     ],
     "tier": 2,
     "pageCount": 336
@@ -3604,7 +2869,8 @@
       "British",
       "Dystopian",
       "Political",
-      "20th Century"
+      "20th Century",
+      "Classic"
     ],
     "tier": 2,
     "pageCount": 328
@@ -3627,33 +2893,11 @@
       "Russian",
       "Fiction",
       "Classic",
-      "19th Century"
+      "19th Century",
+      "Literary"
     ],
     "tier": 2,
     "pageCount": 864
-  },
-  {
-    "id": "book-the-brief-wondrous-life-of-oscar-wao",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Brief Wondrous Life of Oscar Wao (2007)",
-    "teaser": "Junot Diaz's novel about an overweight Dominican nerd growing up in New Jersey who dreams of becoming the Dominican J.R.R. Tolkien. The novel won the Pulitzer. The footnotes — lengthy, profane, scholarly — explain Dominican history from Trujillo to the diaspora. Diaz mixes Spanglish, sci-fi references, and deep political history in every paragraph.",
-    "imageUrl": "",
-    "byline": "Junot Diaz",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Brief Wondrous Life of Oscar Wao, Part I",
-      "durationMinutes": 38,
-      "instruction": "Read Part I. The narrator Yunior tells Oscar's story — a ghetto nerd who falls in love too hard and too fast. The footnotes are as long as the page text and cover the Trujillo regime, the fuku (curse), and Dominican nerd culture. Diaz writes like he's telling you a story at 2 AM — profane, tender, full of digressions that circle back. Oscar's tragedy is that he's a romantic in a world that punishes sincerity."
-    },
-    "tags": [
-      "Dominican-American",
-      "Fiction",
-      "Contemporary",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 352
   },
   {
     "id": "book-the-wind-up-bird-chronicle",
@@ -3696,7 +2940,8 @@
       "American",
       "Fiction",
       "Epistolary",
-      "20th Century"
+      "20th Century",
+      "Classic"
     ],
     "tier": 2,
     "pageCount": 304
@@ -3765,7 +3010,9 @@
       "American",
       "Fiction",
       "Contemporary",
-      "21st Century"
+      "21st Century",
+      "Literary",
+      "Appalachia"
     ],
     "tier": 2,
     "pageCount": 560
@@ -3880,7 +3127,8 @@
       "American",
       "Fiction",
       "Literary",
-      "21st Century"
+      "21st Century",
+      "Art"
     ],
     "tier": 2,
     "pageCount": 784
@@ -3903,7 +3151,8 @@
       "American",
       "Satire",
       "Anti-War",
-      "20th Century"
+      "20th Century",
+      "WWII"
     ],
     "tier": 2,
     "pageCount": 288
@@ -3926,7 +3175,9 @@
       "Nigerian",
       "Fiction",
       "Contemporary",
-      "21st Century"
+      "21st Century",
+      "Literary",
+      "Immigration"
     ],
     "tier": 2,
     "pageCount": 496
@@ -3949,33 +3200,11 @@
       "American",
       "Fiction",
       "Post-Apocalyptic",
-      "21st Century"
+      "21st Century",
+      "Literary"
     ],
     "tier": 2,
     "pageCount": 304
-  },
-  {
-    "id": "book-the-underground-railroad",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Underground Railroad (2016)",
-    "teaser": "Colson Whitehead's novel that turns the metaphorical Underground Railroad into a literal train system running beneath the South — engineers, boxcars, tunnels. Won the Pulitzer and the National Book Award. Whitehead said the premise came from a childish misunderstanding: as a kid, he imagined the Railroad was real, and he wanted to honor that literal belief.",
-    "imageUrl": "",
-    "byline": "Colson Whitehead",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Underground Railroad, chapters 1-4",
-      "durationMinutes": 40,
-      "instruction": "Read the first four chapters. Cora, a slave on a Georgia cotton plantation, escapes on the Underground Railroad — an actual train beneath the soil. Each state she visits is a different iteration of American racism: South Carolina performs a genteel eugenics, North Carolina bans Black people entirely. Whitehead's prose is measured, terrifying, and unflinching. The railroad is a magnificent lie made real — and each stop is a new horror."
-    },
-    "tags": [
-      "American",
-      "Historical Fiction",
-      "Speculative",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 336
   },
   {
     "id": "book-erasure",
@@ -3999,29 +3228,6 @@
     ],
     "tier": 2,
     "pageCount": 288
-  },
-  {
-    "id": "book-piranesi",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "Piranesi (2020)",
-    "teaser": "Susanna Clarke's novel about a man living in an infinite House with marble halls, tides, and statues. He calls himself Piranesi, though that's not his name. He keeps meticulous journals and believes he's one of only two living people in the world. Clarke wrote it while housebound with chronic fatigue syndrome. It won the Women's Prize.",
-    "imageUrl": "",
-    "byline": "Susanna Clarke",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Piranesi, Part One",
-      "durationMinutes": 30,
-      "instruction": "Read Part One. 'I am the Beloved Child of the House.' Piranesi explores the endless halls, catalogues the statues, fishes, and writes in his journals. His narration is gentle, precise, and happy — which is why the dawning horror is so effective. The House is both prison and paradise. Notice the capitalized nouns: the House, the Tides, the Other — Piranesi's worldview is a cosmology of one. The mystery of who he really is unfolds through journal entries."
-    },
-    "tags": [
-      "British",
-      "Fantasy",
-      "Literary",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 272
   },
   {
     "id": "book-my-brilliant-friend",
@@ -4087,9 +3293,10 @@
       "Greek",
       "Epic Poetry",
       "Classical",
-      "Ancient"
+      "Ancient",
+      "Epic"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 560
   },
   {
@@ -4135,7 +3342,7 @@
       "Comedy",
       "20th Century"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 224
   },
   {
@@ -4179,7 +3386,8 @@
       "American",
       "Fiction",
       "Literary",
-      "20th Century"
+      "20th Century",
+      "Suburbia"
     ],
     "tier": 2,
     "pageCount": 272
@@ -4317,7 +3525,9 @@
       "Irish",
       "Fiction",
       "Contemporary",
-      "21st Century"
+      "21st Century",
+      "Literary",
+      "Romance"
     ],
     "tier": 2,
     "pageCount": 288
@@ -4432,7 +3642,9 @@
       "American",
       "Fiction",
       "Literary",
-      "21st Century"
+      "21st Century",
+      "Experimental",
+      "Music"
     ],
     "tier": 2,
     "pageCount": 288
@@ -4455,7 +3667,8 @@
       "Korean-American",
       "Historical Fiction",
       "Literary",
-      "21st Century"
+      "21st Century",
+      "Contemporary"
     ],
     "tier": 2,
     "pageCount": 496
@@ -4478,9 +3691,10 @@
       "British",
       "Poetry",
       "Classic",
-      "Medieval"
+      "Medieval",
+      "English"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 608
   },
   {
@@ -4524,9 +3738,10 @@
       "American",
       "Fantasy",
       "Young Adult",
-      "20th Century"
+      "20th Century",
+      "Classic"
     ],
-    "tier": 2,
+    "tier": 1,
     "pageCount": 183
   },
   {
@@ -4547,7 +3762,9 @@
       "American",
       "Fiction",
       "Literary",
-      "20th Century"
+      "20th Century",
+      "Classic",
+      "Race"
     ],
     "tier": 2,
     "pageCount": 224
@@ -4639,7 +3856,8 @@
       "American",
       "Historical Fiction",
       "Literary",
-      "21st Century"
+      "21st Century",
+      "Historical"
     ],
     "tier": 2,
     "pageCount": 416
@@ -4666,29 +3884,6 @@
     ],
     "tier": 2,
     "pageCount": 208
-  },
-  {
-    "id": "book-the-bee-sting",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Bee Sting (2023)",
-    "teaser": "Paul Murray's novel about the Barnes family — an Irish family unraveling after the 2008 financial crash. The novel is structured in four parts, each from a different family member's perspective. It was shortlisted for the Booker Prize. The novel is funny, devastating, and 650 pages that feel like 300.",
-    "imageUrl": "",
-    "byline": "Paul Murray",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Bee Sting, Part One: Cass",
-      "durationMinutes": 42,
-      "instruction": "Read Part One. Cass Barnes, 17, is drinking in the woods with her friend Elaine when the novel opens. Her father's car dealership is failing; her mother is selling things on eBay; her brother is building a bunker. Murray writes Irish family life with comic precision and then turns the screw: the financial crash is a slow-motion car wreck that everyone sees coming and no one can stop. The bee sting of the title is both literal and metaphorical."
-    },
-    "tags": [
-      "Irish",
-      "Fiction",
-      "Contemporary",
-      "21st Century"
-    ],
-    "tier": 2,
-    "pageCount": 592
   },
   {
     "id": "book-the-midnight-library",
@@ -4754,7 +3949,8 @@
       "American",
       "Fiction",
       "Satire",
-      "21st Century"
+      "21st Century",
+      "Publishing"
     ],
     "tier": 2,
     "pageCount": 336
@@ -5710,28 +4906,6 @@
     "pageCount": 384
   },
   {
-    "id": "book-to-the-lighthouse",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "To the Lighthouse",
-    "teaser": "Woolf's 1927 novel of the Ramsay family's summers on the Isle of Skye — the trip to the lighthouse postponed, the mother's death, and time passing like weather. The modernist novel at its most luminous.",
-    "imageUrl": "",
-    "byline": "Virginia Woolf",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Window section and Time Passes",
-      "durationMinutes": 75,
-      "instruction": "Read the opening section, where Mrs. Ramsay's dinner holds the family together, then Time Passes. Notice how Woolf renders what is not said. Write what the lighthouse means to each character — and what arriving there at the end completes."
-    },
-    "tags": [
-      "British",
-      "Modernism",
-      "Classic"
-    ],
-    "tier": 1,
-    "pageCount": 209
-  },
-  {
     "id": "book-orlando",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -6546,28 +5720,6 @@
     "pageCount": 496
   },
   {
-    "id": "book-bell-jar",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Bell Jar",
-    "teaser": "Sylvia Plath's 1963 autobiographical novel of Esther Greenwood's summer in New York and her descent into breakdown — the fig tree, the bell jar, and the woman who must choose which self to be. The great novel of the gifted girl's suffocation.",
-    "imageUrl": "",
-    "byline": "Sylvia Plath",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the summer and the fig tree",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where Esther's internship and her paralysis before the fig tree are established. Notice how Plath keeps the voice witty even at the edge. Write what the bell jar represents, and what lifting it requires."
-    },
-    "tags": [
-      "American",
-      "Confessional",
-      "Classic"
-    ],
-    "tier": 1,
-    "pageCount": 288
-  },
-  {
     "id": "book-ariel",
     "categoryId": "BOOKS",
     "subtype": "Poetry",
@@ -6983,28 +6135,6 @@
       "Pamphlet"
     ],
     "tier": 2,
-    "pageCount": 256
-  },
-  {
-    "id": "book-fahrenheit-451-burn",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Fahrenheit 451",
-    "teaser": "Ray Bradbury's 1953 novel of Montag the fireman who burns books — until the girl next door asks him if he is happy. The definitive American novel of censorship, and of the warmth that books give.",
-    "imageUrl": "",
-    "byline": "Ray Bradbury",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the fire and the meeting with Clarisse",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where Montag's fire and wall-screens meet Clarisse's questions. Notice how Bradbury compresses the whole argument into image and scene. Write what the novel predicts about distraction, and what books are for."
-    },
-    "tags": [
-      "American",
-      "Dystopia",
-      "Classic"
-    ],
-    "tier": 1,
     "pageCount": 256
   },
   {
@@ -7448,50 +6578,6 @@
     "pageCount": 144
   },
   {
-    "id": "book-lord-flies-golding",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Lord of the Flies",
-    "teaser": "Golding's 1954 novel of schoolboys marooned on an island — the conch, the beast, and the descent from order to savagery. A chilling fable about the civilization that is only ever skin-deep.",
-    "imageUrl": "",
-    "byline": "William Golding",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the conch and the assembly",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where the conch establishes the fragile order. Notice how each object — conch, glasses, beast — marks a stage of decline. Write what the naval officer's arrival at the end suggests about rescue, civilization, and the beast inside."
-    },
-    "tags": [
-      "British",
-      "Nobel",
-      "Allegory"
-    ],
-    "tier": 1,
-    "pageCount": 224
-  },
-  {
-    "id": "book-catch22-heller",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Catch-22",
-    "teaser": "Heller's 1961 novel of Yossarian and the bombardiers of Pianosa — the logic trap that keeps men flying missions forever. The funniest and most furious anti-war novel ever written.",
-    "imageUrl": "",
-    "byline": "Joseph Heller",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — Yossarian in the hospital",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where the hospital ward introduces the novel's looping logic. Notice how Heller circles the same events from new angles. Write what Catch-22 names about bureaucracy and war — and why the joke is still so sharp."
-    },
-    "tags": [
-      "American",
-      "Satire",
-      "War"
-    ],
-    "tier": 1,
-    "pageCount": 464
-  },
-  {
     "id": "book-1984-alternate",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -7734,28 +6820,6 @@
     "pageCount": 512
   },
   {
-    "id": "book-hitchhiker-adams",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Hitchhiker's Guide to the Galaxy",
-    "teaser": "Adams's 1979 comedy — Arthur Dent's house is demolished, then the Earth, and he hitchhikes through space with Ford Prefect, a towel, and the answer 42. The funniest book in the galaxy.",
-    "imageUrl": "",
-    "byline": "Douglas Adams",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the bulldozers and the Vogons",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where the demolition of Arthur's house rhymes with the demolition of Earth. Notice how the footnotes and digressions are half the joke. Write what the Guide's cover line — DON'T PANIC — suggests about Adams's whole worldview."
-    },
-    "tags": [
-      "British",
-      "Comedy",
-      "Science Fiction"
-    ],
-    "tier": 1,
-    "pageCount": 224
-  },
-  {
     "id": "book-dirk-gently",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -7886,28 +6950,6 @@
     ],
     "tier": 1,
     "pageCount": 432
-  },
-  {
-    "id": "book-canterbury-tales",
-    "categoryId": "BOOKS",
-    "subtype": "Poetry",
-    "name": "The Canterbury Tales",
-    "teaser": "Chaucer's 14th-century frame of pilgrims telling stories on the road to Canterbury — the Knight, the Wife of Bath, the Pardoner, and the Miller. The book that made English literature possible.",
-    "imageUrl": "",
-    "byline": "Geoffrey Chaucer",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The General Prologue and the Wife of Bath's Tale",
-      "durationMinutes": 75,
-      "instruction": "Read the General Prologue, where the pilgrims are sketched in a few lines each, then the Wife of Bath's prologue and tale. Notice how the teller and the tale play off each other. Write what the frame's variety says about Chaucer's England — and about storytelling itself."
-    },
-    "tags": [
-      "English",
-      "Poetry",
-      "Medieval"
-    ],
-    "tier": 1,
-    "pageCount": 608
   },
   {
     "id": "book-paradise-lost-milton",
@@ -8504,50 +7546,6 @@
     "pageCount": 608
   },
   {
-    "id": "book-native-son",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Native Son",
-    "teaser": "Richard Wright's 1940 novel of Bigger Thomas, a young Black man in Chicago whose fear and rage ignite a crime and a trial. A landmark of American protest literature, still searing today.",
-    "imageUrl": "",
-    "byline": "Richard Wright",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the rat and the job",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where the killing of the rat introduces the novel's atmosphere. Notice how Wright makes the reader inhabit Bigger's fear. Write what the book argues about how a society manufactures the criminals it fears."
-    },
-    "tags": [
-      "American",
-      "Protest",
-      "Classic"
-    ],
-    "tier": 1,
-    "pageCount": 544
-  },
-  {
-    "id": "book-invisible-man",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Invisible Man",
-    "teaser": "Ralph Ellison's 1952 novel of a nameless narrator who descends into a basement of light bulbs and tells why he is invisible — not unseen in fantasy but unseen in fact. The great American novel of identity.",
-    "imageUrl": "",
-    "byline": "Ralph Ellison",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the battle royal",
-      "durationMinutes": 75,
-      "instruction": "Read the battle royal chapter, where the narrator is made to fight blindfolded for the entertainment of white men. Notice how Ellison layers symbol onto event. Write how the prologue's 1,369 light bulbs connect to the search for identity."
-    },
-    "tags": [
-      "American",
-      "National Book Award",
-      "Identity"
-    ],
-    "tier": 1,
-    "pageCount": 608
-  },
-  {
     "id": "book-go-tell-it-on-the-mountain",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -8832,50 +7830,6 @@
     ],
     "tier": 1,
     "pageCount": 400
-  },
-  {
-    "id": "book-snow-crash",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Snow Crash",
-    "teaser": "Neal Stephenson's 1992 cyberpunk satire — Hiro Protagonist, pizza deliveryman and swordsman, hunts a linguistic virus in a hyper-capitalist near future. It coined terms and predicted the metaverse.",
-    "imageUrl": "",
-    "byline": "Neal Stephenson",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the Deliverator and the metaverse",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters. Notice how Stephenson mixes computer science, Sumerian myth, and wisecracks. Write what the novel's core idea — that language itself can be a weapon — does to the boundary between mind and machine."
-    },
-    "tags": [
-      "American",
-      "Cyberpunk",
-      "Satire"
-    ],
-    "tier": 1,
-    "pageCount": 480
-  },
-  {
-    "id": "book-neuromancer",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Neuromancer",
-    "teaser": "William Gibson's 1984 novel that defined cyberpunk — Case, a washed-up console cowboy, is hired for one last job in cyberspace. The book that made 'the matrix' a word and 'cyberspace' a place.",
-    "imageUrl": "",
-    "byline": "William Gibson",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the sprawl and the console cowboy",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where Gibson's slangy, sensory prose builds the future city. Notice how technology is described like weather and flesh. Write how the novel treats artificial intelligence and whether it earns its famous ending."
-    },
-    "tags": [
-      "American",
-      "Cyberpunk",
-      "Hugo Nebula"
-    ],
-    "tier": 1,
-    "pageCount": 288
   },
   {
     "id": "book-american-gods",
@@ -9560,28 +8514,6 @@
     "pageCount": 512
   },
   {
-    "id": "book-heart-of-darkness",
-    "categoryId": "BOOKS",
-    "subtype": "Novella",
-    "name": "Heart of Darkness",
-    "teaser": "Conrad's 1899 novella — Marlow travels up the Congo to collect the ivory trader Kurtz, and finds the horror at the heart of empire. A frame-story shadow that still shapes how we think about colonialism.",
-    "imageUrl": "",
-    "byline": "Joseph Conrad",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the Thames and the journey upriver",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where the journey is framed as a story told on a boat at dusk. Notice how Conrad layers darkness upon darkness. Write what Kurtz's 'The horror! The horror!' means, and why the novella remains contested."
-    },
-    "tags": [
-      "British",
-      "Colonial",
-      "Novella"
-    ],
-    "tier": 1,
-    "pageCount": 112
-  },
-  {
     "id": "book-lord-jim",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -9646,28 +8578,6 @@
     ],
     "tier": 2,
     "pageCount": 640
-  },
-  {
-    "id": "book-remains-of-the-day",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Remains of the Day",
-    "teaser": "Kazuo Ishiguro's 1989 Booker winner — Stevens, an aging butler, takes a motoring trip through England and remembers the service, the dignity, and the love he misplaced. Regret in perfect white gloves.",
-    "imageUrl": "",
-    "byline": "Kazuo Ishiguro",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the journey begins",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where Stevens's stiff narration meets the England of the 1950s. Notice how the gaps in his account are the real story. Write what 'dignity' means to Stevens, and what his profession has cost him."
-    },
-    "tags": [
-      "British",
-      "Booker",
-      "Memory"
-    ],
-    "tier": 1,
-    "pageCount": 258
   },
   {
     "id": "book-pygmalion",
@@ -9758,28 +8668,6 @@
     "pageCount": 288
   },
   {
-    "id": "book-one-flew-over",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "One Flew Over the Cuckoo's Nest",
-    "teaser": "Ken Kesey's 1962 novel of the ward, the Big Nurse, and Randle McMurphy — told by Chief Bromden, who pretends to be deaf. A parable of institutions, conformity, and the men who refuse to be fixed.",
-    "imageUrl": "",
-    "byline": "Ken Kesey",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the fog and the ward",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where Bromden's fog and the Big Nurse's machinery are established. Notice how Kesey narrates the ward from inside a mind that has learned to disappear. Write what the Combine — the book's name for control — stands for."
-    },
-    "tags": [
-      "American",
-      "Institution",
-      "Classic"
-    ],
-    "tier": 1,
-    "pageCount": 320
-  },
-  {
     "id": "book-canticle-for-leibowitz",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -9822,28 +8710,6 @@
     ],
     "tier": 1,
     "pageCount": 352
-  },
-  {
-    "id": "book-earths-sea-cycle",
-    "categoryId": "BOOKS",
-    "subtype": "Fantasy",
-    "name": "A Wizard of Earthsea",
-    "teaser": "Ursula K. Le Guin's 1968 first novel of Earthsea — Ged, a goatherd with a gift, is taught at the school of wizardry and looses a shadow he must spend his life hunting. The fantasy of balance.",
-    "imageUrl": "",
-    "byline": "Ursula K. Le Guin",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the naming and the shadow",
-      "durationMinutes": 60,
-      "instruction": "Read the opening chapters, where Ged's true name is given and his pride calls the shadow into the world. Notice how Le Guin's prose is spare and mythic. Write what the novel's central lesson — to know oneself — means for the whole genre."
-    },
-    "tags": [
-      "American",
-      "Fantasy",
-      "Classic"
-    ],
-    "tier": 1,
-    "pageCount": 183
   },
   {
     "id": "book-lion-witch-wardrobe",
@@ -10284,28 +9150,6 @@
     ],
     "tier": 1,
     "pageCount": 128
-  },
-  {
-    "id": "book-grapes-of-wrath",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Grapes of Wrath",
-    "teaser": "Steinbeck's 1939 Pulitzer-winning novel of the Joad family driven off the Oklahoma dust bowl toward California — the great American novel of the Depression, of the road, and of 'we.'.",
-    "imageUrl": "",
-    "byline": "John Steinbeck",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The opening chapters — the dust and the road",
-      "durationMinutes": 75,
-      "instruction": "Read the opening chapters, where the dust and the bank's eviction frame the Joads' journey. Notice how Steinbeck alternates the family chapters with the wider interchapters. Write what the interchapters — the turtle, the used-car lots — add to the family's story."
-    },
-    "tags": [
-      "American",
-      "Pulitzer",
-      "Depression"
-    ],
-    "tier": 1,
-    "pageCount": 464
   },
   {
     "id": "book-of-mice-and-men",
