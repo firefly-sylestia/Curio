@@ -113,6 +113,7 @@ import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
 import com.curio.app.data.derivedDecadeTag
 import com.curio.app.data.isMusicTopic
+import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
@@ -1792,7 +1793,7 @@ private fun HeroCard(
                                         size = 14.dp
                                     )
                                     Text(
-                                        text = yearQual,
+                                        text = yearQual.orEmpty(),
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                         color = ink
                                     )
