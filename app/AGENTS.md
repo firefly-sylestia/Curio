@@ -1692,6 +1692,18 @@ app/src/main/java/com/curio/app/
     sweep order of operations: (1) `curioSpacing` the big page paddings,
     (2) `curioCorner` the card/dialog shapes, (3) only then audit
     remaining micro-values for genuine M3 deltas.
+  - SPACING SWEEP PASS 1 (step 1 of the order above): the BIG page
+    paddings + gaps in the four biggest screens are now
+    `curioSpacing(brand, m3)` — 30 call sites (was 0):
+    PetDesignerScreen (13: 18/20/22dp paddings → lg, 36dp spacer → xl),
+    EntryDetailScreen (10: 20dp → lg, 28dp → xl, 40dp → xxl, 18dp →
+    lg), HomeScreen (2: 26dp spacer + 20dp padding → lg), SpinScreen (5:
+    20/22dp → lg, 28dp spacer → xl). Rule: brand values 18/20/22/26 →
+    `CurioSpacing.lg` (24), 28/36 → `xl` (32), 40 → `xxl` (48); 24/32
+    already ARE the M3 tokens so they stay literal (no-op wrapper).
+    Default look is byte-identical — the m3 arg only applies under the
+    guidelines toggle. Still to go: step 2 `curioCorner` the per-screen
+    card/dialog shapes, step 3 the micro-value audit.
   - NOT swept (documented remainder): per-screen hardcoded paddings /
     radii across the 60+ feature files — the token helpers exist and the
     pattern is established; the sweep continues incrementally. Dialogs

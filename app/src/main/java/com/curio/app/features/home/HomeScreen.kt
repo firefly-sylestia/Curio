@@ -145,6 +145,8 @@ import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioDialogShape
+import com.curio.app.ui.theme.CurioSpacing
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -705,7 +707,7 @@ fun HomeScreen(navController: NavController) {
             // Give the quest block a deliberate breathing room below the
             // hero's white sheet so the shuffle deck never feels pinned to
             // the torn edge.
-            Spacer(Modifier.height(26.dp))
+            Spacer(Modifier.height(curioSpacing(26.dp, CurioSpacing.lg)))
 
             // ── Quest block — below the hero tear, above the content ────
             // "TODAY'S QUEST" eyebrow (no indicator) + the big solid Shuffle
@@ -1723,7 +1725,7 @@ private fun FirstTimeEmpty(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(curioSpacing(20.dp, CurioSpacing.lg)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {

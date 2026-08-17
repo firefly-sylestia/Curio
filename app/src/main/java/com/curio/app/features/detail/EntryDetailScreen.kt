@@ -165,8 +165,10 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioSpacing
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.readableAccentInk
@@ -477,7 +479,7 @@ fun EntryDetailScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .padding(horizontal = 28.dp)
+                        .padding(horizontal = curioSpacing(28.dp, CurioSpacing.xl))
                         // Keep the centered content (glyph + title + frosted bar)
                         // clear of the overlaid back / more buttons at the top of
                         // the banner — without this floor, a two-line title (or
@@ -508,7 +510,7 @@ fun EntryDetailScreen(
                         textAlign = TextAlign.Center,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 20.dp)
+                        modifier = Modifier.padding(horizontal = curioSpacing(20.dp, CurioSpacing.lg))
                     )
                     // v113 — the session duration no longer duplicates as a
                     // hero pill above the stat card: the Date · Mood ·
@@ -523,7 +525,7 @@ fun EntryDetailScreen(
                             fontSize = MaterialTheme.typography.headlineMedium.fontSize
                         )
                     }
-                    Spacer(Modifier.height(18.dp))
+                    Spacer(Modifier.height(curioSpacing(18.dp, CurioSpacing.lg)))
 
                     // ── Frosted date / mood / session / type grid card — the
                     // meta card's date, mood, session and type segments moved
@@ -801,7 +803,7 @@ fun EntryDetailScreen(
             }
         }
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(curioSpacing(40.dp, CurioSpacing.xxl)))
         }
 
         // Keep scroll-linked controls in their own recomposition scope. The
@@ -2281,7 +2283,7 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(curioSpacing(20.dp, CurioSpacing.lg)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -2453,7 +2455,7 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
 @Composable
 private fun MarginaliaRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.Marginalia ?: return
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(curioSpacing(20.dp, CurioSpacing.lg))) {
         data.fieldMindMetadata?.let { metadata ->
             FieldMindMetadataCard(metadata = metadata, category = category)
         }
@@ -3704,7 +3706,7 @@ private fun ExpandedMoodBoardDialog(
 @Composable
 private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navController: NavController) {
     val data = entry.captureData as? CaptureData.FieldNotes ?: return
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(curioSpacing(20.dp, CurioSpacing.lg))) {
         data.fieldMindMetadata?.let { metadata ->
             FieldMindMetadataCard(metadata = metadata, category = category)
         }
@@ -3839,7 +3841,7 @@ private fun FieldMindMetadataCard(metadata: FieldMindMetadata, category: CurioCa
         shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(modifier = Modifier.padding(curioSpacing(18.dp, CurioSpacing.lg)), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 CurioIcon(CurioIcons.ScienceGlyph, null, tint = category.themedAccent(), size = 22.dp)
                 Column(modifier = Modifier.weight(1f)) {
@@ -4112,7 +4114,7 @@ private fun CurioShareCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(28.dp),
+                .padding(curioSpacing(28.dp, CurioSpacing.xl)),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top: category chip + sparkle
@@ -4309,7 +4311,7 @@ private fun EntryShareSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = curioSpacing(20.dp, CurioSpacing.lg))
                 .padding(bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)

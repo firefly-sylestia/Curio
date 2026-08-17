@@ -1,8 +1,21 @@
 # Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: m3-layout-sweep CI FIXED + audit refined — committed + pushed
+## Status: curioSpacing sweep pass 1 DONE (30 call sites) — committed + pushed
 
-## m3-layout-sweep (latest) — user: "go back to m3 layout branch and fix
+## m3-layout-sweep (latest) — user: "Run the curioSpacing token sweep on
+the biggest screens (Pet Designer, Entry Detail, Home, Spin) — replace
+the large page paddings and gaps with the CurioSpacing tokens".
+- Converted the BIG page paddings/gaps in the 4 biggest screens to
+  `curioSpacing(brand, m3)`: PetDesignerScreen 13, EntryDetailScreen 10,
+  HomeScreen 2, SpinScreen 5 = 30 sites (was 0). Mapping: 18/20/22/26 →
+  lg (24), 28/36 → xl (32), 40 → xxl (48); 24/32 already are M3 tokens.
+  Default look byte-identical; m3 args apply only under the guidelines
+  toggle. Added CurioSpacing/curioSpacing imports to all 4 files.
+- Remaining: step 2 `curioCorner` per-screen card/dialog shapes (PetDesigner
+  77, EntryDetail 48, Home 31, Spin 29, Promo 27, Quests 24, Reveal 22,
+  Profile 17), step 3 micro-value audit.
+
+## m3-layout-sweep (earlier) — user: "go back to m3 layout branch and fix
 this [CI] and suggest follow ups for remaining material things do an audit
 after fix and push".
 - Fixed the two CI compile errors on this branch (same ones fixed on Alpha

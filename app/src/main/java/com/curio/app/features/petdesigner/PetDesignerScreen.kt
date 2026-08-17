@@ -137,6 +137,8 @@ import com.curio.app.ui.pet.EYE_STYLE_PIXELS
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioSpacing
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
 
@@ -1670,7 +1672,7 @@ private fun ImportMenuDialog(
     onDismiss: () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(18.dp),
+        modifier = Modifier.padding(curioSpacing(18.dp, CurioSpacing.lg)),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
@@ -1756,7 +1758,7 @@ private fun AccessoriesDialog(
 ) {
     Column(
         modifier = Modifier
-            .padding(18.dp)
+            .padding(curioSpacing(18.dp, CurioSpacing.lg))
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -2223,7 +2225,7 @@ private fun DialogScrim(onDismiss: () -> Unit, content: @Composable () -> Unit) 
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             modifier = Modifier
-                .padding(20.dp)
+                .padding(curioSpacing(20.dp, CurioSpacing.lg))
                 .fillMaxWidth()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
@@ -2260,7 +2262,7 @@ private fun ImportPngDialog(
             .padding(horizontal = 24.dp)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(curioSpacing(20.dp, CurioSpacing.lg)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -2491,7 +2493,7 @@ private fun ColorEditorCard(
     val hexError = hexDraft.length != 6
     Column(
         modifier = Modifier
-            .padding(18.dp)
+            .padding(curioSpacing(18.dp, CurioSpacing.lg))
             .verticalScroll(rememberScrollState())
     ) {
         Text(
@@ -3402,7 +3404,7 @@ private fun DrawPickerDialog(
     val visibleCategory = "body"
     Column(
         modifier = Modifier
-            .padding(18.dp)
+            .padding(curioSpacing(18.dp, CurioSpacing.lg))
             .verticalScroll(rememberScrollState())
     ) {
         Text(
@@ -3773,7 +3775,7 @@ private fun ImportCard(
 ) {
     var text by rememberSaveable(draft) { mutableStateOf(draft) }
     var error by rememberSaveable { mutableStateOf(false) }
-    Column(modifier = Modifier.padding(18.dp)) {
+    Column(modifier = Modifier.padding(curioSpacing(18.dp, CurioSpacing.lg))) {
         Text(
             "Paste a pet design",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
@@ -5290,7 +5292,7 @@ private fun EditorPickPrompt(onOpenPicker: () -> Unit) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp),
+            modifier = Modifier.padding(horizontal = curioSpacing(18.dp, CurioSpacing.lg), vertical = curioSpacing(20.dp, CurioSpacing.lg)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CurioIcon(
@@ -5471,16 +5473,16 @@ private fun AnimationPlayerDialog(
                     staticPose = !playing
                 )
             }
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(curioSpacing(18.dp, CurioSpacing.lg)))
             Text(
                 "${effective.frames.size} frames · loops",
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White.copy(alpha = 0.7f)
             )
-            Spacer(Modifier.height(22.dp))
+            Spacer(Modifier.height(curioSpacing(22.dp, CurioSpacing.lg)))
             // Transport: step back / play-pause / step forward.
             Row(
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(curioSpacing(18.dp, CurioSpacing.lg)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TransportIconButton(
@@ -5533,7 +5535,7 @@ private fun AnimationPlayerDialog(
                     modifier = Modifier.padding(vertical = 14.dp)
                 )
             }
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.height(curioSpacing(36.dp, CurioSpacing.xl)))
         }
     }
 }
@@ -5641,7 +5643,7 @@ private fun EvolutionChoiceDialog(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(curioSpacing(20.dp, CurioSpacing.lg)))
         paths.forEach { (path, name, emoji, desc) ->
             val isSelected = selected == path
             Card(
@@ -5672,7 +5674,7 @@ private fun EvolutionChoiceDialog(
                 }
             }
         }
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(curioSpacing(20.dp, CurioSpacing.lg)))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TextButton(onClick = { /* dismiss handled externally */ }) {
                 Text("Cancel")

@@ -152,6 +152,8 @@ import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMixedDeck
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.CurioSpacing
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
@@ -2091,7 +2093,7 @@ private fun FilterSheet(
                 .clip(applyShape)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
+                modifier = Modifier.padding(horizontal = curioSpacing(22.dp, CurioSpacing.lg), vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -2179,7 +2181,7 @@ private fun CompactChip(
         Row(
             modifier = Modifier
                 .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
-                .padding(horizontal = 20.dp, vertical = 13.dp),
+                .padding(horizontal = curioSpacing(20.dp, CurioSpacing.lg), vertical = curioSpacing(13.dp, CurioSpacing.sm)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -3083,7 +3085,7 @@ private fun HeroTicketCard(
                         Row(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
-                                .padding(20.dp),
+                                .padding(curioSpacing(20.dp, CurioSpacing.lg)),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -3135,7 +3137,7 @@ private fun HeroTicketCard(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(20.dp),
+                            .padding(curioSpacing(20.dp, CurioSpacing.lg)),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         // v7.14 — the subtype-badge row used to occupy the
@@ -3144,7 +3146,7 @@ private fun HeroTicketCard(
                         // third. With it gone, SpaceBetween slides the title
                         // to the very top edge; a spacer the height of the
                         // old badge (~28dp) returns it to that position.
-                        Spacer(Modifier.height(28.dp))
+                        Spacer(Modifier.height(curioSpacing(28.dp, CurioSpacing.xl)))
 
                         // Name + tags + teaser — v6.6: reels with the deck.
                         // Previously the hero content snapped instantly on
