@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -2643,9 +2644,11 @@ private fun DrawerLifetimeStrip() {
     }
 }
 
-/** v174g — one opaque lifetime pane: icon + value + label. */
+/** v174g — one opaque lifetime pane: icon + value + label. A RowScope
+ *  extension so `Modifier.weight(1f)` resolves inside the caller's row
+ *  (the stats page's lifetime panes are inline for the same reason). */
 @Composable
-private fun DrawerLifetimePane(icon: String, label: String, value: Int, tint: Color) {
+private fun RowScope.DrawerLifetimePane(icon: String, label: String, value: Int, tint: Color) {
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,

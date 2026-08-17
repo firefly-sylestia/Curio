@@ -1480,6 +1480,11 @@ app/src/main/java/com/curio/app/
     lifetimeState` — Spins, Explores, Saved, Quotes, Pins, Likes,
     Dislikes, Daily + Badges (`allStages().count { isStageDone(it) }`,
     mirroring JourneyCard). Colors match the stats page's lifetime grid.
+    CI LESSON: a pane extracted into its own composable CANNOT use
+    `Modifier.weight(1f)` (unresolved — weight is a RowScope/ColumnScope
+    extension; the stats page's panes are inline inside their Row for that
+    reason). The helper is now a `RowScope.` extension function so the
+    weight resolves in the caller's row.
   - FOOTER (`DrawerFooter`): no more 188dp shadowed/rounded box with
     alpha 0.55 + fade overlay — the SVG is now a FLAT opaque
     `AsyncImage` (160dp, `Alignment.BottomCenter` crop, no alpha / shadow
