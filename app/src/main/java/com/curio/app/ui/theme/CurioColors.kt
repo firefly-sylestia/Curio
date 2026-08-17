@@ -509,6 +509,16 @@ object CurioGradients {
         // them (cream). v25 — Pastel crown depth PASSED: always ON, so its
         // toggle was removed from Experiments and the pastel crown read is
         // fixed.
+        // v185 — Material theme: the muted family fill over the NEUTRAL
+        // scheme background (M3: surfaces stay neutral, one restrained
+        // accent family per lane — no vivid per-lane gradients).
+        if (materialThemeOn) {
+            val dark = isCurioDarkTheme()
+            val familyStart = accent.materialAccentFor(dark)
+            val start = lerp(familyStart, Color.Black, if (dark) 0.08f else 0.03f)
+            val end = MaterialTheme.colorScheme.background
+            return listOf(start, lerp(start, end, 0.30f))
+        }
         val start = if (AppPreferences.pastelColorsState) {
             // v7.12 — subtle 5% black deepen at the very top of pastel
             // gradients so every pastel card reads with a gentle darker
@@ -551,6 +561,14 @@ object CurioGradients {
      */
     @Composable
     fun heroBlendGradient(accent: Color): List<Color> {
+        // v185 — Material theme: a quiet two-tone family gradient over the
+        // neutral scheme background (no golden companion, no vivid crown).
+        if (materialThemeOn) {
+            val dark = isCurioDarkTheme()
+            val family = accent.materialAccentFor(dark)
+            val crown = lerp(family, Color.White, if (dark) 0.05f else 0.10f)
+            return listOf(crown, family, MaterialTheme.colorScheme.background)
+        }
         val pastel = AppPreferences.pastelColorsState
         val dark = isCurioDarkTheme()
 
@@ -698,6 +716,17 @@ object CurioMixedDeck {
      * in dark.
      */
     fun mixedDeckAccent(accents: List<Color>, pastel: Boolean = false, dark: Boolean = false): Color {
+        // v185 — Material theme: every lane collapses to its muted M3 family
+        // and the mix blends the FAMILY tones (perceptual centroid), so a
+        // multi-category deck reads as restrained M3 tones, never a vivid
+        // rainbow.
+        if (materialThemeOn) {
+            val d = accents.distinct()
+            if (d.isEmpty()) return CurioColors.CategoryCoral
+            val families = d.map { materialFamilyFor(it) }.distinct()
+            if (families.size == 1) return families.first().fill(dark)
+            return oklabCentroid(families.map { it.fill(dark) })
+        }
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
         val distinct = accents.distinct()
@@ -738,6 +767,23 @@ object CurioMixedDeck {
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
         val distinct = accents.distinct()
+        // v185 — Material theme: blend the muted FAMILY tones (no vivid
+        // multi-accent sweep — M3 restraint).
+        if (materialThemeOn) {
+            val dark = isCurioDarkTheme()
+            if (distinct.size <= 1) {
+                return CurioGradients.cardGradient(mixedDeckAccent(distinct, dark = dark))
+            }
+            val fam = distinct.map { materialFamilyFor(it) }.distinct().take(4)
+            val stops = mutableListOf<Color>()
+            fam.forEachIndexed { i, f ->
+                if (i == 0) stops.add(f.fill(dark))
+                if (i < fam.size - 1) {
+                    stops.addAll(oklabGradientStops(f.fill(dark), fam[i + 1].fill(dark), steps = 7).drop(1))
+                }
+            }
+            return stops
+        }
         val pastel = AppPreferences.pastelColorsState
         val dark = isCurioDarkTheme()
         if (distinct.size <= 1) {
@@ -776,6 +822,9 @@ object CurioMixedDeck {
     @Composable
     fun mixedDeckWash(blend: Color): Color {
         val background = MaterialTheme.colorScheme.background
+        // v185 — Material theme: the page stays NEUTRAL (M3: surfaces stay
+        // neutral, one primary carries the brand — no strong page tints).
+        if (materialThemeOn) return background
         if (!AppPreferences.tintWashEffective()) return background
         // v81 — dark mode: NO page tint — pitch black, the same rule as the
         // single-category wash (the watermark + deck carry the mix color).

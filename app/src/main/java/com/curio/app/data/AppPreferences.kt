@@ -59,6 +59,15 @@ object AppPreferences {
     private const val KEY_SAVES_WEEK_COUNTS = "saves_week_counts"
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
+    // v185 — proper M3 theme system (opt-in, default OFF): the Material
+    // theme re-does the COLOR system per M3 guidelines (single primary,
+    // neutral surfaces, 36 lane accents collapsed to ~6 muted families);
+    // the guidelines toggle applies full M3 typography/shape/spacing/layout
+    // INDEPENDENTLY (works on the Curio style too); the chrome option picks
+    // how far the guidelines go on brand chrome (full M3 vs keep Curio).
+    private const val KEY_MATERIAL_THEME = "material_theme"
+    private const val KEY_MATERIAL_GUIDELINES = "material_guidelines"
+    private const val KEY_MATERIAL_CHROME_FULL = "material_chrome_full"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
     // v28 — dark-mode elevation visibility: black shadows vanish on
@@ -256,6 +265,25 @@ object AppPreferences {
     // Default ON (v7.x — the soft look is the app's shipped default now).
     // Seeded from prefs in [initThemeMode].
     var pastelColorsState by mutableStateOf(true)
+        private set
+
+    // v185 — proper M3 Material theme (default OFF): the whole color system
+    // re-does per M3 guidelines when on. Opt-in — the default app look is
+    // untouched. Independent of [materialGuidelinesState].
+    var materialThemeState by mutableStateOf(false)
+        private set
+
+    // v185 — full M3 guidelines (default OFF): M3 typography, shapes,
+    // spacing, layout and tonal elevation on top of the CURRENT style
+    // (works on Curio colors too — independent of [materialThemeState]).
+    var materialGuidelinesState by mutableStateOf(false)
+        private set
+
+    // v185 — chrome treatment under the guidelines toggle: false (default)
+    // keeps Curio's brand chrome (floating pill nav, tear heroes, category
+    // cards); true swaps the nav to the M3 NavigationBar and heroes to
+    // tonal surfaces. Only read when [materialGuidelinesState] is on.
+    var materialChromeFullState by mutableStateOf(false)
         private set
 
     // Sky-azure hero variant (v27l) — when ON, the shared torn hero
@@ -589,6 +617,9 @@ object AppPreferences {
         themeModeState = getThemeMode(context)
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
+        materialThemeState = isMaterialThemeEnabled(context)
+        materialGuidelinesState = isMaterialGuidelinesEnabled(context)
+        materialChromeFullState = isMaterialChromeFullEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
@@ -679,6 +710,38 @@ object AppPreferences {
     fun setPastelColorsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PASTEL_COLORS_ENABLED, enabled).apply()
         pastelColorsState = enabled
+    }
+
+    // ── v185 — proper M3 Material theme + full guidelines (both opt-in) ──
+    /** Whether the proper M3 Material color theme is on (default off). */
+    fun isMaterialThemeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MATERIAL_THEME, false)
+
+    fun setMaterialThemeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MATERIAL_THEME, enabled).apply()
+        materialThemeState = enabled
+    }
+
+    /** Whether full M3 guidelines (type/shape/spacing/layout) are on (default off). */
+    fun isMaterialGuidelinesEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MATERIAL_GUIDELINES, false)
+
+    fun setMaterialGuidelinesEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MATERIAL_GUIDELINES, enabled).apply()
+        materialGuidelinesState = enabled
+    }
+
+    /**
+     * Whether the guidelines' chrome treatment goes FULL M3 (M3
+     * NavigationBar + tonal heroes) vs keeping Curio's brand chrome
+     * (floating pill nav, tear heroes). Default off = keep Curio chrome.
+     */
+    fun isMaterialChromeFullEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MATERIAL_CHROME_FULL, false)
+
+    fun setMaterialChromeFullEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MATERIAL_CHROME_FULL, enabled).apply()
+        materialChromeFullState = enabled
     }
 
     // ── Pastel crown depth (v7.12 experimental) ───────────────────────

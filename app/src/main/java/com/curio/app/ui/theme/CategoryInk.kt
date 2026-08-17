@@ -23,6 +23,9 @@ import com.curio.app.data.CurioCategory
  */
 @Composable
 fun CurioCategory.categoryInk(): Color {
+    // v185 — Material theme: muted family ink (M3-aligned), never the raw
+    // Tailwind accent.
+    if (materialThemeOn) return materialInk()
     // v81 — dark mode: the LIGHT 300-level twin is the text/icon ink on the
     // pitch-black page (the "lighter color is now the text" reversal).
     if (isCurioDarkTheme()) return lightAccent
@@ -57,6 +60,9 @@ fun CurioCategory.categoryInk(): Color {
  */
 @Composable
 fun CurioCategory.themedAccent(): Color {
+    // v185 — Material theme: the muted M3 family color (one per family),
+    // not the vivid per-lane Tailwind accent.
+    if (materialThemeOn) return materialAccent()
     // Pastel color mode (v7.5) — every accent softens to its pastel twin so
     // fills, gradients, chips and the mixed-deck blends all read pastel. The
     // twin is theme-aware: an airy pastel on the cream surface in light mode,
@@ -84,6 +90,8 @@ fun CurioCategory.themedAccent(): Color {
  */
 @Composable
 fun CurioCategory.headerAccent(): Color {
+    // v185 — Material theme: the muted family banner fill.
+    if (materialThemeOn) return materialHeaderAccent()
     val base = themedAccent()
     // v32 — non-pastel category banners were TOO VIVID (blinding) next to
     // the calm pastel headers: pull saturation ~15% so a vivid lane accent
@@ -137,6 +145,8 @@ fun CurioCategory.readableAccentInk(): Color {
  */
 @Composable
 fun CurioCategory.onAccent(): Color = when {
+    // v185 — Material theme: ink that reads on the muted family fill.
+    materialThemeOn -> materialOnAccent()
     !AppPreferences.pastelColorsState -> Color.White
     isCurioDarkTheme() -> lightAccent
     // The wildcard's accent is ALREADY a pastel pink — a deep hue twin (the
@@ -232,6 +242,8 @@ fun pastelFillInk(fill: Color): Color = when {
  * recomposition of animated screens. v7.94.
  */
 internal fun CurioCategory.categoryInkFor(pastel: Boolean, dark: Boolean): Color = when {
+    // v185 — Material theme (non-composable twin path).
+    materialThemeOn -> materialInkFor(dark)
     dark -> lightAccent
     // v27p — same light-mode rule as [categoryInk]: deepen mid-lightness
     // accents so watermark glyphs track the text ink exactly.
@@ -243,7 +255,10 @@ internal fun CurioCategory.categoryInkFor(pastel: Boolean, dark: Boolean): Color
  * parameterized by pastel mode + dark theme (see [categoryInkFor]).
  */
 internal fun CurioCategory.themedAccentFor(pastel: Boolean, dark: Boolean): Color =
-    if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark)
+    // v185 — Material theme (non-composable twin path): the muted family
+    // fill instead of the vivid accent.
+    if (materialThemeOn) materialAccentFor(dark)
+    else if (!pastel) (if (dark) darkAccent(accent) else accent) else pastelAccent(accent, dark)
 
 /** Whether a color is pale enough to need a deep ink twin instead of itself. */
 private fun Color.isPale(): Boolean {
@@ -316,6 +331,10 @@ private fun Color.needsLightDeepInk(): Boolean = luminance() > 0.105f
 @Composable
 fun CurioCategory.categoryBackgroundWash(): Color {
     val background = MaterialTheme.colorScheme.background
+    // v185 — Material theme: M3 keeps page backgrounds NEUTRAL (the
+    // multi-color guideline — surfaces stay neutral, one primary carries
+    // the brand), so the category wash collapses to the scheme background.
+    if (materialThemeOn) return background
     // Settings toggle (v6.4): when the category tint is turned off, pages use
     // the plain theme background (cream) exactly as they did before the wash
     // rollout.
@@ -344,6 +363,8 @@ fun CurioCategory.categoryBackgroundWash(): Color {
  */
 @Composable
 fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
+    // v185 — Material theme: neutral M3 surfaces (no per-category tint).
+    if (materialThemeOn) return base
     if (!AppPreferences.tintWashEffective()) return base
     // v81 — dark mode: a near-black card tinted with the category's hue
     // (elevation reads as lighter surfaces on the black page — the dark
@@ -387,6 +408,8 @@ fun CurioCategory.categorySurfaceMoodBoard(base: Color = MaterialTheme.colorSche
  */
 @Composable
 fun CurioCategory.categoryChipSurface(base: Color = MaterialTheme.colorScheme.surfaceContainerLow): Color {
+    // v185 — Material theme: neutral M3 chip surfaces.
+    if (materialThemeOn) return base
     if (!AppPreferences.tintWashEffective()) return base
     // v81 — dark mode: a touch lighter + more desaturated than cards so the
     // chip lifts off the near-black cards (deep accents otherwise read

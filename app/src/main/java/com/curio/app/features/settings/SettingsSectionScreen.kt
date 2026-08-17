@@ -224,6 +224,41 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v185 — the proper M3 Material theme system (both opt-in, default
+        // OFF — the current app look is untouched).
+        SettingsRowPulse(highlightKey == "appearance-material-theme") {
+            CompactSwitchRow(
+                "Material theme",
+                "Proper Material 3 colors: one primary, neutral surfaces, muted category families",
+                AppPreferences.materialThemeState
+            ) {
+                AppPreferences.setMaterialThemeEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        SettingsRowPulse(highlightKey == "appearance-material-guidelines") {
+            CompactSwitchRow(
+                "Material guidelines",
+                "Full M3: typography, shapes, spacing and layout (works on any style)",
+                AppPreferences.materialGuidelinesState
+            ) {
+                AppPreferences.setMaterialGuidelinesEnabled(context, it)
+            }
+        }
+        // v185 — chrome treatment only matters when the guidelines are on.
+        if (AppPreferences.materialGuidelinesState) {
+            CurioSettingsDivider()
+            SettingsRowPulse(highlightKey == "appearance-material-chrome") {
+                CompactSwitchRow(
+                    "Material chrome",
+                    "Full M3 nav bar and heroes (off keeps Curio's pill bar and tear heroes)",
+                    AppPreferences.materialChromeFullState
+                ) {
+                    AppPreferences.setMaterialChromeFullEnabled(context, it)
+                }
+            }
+        }
+        CurioSettingsDivider()
         // v101 — the dark-mode pill glow is the subtle top-only version by
         // default; the toggle restores the fuller glow for comparison.
         SettingsRowPulse(highlightKey == "appearance-pill-glow") {

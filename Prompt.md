@@ -1,25 +1,48 @@
-# Current Request — nav pill polish (v184): calmer morph/collapse, bigger pill, more spacing, Changa One font
+# Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: DONE — committed and pushed
+## Status: IN PROGRESS — Phase A/B underway (branch: Alpha, synced to main a127f10)
 
-## Request
-1. "make the nav pill morph and collape animation even smoother and calmer. and give the inactive buttons a little more space. and use a new bond font for the tet of nav pill maybe this one, Changa One" (https://fonts.google.com/specimen/Changa+One)
-2. "also make it a little wide like just a little heigh the pill"
-3. "also just like it expands when i come back to home screen make it collapse when i go to other screen from home screen for smoother look."
+## Request (user, paraphrased)
+"Go to alpha branch, sync with main (alpha was 251 behind — done, fast-forwarded + pushed). Then: read the full M3 guidelines (m3.material.io color system + get-started + full guideline). Add 2 new toggles: (1) a proper Material theme — category colors per M3 multi-color guideline; (2) a test 'full Material guideline' — text spacing boxes layout everything. New EXTRA system as toggles, opt-in only, without changing the current app look. Make a proper plan and follow it until done."
 
-## Changes (all in `app/src/main/java/com/curio/app/ui/components/CurioBottomNav.kt`)
-- **Springs**: `PillWidth/Motion/Color/ExpandSpring` stiffness 400 → 240, damping stays 1.0 (critically damped — zero overshoot/bounce). All four specs identical → v162/v165 lockstep preserved. ~40% slower settle.
-- **Collapse**: verified it already mirrors the expand — the outgoing pill's width shrinks + label slides back into the icon on the SAME springs as the incoming pill's growth (since v162; the v125 "instant label exit" was long gone). The 240 stiffness slows BOTH directions. Fixed the stale v125 function KDoc claiming the label exit is instant.
-- **Size**: icon pills 60 → 64dp, expanded 128 → 136dp, height 48 → 52dp ("a little wide, a little high").
-- **Spacing**: bar inner padding 7 → 8dp, pill gap 6 → 10dp (inactive buttons breathe).
-- **Font**: bundled `changa_one_regular.ttf` (Changa One v1.003, OFL — verified TTF magic + name table) + `ChangaOneFontFamily` (single-entry, like PatrickHand — Changa One has no bold TTF, so labels use `FontWeight.Normal` to avoid fake-bold synthesis). Nav pill labels at 13sp (12sp geom Bold → 13sp Changa One keeps visual weight); rail labels match. License at `app/third_party/changa_one_OFL.txt` (NOT in res/font — typed dir rejects non-fonts).
+## Clarified via ask_user (user's answers)
+1. **Style picker**: "clear the current material style and fully redo it from beginning with the guidelines" — the old partial Material style is ALREADY gone (removed in v78; only stale comments remain). So: build the proper M3 Material theme from scratch as an opt-in toggle.
+2. **Category colors**: "One color per family, muted" — collapse the 36 lanes into ~6 hue families, each mapped to muted M3-aligned tones from the scheme (secondary/tertiary/container roles). Lanes are not identical, but no raw per-lane hues.
+3. **Toggle 2**: INDEPENDENT of the Material theme — applies M3 typography/shape/spacing/layout on the CURRENT Curio style too.
+4. **Brand chrome**: "give both as an option, all opt-in, no default on" — a sub-option: Full M3 chrome (M3 NavigationBar, tonal heroes) vs Keep Curio brand chrome (floating pill nav, tear heroes, category cards stay). Both toggles OFF by default = current app unchanged.
 
-## Files changed
-- app/src/main/java/com/curio/app/ui/components/CurioBottomNav.kt (springs, dims, spacing, labels, imports, KDoc)
-- app/src/main/java/com/curio/app/ui/theme/CurioTypography.kt (ChangaOneFontFamily)
-- app/src/main/res/font/changa_one_regular.ttf (new)
-- app/third_party/changa_one_OFL.txt (new — license)
-- fastlane changelog (ADD bullet), app/AGENTS.md (v184 entry), Prompt.md
+## M3 guideline answers (from reading m3.material.io + developer.android.com M3 docs)
+- Color system = 5 key colors (primary, secondary, tertiary, neutral, error) × 13-tone palettes; ~45 roles. Surfaces neutral, ONE primary for key actions, secondary/tertiary for restrained accents. Multi-color products: neutralize — the guideline for many colors is restraint, not a color per section.
+- Dynamic color (Material You): derive the scheme from the wallpaper (Android 12+).
+- Typography: 15-style type scale (display/headline/title/body/label × large/medium/small), Roboto defaults.
+- Shapes: extraSmall 4 / small 8 / medium 12 / large 16 / extraLarge 24 (Curio currently 8/16/24/32/48).
+- Elevation: tonal color overlays (surfaceContainer ladder) + shadows.
 
-## Follow-ups
-- CI validates the compile (new font resource + imports). Changa One is wide — watch that the expanded 136dp pill still fits "Shuffle"/"Cabinet" at 13sp on device; easy to tweak later.
+## Architecture
+### Toggle 1 — "Material theme" (Settings → Appearance switch, default OFF)
+- `MaterialColorSchemes.kt`: light/dark ColorScheme — dynamic (API 31+) with a seeded brand-coral baseline fallback (built from a proper M3-style tonal palette via the existing toHsl/fromHsl helpers, M3 tone→role mapping).
+- `MaterialFamilies.kt`: 36 lane accents → 6 hue families (rose/red, orange/amber, gold/yellow, green/teal, blue/indigo, purple/violet); each family resolves to a muted M3-aligned color from the active scheme (secondary / tertiary / primary-container roles).
+- Wire the CHOKE POINTS so every screen repaints: `CurioCategory.themedAccent()`, `categoryInk()`, `onAccent()`, `headerAccent()`, `categoryBackgroundWash()`, `categorySurface()`, `categoryChipSurface()`, `CurioGradients.cardGradient/heroBlendGradient`, `CurioMixedDeck.*`, watermark ink. When `materialThemeState` is on, these resolve through the scheme (family accents, neutral surfaces, single primary).
+### Toggle 2 — "Material guidelines" (default OFF, independent of toggle 1)
+- `MaterialTypography` = default M3 type scale (Roboto); `MaterialShapes` = M3 4/8/12/16/24; spacing token layer (4/8/12/16/24/32/48dp) applied to shared components; tonal elevation.
+- CurioTheme switches typography/shapes when on. Works on Curio colors too.
+### Chrome sub-option (when guidelines on): full M3 chrome vs keep Curio brand chrome.
+
+## Phases
+- A. Preferences (materialThemeState / materialGuidelinesState / materialChromeFullState) + Settings → Appearance rows. ✅ (in progress)
+- B. Material color system (schemes, families, choke-point wiring).
+- C. Material guidelines system (typography, shapes, spacing, elevation) + chrome option.
+- D. Docs: app/AGENTS.md (v185+), changelog, Prompt.md; commit + push per phase.
+
+## Files (planned)
+- app/src/main/java/com/curio/app/data/AppPreferences.kt (3 prefs + setters)
+- app/src/main/java/com/curio/app/features/settings/SettingsSectionScreen.kt (Appearance rows)
+- app/src/main/java/com/curio/app/ui/theme/MaterialColorSchemes.kt (NEW)
+- app/src/main/java/com/curio/app/ui/theme/MaterialFamilies.kt (NEW)
+- app/src/main/java/com/curio/app/ui/theme/CurioTheme.kt (scheme/typography/shape switching)
+- app/src/main/java/com/curio/app/ui/theme/CategoryInk.kt (choke-point gating)
+- app/src/main/java/com/curio/app/ui/theme/CurioColors.kt (gradients/mixed-deck gating)
+- app/AGENTS.md, fastlane changelog, Prompt.md
+
+## Verification
+- Static only (no Gradle here): check_braces.js, git diff --check, import-hygiene greps; CI validates compile on push.
