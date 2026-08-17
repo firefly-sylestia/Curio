@@ -1168,6 +1168,26 @@ app/src/main/java/com/curio/app/
     next real change). LESSON: the user's "0/pages" = the "0 / 350
     pages" count line under the ring — shorthand for current/total
     display.
+- **v169 — category-picker "Manage categories" is a proper floating,
+  theme-aware, text-only capsule; filters' Apply/Show-all drops its check
+  tick.** User: "in category picker the manage category option there a
+  scafhold or strip behind the button make it proper floating, and theme
+  aware and remove the tick mark just text and same in filters show all
+  topics dont push". SpinScreen.kt:
+  - Manage pill (the picker sheet's bottom action): was a full-width bar
+    (`fillMaxWidth()` — read as a strip). Now content-sized + centered
+    via ColumnScope `.align(Alignment.CenterHorizontally)`, and its
+    static `surfaceContainerHigh` color became the nav-pill's dynamic
+    container `curioFloatingNavContainerFor(currentCat.categoryBackgroundWash())`
+    — the sheet's wash lifted 30% toward the elevated surface in light,
+    elevated dark in dark (the sheet itself is `currentCat.categoryBackgroundWash()`
+    tinted). Text-only: the CurioIcons.DragHandle glyph + Spacer are gone.
+  - Filters' Apply / Show all topics pill: the leading CurioIcons.Check
+    tick + Spacer are gone — text only (accent pill design unchanged).
+  - COMMIT ONLY — the user said "dont push" (still unpushed: v168 too).
+    LESSON: "scafhold or strip" = a full-width bottom action read as a
+    bar; "proper floating" = the content-sized centered capsule language;
+    "tick mark" = the leading glyph in the pill row.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`

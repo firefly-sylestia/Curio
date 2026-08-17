@@ -28,6 +28,8 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Category picker: "Manage categories" is now a proper floating capsule (content-sized and centered — the old full-width bar is gone), it wears the same dynamic theme-aware container as the nav pill, and it's text only — the little drag-handle glyph is gone.
+- Filters: the Apply / Show all topics button is text only now — the leading check tick is gone (same as the Manage pill).
 - Progress dialog: the count is now a single number in the top corner — tap it and the inline field opens right there, Enter saves it, and a small replay icon resets it to the default; the "0 / pages" line and the "Edit total" chip are gone.
 - Topic Reveal: the Like/Dislike pill's capsule now wears the page's dynamic tint like the nav bar — it follows the topic's category wash in light mode instead of sitting on a static grey plate.
 - Navigation: tapping a nav pill no longer flashes the grey ripple circle — the tabs respond without the touch "shadow" effect.

@@ -1,6 +1,27 @@
 # Prompt.md — Request log
 
-## Current request — progress editor dialog: single-count top corner + remove "0/pages" and "Edit total" — commit only, NO push
+## Current request — category picker Manage pill: floating + theme-aware + text-only; filters Show-all tick removed — commit only, NO push
+
+User: "in category picker the manage category option there a scafhold or
+strip behind the button make it proper floating, and theme aware and
+remove the tick mark just text and same in filters show all topics dont
+push".
+
+SpinScreen.kt:
+- Manage pill (picker sheet bottom action): was full-width
+  (fillMaxWidth = the strip). Now content-sized + centered
+  (.align(CenterHorizontally)) and its static surfaceContainerHigh is
+  the nav-pill dynamic container
+  curioFloatingNavContainerFor(currentCat.categoryBackgroundWash())
+  (sheet is wash-tinted; light lifts 30%, dark = elevated dark).
+  Text-only — CurioIcons.DragHandle glyph removed.
+- Filters Apply / Show all topics: CurioIcons.Check tick removed —
+  text only (accent pill unchanged).
+
+Docs: changelog FIX lines, AGENTS.md v169, this file. COMMITTED ONLY —
+"dont push" (v168 progress-dialog commit is also still unpushed).
+
+## Earlier completed request — progress editor dialog: single-count top corner + remove "0/pages" and "Edit total" — commit only, NO push
 
 User: "from the progress editor dialog remove the 0/pages option and move
 it to the top corner and just show one no. and tapping it automatically

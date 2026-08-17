@@ -142,6 +142,7 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
+import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
@@ -2091,6 +2092,9 @@ private fun FilterSheet(
                     .curioInnerGlow(applyShape, cat.themedAccent(), strength = 0.12f)
                     .clip(applyShape)
             ) {
+                // v168 — TEXT ONLY: the leading check tick is gone (the
+                // user asked for just the label, same as the category
+                // picker's Manage pill).
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -2098,12 +2102,6 @@ private fun FilterSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    CurioIcon(
-                        CurioIcons.Check, null,
-                        tint = cat.themedButtonInk(),
-                        size = 19.dp
-                    )
-                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = if (activeCount > 0) "Apply filters ($activeCount)" else "Show all topics",
                         style = MaterialTheme.typography.labelLarge.copy(
@@ -4709,35 +4707,30 @@ private fun CategoryPickerSheet(
                         // 50, elevated surface, icon + label centered) instead
                         // of a flat full-width TextButton. v160 — the dark-
                         // mode hairline rim is gone (see v157).
+                        // v168 — PROPER floating capsule: content-sized and
+                        // centered (the old fillMaxWidth bar read as a strip),
+                        // theme-aware via the same dynamic container as the
+                        // nav pill (the sheet's wash lifted 30% toward the
+                        // elevated surface in light, elevated dark in dark),
+                        // and TEXT ONLY — the drag-handle glyph is gone.
                         Surface(
                             onClick = onBrowseAll,
                             shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            color = curioFloatingNavContainerFor(currentCat.categoryBackgroundWash()),
                             shadowElevation = 6.dp,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 4.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                CurioIcon(
-                                    CurioIcons.DragHandle, null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 18.dp
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    // v26 — renamed; now opens Manage Categories.
-                                    // v90 — theme-aware neutral ink (the old scheme
-                                    // primary read as a pale pink link on the sheet).
-                                    text = "Manage categories",
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                            Text(
+                                // v26 — renamed; now opens Manage Categories.
+                                // v90 — theme-aware neutral ink (the old scheme
+                                // primary read as a pale pink link on the sheet).
+                                text = "Manage categories",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                            )
                         }
                     }
 
