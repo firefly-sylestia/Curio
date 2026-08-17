@@ -17346,5 +17346,1734 @@
       "durationMinutes": 8,
       "instruction": "Learn why small dark blobs are future stars, then explain how they avoid collapsing too fast."
     }
+  },
+  {
+    "id": "astronomy-gamma-cassiopeiae",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "Gamma Cassiopeiae",
+    "teaser": "A bright star in the W-shaped constellation that keeps having tantrums: it's a Be star whose rapid spin flings a disk of gas around its equator, and it periodically erupts, briefly doubling in brightness. Its 1937 outburst made it briefly outshine the whole constellation. The disk flickers, and astronomers watch it like a patient on a monitor.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the star Gamma Cassiopeiae",
+      "durationMinutes": 12,
+      "instruction": "Read how a star spinning near its limit flings a disk of itself into space, then notice that its brightness changes without warning — the star is having an outburst."
+    },
+    "tags": [
+      "Stars",
+      "Variable Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-r-coronae-borealis",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "R Coronae Borealis",
+    "teaser": "The prototype of a bizarre class of star that dims dramatically, then slowly recovers. The star periodically puffs out soot — literally carbon dust — that blocks its own light, dropping from naked-eye brightness to invisible for months. It's one of the rarest stellar behaviours, and the soot is the star's own carbon-rich atmosphere condensing.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet R Coronae Borealis",
+      "durationMinutes": 12,
+      "instruction": "Read how a star can hide behind its own soot, then notice that the dimming is not an eclipse by another object but a star choking on its own carbon."
+    },
+    "tags": [
+      "Stars",
+      "Variable Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-kapteyns-star",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "Kapteyn's Star",
+    "teaser": "A red dwarf discovered in 1897 by Jacobus Kapteyn, famous for its huge proper motion — second only to Barnard's Star. It was once part of a dwarf galaxy that the Milky Way tore apart and swallowed, making it a star with a refugee history. Its 2014 exoplanet claim was later disputed, but the star remains a cosmic immigrant story.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Kapteyn's Star",
+      "durationMinutes": 12,
+      "instruction": "Read how a star from a shredded dwarf galaxy now lives among the Sun's neighbours, then notice that its speed across the sky betrays its foreign origin."
+    },
+    "tags": [
+      "Stars",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-61-cygni",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "61 Cygni",
+    "teaser": "The first star to have its distance measured: Friedrich Bessel's 1838 parallax of this faint double star proved the stars were not all at the same distance, a Copernican-scale shift. It's a close binary of orange dwarfs nicknamed the Flying Star for its swift motion. Its two components take about 650 years to orbit each other.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet 61 Cygni",
+      "durationMinutes": 12,
+      "instruction": "Read how the first measured stellar distance used a star's tiny annual wobble, then notice that the same wobble technique still maps the galaxy today."
+    },
+    "tags": [
+      "Stars",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-delta-cephei",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "Delta Cephei",
+    "teaser": "The star that gave its name to the Cepheid variable class — and through them, the universe's distance ladder. Its brightness pulses in a steady rhythm, and the period of that rhythm reveals its true luminosity, letting astronomers measure distances across galaxies. Henrietta Leavitt discovered the relation; Edwin Hubble used it to prove the universe expands.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Delta Cephei",
+      "durationMinutes": 12,
+      "instruction": "Read how a pulsing star's rhythm reveals its true brightness, then follow the chain: period → luminosity → distance → the expanding universe."
+    },
+    "tags": [
+      "Stars",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-algol",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "Algol (The Demon Star)",
+    "teaser": "The most famous eclipsing binary in the sky: two stars that cross in front of each other, making the combined light dip noticeably every 2.87 days. Ancient sky-watchers noticed its wink and named it the Demon Star. Its pair is actually a triple system, and the eclipses are so regular you can time your watch by them.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Algol",
+      "durationMinutes": 12,
+      "instruction": "Read how a star that blinks every 2.87 days taught us about binary systems, then notice that the demon star's 'wink' is a perfectly regular eclipse, not a demon."
+    },
+    "tags": [
+      "Stars",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-van-maanens-star",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "Van Maanen's Star",
+    "teaser": "The closest known solitary white dwarf, 14 light-years away — the cooling corpse of a star that ran out of fuel. It's so dense that a teaspoon of its material would weigh tonnes, yet it's the remnant of a star much like the Sun. It drifts through the galaxy with no companion, a stellar ghost.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Van Maanen's Star",
+      "durationMinutes": 12,
+      "instruction": "Read what a white dwarf is — a star's exposed core — then notice that Van Maanen's Star is cooling and will keep cooling for billions of years."
+    },
+    "tags": [
+      "Stars",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-r136a1",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "R136a1",
+    "teaser": "The most massive star known: roughly 200 times the Sun's mass, burning fuel at a rate that would strip a normal star apart. It lives in the Tarantula Nebula, a star factory in the Large Magellanic Cloud. Stars this big were long theorized to be impossible — their own light should blow them away. R136a1 exists anyway.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet R136a1",
+      "durationMinutes": 12,
+      "instruction": "Read how a star 200 times the Sun's mass should self-destruct, then notice that it's already slimming down — it's lost mass since birth and will die as a supernova soon (in cosmic terms)."
+    },
+    "tags": [
+      "Stars",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-s-doradus",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "S Doradus",
+    "teaser": "A luminous blue variable in the Large Magellanic Cloud, one of the brightest stars known — so bright that if it replaced the Sun, Earth would instantly vaporize. Stars like S Doradus are caught between two states, puffing off mass in giant eruptions. They're the likely ancestors of the most energetic supernovae.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet S Doradus",
+      "durationMinutes": 12,
+      "instruction": "Read how a star near the edge of what physics allows behaves, then notice that its eruptions are a death rattle in slow motion."
+    },
+    "tags": [
+      "Stars",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-centaurus-a",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "Centaurus A",
+    "teaser": "The nearest giant radio galaxy, 12 million light-years away, with a dark dust lane slicing across its bright core — the signature of a galaxy that ate another. It's also a prodigious source of radio waves, powered by a supermassive black hole that fires jets 10,000 light-years into space. A galactic cannibal caught mid-meal.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet Centaurus A",
+      "durationMinutes": 15,
+      "instruction": "Read how a galaxy's dust lane betrays its cannibal past, then notice that the jets from its core are invisible to our eyes but blaze in radio."
+    },
+    "tags": [
+      "Galaxies",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-pinwheel-galaxy",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "The Pinwheel Galaxy (M101)",
+    "teaser": "A giant face-on spiral in Ursa Major, 21 million light-years away, whose arms sweep so wide they cover more sky than the full Moon. It's a star factory: in 2011 it hosted one of the closest and brightest supernovae of the modern era. Its open arms make it a favourite target for amateur astronomers with big scopes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Pinwheel Galaxy",
+      "durationMinutes": 15,
+      "instruction": "Read how a galaxy's open arms trace where gas piles up, then notice that the 2011 supernova briefly outshone the whole galaxy's core."
+    },
+    "tags": [
+      "Galaxies",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-antennae-galaxies",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "The Antennae Galaxies",
+    "teaser": "Two spiral galaxies caught mid-collision 45 million light-years away, their long tidal tails of stars giving the pair its name. The collision is triggering a firestorm of star formation in the overlap region. It's the best nearby example of what happens when galaxies merge — a process our own Milky Way will undergo with Andromeda in about 4 billion years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Antennae Galaxies",
+      "durationMinutes": 15,
+      "instruction": "Read how two galaxies' gravitational tango flings stars into tails, then notice the bright knot where the two discs overlap — a nursery of newborn star clusters."
+    },
+    "tags": [
+      "Galaxies",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-hoags-object",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "Hoag's Object",
+    "teaser": "One of the strangest galaxies known: a perfect ring of young blue stars surrounding a yellow core, with empty space between — like a cosmic donut. Discovered by Art Hoag in 1950, it's a rare ring galaxy whose formation is still debated. Even stranger, another ring galaxy is visible through the gap, an almost impossible coincidence.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet Hoag's Object",
+      "durationMinutes": 15,
+      "instruction": "Read how a ring galaxy could form — a collision, a bar, a ripple? — then notice the second ring galaxy peeking through the gap, a one-in-a-billion alignment."
+    },
+    "tags": [
+      "Galaxies",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-cigar-galaxy",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "The Cigar Galaxy (M82)",
+    "teaser": "A starburst galaxy seen edge-on, 12 million light-years away, churning out stars so furiously that it's blowing its own gas out in red filaments — a galactic wind you can see. The starburst was triggered by a close brush with its neighbour M81. Its core hides a black hole and a dense star cluster, and the outflow is visible in amateur telescopes.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Cigar Galaxy",
+      "durationMinutes": 15,
+      "instruction": "Read how a galaxy can be caught mid-starburst, then notice the red gas streaming out of its poles — the galaxy is exhaling."
+    },
+    "tags": [
+      "Galaxies",
+      "Celestial Phenomena"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-ic-1101",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "IC 1101",
+    "teaser": "A giant elliptical galaxy at the centre of a galaxy cluster, often described as one of the largest known galaxies — if it replaced the Milky Way, its halo would swallow the Andromeda galaxy too. Most of its stars are old and red; its star-forming days are over. It's a fossil of galaxy formation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet IC 1101",
+      "durationMinutes": 15,
+      "instruction": "Read how a giant elliptical grows by eating smaller galaxies, then notice that its size is mostly dim halo — the bright core is a fraction of it."
+    },
+    "tags": [
+      "Galaxies",
+      "Cosmology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-bullet-cluster",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "The Bullet Cluster",
+    "teaser": "A galaxy cluster collision that became one of the strongest pieces of evidence for dark matter. When two clusters smashed together, their galaxies sailed through, their hot gas collided and slowed — but the gravity stayed with the galaxies, not the gas. Something invisible carries most of the mass, and it didn't slow down.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Bullet Cluster",
+      "durationMinutes": 15,
+      "instruction": "Read how a cosmic crash separates ordinary matter from dark matter, then follow the logic: the lensing shows mass where the gas isn't — dark matter is real."
+    },
+    "tags": [
+      "Galaxies",
+      "Cosmology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-laniakea",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "Laniakea Supercluster",
+    "teaser": "The name given in 2014 to the enormous basin of galaxies that contains the Milky Way — 100,000 galaxies across 500 million light-years, all flowing toward a gravitational centre called the Great Attractor. Its name means 'immeasurable heaven' in Hawaiian. The Milky Way is a suburb of this much larger structure.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Laniakea Supercluster",
+      "durationMinutes": 15,
+      "instruction": "Read how astronomers map the universe's largest structures by tracking galaxy motions, then notice that Laniakea itself is nested inside even larger structures."
+    },
+    "tags": [
+      "Galaxies",
+      "Cosmology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-bootes-void",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "The Boötes Void",
+    "teaser": "A sphere of nearly empty space 330 million light-years across, containing only a handful of galaxies where hundreds should be. Discovered in 1981, it's one of the largest voids known — a region of the universe where matter never clumped. Astronomers call it the Great Nothing.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Boötes Void",
+      "durationMinutes": 15,
+      "instruction": "Read how a bubble of emptiness can be bigger than most structures, then consider that voids are as informative as galaxies — they show where gravity lost."
+    },
+    "tags": [
+      "Galaxies",
+      "Cosmology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-vesta",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "Vesta",
+    "teaser": "The second-largest body in the asteroid belt and the only one with a crust, mantle and core like a planet's — a leftover planetary building block. It bears an enormous impact basin, Rheasilvia, whose southern pole was punched out by a collision. Chunks knocked off Vesta fall to Earth as HED meteorites, letting us hold a piece of it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Vesta",
+      "durationMinutes": 15,
+      "instruction": "Read how an asteroid kept its planetary structure intact, then notice that the meteorites in your collection may literally be pieces of Vesta's crust."
+    },
+    "tags": [
+      "Asteroids",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-pallas",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "Pallas",
+    "teaser": "The second asteroid ever discovered (1802), and one of the most unusual: its orbit is so tilted and eccentric that it dives through the belt at a steep angle. It's thought to be a remnant of a protoplanet that never finished forming. Recent studies suggest its surface may be covered in water-bearing minerals.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Pallas",
+      "durationMinutes": 12,
+      "instruction": "Read how the second asteroid found turned out to be one of the strangest, then notice that its tilted orbit suggests a violent past — or a visitor from elsewhere."
+    },
+    "tags": [
+      "Asteroids",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-hygiea",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "Hygiea",
+    "teaser": "The fourth-largest asteroid in the belt — and, after Dawn's measurements, a candidate dwarf planet, the smallest in the solar system. It's remarkably round and dark, coated in carbon-rich material. It was the first asteroid whose shape was measured to be nearly spherical, which is exactly what bumps it up a class.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Hygiea",
+      "durationMinutes": 12,
+      "instruction": "Read how roundness can make a rock a dwarf planet, then notice that Hygiea's dark carbon surface is ancient material left from the solar system's birth."
+    },
+    "tags": [
+      "Asteroids",
+      "Dwarf Planets"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-eros",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "Eros",
+    "teaser": "The first asteroid ever orbited and landed on by a spacecraft: NEAR Shoemaker touched down on its cratered, peanut-shaped surface in 2001. It's a near-Earth asteroid, and radar images show a body covered in regolith — ground-up rock — with boulders scattered across it. The mission ended with a gentle crash-landing that was never supposed to work, and did.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Eros",
+      "durationMinutes": 15,
+      "instruction": "Read how a spacecraft ended its mission by landing on the asteroid it had orbited for a year, then notice that Eros's surface is loose rubble, not solid rock."
+    },
+    "tags": [
+      "Asteroids",
+      "Space Missions"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-psyche",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "16 Psyche",
+    "teaser": "An asteroid that appears to be the exposed metal core of a shattered protoplanet — mostly iron and nickel, worth more in fiction than in fact. It's so dense that astronomers suspect it's a planetary core stripped of its rocky mantle. NASA's Psyche spacecraft launched in 2023 to visit it, arriving in 2029 to test the idea.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet 16 Psyche",
+      "durationMinutes": 15,
+      "instruction": "Read how an asteroid of metal could be a planet's naked core, then notice that the mission to test it will teach us how planetary cores form."
+    },
+    "tags": [
+      "Asteroids",
+      "Space Missions"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-sedna",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Solar System",
+    "name": "Sedna",
+    "teaser": "One of the most distant known objects in the solar system, three times farther out than Neptune, on an orbit so stretched it takes 11,000 years to circle the Sun. Its discovery in 2003 hinted at a hidden ninth planet or an ancient encounter that flung it out. Sedna never gets close enough to any planet to be disturbed — it's a fossil of the solar system's formation.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Sedna",
+      "durationMinutes": 15,
+      "instruction": "Read how an object on an 11,000-year orbit preserves the solar system's earliest history, then consider what could have flung Sedna so far out."
+    },
+    "tags": [
+      "Solar System",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-quaoar",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Solar System",
+    "name": "Quaoar",
+    "teaser": "A trans-Neptunian object that surprised astronomers by hosting a ring where no ring should be: far outside its Roche limit, where gravity should have let the ring coalesce into a moon. Discovered in 2002, Quaoar is about half Pluto's size. Its impossible ring is teaching us that ring physics is stranger than textbooks say.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Quaoar",
+      "durationMinutes": 15,
+      "instruction": "Read how a ring surviving beyond the Roche limit broke a textbook rule, then notice that Quaoar's moon Weywot orbits inside the ring's gap."
+    },
+    "tags": [
+      "Solar System",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-gonggong",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Solar System",
+    "name": "Gonggong",
+    "teaser": "A red trans-Neptunian dwarf planet with a 552-year orbit, named after a Chinese water god. Its redness suggests a surface covered in methanol ice — the frozen leftovers of the early solar system. It's one of several large bodies beyond Neptune that are redefining where 'planet' begins and end.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Gonggong",
+      "durationMinutes": 12,
+      "instruction": "Read why a distant red world matters to planetary classification, then notice that its reddish colour is frozen methanol, a sign of a very old, very cold surface."
+    },
+    "tags": [
+      "Solar System",
+      "Dwarf Planets"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-phaethon",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Comets & Meteors",
+    "name": "Phaethon",
+    "teaser": "An asteroid that acts like a comet: it brightens dramatically when closest to the Sun, shedding dust that becomes the Geminid meteor shower every December. Some of its material may have boiled off its surface in a previous close pass. It's a 'rock comet', blurring the line between asteroid and comet.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Phaethon",
+      "durationMinutes": 12,
+      "instruction": "Read how one asteroid supplies an annual meteor shower, then notice that Phaethon gets so hot at perihelion that its surface may literally crack and shed."
+    },
+    "tags": [
+      "Comets & Meteors",
+      "Asteroids"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-trappist-1e",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "TRAPPIST-1e",
+    "teaser": "A rocky planet in a seven-planet system 40 light-years away, often called the best place to look for life beyond Earth. It's about the size of Earth, likely rocky, and sits in the habitable zone of an ultra-cool red dwarf. Its siblings orbit so tightly that their transits allow astronomers to measure their masses and compositions.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet TRAPPIST-1e",
+      "durationMinutes": 15,
+      "instruction": "Read why an Earth-sized planet around a dim red dwarf is the prime life-search target, then notice that the whole system would fit inside Mercury's orbit."
+    },
+    "tags": [
+      "Exoplanets",
+      "Astrobiology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-hd-189733b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "HD 189733b",
+    "teaser": "A hot Jupiter 63 light-years away famous for its colour: deep azure blue, like Earth's oceans — but the blue is a scorched sky of silicate rain. Its atmosphere was the first to have its colour directly measured. Winds there blow at 8,700 km/h, and the 'rain' is molten glass falling sideways.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet HD 189733b",
+      "durationMinutes": 15,
+      "instruction": "Read how a blue planet turned out to be a glass-raining hellworld, then notice that its colour comes from scattering in a hazy atmosphere, not water."
+    },
+    "tags": [
+      "Exoplanets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-wasp-12b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "WASP-12b",
+    "teaser": "A hot Jupiter so close to its star that the star is slowly eating it — the planet is being pulled apart and its material is streaming into the star, shrinking the planet's orbit. It's the first planet confirmed to be in the process of being destroyed. Its day side reaches 2,500°C, hot enough to vaporize most metals.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet WASP-12b",
+      "durationMinutes": 12,
+      "instruction": "Read how a planet can be devoured by its own star, then notice that WASP-12b's death spiral is a preview of what will happen to many close-in planets."
+    },
+    "tags": [
+      "Exoplanets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-55-cancri-e",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "55 Cancri e",
+    "teaser": "A super-Earth that may be made largely of diamond — a carbon-rich world orbiting its star so closely that a year lasts 18 hours. Its surface may be a crust of graphite over a diamond mantle, and it could host lava oceans. It's one of the first rocky planets found around a Sun-like star.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet 55 Cancri e",
+      "durationMinutes": 12,
+      "instruction": "Read how a planet's carbon content could make it a giant diamond, then notice that its 18-hour year means its star looms enormous in its sky."
+    },
+    "tags": [
+      "Exoplanets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-k2-18b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "K2-18b",
+    "teaser": "A sub-Neptune 124 light-years away that made headlines in 2023 when the James Webb Space Telescope found hints of dimethyl sulphide in its atmosphere — a molecule produced on Earth only by life. The detection is tentative and the planet may be a mini-Neptune, not a water world. A cautionary tale in the search for life: exciting, but not proof.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet K2-18b",
+      "durationMinutes": 15,
+      "instruction": "Read how a single molecule in an exoplanet's air can ignite the life debate, then weigh why astronomers call the finding promising but unconfirmed."
+    },
+    "tags": [
+      "Exoplanets",
+      "Astrobiology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-lhs-1140b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "LHS 1140b",
+    "teaser": "A super-Earth 49 light-years away with an unusually precise mass measurement, making it a prime target for atmosphere studies. It orbits a quiet red dwarf and may be a water world — possibly a single global ocean. Its star's calmness means its atmosphere has a real chance of surviving.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet LHS 1140b",
+      "durationMinutes": 12,
+      "instruction": "Read why a precisely weighed super-Earth matters for the life hunt, then notice that a quiet star may be the real reason this planet is promising."
+    },
+    "tags": [
+      "Exoplanets",
+      "Astrobiology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-51-pegasi-b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "51 Pegasi b",
+    "teaser": "The first exoplanet ever found around a Sun-like star, announced in 1995 — a discovery that opened the exoplanet era and earned its discoverers the Nobel Prize. It's a hot Jupiter, a giant planet in a 4-day orbit, so close to its star that it was initially dismissed as an instrument artefact. It upended every model of how planets form.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet 51 Pegasi b",
+      "durationMinutes": 12,
+      "instruction": "Read how the first exoplanet was nearly dismissed as noise, then notice that its existence forced astronomers to rethink where giant planets can live."
+    },
+    "tags": [
+      "Exoplanets",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-gj-1214b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "GJ 1214b",
+    "teaser": "A 'water world' candidate: a planet smaller than Neptune whose density suggests a thick envelope of water or steam over a rocky core. Its atmosphere is probably hazy, hiding the surface. It's a favourite target for transit observations because its host star is small and nearby.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet GJ 1214b",
+      "durationMinutes": 12,
+      "instruction": "Read how a planet's low density hints at a global ocean, then notice that its haze is exactly what makes its atmosphere hard to probe."
+    },
+    "tags": [
+      "Exoplanets",
+      "Astrobiology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-miranda",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Miranda",
+    "teaser": "Uranus's smallest major moon, and its strangest: a jumble of cliff faces and fault valleys that look like a badly sewn patchwork. The cliffs include Verona Rupes, the tallest known cliff in the solar system — a 20-kilometre drop. Astronomers think Miranda was shattered and reassembled, or that it froze mid-eruption.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Miranda",
+      "durationMinutes": 12,
+      "instruction": "Read how a moon can look like a broken reassembly, then notice that falling off Verona Rupes would take ten minutes — the solar system's biggest drop."
+    },
+    "tags": [
+      "Moons",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-mimas",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Mimas",
+    "teaser": "Saturn's Death Star moon: a 140-kilometre impact crater named Herschel takes up a third of its face, making it uncannily resemble the fictional space station. The impact that formed it nearly shattered the moon. Mimas may also hide a subsurface ocean, detected by the way it wobbles in its orbit.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Mimas",
+      "durationMinutes": 12,
+      "instruction": "Read how a crater that dominates a moon almost destroyed it, then notice that Mimas's wobble hints at an ocean beneath its icy shell."
+    },
+    "tags": [
+      "Moons",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-hyperion",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Hyperion",
+    "teaser": "Saturn's sponge moon: its surface is so porous that it looks like a loofah, the result of eons of impacts packing ice into a honeycomb. It's also the only moon known to tumble chaotically, with no fixed spin axis — its rotation is a cosmic coin flip. It's so small and porous that it barely qualifies as a solid body.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Hyperion",
+      "durationMinutes": 12,
+      "instruction": "Read how a moon can be a loose pile of ice with a sponge texture, then notice that its chaotic tumble means it has no day-night cycle at all."
+    },
+    "tags": [
+      "Moons",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-phoebe",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Phoebe",
+    "teaser": "Saturn's outermost large moon, orbiting backwards and far out — evidence it's a captured object from the outer solar system. Cassini flew past it in 2004 and found water ice, carbon compounds and an irregular, crater-pocked surface. Phoebe is probably the source of the dark material that coats Iapetus's leading hemisphere.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Phoebe",
+      "durationMinutes": 12,
+      "instruction": "Read how a backwards-orbiting moon reveals its captured origin, then follow the trail: Phoebe's dust may be the very stuff darkening Iapetus."
+    },
+    "tags": [
+      "Moons",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-amalthea",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Amalthea",
+    "teaser": "Jupiter's reddest moon: a small, irregular potato of a moon whose reddish colour comes from sulphur knocked off Io's volcanoes and swept into its orbit. It orbits just inside Jupiter's radiation belts, inside the orbit of Io. Its low density suggests it's mostly water ice — odd for a moon so close to Jupiter's heat.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Amalthea",
+      "durationMinutes": 12,
+      "instruction": "Read how a tiny inner moon gets painted red by a neighbour's volcano, then notice that Amalthea helps shepherd Jupiter's faint ring system."
+    },
+    "tags": [
+      "Moons",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-oberon",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Oberon",
+    "teaser": "The outermost of Uranus's major moons, named for the king of the fairies in A Midsummer Night's Dream. It's heavily cratered, with a bright white spot at one crater's centre — possibly fresh ice exposed by an impact. Like all Uranus's moons, it orbits tipped on its side, because its planet was knocked over long ago.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Oberon",
+      "durationMinutes": 12,
+      "instruction": "Read how Uranus's tilted system leaves its moons in extreme seasons, then notice that Oberon's bright crater floor is probably young ice."
+    },
+    "tags": [
+      "Moons",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-gegenschein",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "The Gegenschein",
+    "teaser": "A faint, diffuse glow directly opposite the Sun in the night sky — the counterglow. Like the zodiacal light, it's sunlight bouncing off interplanetary dust, but seen backlit: the dust directly behind Earth reflects light straight back at us. It's so faint that it was only reliably observed from dark-sky sites.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Learn about the gegenschein",
+      "durationMinutes": 12,
+      "instruction": "Read why the dust opposite the Sun glows, then notice that it's the same interplanetary dust that makes the zodiacal light, seen from the other side."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-earthshine",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Earthshine",
+    "teaser": "The ghostly glow that lets you see the dark part of the crescent Moon — sunlight bouncing off Earth and back onto the Moon's night side. Leonardo da Vinci explained it in the 1500s. It's brightest when Earth's cloudy side faces the Moon, and it's strongest in the few days after new moon.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Spot earthshine on the Moon",
+      "durationMinutes": 10,
+      "instruction": "Read how reflected Earthlight faintly lights the Moon, then look a few days after new moon: the dark limb glows visibly in the twilight sky."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-belt-of-venus",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "The Belt of Venus",
+    "teaser": "A pink band of sky hugging the horizon opposite the Sun during twilight — sunlight filtered through the atmosphere, scattering red and scattering the blue away. It appears just before sunrise and just after sunset, with the Earth's own shadow a dark blue band beneath it. It's not Venus at all; the name is poetic.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Spot the Belt of Venus",
+      "durationMinutes": 10,
+      "instruction": "Read how twilight divides into a pink band and a blue shadow, then look opposite the sunset: the pink is sunlight through thick air, the blue is Earth's shadow."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-metonic-cycle",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Time & Calendars",
+    "name": "The Metonic Cycle",
+    "teaser": "The 19-year cycle that synchronizes the Moon and the Sun: after 19 years, the Moon's phases repeat on the same calendar dates. Ancient Greek astronomer Meton used it to align lunar and solar calendars, and it still drives the date of Easter. The Moon beats the Sun by a handful of hours over 19 years, close enough for calendars.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Metonic cycle",
+      "durationMinutes": 12,
+      "instruction": "Read how a 19-year pattern reconciles two clocks that never quite match, then notice that Easter's date is still set by this ancient discovery."
+    },
+    "tags": [
+      "Time & Calendars",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-saros-cycle",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Time & Calendars",
+    "name": "The Saros Cycle",
+    "teaser": "The 18-year cycle that makes solar and lunar eclipses repeat: after 18 years 11 days, the Earth, Moon and Sun return to nearly the same geometry, and an eclipse similar to the last one occurs again. Ancient Babylonian astronomers discovered it by tracking eclipses for centuries. Each Saros series runs for about a thousand years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Saros cycle",
+      "durationMinutes": 12,
+      "instruction": "Read how ancient astronomers predicted eclipses centuries ahead with a simple cycle, then notice that the 2024 and 2026 eclipses belong to the same Saros family."
+    },
+    "tags": [
+      "Time & Calendars",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-aurora-borealis-science",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Why Auroras Happen",
+    "teaser": "Auroras are the sky's neon sign: charged particles from the Sun's wind slam into Earth's magnetic field, get funnelled toward the poles, and collide with oxygen and nitrogen atoms, making them glow. Green comes from oxygen at 100 kilometres up; red from higher oxygen; blue and purple from nitrogen. The same process happens on Jupiter and Saturn, and even on Mars.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Understand how auroras work",
+      "durationMinutes": 15,
+      "instruction": "Read how solar wind particles light up the upper atmosphere, then notice that every colour is a different gas at a different height — a spectrum written in sky."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Physics in Space"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-southern-lights",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "The Southern Lights (Aurora Australis)",
+    "teaser": "The southern twin of the northern lights, centred on Antarctica and best seen from Tasmania, New Zealand and the southern tip of South America. It's the same solar-wind physics, but its oval of light circles the south geomagnetic pole. The best viewing season is autumn and winter — long dark nights under the auroral oval.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Learn about the southern lights",
+      "durationMinutes": 15,
+      "instruction": "Read how the aurora australis mirrors its northern twin around the south pole, then notice that Tasmania and southern New Zealand sit directly under the oval."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-al-sufi",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Astronomers",
+    "name": "Abd al-Rahman al-Sufi",
+    "teaser": "A 10th-century Persian astronomer who produced the Book of Fixed Stars, the finest star catalogue of its era, with beautifully illustrated constellations and careful observations. He recorded the Andromeda Galaxy — 'a little cloud' — the first description of a galaxy outside our own, centuries before telescopes. His work bridged Greek, Indian and Islamic astronomy.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet al-Sufi",
+      "durationMinutes": 15,
+      "instruction": "Read how a 10th-century astronomer described the Andromeda Galaxy with the naked eye, then notice that his star charts stayed authoritative for 700 years."
+    },
+    "tags": [
+      "Astronomers",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-margaret-burbidge",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Astronomers",
+    "name": "Margaret Burbidge",
+    "teaser": "A pioneering astrophysicist who co-authored the 1957 B2FH paper — the foundational work on how stars forge the elements — and whose spectrograph design let astronomers measure galaxy redshifts. She was the first director of the Royal Greenwich Observatory, and she turned down a prize rather than accept the women-only version of it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Margaret Burbidge",
+      "durationMinutes": 15,
+      "instruction": "Read how one paper explained where the elements come from, then notice that she refused a women-only prize — she wanted the real one."
+    },
+    "tags": [
+      "Astronomers",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-big-rip",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Cosmology",
+    "name": "The Big Rip",
+    "teaser": "One possible end of the universe: if dark energy keeps accelerating and never weakens, it could eventually tear apart everything — galaxies, stars, atoms — in a violent final moment. The idea is speculative; the timeline depends on exactly how dark energy behaves, and it may be trillions of years away. A cosmic horror story with real physics behind it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Big Rip hypothesis",
+      "durationMinutes": 15,
+      "instruction": "Read how accelerating expansion could shred matter itself, then weigh the evidence: we don't yet know dark energy's true nature, so the end is still unwritten."
+    },
+    "tags": [
+      "Cosmology",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-fine-tuned-universe",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Cosmology",
+    "name": "The Fine-Tuned Universe",
+    "teaser": "The observation that the universe's constants sit in an astonishingly narrow range that allows life — change the strength of gravity or the mass of the electron by a hair and stars never form, atoms never hold. Physicists debate what it means: a multiverse, a design, or just that we can only observe a universe that allows observers.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the fine-tuning problem",
+      "durationMinutes": 15,
+      "instruction": "Read how a handful of physical constants look tuned for life, then weigh the three answers: multiverse, design, or observer selection."
+    },
+    "tags": [
+      "Cosmology",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-dragonfly-44",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Galaxies",
+    "name": "Dragonfly 44",
+    "teaser": "A galaxy that is almost all dark matter: it's as massive as the Milky Way but emits barely any light, its stars few and faint. Discovered with the Dragonfly Telephoto Array, it's a 'dark galaxy' — proof that galaxies can be dominated by invisible matter to an extreme degree. Its existence challenges how galaxies form.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Dragonfly 44",
+      "durationMinutes": 12,
+      "instruction": "Read how a galaxy can be 99.99% dark matter, then notice that its few stars orbit as if the mass were there — the dark matter holds them."
+    },
+    "tags": [
+      "Galaxies",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-m27",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Dumbbell Nebula (M27)",
+    "teaser": "The first planetary nebula ever discovered (1764), and the brightest in the sky: a dying star's expelled shell glowing like a dumbbell of gas. Its central star is a white dwarf, the leftover core, cooking the gas until it fluoresces. At 1,200 light-years, it's close enough that its apple-core shape is easy to see in any telescope.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Dumbbell Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how a star's last gasp becomes a glowing cloud, then notice the central star: what's left of the Sun-like star that made it."
+    },
+    "tags": [
+      "Nebulae",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-m57",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Ring Nebula (M57)",
+    "teaser": "The classic planetary nebula in Lyra — a smoke ring of gas around a dying star, 2,000 light-years away. The ring is actually a cylinder viewed end-on, like looking down a glowing tube. Its central white dwarf is visible in larger telescopes, and the gas is expanding at about 30 km/s. A stellar death in progress.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Ring Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how a ring of gas is really a tube seen end-on, then notice the tiny central star: the Sun's distant future, 2,000 light-years away."
+    },
+    "tags": [
+      "Nebulae",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-eskimo-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Eskimo Nebula",
+    "teaser": "A planetary nebula 3,000 light-years away whose twin lobes of gas and a bright inner core make it look like a face in a fur hood. Hubble's images show a surprisingly complex structure: comet-like knots of gas streaming from the central star. It's the death shroud of a Sun-like star, and its nickname comes from the hood-like outer halo.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Eskimo Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how a dying star sculpts knots and lobes of gas, then notice that the hood and face are two different shells ejected at different times."
+    },
+    "tags": [
+      "Nebulae",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-cats-eye-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Cat's Eye Nebula",
+    "teaser": "One of the most intricate planetary nebulae known: nested shells, bubbles and knots of gas that look like a cat's eye, 3,300 light-years away. Each ring is a separate pulse of mass shed by the dying star, some on timescales of centuries. Hubble's images of it are so detailed they look artificial.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Cat's Eye Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how a dying star's irregular pulses sculpt nested shells, then count the rings — each one is a separate ejection event in the star's death spasms."
+    },
+    "tags": [
+      "Nebulae",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-veil-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Veil Nebula",
+    "teaser": "The tattered remains of a supernova that exploded up to 15,000 years ago in the constellation Cygnus — a filamentary web of glowing gas, the largest visible supernova remnant. The explosion's shockwave is still plowing through space, heating the gas so it glows in oxygen and hydrogen. It spans six times the full moon's width, but is so faint it needs dark skies and a nebula filter.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Veil Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how a stellar explosion's shockwave still glows after thousands of years, then notice the filaments: they trace the magnetic field frozen into the gas."
+    },
+    "tags": [
+      "Nebulae",
+      "Supernovae"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-rosette-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Rosette Nebula",
+    "teaser": "A giant star-forming cloud in Monoceros whose central cluster of hot young stars blows a hole in the middle, leaving a rose-shaped ring of glowing gas. The cluster's stars are so young that many are still wreathed in the dust that birthed them. It's a stellar nursery you can photograph from a backyard with a modest telescope.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Rosette Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how newborn stars excavate their own birth cloud, then notice the dark pillars at the ring's edge — the next generation still forming inside."
+    },
+    "tags": [
+      "Nebulae",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-jewel-box-cluster",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "The Jewel Box Cluster",
+    "teaser": "A dazzling open cluster in the Southern Cross, named by John Herschel for the box of jewels it resembles: blue, red and white stars packed into a small space. It's about 6,400 light-years away and only 14 million years old — its brightest stars are still young blue giants. A small telescope resolves it into a scattering of coloured gems.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Find the Jewel Box Cluster",
+      "durationMinutes": 12,
+      "instruction": "Read why open clusters are star siblings born together, then notice the colours: the red supergiant standing out among the blue stars is a rarity."
+    },
+    "tags": [
+      "Stars",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-hyades",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "The Hyades",
+    "teaser": "The nearest open cluster to Earth, only 150 light-years away — the V-shaped group of stars that forms the face of Taurus the bull. Its stars share a common motion through space, drifting together. The cluster is so close and so well-measured that it anchors the cosmic distance scale: get the Hyades right, and everything beyond follows.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Find the Hyades cluster",
+      "durationMinutes": 12,
+      "instruction": "Read how a nearby cluster calibrates the distances to everything farther away, then look at Taurus: the V of the bull's face is the cluster."
+    },
+    "tags": [
+      "Stars",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-barnards-loop",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "Barnard's Loop",
+    "teaser": "A vast, faint arc of glowing hydrogen stretching across the constellation Orion, 1,300 light-years away — a bubble blown by the wind of hot young stars. It's so dim that it's best seen in photographs; the eye usually needs a very dark sky and a filter. The arc marks the edge of a giant cavity excavated by Orion's stellar nursery.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet Barnard's Loop",
+      "durationMinutes": 12,
+      "instruction": "Read how the winds of newborn stars carve a bubble in the gas, then notice that the loop is one edge of a cavity, not a ring around anything solid."
+    },
+    "tags": [
+      "Nebulae",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-coalsack-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Coalsack Nebula",
+    "teaser": "The most prominent dark nebula in the sky: a cloud of dust so thick that it blocks the Milky Way's light, visible to the naked eye as an ink blot next to the Southern Cross. It's about 600 light-years away and 30-40 light-years across. The Portuguese explorer João Faras charted it in 1500 — the first recorded dark nebula.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Find the Coalsack Nebula",
+      "durationMinutes": 12,
+      "instruction": "Read how a cloud of dust can be seen by the absence it creates, then look next to the Southern Cross on a dark night: the black patch is real, not your eyes."
+    },
+    "tags": [
+      "Nebulae",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-lagoon-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Lagoon Nebula (M8)",
+    "teaser": "A giant star-forming region in Sagittarius, 4,000 light-years away, whose bright lane of gas splits the cloud and gives it its name. It contains a dark dust structure called the Hourglass, carved by the wind of a bright star. Under dark skies it's visible to the naked eye as a faint smudge near the Teapot's spout.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Lagoon Nebula",
+      "durationMinutes": 12,
+      "instruction": "Read how gas and dust pile into stellar nurseries, then try to spot it from a dark site: it's one of the few nebulae visible to the naked eye."
+    },
+    "tags": [
+      "Nebulae",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-orion-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Orion Nebula (M42)",
+    "teaser": "The sky's brightest nebula and the closest stellar nursery to Earth, 1,350 light-years away — visible to the naked eye as a fuzzy star below Orion's belt. Inside, the Trapezium cluster of young stars is lighting up the gas. Its glowing heart has been a target for every telescope from Galileo's to the James Webb.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Orion Nebula",
+      "durationMinutes": 12,
+      "instruction": "Read why the Orion Nebula is the most-studied piece of sky, then look below the belt: the middle 'star' of the sword is a cloud birthing stars right now."
+    },
+    "tags": [
+      "Nebulae",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-makemake",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Dwarf Planets",
+    "name": "Makemake",
+    "teaser": "A dwarf planet in the Kuiper Belt named after the Rapa Nui creator god — the only dwarf planet without a known moon, which makes measuring its mass hard. Its surface is covered in frozen methane and ethane, giving it a reddish tint. It's so far and small that even Hubble sees it as just a dot.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Makemake",
+      "durationMinutes": 12,
+      "instruction": "Read how a dwarf planet's missing moon makes it hard to weigh, then notice that its reddish colour is sunlight-baked methane ice."
+    },
+    "tags": [
+      "Dwarf Planets",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-haumea",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Dwarf Planets",
+    "name": "Haumea",
+    "teaser": "The strangest-shaped dwarf planet: it spins so fast — once every four hours — that it's stretched into an elongated ellipsoid, like a spinning football. It has two moons and a ring, and it's covered in crystalline water ice that may come from a giant ancient impact. The collision that gave it its moons probably also gave it its spin.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Haumea",
+      "durationMinutes": 12,
+      "instruction": "Read how a dwarf planet can be stretched by its own spin, then follow the logic: a huge ancient impact spun it up and left its icy family behind."
+    },
+    "tags": [
+      "Dwarf Planets",
+      "Solar System"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-orcus",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Solar System",
+    "name": "Orcus",
+    "teaser": "A Kuiper Belt object that mirrors Pluto: similar size, similar orbit, and a large moon (Vanth) that locks it in a 1:1 spin. It's often called the anti-Pluto because it sits opposite Pluto in its resonance with Neptune. Its surface is water ice, and its dark red colour comes from organic compounds.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Orcus",
+      "durationMinutes": 12,
+      "instruction": "Read how two dwarf worlds can share an orbit resonance in opposite phases, then notice that Orcus's water-ice surface hides an ancient, dark red crust."
+    },
+    "tags": [
+      "Solar System",
+      "Dwarf Planets"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-ida",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "Ida and Dactyl",
+    "teaser": "The asteroid that surprised everyone: when Galileo flew past Ida in 1993, it found a tiny moon orbiting it — Dactyl, the first confirmed asteroid moon. Ida is an irregular, heavily cratered body in the main belt, and its discovery changed how we think asteroids behave. A 50-kilometre rock with its own 1.5-kilometre companion.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Ida and Dactyl",
+      "durationMinutes": 12,
+      "instruction": "Read how the first asteroid moon was found by accident, then notice that we now know a quarter of all asteroids have companions."
+    },
+    "tags": [
+      "Asteroids",
+      "Space Missions"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-gaspra",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Asteroids",
+    "name": "Gaspra",
+    "teaser": "The first asteroid ever photographed up close: Galileo flew past in 1991 and revealed a cratered, lumpy rock 18 kilometres long. It's an S-type asteroid, rich in silicates and metal. The flyby images were so good they showed that Gaspra is a solid body covered in regolith, not a rubble pile.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Gaspra",
+      "durationMinutes": 12,
+      "instruction": "Read how the first asteroid flyby changed asteroid science, then notice that Gaspra's craters cluster where impacts are more likely — a map of cosmic traffic."
+    },
+    "tags": [
+      "Asteroids",
+      "Space Missions"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-kelt-9b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "KELT-9b",
+    "teaser": "The hottest known exoplanet: a gas giant 670 light-years away whose day-side reaches 4,300°C — hotter than most stars. It orbits so close to its massive star that the star's own heat tears molecules apart in its atmosphere. Hydrogen and iron are vaporized on the day side and rain back down on the night side. The planet is literally being cooked.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet KELT-9b",
+      "durationMinutes": 12,
+      "instruction": "Read how a planet can be hotter than a star's surface, then notice that its atmosphere is so hot that molecules can't survive — they're ripped apart and re-form."
+    },
+    "tags": [
+      "Exoplanets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-kepler-186f",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "Kepler-186f",
+    "teaser": "The first Earth-sized planet found in the habitable zone of another star: announced in 2014, 580 light-years away. It's about 10% larger than Earth and orbits a red dwarf. Being Earth-sized matters — bigger planets are probably gas worlds. It's a milestone, not proof of life, but it showed that Earth-sized habitable-zone planets exist in abundance.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Kepler-186f",
+      "durationMinutes": 12,
+      "instruction": "Read why Earth-sized in the habitable zone was the milestone the field was waiting for, then notice that its star is dimmer and redder than the Sun."
+    },
+    "tags": [
+      "Exoplanets",
+      "Astrobiology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-kepler-442b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "Kepler-442b",
+    "teaser": "A super-Earth 1,200 light-years away, often rated one of the most potentially habitable planets known: it receives about two-thirds of the sunlight Earth does, and its host star is a stable orange dwarf. Its size — about 30% larger than Earth — means it could be rocky. It's a favourite in habitability rankings, even if we can't see its surface.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Kepler-442b",
+      "durationMinutes": 12,
+      "instruction": "Read how sunlight levels and star stability feed habitability scores, then notice that Kepler-442b keeps topping lists without us knowing if it has water."
+    },
+    "tags": [
+      "Exoplanets",
+      "Astrobiology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-wasp-17b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "WASP-17b",
+    "teaser": "The first planet found to orbit backwards — its orbit runs opposite to its star's rotation, which suggests it was violently scattered into place by a close encounter. It's a bloated hot Jupiter so puffy that its density is lower than a marshmallow's. It's also one of the first planets with water detected in its atmosphere.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet WASP-17b",
+      "durationMinutes": 12,
+      "instruction": "Read how a retrograde orbit reveals a violent past, then consider its density: a planet puffier than marshmallow, made mostly of gas stretched thin."
+    },
+    "tags": [
+      "Exoplanets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-hd-209458b",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Exoplanets",
+    "name": "HD 209458b (Osiris)",
+    "teaser": "The first exoplanet seen to transit its star, the first with its atmosphere detected, and the first found to be evaporating — its star is boiling its atmosphere off into space, leaving a comet-like tail. It's a hot Jupiter 159 light-years away, discovered in 1999. Its evaporation proved that gas giants can lose their atmospheres entirely.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet HD 209458b",
+      "durationMinutes": 12,
+      "instruction": "Read how a transiting planet lets astronomers taste its atmosphere, then follow its fate: the star is slowly boiling Osiris away."
+    },
+    "tags": [
+      "Exoplanets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-lunar-gateway",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Space Infrastructure",
+    "name": "The Lunar Gateway",
+    "teaser": "A planned small space station in orbit around the Moon, designed as a staging point for lunar landings and deep-space missions under the Artemis programme. It will orbit in a halo around the Moon, letting crews reach it from Earth in days. It's smaller than the ISS and won't be permanently occupied — crews will visit for weeks at a time.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Lunar Gateway",
+      "durationMinutes": 12,
+      "instruction": "Read why a Moon-orbiting outpost beats landing every time, then notice the plan: it's a pit stop, not a home, for the trips to the lunar south pole."
+    },
+    "tags": [
+      "Space Infrastructure",
+      "Future Missions"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-harvest-moon",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "The Harvest Moon",
+    "teaser": "The full moon nearest the autumn equinox, famous for rising at nearly the same time for several nights in a row — giving farmers extra evening light to bring in crops. The effect happens because the ecliptic is shallow against the horizon in autumn, so the moon's daily rise delays by only ~25 minutes instead of the usual ~50. The extra light was a real agricultural boon before electric lights.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Watch the Harvest Moon",
+      "durationMinutes": 10,
+      "instruction": "Read why the autumn full moon lingers at the horizon, then try it: the Harvest Moon rises at dusk for several nights, not just one."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-supermoon",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Supermoon",
+    "teaser": "A full moon that coincides with the moon's closest approach to Earth, making it appear up to 14% larger and 30% brighter than the year's smallest full moon. The term comes from astrology, not astronomy — astronomers prefer 'perigee full moon'. The size difference is real but subtle: most people can't tell without photos.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Compare a supermoon to a micromoon",
+      "durationMinutes": 10,
+      "instruction": "Read why the moon's elliptical orbit makes some full moons bigger, then try the honest test: photograph one full moon and compare it to the smallest of the year."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-blood-moon",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Blood Moon (Total Lunar Eclipse)",
+    "teaser": "The red moon seen during a total lunar eclipse: Earth's shadow falls on the Moon, but sunlight bent through Earth's atmosphere still reaches it — and the atmosphere scatters blue light away, leaving only red. A Blood Moon is a total lunar eclipse in progress. The colour varies with volcanic dust and pollution: a darker red means a dirtier atmosphere.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Watch a total lunar eclipse",
+      "durationMinutes": 15,
+      "instruction": "Read how Earth's atmosphere paints the eclipsed Moon red, then notice that the shade of red tells you what's floating in our air."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-conjunction",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Planetary Conjunctions",
+    "teaser": "When two planets (or a planet and the Moon) line up in the same part of the sky, appearing close together for a few nights. They're not actually near each other — it's a line-of-sight effect, sometimes involving planets separated by billions of kilometres. Great conjunctions of Jupiter and Saturn happen every 20 years; the 2020 one was the closest in 400 years.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Catch a planetary conjunction",
+      "durationMinutes": 10,
+      "instruction": "Read how a line-of-sight alignment makes distant worlds look like neighbours, then check the sky when two bright planets sit close: it's geometry, not gravity."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-opposition",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Planetary Opposition",
+    "teaser": "When a planet sits opposite the Sun in our sky — rising at sunset and visible all night, at its closest and brightest for the year. Mars oppositions happen every ~26 months, and its apparent size doubles between far and near oppositions. It's the best time to observe any outer planet: it's up all night, and it's at its biggest.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Observe a planet at opposition",
+      "durationMinutes": 10,
+      "instruction": "Read why a planet at opposition is at its best for the year, then try it with Mars or Jupiter: it rises as the Sun sets and is visible until dawn."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-great-red-spot",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Planets",
+    "name": "The Great Red Spot",
+    "teaser": "A storm on Jupiter larger than Earth that has been raging for at least 190 years — a high-pressure anticyclone spinning counterclockwise. It's shrinking: it was twice Earth's width in the 1800s, now barely more than one. The storm's red colour may come from compounds broken down by sunlight. Why it persists is still an open question.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Great Red Spot",
+      "durationMinutes": 12,
+      "instruction": "Read how a storm can outlive centuries of observations, then follow the mystery: it's shrinking, and no one knows why it hasn't simply decayed."
+    },
+    "tags": [
+      "Planets",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-titan-lakes",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Moons",
+    "name": "Titan's Methane Lakes",
+    "teaser": "The only place in the solar system besides Earth with liquid on its surface: Saturn's moon Titan hosts lakes and seas of liquid methane and ethane at −180°C. Cassini radar mapped shorelines, islands and rivers that look eerily like Earth's — but with a hydrocarbon water cycle. It's a chemistry laboratory doing weather with different ingredients.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Titan's lakes",
+      "durationMinutes": 12,
+      "instruction": "Read how a moon can have a full weather cycle with methane instead of water, then notice that the lakes' shorelines could one day be explored by a submarine."
+    },
+    "tags": [
+      "Moons",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-spica",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "Spica",
+    "teaser": "The brightest star in Virgo and one of the nearest stars massive enough to end its life as a supernova — a blue giant 250 light-years away. It's actually two stars orbiting so close that they distort each other into egg shapes. Its name means 'the ear of wheat', and its light is so blue-white that it's used to calibrate star colours.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Spica",
+      "durationMinutes": 12,
+      "instruction": "Read how two massive stars orbit close enough to deform each other, then notice that Spica is doomed: it's massive enough to die as a supernova."
+    },
+    "tags": [
+      "Stars",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-uy-scuti",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Stars",
+    "name": "UY Scuti",
+    "teaser": "One of the largest stars known: a red supergiant so vast that if it sat at the Sun's position, its surface would swallow Jupiter's orbit. It's 1,700 times the Sun's radius, though it's so diffuse that its mass is only about 30 Suns. It pulsates, swelling and shrinking, and it's shedding mass — it won't last long in cosmic terms.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet UY Scuti",
+      "durationMinutes": 12,
+      "instruction": "Read how a star can be 1,700 times the Sun's width yet surprisingly light, then consider its fate: it will blow itself apart as a supernova soon (in stellar terms)."
+    },
+    "tags": [
+      "Stars",
+      "Stellar Evolution"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-boomerang-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Boomerang Nebula",
+    "teaser": "The coldest known place in the universe: a planetary nebula 5,000 light-years away whose gas is colder than the cosmic background radiation, at about 1 kelvin. The extreme chill comes from gas expanding outward so fast it literally freezes itself — the same trick a fridge uses. It's a dying star's outflow caught mid-breath.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Boomerang Nebula",
+      "durationMinutes": 15,
+      "instruction": "Read how expanding gas can cool below the temperature of deep space, then notice that the Boomerang is a fridge running on a stellar wind."
+    },
+    "tags": [
+      "Nebulae",
+      "Mysteries"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-cone-nebula",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Nebulae",
+    "name": "The Cone Nebula",
+    "teaser": "A dark pillar of gas and dust in the star-forming region NGC 2264, 2,500 light-years away — a 7-light-year-long finger being eroded by the light of young stars. Its shape comes from the same process that carves the Pillars of Creation. Inside it, new stars are still forming, hidden from view.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Meet the Cone Nebula",
+      "durationMinutes": 12,
+      "instruction": "Read how starlight sculpts dust into pillars, then notice that the Cone's tip points at the cluster of bright stars doing the carving."
+    },
+    "tags": [
+      "Nebulae",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-kepler-supernova",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Supernovae",
+    "name": "Kepler's Supernova (1604)",
+    "teaser": "The last supernova seen with the naked eye in our galaxy — a type Ia explosion in 1604 that outshone every star and even Jupiter, observed by Johannes Kepler. It's the explosion of a white dwarf that stole too much mass from a companion and detonated. Its remnant still glows in X-rays, 400 years later, a fossil of the event.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet Kepler's Supernova",
+      "durationMinutes": 15,
+      "instruction": "Read how a white dwarf's theft of mass ends in detonation, then follow the trail: the expanding remnant Kepler mapped in 1604 is still visible to telescopes today."
+    },
+    "tags": [
+      "Supernovae",
+      "History of Astronomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-baily-beads",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Baily's Beads",
+    "teaser": "The string of bright points that flash around the Moon's edge just before totality in a solar eclipse — sunlight streaming through valleys on the lunar limb. Named for Francis Baily, who described them in 1836, they last only seconds. They're the proof that the Moon's edge is ragged mountains, not a smooth disc.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Observe",
+      "targetName": "Catch Baily's Beads at an eclipse",
+      "durationMinutes": 10,
+      "instruction": "Read how lunar mountains turn the last sliver of sunlight into beads, then plan for the next total eclipse: the beads appear just before and after totality."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Observing the Sky"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-stellar-parallax",
+    "categoryId": "ASTRONOMY",
+    "subtype": "History of Astronomy",
+    "name": "Stellar Parallax",
+    "teaser": "The tiny apparent shift of a star's position as Earth moves around the Sun — the direct proof that the Earth orbits, and the ruler by which all cosmic distances are measured. First measured in 1838 for 61 Cygni, it's the 'parallax' of a finger held at arm's length, seen with two eyes six months apart. Every star's distance ultimately rests on this wobble.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet stellar parallax",
+      "durationMinutes": 12,
+      "instruction": "Read how a six-month baseline measures distances to the stars, then follow the chain: parallax calibrates every rung of the cosmic distance ladder."
+    },
+    "tags": [
+      "History of Astronomy",
+      "Stars"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "astronomy-lunar-phases",
+    "categoryId": "ASTRONOMY",
+    "subtype": "Celestial Phenomena",
+    "name": "Why the Moon Has Phases",
+    "teaser": "The Moon's phases are just geometry: half the Moon is always lit by the Sun, and we see different slices of that lit half as the Moon orbits Earth. The new moon is the Moon between us and the Sun; the full moon is the Moon opposite it. The phase cycle takes 29.5 days — the same length as a lunar month in every calendar that uses one.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Understand the Moon's phases",
+      "durationMinutes": 10,
+      "instruction": "Read why half the Moon is always day-lit, then trace the cycle: new to full to new takes 29.5 days, and every phase is just our viewing angle changing."
+    },
+    "tags": [
+      "Celestial Phenomena",
+      "Time & Calendars"
+    ],
+    "tier": 1
   }
 ]
