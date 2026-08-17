@@ -3,22 +3,31 @@ package com.curio.app.features.settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -38,6 +47,7 @@ import com.curio.app.data.AudioQuality
 import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
 import com.curio.app.data.VoskModels
+import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
@@ -298,20 +308,74 @@ fun OfflineModelDialog(
     // v125 — the offline model version is bumped by download/delete, so
     // re-reading the installed state below recomposes with fresh data.
     AppPreferences.offlineModelVersionState
+    // v136 — the picker was an AlertDialog whose fixed max height squeezed
+    // the rows and clipped the bottom of the list ("squished, can't see
+    // below"); it's now a FULL-HEIGHT ModalBottomSheet with a scrolling
+    // list so all seven models fit with breathing room.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    AlertDialog(
-        containerColor = curioDialogContainerColor(),
-        shape = CurioDialogShape,
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Offline model", fontWeight = FontWeight.ExtraBold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        sheetState = sheetState,
+        containerColor = curioDialogContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 8.dp, top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large and Full models are much more accurate but are heavy downloads that need real storage and memory. No internet needed while it runs.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    "Offline model",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
                 )
-                VoskModels.CATALOG.forEach { model ->
+                Surface(
+                    onClick = onDismiss,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Close",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+            Text(
+                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large and Full models are much more accurate but are heavy downloads that need real storage and memory. No internet needed while it runs.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+            )
+            if (downloadError != null) {
+                Text(
+                    downloadError.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 6.dp)
+                )
+            }
+            // The model list — scrolls within the full-height sheet (the
+            // old dialog capped the height and clipped the bottom rows).
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(VoskModels.CATALOG, key = { it.id }) { model ->
                     val downloaded = VoskModels.isDownloaded(context, model.id)
                     val selected = downloaded && model.id == currentModelId
                     val isDownloading = downloadingId == model.id
@@ -331,9 +395,9 @@ fun OfflineModelDialog(
                             .curioDarkGlow(2.dp, RoundedCornerShape(16.dp))
                     ) {
                         Row(
-                            modifier = Modifier.padding(12.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 13.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             if (downloaded) {
                                 RadioButton(
@@ -439,7 +503,7 @@ fun OfflineModelDialog(
                                                 }
                                             }
                                         },
-                                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)
+                                        contentPadding = PaddingValues(horizontal = 8.dp)
                                     ) {
                                         Text(
                                             "Download",
@@ -452,17 +516,8 @@ fun OfflineModelDialog(
                         }
                     }
                 }
-                if (downloadError != null) {
-                    Text(
-                        text = downloadError.orEmpty(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss, colors = curioDialogActionButtonColors()) { Text("Close", fontWeight = FontWeight.Bold) }
+            Spacer(Modifier.height(20.dp))
         }
-    )
+    }
 }

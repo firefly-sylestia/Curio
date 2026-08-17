@@ -799,6 +799,22 @@ app/src/main/java/com/curio/app/
   a same-size sheet. LESSON: a modal drawer covers the whole screen —
   anything the NavHost draws after it (the floating nav bar) sits ON
   TOP of it unless explicitly gated.
+- **v136 — offline model picker is a full-height scrolling sheet.**
+  `OfflineModelDialog` (SettingsSharedComponents) was an `AlertDialog`
+  whose internal `Column` capped the height — the seven-model catalog
+  squeezed the rows and clipped the bottom rows ("squished, can't see
+  below"). It's now a `ModalBottomSheet` (the app's sheet pattern:
+  `rememberModalBottomSheetState(skipPartiallyExpanded = true)`, rounded
+  28dp top corners, drag handle, `curioDialogContainerColor()`) with a
+  header Row (title + circular close), the intro copy, and a
+  `LazyColumn` (`weight(1f, fill = false)`) that scrolls — plus a 20dp
+  bottom spacer. Row padding grew 12 → 14×13dp, spacing 8 → 10dp for
+  breathing room. The old trailing duplicate `downloadError` Text inside
+  the LazyColumn (invalid — raw composable in `LazyListScope`) and the
+  leftover `confirmButton` closing are gone. LESSON: `AlertDialog` has a
+  fixed max height and clips long lists — a scrolling list belongs in a
+  bottom sheet or a `LazyColumn` inside a custom dialog, never a bare
+  `Column` in an AlertDialog `text` slot.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

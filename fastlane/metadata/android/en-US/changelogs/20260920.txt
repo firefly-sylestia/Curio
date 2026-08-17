@@ -28,7 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
-- Progress: the progress editor got a clean redesign — a big count with −/+ steppers, an explicit "of N pages" line with an edit pencil, a progress bar, and a slider that stays responsive on 1,000-page books (the old slider stuttered against non-integer steps on big totals).
+- Offline model picker: the list now opens as a full-height sheet that scrolls — all seven models fit with breathing room, and nothing is cut off below (the old fixed-size dialog squeezed the rows and clipped the bottom). — a big count with −/+ steppers, an explicit "of N pages" line with an edit pencil, a progress bar, and a slider that stays responsive on 1,000-page books (the old slider stuttered against non-integer steps on big totals).
 - Saved entries from before the book dedupe no longer hang on "Loading…" — old names like "The Odyssey" now resolve to the current entry ("The Odyssey (c. 8th century BCE)") automatically.
 - Topic Reveal: all of a topic's tags now show as chips (no more 3-chip cap, wrapping to multiple rows), plus a derived decade chip (e.g. "1940s") when the year is recoverable.
 - Topic Database: the category icon tiles use the current theme-aware look — the glyph and its tile stay visible in dark mode too.
