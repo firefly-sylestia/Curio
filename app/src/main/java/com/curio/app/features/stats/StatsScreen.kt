@@ -5,9 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,11 +36,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -62,13 +58,13 @@ import com.curio.app.data.StreakTracker
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBadgeMedal
+import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
-import kotlin.random.Random
 
 /** v174c — the Curiosity Stats page: the drawer's observatory world, full
  *  page. A celestial sky header, an INTERACTIVE constellation brain where
@@ -369,7 +365,7 @@ private fun StatsConstellationCard(
                 StatsSummaryChip("${explored.size}", "lanes", Color(0xFF7FA0C8))
                 StatsSummaryChip(CurioQuests.lifetimeState.spins.toString(), "spins", Color(0xFF9B7BB8))
             }
-            CategoryConstellation(
+            CurioConstellation(
                 explored = explored,
                 laneCounts = laneCounts,
                 laneRecent = laneRecent,
@@ -458,121 +454,6 @@ private fun StatsSummaryChip(value: String, label: String, tint: Color) {
  *  sized by saved count, glowing when active this week. Tap a star to select
  *  it (tap empty space to clear). */
 @Composable
-private fun CategoryConstellation(
-    explored: List<CategoryId>,
-    laneCounts: Map<CategoryId, Int>,
-    laneRecent: Map<CategoryId, Long>,
-    recentCutoff: Long,
-    selected: CategoryId?,
-    onSelect: (CategoryId?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Deterministic node positions: two lobes (left / right hemisphere).
-    val nodes = remember(explored) {
-        explored.mapIndexed { index, id ->
-            val total = explored.size
-            val side = if (index < (total + 1) / 2) -1 else 1
-            val idxInSide = if (side < 0) index else index - (total + 1) / 2
-            val nInSide = if (side < 0) (total + 1) / 2 else total / 2
-            val t = if (nInSide <= 1) 0.5f else idxInSide.toFloat() / (nInSide - 1)
-            val angle = (0.28f + t * 0.44f) * kotlin.math.PI.toFloat()
-            val rnd = Random(id.name.hashCode())
-            val jx = (rnd.nextFloat() - 0.5f) * 0.05f
-            val jy = (rnd.nextFloat() - 0.5f) * 0.05f
-            val cx = 0.5f + side * 0.12f
-            val cy = 0.52f
-            val pos = Offset(
-                cx + side * kotlin.math.cos(angle.toDouble()).toFloat() * 0.21f + jx,
-                cy + kotlin.math.sin(angle.toDouble()).toFloat() * 0.33f + jy
-            )
-            id to pos
-        }
-    }
-    // Accents must resolve in COMPOSITION (themedAccent is @Composable and
-    // can't run inside the Canvas draw lambda below; recomputing the small
-    // map per recomposition is cheap).
-    val accents = nodes.associate { (id, _) -> id to CurioCategories.byId(id).themedAccent() }
-    // v181 — theme-aware link inks (audit fix, same as the drawer map: the
-    // old steel-blue at 0.22 alpha vanished on the light card surface).
-    // Resolved in COMPOSITION — isCurioDarkTheme can't run in the Canvas
-    // draw lambda below.
-    val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.32f)
-                    else Color(0xFF5F7E9A).copy(alpha = 0.50f)
-    val fissureColor = if (isCurioDarkTheme()) Color(0xFFD9A85C).copy(alpha = 0.30f)
-                       else Color(0xFFA97F3C).copy(alpha = 0.45f)
-
-    Canvas(
-        modifier = modifier.pointerInput(explored, laneCounts, laneRecent) {
-            detectTapGestures { tap ->
-                // Only stars within the touch radius register; tapping empty
-                // sky clears the selection.
-                val hit = nodes.mapNotNull { (id, n) ->
-                    val dx = tap.x - n.x * size.width
-                    val dy = tap.y - n.y * size.height
-                    val d = kotlin.math.sqrt(dx * dx + dy * dy)
-                    if (d <= 34.dp.toPx()) id to d else null
-                }.minByOrNull { it.second }?.first
-                onSelect(hit)
-            }
-        }
-    ) {
-        val w = size.width
-        val h = size.height
-        val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
-        // v181 — nearest-neighbour WEB: every star links to its 2 closest
-        // stars, so the constellation reads as one connected map (the old
-        // lane-order chain + single fissure were nearly invisible in light
-        // mode). Each pair is deduped; the gold fissure below bridges the
-        // two hemispheres.
-        val links = LinkedHashSet<Pair<Int, Int>>()
-        nodes.indices.forEach { i ->
-            val nearest = nodes.indices
-                .filter { it != i }
-                .sortedBy { j ->
-                    val dx = pts[i].x - pts[j].x
-                    val dy = pts[i].y - pts[j].y
-                    dx * dx + dy * dy
-                }
-                .take(2)
-            nearest.forEach { j ->
-                links.add(if (i < j) i to j else j to i)
-            }
-        }
-        links.forEach { (a, b) ->
-            drawLine(
-                color = linkColor,
-                start = pts[a],
-                end = pts[b],
-                strokeWidth = 1.dp.toPx()
-            )
-        }
-        if (nodes.size >= 3) {
-            val mid = nodes.size / 2
-            drawLine(
-                color = fissureColor,
-                start = pts[mid - 1],
-                end = pts[mid],
-                strokeWidth = 1.dp.toPx()
-            )
-        }
-        nodes.forEachIndexed { i, (id, n) ->
-            val p = pts[i]
-            val accent = accents[id] ?: Color(0xFF7FAFD8)
-            val count = laneCounts[id] ?: 0
-            val recent = (laneRecent[id] ?: 0L) >= recentCutoff
-            val r = (5.5f + kotlin.math.min(count, 60).toFloat() * 0.30f).dp.toPx()
-            val isSel = selected == id
-            drawCircle(
-                color = accent.copy(alpha = if (recent) 0.20f else 0.10f),
-                radius = r * (if (recent || isSel) 2.6f else 2.2f),
-                center = p
-            )
-            drawCircle(color = accent, radius = r, center = p)
-            drawCircle(color = Color.White.copy(alpha = 0.85f), radius = r * 0.42f, center = p)
-        }
-    }
-}
-
 /** v174c — the lifetime totals grid: spins, explores, saves, quotes, pins,
  *  likes, dislikes and daily quests, in compact paper panes. */
 @Composable

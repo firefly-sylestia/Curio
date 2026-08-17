@@ -129,6 +129,7 @@ import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
@@ -163,7 +164,6 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.onAccent
-import kotlin.random.Random
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -2347,6 +2347,12 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     val explored = remember(progress) {
         progress.filterValues { it.explores > 0 || it.saves > 0 }.keys.toSet()
     }
+    // v186 — the drawer now draws THE SAME constellation as the "Your
+    // Curiosity" page (the shared [CurioConstellation]): explored lanes in
+    // the brain two-lobe layout, star size = saved count, all-time window
+    // (recentCutoff 0 → every explored lane glows recent), nearest-neighbour
+    // web + gold fissure. The grid-web "map" is gone.
+    val exploredList = remember(progress) { lanes.filter { it in explored } }
     var selected by remember { mutableStateOf<CategoryId?>(null) }
 
     Column(
@@ -2354,16 +2360,17 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        // ── The constellation: every lane is a star ─────────────────────
-        DrawerLaneConstellation(
-            lanes = lanes,
-            explored = explored,
-            progress = progress,
+        // ── The constellation: the Stats page's brain web ───────────────
+        CurioConstellation(
+            explored = exploredList,
+            laneCounts = progress.mapValues { it.value.saves },
+            laneRecent = progress.mapValues { it.value.lastAt },
+            recentCutoff = 0L,
             selected = selected,
             onSelect = { selected = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(196.dp)
+                .height(230.dp)
         )
         // Selected lane's data — richer passport panel.
         AnimatedVisibility(
@@ -2434,146 +2441,6 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     }
 }
 
-/** v176 — one solid star per lane (ALL lanes shown): explored lanes are
- *  SOLID accent chips with their icon + a glow, inactive lanes are solid
- *  but smaller and muted (differentiated by size + color, not transparency),
- *  and a few extra tiny stars fill the sky. Only explored stars respond to
- *  taps. Deterministic grid scatter + per-lane jitter so every lane is
- *  visible and the constellation reads as a whole. */
-@Composable
-private fun DrawerLaneConstellation(
-    lanes: List<CategoryId>,
-    explored: Set<CategoryId>,
-    progress: Map<CategoryId, CurioPassport.CategoryProgress>,
-    selected: CategoryId?,
-    onSelect: (CategoryId?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Deterministic scatter: an even grid (so all lanes fit) + a small
-    // per-lane jitter so stars don't line up in a rigid lattice.
-    val nodes = remember(lanes) {
-        val n = lanes.size
-        val cols = kotlin.math.ceil(kotlin.math.sqrt(n.toFloat())).toInt().coerceAtLeast(1)
-        val rows = (n + cols - 1) / cols
-        lanes.mapIndexed { index, id ->
-            val col = index % cols
-            val row = index / cols
-            val rnd = Random(id.name.hashCode())
-            val jx = (rnd.nextFloat() - 0.5f) * 0.07f
-            val jy = (rnd.nextFloat() - 0.5f) * 0.07f
-            val x = ((col + 0.5f) / cols + jx).coerceIn(0.07f, 0.93f)
-            val y = ((row + 0.5f) / rows + jy).coerceIn(0.10f, 0.90f)
-            id to Offset(x, y)
-        }
-    }
-    // Extra tiny stars (decorative + future data slots), seeded so the sky
-    // feels full even when few lanes are explored.
-    val extras = remember {
-        val rnd = Random(0xD2A7E + 101)
-        List(16) {
-            Offset(0.05f + rnd.nextFloat() * 0.9f, 0.08f + rnd.nextFloat() * 0.8f)
-        }
-    }
-    // Accents must resolve in COMPOSITION (themedAccent is @Composable and
-    // can't run inside the Canvas draw lambda; recomputing the small map per
-    // recomposition is cheap).
-    val accents = lanes.associateWith { CurioCategories.byId(it).themedAccent() }
-    // v178 — theme-aware constellation inks (audit fix: the old steel-blue
-    // at 0.20 alpha vanished on the white drawer surface in light mode).
-    // Dark: light blue on near-black. Light: a deeper slate so the lines
-    // and tiny stars actually read on white.
-    val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.30f)
-                    else Color(0xFF5F7E9A).copy(alpha = 0.55f)
-    val tinyStarColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.35f)
-                        else Color(0xFF5F7E9A).copy(alpha = 0.50f)
-    val idleDotColor = if (isCurioDarkTheme()) Color(0xFF4A5F6E) else Color(0xFF7E9CB0)
-
-    BoxWithConstraints(modifier = modifier) {
-        val w = maxWidth
-        val h = maxHeight
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val pw = size.width
-            val ph = size.height
-            // Extra tiny stars first (under everything).
-            extras.forEach { s ->
-                drawCircle(
-                    color = tinyStarColor,
-                    radius = 1.2.dp.toPx(),
-                    center = Offset(s.x * pw, s.y * ph)
-                )
-            }
-            // Grid web (v178): connect each node to its RIGHT + DOWN grid
-            // neighbours so EVERY star is visibly linked (the old single
-            // zigzag chain hid links under the explored chips and read as
-            // unconnected in light mode). Interior stars get 4 links, edge
-            // stars 2–3 — the constellation reads as a connected mesh.
-            val n = nodes.size
-            val c = kotlin.math.ceil(kotlin.math.sqrt(n.toFloat())).toInt().coerceAtLeast(1)
-            val r = (n + c - 1) / c
-            val pts = nodes.map { (_, nd) -> Offset(nd.x * pw, nd.y * ph) }
-            nodes.indices.forEach { i ->
-                val col = i % c
-                val row = i / c
-                // v181 — length guards: with a NON-rectangular grid (e.g. 29
-                // lanes → 6×5 with the last row holding 5), the last node of a
-                // short row has no right/down neighbour — pts[i+1]/pts[i+c]
-                // indexed past the end and crashed the drawer open
-                // (IndexOutOfBounds 29/29 on draw).
-                if (col < c - 1 && i + 1 < n) {
-                    drawLine(
-                        color = linkColor,
-                        start = pts[i],
-                        end = pts[i + 1],
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-                if (row < r - 1 && i + c < n) {
-                    drawLine(
-                        color = linkColor,
-                        start = pts[i],
-                        end = pts[i + c],
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-            }
-        }
-        nodes.forEach { (id, n) ->
-            val cat = CurioCategories.byId(id)
-            val accent = accents[id] ?: Color(0xFF7FAFD8)
-            val isExplored = id in explored
-            val isSel = selected == id
-            if (isExplored) {
-                // Active: SOLID accent chip + icon + glow; tap selects.
-                val chip = 34.dp
-                Surface(
-                    onClick = { onSelect(if (isSel) null else id) },
-                    shape = CircleShape,
-                    color = accent,
-                    border = BorderStroke(1.dp, accent.copy(alpha = 0.9f)),
-                    shadowElevation = if (isSel) 4.dp else 1.dp,
-                    modifier = Modifier
-                        .offset(x = w * n.x - chip / 2, y = h * n.y - chip / 2)
-                        .size(chip)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        CurioIcon(cat.iconGlyph, null, tint = cat.onAccent(), size = 16.dp)
-                    }
-                }
-            } else {
-                // Inactive: SOLID but smaller + muted (size + color, not
-                // transparency). Decorative only — no tap.
-                val dot = 14.dp
-                Box(
-                    modifier = Modifier
-                        .offset(x = w * n.x - dot / 2, y = h * n.y - dot / 2)
-                        .size(dot)
-                        .clip(CircleShape)
-                        .background(idleDotColor)
-                )
-            }
-        }
-    }
-}
 
 /** v176 — one compact stat pane inside the map's tap panel. */
 @Composable
@@ -2622,7 +2489,10 @@ private fun DrawerFooter() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(210.dp)
+            // v186 — the user said the footer "looks big": 210 → 150dp tall
+            // (the planet art reads as a smaller bottom band, the credits
+            // still sit in the fade).
+            .height(150.dp)
     ) {
         // The art, bottom-anchored and filling the drawer's full width —
         // cropped from the top so the planet reads at the bottom end.
@@ -2638,7 +2508,7 @@ private fun DrawerFooter() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(110.dp)
+                .height(80.dp)
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(

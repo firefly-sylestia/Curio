@@ -1,6 +1,22 @@
 # Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: Phases A–C DONE (committed + pushed to Alpha 2295d17) — spacing/layout sweep + CI follow-up remain
+## Status: v186 drawer/nav/footer tweaks DONE (committed + pushed to Alpha) — see below
+
+## v186 (latest) — user: "make the home shuffle cabinet tet xt even
+larger in default look and in drawer show the your constellaetion from
+the your curiocity page not another thing" + "footer looks big… make it
+more small".
+- Extracted the Stats `CategoryConstellation` → shared
+  `ui/components/CurioConstellation.kt`; Stats page + drawer both call it.
+  Drawer passes passport data (explored sorted, saves = size, lastAt =
+  recent, cutoff 0 = all-time). Deleted the drawer's grid-web
+  `DrawerLaneConstellation` (~140 lines) + 5 unused Stats imports.
+- Nav labels 13 → 15sp (default look). Footer 210 → 150dp, fade 110 → 80dp.
+- Committed + pushed to Alpha (branch).
+
+## Earlier (v185) — M3 theme system, committed + pushed to Alpha 2295d17
+and 56c0986. Phases A–C done; the per-screen spacing/layout sweep + CI
+validation remain.
 
 ## Request (user, paraphrased)
 "Go to alpha branch, sync with main (alpha was 251 behind — done, fast-forwarded + pushed). Then: read the full M3 guidelines (m3.material.io color system + get-started + full guideline). Add 2 new toggles: (1) a proper Material theme — category colors per M3 multi-color guideline; (2) a test 'full Material guideline' — text spacing boxes layout everything. New EXTRA system as toggles, opt-in only, without changing the current app look. Make a proper plan and follow it until done."

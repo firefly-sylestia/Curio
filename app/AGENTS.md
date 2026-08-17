@@ -1648,6 +1648,27 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v186 — drawer shows the Stats page's constellation; nav labels larger;
+  footer slimmer. (branch Alpha)** User: "make the home shuffle cabinet
+  tet xt even larger in default look and in drawer show the your
+  constellaetion from the your curiocity page not another thing bruh" +
+  "also the footer looks big its good now but looks big so make it more
+  small".
+  - SHARED CONSTELLATION: extracted the Stats page's `CategoryConstellation`
+    into `ui/components/CurioConstellation.kt` (internal, public in the
+    components package) — the exact same brain two-lobe rendering, web
+    links, gold fissure, size-by-saves, recent glow, tap-select. The Stats
+    page calls the shared component (private duplicate deleted, 5 unused
+    imports removed). The DRAWER's `DrawerCuriosityMap` now calls the same
+    `CurioConstellation` with passport data (explored lanes sorted by
+    ordinal, `laneCounts = saves`, `laneRecent = lastAt`, `recentCutoff =
+    0L` = all-time → every explored lane glows), and the whole
+    `DrawerLaneConstellation` grid-web function (v176-era) was deleted
+    (~140 lines). The drawer's richer passport tap panel stays.
+  - NAV LABELS: default-look Changa One label 13 → 15sp (still fits the
+    136dp expanded pill; guidelines branch untouched).
+  - FOOTER: 210 → 150dp tall, fade 110 → 80dp — the planet reads as a
+    small bottom band.
 - **v185 — proper M3 theme system (2 opt-in toggles), on branch Alpha.**
   User: "go to alpha branch and sync it with main (alpha was so much
   behind)… read everything [m3.material.io color system overview +

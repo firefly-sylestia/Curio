@@ -504,13 +504,16 @@ private fun FloatingNavPill(
                     // already display-heavy). Size nudged 12 → 13sp so the
                     // wide face reads at the same visual weight as the old
                     // geom Bold.
+                    // v186 — the user asked for the labels EVEN LARGER in
+                    // the default look: 13 → 15sp (still fits the 136dp
+                    // expanded pill: icon 26 + label ~70sp + padding).
                     // v185 — full M3 chrome drops the display face for the
                     // M3 label style (the guidelines' own typography).
                     style = if (materialGuidelinesOn) MaterialTheme.typography.labelMedium
                     else MaterialTheme.typography.labelMedium.copy(
                         fontFamily = ChangaOneFontFamily,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 13.sp
+                        fontSize = 15.sp
                     ),
                     color = activeInk,
                     maxLines = 1,
