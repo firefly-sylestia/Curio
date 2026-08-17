@@ -66,3 +66,6 @@ __pycache__/
 # Web app (separate React project, not part of Android build)
 /web/dist
 /web/.vite
+
+# Generated UI-texts reference (extraction tool: tools/extract_app_texts.py)
+/app-texts.md
