@@ -30,6 +30,12 @@ StatsScreen.kt (new, CurioRoutes.STATS):
 Entry points: drawer map card onClick + "Stats & insights" sub-row;
 Profile ProgressAndAchievementsCard onOpenStats pill.
 
+CI FIX ("fix this and push"): StatsScreen.kt "Unresolved reference
+'Column'" at all `StatsCard {` sites + the declaration — the shell's
+`content: @Composable Column.() -> Unit` used the layout FUNCTION as a
+receiver TYPE. Fixed to ColumnScope (import added). LESSON: receiver
+scopes are ColumnScope / RowScope / BoxScope, never the composable name.
+
 Docs: changelog ADD, AGENTS.md v174c, this file. PUSH.
 
 ## Completed request — drawer redesigned as a tiny personal observatory

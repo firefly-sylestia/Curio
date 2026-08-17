@@ -1327,6 +1327,13 @@ app/src/main/java/com/curio/app/
     (glyph "monitoring") in the Your Curiosity group; Profile —
     ProgressAndAchievementsCard gained onOpenStats + a compact Stats pill
     in the XP header row.
+  - CI FIX 2 (v174c): StatsScreen.kt "Unresolved reference 'Column'" at
+    every `StatsCard {` + the declaration — the shared card shell declared
+    `content: @Composable Column.() -> Unit`, but Column is a COMPOSABLE
+    FUNCTION, not a type; the receiver scope type is ColumnScope
+    (androidx.compose.foundation.layout.ColumnScope). LESSON: `X.() ->
+    Unit` receivers need a real TYPE (ColumnScope / RowScope / BoxScope),
+    never the layout function name.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin
