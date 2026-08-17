@@ -1,52 +1,40 @@
 # Prompt.md — Request log
 
-## Current request — drawer: constant galaxy (box removed), flat opaque footer, opaque buttons, lifetime totals + badges (DONE, pushed)
+## Current request — drawer hero sky = user's SVG artwork; revert 6300f774 (DONE)
 
-User: "lets fix the drawer, can u crop the footer from the button a little
-more and don give it transparecny or shadow or border. and then remove the
-box for your curiocity galaxy, and show a contantt galaxy always only
-starts showing the point when something gets added. and also make the
-buttons non transparect, and also add more things like spinning, explores
-likes etc from the lifetime totals data. also badge collected. etc"
+User: "i uploaded a new svg for the night sky use that and also remove the
+watermarks from the backgroud drawer hero" → then, via ask_user: "i want you
+to fully revert that <github.com/firefly-sylestia/Curio/commit/6300f774>
+this commit revert it fully. also for light mode use another svg i just
+uploaded."
 
-### Interpretation (no ask_user needed — all four asks were concrete)
-1. Footer: crop the illustration a little more (shorter), fully opaque — no
-   transparency fade, no shadow, no rounded border panel.
-2. Curiosity galaxy: remove the card box (border + shadow + elevated
-   surface); the galaxy (sky + stars) is ALWAYS visible; the lane POINTS
-   only appear once a lane has something added.
-3. Buttons non-transparent: the drawer's tappable rows/controls get opaque
-   fills.
-4. More stats: show spins / explores / likes / etc. from the lifetime
-   totals data (`CurioQuests.lifetimeState`) plus the earned badge count.
+### Clarifications (ask_user)
+1. Theme use: dark mode shows the uploaded night-sky SVG; light mode shows the
+   separately uploaded day-sky SVG (`curio_day_sky_fixed(1).svg`) — i.e. the
+   hero sky is ALWAYS artwork now, theme-picked.
+2. Galaxy panel question skipped — the full revert removes the constant-galaxy
+   panel anyway (drawer returns to the boxed real-data curiosity map).
 
 ### Changes
-- `DrawerFooter` (HomeScreen.kt): the 188dp shadowed/rounded box, alpha
-  0.55, and the fade overlay are GONE. The SVG is now a flat opaque
-  AsyncImage (160dp, `Alignment.BottomCenter` crop — top sky trimmed) with
-  no alpha/shadow/clip, and the "v1.1.0 · Made with curiosity ♥" row moved
-  BELOW the image onto the plain surface (credits stay readable over an
-  opaque illustration). Removed the now-unused `Modifier.alpha` import.
-- `DrawerCuriosityMap`: the bordered/shadowed card Surface is removed — the
-  map is a flat Column (whole column `clickable` → Stats page; dots / range
-  selector still consume their own taps). Title renamed "Your Curiosity
-  Galaxy". A constant galaxy panel (rounded 24dp sky gradient +
-  `DrawerCelestialSky` stars/sparkles/moon — no border, no shadow) ALWAYS
-  shows; `DrawerLaneConstellation` dots render only when `explored` is
-  non-empty. Helper copy + empty-state column deleted (the galaxy IS the
-  empty state). Selected-lane panel + dismiss chip fills → opaque lerps.
-- NEW `DrawerLifetimeStrip` + `DrawerLifetimePane`: 3×3 grid of opaque
-  panes from lifetimeState — Spins, Explores, Saved, Quotes, Pins, Likes,
-  Dislikes, Daily + Badges (`allStages().count { isStageDone(it) }`).
-- Buttons opaque: `DrawerNavItem` rows `Color.Transparent` →
-  `lerp(surfaceContainerHigh, iconTint, 0.06f)`; both collapsible group
-  cards `surfaceContainerHigh.copy(alpha = 0.45f)` → opaque
-  `lerp(surface, surfaceContainerHigh, 0.45f)`; the SHARED
-  `StatsRangeSelectorPill` (StatsRange.kt, also on the stats page) →
-  opaque `surfaceContainerHigh`.
-- Version tag: v174g (v174f was taken by the APK-slimming commit).
-- Docs: app/AGENTS.md v174g entry + fastlane changelog drawer bullets.
+- Reverted `6300f774` ("constant galaxy, flat opaque footer, opaque buttons,
+  lifetime totals + badges") and its CI follow-up `91b4375` (RowScope fix for
+  the now-deleted `DrawerLifetimePane`) via `git revert --no-commit` — drawer
+  back to the v174e/v174f sky-tear design. Changelog + AGENTS.md additions
+  from that commit reverted with it.
+- Drawer hero (HomeScreen.kt `HomeDrawerContent`): procedural
+  `DrawerCelestialSky` (stars/grain/constellation/sparkles/moon) and the
+  mirrored watermark glyph collage (`heroSymbols`/`heroPairs`) DELETED. The
+  banner now loads the user's SVG via Coil `SvgDecoder` (same path as the
+  footer): dark → `res/raw/drawer_hero_sky_dark.svg` (uploaded
+  `svgviewer-output (11).svg` — dark palette, moon-edge sparkle removed),
+  light → `res/raw/drawer_hero_sky_light.svg` (uploaded
+  `curio_day_sky_fixed(1).svg` — day sky, sun at the moon's 0.84/0.28
+  position, clouds, birds). Theme gradient kept as the loading backdrop;
+  greeting + avatar unchanged on top.
+- Dead code removed: `DrawerCelestialSky`, `SkyStar`/`SkyLink`/`SkySparkle`,
+  `drawSparkle`, and the `Path`/`DrawScope` imports (only the hero used them).
+- Changelog (20260920.txt) + app/AGENTS.md v175 notes updated.
 
-No compile/test possible in this env (CI validates on push) — the changes
-follow the COMPILE-SAFETY rules (opaque lerp fills for anything under a
-shadow, `themedAccent` outside remember, no new Material3 APIs).
+No compile/test possible in this env (CI validates on push) — changes follow
+COMPILE-SAFETY rules (no sed, checked references/imports, ImageRequest in
+remember keyed by res id).

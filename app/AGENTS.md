@@ -1456,49 +1456,34 @@ app/src/main/java/com/curio/app/
     read as overlapping the grid's last row — the sliced row + 6dp
     shadow formed a band behind the button. Fixed: grid bottom
     contentPadding 4→20dp, gap 8→16dp, pill shadow 6→3dp.
-- **v174g — drawer: constant galaxy (box removed), flat opaque footer,
-  opaque buttons, lifetime totals + badges in the map.** User: "crop the
-  footer from the bottom a little more and don't give it transparency or
-  shadow or border; remove the box for your curiosity galaxy and show a
-  constant galaxy always, only starting to show the points when something
-  gets added; make the buttons non-transparent; add more things like
-  spins, explores, likes etc from the lifetime totals data, also badge
-  collected."
-  - GALAXY (`DrawerCuriosityMap`): the bordered/shadowed card Surface is
-    GONE — the map is now a flat column (whole column `clickable` → stats
-    page, dots/selector still consume their own taps). Title renamed
-    "Your Curiosity Galaxy". A constant galaxy PANEL (24dp rounded
-    gradient in the drawer's sky colours + `DrawerCelestialSky` stars /
-    sparkles / moon, no border, no shadow) ALWAYS shows; the lane dots
-    (`DrawerLaneConstellation`) only render when `explored` is non-empty.
-    The old helper copy + empty-state column were deleted (the galaxy IS
-    the empty state). Selected-lane panel + dismiss chip fills converted
-    to opaque lerps (`lerp(surfaceContainerHigh, accent, 0.14f)` etc —
-    v27n rule).
-  - LIFETIME STRIP (`DrawerLifetimeStrip` + `DrawerLifetimePane`): under
-    the galaxy, a 3×3 grid of opaque panes from `CurioQuests.
-    lifetimeState` — Spins, Explores, Saved, Quotes, Pins, Likes,
-    Dislikes, Daily + Badges (`allStages().count { isStageDone(it) }`,
-    mirroring JourneyCard). Colors match the stats page's lifetime grid.
-    CI LESSON: a pane extracted into its own composable CANNOT use
-    `Modifier.weight(1f)` (unresolved — weight is a RowScope/ColumnScope
-    extension; the stats page's panes are inline inside their Row for that
-    reason). The helper is now a `RowScope.` extension function so the
-    weight resolves in the caller's row.
-  - FOOTER (`DrawerFooter`): no more 188dp shadowed/rounded box with
-    alpha 0.55 + fade overlay — the SVG is now a FLAT opaque
-    `AsyncImage` (160dp, `Alignment.BottomCenter` crop, no alpha / shadow
-    / clip), and the version + "Made with curiosity ♥" row moved BELOW
-    it onto the plain surface so the credits stay readable over an opaque
-    image. LESSON: an opaque illustration behind text needs the credits
-    OUTSIDE the image box, not overlaid.
-  - BUTTONS OPAQUE: `DrawerNavItem` rows were `Color.Transparent` →
-    `lerp(surfaceContainerHigh, iconTint, 0.06f)` (opaque, softly
-    tinted); both collapsible group cards were
-    `surfaceContainerHigh.copy(alpha = 0.45f)` → opaque
-    `lerp(surface, surfaceContainerHigh, 0.45f)` (v27n blend rule); the
-    SHARED `StatsRangeSelectorPill` (StatsRange.kt — also rides the stats
-    page) is now opaque `surfaceContainerHigh` instead of 0.6 alpha.
+- **v175 — drawer hero sky is the user's SVG artwork; v174g fully
+  reverted.** User: "i uploaded a new svg for the night sky use that and
+  also remove the watermarks from the backgroud drawer hero" + "fully
+  revert <6300f774>... also for light mode use another svg i just
+  uploaded."
+  - REVERT: `6300f774` (constant galaxy / flat opaque footer / opaque
+    buttons / lifetime totals + badges) and its CI follow-up `91b4375`
+    (RowScope fix for the now-deleted `DrawerLifetimePane`) reverted
+    cleanly via `git revert --no-commit` — the drawer returns to the
+    v174e/v174f sky-tear design: boxed real-data curiosity map, the
+    transparent alpha-0.55 footer, the pre-existing nav rows. The
+    changelog + AGENTS.md additions from that commit went with it.
+  - HERO SKY: the procedural `DrawerCelestialSky` (stars / grain /
+    constellation / sparkles / crescent moon) and the mirrored watermark
+    glyph collage (`heroSymbols`/`heroPairs`) are GONE from the drawer
+    hero. The banner now loads the user's uploaded SVG artwork via Coil's
+    `SvgDecoder` (same path as the footer): dark theme →
+    `res/raw/drawer_hero_sky_dark.svg` (the uploaded night sky
+    `svgviewer-output (11).svg`, dark palette with the moon-edge sparkle
+    removed), light theme → `res/raw/drawer_hero_sky_light.svg` (the
+    uploaded `curio_day_sky_fixed(1).svg` day sky — sun at the moon's
+    position 0.84/0.28, clouds, birds). The theme gradient stays as the
+    loading backdrop; greeting + avatar read as the sky's scenery.
+  - DEAD CODE: `DrawerCelestialSky`, `SkyStar`/`SkyLink`/`SkySparkle`,
+    `drawSparkle` and the `Path`/`DrawScope` imports deleted (only the
+    hero used them). LESSON: when a commit is reverted, its CI-only
+    follow-up fixes must go too or the revert conflicts on the code they
+    patched.
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

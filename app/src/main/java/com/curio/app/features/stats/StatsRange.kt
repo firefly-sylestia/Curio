@@ -64,8 +64,7 @@ fun StatsRangeSelectorPill(modifier: Modifier = Modifier) {
         Surface(
             onClick = { menuOpen = true },
             shape = RoundedCornerShape(12.dp),
-            // v174g — opaque pill (no translucency).
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

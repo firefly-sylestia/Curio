@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="186" viewBox="0 0 320 186">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#72C7DF"/>
+      <stop offset=".48" stop-color="#A9DDE3"/>
+      <stop offset="1" stop-color="#E7F3E9"/>
+    </linearGradient>
+
+    <radialGradient id="sunGlow">
+      <stop offset="0" stop-color="#FFF2AE" stop-opacity=".68"/>
+      <stop offset=".42" stop-color="#FFE59A" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#FFE59A" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="cloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".88"/>
+      <stop offset=".7" stop-color="#F9FCF8" stop-opacity=".70"/>
+      <stop offset="1" stop-color="#DCECEA" stop-opacity=".48"/>
+    </linearGradient>
+
+    <linearGradient id="cloudSoft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".62"/>
+      <stop offset="1" stop-color="#E9F5F2" stop-opacity=".32"/>
+    </linearGradient>
+
+    <filter id="cloudBlur" x="-20%" y="-30%" width="140%" height="170%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+
+    <style>
+      .bird {
+        fill: none;
+        stroke: #3D6870;
+        stroke-width: 1.35;
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="320" height="186" fill="url(#sky)"/>
+
+  <!-- Sun: same position as the night moon -->
+  <circle cx="268.80" cy="52.08" r="42" fill="url(#sunGlow)"/>
+
+  <g stroke="#FFE49A" stroke-width="1.6" stroke-linecap="round" opacity=".58">
+    <line x1="268.8" y1="23" x2="268.8" y2="17"/>
+    <line x1="268.8" y1="81" x2="268.8" y2="87"/>
+    <line x1="239.8" y1="52.08" x2="233.8" y2="52.08"/>
+    <line x1="297.8" y1="52.08" x2="303.8" y2="52.08"/>
+    <line x1="248.3" y1="31.6" x2="243.9" y2="27.2"/>
+    <line x1="289.3" y1="72.6" x2="293.7" y2="77"/>
+    <line x1="289.3" y1="31.6" x2="293.7" y2="27.2"/>
+    <line x1="248.3" y1="72.6" x2="243.9" y2="77"/>
+  </g>
+
+  <circle cx="268.80" cy="52.08" r="13" fill="#FFD66B"/>
+  <circle cx="265.1" cy="48.1" r="4.8" fill="#FFE9A2" opacity=".72"/>
+
+  <!-- High wispy cloud, fully inside canvas -->
+  <g opacity=".58" filter="url(#cloudBlur)">
+    <path d="M18 47
+             C28 40 40 40 49 45
+             C53 35 63 30 73 34
+             C81 25 96 28 101 39
+             C112 37 122 42 126 51
+             C105 57 42 57 18 53 Z"
+          fill="url(#cloudSoft)"/>
+  </g>
+
+  <!-- Main left cloud, larger and more readable -->
+  <g opacity=".82">
+    <path d="M-18 116
+             C-6 105 8 103 21 109
+             C25 96 38 89 51 95
+             C59 82 77 84 85 98
+             C98 94 111 101 116 113
+             C128 112 139 118 144 129
+             C126 138 22 140 -18 132 Z"
+          fill="url(#cloud)"/>
+    <path d="M-8 127
+             C25 134 99 133 137 126
+             C125 137 27 142 -8 135 Z"
+          fill="#D6E8E6" opacity=".34"/>
+  </g>
+
+  <!-- Middle floating cloud -->
+  <g opacity=".64">
+    <path d="M112 91
+             C121 84 132 84 140 88
+             C144 79 154 74 163 79
+             C169 69 184 72 188 83
+             C198 81 208 87 211 96
+             C194 101 128 101 112 97 Z"
+          fill="url(#cloud)"/>
+  </g>
+
+  <!-- RIGHT CLOUD: moved inward/up so it cannot clip -->
+  <g opacity=".82">
+    <path d="M203 130
+             C214 120 227 119 237 125
+             C241 113 253 107 264 113
+             C271 101 288 104 294 117
+             C305 115 316 121 321 131
+             C326 140 321 149 314 153
+             L205 153
+             C199 147 198 137 203 130 Z"
+          fill="url(#cloud)"/>
+
+    <path d="M208 145
+             C235 150 288 149 318 142
+             C313 152 231 158 208 150 Z"
+          fill="#D3E7E5" opacity=".34"/>
+  </g>
+
+  <!-- Soft distant horizon cloud -->
+  <path d="M0 163
+           C25 157 48 158 67 164
+           C88 157 109 158 129 164
+           C150 158 172 159 192 165
+           C214 158 238 159 258 165
+           C281 159 304 160 320 165
+           L320 186 L0 186 Z"
+        fill="#FFFFFF" opacity=".16"/>
+
+  <!-- Birds -->
+  <g class="bird">
+    <path d="M53 66 C56 63 59 63 62 66
+             C65 63 68 63 71 66"/>
+    <path d="M151 48 C153 46 155 46 157 48
+             C159 46 161 46 163 48"/>
+    <path d="M201 76 C203 74 205 74 207 76
+             C209 74 211 74 213 76"/>
+    <path d="M116 126 C118 124 120 124 122 126
+             C124 124 126 124 128 126"/>
+  </g>
+
+  <!-- Very subtle daytime grain -->
+  <g fill="#245C60">
+    <circle cx="181.24" cy="52.57" r=".70" opacity=".045"/>
+    <circle cx="301.51" cy="185.05" r=".54" opacity=".04"/>
+    <circle cx="243.93" cy="3.73" r=".56" opacity=".045"/>
+    <circle cx="287.51" cy="113.41" r=".69" opacity=".035"/>
+    <circle cx="152.47" cy="139" r=".66" opacity=".045"/>
+    <circle cx="206.51" cy="59.04" r=".63" opacity=".03"/>
+    <circle cx="112.79" cy="52.32" r=".67" opacity=".045"/>
+    <circle cx="138.57" cy="163.35" r=".46" opacity=".035"/>
+    <circle cx="312.11" cy="94.89" r=".55" opacity=".045"/>
+    <circle cx="87.86" cy="185.88" r=".49" opacity=".04"/>
+    <circle cx="15.87" cy="81.07" r=".41" opacity=".045"/>
+    <circle cx="39.20" cy="38.99" r=".39" opacity=".04"/>
+    <circle cx="212.92" cy="172.93" r=".77" opacity=".03"/>
+    <circle cx="170.24" cy="75.35" r=".74" opacity=".035"/>
+    <circle cx="132.04" cy="44.23" r=".48" opacity=".045"/>
+    <circle cx="20.21" cy="155.64" r=".69" opacity=".03"/>
+    <circle cx="205.03" cy="133.76" r=".42" opacity=".04"/>
+    <circle cx="239.41" cy="66.63" r=".45" opacity=".04"/>
+    <circle cx="193.99" cy="164.81" r=".66" opacity=".035"/>
+    <circle cx="91.77" cy="183.44" r=".44" opacity=".04"/>
+    <circle cx="186.46" cy="171.75" r=".37" opacity=".035"/>
+    <circle cx="114.29" cy="84.63" r=".69" opacity=".045"/>
+    <circle cx="68.28" cy=".70" r=".46" opacity=".04"/>
+    <circle cx="253.80" cy="1.90" r=".43" opacity=".04"/>
+    <circle cx="181.36" cy="184.13" r=".79" opacity=".035"/>
+    <circle cx="133.89" cy="112.63" r=".78" opacity=".03"/>
+    <circle cx="312.29" cy="20.24" r=".68" opacity=".04"/>
+    <circle cx="161.04" cy="100.05" r=".47" opacity=".035"/>
+    <circle cx="183.82" cy="87.12" r=".54" opacity=".03"/>
+    <circle cx="241.15" cy="114.47" r=".35" opacity=".04"/>
+    <circle cx="165.82" cy="150.20" r=".47" opacity=".035"/>
+    <circle cx="187.79" cy="96.41" r=".71" opacity=".03"/>
+    <circle cx="4.33" cy="161.58" r=".39" opacity=".035"/>
+    <circle cx="273.82" cy="81.23" r=".48" opacity=".04"/>
+    <circle cx="234.33" cy="26.97" r=".41" opacity=".035"/>
+    <circle cx="145.53" cy="62.41" r=".59" opacity=".04"/>
+    <circle cx="122.03" cy="30.58" r=".68" opacity=".04"/>
+    <circle cx="11.34" cy="44.49" r=".71" opacity=".03"/>
+    <circle cx="154.80" cy="158.60" r=".78" opacity=".03"/>
+    <circle cx="228.21" cy="111.78" r=".72" opacity=".035"/>
+    <circle cx="266.17" cy="142.19" r=".70" opacity=".04"/>
+    <circle cx="312.19" cy="135.18" r=".80" opacity=".035"/>
+    <circle cx="251.90" cy="62.44" r=".59" opacity=".035"/>
+    <circle cx="251.07" cy="76.17" r=".60" opacity=".04"/>
+    <circle cx="229.49" cy="49.11" r=".48" opacity=".035"/>
+    <circle cx="178.55" cy="167.94" r=".64" opacity=".03"/>
+    <circle cx="120.30" cy="67.08" r=".44" opacity=".03"/>
+  </g>
+
+</svg>
