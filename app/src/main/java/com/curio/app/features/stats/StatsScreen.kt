@@ -165,13 +165,6 @@ fun StatsScreen(navController: NavController) {
     }
 }
 
-/** v174d — keep only entries captured inside [StatsRange]'s window. */
-private fun List<CurioEntry>.filterForRange(range: StatsRange): List<CurioEntry> {
-    val days = range.days ?: return this
-    val cutoff = System.currentTimeMillis() - days * 24L * 3600 * 1000
-    return filter { it.capturedAtMillis >= cutoff }
-}
-
 /** v174c — the stats page's celestial palette (mirrors the drawer's sky). */
 @Composable
 private fun statsSkyColors(): Triple<Color, Color, Color> {
@@ -193,7 +186,9 @@ private fun StatsSkyHeader(
     skyInk: Color,
     onBack: () -> Unit
 ) {
-    val starTint = Color(0xFFFFFDF4)
+    // v174e — light mode uses the deep seafoam INK for the celestial bits so
+    // the stars/moon stay visible on the pale dawn sky (warm white vanishes).
+    val starTint = if (isCurioDarkTheme()) Color(0xFFFFFDF4) else Color(0xFF2C5A53)
     val stars = remember {
         val rnd = Random(0xD2A7E + 41)
         List(22) {
@@ -238,7 +233,7 @@ private fun StatsSkyHeader(
             Surface(
                 onClick = onBack,
                 shape = CircleShape,
-                color = starTint.copy(alpha = 0.85f),
+                color = Color(0xFFFFFDF4).copy(alpha = 0.85f),
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {

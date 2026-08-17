@@ -1365,6 +1365,56 @@ app/src/main/java/com/curio/app/
   ("saved this week/month/all time"). In-memory state (not persisted).
   LESSON: only entry-based stats are time-bucketed; lifetime counters and
   quest history can't be filtered — union quest lanes only on All Time.
+- **v174e — drawer map rework: no fake data, real lane constellation +
+  sky-tear banner + transparent footer.** User: "dont use fake data, use
+  empty state, extend the drawer banner's sky design and its color to the
+  tear start so it looks like a sky tear... remove the learned/explored/
+  topics/questions/saved/shared/streak stats, only use what exists... dots
+  with rounded icons connected, tapping shows the data... replace the
+  footer svg with this one (no background), place it more below and less
+  opaque so 'Made with curiosity' is visible". ask_user: (1) drop the
+  stat list entirely; (2) icon-dots in the DRAWER map only (stats page
+  unchanged); (3) the sky tear is the drawer banner — the stats page stays
+  as-is, just light-mode tuned.
+  - DRAWER MAP (`DrawerCuriosityMap` in HomeScreen.kt): the 7 orbiting
+    `MapStat`s (Learned=128 / Explored / Topics / Questions=98 / Saved /
+    Shared=72 / Streak — the fake design numbers) and the "Overall
+    Curiosity N" center overlay are GONE. The card now loads real entries
+    (`CurioRepositoryHolder.repo.getAll()` in a LaunchedEffect), filters
+    them via the SHARED `filterForRange` (moved from StatsScreen.kt to
+    StatsRange.kt — same package, no import churn), and shows a
+    `DrawerLaneConstellation`: one 34dp rounded lane-icon chip per
+    EXPLORED lane (deterministic two-lobe arc seeded by name hash, thin
+    connecting lines, accent border; selected = solid accent fill +
+    `onAccent()` icon + 3dp lift). Tapping a dot toggles an inline panel
+    (lane name + "N saved · active this week" + dismiss chip); the
+    helper copy "A little galaxy of everything you've explored." only
+    shows in the EMPTY state (no explored lanes → icon + "Spin a deck
+    and explore to light up your map."). Deleted `MapStat` +
+    `ConstellationBrain` (dead). Whole card still opens the stats page on
+    non-dot taps (nested clickables — the inner dot consumes its tap).
+  - SKY TEAR (drawer banner): `DrawerRollingHorizon` (the cream hills at
+    the banner's bottom) is DELETED so the sky gradient + stars run all
+    the way down to the torn seam — the banner reads as a torn piece of
+    sky. LESSON: the torn hero's bottom band belongs to the hero's own
+    art; an overlay horizon between the art and the seam breaks the
+    "tear" illusion.
+  - LIGHT-MODE TUNE: the celestial bits (`DrawerCelestialSky` +
+    `StatsSkyHeader`) hardcoded warm-white `starTint` — invisible on the
+    pale seafoam sky. Both now resolve `starTint`
+    theme-aware (light = deep seafoam ink `#2C5A53`, dark = warm white
+    `#FFFDF4`); the stats back-pill keeps an explicit warm-white fill so
+    the dark arrow still reads.
+  - FOOTER (`DrawerFooter`): `res/raw/drawer_footer.svg` replaced with
+    the user's NEW svg — it has NO `#FCF3E8` background rect (the old one
+    had a cream backdrop panel). The AsyncImage is now
+    `Alignment.BottomCenter` + `alpha(0.55f)` so the art sits lower and
+    the "v1.1.0 · Made with curiosity ♥" line reads over it.
+  - LESSON: an SVG's first `<path d="M0 0h1536v1024H0z" fill=...>` is a
+    full-canvas background rect — a "no background" version simply lacks
+    it; `remember {}` is `@DisallowComposableCalls` so resolve
+    `themedAccent()` maps OUTSIDE remember (the associateWith pattern the
+    stats page uses).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

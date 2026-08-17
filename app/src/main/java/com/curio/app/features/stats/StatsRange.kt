@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.CurioEntry
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
@@ -30,6 +31,14 @@ enum class StatsRange(val label: String, val days: Long?) {
     WEEK("This Week", 7),
     MONTH("This Month", 30),
     ALL("All Time", null)
+}
+
+/** v174d — keep only entries captured inside [StatsRange]'s window. Shared
+ *  by the stats page AND the drawer's curiosity map. */
+fun List<CurioEntry>.filterForRange(range: StatsRange): List<CurioEntry> {
+    val days = range.days ?: return this
+    val cutoff = System.currentTimeMillis() - days * 24L * 3600 * 1000
+    return filter { it.capturedAtMillis >= cutoff }
 }
 
 /** Process-wide holder (same pattern as CurioNavTint) — survives navigation
