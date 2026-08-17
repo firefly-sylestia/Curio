@@ -1941,33 +1941,38 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                 // silently appearing in a same-size sheet, and the group
                 // card gives the rows their hierarchy background.
                 item("curiosityGroup") {
-                    AnimatedVisibility(
-                        visible = curiosityExpanded,
-                        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
-                        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
-                                .padding(vertical = 2.dp)
+                    // v137 — AnimatedVisibility is a ColumnScope extension,
+                    // and a LazyColumn item's scope has no Column receiver —
+                    // the collapsible group needs its own Column to host it.
+                    Column {
+                        AnimatedVisibility(
+                            visible = curiosityExpanded,
+                            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
+                            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
                         ) {
-                            DrawerNavItem(
-                                icon = CurioIcons.History,
-                                label = "Topic History",
-                                iconTint = CurioColors.DustyBlue
-                            ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
-                            DrawerNavItem(
-                                icon = CurioIcons.DragHandle,
-                                label = "Manage Categories",
-                                iconTint = curioSageInk()
-                            ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
-                            DrawerNavItem(
-                                icon = CurioIcons.Database,
-                                label = "Browse Topics",
-                                iconTint = CurioColors.CategorySky
-                            ) { onNavigate(CurioRoutes.DATABASE) }
+                            Column(
+                                modifier = Modifier
+                                    .padding(start = 4.dp, end = 4.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                    .padding(vertical = 2.dp)
+                            ) {
+                                DrawerNavItem(
+                                    icon = CurioIcons.History,
+                                    label = "Topic History",
+                                    iconTint = CurioColors.DustyBlue
+                                ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
+                                DrawerNavItem(
+                                    icon = CurioIcons.DragHandle,
+                                    label = "Manage Categories",
+                                    iconTint = curioSageInk()
+                                ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
+                                DrawerNavItem(
+                                    icon = CurioIcons.Database,
+                                    label = "Browse Topics",
+                                    iconTint = CurioColors.CategorySky
+                                ) { onNavigate(CurioRoutes.DATABASE) }
+                            }
                         }
                     }
                 }
@@ -1982,32 +1987,34 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     )
                 }
                 item("aboutGroup") {
-                    AnimatedVisibility(
-                        visible = aboutExpanded,
-                        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
-                        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
-                                .padding(vertical = 2.dp)
+                    Column {
+                        AnimatedVisibility(
+                            visible = aboutExpanded,
+                            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
+                            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
                         ) {
-                            DrawerNavItem(
-                                icon = CurioIcons.SupportAgent,
-                                label = "Support & diagnostics",
-                                iconTint = curioRoseInk()
-                            ) { onNavigate(CurioRoutes.SUPPORT) }
-                            DrawerNavItem(
-                                icon = CurioIcons.Replay,
-                                label = "Replay intro",
-                                iconTint = CurioColors.HomeRosewood
+                            Column(
+                                modifier = Modifier
+                                    .padding(start = 4.dp, end = 4.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                    .padding(vertical = 2.dp)
                             ) {
-                                // Re-show the welcome screens: reset the completed
-                                // flag, then open onboarding like Settings' replay.
-                                CurioOnboardingState.reset(context)
-                                onNavigate(CurioRoutes.ONBOARDING)
+                                DrawerNavItem(
+                                    icon = CurioIcons.SupportAgent,
+                                    label = "Support & diagnostics",
+                                    iconTint = curioRoseInk()
+                                ) { onNavigate(CurioRoutes.SUPPORT) }
+                                DrawerNavItem(
+                                    icon = CurioIcons.Replay,
+                                    label = "Replay intro",
+                                    iconTint = CurioColors.HomeRosewood
+                                ) {
+                                    // Re-show the welcome screens: reset the completed
+                                    // flag, then open onboarding like Settings' replay.
+                                    CurioOnboardingState.reset(context)
+                                    onNavigate(CurioRoutes.ONBOARDING)
+                                }
                             }
                         }
                     }
