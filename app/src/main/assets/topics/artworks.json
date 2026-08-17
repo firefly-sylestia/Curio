@@ -15391,5 +15391,719 @@
       "1900s"
     ],
     "tier": 1
+  },
+  {
+    "id": "artw-annunciation-1434",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Annunciation (1434)",
+    "teaser": "The angel Gabriel and Mary in a church so detailed you can read the stained glass — van Eyck's oil technique let him paint light through windows, shadows on marble, and the words of the angel's greeting painted upside-down as if spoken into the air. The church is a metaphor: the New Testament arriving inside the Old.",
+    "imageUrl": "",
+    "byline": "Jan van Eyck",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Annunciation (1434) details",
+      "durationMinutes": 10,
+      "instruction": "Look at the painted words — Gabriel's greeting appears upside-down on the canvas, as if flying from his mouth. Then find the seven windows: the light is theology made paint."
+    },
+    "tags": [
+      "Early Netherlandish",
+      "Painting",
+      "1400s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-descent-from-the-cross-1435",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Descent from the Cross (1435)",
+    "teaser": "Christ's body lowered from the cross in a composition so tight that every figure seems pressed together by grief — Mary swooning in the same arc as her son, the shroud held like a cradle. Van der Weyden compressed the scene into a shallow stage, making the sorrow feel immediate. It became the most copied painting in the north.",
+    "imageUrl": "",
+    "byline": "Rogier van der Weyden",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Descent from the Cross (1435) composition",
+      "durationMinutes": 10,
+      "instruction": "Look at the curve of Mary's body — it mirrors Christ's, grief repeating his form. Then notice the shallow space: the figures are packed like a relief, emotion at full pressure."
+    },
+    "tags": [
+      "Early Netherlandish",
+      "Painting",
+      "1400s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-portrait-of-a-lady-1460",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Portrait of a Lady (1460)",
+    "teaser": "An unknown woman, hands folded like a closed book, her veil framing a face of unnerving stillness — the most famous anonymous portrait of the 1400s. The downward sweep of her eyelid and the corner of her mouth make her look at once serene and sorrowful. Her identity is lost; her presence is not.",
+    "imageUrl": "",
+    "byline": "Rogier van der Weyden",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Portrait of a Lady (1460) the veil",
+      "durationMinutes": 8,
+      "instruction": "Look at the hands — pressed together as if holding something invisible. Then look at the veil's geometry: every fold is drawn with the precision of a map."
+    },
+    "tags": [
+      "Early Netherlandish",
+      "Portrait",
+      "1400s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-merode-altarpiece-1427",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Mérode Altarpiece (1427)",
+    "teaser": "The Annunciation in a Flemish burgher's home — Mary reading in a tidy room, Gabriel arriving through the window, Joseph working at his carpentry bench. Campin painted the holy event as ordinary household life, full of coded objects: the extinguished candle, the lilies, the mousetrap (a symbol of Christ catching the devil). One of the earliest oil paintings to survive.",
+    "imageUrl": "",
+    "byline": "Robert Campin",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Mérode Altarpiece (1427) symbols",
+      "durationMinutes": 10,
+      "instruction": "Look for the mousetrap on Joseph's bench — Campin's inside joke about God baiting the devil. Then notice the town through the window: the everyday world pressed against the sacred room."
+    },
+    "tags": [
+      "Early Netherlandish",
+      "Painting",
+      "1400s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-battle-of-san-romano-1438",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Battle of San Romano (1438)",
+    "teaser": "Florentine cavalry clashing in a forest of lances — Uccello's celebration of perspective, painted as a decorative frieze of armoured knights and fallen horses. The lances are laid out like a geometry exercise, and the horses rear in frozen theatrical poses. Uccello was famously obsessed with perspective; his wife reportedly called him to bed each night saying 'the perspective is in bed'. The painting was once a single triptych; its panels now live in three museums.",
+    "imageUrl": "",
+    "byline": "Paolo Uccello",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Battle of San Romano (1438) lances",
+      "durationMinutes": 10,
+      "instruction": "Look at the lances — they radiate like a compass, Uccello showing off his mastery of foreshortening. Then notice the fallen soldier's foreshortened body on the ground: perspective as battlefield."
+    },
+    "tags": [
+      "Renaissance",
+      "Painting",
+      "1400s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-tribute-money-1425",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Tribute Money (1425)",
+    "teaser": "Christ, the tax collector and Peter in a single continuous scene — the moment Christ tells Peter to find a coin in a fish's mouth, told in three sequential moments within one fresco. Masaccio's breakthrough was light: one consistent source casting real shadows, making the figures solid for the first time in a century. It is the painting that started the Renaissance.",
+    "imageUrl": "",
+    "byline": "Masaccio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Tribute Money (1425) light",
+      "durationMinutes": 10,
+      "instruction": "Look at the shadows — every figure casts a consistent shadow from the same light, a shock in 1425. Then follow Peter's journey: the same apostle appears three times in one scene."
+    },
+    "tags": [
+      "Renaissance",
+      "Painting",
+      "1400s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-mystical-nativity-1501",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Mystical Nativity (1501)",
+    "teaser": "The birth of Christ watched by angels, shepherds and demons — painted in a year Botticelli believed was the end of the world. Three angels embrace three men at the bottom, the saved and the damned reconciled. The Greek inscription at the top warns of tribulation and names the painter's hopes. It is Botticelli's last great painting and his strangest.",
+    "imageUrl": "",
+    "byline": "Sandro Botticelli",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Mystical Nativity (1501) inscription",
+      "durationMinutes": 8,
+      "instruction": "Look at the angels at the bottom — they embrace humans under the olive boughs, a reconciliation Botticelli desperately hoped for. Then read the inscription: it predicts the end of the world in 1501."
+    },
+    "tags": [
+      "Renaissance",
+      "Painting",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-venus-and-mars-1485",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Venus and Mars (1485)",
+    "teaser": "Venus watching over the sleeping god of war while satyrs play with his armour — the goddess of love has conquered war, who sleeps it off. Mars is sprawled in an impossible pose, his helmet and lance stolen by tiny satyrs. The panel was a wedding gift: a promise that love tames violence. Botticelli painted it with a wink.",
+    "imageUrl": "",
+    "byline": "Sandro Botticelli",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Venus and Mars (1485) the satyrs",
+      "durationMinutes": 8,
+      "instruction": "Look at Mars's pose — utterly defenceless, snoring while his weapons are played with. Then find the satyr blowing a conch in his ear: the god of war sleeps through it all."
+    },
+    "tags": [
+      "Renaissance",
+      "Mythology",
+      "1480s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-sistine-madonna-1512",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Sistine Madonna (1512)",
+    "teaser": "Mary carrying the Christ child down to earth, flanked by saints, with the two famous cherubs leaning on the frame's edge below. The curtain has opened; the Madonna steps into our world. The bottom pair of angels became the most reproduced cherubs in history — they're on posters, mugs and banknotes. The painting is Raphael's last Madonna and his most tender.",
+    "imageUrl": "",
+    "byline": "Raphael",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Sistine Madonna (1512) the cherubs",
+      "durationMinutes": 8,
+      "instruction": "Look at the two cherubs at the bottom — borrowed from a real sketch Raphael made of a boy in the street. Then look at Mary's bare feet: she has stepped off her heavenly cloud onto the world's floor."
+    },
+    "tags": [
+      "Renaissance",
+      "Painting",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-lady-with-ermine-1490",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Lady with an Ermine (1490)",
+    "teaser": "Cecilia Gallerani holding an ermine — the animal of the Sforza family and a symbol of purity — with her hand and the creature's body turning in the same elegant spiral. Leonardo painted the ermine as a living animal, alert and twisting, a study of movement decades before motion studies. It is one of only four portraits of women by Leonardo.",
+    "imageUrl": "",
+    "byline": "Leonardo da Vinci",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Lady with an Ermine (1490) the ermine",
+      "durationMinutes": 8,
+      "instruction": "Look at the spiral of the pose — the woman, the ermine and her hand all turn together. Then notice the animal's alertness: Leonardo painted it mid-movement, not as a prop."
+    },
+    "tags": [
+      "Renaissance",
+      "Portrait",
+      "1480s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-ginevra-benchi-1478",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Ginevra de' Benci (1478)",
+    "teaser": "A young Florentine woman in a portrait that was revolutionary for its inwardness — she is beautiful but not posed for admiration; her face is pale, her gaze averted, her personality closed. Leonardo painted her against a juniper bush (ginevra plays on ginepro, juniper) and used the new oil technique to model her face with soft shadow. It is the only Leonardo painting in the Americas.",
+    "imageUrl": "",
+    "byline": "Leonardo da Vinci",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Ginevra de' Benci (1478) the gaze",
+      "durationMinutes": 8,
+      "instruction": "Look at her face — Leonardo modelled it with shadow, not outline, so she seems present rather than posed. Then find the juniper behind her: a botanical pun on her name."
+    },
+    "tags": [
+      "Renaissance",
+      "Portrait",
+      "1470s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-last-judgment-sistine-1541",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Last Judgment (1541)",
+    "teaser": "The end of the world painted across the altar wall of the Sistine Chapel — a whirlwind of resurrected bodies, saints and demons, with Christ at the centre raising his hand. It scandalized the Church: naked bodies, a saint with a trophy skin, and the Pope's master of ceremonies depicted as a serpent-bitten fool. Michelangelo painted it twenty years after the ceiling, angrier and more monumental.",
+    "imageUrl": "",
+    "byline": "Michelangelo",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Last Judgment (1541) composition",
+      "durationMinutes": 10,
+      "instruction": "Look at Christ's raised arm — the whole composition spins around it like a storm. Then find Saint Bartholomew holding his flayed skin: the face on the skin is Michelangelo's own self-portrait."
+    },
+    "tags": [
+      "Renaissance",
+      "Painting",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-view-of-toledo-1600",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "View of Toledo (1600)",
+    "teaser": "The Spanish city of Toledo under a sky of boiling silver — painted not as a map but as a mood, with the cathedral and the Alcázar looming over the gorge. El Greco rearranged the city's actual geography for drama: buildings move, the sky is a storm of light. It is one of the first great landscape paintings in European art, and it shows a place as a vision.",
+    "imageUrl": "",
+    "byline": "El Greco",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "View of Toledo (1600) the sky",
+      "durationMinutes": 8,
+      "instruction": "Look at the sky — silver, green and black, more powerful than the city. Then notice the geography is invented: El Greco moved real buildings to make a truer portrait of the place's mood."
+    },
+    "tags": [
+      "Mannerism",
+      "Landscape",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-burial-count-orgaz-1586",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Burial of the Count of Orgaz (1586)",
+    "teaser": "Heaven opening over a funeral: saints lowering the dead count into his tomb while angels carry his soul upward — the earthly scene painted with precise portraits, the heavenly half dissolving into flame and light. El Greco signed his name on a handkerchief in the crowd. The painting split into two worlds, and both are masterpieces.",
+    "imageUrl": "",
+    "byline": "El Greco",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Burial of the Count of Orgaz (1586) two halves",
+      "durationMinutes": 10,
+      "instruction": "Look at the boundary between earth and heaven — the saints are solid, the sky is pure light. Then find the boy at the left pointing at the miracle: he is the painter's son, and his handkerchief carries El Greco's signature."
+    },
+    "tags": [
+      "Mannerism",
+      "Painting",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-woman-blue-reading-1663",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Woman in Blue Reading a Letter (1663)",
+    "teaser": "A pregnant woman reading a letter by a window, the map on the wall behind her hinting at an absent husband — Vermeer's most intimate study of a private moment. The blue of her jacket is ultramarine, the most expensive pigment of the age. The light falls on the letter, not her face: the message is the subject.",
+    "imageUrl": "",
+    "byline": "Johannes Vermeer",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Woman in Blue Reading a Letter (1663) the letter",
+      "durationMinutes": 8,
+      "instruction": "Look at the light on the letter — the only bright surface in the room. Then notice the map: Vermeer painted it with the creases of a real map, a clue to the letter's subject."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1660s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-music-lesson-1665",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Music Lesson (1665)",
+    "teaser": "A young woman at a virginal watched by her teacher, the mirror above them reflecting the room — including the painter's own easel. Vermeer's obsession with optics fills the scene: the mirror, the perspective, the light through the window. The virginal's lid carries an inscription: 'Music is the companion of joy, the healer of sorrow.'",
+    "imageUrl": "",
+    "byline": "Johannes Vermeer",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Music Lesson (1665) the mirror",
+      "durationMinutes": 8,
+      "instruction": "Look at the mirror — it reflects the woman's face AND the artist's easel, a self-portrait hidden in plain sight. Then read the virginal's lid: the motto explains the room."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1660s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-girl-reading-window-1657",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Girl Reading a Letter at an Open Window (1657)",
+    "teaser": "A girl reading by an open window, her reflection barely visible in the glass — one of Vermeer's earliest interiors and his first essay in the theme of letters and longing. X-rays revealed that the wall behind her originally held a large painting of Cupid, painted over by the artist or another hand. The window's light is the real subject.",
+    "imageUrl": "",
+    "byline": "Johannes Vermeer",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Girl Reading a Letter at an Open Window (1657) the glass",
+      "durationMinutes": 8,
+      "instruction": "Look at the window — the glass is a mirror so faint you almost miss the girl's reflection. Then know the secret: X-rays show a Cupid was once on the wall behind her, a love story painted out."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1650s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-embarkation-cythera-1717",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Embarkation for Cythera (1717)",
+    "teaser": "Couples preparing to board a golden boat for the island of love — the painting that invented the fête galante, a genre of dreamy aristocratic courtship. Watteau's lovers hesitate rather than depart; the whole scene is a sigh in paint. It made his name at the French Academy, which had to invent a new category for it.",
+    "imageUrl": "",
+    "byline": "Jean-Antoine Watteau",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Embarkation for Cythera (1717) the couples",
+      "durationMinutes": 8,
+      "instruction": "Look at the couples — they're turning back, reluctant to leave. Then notice the statue of Venus and the cupids: the island of love is decorated for a departure that never quite happens."
+    },
+    "tags": [
+      "Rococo",
+      "Painting",
+      "1700s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-ray-1728",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Ray (1728)",
+    "teaser": "A gutted ray hanging over a kitchen table of fish, jugs and a cat — a still life so honest that it made Chardin's reputation overnight. The ray's pale underside glows like a strange flower; the composition is a quiet masterpiece of shapes. Diderot called Chardin 'the great magician'. A still life was never just still life again.",
+    "imageUrl": "",
+    "byline": "Jean-Baptiste-Siméon Chardin",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Ray (1728) composition",
+      "durationMinutes": 8,
+      "instruction": "Look at the ray's underside — it reads almost like a creature from a dream. Then notice the cat and the oyster: Chardin's kitchen is a theatre of textures."
+    },
+    "tags": [
+      "Rococo",
+      "Still Life",
+      "1700s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-soap-bubbles-1734",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Soap Bubbles (1734)",
+    "teaser": "A boy blowing a soap bubble through a straw while another watches — an everyday moment with an old moral: life is brief, like the bubble. Chardin painted the boy with his back to us, so the bubble's fragility is the subject. The painting's stillness makes the bubble's imminent pop almost audible. It was a favourite of Enlightenment thinkers.",
+    "imageUrl": "",
+    "byline": "Jean-Baptiste-Siméon Chardin",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Soap Bubbles (1734) the bubble",
+      "durationMinutes": 8,
+      "instruction": "Look at the bubble — a perfect sphere of light about to vanish. Then notice the boy's absorption: the whole painting is the second before the pop."
+    },
+    "tags": [
+      "Rococo",
+      "Painting",
+      "1730s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-turkish-bath-1862",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Turkish Bath (1862)",
+    "teaser": "A circle of nude women in a Turkish bath — painted by Ingres in his eighties, a lifetime of odalisques condensed into one ring of flesh. The composition is a perfect circle, the figures pressed together like a mosaic. It scandalized and fascinated Paris; Ingres kept it in his studio for years, adjusting figures even into his eighties. The arched window at the back opens onto nothing.",
+    "imageUrl": "",
+    "byline": "Jean-Auguste-Dominique Ingres",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Turkish Bath (1862) the circle",
+      "durationMinutes": 8,
+      "instruction": "Look at the circular composition — every figure flows into the next, a wreath of bodies. Then find the bather at the back playing a lute: she is a quote from Ingres's own earlier painting."
+    },
+    "tags": [
+      "Neoclassicism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-sleep-of-reason-1799",
+    "categoryId": "ARTWORKS",
+    "subtype": "Print",
+    "name": "The Sleep of Reason Produces Monsters (1799)",
+    "teaser": "A sleeping man slumped over a desk while owls and bats swarm around him — the frontispiece of Goya's Caprichos, his series of satirical prints attacking superstition and folly. The title cuts both ways: reason asleep breeds monsters, but so does reason's confidence. The etching is the manifesto of the modern artist as social critic.",
+    "imageUrl": "",
+    "byline": "Francisco de Goya",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Sleep of Reason Produces Monsters (1799) the owls",
+      "durationMinutes": 8,
+      "instruction": "Look at the owl at the desk — it offers a pen, inviting the dreamer to keep writing. Then read the image both ways: the monsters are born of sleep, but also of the awake world's foolishness."
+    },
+    "tags": [
+      "Romanticism",
+      "Print",
+      "1790s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-garden-sainte-adresse-1867",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Garden at Sainte-Adresse (1867)",
+    "teaser": "A seaside garden in bright diagonal sunlight — four figures on a terrace, the Channel behind them, a flag catching the wind. Monet painted it from his aunt's house with the sea and the sky as a backdrop. The composition is built from bold diagonals, and the painting already shows the flat colour areas that would become his style. It was a hit at the 1867 Salon, one of his first.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Garden at Sainte-Adresse (1867) diagonals",
+      "durationMinutes": 8,
+      "instruction": "Look at the flag and the boat smoke — the only moving things in a painting of stillness. Then notice the composition: Monet built the whole scene on diagonals, a decade before his famous series."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-gare-saint-lazare-1877",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Gare Saint-Lazare series (1877)",
+    "teaser": "The glass-roofed train station in Paris painted from inside the smoke — twelve canvases of locomotives, steam and soot that made the modern city a fit subject for art. Monet wore his best clothes and asked the station master to hold the trains so the steam would be right. The smoke turns the shed into a cathedral of cloud.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Gare Saint-Lazare series (1877) smoke",
+      "durationMinutes": 8,
+      "instruction": "Look at the steam — it fills the glass roof like weather, the trains emerging from it like ghosts. Then picture Monet in his Sunday suit, persuading railwaymen to stage his scenes."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-box-1874",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Box (1874)",
+    "teaser": "A couple in a theatre box, she in pearls leaning forward, he in evening dress looking through opera glasses — the Parisian leisure class at its most glamorous. The woman is the painter's future model; the scene is about seeing and being seen. Renoir painted the box with the looseness of a sketch, the opera glasses catching the light.",
+    "imageUrl": "",
+    "byline": "Pierre-Auguste Renoir",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Box (1874) the audience",
+      "durationMinutes": 8,
+      "instruction": "Look at the woman's pearls and the man's glasses — the painting is a study in looking. Then notice the blurred audience behind: Renoir painted the social game of who watches whom."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-bellelli-family-1867",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Bellelli Family (1867)",
+    "teaser": "Degas's aunt, uncle and two cousins in a sombre salon — a family portrait with the tension left in. The mother stands in black, the father sits half-turned away, the girls keep a careful distance. Degas painted it in Florence over two years, and the psychology is as sharp as the drawing. It is his first masterpiece and his most intimate.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Bellelli Family (1867) the tension",
+      "durationMinutes": 8,
+      "instruction": "Look at the space between the parents — the father is turned away, the mother stands apart. Then look at the girls: they mirror the divide. Degas painted the family's fault line with perfect manners."
+    },
+    "tags": [
+      "Impressionism",
+      "Portrait",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-star-1878",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Star (1878)",
+    "teaser": "A ballerina on stage caught in the footlights, arms raised mid-bow, while the corps dissolves in the wings — Degas's image of the dancer as both star and silhouette. The pastel technique lets the light flare around her like a halo. It is the moment of triumph, and also the moment the star is alone on stage.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Star (1878) the light",
+      "durationMinutes": 8,
+      "instruction": "Look at the footlights — they flare through the pastel like a flash. Then look at the wings: the star is the only clear figure, everything else dissolving into the dark."
+    },
+    "tags": [
+      "Impressionism",
+      "Drawing",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-tub-1886",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Tub (1886)",
+    "teaser": "A woman sponging herself in a metal tub, seen from above at a startling angle — the bather as seen by nobody, unposed and unguarded. Degas's late pastels of women washing were criticized as ugly; he called them 'the nude, viewed from the keyhole'. The composition is radical: the tub's rim crosses the canvas, and the figure is off-centre.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Tub (1886) the angle",
+      "durationMinutes": 8,
+      "instruction": "Look at the viewpoint — from above and off-centre, as if the painter is not supposed to be there. Then notice the metal tub's reflection: Degas painted the water and the room in its curved surface."
+    },
+    "tags": [
+      "Impressionism",
+      "Drawing",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-carnation-lily-lily-rose-1886",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Carnation, Lily, Lily, Rose (1886)",
+    "teaser": "Two little girls lighting paper lanterns in an English garden at dusk — the title from a popular song, the light a miracle of timing. Sargent painted it for two summers, working only in the final minutes of daylight when the lanterns' glow balanced the fading sky. The girls stood motionless for minutes at a time while he worked. It is his most loved painting.",
+    "imageUrl": "",
+    "byline": "John Singer Sargent",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Carnation, Lily, Lily, Rose (1886) the light",
+      "durationMinutes": 8,
+      "instruction": "Look at the glow — the lanterns and the dusk are painted to the same brightness, which only happens for about twenty minutes. Then know the method: Sargent repainted it all the next summer, chasing the same minute of light."
+    },
+    "tags": [
+      "Victorian",
+      "Painting",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-swimming-hole-1885",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Swimming Hole (1885)",
+    "teaser": "Nude young men at a swimming hole, posed with the geometry of a frieze — Eakins's study of the body in motion and sunlight, painted from photographs he staged himself. The figures are arranged like a classical relief, but the setting is an ordinary American river. The painting scandalized Philadelphia's art establishment, and Eakins's reputation suffered for his honesty about the body.",
+    "imageUrl": "",
+    "byline": "Thomas Eakins",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Swimming Hole (1885) composition",
+      "durationMinutes": 8,
+      "instruction": "Look at the arrangement — the swimmers are placed like figures on a Greek frieze. Then know the method: Eakins posed his friends for photographs first, then painted the bodies with anatomical precision."
+    },
+    "tags": [
+      "Realism",
+      "Painting",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-little-girl-blue-armchair-1878",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Little Girl in a Blue Armchair (1878)",
+    "teaser": "A small girl slouched in an oversized blue armchair, legs out, mind elsewhere — a child painted without sentimentality. Cassatt, the American who joined the Impressionists, made the sitter her friend's daughter. The loose armchair and the tilted floor show Degas's influence; he suggested the background. It is childhood as it is, not as adults imagine it.",
+    "imageUrl": "",
+    "byline": "Mary Cassatt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Little Girl in a Blue Armchair (1878) the pose",
+      "durationMinutes": 8,
+      "instruction": "Look at the girl's pose — slumped, bored, utterly real. Then notice the armchair's size: the furniture is the adult world, and she is lost in it."
+    },
+    "tags": [
+      "Impressionism",
+      "Portrait",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-broadway-boogie-woogie-1942",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Broadway Boogie Woogie (1942)",
+    "teaser": "New York City reduced to its grid — a map of Manhattan's streets as coloured blocks and lines, painted by the Dutch artist who fled the war and fell in love with the city's rhythm. The tiny coloured squares are traffic and jazz. Mondrian considered it his masterpiece; he worked on it until his death two years later. It is his farewell to Europe and his hello to America.",
+    "imageUrl": "",
+    "byline": "Piet Mondrian",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Broadway Boogie Woogie (1942) the grid",
+      "durationMinutes": 8,
+      "instruction": "Look at the yellow lines — they run like taxi routes through the grid. Then find the clusters of coloured blocks: Mondrian said the painting was jazz you could see."
+    },
+    "tags": [
+      "De Stijl",
+      "Painting",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-early-sunday-morning-1930",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Early Sunday Morning (1930)",
+    "teaser": "A row of empty shopfronts on a silent street — no people, no traffic, just a barber pole, a fire hydrant and long morning shadows. Hopper's city is always waiting for something that doesn't arrive. The light is the only character: it falls on the buildings like a question. It is the definitive image of American solitude.",
+    "imageUrl": "",
+    "byline": "Edward Hopper",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Early Sunday Morning (1930) the emptiness",
+      "durationMinutes": 8,
+      "instruction": "Look at the windows — every one is dark, every shop closed. Then notice the barber pole: the only colour in the street, spinning nowhere. Hopper called it 'almost a street scene'."
+    },
+    "tags": [
+      "American Scene",
+      "Painting",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-autumn-rhythm-1950",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Autumn Rhythm (1950)",
+    "teaser": "A 5-metre tangle of black, white and rust paint — Pollock's poured-paint method at full scale, the canvas laid on the floor and attacked from all sides. The title came after the painting, when the skeins read like autumn wind. It is the purest statement of action painting: the painting is the record of the movement that made it.",
+    "imageUrl": "",
+    "byline": "Jackson Pollock",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Autumn Rhythm (1950) the weave",
+      "durationMinutes": 8,
+      "instruction": "Look at the layers — black lines over white lines over rust, a woven surface with real depth. Then step back: the chaos resolves into a rhythm, which is what the title claims."
+    },
+    "tags": [
+      "Abstract Expressionism",
+      "Painting",
+      "1950s"
+    ],
+    "tier": 1
   }
 ]
