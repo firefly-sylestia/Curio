@@ -114,7 +114,7 @@ import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioBottomBar
+import com.curio.app.ui.components.CurioFloatingNavBar
 import com.curio.app.ui.components.CurioInAppToastHost
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -361,7 +361,9 @@ fun CurioNavHost(
         Scaffold(
             bottomBar = {
                 if (!wide && showBottomBar) {
-                    CurioBottomBar(navController = navController)
+                    // v124 — the phone bottom nav is the floating pill bar
+                    // (icons, active tab expands its label).
+                    CurioFloatingNavBar(navController = navController)
                 }
             },
             // Every screen applies its own statusBarsPadding().  This Scaffold

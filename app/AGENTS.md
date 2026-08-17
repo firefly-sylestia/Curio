@@ -40,7 +40,7 @@ app/src/main/java/com/curio/app/
 │   │   ├── CurioIcons.kt           # glyph constants + CurioIcon(name, ...) ligature renderer
 │   │   └── CurioTheme.kt           # light/dark M3 color schemes + edge-to-edge SideEffect
 │   └── components/                 # reusable building blocks
-│       ├── CurioBottomNav.kt       # 3-tab M3 NavigationBar with saveState/restoreState
+│       ├── CurioBottomNav.kt       # 3-tab nav chrome: floating pill bar (phones) + NavigationRail (wide), saveState/restoreState
 │       ├── CurioCategoryChip.kt    # FilterChip per category + CurioWildcardChip
 │       ├── CurioEmptyState.kt      # universal §13.7 empty-state skeleton
 │       ├── CurioHeroCard.kt        # ~40% vertical hero Spin card on Home
@@ -579,6 +579,26 @@ app/src/main/java/com/curio/app/
   in place); and the idle AUTO-FLOW scheduler only picks
   `HIDE_SEEK`/`CHAMELEON` — star-catch (a 10s round) stays reachable
   via game mode's cycle + manual taps, never the auto-flow.
+- **v124 — floating pill nav bar (phones).** The edge-to-edge M3
+  `NavigationBar` is REPLACED by `CurioFloatingNavBar` (in
+  `ui/components/CurioBottomNav.kt`; the old `CurioBottomBar` composable
+  is deleted): a floating 50-radius capsule pinned bottom-center above
+  the gesture inset. Every tab renders icon-only (48dp pill); the ACTIVE
+  pill springs wider (96dp, `animateDpAsState` spring damping 0.75) and
+  its label slides out (`AnimatedVisibility` expandHorizontally+
+  fadeIn) while the previously active pill collapses — the "smooth
+  collapse and expand" the user asked for. The active indicator is a
+  filled capsule covering the WHOLE pill (icon + label). Colors are
+  pure `colorScheme` tokens (surfaceContainerHigh bar + shadow 6dp,
+  secondaryContainer indicator, onSecondaryContainer ink,
+  onSurfaceVariant inactive) so Curio / AMOLED / Material (dynamic)
+  themes and dark mode adapt automatically. Geometry: the slot stays
+  80dp + nav-bar inset (verified against M3's `NavigationBar`:
+  `windowInsetsPadding + defaultMinSize(80)`), so Scaffold innerPadding
+  and the Reveal 80dp placeholder are unchanged; wide windows keep
+  `CurioNavigationRail` (user decision). Label width is FIXED (48↔96dp)
+  so the bar's total width is constant and the morph is stable. The
+  page-wash tint (`CurioNavTint`) now applies to the rail only.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

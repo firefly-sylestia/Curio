@@ -1,6 +1,50 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: tour skip on Spin no longer breaks Home; drawer name lines; pet poof teleport + chameleon + auto-flow
+## Current request — COMPLETED: floating pill nav bar (phones)
+
+The user: "lets add a floating nav bar in pill size with animation like
+first it will just be icons and when that page is active that page gets
+its text shown, and switching to other page gives it a smooth collapse
+and expand of other, and the active indicator covers the active pill
+not just the icon, and change it properly with dynamic theme and in
+dark mode as well."
+
+Clarified via ask_user: **Replace it** (no Settings toggle — the floating
+pill is the only phone bottom nav) and **Keep the side rail** on wide
+windows (tablets/landscape keep `CurioNavigationRail`).
+
+### What shipped (`ui/components/CurioBottomNav.kt` + `CurioNavHost.kt`)
+1. **`CurioFloatingNavBar` replaces `CurioBottomBar`** (old M3
+   `NavigationBar` composable deleted): a floating 50-radius capsule
+   pinned bottom-center above the gesture inset.
+2. **Icons-only at rest; active pill expands** — each tab is a 48dp
+   pill; the active one springs to 96dp (`animateDpAsState` spring,
+   damping 0.75 / StiffnessMediumLow) and its label slides out
+   (`AnimatedVisibility` expandHorizontally + fadeIn 160ms); the
+   previously active pill collapses the same way (shrinkHorizontally +
+   fadeOut 120ms) — the smooth collapse/expand morph.
+3. **Indicator covers the whole pill** — the active fill is a capsule
+   behind icon AND label (not just the icon).
+4. **Theme/dark-mode correct** — pure `colorScheme` tokens:
+   surfaceContainerHigh bar + 6dp shadow, secondaryContainer
+   indicator, onSecondaryContainer ink, onSurfaceVariant inactive
+   icons. Adapts to Curio / AMOLED / Material (dynamic) + dark.
+5. **Geometry preserved** — the slot is 80dp + nav-bar inset (verified
+   against M3's `NavigationBar` = `windowInsetsPadding +
+   defaultMinSize(80)`), so Scaffold innerPadding and the Reveal 80dp
+   placeholder are unchanged; the pill floats 12dp above the inset.
+   Fixed expanded width (48↔96dp) keeps the bar's total width constant
+   so the morph is stable. `CurioNavTint` wash now applies to the rail
+   only (the pill is token-driven).
+
+### Validation
+`git diff --check` clean; brace balance checked; unused-import sweep
+clean (setValue false-positive — needed by `by mutableStateOf`
+delegates in CurioNavTint); no remaining `CurioBottomBar` references
+(grep); M3 NavigationBar footprint verified from the 1.5.0-alpha20
+source jar. No Gradle locally (env rule) — CI validates on push.
+
+## Previous request — COMPLETED: tour skip on Spin no longer breaks Home; drawer name lines; pet poof teleport + chameleon + auto-flow
 
 The user: "when the tour gets skipped on spin page the navigation to
 home doesnt work after that, so fix it. and in drawer remove that spin

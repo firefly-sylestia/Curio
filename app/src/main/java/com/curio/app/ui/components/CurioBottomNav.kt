@@ -1,30 +1,34 @@
 package com.curio.app.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -45,10 +50,10 @@ import com.curio.app.ui.theme.CurioIcons
 
 /**
  * Out-of-band handoff for the Spin page's category tint wash — published by
- * [com.curio.app.features.spin.SpinScreen] and consumed by [CurioBottomBar]
- * so the Scaffold-level nav bar can blend with the tinted Spin page (the bar
- * lives outside the NavHost content and can't read SpinScreen's state
- * directly). Mirrors the [com.curio.app.navigation.LightboxTarget] pattern.
+ * [com.curio.app.features.spin.SpinScreen] and consumed by
+ * [CurioNavigationRail] so the rail can blend with the tinted Spin page
+ * (the rail lives outside the NavHost content and can't read SpinScreen's
+ * state directly). Mirrors the [com.curio.app.navigation.LightboxTarget] pattern.
  *
  * Spin publishes its deck wash; Cabinet publishes its active-filter wash
  * (null when showing "All" — a plain page). Home publishes its category
@@ -126,8 +131,37 @@ object CurioBottomNavItems {
     val all: List<CurioBottomDestination> = listOf(Home, Shuffle, Cabinet)
 }
 
+// v124 — the phone bottom nav is a FLOATING PILL BAR: every tab renders
+// icon-only, and the active tab smoothly expands to reveal its label
+// (spring width morph + label slide-out) while the previously active pill
+// collapses back to an icon. The active indicator fills the WHOLE pill
+// (icon + label), not just the icon. Colors are pure colorScheme tokens
+// (surfaceContainerHigh pill + secondaryContainer indicator +
+// onSecondaryContainer ink), so the bar follows the Curio / AMOLED /
+// Material (dynamic) themes and dark mode out of the box.
+private val FloatingPillIconWidth = 48.dp
+private val FloatingPillExpandedWidth = 96.dp
+private val FloatingPillHeight = 48.dp
+
+/**
+ * Curio's persistent bottom navigation — a floating pill bar (v124).
+ *
+ * Three destinations:
+ *   [ Home ]   [ Shuffle ]   [ Cabinet ]
+ *
+ * Tapping a tab uses the standard Compose pattern: navigate with
+ * popUpTo(startDestination) + saveState=true + restoreState=true +
+ * launchSingleTop=true. This preserves each tab's back stack across
+ * switches and avoids re-creating the screen UI from scratch.
+ *
+ * The bar is hidden outside of [CurioRoutes.bottomNavRoutes] by the
+ * parent scaffold (see CurioNavHost). This composable assumes it IS visible.
+ * It reserves the SAME 80dp + nav-bar inset footprint the old edge-to-edge
+ * bar did, so Scaffold innerPadding (and the Reveal placeholder) never
+ * changes. Wide windows use [CurioNavigationRail] instead.
+ */
 @Composable
-fun CurioBottomBar(
+fun CurioFloatingNavBar(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -142,73 +176,126 @@ fun CurioBottomBar(
         routePrefix
     }
 
-    NavigationBar(
+    // Slot = 8dp top air + 72dp (48dp pill + 12dp float gap) + nav inset =
+    // the old bar's 80dp + inset, so innerPadding stays identical.
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 80.dp),
-        containerColor = curioNavContainerColor(routePrefix),
-        tonalElevation = 0.dp,
-        windowInsets = WindowInsets.navigationBars
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(top = 8.dp)
+            .height(72.dp),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        CurioBottomNavItems.all.forEach { destination ->
-            // The hierarchy walk handles nested-graph destinations; today all routes are flat
-            // so the hierarchy contains exactly the current route + start destination.
-            val selected = selectedRoute == destination.route ||
-                navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
-                    routeEntry.route?.substringBefore("/") == destination.route
-                } == true
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = 6.dp,
+            modifier = Modifier.padding(bottom = 12.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                CurioBottomNavItems.all.forEach { destination ->
+                    // The hierarchy walk handles nested-graph destinations;
+                    // today all routes are flat so the hierarchy contains
+                    // exactly the current route + start destination.
+                    val selected = selectedRoute == destination.route ||
+                        navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
+                            routeEntry.route?.substringBefore("/") == destination.route
+                        } == true
+                    FloatingNavPill(
+                        destination = destination,
+                        selected = selected,
+                        onClick = {
+                            // Compare the route PREFIX: the Shuffle tab is also
+                            // the current screen when the deck was opened via a
+                            // category launch ("spin/artists"), and re-tapping an
+                            // already-selected tab must be a no-op instead of
+                            // re-opening it.
+                            if (selectedRoute != destination.route) {
+                                // Anchor to HOME (the persistent root), not the
+                                // graph start destination: SPLASH is popped on
+                                // launch, so popUpTo(startDestination) would be
+                                // a no-op and tab switches would pile up dupes.
+                                navController.navigateToTab(destination.route)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    // Compare the route PREFIX: the Shuffle tab is also the
-                    // current screen when the deck was opened via a category
-                    // launch ("spin/artists"), and re-tapping an already-
-                    // selected tab must be a no-op instead of re-opening it.
-                    if (selectedRoute != destination.route) {
-                        // Anchor to HOME (the persistent root), not the
-                        // graph start destination: SPLASH is popped on
-                        // launch, so popUpTo(startDestination) would be a
-                        // no-op and tab switches would pile up duplicates.
-                        navController.navigateToTab(destination.route)
-                    }
-                },
-                icon = {
-                    CurioIcon(
-                        name = if (selected) destination.selectedIcon else destination.icon,
-                        contentDescription = destination.label,
-                        tint = if (selected)
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 24.dp
-                    )
-                },
-                label = {
-                    Text(
-                        text = destination.label,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+/**
+ * One pill in the floating bar: icon-only while inactive; the selected
+ * pill springs wider and slides its label out (the indicator covers the
+ * whole pill, icon + label). The spring morph + label slide are the
+ * "smooth collapse and expand" the v124 design asked for.
+ */
+@Composable
+private fun FloatingNavPill(
+    destination: CurioBottomDestination,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val pillWidth by animateDpAsState(
+        targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+        animationSpec = spring(
+            dampingRatio = 0.75f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "floatingNavPillWidth"
+    )
+    val activeInk = MaterialTheme.colorScheme.onSecondaryContainer
+    Box(
+        modifier = Modifier
+            .width(pillWidth)
+            .height(FloatingPillHeight)
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (selected) MaterialTheme.colorScheme.secondaryContainer
+                else Color.Transparent
             )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CurioIcon(
+                name = if (selected) destination.selectedIcon else destination.icon,
+                contentDescription = destination.label,
+                tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 22.dp
+            )
+            AnimatedVisibility(
+                visible = selected,
+                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(120))
+            ) {
+                Text(
+                    text = destination.label,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = activeInk,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                )
+            }
         }
     }
 }
 
 /**
  * Curio's wide-window navigation — a slim NavigationRail on the left edge,
- * shown instead of the bottom bar on medium/expanded windows (tablets and
- * landscape). Shares [CurioBottomNavItems] and the page-wash tint with
- * [CurioBottomBar], so the rail wears the same category-tinted container
- * color as the page it sits beside. The parent NavHost decides which nav
- * chrome to render (see CurioNavHost) and passes a full-height modifier.
+ * shown instead of the floating pill bar on medium/expanded windows
+ * (tablets and landscape). Shares [CurioBottomNavItems] and the page-wash
+ * tint, so the rail wears the same category-tinted container color as the
+ * page it sits beside. The parent NavHost decides which nav chrome to
+ * render (see CurioNavHost) and passes a full-height modifier.
  */
 @Composable
 fun CurioNavigationRail(

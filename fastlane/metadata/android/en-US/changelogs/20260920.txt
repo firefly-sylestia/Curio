@@ -1,4 +1,5 @@
 ADD
+- Navigation: the bottom bar is now a floating pill — the tabs show as icons, and the active tab smoothly expands to reveal its label (the indicator covers the whole pill) in every theme, including dark and AMOLED.
 - Drawer: the topic-browsing rows (Topic History, Manage Categories, Browse Topics) fold under a collapsible "Your Curiosity" section, and Support & diagnostics + Replay intro group under "About" — both collapsed by default.
 - New Curio icon: a cosmic mark — a mint planet with a pink moon over gold waves on a midnight sky (launcher, round, themed and notification icons, plus the splash).
 - Updates page: a dedicated sub-page (Settings → Updates) with your version, a check for updates with release notes, direct APK download & install, and the opt-in Update checker toggle — the background check is off by default to save data.
