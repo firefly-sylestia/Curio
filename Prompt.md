@@ -1,78 +1,81 @@
 # Prompt.md — Request log
 
-## Current request — Pet Designer theme-aware studio pill, opaque edit prompt, full-bleed hero (DONE)
+## Current request — Spin category picker: no footer, floating no-background Mix/Cancel, hero watermark placement (DONE)
 
-User: "make the pet desinger gets the theme aware as well. and make the
-what do you want to edit box non trasparent. and fix its header tear hero
-too as its cut from sides."
+User: "ykw in spin screen category picker remove anything that below the
+category cards like remove it fully. no need for manage category and make
+the mix and cancel button appear as nav bar style pill only when selected
+multiple. with no backgroud and floating style. and also the hero banner
+of it chnage its glyph style and placement snon eo fthe icon is visible
+and makes its backgroud tint take theme aware too and also watermark"
 
 ### Clarifications (ask_user)
-- "the floating nav pill doesnt and also fix its hero banner side cut" —
-  the theme issue is the STUDIO bottom pill bar, not the page (the page is
-  already MaterialTheme-driven).
+- Mix/Cancel pill: NO background — just the buttons floating over the
+  grid, no capsule fill.
+- Hero glyphs: "the ions are not visible due to the placement so fix the
+  icon placings" — a PLACEMENT bug, not a removal. (The hero fill/wash/
+  ink were already theme-aware via headerAccent / categoryBackgroundWash /
+  heroHeaderInk.)
 
-### Changes (PetDesignerScreen.kt)
-- **Studio pill (`PetStudioTab`)**: the ACTIVE tab wore the stale solid
-  `secondary` + `onSecondary` (the butter the main nav bar dropped in
-  v161). Now uses the nav bar's plain-page language —
-  `secondaryContainer` + `onSecondaryContainer` (light/dark aware). The
-  v147b doc comment updated to match.
-- **Edit prompt (`EditorPickPrompt`)**: the "What do you want to edit?"
-  card's fill `lerp(surface, primaryContainer, 0.55f)` read as a
-  translucent plate over the page's lane wash — replaced with the solid
-  `surfaceContainerHigh` (same elevated container as DialogScrim) so it's
-  clearly opaque. `lerp` still used elsewhere (2321, 4559).
-- **Hero side cut**: `SettingsHeroHeader` is the FIRST LazyColumn item and
-  the list's `contentPadding(start/end = wideContentEdgePadding())`
-  inset it 16dp+ each side. Fix: compute `val edgePad =
-  wideContentEdgePadding()` once, use it in contentPadding, and wrap the
-  hero item in `Box(Modifier.fillMaxWidth().padding(horizontal =
-  -edgePad))` so the banner bleeds to both screen edges (content below
-  stays padded; works on wide screens too).
-- Changelog (20260920.txt) + app/AGENTS.md v179 notes added.
+### Changes (SpinScreen.kt `CategoryPickerSheet`)
+- **Footer removed**: the "Manage categories" floating pill is gone —
+  nothing sits below the category cards in single-select. Removed the
+  `onBrowseAll` param (signature + call site + its Manage-Categories
+  navigation) and the now-unused `curioFloatingNavContainerFor` +
+  `ButtonDefaults` imports.
+- **Mix/Cancel floating**: in multi-select the controls are a floating
+  Row (`align(BottomCenter)`, bottom 18dp) inside the grid's weight Box —
+  no background capsule. Mix is a solid category pill (themedButtonFill +
+  themedButtonInk; Button → Surface swap, `return@Surface`), Cancel is a
+  plain TextButton. Grids' bottom contentPadding is now `if
+  (multiSelectMode) 88dp else 20dp` so the floating controls never cover
+  the last card row.
+- **Hero watermark placement**: the small twin was UNDER the status bar
+  (its `align(TopStart)` had no `statusBarsPadding` — the title column
+  had it) and the 72dp large one was clipped by the tear + hidden behind
+  the tabs/presets rows. Fixed: small gets `.statusBarsPadding()`
+  (top-left corner), large is 64dp raised to `bottom = 58dp` (right edge
+  just above the preset chips — the tabs row is left-aligned, so that
+  corner is empty), alphas bumped 0.07/0.10 → 0.10/0.14.
+- Changelog (20260920.txt) + app/AGENTS.md v180 notes added. NOTE: the
+  FilterSheet hero (line ~1814) has the SAME placement bug — left unfixed
+  (user asked about the picker only).
 
-No compile/test possible in this env (CI validates on push) — changes are
-small modifier/color swaps; verified no imports changed (`Box`,
-`fillMaxWidth`, `PaddingValues` already in use; `surfaceContainerHigh` /
-`secondaryContainer` / `onSecondaryContainer` are standard M3 scheme
-members already used in this file).
+No compile/test possible in this env (CI validates on push) — brace
+balance verified via awk (80/80), imports/references checked, `Dp * Float`
+ordering preserved.
+
+## Previous request — Pet Designer theme-aware studio pill, opaque edit prompt, full-bleed hero (DONE, shipped b454c67)
+
+User: "make the pet desinger gets the theme aware as well..." Clarified:
+"the floating nav pill doesnt and also fix its hero banner side cut".
+- `PetStudioTab` active pill: stale `secondary`/`onSecondary` (the butter
+  the nav bar dropped) → `secondaryContainer`/`onSecondaryContainer`.
+- `EditorPickPrompt`: lerp tint → solid `surfaceContainerHigh`.
+- Hero side cut: `SettingsHeroHeader` is the first list item, inset by
+  `wideContentEdgePadding()`; fixed with
+  `Box(Modifier.fillMaxWidth().padding(horizontal = -edgePad))` so the
+  banner bleeds full-width.
 
 ## Previous request — constellation audit + Stats hero banner matches the drawer (DONE, shipped 2bf548d)
 
-User: "do a proper audit that the constelations lines and star colors are
-right and visible in light mode and each stars in connected somehow and
-now use the day one view in drawer hero in your curiocity hero too, dont
-chnage the design just the banner style of the header." (Stats header sky =
-theme-picked like the drawer per ask_user.)
-
-- `DrawerLaneConstellation`: theme-aware inks (dark #7FAFD8@0.30 lines /
-  #7FAFD8@0.35 tiny stars / #4A5F6E idle dots; light #5F7E9A@0.55 lines /
-  @0.50 tiny stars / #7E9CB0 dots — resolved in composition since
-  isCurioDarkTheme can't run in Canvas). Replaced the zigzag chain with a
-  RIGHT+DOWN grid web so every star gets 2–4 visible links.
-- `StatsSkyHeader` (StatsScreen.kt): procedural gradient + 22 stars +
-  carved moon GONE; now loads the same theme-picked SVG as the drawer
-  hero (R.raw.drawer_hero_sky_dark/light) via Coil over the theme
-  gradient. Design unchanged (rounded tear, back pill, title).
-- Changelog + AGENTS.md v178 notes added.
+Theme-aware constellation inks (light-mode visibility) + right/down grid
+web links in `DrawerLaneConstellation`; `StatsSkyHeader` now loads the
+same theme-picked sky SVG as the drawer hero (design unchanged).
 
 ## Previous request — tap the moon/sun on the drawer hero to flip the theme (DONE, shipped 1aadf44)
 
-Always-on per ask_user. Invisible 48dp hit-circle at (268.8, 52.08) in the
-drawer hero's sky Box; tap calls `AppPreferences.setThemeMode(context, if
-(isCurioDarkTheme()) THEME_LIGHT else THEME_DARK)`. Changelog + AGENTS.md
-v177 notes added.
+Invisible 48dp hit-circle at (268.8, 52.08); `setThemeMode` flips to the
+opposite of the current effective theme. Always-on.
 
 ## Previous request — drawer curiosity map + new flat cropped footer (DONE, shipped ccf2fae)
 
-Plain-surface constellation of ALL lanes (explored glow + tap data,
-inactive solid smaller dots), new cropped planet footer flat at the bottom
-edge with a fade + credits. Changelog + AGENTS.md v176 updated.
+Plain-surface constellation of ALL lanes + new cropped planet footer flat
+at the bottom edge with a fade + credits.
 
 ## Previous request — drawer hero sky = user's SVG artwork; revert 6300f774 (DONE, shipped bff5809)
 
 Reverted `6300f774` + `91b4375`; deleted procedural `DrawerCelestialSky` +
-watermark glyphs; hero loads the user's SVGs via Coil (dark →
-`drawer_hero_sky_dark.svg`, light → `drawer_hero_sky_light.svg`).
-Changelog + AGENTS.md v175 updated. Also `04efc1e` (chore: icon-font
-backup + SVG generator committed, empty package.json stubs deleted).
+watermark glyphs; hero loads the user's SVGs via Coil. Also `04efc1e`
+(chore: icon-font backup + SVG generator committed, empty package.json
+stubs deleted).

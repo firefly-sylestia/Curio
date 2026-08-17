@@ -1592,6 +1592,39 @@ app/src/main/java/com/curio/app/
     `Box(Modifier.fillMaxWidth().padding(horizontal = -edgePad))` so the
     banner bleeds to BOTH screen edges (content below stays padded).
     Works on wide screens too (larger edgePad cancels fully).
+- **v180 — Spin category picker: no footer below the cards, floating
+  no-background Mix/Cancel, hero watermark placement fixed.** User: "in
+  spin screen category picker remove anything that below the category
+  cards like remove it fully. no need for manage category and make the
+  mix and cancel button appear as nav bar style pill only when selected
+  multiple. with no backgroud and floating style. and also the hero
+  banner of it chnage its glyph style and placement so none of the icon
+  is visible and makes its backgroud tint take theme aware too and also
+  watermark." Clarified via ask_user: Mix/Cancel pill = NO background
+  (just the buttons floating); "icons not visible" = PLACEMENT bug, fix
+  the placements (the hero fill/wash/ink were already theme-aware).
+  - FOOTER REMOVED: the "Manage categories" floating pill is GONE —
+    nothing sits below the category cards in single-select.
+    `onBrowseAll` param removed from `CategoryPickerSheet` + the call
+    site (the Manage-Categories navigation went with it); the
+    `curioFloatingNavContainerFor` + `ButtonDefaults` imports are now
+    unused and deleted.
+  - MIX/CANCEL: in multi-select the controls are a FLOATING row
+    (`align(BottomCenter)` in the grid's weight Box, bottom 18dp) with
+    NO background capsule — Mix is a solid category pill
+    (`themedButtonFill`/`themedButtonInk`, theme-aware) and Cancel is a
+    plain text button. The grids' bottom contentPadding is now
+    `if (multiSelectMode) 88dp else 20dp` so the floating controls never
+    cover the last row of cards. Button → Surface swap (return@Surface).
+  - HERO GLYPHS: the small twin sat UNDER the status bar (its
+    `align(TopStart)` had no `statusBarsPadding`, unlike the title
+    column) and the 72dp large one was clipped by the tear + hidden
+    behind the tabs/presets rows. Fixed: small gets `.statusBarsPadding()`
+    (top-left corner), large is 64dp raised to `bottom = 58dp` (right
+    edge just above the preset chips — the tabs row is left-aligned so
+    that corner is free), alphas bumped 0.07/0.10 → 0.10/0.14. NOTE: the
+    FilterSheet hero (line ~1814) has the SAME placement bug — left
+    unfixed (user asked about the picker only).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin

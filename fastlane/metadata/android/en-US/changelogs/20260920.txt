@@ -1,4 +1,6 @@
 ADD
+- Spin: the category picker has no footer below the cards anymore — the "Manage categories" pill is gone. Mix + Cancel now float over the grid as nav-bar-style controls (no background capsule) and only appear in multi-select.
+- Spin: the picker hero's watermark icons are visible now — the small twin was hidden under the status bar and the large one behind the preset chips; both are repositioned into free corner space.
 - Pet Designer: the studio's bottom pill bar is theme-aware now — the active tab wears the same muted container + ink as the main nav bar (the old solid butter read as a stray yellow), and the "What do you want to edit?" card is a solid opaque container instead of a translucent tint.
 - Pet Designer: the header's torn banner now bleeds full-width — the list padding used to inset it, cutting the tear at both sides.
 - Stats: the "Your Curiosity" page's header banner is now the same sky artwork as the drawer hero — the night sky in dark mode, the day sky in light mode (the header's design is unchanged, only the banner art).

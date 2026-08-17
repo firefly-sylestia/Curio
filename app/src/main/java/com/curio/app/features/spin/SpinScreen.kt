@@ -61,7 +61,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -142,7 +141,6 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
-import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
@@ -1358,12 +1356,6 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 AppPreferences.setLastSpinCategories(context, cats.map { it.id })
                 showCategoryPicker = false
             },
-            onBrowseAll = {
-                // v26 — the sheet's "Manage categories" link opens the
-                // Manage Categories screen (was the full-screen picker).
-                showCategoryPicker = false
-                navController.navigate(CurioRoutes.MANAGE_CATEGORIES) { launchSingleTop = true }
-            }
         )
     }
 
@@ -4224,8 +4216,7 @@ private fun CategoryPickerSheet(
     currentCat: CurioCategory,
     onDismiss: () -> Unit,
     onCategorySelected: (CurioCategory) -> Unit,
-    onCategoriesSelected: (List<CurioCategory>) -> Unit,
-    onBrowseAll: () -> Unit
+    onCategoriesSelected: (List<CurioCategory>) -> Unit
 ) {
     // v7.94 — read the REACTIVE visible list directly (no remember): it
     // recomposes when Manage Categories hides/shows/reorders lanes.
@@ -4373,25 +4364,31 @@ private fun CategoryPickerSheet(
                             )
                         )
                 ) {
-                    // Watermark glyphs — a large category symbol peeking
-                    // from the corner + a small twin, both in the hero ink.
+                    // Watermark glyphs — v180 placement fix: the small twin
+                    // sat UNDER the status bar (no statusBarsPadding, unlike
+                    // the title column) and the large one was clipped by the
+                    // tear and hidden behind the tabs/presets rows. Both now
+                    // sit in free corner space — top-left below the status
+                    // bar, and right edge just ABOVE the preset chips (the
+                    // tabs row is left-aligned, so that corner is empty).
                     CurioIcon(
                         currentCat.iconGlyph,
                         null,
-                        tint = pickerHeroInk.copy(alpha = 0.10f),
-                        size = 72.dp,
+                        tint = pickerHeroInk.copy(alpha = 0.14f),
+                        size = 64.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = 10.dp, bottom = 6.dp)
+                            .padding(end = 12.dp, bottom = 58.dp)
                     )
                     CurioIcon(
                         currentCat.iconGlyph,
                         null,
-                        tint = pickerHeroInk.copy(alpha = 0.07f),
+                        tint = pickerHeroInk.copy(alpha = 0.10f),
                         size = 40.dp,
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(start = 14.dp, top = 10.dp)
+                            .statusBarsPadding()
+                            .padding(start = 14.dp, top = 8.dp)
                     )
                     // Title + deck status chip + Original/New tabs + quick-mix
                     // presets, ALL riding the banner (v83 — the tear grew to
@@ -4579,7 +4576,9 @@ private fun CategoryPickerSheet(
                                 when (page) {
                                     0 -> LazyVerticalGrid(
                                         columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 20.dp),
+                                        // v180 — extra bottom clearance in multi-select so the floating Mix/Cancel
+                                        // controls never cover the grid's last row.
+                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = if (multiSelectMode) 88.dp else 20.dp),
                                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier.fillMaxSize()
@@ -4610,7 +4609,9 @@ private fun CategoryPickerSheet(
                                     }
                                     else -> LazyVerticalGrid(
                                         columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 20.dp),
+                                        // v180 — extra bottom clearance in multi-select so the floating Mix/Cancel
+                                        // controls never cover the grid's last row.
+                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = if (multiSelectMode) 88.dp else 20.dp),
                                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier.fillMaxSize()
@@ -4651,95 +4652,60 @@ private fun CategoryPickerSheet(
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
-
-                    // ── Browse all link, or Mix row in multi-select ──
-                    if (multiSelectMode) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                }
+                // v180 — nothing sits below the category cards anymore (the
+                // "Manage categories" pill is gone entirely). Multi-select
+                // shows Mix + Cancel as a FLOATING row over the grid — nav-
+                // bar-style controls with NO background capsule behind them.
+                if (multiSelectMode) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Mix — a solid category pill (theme-aware fill + ink).
+                        Surface(
+                            onClick = {
+                                if (selectedSlugs.isEmpty()) return@Surface
+                                onCategoriesSelected(
+                                    categories.filter { it.id.routeSlug in selectedSlugs }
+                                )
+                            },
+                            enabled = selectedSlugs.isNotEmpty(),
+                            shape = RoundedCornerShape(50),
+                            color = currentCat.themedButtonFill(),
+                            contentColor = currentCat.themedButtonInk()
                         ) {
-                            Button(
-                                onClick = {
-                                    if (selectedSlugs.isEmpty()) return@Button
-                                    onCategoriesSelected(
-                                        categories.filter { it.id.routeSlug in selectedSlugs }
-                                    )
-                                },
-                                enabled = selectedSlugs.isNotEmpty(),
-                                shape = RoundedCornerShape(24.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    // v83 — theme-aware: the Mix CTA wears the
-                                    // category's fill + ink (deep same-hue in
-                                    // dark, never pale rose + near-black ink).
-                                    containerColor = currentCat.themedButtonFill(),
-                                    contentColor = currentCat.themedButtonInk()
-                                ),
-                                modifier = Modifier.weight(1f)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                             ) {
-                                CurioIcon(CurioIcons.Check, null, size = 18.dp)
+                                CurioIcon(CurioIcons.Check, null, size = 16.dp)
                                 Text(
                                     text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                            TextButton(
-                                onClick = {
-                                    multiSelectMode = false
-                                    selectedSlugs = emptySet()
-                                }
-                            ) {
-                                Text(
-                                    "Cancel",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                                 )
                             }
                         }
-                    } else {
-                        // v149 — "Manage categories" floats as a pill over
-                        // the sheet's bottom: the app's pill language (rounded
-                        // 50, elevated surface, icon + label centered) instead
-                        // of a flat full-width TextButton. v160 — the dark-
-                        // mode hairline rim is gone (see v157).
-                        // v168 — PROPER floating capsule: content-sized and
-                        // centered (the old fillMaxWidth bar read as a strip),
-                        // theme-aware via the same dynamic container as the
-                        // nav pill (the sheet's wash lifted 30% toward the
-                        // elevated surface in light, elevated dark in dark),
-                        // and TEXT ONLY — the drag-handle glyph is gone.
-                        Surface(
-                            onClick = onBrowseAll,
-                            shape = RoundedCornerShape(50),
-                            color = curioFloatingNavContainerFor(currentCat.categoryBackgroundWash()),
-                            // v174f — the elevation is a whisper now (6dp
-                            // shadow bled up into the grid's last row and
-                            // read as a band behind the pill).
-                            shadowElevation = 3.dp,
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(vertical = 4.dp)
+                        // Cancel — plain text, no background.
+                        TextButton(
+                            onClick = {
+                                multiSelectMode = false
+                                selectedSlugs = emptySet()
+                            }
                         ) {
                             Text(
-                                // v26 — renamed; now opens Manage Categories.
-                                // v90 — theme-aware neutral ink (the old scheme
-                                // primary read as a pale pink link on the sheet).
-                                text = "Manage categories",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                                "Cancel",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
-
-                    Spacer(Modifier.height(8.dp))
-        }
-    }
+                }
+            }
     }
     }
 }
