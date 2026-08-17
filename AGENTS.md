@@ -14,6 +14,10 @@ This file is part of the **DOX framework** defined in `master.md`. All agents MU
 
 Top-level instruction file for all AI agents (Codebuff/Buffy and spawned sub-agents) working on the Curio Android project. Project-wide rules, global preferences, and the top-level Child DOX Index.
 
+**⚠️ SCOPE: This project's active workstream is the Android app (`app/`)
+ONLY. `web/` and `desktop/` are separate projects on hold — do not touch
+them unless the user explicitly asks (see the 🔒 Scope section below).**
+
 ## ❓ ASK WHEN UNSURE
 
 If you understand the user's request less than ~80%, **ask for confirmation
@@ -235,7 +239,23 @@ Do not create historical design/status documents for routine changes. Keep durab
 - Store changelogs use `versionCode` (integer) — see `fastlane/AGENTS.md`
 - In-app changelog: detailed (unlimited). Store changelog: brief (≤500 chars)
 
-## Desktop App (desktop/)
+## 🔒 Scope — Android App ONLY (web/ + desktop/ on hold)
+
+**Do NOT edit, build, or touch anything under `web/` or `desktop/` unless
+the user explicitly asks for it in the current request.** The active
+workstream is the **Android app only** (`app/` module).
+
+- The web (React/TS) and desktop (Compose Multiplatform) ports are
+  **separate projects on hold** — do not treat them as part of any Android
+  task, do not "keep them in sync" with Android changes, and do not apply
+  Android fixes/features to them.
+- This includes data mirrors: Android data fixes (e.g. topic JSON dedupes)
+  apply to `app/src/main/assets/` ONLY — do not touch
+  `web/src/data/topics/` or desktop-adjacent data unless the user says so.
+- If a request is ambiguous about scope, default to Android-only and note
+  the web/desktop impact in your summary so the user can opt in.
+
+## Desktop App (desktop/) — ⛔ ON HOLD (do not touch unless asked)
 
 The `desktop/` directory is the **Compose Multiplatform (JVM) port** of the
 Android app — the same Kotlin codebase running as a native Windows `.exe`
@@ -306,7 +326,7 @@ in `targetFormats` but has no release job yet (add runners per OS when
 wanted). UI parity with Android (per the tablet-layout pass + web parity
 effort) is the ongoing goal; the shuffle deck must stay 2 peek cards.
 
-## Web App (web/)
+## Web App (web/) — ⛔ ON HOLD (do not touch unless asked)
 
 The `web/` directory contains a standalone React + TypeScript web application that mirrors the Android app's UI and functionality. It is a separate project from the Android app and is NOT included in the Android build.
 
