@@ -13,7 +13,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -80,7 +79,6 @@ import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.delay
@@ -884,13 +882,9 @@ fun CurioNavHost(
                 .padding(bottom = 12.dp),
             shape = RoundedCornerShape(50),
             // v149 — same dynamic container as the floating nav bar: the
-            // pill follows the page tint while staying elevated, and dark
-            // mode draws a hairline rim (the black shadow is invisible on
-            // the near-black pages).
+            // pill follows the page tint while staying elevated.
+            // v160 — the dark-mode hairline rim is gone (see v157).
             color = curioFloatingNavContainer(routePrefix),
-            border = if (isCurioDarkTheme())
-                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
-            else null,
             shadowElevation = 6.dp
         ) {
             Row(

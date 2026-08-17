@@ -968,6 +968,22 @@ app/src/main/java/com/curio/app/
   the capsule — nothing else needed. LESSON: pill geometry is three
   independent constants; the user's "keep length, shrink height" is a
   single constant change applied to both copies of the size trio.
+- **v160 — the remaining dark-mode hairline rims are ALL gone (the 5
+  surfaces the v157 note flagged + the Spin one).** User: "remove the
+  same darkmode hairline that u mentioned exosist in more elements". The
+  v149 `BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))` rim was
+  stripped from: the tour Skip/Next dock (CurioNavHost), the reveal
+  Like/Dislike pill (TopicRevealScreen), the category picker's "Manage
+  categories" pill (SpinScreen — the one the v157 note didn't list), and
+  the pet studio bar + floating action capsule (PetDesignerScreen).
+  Each Surface keeps its `shadowElevation = 6.dp` and theme container
+  fill; the now-unused `BorderStroke` import went in all four files
+  (CurioNavHost also lost its now-unused `isCurioDarkTheme` import).
+  Non-rim `BorderStroke` uses (badges, chips, quest medals, glass)
+  untouched. LESSON: the v157 note enumerated the rim sites but missed
+  the Spin one — a pattern sweep (`grep BorderStroke` for the
+  `White.copy(alpha = 0.10f)` signature) catches every copy before
+  claiming "all gone".
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view

@@ -23,7 +23,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -2206,11 +2205,8 @@ private fun RevealSentimentPill(
         Surface(
             shape = RoundedCornerShape(50),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            // v149 — dark-mode elevation: the black shadow is invisible on
-            // the near-black reveal pages, so dark mode draws a hairline rim.
-            border = if (isCurioDarkTheme())
-                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
-            else null,
+            // v160 — the v149 dark-mode hairline rim is gone (see v157);
+            // the elevated fill alone defines the pill.
             shadowElevation = 6.dp
         ) {
             Row(

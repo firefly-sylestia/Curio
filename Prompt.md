@@ -1,6 +1,24 @@
 # Prompt.md — Request log
 
-## Current request (completed) — slim the nav pill + reveal Like/Dislike pill (60 → 48dp tall, lengths kept)
+## Current request (completed) — remove the remaining dark-mode hairline rims (all 5 sites)
+
+User: "remove the same darkmode hairline that u mentioned exosist in more
+elements" — the v157 follow-up.
+
+Removed `BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))` from:
+1. Tour Skip/Next dock (CurioNavHost.kt)
+2. Reveal Like/Dislike pill (TopicRevealScreen.kt)
+3. "Manage categories" pill (SpinScreen.kt — the extra one not in the v157 list)
+4. Pet studio bar (PetDesignerScreen.kt)
+5. Pet Designer floating action capsule (PetDesignerScreen.kt)
+
+Each Surface keeps its 6dp shadow + theme fill. `BorderStroke` imports
+removed from all four files; CurioNavHost also lost its now-unused
+`isCurioDarkTheme` import. Intentional tinted BorderStroke uses (badges,
+chips, quest medals, glass gradients) untouched. Docs: changelog FIX line,
+AGENTS.md v160, this file. Committed only — user still holds the push.
+
+## Earlier completed request — slim the nav pill + reveal Like/Dislike pill (60 → 48dp tall, lengths kept)
 
 User: "the navbar pill height is too much keep its lengh but decrase the
 heigh the widneness same in like and dislike".

@@ -23,7 +23,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -4707,15 +4706,13 @@ private fun CategoryPickerSheet(
                     } else {
                         // v149 — "Manage categories" floats as a pill over
                         // the sheet's bottom: the app's pill language (rounded
-                        // 50, elevated surface, icon + label centered, dark
-                        // hairline rim) instead of a flat full-width TextButton.
+                        // 50, elevated surface, icon + label centered) instead
+                        // of a flat full-width TextButton. v160 — the dark-
+                        // mode hairline rim is gone (see v157).
                         Surface(
                             onClick = onBrowseAll,
                             shape = RoundedCornerShape(50),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            border = if (isCurioDarkTheme())
-                                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
-                            else null,
                             shadowElevation = 6.dp,
                             modifier = Modifier
                                 .fillMaxWidth()

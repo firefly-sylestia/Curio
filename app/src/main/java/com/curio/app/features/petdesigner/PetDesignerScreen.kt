@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -1388,12 +1387,9 @@ private fun PetStudioBottomNav(
         shape = RoundedCornerShape(50),
         // v149 — same dynamic container as the floating nav bar (the pet
         // page publishes no wash, so this resolves to the elevated surface
-        // with the theme-aware fallback) + a dark-mode hairline rim (the
-        // black shadow is invisible on the near-black pages).
+        // with the theme-aware fallback). v160 — the dark-mode hairline
+        // rim is gone (see v157).
         color = curioFloatingNavContainer(null),
-        border = if (isCurioDarkTheme())
-            BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
-        else null,
         shadowElevation = 6.dp
     ) {
         Row(
@@ -1521,11 +1517,8 @@ private fun StudioFloatingToolbar(
             shape = RoundedCornerShape(50),
             // v149 — same dynamic container as the floating nav bar (the pet
             // page publishes no wash, so this resolves to the elevated
-            // surface) + a dark-mode hairline rim.
+            // surface). v160 — the dark-mode hairline rim is gone (v157).
             color = curioFloatingNavContainer(null),
-            border = if (isCurioDarkTheme())
-                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
-            else null,
             shadowElevation = 6.dp
         ) {
             Row(
