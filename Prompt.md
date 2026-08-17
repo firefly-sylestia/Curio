@@ -1,40 +1,50 @@
 # Prompt.md — Request log
 
-## Current request — new Stats page + CI fix
+## Current request — quality audit + profile-avatar backup/restore fix
 
-User: "ask me for with suggestions for the new stat page" → ask_user
-answers: centerpiece = interactive constellation brain map; sections =
-ALL (streak+level, lifetime totals, per-category, quests & badges);
-reached from drawer AND Profile; style = observatory; PLUS fix the CI
-failure (CurioProgressPill.kt:342 "No parameter with name
-'horizontalAlignment'" — v168 wrote a Column param on a Row →
-Arrangement.spacedBy(8.dp, Alignment.End)) and push.
+User: "do a quality check on the app and then give me al the things and
+then also the profile pic wasnt restoring on backrup restore so fix it"
+(no "dont push" → commit + push).
 
-StatsScreen.kt (new, CurioRoutes.STATS):
-- StatsSkyHeader: celestial band (mirrors drawer sky colors), stars,
-  crescent, back pill, title.
-- StreakLevelCard: streak + best streak; level + xpProgress bar to next.
-- StatsConstellationCard + CategoryConstellation: per-lane stars — two
-  lobe arc layout, deterministic jitter (CategoryId.name.hashCode),
-  radius by saved count, glow when active this week, tap selects within
-  34dp (detectTapGestures), empty tap clears; selection chip shows name /
-  count / active-this-week. themedAccent resolved in composition (NOT the
-  draw lambda — @Composable).
-- LifetimeTotalsCard: 8 counters in a 2-col grid.
-- JourneyCard: stages done + medals row (CurioBadgeMedal 40dp) + Quests
-  link.
-- LanesBreakdownCard: per-lane rows (tap selects in the constellation).
-- Data: repo.getAll() grouped by topic.categoryId ∪ categoriesState;
-  StreakTracker; CurioQuests counters + xpProgress + levelTitle.
+### Avatar fix (DONE)
+Root cause: AppPreferences.getProfileAvatarPath stores an absolute
+filesDir/profile_avatar_<ts>.png path in curio_app_prefs; backup stored
+the prefs (path) but never the PNG → restored app pointed at a dead file
+→ blank avatar. Fix in CurioBackupManager.kt:
+- FORMAT_VERSION 6 → 7.
+- Export: new streamed `avatarFile` section (base64 PNG, null when unset)
+  after sessionShots.
+- Restore: read `avatarFile` (NULL-safe), write FRESH
+  profile_avatar_<ts>.png, sweep old profile_avatar_* files, and
+  AppPreferences.setProfileAvatarPath AFTER the prefs loop (restored
+  prefs carry the source device's dead path).
+- v6 backups (no avatarFile) restore fine — else-skip covers it.
+- BackupPayload data class got the matching `avatarFile: ByteArray?`
+  field (legacy class, consistency only).
+LESSON: never back up only a filesDir path — the file must ride along;
+re-home restored paths to fresh files.
 
-Entry points: drawer map card onClick + "Stats & insights" sub-row;
-Profile ProgressAndAchievementsCard onOpenStats pill.
+### Quality audit (DONE — findings below, nothing else to fix)
+- TODOs: 1 trivial (ReelNotesFormat lightbox placeholder, Phase 4).
+- No deprecated APIs, no @Suppress without a documented reason.
+- No debug logging (1 init Log.d in CrashReporter), no runBlocking /
+  GlobalScope / Thread.sleep in app code (CrashReporter's 300ms sleep is
+  a deliberate crash-dedup pause).
+- No WebView; cleartext disabled globally (network_security_config);
+  manifest permissions all justified + commented (audio, notifications,
+  internet for update checks, install packages, boot, overlay, FGS).
+- No dangerous `!!` in the new stats/backup code; divisions guarded.
+- Hardcoded hex colors are intentional skin values (paper notebook,
+  badge metal tiers) — not theme violations.
+- coil-svg 2.7.0 declared correctly (toml + build.gradle);
+  res/raw/drawer_footer.svg present (332 KB — heavy-ish but lazy-loaded
+  via Coil only when the drawer opens; candidate for a compression pass
+  later, not urgent).
+- Strings: minimal strings.xml (app hardcodes UI copy by design — a
+  known localization tradeoff).
+- Changelog: this fix gets a FIX bullet at the top of the FIX section.
 
-CI FIX ("fix this and push"): StatsScreen.kt "Unresolved reference
-'Column'" at all `StatsCard {` sites + the declaration — the shell's
-`content: @Composable Column.() -> Unit` used the layout FUNCTION as a
-receiver TYPE. Fixed to ColumnScope (import added). LESSON: receiver
-scopes are ColumnScope / RowScope / BoxScope, never the composable name.
+Docs: changelog FIX line, AGENTS.md v175, this file. Commit + push.
 
 ## Completed request — stats time-range filter from the drawer selector
 

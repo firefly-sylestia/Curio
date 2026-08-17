@@ -34,6 +34,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Backup & restore: your profile photo now survives a restore — the avatar file is bundled into the backup (previously only its path was, so a restored app pointed at a file that didn't exist and showed a blank avatar).
 - Navigation: the pill bar's morph is even slower and calmer now — the tab pills glide at half the previous pace (still zero bounce), and the Topic Reveal Like/Dislike pill and the Pet Designer studio bar move with the exact same slowed motion.
 - Navigation: Cabinet's "All" tab no longer turns yellow — the active pill now wears the same accent as the Spin screen ("whatever the spin screen color have set"), falling back to the coral brand when Spin hasn't been opened yet.
 - Mood board: resizing a quote card now scales the WHOLE note — the text grows and shrinks with the card (it used to only stretch the width with fixed-size text), and the saved/shared card renders at the same relative size and spot as the editor (the old editor-only display cap that made exported cards look bigger or misplaced is gone).

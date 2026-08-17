@@ -1334,6 +1334,21 @@ app/src/main/java/com/curio/app/
     (androidx.compose.foundation.layout.ColumnScope). LESSON: `X.() ->
     Unit` receivers need a real TYPE (ColumnScope / RowScope / BoxScope),
     never the layout function name.
+- **v175 — backup/restore now carries the profile avatar FILE (was
+  path-only).** User: "the profile pic wasnt restoring on backup restore
+  so fix it". Root cause: `AppPreferences.getProfileAvatarPath` stores an
+  absolute `filesDir/profile_avatar_<ts>.png` path in `curio_app_prefs`;
+  backup stored the prefs (path) but never the PNG, so a restored app
+  pointed at a nonexistent file → blank avatar. Fix in CurioBackupManager:
+  FORMAT_VERSION 6 → 7; export streams a new `avatarFile` section (base64
+  of the PNG, null when unset); restore reads it (NULL-safe), writes a
+  FRESH `profile_avatar_<ts>.png`, sweeps old avatar files, and overrides
+  `setProfileAvatarPath` AFTER the prefs loop (the restored prefs carry
+  the source device's dead path). v6 backups (no avatarFile) still
+  restore — reader's else-skip covers it. BackupPayload got a matching
+  `avatarFile: ByteArray?` field (legacy class, consistency only).
+  LESSON: never back up only a filesDir path — the file must ride along;
+  when restoring paths into prefs, re-home them to fresh files.
 - **v174d — the drawer map's "This Week ˅" selector is now LIVE and
   filters the stats constellation.** User: "Make the stats constellation
   filter to a time range via the 'This Week' selector on the drawer

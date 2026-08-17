@@ -42,6 +42,10 @@ import kotlinx.coroutines.withContext
  *    `filesDir/images/{id}/{n}.img` and rewrites every image URI in the
  *    capture to the restored file path — provider URIs from a document
  *    picker would otherwise be dead on a new device.
+ *  - the profile avatar photo (v7) — the cropped PNG behind the prefs
+ *    path, embedded base64. Restore writes it back to a fresh
+ *    `filesDir/profile_avatar_<ts>.png` and rewrites the prefs key to the
+ *    restored path (the source device's absolute path would be dead).
  *  - the user-facing prefs: [AppPreferences], [AudioQualitySettings],
  *    [StreakTracker], the quests/levels state ([CurioQuests]), the
  *    explore-session state (done topics / mark-as-done, active + queued
@@ -65,7 +69,7 @@ import kotlinx.coroutines.withContext
 object CurioBackupManager {
 
     /** Bump when the payload shape changes. Restore accepts version <= this. */
-    const val FORMAT_VERSION = 6
+    const val FORMAT_VERSION = 7
 
     /** MIME type used by the file pickers. */
     const val MIME_TYPE = "application/json"
@@ -269,6 +273,23 @@ object CurioBackupManager {
                 }
                 writer.endObject()
 
+                // Profile avatar (v7) — the cropped photo FILE behind the
+                // prefs path. The prefs-only approach restored a dead
+                // absolute path on a new device ("profile pic missing after
+                // backup restore"), so the bytes ride along now; null when
+                // no avatar is set.
+                writer.name("avatarFile")
+                val avatarPath = AppPreferences.getProfileAvatarPath(context)
+                val avatarBytes = runCatching {
+                    val file = File(avatarPath)
+                    if (avatarPath.isNotBlank() && file.isFile && file.length() > 0L) file.readBytes() else null
+                }.getOrNull()
+                if (avatarBytes != null) {
+                    writer.value(b64.encodeToString(avatarBytes))
+                } else {
+                    writer.nullValue()
+                }
+
                 writer.name("pendingWrite")
                 if (pendingWrite != null) {
                     gson.toJson(pendingWrite, PendingWriteBackup::class.java, writer)
@@ -337,6 +358,7 @@ object CurioBackupManager {
         var payloadPreferences: Map<String, Map<String, PrefEntry>> = emptyMap()
         var pendingWrite: PendingWriteBackup? = null
         var speciesCatalogJson: String? = null
+        var avatarFileBytes: ByteArray? = null
 
         withContext(Dispatchers.IO) {
             try {
@@ -416,6 +438,14 @@ object CurioBackupManager {
                                         .getOrNull()?.let { shotPaths[path] = it }
                                 }
                                 reader.endObject()
+                            }
+                            "avatarFile" -> {
+                                avatarFileBytes = if (reader.peek() == JsonToken.NULL) {
+                                    reader.nextNull()
+                                    null
+                                } else {
+                                    Base64.getDecoder().decode(reader.nextString())
+                                }
                             }
                             "pendingWrite" -> {
                                 pendingWrite = if (reader.peek() == JsonToken.NULL) {
@@ -561,6 +591,22 @@ object CurioBackupManager {
             DailyReminderScheduler.schedule(context, AppPreferences.getReminderHour(context))
         } else {
             DailyReminderScheduler.cancel(context)
+        }
+        // Profile avatar (v7) — the bundled photo restores to a FRESH file
+        // (the prefs restored above carry the source device's absolute path,
+        // which is dead here) and the prefs key is rewritten to it. Old
+        // avatar files are swept exactly like a fresh save does.
+        if (avatarFileBytes != null && avatarFileBytes.isNotEmpty()) {
+            val ts = System.currentTimeMillis()
+            val avatarFile = File(context.filesDir, "profile_avatar_$ts.png")
+            runCatching {
+                avatarFile.outputStream().use { it.write(avatarFileBytes) }
+            }.onSuccess {
+                context.filesDir.listFiles()
+                    ?.filter { f -> f.name.startsWith("profile_avatar_") && f != avatarFile }
+                    ?.forEach { f -> f.delete() }
+                AppPreferences.setProfileAvatarPath(context, avatarFile.absolutePath)
+            }
         }
         // curio_prefs rides in the generic prefs map — re-seed the reactive
         // explore-session state (done topics, recents, active/queued
@@ -744,6 +790,8 @@ data class BackupPayload(
     val sessionShots: Map<String, ByteArray> = emptyMap(),
     /** v6 — the pending (unsaved) write handoff (note + screenshots). */
     val pendingWrite: PendingWriteBackup? = null,
+    /** v7 — the profile avatar photo bytes (the prefs path is device-absolute). */
+    val avatarFile: ByteArray? = null,
     /** Imported FieldMind species catalog, preserved by Curio backup/restore. */
     val speciesCatalogJson: String? = null
 )
