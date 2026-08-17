@@ -35,6 +35,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioMotion
 
@@ -63,11 +64,14 @@ fun ScreenEntrance(content: @Composable () -> Unit) {
     // same 750 stiffness as the nav pill) so pages lift in with zero
     // overshoot — the old 0.85 damping spring bounced slightly past the
     // target, one of the "violent page opening" feels.
+    // v167 — CI fix: slideInVertically animates IntOffset, so the calm
+    // spring must be typed IntOffset (a SpringSpec<Float> won't typecheck
+    // — the same per-target-typing lesson as the v165 pill springs).
     AnimatedVisibility(
         visibleState = state,
         enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Standard)) +
                 slideInVertically(
-                    animationSpec = CurioMotion.Springs.Calm,
+                    animationSpec = spring<IntOffset>(dampingRatio = 1f, stiffness = 750f),
                     initialOffsetY = { it / 8 }
                 ),
         content = { content() }

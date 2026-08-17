@@ -1136,8 +1136,15 @@ app/src/main/java/com/curio/app/
     with a remembered `MutableInteractionSource`, so tapping a tab never
     flashes the grey ripple circle. The 6dp drop shadow under the bar
     stays (user picked ripple only). LESSON: "touch shadow" in this
-    project's user-speak = the press ripple — ask rather than assume
+    project's    user-speak = the press ripple — ask rather than assume
     which shadow.
+  - v167 CI FIX: `CurioAnimations.kt:70` — `SpringSpec<Float>` (the new
+    `Springs.Calm`) passed to `slideInVertically`, which animates
+    IntOffset. The calm spring there is now typed inline
+    `spring<IntOffset>(1f, 750f)` (same physics). LESSON (same as v165):
+    a spring's generic must match the ANIMATED value's type —
+    slideInVertically/Out = IntOffset, scaleIn/Out + fade = Float,
+    expand/shrinkHorizontally = IntSize, colors = Color.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`

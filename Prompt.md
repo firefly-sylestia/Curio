@@ -18,6 +18,10 @@ User: "the like and unlike button pill doesnt get the backgroud tint with
    under the bar stays — user picked ripple only).
 
 Docs: changelog FIX lines, AGENTS.md v167, this file. Committed + pushed.
+CI fix after push: `CurioAnimations.kt:70` — Springs.Calm (SpringSpec<Float>)
+passed to slideInVertically (animates IntOffset). Now typed inline
+`spring<IntOffset>(1f, 750f)` — same physics. (Same per-target-typing
+lesson as v165.) Committed + pushed.
 
 ## Earlier completed request — calmer nav collapse (same for all pills), muted colors (Cabinet "All" not pink), dark-mode session note, calmer page openings
 
