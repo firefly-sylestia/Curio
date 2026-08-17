@@ -40,6 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -292,6 +294,8 @@ fun CurioFloatingNavBar(
     } else {
         routePrefix
     }
+    // v188 — a light tick when switching tabs.
+    val haptics = LocalHapticFeedback.current
 
     // v149 — the ACTIVE pill wears the current page's category color
     // (published via [CurioNavTint]); null on plain pages → secondary.
@@ -317,6 +321,7 @@ fun CurioFloatingNavBar(
                     selected = selected,
                     onClick = {
                         if (selectedRoute != destination.route) {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             navController.navigateToTab(destination.route)
                         }
                     },
@@ -389,6 +394,8 @@ fun CurioFloatingNavBar(
                             // already-selected tab must be a no-op instead of
                             // re-opening it.
                             if (selectedRoute != destination.route) {
+                                // v188 — light tick on tab switch.
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 // Anchor to HOME (the persistent root), not the
                                 // graph start destination: SPLASH is popped on
                                 // launch, so popUpTo(startDestination) would be
@@ -545,6 +552,8 @@ fun CurioNavigationRail(
     } else {
         routePrefix
     }
+    // v188 — light tick on tab switch (wide-window rail).
+    val haptics = LocalHapticFeedback.current
     // v161/v166 — the rail's active indicator mirrors the phone pill bar:
     // the current page's accent CALMED (v166 muted the bright accents), else
     // the theme's muted secondaryContainer (the old hard-coded secondary /
@@ -574,6 +583,8 @@ fun CurioNavigationRail(
                     // category-launched deck ("spin/artists") is still the
                     // Shuffle tab, so re-tapping must not re-navigate.
                     if (selectedRoute != destination.route) {
+                        // v188 — light tick on tab switch.
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         navController.navigateToTab(destination.route)
                     }
                 },

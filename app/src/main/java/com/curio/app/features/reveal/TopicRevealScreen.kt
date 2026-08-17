@@ -74,6 +74,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -2208,6 +2210,8 @@ private fun RevealSentimentPill(
     onDislike: () -> Unit,
     onLike: () -> Unit
 ) {
+    // v188 — light tick when tapping Like/Dislike.
+    val haptics = LocalHapticFeedback.current
     Box(
         modifier = Modifier
             .navigationBarsPadding()
@@ -2231,7 +2235,10 @@ private fun RevealSentimentPill(
                     active = sentiment == AppPreferences.SENTIMENT_DISLIKE,
                     accent = accent,
                     ink = ink,
-                    onClick = onDislike
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onDislike()
+                    }
                 )
                 SentimentSegment(
                     icon = CurioIcons.ThumbUp,
@@ -2239,7 +2246,10 @@ private fun RevealSentimentPill(
                     active = sentiment == AppPreferences.SENTIMENT_LIKE,
                     accent = accent,
                     ink = ink,
-                    onClick = onLike
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onLike()
+                    }
                 )
             }
         }

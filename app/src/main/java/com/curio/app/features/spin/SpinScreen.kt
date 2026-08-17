@@ -53,6 +53,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
@@ -144,6 +145,7 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
+import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -1707,7 +1709,17 @@ private fun FilterSheet(
     }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            // v189 — popping the sheet back (swipe / scrim tap / back)
+            // with chips ticked APPLIES the draft instead of silently
+            // dropping it (same behavior as the picker's mix-on-pop). Only
+            // a pop with nothing changed keeps the previous selection.
+            if (draftFilters != initialFilters || draftSubtypes != initialSubtypes) {
+                onApply(draftFilters, draftSubtypes)
+            } else {
+                onDismiss()
+            }
+        },
         sheetState = sheetState,
         // v33 — the sheet uses the SOFT page wash (the same background tint
         // as the Spin page behind it), not the stronger card-level
@@ -4281,7 +4293,19 @@ private fun CategoryPickerSheet(
     // the old 184dp crushed the preset chips into a squished, thin row.
     val pickerHeroHeight = 208.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            // v189 — popping the sheet back (swipe / scrim tap / back)
+            // while lanes are ticked APPLIES the mix instead of dropping
+            // the selection. A pop with nothing selected (or single-select
+            // mode) just closes, keeping the current deck.
+            if (multiSelectMode && selectedSlugs.isNotEmpty()) {
+                onCategoriesSelected(
+                    categories.filter { it.id.routeSlug in selectedSlugs }
+                )
+            } else {
+                onDismiss()
+            }
+        },
         sheetState = sheetState,
         // v6.6 — the full-screen category selection page wears the
         // same category tint wash as the Spin page it sits on, so
@@ -4659,53 +4683,67 @@ private fun CategoryPickerSheet(
                 }
                 // v180 — nothing sits below the category cards anymore (the
                 // "Manage categories" pill is gone entirely). Multi-select
-                // shows Mix + Cancel as a FLOATING row over the grid — nav-
-                // bar-style controls with NO background capsule behind them.
+                // shows Mix + Cancel as a FLOATING row over the grid.
+                // v189 — the pair now lives in ONE capsule styled like the
+                // bottom nav bar (page-wash lift, 50% radius, 6dp shadow),
+                // with Mix as the accent-filled active pill inside it.
                 if (multiSelectMode) {
-                    Row(
+                    val capsuleShape = RoundedCornerShape(50)
+                    Surface(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = 18.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        shape = capsuleShape,
+                        color = curioFloatingNavContainerFor(
+                            currentCat.categoryBackgroundWash()
+                        ),
+                        shadowElevation = 6.dp
                     ) {
-                        // Mix — a solid category pill (theme-aware fill + ink).
-                        Surface(
-                            onClick = {
-                                if (selectedSlugs.isEmpty()) return@Surface
-                                onCategoriesSelected(
-                                    categories.filter { it.id.routeSlug in selectedSlugs }
-                                )
-                            },
-                            enabled = selectedSlugs.isNotEmpty(),
-                            shape = RoundedCornerShape(50),
-                            color = currentCat.themedButtonFill(),
-                            contentColor = currentCat.themedButtonInk()
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                            // Mix — a solid category pill (theme-aware fill +
+                            // ink), the capsule's active-pill.
+                            Surface(
+                                onClick = {
+                                    if (selectedSlugs.isEmpty()) return@Surface
+                                    onCategoriesSelected(
+                                        categories.filter { it.id.routeSlug in selectedSlugs }
+                                    )
+                                },
+                                enabled = selectedSlugs.isNotEmpty(),
+                                shape = capsuleShape,
+                                color = currentCat.themedButtonFill(),
+                                contentColor = currentCat.themedButtonInk()
                             ) {
-                                CurioIcon(CurioIcons.Check, null, size = 16.dp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                                ) {
+                                    CurioIcon(CurioIcons.Check, null, size = 16.dp)
+                                    Text(
+                                        text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                                    )
+                                }
+                            }
+                            // Cancel — plain text, no background, same height.
+                            TextButton(
+                                onClick = {
+                                    multiSelectMode = false
+                                    selectedSlugs = emptySet()
+                                },
+                                modifier = Modifier.heightIn(min = 44.dp)
+                            ) {
                                 Text(
-                                    text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
+                                    "Cancel",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                        }
-                        // Cancel — plain text, no background.
-                        TextButton(
-                            onClick = {
-                                multiSelectMode = false
-                                selectedSlugs = emptySet()
-                            }
-                        ) {
-                            Text(
-                                "Cancel",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
                     }
                 }

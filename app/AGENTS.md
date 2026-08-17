@@ -1648,6 +1648,33 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v189 — page-switch haptics; Mix/Cancel as ONE nav-bar capsule;
+  picker + filter apply on pop-back. (branch Alpha)** User: "add haptics
+  when switching pages with nav pill or like or pet designer too" + "also
+  make the mix and cancel as a navbar style pill and also let user apply
+  the mix even when it pops back same for filters".
+  - HAPTICS: a light tick (`HapticFeedbackType.TextHandleMove` via
+    `LocalHapticFeedback.current`, resolved in composition — never inside
+    the clickable) fires on: tab switches in all three nav surfaces
+    (`CurioFloatingNavBar` floating pill + M3 `NavigationBar` branch +
+    `CurioNavigationRail`), the Topic Reveal Like/Dislike segments, and
+    the Pet Designer studio bar tabs. `TextHandleMove` is the lightest
+    standard tick (no strong press flash on Android 12+).
+  - MIX/CANCEL CAPSULE: the picker's floating Mix + Cancel now live in
+    ONE capsule styled like the bottom nav bar — `Surface` with
+    `RoundedCornerShape(50)`, `curioFloatingNavContainerFor(wash)`
+    (internal, CurioBottomNav.kt — the page wash lifted toward the
+    elevated surface, dark = surfaceContainerHigh), `shadowElevation =
+    6.dp`, inner Row `padding(8.dp)`; Mix stays the accent-filled
+    active-pill (`themedButtonFill`/`themedButtonInk`), Cancel is plain
+    text with `heightIn(min = 44.dp)` to match the pill's height.
+  - APPLY-ON-POP: both sheets' `onDismissRequest` now APPLY instead of
+    dropping the draft when there's something to apply. Picker:
+    `multiSelectMode && selectedSlugs.isNotEmpty()` →
+    `onCategoriesSelected(selected)` (swipe/scrim/back applies the mix;
+    single-select or empty selection just closes). FilterSheet: draft
+    differs from initial → `onApply(draftFilters, draftSubtypes)`; a
+    no-change pop keeps the old set.
 - **v186 — drawer shows the Stats page's constellation; nav labels larger;
   footer slimmer. (branch Alpha)** User: "make the home shuffle cabinet
   tet xt even larger in default look and in drawer show the your

@@ -77,7 +77,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -1393,6 +1395,8 @@ private fun PetStudioBottomNav(
     page: PetDesignerPage,
     onSelect: (PetDesignerPage) -> Unit
 ) {
+    // v188 — light tick when switching studio pages.
+    val haptics = LocalHapticFeedback.current
     // v142 — restyled to the app's FLOATING PILL BAR language (the main
     // app replaced its stock M3 bar with this in v124/v129): a rounded,
     // elevated container with capsule tabs. The NavHost content is already
@@ -1425,12 +1429,15 @@ private fun PetStudioBottomNav(
             horizontalArrangement = Arrangement.Center
         ) {
             PetStudioTab(CurioIcons.Pets, "Pets", page == PetDesignerPage.PETS) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSelect(PetDesignerPage.PETS)
             }
             PetStudioTab(CurioIcons.Brush, "Editor", page == PetDesignerPage.EDITOR) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSelect(PetDesignerPage.EDITOR)
             }
             PetStudioTab(CurioIcons.Settings, "Settings", page == PetDesignerPage.SETTINGS) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSelect(PetDesignerPage.SETTINGS)
             }
         }

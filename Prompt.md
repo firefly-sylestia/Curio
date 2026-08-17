@@ -1,6 +1,24 @@
 # Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: v186 drawer/nav/footer tweaks DONE (committed + pushed to Alpha) — see below
+## Status: v189 haptics + mix/filter apply-on-pop DONE (committed + pushed to Alpha) — see below
+
+## v189 (latest) — user: "add haptics when switching pages with nav pill
+or like or pet designer too" + "also make the mix and cancel as a navbar
+style pill and also let user apply the mix even when it pops back same
+for filters".
+- Haptics (`HapticFeedbackType.TextHandleMove`, resolved in composition):
+  nav tab switches (floating pill + M3 bar + rail), Like/Dislike pill
+  segments, Pet Designer studio tabs.
+- Mix/Cancel restyled as ONE nav-bar-style capsule: `curioFloatingNav
+  ContainerFor(wash)` fill, 50% radius, 6dp shadow, inner Row padding
+  8dp; Mix = accent active-pill, Cancel = plain text heightIn(min=44).
+- Apply-on-pop: picker's `onDismissRequest` applies the mix when in
+  multi-select with a non-empty selection; FilterSheet applies when the
+  draft differs from initial. No-change pops just close.
+- Docs updated (changelog FIX bullets, AGENTS.md v189).
+
+## v186 (earlier) — drawer/nav/footer tweaks (see AGENTS.md v186).
+Committed + pushed to Alpha.
 
 ## v186 (latest) — user: "make the home shuffle cabinet tet xt even
 larger in default look and in drawer show the your constellaetion from
