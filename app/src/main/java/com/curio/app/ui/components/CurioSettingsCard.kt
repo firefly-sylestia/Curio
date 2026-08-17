@@ -25,6 +25,9 @@ import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.features.settings.settingsCardChipTint
 import com.curio.app.features.settings.settingsCardTintLift
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioSpacing
+import com.curio.app.ui.theme.curioCorner
+import com.curio.app.ui.theme.curioSpacing
 
 /**
  * Shared paper-card primitives for Profile + Settings — one visual language
@@ -44,8 +47,9 @@ fun CurioSettingsCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val cardShape = curioCorner(28.dp, MaterialTheme.shapes.large)
     Surface(
-        shape = RoundedCornerShape(28.dp),
+        shape = cardShape,
         // v27n — every theme wears the faint container step as its elevation
         // (the black-glass shine edge keeps AMOLED cards defined on pure
         // black; the old hairline outline is gone).
@@ -83,12 +87,12 @@ fun CurioSettingsCard(
             .fillMaxWidth()
             // v28 — dark mode: soft light glow + faint hairline so the
             // elevation reads on midnight (black shadows are invisible).
-            .curioDarkGlow(shadowElevation, RoundedCornerShape(28.dp))
-            .categoryEdgeShine(RoundedCornerShape(28.dp))
+            .curioDarkGlow(shadowElevation, cardShape)
+            .categoryEdgeShine(cardShape)
             // v81 — dark: a faint radial inner glow in the hero hue on the
             // card (One UI pushed-in glass; self-gating, light is a no-op).
-            .curioInnerGlow(RoundedCornerShape(28.dp), settingsCardChipTint(), strength = 0.10f)
-    ) { Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp), content = content) }
+            .curioInnerGlow(cardShape, settingsCardChipTint(), strength = 0.10f)
+    ) { Column(modifier = Modifier.padding(horizontal = curioSpacing(14.dp, CurioSpacing.md), vertical = curioSpacing(12.dp, CurioSpacing.sm)), content = content) }
 }
 
 /** Icon-card header — bare accent icon + title + subtitle (v115: the

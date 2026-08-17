@@ -1,6 +1,25 @@
 # Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: v186 drawer/nav/footer tweaks DONE (committed + pushed to Alpha) — see below
+## Status: v187 layout M3 audit on branch m3-layout-sweep — see below
+
+## v187 (latest) — full-layout M3 audit (branch `m3-layout-sweep`)
+- Created the branch (from Alpha), added it to `.github/workflows/android.yml`
+  triggers, pushed → CI builds it (280028b).
+- AUDIT: ~1900 hardcoded layout values in app/src/main/java — 484
+  RoundedCornerShape / 560 .padding / 470 .spacedBy / 394 fixed sizes.
+- TOKENS: `curioCorner(curio, m3)` + `curioSpacing(brand, m3)` in
+  MaterialGuidelines.kt — brand value normally, M3 token under the
+  guidelines toggle.
+- SWEPT the shared component layer: CurioSettingsCard, CurioCategoryCard,
+  CurioCategoryChip(+Wildcard), CurioTopicCard, CurioHeroCard,
+  CurioStreakPill, CurioEmptyState, CurioProgressPill, PaperCard — card
+  corners now flip to M3 shape tokens under the guidelines toggle; pills
+  (50dp) stay brand. Settings card inner padding converts to tokens.
+- REMAINS: per-screen hardcoded paddings/radii (60+ feature files) —
+  pattern established, sweep continues incrementally; CurioDialogShape
+  left (24 ≈ M3 extraLarge 28).
+
+## v186 — drawer/nav/footer tweaks (committed + pushed to Alpha 7aab245 + c03ce50 CI fix)
 
 ## v186 (latest) — user: "make the home shuffle cabinet tet xt even
 larger in default look and in drawer show the your constellaetion from

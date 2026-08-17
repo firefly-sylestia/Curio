@@ -65,6 +65,7 @@ import com.curio.app.data.NotePaperColor
 import com.curio.app.data.NotePaperStyle
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.notePaperBorder
 import com.curio.app.ui.theme.notePaperInk
 import com.curio.app.ui.theme.notePaperRule
@@ -1998,7 +1999,7 @@ fun NotePaperColorToggle(
         Surface(
             onClick = { expanded = !expanded },
             enabled = enabled,
-            shape = RoundedCornerShape(10.dp),
+            shape = curioCorner(10.dp, MaterialTheme.shapes.small),
             // v27r — see CompactPaperChip: the expanded paper toggle wears a
             // MODERATED accent tint, not a solid block; flat 2dp.
             color = if (expanded) lerp(MaterialTheme.colorScheme.surfaceContainerHighest, accent, 0.45f)
@@ -2006,7 +2007,7 @@ fun NotePaperColorToggle(
             shadowElevation = 2.dp,
             // v28 — dark mode elevation visibility (glow + hairline).
             modifier = Modifier
-                .curioDarkGlow(2.dp, RoundedCornerShape(10.dp))
+                .curioDarkGlow(2.dp, curioCorner(10.dp, MaterialTheme.shapes.small))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),

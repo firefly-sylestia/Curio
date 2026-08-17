@@ -1648,6 +1648,37 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v187 — full-layout M3 audit + sweep (branch `m3-layout-sweep`).**
+  User: "create a ne brach name it yourself add it in the workflow push
+  build and do the full layout m3 al hardcoded things audit". Branch
+  `m3-layout-sweep` created from Alpha, added to the CI triggers in
+  `.github/workflows/android.yml` (`branches: [main, Alpha,
+  m3-layout-sweep]`), pushed (CI builds it).
+  - AUDIT (hardcoded layout surface in `app/src/main/java`): **484
+    `RoundedCornerShape(...)`** across 63 files, **560 `.padding(`**,
+    **470 `.spacedBy(`**, **394 fixed `.height/.width(N.dp)`** — ~1900
+    hardcoded values total. Categories: pill chrome (50dp — brand, stays
+    fully round), cards/containers (10–28dp), dialogs (24dp ≈ M3
+    extraLarge 28), per-screen micro-paddings (brand spacing).
+  - TOKENS: `curioCorner(curio, m3)` (brand radius normally, M3 shape
+    token under guidelines) + `curioSpacing(brand, m3)` added to
+    `MaterialGuidelines.kt`. Converting a hardcoded shape to
+    `curioCorner(24.dp, MaterialTheme.shapes.large)` makes the box flip
+    to the M3 scale under the guidelines toggle without touching the
+    default Curio look.
+  - SWEPT (shared component layer — the chrome every screen renders):
+    CurioSettingsCard (28→large + inner padding 14/12→md/sm),
+    CurioCategoryCard (22→large), CurioCategoryChip + CurioWildcardChip
+    (16→small), CurioTopicCard (20→large), CurioHeroCard (28→large),
+    CurioStreakPill (20→large), CurioEmptyState CTA (24→large),
+    CurioProgressPill (dialog 28→extraLarge, field 10→small, value
+    surface 12→medium), PaperCard stat box (10→small). Pills (50dp) stay
+    — they're brand chrome.
+  - NOT swept (documented remainder): per-screen hardcoded paddings /
+    radii across the 60+ feature files — the token helpers exist and the
+    pattern is established; the sweep continues incrementally. Dialogs
+    (CurioDialogShape 24dp) left as-is — 24 ≈ M3 extraLarge 28, near-
+    identical.
 - **v186 — drawer shows the Stats page's constellation; nav labels larger;
   footer slimmer. (branch Alpha)** User: "make the home shuffle cabinet
   tet xt even larger in default look and in drawer show the your

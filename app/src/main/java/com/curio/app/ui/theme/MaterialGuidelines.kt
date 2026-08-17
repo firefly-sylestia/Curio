@@ -1,7 +1,12 @@
 package com.curio.app.ui.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 
@@ -60,3 +65,26 @@ object CurioSpacing {
     val xl = 32.dp
     val xxl = 48.dp
 }
+
+/**
+ * v187 — theme-aware CORNER: Curio's brand radius normally, the given M3
+ * shape token when the guidelines toggle is on. Convert a hardcoded
+ * `RoundedCornerShape(24.dp)` into `curioCorner(24.dp, MaterialTheme.shapes.large)`
+ * and the box flips to the M3 scale under the guidelines without touching
+ * the default Curio look.
+ *
+ * @param curio the brand corner radius (default look).
+ * @param m3 the M3 shape token to wear when [materialGuidelinesOn].
+ */
+@Composable
+fun curioCorner(curio: Dp, m3: Shape = MaterialTheme.shapes.medium): Shape =
+    if (materialGuidelinesOn) m3 else RoundedCornerShape(curio)
+
+/**
+ * v187 — theme-aware SPACING: [brand] normally, [m3] when the guidelines
+ * toggle is on. Convert a hardcoded padding/spacer value into
+ * `curioSpacing(24.dp, CurioSpacing.lg)` and it re-tunes under M3.
+ */
+@Composable
+fun curioSpacing(brand: Dp, m3: Dp): Dp =
+    if (materialGuidelinesOn) m3 else brand

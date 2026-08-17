@@ -14,6 +14,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.onAccent
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.themedAccent
 
 /**
@@ -62,7 +63,7 @@ fun CurioCategoryChip(
                 size = 18.dp
             )
         },
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+        shape = curioCorner(16.dp, MaterialTheme.shapes.small),
         colors = FilterChipDefaults.filterChipColors(
             containerColor = if (selected) category.themedAccent()
                              else MaterialTheme.colorScheme.surface,
@@ -114,7 +115,7 @@ fun CurioWildcardChip(
                 size = 18.dp
             )
         },
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+        shape = curioCorner(16.dp, MaterialTheme.shapes.small),
         colors = FilterChipDefaults.filterChipColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primary
                              else MaterialTheme.colorScheme.surface,

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -94,7 +95,7 @@ fun CurioEmptyState(
                 Spacer(Modifier.height(8.dp))
                 Button(
                     onClick = onCtaClick,
-                    shape = RoundedCornerShape(24.dp),
+                    shape = curioCorner(24.dp, MaterialTheme.shapes.large),
                     colors = ButtonDefaults.buttonColors(
                         // v81 — dark: the deep rose fill + bright twin ink
                         // (the pale coral fill would glare on the black page).

@@ -44,6 +44,7 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.onAccent
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.themedAccent
 
 /**
@@ -140,8 +141,9 @@ fun CurioCategoryCard(
         }
     }
 
+    val cardShape = curioCorner(22.dp, MaterialTheme.shapes.large)
     Surface(
-        shape = RoundedCornerShape(22.dp),
+        shape = cardShape,
         color = Color.Transparent,
         shadowElevation = cardElevation,
         tonalElevation = 0.dp,
@@ -150,12 +152,12 @@ fun CurioCategoryCard(
             .height(104.dp)
             .scale(scale)
             // v28 — dark mode elevation visibility (glow + hairline).
-            .curioDarkGlow(cardElevation, RoundedCornerShape(22.dp))
+            .curioDarkGlow(cardElevation, cardShape)
             // v9.x — the theme-style edge shine: AMOLED black-glass and
             // Material both wear the category-colored rim light. Coming-soon
             // tiles wear a much fainter rim so they read as "locked".
             .categoryEdgeShine(
-                RoundedCornerShape(22.dp),
+                cardShape,
                 accent = category.themedAccent(),
                 intensity = if (comingSoon) 0.25f else 1f
             )
@@ -173,7 +175,7 @@ fun CurioCategoryCard(
                         MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                     else SolidColor(idleSurface),
-                    RoundedCornerShape(22.dp)
+                    cardShape
                 )
                 .combinedClickable(
                     onClick = onClick,
@@ -201,7 +203,7 @@ fun CurioCategoryCard(
                         .fillMaxSize()
                         .background(
                             Color.White.copy(alpha = 0.14f),
-                            RoundedCornerShape(22.dp)
+                            cardShape
                         )
                 )
             }

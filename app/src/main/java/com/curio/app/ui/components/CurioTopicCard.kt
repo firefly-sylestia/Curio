@@ -45,6 +45,7 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.TopicProgressStore
 import com.curio.app.data.formatSessionShort
 import com.curio.app.ui.theme.CurioGradients
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -99,6 +100,7 @@ fun CurioEntryCard(
         }
     }
 
+    val topicCardShape = curioCorner(20.dp, MaterialTheme.shapes.large)
     Surface(
         modifier = modifier
             .scale(pressScale)
@@ -111,9 +113,9 @@ fun CurioEntryCard(
             )
             // v9.x — theme-style edge shine (hairline + top shine).
             // v28 — dark mode elevation visibility (glow + hairline).
-            .curioDarkGlow(2.dp, RoundedCornerShape(20.dp))
-            .categoryEdgeShine(RoundedCornerShape(20.dp)),
-        shape = RoundedCornerShape(20.dp),
+            .curioDarkGlow(2.dp, topicCardShape)
+            .categoryEdgeShine(topicCardShape),
+        shape = topicCardShape,
         // v78 — light Curio only (the AMOLED pitch-black card is gone with
         // dark mode): the category-tinted surface.
         color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),

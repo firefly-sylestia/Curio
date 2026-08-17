@@ -34,6 +34,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -87,6 +88,7 @@ fun CurioHeroShuffleCard(
     }
 
     // ── Press scale animation ─────────────────────────────────────────────
+    val heroCardShape = curioCorner(28.dp, MaterialTheme.shapes.large)
     val pressScale by animateFloatAsState(
         targetValue = if (pressed) 0.96f else 1f,
         animationSpec = CurioMotion.Springs.Press,
@@ -103,8 +105,8 @@ fun CurioHeroShuffleCard(
             .height(220.dp)
             .scale(pressScale)
             // v9.x — theme-style edge shine (hairline + top shine).
-            .categoryEdgeShine(RoundedCornerShape(28.dp)),
-        shape = RoundedCornerShape(28.dp),
+            .categoryEdgeShine(heroCardShape),
+        shape = heroCardShape,
         color = Color.Transparent,
         shadowElevation = 0.dp
     ) {
@@ -115,7 +117,7 @@ fun CurioHeroShuffleCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(cardGradient),
-                        RoundedCornerShape(28.dp)
+                        heroCardShape
                     )
             )
 

@@ -50,6 +50,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicProgressStore
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.components.curioInnerGlow
 import kotlin.math.abs
@@ -317,7 +318,7 @@ fun CurioProgressEditorDialog(
         // [contentColor] drives every element (readable category ink), so
         // the ring, steppers, slider and Save all read in both modes.
         containerColor = curioDialogContainerColor(),
-        shape = RoundedCornerShape(28.dp),
+        shape = curioCorner(28.dp, MaterialTheme.shapes.extraLarge),
         title = {
             Text(
                 text = topic.name,
@@ -361,7 +362,7 @@ fun CurioProgressEditorDialog(
                             cursorBrush = SolidColor(contentColor),
                             modifier = Modifier
                                 .width(56.dp)
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(curioCorner(10.dp, MaterialTheme.shapes.small))
                                 .background(contentColor.copy(alpha = 0.12f))
                                 .padding(horizontal = 8.dp, vertical = 6.dp)
                         )
@@ -371,7 +372,7 @@ fun CurioProgressEditorDialog(
                                 valueText = value.toString()
                                 editingValue = true
                             },
-                            shape = RoundedCornerShape(12.dp),
+                            shape = curioCorner(12.dp, MaterialTheme.shapes.medium),
                             color = contentColor.copy(alpha = 0.08f)
                         ) {
                             Row(

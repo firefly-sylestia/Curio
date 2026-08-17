@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioCorner
 import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
@@ -46,7 +47,7 @@ fun CurioStreakPill(
     val ink = if (isCurioDarkTheme()) CurioColors.ButterYellow else CurioColors.DeepPlum
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
+        shape = curioCorner(20.dp, MaterialTheme.shapes.large),
         color = CurioColors.ButterYellow.copy(alpha = 0.40f),
         modifier = modifier
     ) {
@@ -86,7 +87,7 @@ fun CurioSecondaryAction(
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
+        shape = curioCorner(20.dp, MaterialTheme.shapes.large),
         color = Color.Transparent,
         modifier = modifier
     ) {
