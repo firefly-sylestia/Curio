@@ -1650,7 +1650,10 @@ private fun SoundBiteRender(
     fun startOfflineTranscription() {
         if (transcribing) return
         val modelId = AppPreferences.getOfflineModelId(detailContext)
-        if (!VoskModels.isDownloaded(detailContext, modelId)) return
+        // v158 — only transcribe with a model that is still in the catalog
+        // (the Full server-grade models were removed; a stale selection or
+        // orphaned install must not try to load a removed model again).
+        if (VoskModels.byId(modelId) == null || !VoskModels.isDownloaded(detailContext, modelId)) return
         transcribing = true
         transcribeError = null
         transcribeProgress = 0f

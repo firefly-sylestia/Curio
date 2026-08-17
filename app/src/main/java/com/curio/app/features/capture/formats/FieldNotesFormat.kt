@@ -2,6 +2,7 @@ package com.curio.app.features.capture.formats
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureData
 import com.curio.app.data.NotePaperColor
 import com.curio.app.data.NotePaperStyle
@@ -64,6 +65,9 @@ fun FieldNotesFormat(
     initialData: CaptureData.FieldNotes? = null
 ) {
     val context = LocalContext.current
+    // v158 — the dictation mic shows only while the Voice-to-text settings
+    // toggle is on (same experiment gate as the sound bite note box).
+    val voiceToTextEnabled = AppPreferences.voiceToTextEnabledState
     // Edit mode: restore the three sections + photos so re-saving preserves
     // the original capture instead of silently wiping it.
     var observed by remember(initialData) { mutableStateOf(initialData?.observed ?: "") }
@@ -192,7 +196,18 @@ fun FieldNotesFormat(
                 onPaperStyleChange = { observedStyle = it },
                 paperColor = observedColor,
                 onPaperColorChange = { observedColor = it },
-                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
+                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+                // v158 — dictation rides the section's own tool dock.
+                trailingAction = {
+                    DictationMic(
+                        enabled = true,
+                        visible = voiceToTextEnabled,
+                        accent = MaterialTheme.colorScheme.tertiary,
+                        onInsert = { text ->
+                            observed = if (observed.isBlank()) text else "$observed\n$text"
+                        }
+                    )
+                }
             )
         }
 
@@ -229,7 +244,18 @@ fun FieldNotesFormat(
                 onPaperStyleChange = { surprisedStyle = it },
                 paperColor = surprisedColor,
                 onPaperColorChange = { surprisedColor = it },
-                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
+                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+                // v158 — dictation rides the section's own tool dock.
+                trailingAction = {
+                    DictationMic(
+                        enabled = true,
+                        visible = voiceToTextEnabled,
+                        accent = MaterialTheme.colorScheme.tertiary,
+                        onInsert = { text ->
+                            surprised = if (surprised.isBlank()) text else "$surprised\n$text"
+                        }
+                    )
+                }
             )
         }
 
@@ -266,7 +292,18 @@ fun FieldNotesFormat(
                 onPaperStyleChange = { learnNextStyle = it },
                 paperColor = learnNextColor,
                 onPaperColorChange = { learnNextColor = it },
-                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
+                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+                // v158 — dictation rides the section's own tool dock.
+                trailingAction = {
+                    DictationMic(
+                        enabled = true,
+                        visible = voiceToTextEnabled,
+                        accent = MaterialTheme.colorScheme.tertiary,
+                        onInsert = { text ->
+                            learnNext = if (learnNext.isBlank()) text else "$learnNext\n$text"
+                        }
+                    )
+                }
             )
         }
 

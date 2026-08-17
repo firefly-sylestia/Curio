@@ -360,7 +360,7 @@ fun OfflineModelDialog(
                 }
             }
             Text(
-                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large and Full models are much more accurate but are heavy downloads that need real storage and memory. Downloads keep running if you close this screen — pause or cancel them anytime, and several can download at once. No internet needed while it runs.",
+                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large model is more accurate but a heavier download. (v158 — the Full server-grade models are gone: they lagged and crashed phones.) Downloads keep running if you close this screen — pause or cancel them anytime, and several can download at once. No internet needed while it runs.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
@@ -425,12 +425,12 @@ fun OfflineModelDialog(
                             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                 Text(model.displayName, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
                                 // v140 — quality-tier badge: tier label + accuracy hint,
-                                // tinted per tier (sage = small/fast, gold = large,
-                                // rose = full/most accurate).
+                                // tinted per tier (sage = small/fast, gold = large).
+                                // v158 — the Full tier is gone (those models were
+                                // removed from the catalog).
                                 val tierInk = when (model.tier) {
                                     VoskModels.Tier.SMALL -> curioSageInk()
                                     VoskModels.Tier.LARGE -> curioGoldInk()
-                                    VoskModels.Tier.FULL -> curioRoseInk()
                                 }
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),

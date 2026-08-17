@@ -53,13 +53,13 @@ object VoskModels {
 
     /**
      * Quality tier — drives the picker's badge + accuracy hint (v140).
-     * Small = fast & light, Large = a real accuracy step up, Full = the
-     * flagship server-grade models.
+     * Small = fast & light, Large = a real accuracy step up. v158 — the
+     * Full server-grade tier is GONE: those models (1–2.3 GB) lagged and
+     * crashed phones, so the catalog only offers phone-friendly sizes.
      */
     enum class Tier(val label: String, val hint: String) {
         SMALL("Small", "fast & light"),
-        LARGE("Large", "more accurate"),
-        FULL("Full", "most accurate")
+        LARGE("Large", "more accurate")
     }
 
     /** One downloadable offline model. */
@@ -103,9 +103,11 @@ object VoskModels {
             tier = Tier.SMALL
         ),
         // v131 — the bigger tiers: Large (~128 MB, phone-friendly, notably
-        // more accurate than the smalls) and the Full server-grade models
-        // (~1-2.3 GB — most accurate, but heavy downloads that need real
-        // storage + memory). Sizes from the alphacephei.com model page.
+        // more accurate than the smalls). v158 — the Full server-grade
+        // models (1–2.3 GB) are GONE: they lagged and crashed phones, so
+        // the catalog only offers phone-friendly sizes. (Vosk has no
+        // "medium" tier — the ladder is Small ~40 MB / Large ~128 MB /
+        // server-grade 1–2.3 GB.) Sizes from the alphacephei.com model page.
         Info(
             id = "vosk-model-en-us-0.22-lgraph",
             displayName = "Large · English (US)",
@@ -114,33 +116,6 @@ object VoskModels {
             sizeBytes = 128_000_000L,
             url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip",
             tier = Tier.LARGE
-        ),
-        Info(
-            id = "vosk-model-en-us-0.22",
-            displayName = "Full · English (US)",
-            langLabel = "Most accurate US English — large download, needs real storage & memory",
-            sizeLabel = "~1.8 GB",
-            sizeBytes = 1_800_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip",
-            tier = Tier.FULL
-        ),
-        Info(
-            id = "vosk-model-en-us-0.42-gigaspeech",
-            displayName = "Full · English (US) — Gigaspeech",
-            langLabel = "Newest accurate model — best on podcasts & clear speech",
-            sizeLabel = "~2.3 GB",
-            sizeBytes = 2_300_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.42-gigaspeech.zip",
-            tier = Tier.FULL
-        ),
-        Info(
-            id = "vosk-model-en-in-0.5",
-            displayName = "Full · English (India)",
-            langLabel = "Higher accuracy for Indian accents — large download",
-            sizeLabel = "~1 GB",
-            sizeBytes = 1_000_000_000L,
-            url = "https://alphacephei.com/vosk/models/vosk-model-en-in-0.5.zip",
-            tier = Tier.FULL
         )
     )
 
@@ -175,8 +150,9 @@ object VoskModels {
         runCatching { StatFs(context.filesDir.absolutePath).availableBytes }.getOrDefault(0L)
 
     /**
-     * B / KB / MB / GB — the catalog's ~size labels cap at MB, but the
-     * Full tiers run 1–2.3 GB, so picker rows and confirmations need GB.
+     * B / KB / MB / GB — the catalog's ~size labels cap at MB now (v158,
+     * the GB Full tiers are gone), but the formatter keeps the GB branch
+     * defensively for any larger download.
      */
     fun formatModelSize(bytes: Long): String = when {
         bytes < 1024 -> "$bytes B"
@@ -196,6 +172,27 @@ object VoskModels {
         // clean instead of resuming from a stale file.
         File(context.cacheDir, "$id.zip").delete()
         AppPreferences.bumpOfflineModelVersion()
+    }
+
+    /**
+     * v158 — the Full server-grade models were removed from [CATALOG]
+     * (they lagged and crashed phones): prune any installed model that is
+     * no longer in the catalog (its dir + cached zip) and clear the
+     * selection if it pointed at one. Called once at app startup so a
+     * stale selection can never load a removed model again.
+     */
+    fun pruneRemovedModels(context: Context) {
+        val catalogIds = CATALOG.map { it.id }.toSet()
+        modelsDir(context).listFiles()?.forEach { dir ->
+            if (dir.isDirectory && dir.name !in catalogIds) {
+                dir.deleteRecursively()
+                File(context.cacheDir, "${dir.name}.zip").delete()
+            }
+        }
+        val selected = AppPreferences.getOfflineModelId(context)
+        if (selected.isNotBlank() && byId(selected) == null) {
+            AppPreferences.setOfflineModelId(context, "")
+        }
     }
 }
 

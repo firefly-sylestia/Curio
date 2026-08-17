@@ -153,6 +153,9 @@ fun GalleryWallFormat(
     initialData: CaptureData.GalleryWall? = null,
     boardSeed: Int? = null
 ) {
+    // v158 — the dictation mic shows only while the Voice-to-text settings
+    // toggle is on (same experiment gate as the sound bite note box).
+    val voiceToTextEnabled = AppPreferences.voiceToTextEnabledState
     val tiles = remember(initialData) {
         mutableStateListOf<MoodTile>().apply {
             initialData?.tileLayouts?.forEachIndexed { i, t ->
@@ -394,7 +397,19 @@ fun GalleryWallFormat(
             paperStyle = captionStyle,
             onPaperStyleChange = { captionStyle = it },
             paperColor = captionColor,
-            onPaperColorChange = { captionColor = it }
+            onPaperColorChange = { captionColor = it },
+            // v158 — the dictation mic rides the caption label row too
+            // (same shared [DictationMic] flow as every note box).
+            trailingAction = {
+                DictationMic(
+                    enabled = true,
+                    visible = voiceToTextEnabled,
+                    accent = accent,
+                    onInsert = { text ->
+                        caption = if (caption.isBlank()) text else "$caption $text"
+                    }
+                )
+            }
         )
 
         // ── Quote boxes — the board chip's cards float ON the board above;

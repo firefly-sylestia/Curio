@@ -17,6 +17,7 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.VoskModels
 import com.curio.app.data.TopicProgressStore
 import com.curio.app.data.UpdateChecker
 import kotlinx.coroutines.launch
@@ -76,6 +77,12 @@ class MainActivity : ComponentActivity() {
         // v27 — auto-delete recycle-bin captures that passed their retention
         // window (runs again whenever the recycle bin opens).
         lifecycleScope.launch { RecycleBinExpiry.purgeExpired(this@MainActivity) }
+
+        // v158 — the Full server-grade Vosk models were removed from the
+        // catalog (they lagged and crashed phones): prune any already-
+        // installed one and clear a stale selection so transcription can
+        // never load a removed model again.
+        VoskModels.pruneRemovedModels(this)
 
         AppPreferences.initThemeMode(this)
         // Load the persisted explore-session flow state (active session +

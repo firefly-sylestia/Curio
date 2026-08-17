@@ -2,6 +2,7 @@ package com.curio.app.features.capture.formats
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureData
 import com.curio.app.data.NotePaperColor
 import com.curio.app.data.NotePaperStyle
@@ -52,6 +53,9 @@ fun ReelNotesFormat(
     initialData: CaptureData.ReelNotes? = null
 ) {
     val context = LocalContext.current
+    // v158 — the dictation mic shows only while the Voice-to-text settings
+    // toggle is on (same experiment gate as the sound bite note box).
+    val voiceToTextEnabled = AppPreferences.voiceToTextEnabledState
     // Edit mode: restore rating / review / images so re-saving an entry
     // preserves the original capture instead of silently wiping it.
     var rating by remember(initialData) { mutableStateOf(initialData?.rating ?: 0) }
@@ -187,7 +191,18 @@ fun ReelNotesFormat(
             // Roomier slip — the review text breathes off the paper edges
             // (the ruled lines are anchored to the top padding, so they stay
             // aligned under the text lines).
-            paperContentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
+            paperContentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            // v158 — dictation rides the review box's own tool dock.
+            trailingAction = {
+                DictationMic(
+                    enabled = true,
+                    visible = voiceToTextEnabled,
+                    accent = MaterialTheme.colorScheme.tertiary,
+                    onInsert = { text ->
+                        reviewText = if (reviewText.isBlank()) text else "$reviewText\n$text"
+                    }
+                )
+            }
         )
 
         // ── Quote cards — the SHARED hand-placed paper notecard section ──

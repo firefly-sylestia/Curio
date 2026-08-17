@@ -919,6 +919,45 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v158 — Full server-grade Vosk models removed (no medium tier exists) +
+  the dictation mic is now on EVERY note/quote text box in Save your take.**
+  User: "remove the full models as they are laggy and crashing the app
+  along with my phone. and add medium model if theres more. in voice model.
+  and the voice bubble in save your take show it in each note and quote
+  text box not just in sound bite". (1) MODELS: the 1–2.3 GB Full-tier
+  models (Full English / Gigaspeech English / Full Indian English) are
+  GONE from `VoskModels.CATALOG` (now Small ×3 + Large ×1); the
+  `Tier.FULL` enum value, its rose badge tint and the picker copy were
+  removed. RESEARCH: alphacephei.com's catalog has NO English "medium" —
+  the ladder is Small ~40–60 MB / Large ~128 MB / server-grade 1–2.3 GB,
+  so nothing was added. A stale-install guard runs at startup
+  (`VoskModels.pruneRemovedModels` in MainActivity): any installed dir
+  whose id is no longer in the catalog is deleted (zip too), and a stale
+  saved selection is cleared; the detail-page Transcribe button also
+  verifies `VoskModels.byId(modelId) != null` before loading. LESSON:
+  removing a heavy-download feature must handle the already-downloaded
+  artifacts + persisted selection, not just the picker list.
+  (2) DICTATION EVERYWHERE: the SoundBite-only floating-mic flow was
+  extracted into a SHARED reusable composable `DictationMic`
+  (features/capture/formats/DictationMic.kt) that owns its own
+  recognizer session (lazy, destroyed on dispose) + its own RECORD_AUDIO
+  permission launcher + the live-preview dialog, and reports live-listening
+  via `onListeningChange` (SoundBite keeps reporting dictation as busy so
+  format-switch confirmation still guards a live session). SoundBiteFormat
+  lost its ~330 lines of inline recognizer machinery + private dialog;
+  the mic now rides the tool dock (`trailingAction`) of EVERY RichTextEditor
+  note box (Field Notes' 3 sections, Marginalia journal, Reel Notes
+  review, Sound Bite note), the GalleryWall caption (PaperLineField
+  label row) and every quote card via the SHARED `QuoteCardEditor`
+  (covers all QuoteCardsSection callers + the mood board + the floating
+  quote dialog). Every mic is gated on `AppPreferences.voiceToTextEnabledState`
+  (the v125 experiment toggle) — visible only when the setting is on.
+  Insert appends the transcript to the box; quote cards preserve spans
+  via `QuoteCardsState.setText`'s clamping. LESSON: when a one-off
+  feature (SoundBite's mic) becomes an everywhere-feature, extract the
+  machinery once into a self-contained composable and reuse it — the
+  caller keeps only the state var + an append lambda, and the busy-state
+  callback is the one thing the shared piece must surface back.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view

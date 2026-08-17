@@ -1,121 +1,93 @@
 # Prompt.md — Request log
 
-## Current request — remove dark-mode hairline rims (floating nav bar + detail quick-fact box) — commit only, NO push
+## Current request (completed) — remove Full Vosk models + dictation mic on every note/quote box — commit only, NO push
 
-User: "why in dark mode the navbar floating one have borders? remove that and
-still hold the push", plus "i notices in detail view theres border in quick
-fact box".
+User: "remove the full models as they are laggy and crashing the app along
+with my phone. and add medium model if theres more. in voice model. and the
+voice bubble in save your take show it in each note and quote text box not
+just in sound bite".
 
-### Changes
-1. `CurioFloatingNavBar` (CurioBottomNav.kt): removed the v149 dark-mode
-   `BorderStroke(1.dp, White@10%)` capsule rim — the elevated fill alone
-   defines the capsule now. `BorderStroke` import removed (was the only use).
-2. `QuickFactCard` (EntryDetailScreen.kt): removed the v115 dark-mode
-   `Modifier.border(1.dp, ink@18%)` on the quick-fact plate — the lifted
-   fill alone defines it. `foundation.border` import removed (was the only
-   use).
+### Part 1 — models (done)
+- Removed the 3 Full server-grade models (Full English ~1.8 GB, Gigaspeech
+  English ~2.3 GB, Full Indian English ~1 GB) from `VoskModels.CATALOG`;
+  dropped `Tier.FULL` (enum + rose badge tint + picker copy).
+- RESEARCHED medium: alphacephei.com's catalog has NO English "medium" —
+  ladder is Small ~40–60 MB / Large ~128 MB / server-grade 1–2.3 GB, so
+  nothing was added (told the user).
+- Startup prune (`MainActivity` → `VoskModels.pruneRemovedModels`): deletes
+  installed dirs/zips whose id left the catalog, clears a stale saved
+  selection; detail Transcribe button also guards `byId(modelId) != null`.
 
-### Not touched (same dark rim exists, offered to the user)
-- Tour dock (CurioNavHost), reveal Like/Dislike pill (TopicRevealScreen),
-  pet studio bar + floating action capsule (PetDesignerScreen).
+### Part 2 — dictation everywhere (done)
+- NEW shared `DictationMic` (features/capture/formats/DictationMic.kt):
+  owns recognizer (lazy, destroyed on dispose), RECORD_AUDIO permission
+  flow, live-preview dialog; reports live-listening via `onListeningChange`.
+- SoundBiteFormat refactored onto it (~330 lines of inline recognizer +
+  private DictationDialog removed); dictation still counts as busy for the
+  format-switch guard via a local `dictating` state.
+- Mic wired into the tool dock (`trailingAction`) of EVERY note box:
+  FieldNotes ×3, Marginalia journal, ReelNotes review, SoundBite note,
+  GalleryWall caption (PaperLineField label row) + every quote card via
+  the shared `QuoteCardEditor` (covers all formats + mood board + floating
+  quote dialog). All gated on `AppPreferences.voiceToTextEnabledState`.
+- Insert appends the transcript; quote cards preserve spans via
+  `QuoteCardsState.setText` clamping.
+
+### Docs
+Changelog (ADD line rewritten for Large-only ladder + dictation-everywhere;
+picker badge FIX line dropped the Full tier; REMOVE-style note for the Full
+models; the stale "mics are gone" FIX line rewritten), AGENTS.md v158 note,
+this file.
 
 ### Git state
-Committed only — user said hold the push (piles up with the pet designer
-rework commit d6bda78, also unpushed).
+Committed only — user still holds the push (pet designer rework d6bda78 and
+rim removal a8a381b are also unpushed). CI validates on push.
+
+## Earlier completed request — remove dark-mode hairline rims (floating nav bar + detail quick-fact box) — commit only, NO push
+
+- `CurioFloatingNavBar` (CurioBottomNav.kt): removed the v149 dark-mode
+  `BorderStroke(1.dp, White@10%)` capsule rim. `BorderStroke` import removed.
+- `QuickFactCard` (EntryDetailScreen.kt): removed the v115 dark-mode
+  `Modifier.border(1.dp, ink@18%)` plate rim. `foundation.border` import removed.
+- Same rim still exists on the tour dock, reveal Like/Dislike pill, pet
+  studio bar + floating action capsule (offered to the user).
 
 ## Earlier completed request — Pet Designer layout rework (compact nav, floating top actions, tear scrolls away) — commit only, NO push
 
-User: "the pet designer floating nav is stretched all the way fix that. and
-place the save undo redo save and share at the top and sticky, and make the
-tear design be on the background itself and it scrolls away when i scroll
-down, dont push this".
+User-confirmed: bottom nav = compact centered capsule; actions = floating
+pill pinned while scrolling; tear = banner becomes the first scrollable item.
 
-Confirmed via ask_user: bottom nav = compact centered capsule; actions =
-floating pill over the banner pinned while scrolling; tear = banner becomes
-the first scrollable item.
-
-### Changes (PetDesignerScreen.kt)
-1. `PetStudioBottomNav`: dropped `fillMaxWidth()` — a wrapping
-   `Box(fillMaxWidth, contentAlignment = Center)` holds a content-sized
-   capsule centered at the bottom (like the main nav bar).
-2. `EditorToolbar` (full-width stickyHeader strip below the hero) replaced
-   by `StudioFloatingToolbar`: ONE rounded capsule pinned `TopEnd` below
-   the status bar — compact Save text pill (dirty dot) + 38dp
-   Undo/Redo/Reset/Share/Import icon circles (`ToolbarIcon` gained a
-   `size` param). Toasts auto-clear (`LaunchedEffect(toast)` + delay(3000))
-   and render as a transient pill under the capsule.
-3. The torn banner moved OUT of the overlay graphicsLayer-translation Box
-   INTO the list as its first `item` — the tear is part of the page
-   background and scrolls away naturally. Removed: the overlay hero Box,
-   the stickyHeader, the `SettingsHeroTotalHeight` import/top padding.
-
-### Notes
-- No Gradle build here (CI validates on push). User said DO NOT push —
-  committed only.
-- Docs: changelog FIX line, AGENTS.md v156 note, Prompt.md.
+1. `PetStudioBottomNav`: dropped `fillMaxWidth()` — content-sized capsule
+   centered at the bottom.
+2. `EditorToolbar` → `StudioFloatingToolbar`: one rounded capsule pinned
+   TopEnd below the status bar (Save pill + dirty dot, Undo/Redo/Reset/
+   Share/Import circles; `ToolbarIcon` gained a `size` param). Toasts
+   auto-clear after 3s.
+3. Torn banner moved in-flow as the list's first item; overlay Box +
+   stickyHeader + `SettingsHeroTotalHeight` top padding gone.
 
 ## Earlier completed request — light-mode nav capsule tint + smoother pill animations
 
-User: "the active indicator gets the theme dynamic color but in light mode the
-background of it doesn't so make it get the background tint. and also the
-animations feels clanky sometimes make it even more smother".
-
-### Background tint (light mode)
-`curioFloatingNavContainer` lifted the page wash 55% toward the light theme's
-parchment `surfaceContainerHigh`, which erased the tint — the capsule read as a
-plain cream bar behind the colored active pill. Now `lerp(wash, surfaceContainerHigh, 0.30)`
-so the page tint shows through while still lifted above the page. Dark mode
-unchanged (pages are near-black; wash adds nothing). Affects the bottom nav,
-tour dock and pet studio bars (all share the container function).
-
-### Smoother animations (nav bar pills + reveal Like/Dislike segments)
-- Width spring damping 0.75 → 0.9 (near-critical — no settle bounce).
-- Active fill fades via `animateColorAsState(activeFill.copy(alpha = …))`
-  synced to the width spring instead of snapping on/off.
-- Icon tint crossfades (tween 200 FastOutSlowIn).
-- Label fade tween 160 → 240 FastOutSlowIn so it tracks the pill's expansion
-  (exit stays instant per v125).
-
-Docs: changelog FIX line, AGENTS.md v155 note, Prompt.md. Committed + pushed.
+- `curioFloatingNavContainer` light-mode lift 0.55 → 0.30 lerp so the page
+  tint shows through the capsule (dark unchanged).
+- Smoother pills (nav bar + reveal Like/Dislike): width spring damping 0.9,
+  active fill fades via animateColorAsState synced to the spring, icon tint
+  crossfades (200ms FastOutSlowIn), label fade 240ms FastOutSlowIn.
 
 ## Earlier completed request — reveal Like/Dislike pill matches the bigger 60dp nav-bar pill
 
-Follow-up to the morph revert: "Make the reveal Like/Dislike pill match the
-bigger 60dp nav-bar pill size."
-
-- `RevealSentimentIconWidth` 52→60dp, `RevealSentimentExpandedWidth` 96→128dp,
-  `RevealSentimentHeight` 48→60dp, segment icon 20→26dp; the pill's inner Row
-  now uses the nav bar's exact padding/spacing (7dp / 6dp). The reveal
-  sentiment segments are now identical in geometry to the nav bar pills.
-- Changelog FIX line updated. Committed + pushed.
+- `RevealSentimentIconWidth/ExpandedWidth/Height` 52/96/48 → 60/128/60dp,
+  segment icon 20 → 26dp, inner Row padding/spacing 7/6dp — identical to the
+  nav bar pills.
 
 ## Earlier completed request — revert the nav-bar → sentiment-pill shared morph, keep the bigger bottom pill
 
-User (GitHub commit `55ebc74` "feat: bigger bottom pill (60dp/128dp) + nav bar morphs into the reveal Like/Dislike pill via a shared element"): "revert this just keep the size large but revert the shared morph one".
-
-### What that commit (plus its CI-fix follow-up `05e1154`) changed
-1. **Bigger bottom pill** — `FloatingPillIconWidth/ExpandedWidth/Height` 52/112/52 → 60/128/60, icon 24→26. **→ KEEP.**
-2. **Shared-element morph** — `SentimentSharedElementKey` ("nav-pill-sentiment") + `NavPillBoundsTransform` (320ms tween); the nav bar moved INSIDE the SharedTransitionLayout and stays composed 500ms after the reveal opens (`sentimentMorphVisible` LaunchedEffect) as the caller-managed source (`sharedElementWithCallerManagedVisibility`, pills non-interactive via `interactive = showBottomBar`); the reveal's `RevealSentimentPill` is the route-scoped target (`sharedElement` via a new `modifier` param). **→ REVERT.**
-
-### Revert plan (done)
-- **RevealSharedScopes.kt**: deleted `SentimentSharedElementKey` + `NavPillBoundsTransform`.
-- **CurioBottomNav.kt**: `CurioFloatingNavBar` back to `(navController, modifier)`; `FloatingNavPill` back to plain `clickable(onClick)`; dropped the `SharedTransitionScope` / `LocalRevealSharedScope` / `NavPillBoundsTransform` imports and the `sharedModifier` block; **kept 60/128/60 + 26dp**.
-- **CurioNavHost.kt**: dropped `sentimentMorphVisible` + `sentimentSharedState` and the `SentimentSharedElementKey` import; the bar renders with the plain pre-morph block (`if (!wide && showBottomBar && TourController.currentStep == null) { CurioFloatingNavBar(...) }`) back outside the SharedTransitionLayout.
-- **TopicRevealScreen.kt**: dropped the morph state + `sharedElement` modifier at the sentiment pill call; `RevealSentimentPill` lost its `modifier` param; dropped the two imports.
-- **Docs**: app/AGENTS.md — new v153 note (morph reverted, size kept), v151/v152 entries rewritten to match; changelog FIX line now only mentions the bigger pill.
-
-### Verification
-`git diff` of the four code files against the pre-morph parent shows ONLY the size change (60/128/60 + 26dp icon) — the morph is fully gone, braces/structure restored. No Gradle build in this environment (CI validates on push).
-
-### Git state
-Real code change → commit + push. The earlier docs-only commit (workflow rules) is still unpushed and rides along with this push per the docs-commit rule.
+Commit `55ebc74` added bigger pills (60/128/60 + 26dp) + a shared-element
+morph (SentimentSharedElementKey / NavPillBoundsTransform). Reverted the
+morph, kept the size. Code files match the pre-morph parent except size;
+docs updated (AGENTS.md v153, changelog FIX line).
 
 ## Earlier completed request — workflow/instruction changes (commit only, no push)
 
-User asked for three durable rules added to the root AGENTS.md, committed but NOT pushed ("dont push this just commit"):
-
-1. **git pull first** — General Workflow now starts at step 0: run `git pull` before the first work of any session.
-2. **Ask before deleting/replacing anything** — the durable preference in "ASK WHEN UNSURE" now explicitly covers deleting/replacing/overwriting ANY file, data entry, or content (topic JSON entries, strings, assets, docs).
-3. **Text/docs changes commit but never push alone** — the old "SMALL TEXT-ONLY CHANGES — DO NOT PUSH" section became "TEXT-ONLY / DOCS CHANGES — COMMIT, BUT PUSH ONLY WITH THE NEXT REAL CHANGE".
-
-Committed locally per the user's explicit instruction; rides along with the next real change (this revert).
+Added to root AGENTS.md: git pull first, ask before deleting/replacing
+anything, text/docs changes commit but push only with the next real change.

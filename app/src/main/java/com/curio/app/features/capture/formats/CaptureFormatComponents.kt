@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CaptureData
 import com.curio.app.data.JournalMood
 import com.curio.app.data.NotePaperColor
@@ -888,6 +889,9 @@ fun QuoteCardEditor(
     showColorTool: Boolean = true,
     showRemove: Boolean = true
 ) {
+    // v158 — the dictation mic shows only while the Voice-to-text settings
+    // toggle is on (same experiment gate as the note boxes).
+    val voiceToTextEnabled = AppPreferences.voiceToTextEnabledState
     // The tilt SAVED with this card — generated at creation, never re-rolled
     // by recomposition, typing, or section switches.
     val rotation = state.tilts.getOrElse(index) { randomQuoteTilt() }
@@ -962,7 +966,23 @@ fun QuoteCardEditor(
             // v7.19 — the color swatch picker is gated inside
             // [RichTextEditor] by [showColorTool] (the mood board hides it).
             showColorTool = showColorTool,
-            paperContentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+            paperContentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+            // v158 — the dictation mic rides the quote card's tool dock too
+            // (same shared [DictationMic] flow as every note box); Insert
+            // appends the transcript to this card (spans preserved via
+            // [QuoteCardsState.setText]'s clamping).
+            trailingAction = {
+                DictationMic(
+                    enabled = enabled,
+                    visible = voiceToTextEnabled,
+                    accent = accent,
+                    onInsert = { text ->
+                        val existing = state.quotes.getOrElse(index) { "" }
+                        val merged = if (existing.isBlank()) text else "$existing\n$text"
+                        state.setText(index, merged, state.spans.getOrElse(index) { emptyList() })
+                    }
+                )
+            }
         )
     }
 }

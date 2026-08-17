@@ -68,6 +68,9 @@ fun MarginaliaFormat(
     onDataChanged: (CaptureData?) -> Unit = {},
     initialData: CaptureData.Marginalia? = null
 ) {
+    // v158 — the dictation mic shows only while the Voice-to-text settings
+    // toggle is on (same experiment gate as the sound bite note box).
+    val voiceToTextEnabled = AppPreferences.voiceToTextEnabledState
     // Edit mode: restore journal text + spans + quote cards so re-saving
     // preserves the original capture instead of silently wiping it.
     // Legacy entries lack the span fields (Gson → null), guard with orEmpty().
@@ -235,7 +238,18 @@ fun MarginaliaFormat(
                 onPaperStyleChange = { journalStyle = it },
                 paperColor = journalColor,
                 onPaperColorChange = { journalColor = it },
-                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
+                paperContentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+                // v158 — dictation rides the journal's own tool dock.
+                trailingAction = {
+                    DictationMic(
+                        enabled = true,
+                        visible = voiceToTextEnabled,
+                        accent = MaterialTheme.colorScheme.tertiary,
+                        onInsert = { text ->
+                            journalText = if (journalText.isBlank()) text else "$journalText\n$text"
+                        }
+                    )
+                }
             )
         }
 
