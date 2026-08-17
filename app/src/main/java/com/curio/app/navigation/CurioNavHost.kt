@@ -34,10 +34,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -45,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,6 +81,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
 import com.curio.app.features.support.PromoModeScreen
@@ -103,6 +108,7 @@ import com.curio.app.features.petdesigner.PetDesignerScreen
 import com.curio.app.features.picker.CategoryPickerScreen
 import com.curio.app.features.reveal.TopicRevealScreen
 import com.curio.app.features.spin.SpinScreen
+import com.curio.app.features.home.HomeDrawerContent
 import com.curio.app.features.home.HomeScreen
 import com.curio.app.features.splash.SplashScreen
 import com.curio.app.features.fieldmind.FieldMindObservationScreen
@@ -237,6 +243,21 @@ fun CurioNavHost(
     val routePrefix = remember(currentRoute) {
         currentRoute?.substringBefore("/")
     }
+    // v147 — the Home drawer lives HERE at the NavHost root so it renders
+    // ABOVE the floating pill bar (which stays composed underneath — no
+    // more hide-and-reappear). Home's hamburger requests it via
+    // [CurioDrawerState.requestOpen]; this owns the real DrawerState and
+    // keeps [CurioDrawerState.isOpen] in sync for anything reading it.
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerScope = rememberCoroutineScope()
+    LaunchedEffect(CurioDrawerState.openRequest) {
+        if (CurioDrawerState.openRequest > 0) {
+            drawerScope.launch { drawerState.open() }
+        }
+    }
+    LaunchedEffect(drawerState.isOpen) {
+        CurioDrawerState.publishOpen(drawerState.isOpen)
+    }
     // ── Adaptive window layout (tablet & landscape) ────────────────────
     // Medium/Expanded windows (>= 600dp wide) move the three tabs into a
     // left-edge NavigationRail and center page content in a comfortable
@@ -366,6 +387,22 @@ fun CurioNavHost(
     // showed through the NavHost page transitions (the "dim flash" mid-fade
     // on every page switch). The pages paint their own full-bleed
     // backgrounds, so this only ever shows during transitions + gutters.
+    // v147 — the drawer wraps the WHOLE NavHost root (page + rail + the
+    // floating pill bar + the tour dock): it draws ABOVE the nav bar, which
+    // stays composed underneath, so opening the drawer slides the sheet and
+    // scrim over the bar instead of making it vanish and pop back.
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            HomeDrawerContent(
+                onNavigate = { route ->
+                    drawerScope.launch { drawerState.close() }
+                    navController.navigate(route) { launchSingleTop = true }
+                }
+            )
+        },
+        gesturesEnabled = drawerState.isOpen || drawerState.isAnimationRunning
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -777,14 +814,13 @@ fun CurioNavHost(
         // the bottom center, so no painted slot / strip sits behind it. It
         // draws over the page's own full-bleed background; the tab pages
         // clear it themselves (see Home / Spin / Cabinet bottom padding).
-        // v135 — the bar YIELDS while the Home drawer is open: the drawer
-        // covers the whole screen and must sit above the navbar (HomeScreen
-        // publishes its open state via [CurioDrawerState]).
-        // v144 — the bar also YIELDS while the tour is running: the tour's
-        // floating pill dock now floats at the same bottom-center spot, and
-        // the old opaque dock covered the bar anyway, so the bar must not
-        // show behind/around the tour pill on tab stops.
-        if (!wide && showBottomBar && !CurioDrawerState.isOpen && TourController.currentStep == null) {
+        // v147 — the drawer now lives at the NavHost root and draws OVER
+        // this bar (which stays composed underneath) — no more yielding.
+        // v144 — the bar YIELDS while the tour is running: the tour's
+        // floating pill dock floats at the same bottom-center spot, and the
+        // old opaque dock covered the bar anyway, so the bar must not show
+        // behind/around the tour pill on tab stops.
+        if (!wide && showBottomBar && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
                 modifier = Modifier.align(Alignment.BottomCenter)
@@ -885,6 +921,7 @@ fun CurioNavHost(
         }
     }
     }
+    } // v147 — ModalNavigationDrawer close (the drawer floats above the bar)
     // ── Pet-led Tour offer and controls ─────────────────────────────────
     // The offer is intentionally rendered on Home after onboarding; the Tour
     // itself has no scrim and leaves every demonstrated control tappable.

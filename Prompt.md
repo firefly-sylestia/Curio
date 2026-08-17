@@ -47,18 +47,49 @@ quote cards at their true size and spot; (3) open the expanded saved board — s
 board on a board with images + quotes — confirm text mentions both, all wiped;
 (6) empty full-screen board — Quote chip at bottom; add an image — chip moves up.
 
-## Current request — v146: reveal year pill → top bar
+## Current request — v147: drawer floats ABOVE the nav bar (bar stays composed)
 
-The user: "don't place the year pill in reveal hero top corner — it's already covered
-by progress pill, place it above alongside category at the top but to the left corner."
-The v141 hero top-left pill ROW (byline + year) collided with the progress badge at
-the hero's TOP-RIGHT on long-byline topics. Fixed in TopicRevealScreen.kt:
-- Top bar: the category chip's `weight(1f, fill=false)` now wraps a Row holding the
-  chip + the year pill (frosted `categorySurface`, Schedule glyph, `categoryInk()`),
-  so "1851" sits next to the category at the top-left.
-- Hero: top-left row reduced to the byline pill ONLY (the morph element shared with
-  the Spin ticket); the year pill block is gone from the hero.
-Title comment updated (year no longer "in the top-corner pill"). Ticket unchanged.
+The user: "why the navbar disappears in drawer, i meant you to place the drawer above
+it not disappear the nav bar itself and reappear." v135 had hidden the floating pill
+bar while the drawer was open (`!CurioDrawerState.isOpen` gate in CurioNavHost) — the
+bar visibly vanished at drawer-open and popped back at close, which read as a glitch.
+The intent was the drawer sliding OVER the bar, bar composed underneath.
+
+### Root cause
+`ModalNavigationDrawer` lived inside HomeScreen (a NavHost route); the floating bar
+is drawn AFTER the NavHost content in the root Box, so it painted OVER the drawer.
+zIndex can't escape the parent Box — the drawer had to be HOISTED above the bar.
+
+### Changes (commit —)
+- CurioNavHost.kt: owns `rememberDrawerState` + `rememberCoroutineScope`; a
+  `LaunchedEffect(CurioDrawerState.openRequest)` opens it and a second effect
+  publishes `drawerState.isOpen` back to `CurioDrawerState`. The root Box (page +
+  rail + floating bar + tour dock) is now wrapped in `ModalNavigationDrawer` with
+  `HomeDrawerContent` as its sheet; the bar's visibility `if` dropped the
+  `!CurioDrawerState.isOpen` gate (keeps only the tour gate).
+- HomeScreen.kt: drawer state/effects/wrapper removed — the page keeps a plain
+  `Box(fillMaxSize())` in the drawer's old slot (no re-indent); the hamburger calls
+  `CurioDrawerState.requestOpen()`; `HomeDrawerContent` is now `internal`;
+  dead imports dropped (DrawerValue, ModalNavigationDrawer, rememberDrawerState,
+  DisposableEffect, rememberCoroutineScope).
+- CurioBottomNav.kt: `CurioDrawerState` gains `requestOpen()` (increments a private
+  `openTick` exposed as `openRequest`) — doc updated to v147 behavior.
+
+### Verification
+Brace/paren balance checked for both files; no Gradle build here (CI validates on
+push). On-device: (1) open the drawer from Home — the bar stays composed and the sheet
++ scrim slide over it (no vanish/pop on close); (2) drawer navigation still closes the
+sheet then routes; (3) tour pill still floats (bar hides only during the tour).
+
+## Earlier completed request (v146)
+Reveal year pill → top bar: "don't place the year pill in reveal hero top corner —
+it's already covered by progress pill, place it above alongside category at the top
+but to the left corner." The v141 hero top-left pill ROW (byline + year) collided
+with the progress badge at the hero's TOP-RIGHT on long-byline topics. Fixed in
+TopicRevealScreen.kt: the category chip's `weight(1f, fill=false)` now wraps a Row
+holding the chip + the year pill (frosted `categorySurface`, Schedule glyph,
+`categoryInk()`) so "1851" sits next to the category at the top-left; the hero's
+top-left row is reduced to the byline pill ONLY (the morph element).
 
 ### Earlier completed request (v144)
 Tour Skip/Next dock → floating pill bar (rounded-50 surfaceContainerHigh capsule,

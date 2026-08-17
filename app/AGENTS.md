@@ -919,6 +919,24 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v147 — the Home drawer is HOISTED to the NavHost root so it draws
+  ABOVE the floating pill bar, which stays composed underneath.** v135 had
+  "hidden" the bar while the drawer was up (NavHost dropped it from
+  composition via `!CurioDrawerState.isOpen`) — the user's intent was
+  "place the drawer above it", not "disappear the bar and reappear it":
+  the bar visibly vanished at drawer-open and popped back at close. The
+  fix moves `ModalNavigationDrawer` OUT of HomeScreen to wrap the whole
+  NavHost root Box (page + rail + bar + tour dock); the bar's `if` keeps
+  only the tour gate. HomeScreen's hamburger now raises a request via
+  `CurioDrawerState.requestOpen()` (an incremented `openTick`, observed by
+  a NavHost `LaunchedEffect` that opens its own `rememberDrawerState`)
+  instead of touching a local DrawerState; `HomeDrawerContent` became
+  `internal` so the NavHost can render it; Home's page kept its wrapper as
+  a plain `Box(fillMaxSize())` (the drawer's old content slot) so no
+  re-indent was needed. LESSON: a modal overlay that must cover a
+  sibling overlay drawn later in the Box needs to be hoisted ABOVE that
+  sibling in the tree — zIndex cannot escape the parent Box — and "hide
+  the thing under it" reads as a glitchy vanish/reappear.
 - **v146 — reveal year pill moves out of the hero into the top bar.**
   The v141 hero top-left pill ROW (byline + year) collided with the
   progress badge on the hero's TOP-RIGHT: a long byline ("Director ·

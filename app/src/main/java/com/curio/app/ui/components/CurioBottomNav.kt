@@ -91,13 +91,30 @@ object CurioNavTint {
  * hide the floating pill bar while the drawer is open: the drawer must sit
  * ABOVE the nav bar (it covers the whole screen), so the bar yields while
  * the drawer is up and returns when it closes.
+ * v147 — the drawer now lives AT THE NAVHOST ROOT, drawn ABOVE the floating
+ * pill bar while the bar stays composed underneath (no more hide-and-
+ * reappear): Home's hamburger calls [requestOpen], the NavHost owns the
+ * actual DrawerState and observes the request, and [isOpen] tracks the real
+ * open state (published by the NavHost).
  */
 object CurioDrawerState {
     var isOpen by mutableStateOf(false)
         private set
 
+    // Bumped on every open request so the NavHost's LaunchedEffect re-fires
+    // even when a second request arrives while the drawer is already open.
+    private var openTick by mutableStateOf(0)
+
+    /** Read by the NavHost: changes whenever Home requests the drawer open. */
+    val openRequest: Int
+        get() = openTick
+
     fun publishOpen(open: Boolean) {
         isOpen = open
+    }
+
+    fun requestOpen() {
+        openTick++
     }
 }
 

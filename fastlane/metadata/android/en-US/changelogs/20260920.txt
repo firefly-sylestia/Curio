@@ -28,6 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Drawer: the menu drawer now truly floats ABOVE the bottom nav bar — it slides its sheet and scrim over the bar, which stays composed underneath (the bar no longer disappears and pops back when the drawer opens and closes).
 - Topic Reveal: the year pill ("1851") no longer sits in the hero's top corner where the progress badge covered it on long-byline topics — it now rides next to the category chip in the top bar, and the hero keeps just the byline pill for a clean morph.
 - Mood board (full-screen): quote cards are now fully independent from the small board — rearranging or resizing a card in the full-screen editor never changes the small board's cards (and vice versa), so each view keeps its own arrangement.
 - Mood board: resizing a quote card now scales the whole note (height follows width at the paper aspect) instead of just stretching it wider, with a size limit — a card can't balloon past 60% of the board.

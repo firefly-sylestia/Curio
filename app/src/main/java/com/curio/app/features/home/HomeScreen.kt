@@ -41,18 +41,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -60,7 +56,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -193,9 +188,11 @@ import java.util.Calendar
  *      card suggesting the user try a daily shuffle reminder, navigating to
  *      Settings.
  *
- *  The screen still hosts the `ModalNavigationDrawer` for secondary
- *  navigation (Quests, History, Manage Categories, Browse Topics, Support)
- *  — v7.89: the drawer wears the torn-rose hero family.
+ *  v147 — the drawer itself now lives at the NavHost root (drawn ABOVE the
+ *  floating pill bar, which stays composed underneath): Home's hamburger
+ *  raises the request via [CurioDrawerState.requestOpen]. The drawer still
+ *  wears the torn-rose hero family (v7.89) for secondary navigation
+ *  (Quests, History, Manage Categories, Browse Topics, Support).
  */
 /** The quest hero's solid body height — the torn banner. Tall enough for
  *  the greeting + the Streak · Cabinet · Recent bar (pinned just above the
@@ -295,8 +292,6 @@ fun HomeScreen(navController: NavController) {
             }
         }
     } else null
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
     val recentEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
         try {
             value = CurioRepositoryHolder.repo.getAll().take(5)
@@ -334,28 +329,13 @@ fun HomeScreen(navController: NavController) {
 
     val navInsets = WindowInsets.navigationBars.asPaddingValues()
 
-    // v135 — the drawer covers the whole screen INCLUDING the floating pill
-    // bar: publish its open state so the NavHost hides the bar while the
-    // drawer is up (the drawer must sit ABOVE the navbar).
-    LaunchedEffect(drawerState.isOpen) {
-        CurioDrawerState.publishOpen(drawerState.isOpen)
-    }
-    DisposableEffect(Unit) {
-        onDispose { CurioDrawerState.publishOpen(false) }
-    }
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            HomeDrawerContent(
-                onNavigate = { route ->
-                    scope.launch { drawerState.close() }
-                    navController.navigate(route) { launchSingleTop = true }
-                }
-            )
-        },
-        gesturesEnabled = drawerState.isOpen || drawerState.isAnimationRunning
-    ) {
+    // v147 — the Home drawer now lives at the NavHost root (CurioNavHost):
+    // it renders ABOVE the floating pill bar while the bar stays composed
+    // underneath — no more hide-and-reappear. Home's hamburger requests it
+    // via [CurioDrawerState.requestOpen]; the NavHost owns the DrawerState.
+    // This plain Box is the page's own wrapper (the drawer's old content
+    // slot), so the page paints full-bleed exactly as before.
+    Box(modifier = Modifier.fillMaxSize()) {
         // v6.7 — Home sits on the plain theme background (the category tint
         // wash was removed from Home); v27u — the "Home tint" experiment can
         // restore a category-tinted background.
@@ -1166,7 +1146,11 @@ fun HomeScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TopBarPill(
-                    onClick = { scope.launch { drawerState.open() } },
+                    // v147 — the drawer lives at the NavHost root now: the
+                    // hamburger just raises the request and the NavHost
+                    // opens its DrawerState (the bar stays composed beneath
+                    // the drawer instead of hiding).
+                    onClick = { CurioDrawerState.requestOpen() },
                     glyph = CurioIcons.Menu,
                     contentDescription = "Open menu",
                     shape = RoundedCornerShape(50),
@@ -1875,8 +1859,11 @@ private val HomeDrawerHeroHeight = 186.dp
 private val HomeDrawerSheetExtent = 22.dp
 private const val HOME_DRAWER_TEAR_SEED = 0xD2A7E
 
+// v147 — the drawer now renders from the NavHost root (above the floating
+// pill bar), so its content is called from CurioNavHost: internal instead
+// of private. Its row helpers below stay private.
 @Composable
-private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
+internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     val context = LocalContext.current
     val displayName = AppPreferences.getDisplayName(context)
     val heroFill = homeRoseAccent()
