@@ -426,6 +426,12 @@ private fun NoteField(
         maxLines = 2,
         modifier = Modifier
             .fillMaxWidth()
+            // The overlay window is WRAP_CONTENT, so fillMaxWidth resolves to
+            // the field's natural (text) width instead of the bubble's width —
+            // an empty note field would collapse to a sliver. Pin a minimum so
+            // the field always reads as a real input box with room for its
+            // text, matching the expanded panel's topic width.
+            .widthIn(min = EXPANDED_TOPIC_WIDTH)
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (pastel) accent.copy(alpha = 0.14f)
@@ -434,15 +440,17 @@ private fun NoteField(
             .onFocusChanged { onFocusChange(it.isFocused) }
             .padding(horizontal = 10.dp, vertical = 8.dp)
     ) { inner ->
-        if (note.isEmpty()) {
-            Text(
-                text = "Session note…",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (pastel) ink.copy(alpha = 0.55f)
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        Box {
+            if (note.isEmpty()) {
+                Text(
+                    text = "Session note…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (pastel) ink.copy(alpha = 0.55f)
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            inner()
         }
-        inner()
     }
 }
 
