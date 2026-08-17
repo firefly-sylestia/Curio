@@ -12,6 +12,7 @@ import org.vosk.Model
 import org.vosk.Recognizer
 import java.io.ByteArrayOutputStream
 import java.io.File
+import kotlin.math.roundToInt
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.ByteBuffer
@@ -361,8 +362,11 @@ object OfflineTranscriber {
             val i0 = pos.toInt()
             val frac = (pos - i0).toFloat()
             val s0 = mono[i0].toInt()
-            val s1 = mono.getOrElse(i0 + 1) { s0 }.toInt()
-            out[i] = (s0 + ((s1 - s0) * frac)).toShort()
+            // v126 — getOrElse's lambda must return Short (ShortArray), so
+            // the default closes over the raw Short, not the converted Int.
+            val s1 = mono.getOrElse(i0 + 1) { mono[i0] }.toInt()
+            // v126 — Float.toShort() is deprecated: round through Int.
+            out[i] = (s0 + ((s1 - s0) * frac)).roundToInt().toShort()
         }
         return out
     }

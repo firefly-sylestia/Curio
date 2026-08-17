@@ -268,17 +268,6 @@ fun SoundBiteFormat(
         transcribeError = null
     }
 
-    fun onFloatMicTap() {
-        if (!voiceToTextEnabled || dictationOpen) return
-        if (hasMicrophonePermission()) {
-            dictationOpen = true
-            startDictation()
-        } else {
-            dictationRequested = true
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
-    }
-
     // Runtime permission launcher — shared by recording AND dictation.
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -452,6 +441,20 @@ fun SoundBiteFormat(
     fun hasMicrophonePermission(): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
+
+    // v126 — moved AFTER the launcher + permission check it uses: local
+    // functions/vals can't be forward-referenced in Kotlin (this compiled in
+    // the editor but failed CI compileDebugKotlin).
+    fun onFloatMicTap() {
+        if (!voiceToTextEnabled || dictationOpen) return
+        if (hasMicrophonePermission()) {
+            dictationOpen = true
+            startDictation()
+        } else {
+            dictationRequested = true
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
