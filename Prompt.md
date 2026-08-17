@@ -41,3 +41,13 @@ open a year-qualified topic (Moby-Dick) from the deck (byline + year pill top-le
 both, action pill bottom); open the Pet Designer (floating pill bar + fade open); open
 Manage Categories from the Spin picker (full-bleed bottom); fresh install → Home "Pick a
 lane" opens the Spin sheet.
+
+### CI fix — v143
+compileDebug/Release failed on OfflineTranscriber.kt with a CASCADE from two real bugs:
+(1) `val states = _states` was declared BEFORE `private val _states = ...` (property
+initializers run in declaration order → "Variable '_states' must be initialized");
+(2) `VoskModelDownloads` (a separate top-level object) referenced `Info` / `modelsDir`
+unqualified — they're nested in `VoskModels`, so `start`/`downloadWithPause` now take
+`VoskModels.Info` and extraction uses `VoskModels.modelsDir`. Also replaced
+`zipFile.outputStream(received > 0)` with an explicit `FileOutputStream(zipFile, append)`
+(the kotlin.io Boolean overload resolution was ambiguous in CI).

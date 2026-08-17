@@ -22,6 +22,7 @@ import org.vosk.Model
 import org.vosk.Recognizer
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.roundToInt
 import java.net.HttpURLConnection
 import java.net.URL
@@ -220,9 +221,13 @@ object VoskModelDownloads {
         val error: String? = null
     )
 
+    // v143 — `_states` must be declared BEFORE `states` (property
+    // initializers run in declaration order — referencing a later property
+    // fails with "Variable '_states' must be initialized").
+    private val _states = MutableStateFlow<Map<String, State>>(emptyMap())
+
     /** Per-model download state, keyed by model id. */
     val states: StateFlow<Map<String, State>> = _states
-    private val _states = MutableStateFlow<Map<String, State>>(emptyMap())
 
     // App-lifetime scope — surviving the picker dialog is the whole point.
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -236,7 +241,7 @@ object VoskModelDownloads {
     private class PauseRequested : Exception()
 
     /** Starts (or retries) a download. No-op while one is already active. */
-    fun start(context: Context, info: Info) {
+    fun start(context: Context, info: VoskModels.Info) {
         val existing = jobs[info.id]
         if (existing != null && existing.isActive) return
         val job = scope.launch {
@@ -292,7 +297,7 @@ object VoskModelDownloads {
      * `filesDir/vosk-models/<id>/` (the zip's single root folder stripped).
      * Returns true only on a complete, verified extract.
      */
-    private suspend fun downloadWithPause(context: Context, info: Info): Boolean =
+    private suspend fun downloadWithPause(context: Context, info: VoskModels.Info): Boolean =
         withContext(Dispatchers.IO) {
             val zipFile = File(context.cacheDir, "${info.id}.zip")
             try {
@@ -326,7 +331,10 @@ object VoskModelDownloads {
                             else -> return@withContext false
                         }
                         connections[info.id] = conn
-                        zipFile.outputStream(received > 0).use { out ->
+                        // v143 — explicit FileOutputStream(append): the
+                        // kotlin.io outputStream(Boolean) overload resolution
+                        // was ambiguous in CI.
+                        FileOutputStream(zipFile, received > 0).use { out ->
                             conn.inputStream.use { input ->
                                 val buf = ByteArray(64 * 1024)
                                 while (true) {
@@ -352,7 +360,7 @@ object VoskModelDownloads {
                     }
                 }
                 // ── Extract ─────────────────────────────────────────────
-                val dest = File(modelsDir(context), info.id)
+                val dest = File(VoskModels.modelsDir(context), info.id)
                 dest.deleteRecursively()
                 dest.mkdirs()
                 var extracted = 0
