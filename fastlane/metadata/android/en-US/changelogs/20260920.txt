@@ -51,6 +51,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Build: the layout-sweep branch compiles again — restored the `Random` import the deck pick needs (the removed drawer constellation wasn't its only caller) and dropped a stray orphan `@Composable` left by the constellation refactor.
 - Drawer: the footer planet art is slimmer (150dp vs 210dp) so it reads as a small bottom band instead of a big block.
 - Spin: the Filter button only shows its count when filters are actually selected — the badge used the always-non-zero matching-topics number, so it read "Filter · N" permanently even with nothing ticked.
 - Drawer: opening it no longer crashes on devices with 29 lanes — the constellation web's link guards now respect the actual node count (the last row of a non-rectangular grid was indexing past the end).

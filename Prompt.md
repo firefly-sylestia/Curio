@@ -1,8 +1,23 @@
 # Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: v187 layout M3 audit on branch m3-layout-sweep — see below
+## Status: m3-layout-sweep CI FIXED + audit refined — committed + pushed
 
-## v187 (latest) — full-layout M3 audit (branch `m3-layout-sweep`)
+## m3-layout-sweep (latest) — user: "go back to m3 layout branch and fix
+this [CI] and suggest follow ups for remaining material things do an audit
+after fix and push".
+- Fixed the two CI compile errors on this branch (same ones fixed on Alpha
+  earlier): re-added `kotlin.random.Random` to HomeScreen (deck pick still
+  uses it) and dropped the orphan `@Composable` in StatsScreen (deletion
+  splice left two stacked annotations → not repeatable).
+- Audit refreshed: features layer still has 403 `RoundedCornerShape(`,
+  496 `.padding(`, 469 fixed sizes, 2463 `N.dp` refs; shared chrome is
+  converted (16 `curioCorner(` sites); `CurioSpacing` tokens DEFINED but
+  0 call sites. Worst corner files: PetDesignerScreen (77),
+  EntryDetailScreen (48), HomeScreen (31), SpinScreen (29), Promo (27),
+  Quests (24), Reveal (22), Profile (17). Sweep order: (1) curioSpacing
+  page paddings, (2) curioCorner card/dialog shapes, (3) micro audit.
+
+## v187 (earlier) — full-layout M3 audit (branch `m3-layout-sweep`)
 - Created the branch (from Alpha), added it to `.github/workflows/android.yml`
   triggers, pushed → CI builds it (280028b).
 - AUDIT: ~1900 hardcoded layout values in app/src/main/java — 484

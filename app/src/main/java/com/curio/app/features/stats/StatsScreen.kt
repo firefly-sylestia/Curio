@@ -453,7 +453,6 @@ private fun StatsSummaryChip(value: String, label: String, tint: Color) {
  *  arc-positioned into two hemisphere lobes (deterministic jitter per lane),
  *  sized by saved count, glowing when active this week. Tap a star to select
  *  it (tap empty space to clear). */
-@Composable
 /** v174c — the lifetime totals grid: spins, explores, saves, quotes, pins,
  *  likes, dislikes and daily quests, in compact paper panes. */
 @Composable

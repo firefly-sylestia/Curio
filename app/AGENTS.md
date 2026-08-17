@@ -1674,6 +1674,24 @@ app/src/main/java/com/curio/app/
     CurioProgressPill (dialog 28→extraLarge, field 10→small, value
     surface 12→medium), PaperCard stat box (10→small). Pills (50dp) stay
     — they're brand chrome.
+  - CI FIX (same two errors that hit Alpha): `HomeScreen` re-added
+    `import kotlin.random.Random` (still used by the deck pick's
+    shuffle-visible-lanes logic — the deleted drawer constellation was
+    not its only caller), and `StatsScreen` dropped the stray orphan
+    `@Composable` left above `LifetimeTotalsCard`'s doc comment by the
+    constellation-deletion splice (stacked annotations = not repeatable).
+  - REMAINING (post-sweep audit, `app/src/main/java/com/curio/app/features`):
+    **403 `RoundedCornerShape(`**, **496 `.padding(`**, **469 fixed
+    sizes**, **2463 `N.dp` refs** still hardcoded per-screen — the shared
+    chrome is converted (16 `curioCorner(` call sites), but the
+    per-screen layer is untouched. `CurioSpacing` tokens are DEFINED but
+    have **0 call sites** (the token re-tune pass is the next sweep).
+    Worst corner offenders: PetDesignerScreen (77), EntryDetailScreen
+    (48), HomeScreen (31), SpinScreen (29), PromoModeScreen (27),
+    QuestsScreen (24), TopicRevealScreen (22), ProfileScreen (17). The
+    sweep order of operations: (1) `curioSpacing` the big page paddings,
+    (2) `curioCorner` the card/dialog shapes, (3) only then audit
+    remaining micro-values for genuine M3 deltas.
   - NOT swept (documented remainder): per-screen hardcoded paddings /
     radii across the 60+ feature files — the token helpers exist and the
     pattern is established; the sweep continues incrementally. Dialogs
