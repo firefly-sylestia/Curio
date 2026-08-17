@@ -1482,22 +1482,23 @@
   }
  },
  {
-  "id": "geology-sedimentary-basins",
+  "id": "geology-basins",
   "categoryId": "GEOLOGY",
-  "subtype": "Sedimentary Rocks",
+  "subtype": "Hills & Basins",
   "name": "Sedimentary Basins",
-  "teaser": "Sedimentary basins are low areas where sediment accumulates for millions of years: they form where the crust subsides — rift valleys, continental margins, and foreland basins in front of mountains. Thick basin fills can exceed ten kilometers, recording long environmental histories and hosting aquifers, oil, and coal. Basins are the great archives of Earth's surface, and they're where most economic deposits live.",
+  "teaser": "Sedimentary basins are broad, sinking regions of the crust that trap sediment over tens of millions of years. Rivers, wind, and seas pour material into them, and each layer buries the one before, compressing sand into sandstone and mud into shale. Because they collect thick organic-rich sediment, basins are where most of the world's oil, gas, coal, and groundwater hide — and where geologists read Earth's history page by page.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
-   "sediment",
-   "landforms"
+   "hills",
+   "landforms",
+   "sediment"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet the basins",
+   "targetName": "Meet basins",
    "durationMinutes": 8,
-   "instruction": "Discover how basins form and fill over time, then explain why they hold resources."
+   "instruction": "Discover how basins form and fill, then explain why they preserve fossils and oil."
   }
  },
  {
@@ -2147,22 +2148,23 @@
   }
  },
  {
-  "id": "geology-rift-valleys",
+  "id": "geology-rift-valley-canyons",
   "categoryId": "GEOLOGY",
-  "subtype": "Plate Tectonics",
+  "subtype": "Canyons & Valleys",
   "name": "Rift Valleys",
-  "teaser": "Rift valleys form where continental crust pulls apart: the crust stretches, cracks into faults, and the block between drops — the East African Rift and the Basin and Range are examples. Rifts fill with sediment and lakes, and volcanoes line the fault margins. If rifting continues, the continent splits and an ocean forms. A rift valley is a continent in the middle of divorcing.",
+  "teaser": "Rift valleys form where the crust pulls apart and the ground between parallel faults drops down — a process taking millions of years. The East African Rift is splitting Africa, creating a chain of valleys holding deep lakes like Tanganyika and Malawi. Over time a rift can widen into an ocean basin; the Red Sea is a young rift already flooded with seawater. Rift valleys are Earth's clearest windows into continental breakup.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
-   "tectonics",
-   "landforms"
+   "canyons",
+   "landforms",
+   "tectonics"
   ],
   "exploreAction": {
    "verb": "Explore",
    "targetName": "Meet rift valleys",
    "durationMinutes": 8,
-   "instruction": "Learn how rifts form and widen, then explain what the East African Rift is."
+   "instruction": "Discover how rifting creates wide valleys, then explain what the East African Rift is."
   }
  },
  {
@@ -4655,14 +4657,16 @@
   }
  },
  {
-  "id": "geology-oxbow-lakes",
+  "id": "geology-oxbow-formation",
   "categoryId": "GEOLOGY",
-  "subtype": "Rivers",
+  "subtype": "Lakes & Wetlands",
   "name": "Oxbow Lakes",
-  "teaser": "Oxbow lakes form when a river meander cuts itself off: the river erodes through the narrow neck of a bend, abandons the loop, and the old channel becomes a crescent-shaped lake. Over time, sediment fills it in and it becomes a marshy scar. Oxbow lakes dot floodplains worldwide — the Mississippi's valley is full of them. They're frozen snapshots of a river's former path.",
+  "teaser": "An oxbow lake is a river's abandoned bend: as a meandering river migrates across its floodplain, the neck of a loop narrows until a flood cuts through it, straightening the channel. The old loop becomes a crescent-shaped lake, slowly filling with sediment until it becomes a marsh and then dry ground. Oxbow lakes are living proof that rivers constantly shift and leave their old curves behind.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "lakes",
+   "formation",
    "rivers",
    "landforms"
   ],
@@ -4670,7 +4674,7 @@
    "verb": "Explore",
    "targetName": "Meet oxbow lakes",
    "durationMinutes": 8,
-   "instruction": "Learn how meanders cut off to form oxbows, then explain what happens next."
+   "instruction": "Discover how meander cutoffs make oxbows, then explain how they fill with time."
   }
  },
  {
@@ -5671,7 +5675,9 @@
   "tier": 1,
   "tags": [
    "glaciers",
-   "landforms"
+   "landforms",
+   "lakes",
+   "formation"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -8056,25 +8062,6 @@
   }
  },
  {
-  "id": "geology-basins",
-  "categoryId": "GEOLOGY",
-  "subtype": "Hills & Basins",
-  "name": "Sedimentary Basins",
-  "teaser": "Sedimentary basins are broad, sinking regions of the crust that trap sediment over tens of millions of years. Rivers, wind, and seas pour material into them, and each layer buries the one before, compressing sand into sandstone and mud into shale. Because they collect thick organic-rich sediment, basins are where most of the world's oil, gas, coal, and groundwater hide — and where geologists read Earth's history page by page.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "hills",
-   "landforms"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet basins",
-   "durationMinutes": 8,
-   "instruction": "Discover how basins form and fill, then explain why they preserve fossils and oil."
-  }
- },
- {
   "id": "geology-structural-basins",
   "categoryId": "GEOLOGY",
   "subtype": "Hills & Basins",
@@ -8509,25 +8496,6 @@
    "targetName": "Meet glacial valleys",
    "durationMinutes": 8,
    "instruction": "Learn how glaciers widen and straighten valleys, then explain the difference from river valleys."
-  }
- },
- {
-  "id": "geology-rift-valley-canyons",
-  "categoryId": "GEOLOGY",
-  "subtype": "Canyons & Valleys",
-  "name": "Rift Valleys",
-  "teaser": "Rift valleys form where the crust pulls apart and the ground between parallel faults drops down — a process taking millions of years. The East African Rift is splitting Africa, creating a chain of valleys holding deep lakes like Tanganyika and Malawi. Over time a rift can widen into an ocean basin; the Red Sea is a young rift already flooded with seawater. Rift valleys are Earth's clearest windows into continental breakup.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "canyons",
-   "landforms"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet rift valleys",
-   "durationMinutes": 8,
-   "instruction": "Discover how rifting creates wide valleys, then explain what the East African Rift is."
   }
  },
  {
@@ -9880,41 +9848,77 @@
   }
  },
  {
-  "id": "geology-engineering-geology",
+  "id": "geology-engineering-geologist",
   "categoryId": "GEOLOGY",
-  "subtype": "Engineering Geology",
+  "subtype": "Geology Careers",
   "name": "Engineering Geology",
   "teaser": "Engineering geology applies rock and soil science to construction: how to build safely on, in, or against the ground. Engineers study foundation conditions, slope stability, groundwater, and earthquake hazards before anything is poured. A geologist's borehole logs and maps decide where bridges, tunnels, dams, and cities can stand. Getting the geology wrong can sink a building, crack a dam, or bury a road — so the ground is inspected before the blueprint.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "[",
+   "\"",
+   "t",
+   "u",
+   "n",
+   "e",
+   "l",
+   ",",
+   "d",
+   "a",
+   "m",
+   "g",
+   "o",
+   "y",
+   "i",
+   "r",
+   "]",
    "engineering",
    "geology"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet engineering geology",
-   "durationMinutes": 8,
-   "instruction": "Discover how geologists support construction, then explain why site surveys matter."
+   "targetName": "Meet the engineering geologist",
+   "durationMinutes": 10,
+   "instruction": "Investigate how engineering geologists assess rock strength and water flow, then explain how a single fault can reroute a tunnel."
   }
  },
  {
-  "id": "geology-geotechnical",
+  "id": "geology-geotechnical-engineer",
   "categoryId": "GEOLOGY",
-  "subtype": "Engineering Geology",
+  "subtype": "Geology Careers",
   "name": "Geotechnical Engineering",
   "teaser": "Geotechnical engineering is the bridge between geology and construction — the discipline that tests soil and rock to predict how they will behave under load. Geotechnical engineers drill boreholes, run lab tests on samples, and calculate how much weight the ground can bear. Their reports set foundation depths, pile designs, and slope angles. Every skyscraper, highway, and dam rests on a geotechnical verdict about the unseen ground beneath.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "[",
+   "\"",
+   "e",
+   "n",
+   "g",
+   "i",
+   "r",
+   ",",
+   "s",
+   "o",
+   "l",
+   "f",
+   "u",
+   "d",
+   "a",
+   "t",
+   "h",
+   "z",
+   "]",
    "engineering",
    "geology"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet geotechnical engineering",
-   "durationMinutes": 8,
-   "instruction": "Learn what geotechnical engineers do, then explain what bearing capacity is."
+   "targetName": "Meet the ground engineer",
+   "durationMinutes": 10,
+   "instruction": "Investigate how geotechnical engineers test soil and rock, then explain how their work underpins every skyscraper and bridge."
   }
  },
  {
@@ -12578,25 +12582,6 @@
   }
  },
  {
-  "id": "geology-glacial-lakes-formation",
-  "categoryId": "GEOLOGY",
-  "subtype": "Lakes & Wetlands",
-  "name": "Glacial Lakes",
-  "teaser": "Glacial lakes form in the gouges and dams left by ice. As glaciers advance, they scoop out bedrock basins and pile up moraine ridges; when the ice retreats, meltwater fills the hollows. The result is the classic northern landscape: thousands of lakes across Canada, Scandinavia, and the US Midwest. Some are enormous — the Great Lakes fill basins scoured by successive glaciations.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "lakes",
-   "formation"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet glacial lakes",
-   "durationMinutes": 8,
-   "instruction": "Discover how glaciers dig lake basins, then explain what a kettle lake is."
-  }
- },
- {
   "id": "geology-volcanic-lakes",
   "categoryId": "GEOLOGY",
   "subtype": "Lakes & Wetlands",
@@ -12613,25 +12598,6 @@
    "targetName": "Meet volcanic lakes",
    "durationMinutes": 8,
    "instruction": "Learn how volcanoes create lakes, then explain what a maar is."
-  }
- },
- {
-  "id": "geology-oxbow-formation",
-  "categoryId": "GEOLOGY",
-  "subtype": "Lakes & Wetlands",
-  "name": "Oxbow Lakes",
-  "teaser": "An oxbow lake is a river's abandoned bend: as a meandering river migrates across its floodplain, the neck of a loop narrows until a flood cuts through it, straightening the channel. The old loop becomes a crescent-shaped lake, slowly filling with sediment until it becomes a marsh and then dry ground. Oxbow lakes are living proof that rivers constantly shift and leave their old curves behind.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "lakes",
-   "formation"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet oxbow lakes",
-   "durationMinutes": 8,
-   "instruction": "Discover how meander cutoffs make oxbows, then explain how they fill with time."
   }
  },
  {
@@ -13461,13 +13427,15 @@
   "tier": 1,
   "tags": [
    "society",
-   "education"
+   "education",
+   "careers",
+   "academia"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet geology education",
+   "targetName": "Meet geology teaching",
    "durationMinutes": 7,
-   "instruction": "Discover how geology is taught, then explain why field trips matter."
+   "instruction": "Learn how geology is taught in academia, then explain what a professor of geology does."
   }
  },
  {
@@ -14003,22 +13971,41 @@
   }
  },
  {
-  "id": "geology-early-warning-systems",
+  "id": "geology-geohazard-early-warning",
   "categoryId": "GEOLOGY",
-  "subtype": "Geologic Hazards",
+  "subtype": "Applied Geology",
   "name": "Early Warning Systems",
   "teaser": "Early warning systems turn seconds into survival: seismic networks detect the first waves of an earthquake and broadcast alerts before the damaging shaking arrives — Japan's system gives seconds to tens of seconds of warning. Volcano observatories track seismicity, gas, and deformation to warn of eruptions; tsunami buoys confirm waves at sea. Every system buys time to drop, cover, evacuate, or stop trains. The sensors are geological; the life saved is human.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "[",
+   "\"",
+   "e",
+   "a",
+   "r",
+   "t",
+   "h",
+   "q",
+   "u",
+   "k",
+   ",",
+   "w",
+   "n",
+   "i",
+   "g",
+   "s",
+   "m",
+   "o",
+   "]",
    "hazards",
    "technology"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet early warning",
-   "durationMinutes": 9,
-   "instruction": "Learn how warning systems save lives, then explain what a siren test is."
+   "targetName": "Meet the warning systems",
+   "durationMinutes": 11,
+   "instruction": "Explore how earthquake and tsunami early warning works, then explain the trade-off between speed and accuracy."
   }
  },
  {
@@ -14288,22 +14275,40 @@
   }
  },
  {
-  "id": "geology-planetary-geologists",
+  "id": "geology-planetary-geologist",
   "categoryId": "GEOLOGY",
-  "subtype": "Careers",
+  "subtype": "Geology Careers",
   "name": "Planetary Geologists",
   "teaser": "Planetary geologists apply geology beyond Earth: mapping Mars, the Moon, and asteroids, and interpreting what rovers and orbiters send back. They identify landing sites, analyze cratering histories, and study how other worlds evolved — even designing instruments that fly on spacecraft. Many train as classic geologists first, then aim their hammers at the sky. The field's work has reshaped our picture of the solar system, from Mars's ancient rivers to Europa's hidden ocean.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "[",
+   "\"",
+   "p",
+   "l",
+   "a",
+   "n",
+   "e",
+   "t",
+   "s",
+   ",",
+   "m",
+   "r",
+   "c",
+   "o",
+   " ",
+   "i",
+   "g",
+   "]",
    "careers",
    "space"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet planetary geologists",
-   "durationMinutes": 9,
-   "instruction": "Discover what planetary geologists do, then explain how they study distant surfaces."
+   "targetName": "Meet the planetary geologist",
+   "durationMinutes": 10,
+   "instruction": "Discover how geologists study other planets, then explain how craters, canyons and dunes reveal their histories."
   }
  },
  {
@@ -14342,25 +14347,6 @@
    "targetName": "Meet geology research",
    "durationMinutes": 8,
    "instruction": "Discover how geological research works, then explain what peer review is."
-  }
- },
- {
-  "id": "geology-geology-academia",
-  "categoryId": "GEOLOGY",
-  "subtype": "Careers",
-  "name": "Teaching Geology",
-  "teaser": "University geology teaches the next generation while advancing the field. Professors lecture, lead field courses, and run research labs; graduate students map, drill, and publish. Academic geology is where theories are tested and new geologists are trained in fieldwork and modelling. Field camps — where students learn to map outcrops — are the rite of passage of the discipline.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "careers",
-   "academia"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet geology teaching",
-   "durationMinutes": 7,
-   "instruction": "Learn how geology is taught in academia, then explain what a professor of geology does."
   }
  },
  {
@@ -14991,22 +14977,39 @@
   }
  },
  {
-  "id": "geology-well-logging",
+  "id": "geology-well-logging-2",
   "categoryId": "GEOLOGY",
-  "subtype": "Geophysics",
+  "subtype": "Applied Geology",
   "name": "Well Logging",
   "teaser": "Well logging lowers sensors down a borehole to measure the rocks around it: electrical resistivity, natural radioactivity, and sound velocity. Each log reads a different property, and together they identify rock types, fluids, and porosity at depth. The oil industry runs logs in nearly every well — they are the lab results of drilling. Logs also monitor groundwater and geothermal wells.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "[",
+   "\"",
+   "b",
+   "o",
+   "r",
+   "e",
+   "h",
+   "l",
+   ",",
+   "g",
+   "i",
+   "n",
+   "p",
+   "y",
+   "s",
+   "c",
+   "]",
    "geophysics",
    "methods"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet well logging",
-   "durationMinutes": 9,
-   "instruction": "Learn how logs measure rock properties, then explain what a gamma log is."
+   "targetName": "Read the well logs",
+   "durationMinutes": 10,
+   "instruction": "Investigate how logging tools measure rock properties in boreholes, then explain how these records reveal oil, water and geology."
   }
  },
  {
@@ -16454,22 +16457,43 @@
   }
  },
  {
-  "id": "geology-deep-time-thinking",
+  "id": "geology-deep-time-scale",
   "categoryId": "GEOLOGY",
-  "subtype": "Geology & Time",
+  "subtype": "Deep Time",
   "name": "Thinking in Deep Time",
   "teaser": "Deep time is geology's hardest idea: 4.6 billion years of Earth history, so vast that human history is a blink. Geologists learn to think in millions of years — a canyon carved over six million, a mountain range rising over fifty. The metaphor that helps: compress Earth's history into a single year, and humans appear in the final seconds of December 31. It changes how you see every landscape.",
   "imageUrl": "",
   "tier": 1,
   "tags": [
+   "[",
+   "\"",
+   "d",
+   "e",
+   "p",
+   " ",
+   "t",
+   "i",
+   "m",
+   ",",
+   "s",
+   "c",
+   "a",
+   "l",
+   "g",
+   "o",
+   "y",
+   "h",
+   "n",
+   "k",
+   "]",
    "time",
    "thinking"
   ],
   "exploreAction": {
    "verb": "Explore",
-   "targetName": "Meet deep-time thinking",
-   "durationMinutes": 9,
-   "instruction": "Discover how geologists imagine vast time, then explain why the deep view matters."
+   "targetName": "Think in deep time",
+   "durationMinutes": 10,
+   "instruction": "Explore how scientists grasp time scales beyond human experience, then explain the visual tricks that make a billion years feel real."
   }
  },
  {
@@ -18212,22 +18236,6 @@
   }
  },
  {
-  "id": "geology-geotechnical-engineer",
-  "categoryId": "GEOLOGY",
-  "subtype": "Geology Careers",
-  "name": "Geotechnical Engineering",
-  "teaser": "The geologists who stop buildings from sinking and slopes from sliding.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": "[\"engineering\",\"soil\",\"foundations\",\"hazards\"]",
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the ground engineer",
-   "durationMinutes": 10,
-   "instruction": "Investigate how geotechnical engineers test soil and rock, then explain how their work underpins every skyscraper and bridge."
-  }
- },
- {
   "id": "geology-volcanologist-life",
   "categoryId": "GEOLOGY",
   "subtype": "Geology Careers",
@@ -18241,22 +18249,6 @@
    "targetName": "Meet the volcanologist",
    "durationMinutes": 11,
    "instruction": "Explore the work of scientists who monitor volcanoes, then explain how gas, tremor and tilt forewarn eruptions."
-  }
- },
- {
-  "id": "geology-planetary-geologist",
-  "categoryId": "GEOLOGY",
-  "subtype": "Geology Careers",
-  "name": "Planetary Geologists",
-  "teaser": "Earth scientists who explore other worlds from a distance.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": "[\"planets\",\"mars\",\"crater\",\"remote sensing\"]",
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the planetary geologist",
-   "durationMinutes": 10,
-   "instruction": "Discover how geologists study other planets, then explain how craters, canyons and dunes reveal their histories."
   }
  },
  {
@@ -18289,22 +18281,6 @@
    "targetName": "Join the fossil dig",
    "durationMinutes": 10,
    "instruction": "Describe the fieldwork of paleontologists, then explain why the spot where a bone is found matters as much as the bone itself."
-  }
- },
- {
-  "id": "geology-engineering-geologist",
-  "categoryId": "GEOLOGY",
-  "subtype": "Geology Careers",
-  "name": "Engineering Geology",
-  "teaser": "How geology decides where tunnels, dams and roads can go.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": "[\"tunnel\",\"dam\",\"geology\",\"engineering\"]",
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the engineering geologist",
-   "durationMinutes": 10,
-   "instruction": "Investigate how engineering geologists assess rock strength and water flow, then explain how a single fault can reroute a tunnel."
   }
  },
  {
@@ -18404,22 +18380,6 @@
   }
  },
  {
-  "id": "geology-well-logging-2",
-  "categoryId": "GEOLOGY",
-  "subtype": "Applied Geology",
-  "name": "Well Logging",
-  "teaser": "Sensors that read the secrets of rock layers deep underground.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": "[\"borehole\",\"logging\",\"oil\",\"geophysics\"]",
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Read the well logs",
-   "durationMinutes": 10,
-   "instruction": "Investigate how logging tools measure rock properties in boreholes, then explain how these records reveal oil, water and geology."
-  }
- },
- {
   "id": "geology-aggregate-geology",
   "categoryId": "GEOLOGY",
   "subtype": "Applied Geology",
@@ -18433,22 +18393,6 @@
    "targetName": "Meet the aggregate",
    "durationMinutes": 9,
    "instruction": "Discover how crushed rock and sand become concrete, then explain why aggregate is the world's most mined material."
-  }
- },
- {
-  "id": "geology-geohazard-early-warning",
-  "categoryId": "GEOLOGY",
-  "subtype": "Applied Geology",
-  "name": "Early Warning Systems",
-  "teaser": "How sensors and science give seconds of warning before disaster.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": "[\"earthquake\",\"warning\",\"tsunami\",\"sensors\"]",
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the warning systems",
-   "durationMinutes": 11,
-   "instruction": "Explore how earthquake and tsunami early warning works, then explain the trade-off between speed and accuracy."
   }
  },
  {
@@ -18641,22 +18585,6 @@
    "targetName": "Visit Siccar Point",
    "durationMinutes": 11,
    "instruction": "Discover how tilted old rocks beneath horizontal young layers at Siccar Point exposed a gap of millions of years, then explain the unconformity."
-  }
- },
- {
-  "id": "geology-deep-time-scale",
-  "categoryId": "GEOLOGY",
-  "subtype": "Deep Time",
-  "name": "Thinking in Deep Time",
-  "teaser": "How geologists learned to count in millions of years.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": "[\"deep time\",\"time scale\",\"geology\",\"thinking\"]",
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Think in deep time",
-   "durationMinutes": 10,
-   "instruction": "Explore how scientists grasp time scales beyond human experience, then explain the visual tricks that make a billion years feel real."
   }
  },
  {

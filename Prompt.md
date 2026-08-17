@@ -1,39 +1,58 @@
 # Prompt.md — Request log
 
-## Current request — SCOPE: web/ + desktop/ on hold (Android-only workstream)
+## Current request — COMPLETED: scope rail + CI fix + topic-file dedupe
 
-User: "separate web and desktop work dont do it untill i mention it, add it in your instructions"
+User (two messages): (1) "why the duplicate books got separated again —
+I thought you will merge them so the old saved entry don't get corrupt";
+(2) "separate web and desktop work, don't do it until I mention it, add
+it in your instructions"; then confirmed "yes, dedupe all affected files"
+and pasted a CI failure (shared-element API errors in TopicRevealScreen +
+CurioBottomNav).
 
-### Done (this turn)
-- Added a 🔒 Scope rail to root `AGENTS.md`: **do NOT edit/build/touch
-  anything under `web/` or `desktop/` unless the user explicitly asks in
-  the current request.** Includes data mirrors — Android data fixes (topic
-  JSON dedupes etc.) apply to `app/src/main/assets/` ONLY, never
-  `web/src/data/topics/` or desktop data. Ambiguous requests default to
-  Android-only, with the web/desktop impact noted in the summary.
-- Marked both the "Desktop App" and "Web App" section headers in
-  `AGENTS.md` as ⛔ ON HOLD, and added a scope warning line to the Purpose
-  section.
-- Committed + pushed (instruction changes must be committed per AGENTS.md).
+### 1. Scope rail (pushed `e665449`)
+- Root `AGENTS.md` now has a 🔒 Scope section: **no edits/builds under
+  `web/` or `desktop/` unless the user explicitly asks** — including data
+  mirrors (Android data fixes apply to `app/src/main/assets/` ONLY). Both
+  section headers marked ⛔ ON HOLD. Prompt.md rules captured.
 
-### Pending — duplicate topics question (user: "why the duplicate books got separated again")
-Investigation so far:
-- `app/src/main/assets/topics/books.json` is CLEAN: 444 topics, 0 dup
-  names, 0 dup ids. The dedupe (commit `620ae50`, 500→444) is intact; the
-  later `4558e99` only added altPageCount/altPageLabel fields. Web mirror
-  `web/src/data/topics/books.json` is also clean (444, 0 dups).
-- BUT other Android topic files DO have duplicate names (same topic twice
-  under different ids — tier1 short-id + tier2 full-name-id pairs):
-  - authors.json — 38 dups (e.g. author-cervantes t1 + author-miguel-de-cervantes t2;
-    tolstoy/leo-tolstoy; melville/herman-melville; kafka; proust…)
-  - astronomy.json — 89 dups, songs.json — 26, geology.json — 11,
-    animals.json — 10, technologies.json — 3, chemistry.json — 1
-- No duplicate ids anywhere, so saved-entry id lookups can't collide; the
-  duplicates are same-name cards in Browse/Reveal flows.
-- NOT YET FIXED. Next step (when user confirms): dedupe the affected
-  Android files the same way as books (keep richer entry, merge tags, keep
-  tier-1 marquee), Android assets ONLY per the new scope rule.
+### 2. Duplicate-books answer
+- `books.json` was NOT re-separated (still 444, zero dup names/ids; the
+  web mirror clean too). The real dups were in files never deduped —
+  same entity twice under tier-1/tier-2 ids (authors 38, astronomy 89,
+  songs 26, geology 11, animals 10, technologies 3, chemistry 1).
+
+### 3. CI fix (v152)
+- `SharedContentState` is a NESTED interface — `SharedTransitionScope.SharedContentState`
+  (top-level import unresolved in animation 1.11). `sharedElementWithCallerManagedVisibility`
+  param renamed `state` → `sharedContentState` (since Compose 1.8). The
+  reveal pill referenced scope vars that only existed in `HeroCard` —
+  now pulled via `LocalRevealSharedScope` / `LocalRevealVisibilityScope`
+  + `rememberSharedContentState(SentimentSharedElementKey)` in the pill's
+  own composable, null-guarded (plain pill fallback). Dead state removed
+  from HeroCard.
+
+### 4. Dedupe (Android assets ONLY — web mirror untouched per scope rail)
+- 178 groups / 181 entries collapsed across authors (500→461),
+  astronomy (1000→911), songs (1000→972, 2 triplets), geology (1000→989),
+  animals (1016→1006), technologies (1000→997), chemistry (1011→1010).
+- Rule mirrors the books dedupe: richest entry wins (longest teaser +
+  richest exploreAction + most tags), tags unioned keeper-first, tier
+  preserves 1 (marquee), survivor at first position, per-file indent
+  preserved (astronomy/technologies = 2, rest = 1) so untouched content
+  stays byte-identical. Script: `/tmp/dedupe_topics.py`.
+- `topic_index.json` rebuilt via `scripts/build_topic_index.py` —
+  16,833 topics, fully in sync both directions (the old index was stale,
+  predating recent content commits).
+- Saved entries are safe: survivors keep the same name, and the v135
+  tolerant name matcher resolves old names.
+
+### Commits
+- `fix:` CI — shared-element API (CurioBottomNav + TopicRevealScreen)
+- `data:` topic dedupe + index rebuild
+- (scope rail already pushed as `e665449`)
 
 ### Verification
-No Gradle build here (CI validates on push). Instruction change only — no
-app behavior touched this turn.
+No Gradle build here (CI validates on push). On-device: open a topic
+from Spin and confirm the nav pill morphs into the Like/Dislike pill
+(and morphs back on close); browse Authors/Astronomy/Songs and confirm
+no duplicate cards; Topic Database search shows each topic once.

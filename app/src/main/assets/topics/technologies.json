@@ -874,14 +874,16 @@
     }
   },
   {
-    "id": "technologies-search-algorithms",
+    "id": "technologies-search-ranking-systems",
     "categoryId": "TECHNOLOGIES",
-    "subtype": "Software",
+    "subtype": "Search",
     "name": "Search Algorithms",
-    "teaser": "Search algorithms are the recipes for finding a needle in a digital haystack - one of the most common and most important tasks in computing. The simplest is linear search, checking items one by one; on a billion items, that is slow. The classic improvement is binary search, which works on sorted data by repeatedly cutting the list in half - finding any item among a billion in about 30 steps. Modern search goes further, using indexes, hash tables, and clever data structures to answer queries instantly. Every time you search a document, a database, or the web, a search algorithm is at work. The difference between a good and bad one is the difference between an instant answer and an eternal wait.",
+    "teaser": "Search ranking algorithms are the secret formulas that decide which pages appear first when you search, a decision that shapes what billions of people read. The classic breakthrough was PageRank, which treated every link to a page as a vote, weighting votes from important pages more heavily, so a page became authoritative by being linked to by other authoritative pages. Modern systems combine hundreds of signals: how well a page matches your words, the page's freshness, its structure, your location, and patterns of which results people actually click. Machine learning now helps rank results, learning from billions of queries what seems to satisfy people. Ranking is a feedback loop with enormous consequences, since the top result gets most of the clicks, which is why businesses and content farms obsess over it and why search engines guard their algorithms as state secrets.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
+      "search",
+      "technology",
       "software",
       "programming"
     ],
@@ -3705,14 +3707,16 @@
     }
   },
   {
-    "id": "technologies-virtual-reality",
+    "id": "technologies-vr-basics",
     "categoryId": "TECHNOLOGIES",
-    "subtype": "Digital Media",
+    "subtype": "Virtual Reality",
     "name": "Virtual Reality",
-    "teaser": "Virtual reality swaps your world for a simulated one, and the dream is older than you think. Morton Heilig's Sensorama booth in 1957 simulated a motorcycle ride with smells, wind, and motion, and in 1968 Ivan Sutherland built the Sword of Damocles, the first head-mounted display, so heavy it hung from the ceiling. The 1990s saw a commercial wave that crashed because the hardware was expensive and the lag made people sick. The modern era began with the Oculus Rift, a 2012 Kickstarter that raised over two million dollars and led to Facebook's two-billion-dollar acquisition in 2014. Modern headsets show each eye a slightly different image to create depth, track your head precisely so the world stays put as you turn, and update the display at ninety frames per second or faster to avoid nausea. Controllers tracked in space let you reach out and grab virtual objects. VR is now a training tool for pilots and surgeons, a therapy for phobias, and a game platform, and it remains the closest technology has come to teleportation.",
+    "teaser": "Virtual reality, VR, is the technology of replacing your real surroundings with a computer-generated world, and it represents the most complete form of digital immersion ever created. The experience is delivered through a headset with a screen for each eye, and the essential trick is presence: the headset tracks your head movements with sensors, and the image updates instantly to match, so when you turn your head, the virtual world behaves as if it is really there, which is what makes the experience feel like being somewhere rather than looking at a screen. The other pillar is interaction: controllers tracked in space, and increasingly hand tracking, let you reach into the virtual world and manipulate it, grabbing objects, drawing in 3D, and acting naturally. The history runs from the 1960s experiments of Ivan Sutherland's Sword of Damocles, through the failed commercial waves of the 1990s, to the modern era that began with the Oculus Rift in 2012 and matured with the standalone headsets of today. The applications span far beyond gaming: training, where pilots, surgeons, and workers practice without risk; education, where students explore places they cannot visit; therapy, where people confront fears in a safe space; and social experiences, where people meet in shared worlds. The challenges are honest: motion sickness, the weight of headsets, and the isolation from the real world. Virtual reality is the technology of being elsewhere, and its promise is the closest thing to teleportation we have.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
+      "vr",
+      "immersive",
       "media",
       "gaming"
     ],
@@ -3720,18 +3724,20 @@
       "verb": "Explore",
       "targetName": "Meet VR",
       "durationMinutes": 8,
-      "instruction": "Learn how VR headsets trick your senses, then explain why motion sickness happens."
+      "instruction": "Discover how VR creates believable worlds, then explain the difference from a normal screen."
     }
   },
   {
-    "id": "technologies-augmented-reality",
+    "id": "technologies-ar-basics",
     "categoryId": "TECHNOLOGIES",
-    "subtype": "Digital Media",
+    "subtype": "Augmented Reality",
     "name": "Augmented Reality",
-    "teaser": "Augmented reality layers digital things onto the real world through a camera, keeping your surroundings while adding pixels to them. The technology went mainstream in 2017 when Apple and Google shipped ARKit and ARCore, putting AR into every modern phone. The phone figures out the world using visual-inertial odometry: it matches visual feature points between camera frames and combines them with motion data to track its own movement, then detects flat surfaces like floors and tables, and anchors virtual objects to them so they stay put as you move. Lighting estimation even matches virtual objects to the scene's light. The hits were cultural: Pokemon GO in 2016 got a billion downloads by placing creatures in parks and streets, face filters made every social app a mirror of imagination, and IKEA's app let you place furniture in your room before buying. AR's frontier is glasses, from Quest's color passthrough to headsets calling the experience spatial computing. AR's promise is that the real world stays the interface, with digital information gently layered on top.",
+    "teaser": "Augmented reality, AR, is the technology of overlaying digital content on the real world, and it is the interface of the future, because instead of taking you into a virtual world, it brings digital information into your actual surroundings. The fundamental difference from virtual reality is the starting point: VR replaces your view of the world, while AR keeps the real world and adds to it, a digital layer of information, images, and objects anchored to the things around you. The technology that makes it work has three pillars: perception, understanding the real world, with cameras and sensors tracking the device's position and detecting surfaces; rendering, drawing the digital content so it appears anchored to the physical world, even as you move; and interaction, letting you touch, point at, and manipulate the digital content. The history runs from the early head-mounted displays of the 1990s through the smartphone era, when ARKit and ARCore in 2017 put AR into every modern phone, to the headsets, from Quest's passthrough to the vision of AR glasses. The applications are already visible: filters on social media, furniture placed in your room before you buy, navigation arrows on the street, and information overlaid on the world. The promise is the next computing platform: a world where digital information lives in the space around you, not trapped on a screen. Augmented reality is the layering of the digital onto the real, and it is how the two worlds are merging.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
+      "ar",
+      "immersive",
       "media",
       "gaming"
     ],
@@ -13300,25 +13306,6 @@
     }
   },
   {
-    "id": "technologies-vr-basics",
-    "categoryId": "TECHNOLOGIES",
-    "subtype": "Virtual Reality",
-    "name": "Virtual Reality",
-    "teaser": "Virtual reality, VR, is the technology of replacing your real surroundings with a computer-generated world, and it represents the most complete form of digital immersion ever created. The experience is delivered through a headset with a screen for each eye, and the essential trick is presence: the headset tracks your head movements with sensors, and the image updates instantly to match, so when you turn your head, the virtual world behaves as if it is really there, which is what makes the experience feel like being somewhere rather than looking at a screen. The other pillar is interaction: controllers tracked in space, and increasingly hand tracking, let you reach into the virtual world and manipulate it, grabbing objects, drawing in 3D, and acting naturally. The history runs from the 1960s experiments of Ivan Sutherland's Sword of Damocles, through the failed commercial waves of the 1990s, to the modern era that began with the Oculus Rift in 2012 and matured with the standalone headsets of today. The applications span far beyond gaming: training, where pilots, surgeons, and workers practice without risk; education, where students explore places they cannot visit; therapy, where people confront fears in a safe space; and social experiences, where people meet in shared worlds. The challenges are honest: motion sickness, the weight of headsets, and the isolation from the real world. Virtual reality is the technology of being elsewhere, and its promise is the closest thing to teleportation we have.",
-    "imageUrl": "",
-    "tier": 1,
-    "tags": [
-      "vr",
-      "immersive"
-    ],
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "Meet VR",
-      "durationMinutes": 8,
-      "instruction": "Discover how VR creates believable worlds, then explain the difference from a normal screen."
-    }
-  },
-  {
     "id": "technologies-vr-headsets",
     "categoryId": "TECHNOLOGIES",
     "subtype": "Virtual Reality",
@@ -13430,25 +13417,6 @@
       "targetName": "Meet VR training",
       "durationMinutes": 8,
       "instruction": "Discover why VR is perfect for dangerous training, then explain what muscle memory means."
-    }
-  },
-  {
-    "id": "technologies-ar-basics",
-    "categoryId": "TECHNOLOGIES",
-    "subtype": "Augmented Reality",
-    "name": "Augmented Reality",
-    "teaser": "Augmented reality, AR, is the technology of overlaying digital content on the real world, and it is the interface of the future, because instead of taking you into a virtual world, it brings digital information into your actual surroundings. The fundamental difference from virtual reality is the starting point: VR replaces your view of the world, while AR keeps the real world and adds to it, a digital layer of information, images, and objects anchored to the things around you. The technology that makes it work has three pillars: perception, understanding the real world, with cameras and sensors tracking the device's position and detecting surfaces; rendering, drawing the digital content so it appears anchored to the physical world, even as you move; and interaction, letting you touch, point at, and manipulate the digital content. The history runs from the early head-mounted displays of the 1990s through the smartphone era, when ARKit and ARCore in 2017 put AR into every modern phone, to the headsets, from Quest's passthrough to the vision of AR glasses. The applications are already visible: filters on social media, furniture placed in your room before you buy, navigation arrows on the street, and information overlaid on the world. The promise is the next computing platform: a world where digital information lives in the space around you, not trapped on a screen. Augmented reality is the layering of the digital onto the real, and it is how the two worlds are merging.",
-    "imageUrl": "",
-    "tier": 1,
-    "tags": [
-      "ar",
-      "immersive"
-    ],
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "Meet AR",
-      "durationMinutes": 8,
-      "instruction": "Learn how AR adds objects to your real view, then explain how it differs from VR."
     }
   },
   {
@@ -15387,25 +15355,6 @@
       "targetName": "Travel search history",
       "durationMinutes": 8,
       "instruction": "Learn how search engines evolved, then explain what early directories were."
-    }
-  },
-  {
-    "id": "technologies-search-ranking-systems",
-    "categoryId": "TECHNOLOGIES",
-    "subtype": "Search",
-    "name": "Search Algorithms",
-    "teaser": "Search ranking algorithms are the secret formulas that decide which pages appear first when you search, a decision that shapes what billions of people read. The classic breakthrough was PageRank, which treated every link to a page as a vote, weighting votes from important pages more heavily, so a page became authoritative by being linked to by other authoritative pages. Modern systems combine hundreds of signals: how well a page matches your words, the page's freshness, its structure, your location, and patterns of which results people actually click. Machine learning now helps rank results, learning from billions of queries what seems to satisfy people. Ranking is a feedback loop with enormous consequences, since the top result gets most of the clicks, which is why businesses and content farms obsess over it and why search engines guard their algorithms as state secrets.",
-    "imageUrl": "",
-    "tier": 1,
-    "tags": [
-      "search",
-      "technology"
-    ],
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "Meet search ranking",
-      "durationMinutes": 9,
-      "instruction": "Discover how search ranks results, then explain what relevance scoring is."
     }
   },
   {

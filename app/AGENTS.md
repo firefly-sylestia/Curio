@@ -945,6 +945,36 @@ app/src/main/java/com/curio/app/
   live INSIDE the SharedTransitionLayout and use the caller-managed
   visibility variant (the route scopes don't reach it); keep the source
   composed+visible through the entrance, then remove it.
+- **v152 — CI fix for the v151 morph + the remaining topic files
+  deduped (178 groups, 181 entries).** (1) The v151 shared-element code
+  FAILED CI: `SharedContentState` was imported from the wrong package
+  (it is a NESTED interface — `SharedTransitionScope.SharedContentState`,
+  top-level import is unresolved in animation 1.11), the
+  `sharedElementWithCallerManagedVisibility` call used the OLD param
+  name `state` (renamed to `sharedContentState` since Compose 1.8), and
+  the reveal's sentiment pill referenced `sharedTransitionScope` /
+  `sentimentSharedState` / `animatedVisibilityScope` that only existed
+  in `HeroCard` — the pill lives in `TopicRevealScreen` proper. Fixed:
+  `CurioBottomNav` param typed `SharedTransitionScope.SharedContentState?`
+  and the call passes `sharedContentState =`; the reveal pulls
+  `LocalRevealSharedScope` / `LocalRevealVisibilityScope` + `rememberSharedContentState(SentimentSharedElementKey)`
+  in the pill's own scope (null-guarded → plain pill fallback); the dead
+  `sentimentSharedState` in `HeroCard` removed. LESSON: shared-element
+  state + scopes must be created in the SAME composable that applies the
+  modifier — copying the pattern from another function leaves undefined
+  references. (2) The batch-duplication pattern v127 flagged ("other
+  topic files… but only books were deduped") is now fixed for every
+  file that had it: authors 38 groups, astronomy 89, songs 26 (two
+  triplets), geology 11, animals 10, technologies 3, chemistry 1 — 178
+  groups / 181 entries collapsed to one each, mirroring the books rule
+  (richest entry wins: longest teaser + richest exploreAction + most
+  tags; tags unioned keeper-first; tier preserves 1; first-position
+  placement; per-file indent preserved — astronomy/technologies use
+  indent 2, the rest 1 — so untouched content stays byte-identical).
+  `topic_index.json` rebuilt (`scripts/build_topic_index.py`, 16,833
+  topics, fully in sync both ways — the old index was stale, predating
+  recent content commits). Android assets ONLY — the web mirror was NOT
+  touched per the root AGENTS.md 🔒 scope rail (web/ is on hold).
 - **v150 — floating pills go THEME-AWARE + DYNAMIC (user-confirmed:
   container follows the page tint, active pill follows the page color,
   dark-mode elevation), plus the reveal Like/Dislike pill gets the nav-bar

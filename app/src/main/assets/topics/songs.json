@@ -66,11 +66,11 @@
   "tier": 1
  },
  {
-  "id": "song-creep",
+  "id": "song-creep-1992",
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Creep (1992)",
-  "teaser": "The band hated the song and nearly left it off the album — it became their only mainstream hit, and the 'special' lyric is about Thom Yorke's real crush at university.",
+  "teaser": "The band wrote the song's famous chord change accidentally — Thom Yorke's guitar swung between chords during a live show, and the audience's reaction made them keep it. It became their breakthrough despite being banned on some radio stations.",
   "imageUrl": "",
   "byline": "Radiohead",
   "exploreAction": {
@@ -92,7 +92,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Seven Nation Army (2003)",
-  "teaser": "The iconic riff is a bass line played on a guitar with a pitch-shifter — Jack White wrote it while touring and the 'seven nation army' was his phrase for the US military draft.",
+  "teaser": "Jack White wrote the riff as a possible James Bond theme — the song's name came from his childhood mishearing of the Salvation Army. The riff has become a stadium chant worldwide.",
   "imageUrl": "",
   "byline": "The White Stripes",
   "exploreAction": {
@@ -202,7 +202,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Crazy in Love (2003)",
-  "teaser": "The horn sample is from a 1970s Chi-Lites song and the 'uh oh' hook was improvised — Beyoncé's debut solo hit was written in a studio with Jay-Z in two days.",
+  "teaser": "The song's famous horn sample was from a 1970 Chi-Lites record — producer Rich Harrison played it for Beyoncé and she danced to it on the spot. It launched her solo career.",
   "imageUrl": "",
   "byline": "Beyoncé",
   "exploreAction": {
@@ -598,7 +598,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Blinding Lights (2019)",
-  "teaser": "The Weeknd wanted a song that sounded like 'Take On Me' and 'It's All Coming Back to Me Now' — the 1980s synthwave production made it the most-streamed song in Spotify history.",
+  "teaser": "The song's 80s synth-pop sound made it the most-streamed song in Spotify history — it spent a record 90 weeks on the Billboard Hot 100. Its neon video was filmed in a parking garage in a single night.",
   "imageUrl": "",
   "byline": "The Weeknd",
   "exploreAction": {
@@ -686,7 +686,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Uptown Funk (2014)",
-  "teaser": "Bruno Mars and Ronson wrote it after a week of funk references — the bassline was built from Chic's 'Good Times' and the horns were recorded live in a Nashville studio.",
+  "teaser": "The song's Minneapolis-funk sound made it one of the best-selling singles ever — it spent 14 weeks at No. 1. Its video, full of disco suits, was a homage to 80s nightlife.",
   "imageUrl": "",
   "byline": "Mark Ronson",
   "exploreAction": {
@@ -708,7 +708,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Wonderwall (1995)",
-  "teaser": "Noel Gallagher wrote it about a friend, not a lover, and the song's five-chord pattern became the acoustic-guitar standard of a generation — it's one of the most-covered songs of the 1990s.",
+  "teaser": "Noel Gallagher has said the song was written about 'an imaginary friend who's gonna come and save you from yourself' — he's also called the lyric meaningless. It became the Britpop era's defining anthem.",
   "imageUrl": "",
   "byline": "Oasis",
   "exploreAction": {
@@ -730,7 +730,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Lose Yourself (2002)",
-  "teaser": "Eminem wrote the hook in the studio bathroom during the filming of 8 Mile — the song's 'one shot' theme is literally about the take he was about to film.",
+  "teaser": "The song was written for the film 8 Mile and became the first rap song to win the Oscar for Best Original Song. Eminem wrote it in a single take in the studio bathroom.",
   "imageUrl": "",
   "byline": "Eminem",
   "exploreAction": {
@@ -818,7 +818,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Gangsta's Paradise (1995)",
-  "teaser": "The song samples Stevie Wonder's 'Pastime Paradise' and was written for a film about gang life — it became one of the best-selling rap singles ever, and Coolio wrote the chorus as a moral warning.",
+  "teaser": "The song's chorus was adapted from Stevie Wonder's 'Pastime Paradise' — and the video, from the film Dangerous Minds, made it one of the biggest hits of the decade. It was the best-selling single of 1995 worldwide.",
   "imageUrl": "",
   "byline": "Coolio",
   "exploreAction": {
@@ -831,7 +831,8 @@
    "Hip Hop",
    "Rap",
    "American",
-   "1990s"
+   "1990s",
+   "Gangsta Rap"
   ],
   "tier": 1
  },
@@ -990,11 +991,11 @@
   "tier": 1
  },
  {
-  "id": "song-hey-ya",
+  "id": "song-hey-ya-2003",
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Hey Ya! (2003)",
-  "teaser": "André 3000 wrote a breakup song disguised as a party anthem — the band's 'shake it like a Polaroid' line is a real instruction, and the song's sadness is hidden under pure joy. Hey Ya!",
+  "teaser": "André 3000 wrote the song as a Beatles-inspired collage — the verses are in a different tempo from the chorus, and the song famously ends with an outro that feels like the band falling apart. It's been called one of the greatest pop songs ever.",
   "imageUrl": "",
   "byline": "OutKast",
   "exploreAction": {
@@ -1060,7 +1061,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Toxic (2003)",
-  "teaser": "The song's strings were sampled from a Bollywood film and the 'toxic' lyric was Britney's own idea — it's considered one of the greatest pop songs ever by critics.",
+  "teaser": "The song's Bollywood strings and its 'too toxic' chorus made it a critical favorite — it's often ranked among the greatest pop songs ever. The video, with Britney as a spy, is a classic.",
   "imageUrl": "",
   "byline": "Britney Spears",
   "exploreAction": {
@@ -1073,7 +1074,9 @@
    "Dance Pop",
    "Electropop",
    "American",
-   "2000s"
+   "2000s",
+   "Pop",
+   "Dance"
   ],
   "tier": 1
  },
@@ -1082,7 +1085,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Umbrella (2007)",
-  "teaser": "The song was written for Britney Spears, who turned it down — Rihanna's version became her breakthrough, and the 'ella ella' hook was almost cut for being too silly.",
+  "teaser": "The song's 'ella, ella' hook was almost rejected by Rihanna's label — it became her first global No. 1 and one of the best-selling digital singles of its time. The raindrop intro is iconic.",
   "imageUrl": "",
   "byline": "Rihanna",
   "exploreAction": {
@@ -1104,7 +1107,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Single Ladies (Put a Ring on It) (2008)",
-  "teaser": "Beyoncé recorded it in a single day and the choreography was inspired by a 1960s dance troupe — the black-and-white video was shot in one take per angle.",
+  "teaser": "The video's dance was choreographed to look like two backup dancers — Beyoncé performed it on a bare soundstage. The song's message about commitment became a cultural moment.",
   "imageUrl": "",
   "byline": "Beyoncé",
   "exploreAction": {
@@ -1148,7 +1151,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Despacito (2017)",
-  "teaser": "The Justin Bieber remix made the Spanish-language original the most-streamed song in history — the song's 'despacito' (slowly) is both a tempo and a request.",
+  "teaser": "The reggaeton hit with Justin Bieber's remix became the most-streamed song of all time at the time — its 'despacito' chorus made Spanish-language pop mainstream.",
   "imageUrl": "",
   "byline": "Luis Fonsi",
   "exploreAction": {
@@ -1258,7 +1261,7 @@
   "categoryId": "SONGS",
   "subtype": "Song",
   "name": "Circles (2019)",
-  "teaser": "The song's chord progression literally circles — the title is the structure — and the chorus's falsetto was recorded in one take.",
+  "teaser": "The song's mellow pop-rap sound became one of the biggest hits of the decade — it spent a record-breaking time on the charts and its video was a western comedy.",
   "imageUrl": "",
   "byline": "Post Malone",
   "exploreAction": {
@@ -8140,28 +8143,6 @@
   "tier": 1
  },
  {
-  "id": "song-wonderwall-1995",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Wonderwall (1995)",
-  "teaser": "Noel Gallagher has said the song was written about 'an imaginary friend who's gonna come and save you from yourself' — he's also called the lyric meaningless. It became the Britpop era's defining anthem.",
-  "imageUrl": "",
-  "byline": "Oasis",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Wonderwall (1995) by Oasis",
-   "durationMinutes": 3,
-   "instruction": "Listen to the chord progression and the echo — a song Gallagher has described as a wall of sound around a nothing lyric."
-  },
-  "tags": [
-   "Britpop",
-   "Rock",
-   "British",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-don-t-look-back-in-anger",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -9592,50 +9573,6 @@
   "tier": 1
  },
  {
-  "id": "song-gangsta-s-paradise-1995",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Gangsta's Paradise (1995)",
-  "teaser": "The song's chorus was adapted from Stevie Wonder's 'Pastime Paradise' — and the video, from the film Dangerous Minds, made it one of the biggest hits of the decade. It was the best-selling single of 1995 worldwide.",
-  "imageUrl": "",
-  "byline": "Coolio feat. L.V.",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Gangsta's Paradise (1995) by Coolio feat. L.V.",
-   "durationMinutes": 3,
-   "instruction": "Listen to the Stevie Wonder chorus — Coolio asked for permission and Wonder gave it in a day."
-  },
-  "tags": [
-   "Hip Hop",
-   "Gangsta Rap",
-   "American",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-creep-1992",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Creep (1992)",
-  "teaser": "The band wrote the song's famous chord change accidentally — Thom Yorke's guitar swung between chords during a live show, and the audience's reaction made them keep it. It became their breakthrough despite being banned on some radio stations.",
-  "imageUrl": "",
-  "byline": "Radiohead",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Creep (1992) by Radiohead",
-   "durationMinutes": 3,
-   "instruction": "Listen to the sudden crash into the chorus — the song's defining moment was a guitar accident."
-  },
-  "tags": [
-   "Alternative",
-   "Rock",
-   "British",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-today",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -9652,28 +9589,6 @@
   "tags": [
    "Alternative",
    "Rock",
-   "American",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-smells-like-teen-spirit-1991",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Smells Like Teen Spirit (1991)",
-  "teaser": "The title came from a deodorant brand — Kathleen Hanna wrote 'Kurt smells like Teen Spirit' on his wall as a joke. The song's quiet-loud-quiet structure became the grunge template.",
-  "imageUrl": "",
-  "byline": "Nirvana",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Smells Like Teen Spirit (1991) by Nirvana",
-   "durationMinutes": 3,
-   "instruction": "Listen to the dynamics — the song was named after a joke about deodorant."
-  },
-  "tags": [
-   "Grunge",
-   "Alternative",
    "American",
    "1990s"
   ],
@@ -10472,28 +10387,6 @@
   "tier": 1
  },
  {
-  "id": "song-hey-ya-2003",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Hey Ya! (2003)",
-  "teaser": "André 3000 wrote the song as a Beatles-inspired collage — the verses are in a different tempo from the chorus, and the song famously ends with an outro that feels like the band falling apart. It's been called one of the greatest pop songs ever.",
-  "imageUrl": "",
-  "byline": "OutKast",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Hey Ya! (2003) by OutKast",
-   "durationMinutes": 3,
-   "instruction": "Listen to the tempo change between verse and chorus — the song breaks its own rules on purpose."
-  },
-  "tags": [
-   "Funk",
-   "Hip Hop",
-   "American",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-ms-jackson",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -10509,50 +10402,6 @@
   },
   "tags": [
    "Hip Hop",
-   "R&B",
-   "American",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-crazy-in-love-2003",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Crazy in Love (2003)",
-  "teaser": "The song's famous horn sample was from a 1970 Chi-Lites record — producer Rich Harrison played it for Beyoncé and she danced to it on the spot. It launched her solo career.",
-  "imageUrl": "",
-  "byline": "Beyoncé feat. Jay-Z",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Crazy in Love (2003) by Beyoncé feat. Jay-Z",
-   "durationMinutes": 3,
-   "instruction": "Listen to the horn riff — it was discovered by accident and turned into one of pop's greatest hooks."
-  },
-  "tags": [
-   "R&B",
-   "Pop",
-   "American",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-single-ladies-put-a-ring-on-it-2008",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Single Ladies (Put a Ring on It) (2008)",
-  "teaser": "The video's dance was choreographed to look like two backup dancers — Beyoncé performed it on a bare soundstage. The song's message about commitment became a cultural moment.",
-  "imageUrl": "",
-  "byline": "Beyoncé",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Single Ladies (Put a Ring on It) (2008) by Beyoncé",
-   "durationMinutes": 3,
-   "instruction": "Listen to the beat — the video was shot in one day on a bare stage with two dancers."
-  },
-  "tags": [
-   "Pop",
    "R&B",
    "American",
    "2000s"
@@ -10599,28 +10448,6 @@
    "Pop",
    "Ballad",
    "American",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-umbrella-2007",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Umbrella (2007)",
-  "teaser": "The song's 'ella, ella' hook was almost rejected by Rihanna's label — it became her first global No. 1 and one of the best-selling digital singles of its time. The raindrop intro is iconic.",
-  "imageUrl": "",
-  "byline": "Rihanna feat. Jay-Z",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Umbrella (2007) by Rihanna feat. Jay-Z",
-   "durationMinutes": 3,
-   "instruction": "Listen to the rain intro and the 'ella ella' — a hook the label almost killed."
-  },
-  "tags": [
-   "Pop",
-   "R&B",
-   "Barbadian",
    "2000s"
   ],
   "tier": 1
@@ -10731,28 +10558,6 @@
    "Soul",
    "Pop",
    "British",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-toxic-2003",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Toxic (2003)",
-  "teaser": "The song's Bollywood strings and its 'too toxic' chorus made it a critical favorite — it's often ranked among the greatest pop songs ever. The video, with Britney as a spy, is a classic.",
-  "imageUrl": "",
-  "byline": "Britney Spears",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Toxic (2003) by Britney Spears",
-   "durationMinutes": 3,
-   "instruction": "Listen to the Indian strings in the chorus — a Bollywood sample inside a dance-pop hit."
-  },
-  "tags": [
-   "Pop",
-   "Dance",
-   "American",
    "2000s"
   ],
   "tier": 1
@@ -11462,28 +11267,6 @@
   "tier": 1
  },
  {
-  "id": "song-seven-nation-army-2003",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Seven Nation Army (2003)",
-  "teaser": "Jack White wrote the riff as a possible James Bond theme — the song's name came from his childhood mishearing of the Salvation Army. The riff has become a stadium chant worldwide.",
-  "imageUrl": "",
-  "byline": "The White Stripes",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Seven Nation Army (2003) by The White Stripes",
-   "durationMinutes": 3,
-   "instruction": "Listen to the bass-like guitar riff — it's actually a guitar played through a pitch-shifter."
-  },
-  "tags": [
-   "Garage Rock",
-   "Alternative",
-   "American",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-fell-in-love-with-a-girl",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -11720,28 +11503,6 @@
   "tags": [
    "Hip Hop",
    "West Coast",
-   "American",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-lose-yourself-2002",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Lose Yourself (2002)",
-  "teaser": "The song was written for the film 8 Mile and became the first rap song to win the Oscar for Best Original Song. Eminem wrote it in a single take in the studio bathroom.",
-  "imageUrl": "",
-  "byline": "Eminem",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Lose Yourself (2002) by Eminem",
-   "durationMinutes": 3,
-   "instruction": "Listen to the intensity — the song was written in minutes in a studio bathroom, between scenes of the film."
-  },
-  "tags": [
-   "Hip Hop",
-   "Rap",
    "American",
    "2000s"
   ],
@@ -13398,28 +13159,6 @@
   "tier": 1
  },
  {
-  "id": "song-rolling-in-the-deep-2010",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Rolling in the Deep (2010)",
-  "teaser": "Adele wrote it after a breakup, and its gospel-tinged fury made it a worldwide No. 1. The song's stomping beat was inspired by the feeling of a pulse racing.",
-  "imageUrl": "",
-  "byline": "Adele",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Rolling in the Deep (2010) by Adele",
-   "durationMinutes": 3,
-   "instruction": "Listen to the build — the song was written in a single session after a fight."
-  },
-  "tags": [
-   "Soul",
-   "Pop",
-   "British",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-someone-like-you",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -13481,28 +13220,6 @@
    "Ballad",
    "Soul",
    "British",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-blinding-lights-2019",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Blinding Lights (2019)",
-  "teaser": "The song's 80s synth-pop sound made it the most-streamed song in Spotify history — it spent a record 90 weeks on the Billboard Hot 100. Its neon video was filmed in a parking garage in a single night.",
-  "imageUrl": "",
-  "byline": "The Weeknd",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Blinding Lights (2019) by The Weeknd",
-   "durationMinutes": 3,
-   "instruction": "Listen to the synths — a song from 2019 that sounds like 1985 and became the most-streamed ever."
-  },
-  "tags": [
-   "Synthwave",
-   "Pop",
-   "Canadian",
    "2010s"
   ],
   "tier": 1
@@ -14146,28 +13863,6 @@
   "tier": 1
  },
  {
-  "id": "song-sicko-mode-2018",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Sicko Mode (2018)",
-  "teaser": "The song's three distinct beat switches made it a landmark of trap production — it became his first No. 1 and one of the most-streamed songs of the decade.",
-  "imageUrl": "",
-  "byline": "Travis Scott feat. Drake",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Sicko Mode (2018) by Travis Scott feat. Drake",
-   "durationMinutes": 3,
-   "instruction": "Listen to the beat changes — the song is three different tracks stitched into one."
-  },
-  "tags": [
-   "Hip Hop",
-   "Trap",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-goosebumps",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -14183,28 +13878,6 @@
   },
   "tags": [
    "Hip Hop",
-   "Trap",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-old-town-road-2019",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Old Town Road (2019)",
-  "teaser": "The country-rap fusion became the longest-running No. 1 in Billboard history — 19 weeks. Its remix with Billy Ray Cyrus made it a global phenomenon.",
-  "imageUrl": "",
-  "byline": "Lil Nas X",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Old Town Road (2019) by Lil Nas X",
-   "durationMinutes": 3,
-   "instruction": "Listen to the country trap blend — a song that broke the charts so thoroughly they had to remove it from the country list."
-  },
-  "tags": [
-   "Country Rap",
    "Trap",
    "American",
    "2010s"
@@ -14498,28 +14171,6 @@
   "tier": 1
  },
  {
-  "id": "song-circles-2019",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Circles (2019)",
-  "teaser": "The song's mellow pop-rap sound became one of the biggest hits of the decade — it spent a record-breaking time on the charts and its video was a western comedy.",
-  "imageUrl": "",
-  "byline": "Post Malone",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Circles (2019) by Post Malone",
-   "durationMinutes": 3,
-   "instruction": "Listen to the melody — a rap star's most gentle, lasting hit."
-  },
-  "tags": [
-   "Pop Rap",
-   "Alternative",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-thank-u-next",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -14670,28 +14321,6 @@
    "R&B",
    "American",
    "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-uptown-funk-2014",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Uptown Funk (2014)",
-  "teaser": "The song's Minneapolis-funk sound made it one of the best-selling singles ever — it spent 14 weeks at No. 1. Its video, full of disco suits, was a homage to 80s nightlife.",
-  "imageUrl": "",
-  "byline": "Mark Ronson feat. Bruno Mars",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Uptown Funk (2014) by Mark Ronson feat. Bruno Mars",
-   "durationMinutes": 3,
-   "instruction": "Listen to the bassline — a song that brought funk back to the top of the charts."
-  },
-  "tags": [
-   "Funk",
-   "Pop",
-   "American",
-   "2010s"
   ],
   "tier": 1
  },
@@ -15180,28 +14809,6 @@
   "tier": 1
  },
  {
-  "id": "song-born-this-way-2011",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Born This Way (2011)",
-  "teaser": "The song's message of self-acceptance made it a global anthem — its title became a slogan for LGBTQ rights. It debuted at No. 1.",
-  "imageUrl": "",
-  "byline": "Lady Gaga",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Born This Way (2011) by Lady Gaga",
-   "durationMinutes": 3,
-   "instruction": "Listen to the message — a dance song that became a movement's slogan."
-  },
-  "tags": [
-   "Pop",
-   "Dance",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-million-reasons",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -15218,28 +14825,6 @@
   "tags": [
    "Pop",
    "Country",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-firework-2010",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Firework (2010)",
-  "teaser": "The empowerment anthem became one of the best-selling singles ever — its 'firework' metaphor made it a graduation and celebration staple worldwide.",
-  "imageUrl": "",
-  "byline": "Katy Perry",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Firework (2010) by Katy Perry",
-   "durationMinutes": 3,
-   "instruction": "Listen to the chorus — a song about lighting up that became a global ceremony."
-  },
-  "tags": [
-   "Pop",
-   "Dance",
    "American",
    "2010s"
   ],
@@ -15439,28 +15024,6 @@
    "Hip Hop",
    "Pop Rap",
    "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-royals-2013",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Royals (2013)",
-  "teaser": "The minimalist critique of wealth made a 16-year-old a global star — it won two Grammys and its 'we don't care' chorus became iconic.",
-  "imageUrl": "",
-  "byline": "Lorde",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Royals (2013) by Lorde",
-   "durationMinutes": 3,
-   "instruction": "Listen to the minimalism — a song about rejecting luxury built on almost no instruments."
-  },
-  "tags": [
-   "Art Pop",
-   "Minimal",
-   "New Zealander",
    "2010s"
   ],
   "tier": 1
@@ -15774,50 +15337,6 @@
   "tier": 1
  },
  {
-  "id": "song-kill-bill-2022",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Kill Bill (2022)",
-  "teaser": "The song's revenge fantasy — named after the Tarantino films — became her biggest hit. Its deadpan delivery made it one of the most-streamed songs of 2023.",
-  "imageUrl": "",
-  "byline": "SZA",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Kill Bill (2022) by SZA",
-   "durationMinutes": 3,
-   "instruction": "Listen to the deadpan — a murder fantasy sung like a casual thought."
-  },
-  "tags": [
-   "R&B",
-   "Alt R&B",
-   "American",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-snooze-2022",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Snooze (2022)",
-  "teaser": "The song's dreamy R&B made it a streaming giant — its 'snooze' metaphor of falling asleep on love became iconic.",
-  "imageUrl": "",
-  "byline": "SZA",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Snooze (2022) by SZA",
-   "durationMinutes": 3,
-   "instruction": "Listen to the haze — a song about love so comfortable it's a nap."
-  },
-  "tags": [
-   "R&B",
-   "Soul",
-   "American",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-good-days",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -15857,50 +15376,6 @@
    "R&B",
    "Soul",
    "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-havana-2017",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Havana (2017)",
-  "teaser": "The song's Latin-pop groove made it one of the biggest hits of 2017 — its trumpet line and its 'Havana, ooh na-na' chorus became iconic.",
-  "imageUrl": "",
-  "byline": "Camila Cabello feat. Young Thug",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Havana (2017) by Camila Cabello feat. Young Thug",
-   "durationMinutes": 3,
-   "instruction": "Listen to the trumpet — a song about a Cuban girl missing home that topped charts worldwide."
-  },
-  "tags": [
-   "Pop",
-   "Latin",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-despacito-2017",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Despacito (2017)",
-  "teaser": "The reggaeton hit with Justin Bieber's remix became the most-streamed song of all time at the time — its 'despacito' chorus made Spanish-language pop mainstream.",
-  "imageUrl": "",
-  "byline": "Luis Fonsi feat. Daddy Yankee",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Despacito (2017) by Luis Fonsi feat. Daddy Yankee",
-   "durationMinutes": 3,
-   "instruction": "Listen to the rhythm — a Spanish-language song that broke every streaming record."
-  },
-  "tags": [
-   "Latin Pop",
-   "Reggaeton",
-   "Puerto Rican",
    "2010s"
   ],
   "tier": 1
@@ -17067,28 +16542,6 @@
    "Pop",
    "Latin",
    "Canadian",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-can-t-stop-the-feeling-2016",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Can't Stop the Feeling! (2016)",
-  "teaser": "The Trolls soundtrack hit won a Grammy and a Golden Globe nomination — its joyful chorus made it a worldwide dance anthem.",
-  "imageUrl": "",
-  "byline": "Justin Timberlake",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Can't Stop the Feeling! (2016) by Justin Timberlake",
-   "durationMinutes": 3,
-   "instruction": "Listen to the joy — a song written for an animated troll that made the whole world dance."
-  },
-  "tags": [
-   "Pop",
-   "Disco",
-   "American",
    "2010s"
   ],
   "tier": 1
@@ -20328,28 +19781,6 @@
   "tier": 1
  },
  {
-  "id": "song-havana-camila-cabello-2017",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Havana (2017)",
-  "teaser": "The song's Latin groove and its 'Havana, ooh na-na' chorus made it one of the biggest hits of 2017 — it topped charts in over 20 countries.",
-  "imageUrl": "",
-  "byline": "Camila Cabello",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Havana (2017) by Camila Cabello",
-   "durationMinutes": 3,
-   "instruction": "Listen to the trumpet — a Cuban-American singer's love letter to Havana."
-  },
-  "tags": [
-   "Pop",
-   "Latin",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
   "id": "song-i-like-me-better",
   "categoryId": "SONGS",
   "subtype": "Song",
@@ -20450,28 +19881,6 @@
    "targetName": "Taste (2018) by Tyga feat. Offset",
    "durationMinutes": 3,
    "instruction": "Listen to the beat — a song built on almost nothing that conquered summer."
-  },
-  "tags": [
-   "Hip Hop",
-   "Trap",
-   "American",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-sicko-mode-travis-scott-2018",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Sicko Mode (2018)",
-  "teaser": "The song's three beat switches made it a landmark — it became his first No. 1 and one of the most-streamed songs ever.",
-  "imageUrl": "",
-  "byline": "Travis Scott",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Sicko Mode (2018) by Travis Scott",
-   "durationMinutes": 3,
-   "instruction": "Listen to the switches — the song changes character three times."
   },
   "tags": [
    "Hip Hop",
@@ -21820,28 +21229,6 @@
    "Pop",
    "American",
    "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "song-dynamite-2020",
-  "categoryId": "SONGS",
-  "subtype": "Song",
-  "name": "Dynamite (2020)",
-  "teaser": "The song's disco-pop sound became the biggest K-pop hit in America — it debuted at No. 1 and its retro video was a global event. It was BTS's first fully English song.",
-  "imageUrl": "",
-  "byline": "BTS",
-  "exploreAction": {
-   "verb": "Listen",
-   "targetName": "Dynamite (2020) by BTS",
-   "durationMinutes": 3,
-   "instruction": "Listen to the disco — a Korean group's first English song, made to spread joy."
-  },
-  "tags": [
-   "K-Pop",
-   "Pop",
-   "Korean",
-   "2020s"
   ],
   "tier": 1
  },

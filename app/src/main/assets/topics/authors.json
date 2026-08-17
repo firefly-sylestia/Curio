@@ -60,21 +60,24 @@
   "tier": 1
  },
  {
-  "id": "author-cervantes",
+  "id": "author-miguel-de-cervantes",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Miguel de Cervantes",
-  "teaser": "Spanish soldier captured by Barbary pirates, held captive 5 years, ransomed when his family couldn't pay. Started writing Don Quixote at 57 — and his book invented the modern novel.",
+  "teaser": "Spanish writer whose 'Don Quixote' (1605, 1615) is considered the first modern novel. He published Part One at 58 after a life of extraordinary failure: he was wounded at the Battle of Lepanto (losing use of his left hand), captured by pirates and enslaved in Algiers for five years, imprisoned for debt, and excommunicated twice.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Don Quixote, Part I, Chapters 1–8",
-   "durationMinutes": 90,
-   "instruction": "Notice how quickly Cervantes pulls the rug. The novel starts as a parody of chivalric romance; by chapter 8, the protagonist is already beaten up and dragged home. Then read a 19th-century Russian novel, then return — you'll see Don Quixote's DNA in every narration of..."
+   "targetName": "Don Quixote, chapters 1-10",
+   "durationMinutes": 42,
+   "instruction": "Read the first ten chapters. Alonso Quijano reads so many chivalric romances that he loses his mind and reinvents himself as Don Quixote, knight-errant. His first adventure: he 'frees' a boy being whipped by a farmer, rides away feeling heroic, and the farmer beats the boy twice as hard. Cervantes invents metafiction 400 years early — the characters in Part Two have read Part One and know they're famous."
   },
   "tags": [
-   "Spanish Golden Age",
    "Spanish",
+   "Fiction",
+   "Classical",
+   "17th Century",
+   "Spanish Golden Age",
    "Novel"
   ],
   "tier": 1
@@ -160,42 +163,46 @@
   "tier": 1
  },
  {
-  "id": "author-tolstoy",
+  "id": "author-leo-tolstoy",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Leo Tolstoy",
-  "teaser": "Russian aristocrat who after 50 became a Christian anarchist, gave up his copyrights, was excommunicated by the Russian Orthodox Church, and died fleeing his family at 82.",
+  "teaser": "Russian novelist who wrote 'War and Peace' (1869) — one of the longest novels ever — while having 13 children. He wrestled it for six years and his wife Sonya hand-copied the manuscript seven times (about 3,000 pages each time). He renounced his wealth at 50, gave away his copyrights, and died at a train station after leaving home at 82.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "War and Peace, Book I (first 50 pages)",
-   "durationMinutes": 90,
-   "instruction": "Read the first 30 pages. Then pages 100–150 (the hunt scene). The novel trains you to read two scales of time: Napoleon's movements across Europe, and a young woman explaining why she won't marry. Tolstoy is doing this on purpose — he wants you to feel his philosophy."
+   "targetName": "War and Peace, Book One, Part One",
+   "durationMinutes": 45,
+   "instruction": "Read the opening. Anna Pavlovna's soirée in 1805 St. Petersburg. Napoleon is threatening Russia; the aristocracy gossips in French. Pierre Bezukhov, the illegitimate son of a count, blunders into the room and starts arguing for Napoleon. Notice how Tolstoy introduces 20 characters in 30 pages — each one distinct, each one convinced they're the protagonist of history."
   },
   "tags": [
    "Russian",
-   "Novel",
-   "19th Century"
+   "Fiction",
+   "Historical",
+   "19th Century",
+   "Novel"
   ],
   "tier": 1
  },
  {
-  "id": "author-dostoevsky",
+  "id": "author-fyodor-dostoevsky",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Fyodor Dostoevsky",
-  "teaser": "Russian novelist arrested by the Czar in 1849, sentenced to death, pardoned at the last minute after a mock execution. Wrote Notes from Underground and Crime and Punishment in his 40s and 50s.",
+  "teaser": "Sentenced to death by firing squad in 1849 for reading banned books — at the last second a messenger arrived with a reprieve from the Tsar, commuting his sentence to Siberian exile. The mock execution broke him. He became one of the greatest psychological novelists, writing about guilt, God, and the darkest corners of human consciousness.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Crime and Punishment, Part I (the murder scene only)",
-   "durationMinutes": 60,
-   "instruction": "Read just the murder scene. The axe. The room. The footsteps from the upstairs tenant. Dostoevsky decides to show you the murder from inside the killer's mind — he's showing you how a murderer thinks in advance, not in cold blood."
+   "targetName": "Crime and Punishment, Part One",
+   "durationMinutes": 40,
+   "instruction": "Read Part One. Raskolnikov, a destitute student in St. Petersburg, plans and executes a murder. Dostoevsky wrote the novel as he was gambling away his advance — the urgency is on every page. Raskolnikov doesn't feel guilt; he feels fever. Notice how the city itself is a character: the stifling rooms, the yellow walls, the crowds that see everything and nothing."
   },
   "tags": [
    "Russian",
-   "Novel",
-   "19th Century"
+   "Fiction",
+   "Psychological",
+   "19th Century",
+   "Novel"
   ],
   "tier": 1
  },
@@ -260,22 +267,23 @@
   "tier": 2
  },
  {
-  "id": "author-melville",
+  "id": "author-herman-melville",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Herman Melville",
-  "teaser": "American whaler-steward who wrote Typee and Omoo as adventure books for popular sale, then wrote Moby-Dick as metaphysical epic — and died with his novels unread for 30 years.",
+  "teaser": "American novelist who was hugely popular for his early sea adventures, then wrote 'Moby-Dick' (1851) and his career collapsed — the book sold 3,715 copies in his lifetime. At the time of his death, he was remembered — if at all — as 'the man who lived among the cannibals.' The 20th century rediscovered him as one of America's greatest writers.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Moby-Dick, Chapter 1 (Loomings) and Chapter 42 (\"The Whiteness of the Whale\")",
-   "durationMinutes": 90,
-   "instruction": "Read the opening chapter. Then jump straight to chapter 42. The novel's voice is established in the first — Ishmael decides that everyone who goes to sea becomes 'insane.' The middle chapter turns whiteness into an existential problem."
+   "targetName": "Bartleby the Scrivener, the whole story",
+   "durationMinutes": 22,
+   "instruction": "Read the whole story — about 40 pages. A Wall Street lawyer hires Bartleby, a copyist who one day responds to a request with 'I would prefer not to.' That phrase becomes his only response to everything. Melville never explains Bartleby; he's a blank wall. Notice the lawyer-narrator's growing sympathy and frustration — Bartleby's passive resistance is unanswerable. It's a comedy until it isn't."
   },
   "tags": [
    "American",
-   "Novel",
-   "19th Century"
+   "Fiction",
+   "19th Century",
+   "Novel"
   ],
   "tier": 1
  },
@@ -320,41 +328,46 @@
   "tier": 1
  },
  {
-  "id": "author-kafka",
+  "id": "author-franz-kafka",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Franz Kafka",
-  "teaser": "Prague insurance lawyer who wrote The Trial and The Castle while employed full-time, never saw his works published together in life, instructed his friend Max Brod to burn them after his death — Brod disobeyed.",
+  "teaser": "Prague-born writer who worked at an insurance company by day and wrote at night. He made his friend Max Brod promise to burn all his manuscripts after his death — Brod published them instead. His stories about bureaucracies crushing individuals gave us the word 'Kafkaesque.' He died of tuberculosis at 40, mostly unpublished.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Trial, Chapter 1 (\"Someone must have slandered Josef K...\")",
-   "durationMinutes": 30,
-   "instruction": "Read the first 10 pages. K is arrested on his 30th birthday by officials who tell him to keep working. He's never told what he's accused of. The novel's pre-WWII German-language nightmare ended up as prophecy. Read another Kafka work in the same week — the metaphor..."
+   "targetName": "The Metamorphosis, the whole novella",
+   "durationMinutes": 25,
+   "instruction": "Read the whole novella — about 60 pages. Gregor Samsa wakes up as a giant insect. His first thought: how will I get to work? Kafka never explains the transformation; the horror is the family's reaction, not the bug. Notice the deadpan tone — Kafka tells the impossible like a police report. Gregor's humanity fades as his family's indifference grows."
   },
   "tags": [
+   "Czech",
+   "Fiction",
    "Modernist",
+   "20th Century",
    "Austrian-Czech",
    "Novel"
   ],
   "tier": 1
  },
  {
-  "id": "author-proust",
+  "id": "author-marcel-proust",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Marcel Proust",
-  "teaser": "French semi-invalid who wrote In Search of Lost Time from his cork-lined bedroom for 13 years (1909–1922). The novel's opening sentence — 'I drank a spoonful of tea in which I had let a piece of madeleine soak' — became the most quoted 200 words in literature.",
+  "teaser": "French novelist who wrote 'In Search of Lost Time' — seven volumes, 1.2 million words — while bedridden in a cork-lined room, dying of asthma. A madeleine dipped in tea triggers the entire novel. He spent the last three years of his life rewriting the ending. The novel was rejected by multiple publishers; he published the first volume at his own expense.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Swann's Way, \"Combray\" opening 30 pages",
-   "durationMinutes": 90,
-   "instruction": "Read the madeleine passage. Then read the passage on falling in love. Proust's gift is that he shows you how memory isn't a recording — it's a state. The same madeleine tastes different to the same man in different decades."
+   "targetName": "Swann's Way, the first section: Combray",
+   "durationMinutes": 40,
+   "instruction": "Read the Combray section. The narrator bites into a madeleine dipped in tea and his entire childhood in the village of Combray floods back. Proust's sentences are famously long — they spiral, subordinate, return — but they're built to reproduce the texture of consciousness. The Overture (first 50 pages) is about a man who can't fall asleep. Everything follows from that insomnia."
   },
   "tags": [
-   "Modernist",
    "French",
+   "Fiction",
+   "Modernist",
+   "20th Century",
    "Novel"
   ],
   "tier": 1
@@ -520,21 +533,24 @@
   "tier": 1
  },
  {
-  "id": "author-ursula-k-le-guin",
+  "id": "author-ursula-le-guin",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Ursula K. Le Guin",
-  "teaser": "American novelist (daughter of anthropologist Alfred Kroeber and writer Theodora Kroeber) who wrote 20 novels of utopian science fiction and feminist anthropology, and won every major sci-fi award before her death at 88.",
+  "teaser": "Wrote 'The Left Hand of Darkness' in 1969 — a sci-fi novel that treats gender as a social construct decades before that was mainstream. Her parents were anthropologists, and her fiction always reads like ethnography of imaginary cultures. Her Earthsea books proved fantasy could be literary before anyone else tried.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Left Hand of Darkness, opening 30 pages",
-   "durationMinutes": 60,
-   "instruction": "Read the first chapter. The envoy arrives on a planet whose inhabitants change sex. Le Guin refuses allegory — the planet's biology is its own argument. Then read 'The Ones Who Walk Away from Omelas' (short story, ~5 pages)."
+   "targetName": "A Wizard of Earthsea, first 3 chapters",
+   "durationMinutes": 25,
+   "instruction": "Read the opening. Ged, a boy with a gift for magic, goes to wizard school and in a fit of pride summons a shadow monster. The rest of the novel is the chase — but the shadow is hunting him too. Notice Le Guin's magic isn't a set of rules but a moral weight: every spell has a cost, and names are power."
   },
   "tags": [
-   "Sci-Fi",
    "American",
+   "Fantasy",
+   "Science Fiction",
+   "20th Century",
+   "Sci-Fi",
    "Feminist"
   ],
   "tier": 2
@@ -580,24 +596,26 @@
   "tier": 3
  },
  {
-  "id": "author-agnes-varda-essayist",
+  "id": "author-annie-ernaux",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Annie Ernaux",
-  "teaser": "French writer who won the 2022 Nobel for Literature for 'the courage and clinical acuity with which she uncovers the roots, estrangements, and collective restraints of personal memory.' She wrote herself into history.",
+  "teaser": "French writer who won the Nobel Prize in 2022. She invented a genre she calls 'autosociobiography' — writing her own life as a document of class, gender, and time. Her novel 'The Years' (2008) is written without the pronoun 'I' — it's a collective autobiography of postwar France told through objects, songs, and meals.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Years, opening 30 pages",
-   "durationMinutes": 60,
-   "instruction": "Read the first chapter as if it were a collage. The book is written mostly in present tense — and entirely without personal pronouns. Now read it again as a memoir of post-war France. You'll be surprised to realize that 'she' or 'I' is never used."
+   "targetName": "The Years, first half",
+   "durationMinutes": 42,
+   "instruction": "Read the first half. There is no 'I' — the narrator is 'we' and 'she,' describing a generation through photographs, advertisements, political slogans. Ernaux's prose is flat and forensic; she describes a family dinner with the same clinical precision as a political protest. Notice how public events (Algerian War, May '68, Mitterrand's election) intrude on private life like weather."
   },
   "tags": [
    "French",
    "Memoir",
+   "Literary",
+   "21st Century",
    "Contemporary"
   ],
-  "tier": 3
+  "tier": 2
  },
  {
   "id": "author-sylvia-plath",
@@ -840,22 +858,24 @@
   "tier": 2
  },
  {
-  "id": "auth-eudora-welty-143",
+  "id": "author-eudora-welty",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Eudora Welty",
-  "teaser": "A Mississippi writer who photographed poor rural families for the WPA during the Depression, then used those faces in her stories. She won the Pulitzer for The Optimist's Daughter and stayed in her hometown her whole life.",
+  "teaser": "American short story writer and novelist from Mississippi who won the Pulitzer in 1973. She worked as a photographer for the WPA during the Depression, documenting rural Mississippi. Her story 'Why I Live at the P.O.' is the funniest monologue in American literature — narrated by a woman so aggrieved by her family that she moves into the post office where she works.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "'Why I Live at the P.O.' (1941)",
-   "durationMinutes": 17,
-   "instruction": "Read 'Why I Live at the P.O.' aloud - it's a one-sided phone conversation and you only hear the speaker. Welty's trick: the more the narrator insists she's the victim, the funnier and crueler the story gets. Notice how the dialogue carries the whole plot."
+   "targetName": "The Collected Stories, first 5 stories",
+   "durationMinutes": 38,
+   "instruction": "Read the first five stories. 'Why I Live at the P.O.' — Sister narrates how her sister Stella-Rondo came home with an adopted child and turned the whole family against her. Welty's ear for Southern speech is perfect: the exaggerations, the self-pity, the dramatic exits. Her characters talk themselves into and out of revelation. Notice the humor never undercuts the loneliness — the post office is a fortress of grievance."
   },
   "tags": [
    "American",
-   "Short Fiction",
-   "20th Century"
+   "Fiction",
+   "Short Stories",
+   "20th Century",
+   "Short Fiction"
   ],
   "tier": 2
  },
@@ -900,22 +920,24 @@
   "tier": 2
  },
  {
-  "id": "auth-zora-neale-hurston-122",
+  "id": "author-zora-neale-hurston",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Zora Neale Hurston",
-  "teaser": "An anthropologist who collected Black folklore across the American South and the Caribbean before writing Their Eyes Were Watching God. The novel was dismissed by male critics of the Harlem Renaissance and rediscovered decades later as a masterpiece.",
+  "teaser": "African American novelist and anthropologist whose 'Their Eyes Were Watching God' (1937) was out of print and forgotten for decades before Alice Walker resurrected it in 1975. Hurston studied anthropology at Barnard with Franz Boas and conducted fieldwork in Haiti and Jamaica. She died in poverty in 1960 and was buried in an unmarked grave.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Their Eyes Were Watching God, opening chapters",
-   "durationMinutes": 36,
-   "instruction": "Read the first chapter of Their Eyes Were Watching God. Janie is telling her story to her friend Pheoby on a porch - the whole novel is a conversation, written in the Black vernacular Hurston collected as an anthropologist. Notice how the frame sets up the flashback."
+   "targetName": "Their Eyes Were Watching God, chapters 1-6",
+   "durationMinutes": 40,
+   "instruction": "Read the first six chapters. Janie Crawford returns to Eatonville and tells her story to her best friend Pheoby. Hurston writes in two registers: the frame narration in lyrical standard English, Janie's dialogue in Black Southern vernacular. Janie's grandmother marries her off at 16 to an old farmer. 'She had been summoned to behold a revelation.' Hurston's Janie is seeking not a man but a horizon — a life big enough for her soul."
   },
   "tags": [
    "American",
-   "Novel",
-   "Harlem Renaissance"
+   "Fiction",
+   "Harlem Renaissance",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -1015,7 +1037,9 @@
   "tags": [
    "American",
    "Novel",
-   "20th Century"
+   "20th Century",
+   "Fiction",
+   "Essays"
   ],
   "tier": 2
  },
@@ -1080,42 +1104,47 @@
   "tier": 2
  },
  {
-  "id": "auth-kurt-vonnegut-131",
+  "id": "author-kurt-vonnegut",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Kurt Vonnegut",
-  "teaser": "He was a prisoner of war in Dresden when it was firebombed, and he spent 25 years trying to write about it - the result was Slaughterhouse-Five, a war novel with no war scenes, told by a time-traveling optometrist. 'So it goes.'.",
+  "teaser": "American satirist whose novel 'Slaughterhouse-Five' (1969) is based on his experience as a POW who survived the firebombing of Dresden — he witnessed the destruction from a meat locker underground. He called the book 'a failure' on the first page. The aliens in the novel — Tralfamadorians — see all time at once, so death is just 'so it goes.'.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Slaughterhouse-Five, opening chapters",
-   "durationMinutes": 45,
-   "instruction": "Read the first pages of Slaughterhouse-Five. Vonnegut interrupts his own story to tell you the ending and then keeps going. Notice how the famous phrase 'so it goes' follows every death, including trivial ones. The flatness is the point."
+   "targetName": "Slaughterhouse-Five, chapters 1-2",
+   "durationMinutes": 25,
+   "instruction": "Read the first two chapters. Vonnegut introduces himself as a character struggling to write about Dresden. Billy Pilgrim has 'come unstuck in time.' Notice the refrain 'So it goes' — it appears after every mention of death. Vonnegut uses it 106 times. The novel is anti-war but refuses to dramatize: war is never glorious, just absurd and sad."
   },
   "tags": [
    "American",
-   "Novel",
-   "20th Century"
+   "Fiction",
+   "Satire",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
  {
-  "id": "auth-margaret-atwood-132",
+  "id": "author-margaret-atwood",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Margaret Atwood",
-  "teaser": "A Canadian poet who wrote The Handmaid's Tale - the dystopia that made 'under his eye' a global phrase - partly as a warning about what she saw coming. She has won the Booker Prize twice, once at 79 with a sequel.",
+  "teaser": "Canadian writer who has won the Booker Prize twice. Her dystopian novel 'The Handmaid's Tale' (1985) includes no event that hasn't happened somewhere in history — every horror is footnoted. She invented the LongPen, a remote book-signing robot, because she got tired of touring. Her father was an entomologist who took her to the woods instead of school.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Handmaid's Tale, opening chapters",
-   "durationMinutes": 24,
-   "instruction": "Read the opening of The Handmaid's Tale. Offred describes the gymnasium where the women sleep and the aunts who run it - and the horror is how ordinary the language is. Atwood's trick: the narrator uses the past tense about a future, so you feel the dread of someone remembering."
+   "targetName": "The Handmaid's Tale, opening section",
+   "durationMinutes": 35,
+   "instruction": "Read the opening. Offred narrates in present tense from a single room where she sleeps, eats, and waits. The regime of Gilead took everything — her name, her husband, her daughter, even the ability to read. Atwood wrote the novel in West Berlin during the Cold War. Notice how every detail is historically grounded: the 'Salvagings' echo the Salem witch trials."
   },
   "tags": [
    "Canadian",
-   "Novel",
-   "20th Century"
+   "Fiction",
+   "Dystopian",
+   "Feminist",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -1140,22 +1169,24 @@
   "tier": 2
  },
  {
-  "id": "auth-isabel-allende-134",
+  "id": "author-isabel-allende",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Isabel Allende",
-  "teaser": "She got a phone call in 1981 telling her her 99-year-old grandfather was dying, and she began a letter to him that became The House of the Spirits - her first novel, written at 39. She is the most widely read Spanish-language novelist in the world.",
+  "teaser": "Chilean writer who started her first novel 'The House of the Spirits' as a letter to her dying 99-year-old grandfather. It became a global bestseller and launched the Latin American literary boom's female voice. Her father's cousin was Salvador Allende — the Chilean president overthrown by Pinochet in 1973.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The House of the Spirits, opening chapters",
-   "durationMinutes": 44,
-   "instruction": "Read the opening of The House of the Spirits. Allende starts with a dead girl's spirit in the family house - and the novel's magic is that ghosts are just relatives. Notice how the political story, echoing Chile's 1973 coup, grows out of the family story."
+   "targetName": "The House of the Spirits, first 3 chapters",
+   "durationMinutes": 35,
+   "instruction": "Read the opening. The novel begins with a family patriarch who keeps a diary of 'memorable events' and a clairvoyant girl named Clara who predicts deaths. Allende writes in the magical-realist tradition but the magic is domestic — ghosts sit at the dinner table. Notice how political history enters through family meals."
   },
   "tags": [
    "Chilean",
-   "Novel",
-   "Magical Realism"
+   "Fiction",
+   "Magical Realism",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -1180,7 +1211,7 @@
   "tier": 2
  },
  {
-  "id": "auth-chimamanda-ngozi-adichie-136",
+  "id": "author-chimamanda-adichie",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Chimamanda Ngozi Adichie",
@@ -1188,12 +1219,15 @@
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Purple Hibiscus, opening chapters",
-   "durationMinutes": 25,
-   "instruction": "Read the opening of Purple Hibiscus. The narrator Kambili and her brother are visiting their grandfather - and you learn in the first pages what their father's house is like by what is missing from it. Notice how Adichie writes violence through what the child notices."
+   "targetName": "Half of a Yellow Sun, Part One",
+   "durationMinutes": 35,
+   "instruction": "Read Part One. The novel opens in the early 1960s with a houseboy named Ugwu — through his eyes you see the buildup to war as domestic tension. Adichie wrote this because she grew up surrounded by Biafran veterans but never saw their story in fiction. Notice how the privileged dinner conversations slowly tip toward catastrophe."
   },
   "tags": [
    "Nigerian",
+   "Fiction",
+   "Historical",
+   "21st Century",
    "Novel",
    "Contemporary"
   ],
@@ -1220,60 +1254,71 @@
   "tier": 2
  },
  {
-  "id": "auth-salman-rushdie-138",
+  "id": "author-salman-rushdie",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Salman Rushdie",
-  "teaser": "Midnight's Children, his second novel, won the Booker Prize and then the 'Booker of Bookers' - judged the best Booker winner in 25 years. His novel The Satanic Verses led Iran's leader to issue a fatwa against him in 1989; he spent the next decade in hiding.",
+  "teaser": "Indian-British writer whose novel 'The Satanic Verses' (1988) earned a fatwa calling for his death from Iran's Ayatollah. He lived in hiding for 9 years under police protection. His writing mixes history, myth, and Bollywood — 'Midnight's Children' won the Booker of Bookers (best Booker winner in 25 years) for its story of children born at India's independence.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Midnight's Children, opening chapters",
-   "durationMinutes": 36,
-   "instruction": "Read the opening of Midnight's Children. Saleem Sinai is born at the exact moment of India's independence - midnight, August 15, 1947 - and his life is synced to his nation's. Rushdie's sentences pile metaphor on metaphor; notice how he makes history feel like memory."
+   "targetName": "Midnight's Children, Book One",
+   "durationMinutes": 40,
+   "instruction": "Read Book One. The narrator, Saleem Sinai, was born exactly at midnight on August 15, 1947 — Indian independence — and his fate is magically tied to the nation's. Rushdie narrates in a breathless, overflowing voice. Notice how every historical event is refracted through Saleem's personal mythology. History is always a story someone is telling."
   },
   "tags": [
+   "Indian",
+   "British",
+   "Fiction",
+   "Magical Realism",
+   "20th Century",
    "British-Indian",
-   "Novel",
-   "20th Century"
+   "Novel"
   ],
   "tier": 2
  },
  {
-  "id": "auth-kazuo-ishiguro-139",
+  "id": "author-kazuo-ishiguro",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Kazuo Ishiguro",
-  "teaser": "A Japanese-born British writer who won the 2017 Nobel for novels of 'great emotional force' - The Remains of the Day is narrated by an English butler who has repressed his entire life. He wanted to be a songwriter before he became a novelist.",
+  "teaser": "British-Japanese novelist who won the Nobel Prize in 2017. His novels are narrated by people deceiving themselves — a butler who can't admit his loyalty was to a Nazi sympathizer, a clone who never questions her fate. He wrote 'The Remains of the Day' in 4 weeks during a self-imposed writing sprint called 'The Crash.'.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Remains of the Day, opening chapters",
+   "targetName": "The Remains of the Day, the first day's entries",
    "durationMinutes": 40,
-   "instruction": "Read the opening of The Remains of the Day. Stevens the butler is on a road trip and reports it in the language of service, and the tragedy is what he won't say. Notice how the prose gets more honest when he is tired."
+   "instruction": "Read the opening entries of Stevens's motoring diary. He's driving through the English countryside having deep thoughts about what constitutes a 'great butler.' Every memory he shares is a carefully curated lie. Notice how his formal, precise prose is a cage — the emotion bleeds through what he refuses to name."
   },
   "tags": [
    "British",
+   "Japanese",
+   "Fiction",
+   "Nobel",
+   "20th Century",
    "Novel",
    "Contemporary"
   ],
   "tier": 2
  },
  {
-  "id": "auth-orhan-pamuk-140",
+  "id": "author-orhan-pamuk",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Orhan Pamuk",
-  "teaser": "The first Turkish writer to win the Nobel Prize (2006), he wrote My Name Is Red - a murder mystery told partly by a corpse, a dog, and the color red. He called Istanbul 'a city of ruins' and wrote a whole book about its melancholy.",
+  "teaser": "Turkish novelist who won the Nobel Prize in 2006. His novel 'My Name Is Red' (1998) is a murder mystery set among 16th-century Ottoman miniature painters — and includes chapters narrated by a corpse, a coin, and the color red. He was charged with 'insulting Turkishness' in 2005 for mentioning the Armenian genocide; the charges were later dropped.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "My Name Is Red, opening chapters",
-   "durationMinutes": 16,
-   "instruction": "Read the opening of My Name Is Red. The first chapter is narrated by a dead man, who tells you he is dead and then starts remembering. Pamuk writes the Ottoman miniature-painting world with the density of a historian - notice how every chapter has a different narrator."
+   "targetName": "My Name Is Red, first 8 chapters",
+   "durationMinutes": 40,
+   "instruction": "Read the first eight chapters. Each chapter has a different narrator: a corpse, a dog, a tree, a murderer, the color red. Pamuk uses this polyphonic structure to explore the clash between Islamic miniature painting and Western perspective — the murder is about art. Notice how magical the object-narrators feel: the coin's chapter is a miniature economic history of Istanbul."
   },
   "tags": [
    "Turkish",
+   "Fiction",
+   "Historical",
+   "21st Century",
    "Novel",
    "Contemporary"
   ],
@@ -1320,21 +1365,22 @@
   "tier": 2
  },
  {
-  "id": "auth-terry-pratchett-143",
+  "id": "author-terry-pratchett",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Terry Pratchett",
-  "teaser": "He wrote 41 Discworld novels - comic fantasy that hid sharp social satire - and sold over 100 million copies. He was knighted for services to literature, and after his Alzheimer's diagnosis he campaigned openly for the right to die.",
+  "teaser": "British fantasy author who wrote the 41-novel Discworld series — a flat world balanced on four elephants standing on a giant turtle. His books are comedy that becomes philosophy if you're not careful. He sold over 85 million copies worldwide and was knighted in 2009. After being diagnosed with early-onset Alzheimer's, he campaigned for assisted dying and made a documentary about it.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Guards! Guards!, opening chapters",
-   "durationMinutes": 37,
-   "instruction": "Read the opening of Guards! Guards!. The city of Ankh-Morpork has a Watch that is down to three men and a drunk - Pratchett introduces a fantasy city by making you laugh at its plumbing. Notice how the jokes are always at the expense of institutions, never the poor."
+   "targetName": "Guards! Guards!, the whole novel",
+   "durationMinutes": 42,
+   "instruction": "Read Guards! Guards! Vimes, captain of the Night Watch — a cynical drunk in a city that doesn't want police — must stop a 60-foot dragon summoned by a secret society. Pratchett's worldbuilding is a joke-delivery system for ideas about power, justice, and why people obey bad laws. Vimes's 'Boots Theory of Socioeconomic Unfairness' is a better economics lesson than most textbooks. The humor is never cruel."
   },
   "tags": [
    "British",
    "Fantasy",
+   "Satire",
    "20th Century"
   ],
   "tier": 2
@@ -1400,7 +1446,7 @@
   "tier": 2
  },
  {
-  "id": "auth-ocean-vuong-147",
+  "id": "author-ocean-vuong",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Ocean Vuong",
@@ -1408,13 +1454,16 @@
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "On Earth We're Briefly Gorgeous, opening pages",
-   "durationMinutes": 43,
-   "instruction": "Read the opening of On Earth We're Briefly Gorgeous. The novel is a letter from a son to his mother - and the first pages establish that address. Notice how Vuong writes in fragments: he is a poet first, and the sentences behave like stanzas."
+   "targetName": "On Earth We're Briefly Gorgeous, first 30 pages",
+   "durationMinutes": 28,
+   "instruction": "Read the opening letter: 'Let me begin again.' The narrator, Little Dog, writes to his mother Rose, a nail-salon worker who can't read English. Vuong was a poet first, and every paragraph is a poem. Notice how violence and beauty share the same sentence — a columbine flower and a memory of war, a kiss and a bruise."
   },
   "tags": [
-   "American",
+   "Vietnamese-American",
+   "Fiction",
    "Poetry",
+   "21st Century",
+   "American",
    "Contemporary"
   ],
   "tier": 2
@@ -1460,22 +1509,25 @@
   "tier": 2
  },
  {
-  "id": "auth-han-kang-150",
+  "id": "author-han-kang",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Han Kang",
-  "teaser": "The first Korean writer to win the Nobel Prize in Literature (2024), she wrote The Vegetarian - a woman's refusal to eat meat becomes a quiet revolution - which won the Man Booker International Prize. Her novel Human Acts confronts the 1980 Gwangju massacre.",
+  "teaser": "South Korean writer whose novel 'The Vegetarian' (2007) won the International Booker Prize in 2016. It's told in three parts about a woman who stops eating meat after a dream. Her family's reaction escalates to force-feeding and institutionalization. Han writes about bodies, violence, and refusal with unnerving stillness.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Vegetarian, opening chapters",
-   "durationMinutes": 24,
-   "instruction": "Read the opening of The Vegetarian. Yeong-hye's decision begins with a dream she cannot explain - and Kang writes the refusal in three parts, from three points of view. Notice how the prose stays flat and precise while the subject turns strange."
+   "targetName": "The Vegetarian, Part One: The Vegetarian",
+   "durationMinutes": 28,
+   "instruction": "Read Part One, narrated by the husband — a dull man whose wife Yeong-hye stops eating meat after a dream of blood. He's not concerned for her; he's annoyed the dinner parties are awkward. Notice how Han uses the husband's banality as the real horror: his wife is in crisis and all he can think about is his professional standing. The spare prose leaves room for the unsaid."
   },
   "tags": [
+   "South Korean",
+   "Fiction",
+   "Contemporary",
+   "21st Century",
    "Korean",
-   "Novel",
-   "Contemporary"
+   "Novel"
   ],
   "tier": 2
  },
@@ -1620,20 +1672,23 @@
   "tier": 2
  },
  {
-  "id": "auth-louise-erdrich-158",
+  "id": "author-louise-erdrich",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Louise Erdrich",
-  "teaser": "An Ojibwe writer from North Dakota who founded her own independent bookstore, she won the National Book Award for The Round House, about a boy investigating his mother's assault on a reservation. Love Medicine began as a collection of linked stories.",
+  "teaser": "Native American (Ojibwe) novelist who runs Birchbark Books, an independent bookstore in Minneapolis. Her novel 'The Round House' (2012) won the National Book Award and is about a 13-year-old boy seeking justice after his mother is attacked on a reservation — where tribal and federal law create a jurisdictional maze.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Love Medicine, opening chapters",
-   "durationMinutes": 36,
-   "instruction": "Read the opening of Love Medicine. Erdrich introduces the Kashpaw family through several voices, and the novel is built from linked stories - each chapter a different narrator. Notice how land and inheritance are always the real subject."
+   "targetName": "The Round House, first half",
+   "durationMinutes": 40,
+   "instruction": "Read the first half. Joe's mother is attacked and won't speak about it. Joe and his friends start their own investigation, biking around the reservation. Erdrich embeds the legal injustice in the details — the crime happened in a round house (a sacred space) near the reservation boundary, and jurisdiction depends on whose land the rock was sitting on. Notice how humor coexists with horror."
   },
   "tags": [
+   "American",
+   "Fiction",
    "Native American",
+   "21st Century",
    "Novel",
    "Contemporary"
   ],
@@ -1760,22 +1815,24 @@
   "tier": 2
  },
  {
-  "id": "auth-flannery-oconnor-165",
+  "id": "author-flannery-oconnor",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Flannery O'Connor",
-  "teaser": "A devout Catholic from Georgia who wrote stories full of murder, mutilation, and grace - she said her subject was 'the action of grace in territory held largely by the devil.' She died of lupus at 39 and kept a flock of peacocks.",
+  "teaser": "Southern Gothic writer from Georgia who raised peacocks and died of lupus at 39. Her 31 short stories and 2 novels are populated by Bible salesmen, escaped convicts, and self-righteous old women — all of whom encounter violence as a form of grace. She was a devout Catholic in the Protestant South, and her fiction is theology by other means.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "'A Good Man Is Hard to Find' (1953)",
-   "durationMinutes": 45,
-   "instruction": "Read 'A Good Man Is Hard to Find.' A family drives toward their deaths, and the grandmother talks her way into the catastrophe. O'Connor said the violence is 'the cheapest way to get grace across.' Notice how the killer quotes Scripture."
+   "targetName": "A Good Man Is Hard to Find, plus 3 other stories",
+   "durationMinutes": 30,
+   "instruction": "Read 'A Good Man Is Hard to Find' and three others. A grandmother manipulates her family into a detour to see a nonexistent plantation; they encounter an escaped convict called The Misfit. O'Connor's violence arrives with comic timing and theological weight: 'She would have been a good woman if it had been somebody there to shoot her every minute of her life.' Notice how her characters' self-deception is dismantled by brutality."
   },
   "tags": [
    "American",
-   "Short Fiction",
-   "20th Century"
+   "Fiction",
+   "Southern Gothic",
+   "20th Century",
+   "Short Fiction"
   ],
   "tier": 2
  },
@@ -1820,22 +1877,24 @@
   "tier": 2
  },
  {
-  "id": "auth-mark-twain-168",
+  "id": "author-mark-twain",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Mark Twain",
-  "teaser": "Samuel Clemens took his pen name from a Mississippi riverboat call, piloted steamboats before the Civil War, and wrote Huckleberry Finn - the book Hemingway said all modern American literature comes from. He went bankrupt on a typesetting machine he invented.",
+  "teaser": "American novelist and humorist born Samuel Clemens — his pen name 'Mark Twain' is riverboat slang for 'two fathoms deep' (safe water). His novel 'Adventures of Huckleberry Finn' (1884) was banned from the Concord Public Library the month it was published. Hemingway said all American literature comes from one book: Huckleberry Finn.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Adventures of Huckleberry Finn, opening chapters",
-   "durationMinutes": 19,
-   "instruction": "Read the first chapters of Huckleberry Finn. Huck tells his own story in his own voice - 'You don't know about me, without you have read a book by the name of The Adventures of Tom Sawyer' - and the grammar is the point. Notice how quickly it stops being a boy's adventure and starts being about freedom."
+   "targetName": "Adventures of Huckleberry Finn, chapters 1-11",
+   "durationMinutes": 40,
+   "instruction": "Read the first eleven chapters. Huck narrates in his own dialect — Twain pioneered American vernacular in literature. Huck fakes his own murder and escapes on the Mississippi with Jim, a slave running toward freedom. Notice Huck's moral crisis: society has taught him that helping Jim is a sin, but his heart says otherwise. The river is freedom; the shore is hypocrisy."
   },
   "tags": [
    "American",
-   "Novel",
-   "19th Century"
+   "Fiction",
+   "Satire",
+   "19th Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -1900,42 +1959,46 @@
   "tier": 2
  },
  {
-  "id": "auth-graham-greene-172",
+  "id": "author-graham-greene",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Graham Greene",
-  "teaser": "A Catholic convert who wrote 'entertainments' he was ashamed of and serious novels about sin - The Power and the Glory, Brighton Rock, The Quiet American. He worked for MI6 and wrote the screenplay for The Third Man.",
+  "teaser": "British novelist and Catholic convert who divided his books into 'novels' and 'entertainments' — though the line was always blurry. He was a spy for MI6 during WWII, stationed in Sierra Leone and Portugal. His novel 'The Quiet American' (1955) predicted American failure in Vietnam years before the war escalated. He was shortlisted for the Nobel Prize multiple times but never won.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Quiet American, opening chapters",
-   "durationMinutes": 33,
-   "instruction": "Read the opening of The Quiet American. The narrator Fowler is a British journalist in Vietnam, and he tells you about the American who will die - then shows you how it happened. Greene divides his own conscience between the two men; notice which one he makes more attractive."
+   "targetName": "The Power and the Glory, Part One",
+   "durationMinutes": 35,
+   "instruction": "Read Part One. A nameless 'whisky priest' — the last priest in a Mexican state that has outlawed religion — flees across the countryside, pursued by a police lieutenant. Greene's Catholicism is the novel's engine: the priest is a sinner (drunk, father of a child) but also a priest. His martyrdom is accidental and reluctant. Notice the scorching heat — Greene makes Mexico feel like hell with beautiful beaches."
   },
   "tags": [
    "British",
-   "Novel",
-   "20th Century"
+   "Fiction",
+   "Literary",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
  {
-  "id": "auth-albert-camus-173",
+  "id": "author-albert-camus",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Albert Camus",
-  "teaser": "An Algerian-French philosopher who wrote The Stranger, The Plague, and the essay 'The Myth of Sisyphus' - the case for living anyway. He won the Nobel at 44, the second-youngest ever, and died in a car crash at 46 with a train ticket in his pocket.",
+  "teaser": "French-Algerian philosopher and novelist who won the Nobel Prize in 1957 at age 44. His novel 'The Stranger' (1942) opens with 'Mother died today. Or maybe yesterday, I don't know.' Camus called his philosophy 'absurdism' — the world is meaningless, and we must create meaning anyway. He died in a car crash at 46 with an unused train ticket in his pocket.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Stranger, opening pages",
-   "durationMinutes": 15,
-   "instruction": "Read the opening of The Stranger. Meursault tells you his mother died and the date - and the flatness of the prose IS the philosophy. Camus called it a novel about 'the nakedness of man faced with the absurd.' Notice how the sun does the killing."
+   "targetName": "The Stranger, Part One",
+   "durationMinutes": 22,
+   "instruction": "Read Part One. Meursault's mother dies; he shows no emotion. He goes to the beach; he kills a man 'because of the sun.' The novel is written in a flat, declarative style called 'white writing' — no metaphors, no interiority. Notice how the trial in Part Two judges Meursault not for murder but for not crying at his mother's funeral. The sun is the real culprit."
   },
   "tags": [
    "French",
-   "Philosophy",
-   "20th Century"
+   "Fiction",
+   "Philosophical",
+   "20th Century",
+   "Philosophy"
   ],
   "tier": 2
  },
@@ -1960,22 +2023,24 @@
   "tier": 2
  },
  {
-  "id": "auth-john-steinbeck-175",
+  "id": "author-john-steinbeck",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "John Steinbeck",
-  "teaser": "He wrote The Grapes of Wrath about the Dust Bowl exodus to California, won the Pulitzer and the Nobel, and was called a communist for it. He said a writer 'must believe that the thing he is doing is the most important thing in the world.'.",
+  "teaser": "American novelist who drove across the country to research 'The Grapes of Wrath' (1939) — he lived in migrant camps, ate what they ate, and filed reports. When the novel was published, some counties in California burned it. Steinbeck won the Nobel Prize in 1962. His dog ate the first draft of 'Of Mice and Men,' and he had to rewrite it from memory.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Grapes of Wrath, opening chapters",
-   "durationMinutes": 37,
-   "instruction": "Read the opening of The Grapes of Wrath. Steinbeck cuts between the Joad family's story and intercalary chapters about the land and the road - the big picture and the close-up. Notice how the turtle crossing the highway in chapter three is the whole novel in miniature."
+   "targetName": "East of Eden, chapters 1-5",
+   "durationMinutes": 40,
+   "instruction": "Read the opening chapters. Steinbeck calls it 'the only book I have ever written' — all his others were practice. Set in the Salinas Valley, it retells the Cain and Abel story across two generations. The first chapter is a pure description of the valley through seasons — it reads like the Old Testament. Notice the Hebrew word 'timshel' (thou mayest) — it becomes the novel's thesis about free will."
   },
   "tags": [
    "American",
-   "Novel",
-   "20th Century"
+   "Fiction",
+   "Literary",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -2080,61 +2145,68 @@
   "tier": 2
  },
  {
-  "id": "auth-alice-munro-181",
+  "id": "author-alice-munro",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Alice Munro",
-  "teaser": "Canada's greatest short-story writer - she wrote almost nothing else - and the 2013 Nobel laureate whom critics called 'our Chekhov.' Her stories routinely cover decades of a life in thirty pages.",
+  "teaser": "Canadian short story writer who won the Nobel Prize in 2013 — the only short story writer to win the prize as a pure short story writer (not also a novelist). Her stories are set in rural Ontario and span entire lifetimes in 30 pages. She stopped writing in 2013 due to dementia. Her stories work like time machines: a gesture in the present opens a door to 40 years ago.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "'The Bear Came Over the Mountain' (1999)",
-   "durationMinutes": 23,
-   "instruction": "Read 'The Bear Came Over the Mountain' - the story that became the film Away from Her. A woman with dementia is sent to a care home, and her husband discovers she has fallen in love there. Notice how Munro compresses years of a marriage into a handful of scenes."
+   "targetName": "Dear Life, the first 4 stories",
+   "durationMinutes": 38,
+   "instruction": "Read the first four stories. 'To Reach Japan' — a poet on a train to Toronto makes a decision that will define her marriage. Munro's stories don't build to epiphanies; they reveal that the epiphany happened years ago and the character is only now understanding it. Notice the temporal leaps — Munro covers decades in a paragraph and a single afternoon in 10 pages. Time is her medium, not plot."
   },
   "tags": [
    "Canadian",
+   "Fiction",
+   "Short Stories",
+   "20th Century",
    "Short Fiction",
    "Contemporary"
   ],
   "tier": 2
  },
  {
-  "id": "auth-milan-kundera-182",
+  "id": "author-milan-kundera",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Milan Kundera",
-  "teaser": "A Czech novelist who was expelled from his country's writers' union and saw his books banned, then fled to France in 1975. The Unbearable Lightness of Being made 'lightness' and 'weight' global metaphors for choice.",
+  "teaser": "Czech-French novelist who wrote 'The Unbearable Lightness of Being' (1984) — a novel where the narrator is also a philosopher, interrupting the story to explain Nietzsche's concept of eternal return. He was exiled from Czechoslovakia in 1975 for his role in the Prague Spring. His Czech citizenship was revoked; France adopted him.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Unbearable Lightness of Being, opening chapters",
+   "targetName": "The Joke, the first section",
    "durationMinutes": 30,
-   "instruction": "Read the opening of The Unbearable Lightness of Being. Kundera starts with a philosophical question - what if life repeats infinitely? - and then tells a love story as its test case. Notice how he interrupts the fiction to lecture: the essay is part of the novel."
+   "instruction": "Read the first section of Kundera's debut novel (1967). Ludvik, a university student, writes a joke on a postcard to his girlfriend: 'Optimism is the opium of the people.' He's expelled from the Communist Party, sent to a penal battalion, and his life is derailed by a joke. Kundera writes ideology as farce with fatal consequences. The novel was banned in Czechoslovakia after the 1968 Soviet invasion."
   },
   "tags": [
    "Czech",
+   "Fiction",
+   "Philosophical",
+   "20th Century",
    "Novel",
-   "20th Century"
+   "Political"
   ],
   "tier": 2
  },
  {
-  "id": "auth-wole-soyinka-183",
+  "id": "author-wole-soyinka",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Wole Soyinka",
-  "teaser": "The first African to win the Nobel Prize in Literature (1986), he was imprisoned for 22 months during Nigeria's civil war for trying to broker peace - he wrote the memoir The Man Died on toilet paper in solitary confinement.",
+  "teaser": "Nigerian playwright and poet who won the Nobel Prize in 1986 — the first African laureate. He was imprisoned for 22 months during the Nigerian Civil War (1967-69), mostly in solitary confinement, for attempting to broker peace. He wrote poems on toilet paper and hid them in his underwear. His prison memoir 'The Man Died' was published in 1972.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Death and the King's Horseman, opening scenes",
-   "durationMinutes": 37,
-   "instruction": "Read the opening of Death and the King's Horseman. The play is set in 1946 colonial Nigeria, and the horseman must die to accompany his king - Soyinka's tragedy is about ritual versus colonial law. Notice how he refuses to make either side simply right."
+   "targetName": "Death and the King's Horseman, the whole play",
+   "durationMinutes": 45,
+   "instruction": "Read the whole play — it's based on a real event in 1946 colonial Nigeria. The king's horseman must ritually commit suicide to accompany his king to the afterlife, but the British colonial officer intervenes. Soyinka says it's not about colonial clash but about the cosmic duty the horseman is failing. Notice the Yoruba poetry woven through the English — the play moves on two planes at once."
   },
   "tags": [
    "Nigerian",
    "Drama",
+   "Postcolonial",
    "20th Century"
   ],
   "tier": 2
@@ -2180,42 +2252,46 @@
   "tier": 2
  },
  {
-  "id": "auth-yukio-mishima-186",
+  "id": "author-yukio-mishima",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Yukio Mishima",
-  "teaser": "He wrote 40 novels and 20 plays, and ran his own private army - then, in 1970, he took four soldiers hostage at a military headquarters and died by ritual seppuku at 45. His Sea of Fertility tetralogy was delivered to his publisher the morning of his death.",
+  "teaser": "Japanese novelist, playwright, and bodybuilder who wrote 40 novels before attempting a coup at a military base in 1970. After his speech was mocked by soldiers, he committed ritual suicide (seppuku) on the general's balcony. His 'Sea of Fertility' tetralogy is a meditation on reincarnation across 20th-century Japan. His death shocked the world.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Confessions of a Mask, opening chapters",
-   "durationMinutes": 37,
-   "instruction": "Read the opening of Confessions of a Mask. Mishima's narrator describes a boyhood fantasy - a picture of a knight dying - and the shame that follows. The novel is a confession of being unable to be who the world expects. Notice how beauty and death are the same word in his prose."
+   "targetName": "Spring Snow, first section",
+   "durationMinutes": 38,
+   "instruction": "Read the opening of Spring Snow — the first novel of the Sea of Fertility tetralogy. 1912 Tokyo: Kiyoaki Matsugae, a young aristocrat, falls in love with Satoko, the woman he's too proud to pursue until she's engaged to a prince. Mishima's prose is impossibly beautiful — cherry blossoms, kimonos, the dying elegance of the old Japan. Notice the cruelty beneath the beauty."
   },
   "tags": [
    "Japanese",
-   "Novel",
-   "20th Century"
+   "Fiction",
+   "Modernist",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
  {
-  "id": "auth-elena-ferrante-187",
+  "id": "author-elena-ferrante",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Elena Ferrante",
-  "teaser": "The most famous anonymous author alive - no one knows her real name, and she has never been photographed. Her Neapolitan Novels, beginning with My Brilliant Friend, sold over 10 million copies and were adapted for television.",
+  "teaser": "The world's most famous anonymous author — 15+ million copies sold, zero public appearances, only written interviews. Her Neapolitan Novels trace two women's friendship from 1950s Naples to the present. Her identity remains unknown.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "My Brilliant Friend, opening chapters",
-   "durationMinutes": 30,
-   "instruction": "Read the opening of My Brilliant Friend. The narrator Elena is sixty and her best friend Lila has vanished - the whole series is Elena's attempt to write her friend into permanence. Notice how Ferrante renders childhood envy and love as physical forces."
+   "targetName": "My Brilliant Friend, prologue + first chapter",
+   "durationMinutes": 25,
+   "instruction": "Read the prologue and first chapter. Lila has vanished, and Elena is writing their whole history out of spite. Childhood is built through small violences: a doll in a cellar, a broken arm, a race to be first. Ferrante makes the neighborhood feel like a planet."
   },
   "tags": [
    "Italian",
-   "Novel",
-   "Contemporary"
+   "Fiction",
+   "Contemporary",
+   "21st Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -2280,20 +2356,23 @@
   "tier": 2
  },
  {
-  "id": "auth-nk-jemisin-191",
+  "id": "author-nk-jemisin",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "N.K. Jemisin",
-  "teaser": "She became the first author to win the Hugo Award for Best Novel three years in a row - for the Broken Earth trilogy. Her world is geologically alive: a 'fifth season' of catastrophic climate, with people who can quell earthquakes. N.K. Jemisin.",
+  "teaser": "American science fiction and fantasy writer who won the Hugo Award for Best Novel three years in a row (2016-2018) — the first author, male or female, to do so. Her Broken Earth trilogy opens with 'The Fifth Season' (2015), set on a planet wracked by apocalyptic seismic events, and written partly in second person. Jemisin is also a counseling psychologist.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Fifth Season, opening chapters",
-   "durationMinutes": 16,
-   "instruction": "Read the opening of The Fifth Season. The world is ending again, and a woman is trying to get her daughter back - Jemisin writes parts of the apocalypse in second person. Notice how the novel's three timelines are also its argument about survival."
+   "targetName": "The Fifth Season, chapters 1-5",
+   "durationMinutes": 40,
+   "instruction": "Read the first five chapters. The novel opens: 'This is the way the world ends. Again.' Essun discovers her son murdered by his own father and sets out for revenge across a continent fracturing into apocalypse. Jemisin uses three narrative strands — one in second person — that the reader slowly realizes are connected in an impossible way. The geology is rigorous, the oppression systemic, and the voice is searing."
   },
   "tags": [
    "American",
+   "Fantasy",
+   "Science Fiction",
+   "21st Century",
    "Sci-Fi",
    "Contemporary"
   ],
@@ -2340,41 +2419,46 @@
   "tier": 2
  },
  {
-  "id": "auth-sally-rooney-194",
+  "id": "author-sally-rooney",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Sally Rooney",
-  "teaser": "Called 'the first great millennial novelist,' she wrote Normal People about two Irish students who keep orbiting each other - and helped turn it into a TV series. Her debut, Conversations with Friends, was written while she was finishing her MA.",
+  "teaser": "Irish novelist who published her debut 'Conversations with Friends' (2017) at 26 and was called 'the first great millennial novelist.' Her novels are about sex, class, and political conviction among young Irish people. Her third novel 'Beautiful World, Where Are You' (2021) incorporates emails debating Marxism and the purpose of art between the sex scenes.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "Normal People, opening chapters",
-   "durationMinutes": 20,
-   "instruction": "Read the opening of Normal People. The chapters are small, dated scenes, and the narration hovers just outside the characters' heads - Rooney's trademark is telling you what they think while they refuse to say it. Notice how the gaps between chapters are the plot."
+   "targetName": "Normal People, the whole novel",
+   "durationMinutes": 45,
+   "instruction": "Read the whole novel. Connell and Marianne — he's popular, she's weird — pretend not to know each other at school, then meet again at Trinity College where their roles reverse. Rooney writes without quotation marks and with surgical precision about class and desire. Notice the silences: Connell can't say what he feels, and the novel orbits around those unsaid sentences like a planet around a black hole."
   },
   "tags": [
    "Irish",
-   "Novel",
-   "Contemporary"
+   "Fiction",
+   "Contemporary",
+   "21st Century",
+   "Novel"
   ],
   "tier": 2
  },
  {
-  "id": "auth-rf-kuang-195",
+  "id": "author-rf-kuang",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "R.F. Kuang",
-  "teaser": "She wrote her debut fantasy trilogy The Poppy War while an undergraduate - it is inspired by the Sino-Japanese War, and the 'shamanic' magic runs on opium. She went on to earn a PhD in East Asian studies at Yale and wrote Babel, about translation as empire.",
+  "teaser": "Chinese-American novelist who wrote 'Babel' (2022) — a dark academia fantasy about translation, colonialism, and the violence embedded in language — while still in her 20s. Her debut 'The Poppy War' (2018) sold to Harper Voyager when she was 21. She has a Marshall Scholarship and degrees from Cambridge and Oxford and is now at Yale Law School.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Poppy War, opening chapters",
-   "durationMinutes": 43,
-   "instruction": "Read the opening of The Poppy War. Rin is a war orphan who aces an exam that could take her from the south to the military academy - and the book's fantasy builds on real history. Notice how Kuang's magic system runs on suffering."
+   "targetName": "Babel, Book I",
+   "durationMinutes": 45,
+   "instruction": "Read Book I. Robin Swift, a Chinese orphan, is brought to Oxford to study at Babel — the Royal Institute of Translation, where silver bars inscribed with words in two languages produce magical effects. The magic is powered by what's lost in translation. Kuang builds a rigorous magical system out of linguistics. Notice the footnotes: they're scholarly asides that deepen the themes of empire, language, and violence."
   },
   "tags": [
-   "American",
+   "Chinese-American",
    "Fantasy",
+   "Historical",
+   "21st Century",
+   "American",
    "Contemporary"
   ],
   "tier": 2
@@ -2440,42 +2524,46 @@
   "tier": 2
  },
  {
-  "id": "auth-clarice-lispector-199",
+  "id": "author-clarice-lispector",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Clarice Lispector",
-  "teaser": "Born in Ukraine, she immigrated to Brazil as a toddler and became one of the greatest Portuguese-language writers - a stylist whose sentences bend. She died the same day her novel The Hour of the Star was published, at 56.",
+  "teaser": "Brazilian writer born in Ukraine who fled pogroms as an infant. Her novels are more interior monologue than plot — 'The Hour of the Star' (1977) follows a poor girl from the northeast of Brazil who eats hot dogs and dreams of being a movie star. Lispector died the year it was published, at 56.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Hour of the Star, opening pages",
-   "durationMinutes": 39,
-   "instruction": "Read the opening of The Hour of the Star. The narrator is a man named Rodrigo who is trying to write about a poor girl from the northeast - and he keeps interrupting himself. Notice how Lispector makes the act of writing the story part of the story."
+   "targetName": "The Hour of the Star, the whole novella",
+   "durationMinutes": 42,
+   "instruction": "Read the whole novella — it's only 96 pages. A male narrator invents Macabea, a typist so poor and plain she's almost invisible. The narrator keeps interrupting to tell you he doesn't know how to write this. Notice how Lispector makes you question who has the right to tell whose story — the frame narrator is the real subject."
   },
   "tags": [
    "Brazilian",
-   "Novel",
-   "20th Century"
+   "Fiction",
+   "Modernist",
+   "20th Century",
+   "Novel"
   ],
   "tier": 2
  },
  {
-  "id": "auth-roberto-bolaño-200",
+  "id": "author-roberto-bolano",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Roberto Bolaño",
-  "teaser": "A Chilean who was a poet first, then wrote fiction only after a liver-disease diagnosis - in his last decade he produced The Savage Detectives and 2666, his posthumous 900-page masterpiece about a string of unsolved murders.",
+  "teaser": "Chilean novelist who died at 50 in 2003, just as his masterpiece '2666' was gaining global attention. He spent his youth as a vagabond poet in Mexico and Spain, once calling poetry 'braver than anyone.' His novel 'The Savage Detectives' (1998) follows a group of poets searching for a vanished writer in the Sonoran desert.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "The Savage Detectives, opening chapters",
+   "targetName": "The Savage Detectives, first section",
    "durationMinutes": 30,
-   "instruction": "Read the opening of The Savage Detectives. The novel is a diary for the first hundred pages, then erupts into a chorus of testimonies about two poets on the run. Notice how Bolaño builds a story from other people's memories."
+   "instruction": "Read the first section — Juan García Madero's diary, 1975. He's 17, he joins a gang of visceral realist poets in Mexico City, and he's having sex for the first time. Bolaño writes youth as a fever: the poetry, the poverty, the conviction that literature is worth dying for. The novel's structure fractures after Part One — the diary gives way to a chorus of 50+ narrators."
   },
   "tags": [
    "Chilean",
-   "Novel",
-   "Contemporary"
+   "Fiction",
+   "Contemporary",
+   "21st Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -2500,22 +2588,24 @@
   "tier": 2
  },
  {
-  "id": "auth-zadie-smith-202",
+  "id": "author-zadie-smith",
   "categoryId": "AUTHORS",
   "subtype": "Author",
   "name": "Zadie Smith",
-  "teaser": "Her debut White Teeth - about two families in multicultural London - was published when she was 24 and sold a million copies. A Jamaican-English writer, she also writes essays on culture, the internet, and her own body.",
+  "teaser": "British novelist who wrote 'White Teeth' while at Cambridge — the unfinished manuscript sparked a bidding war and she got a 250,000-pound advance at 21. The novel is about two WWII buddies in London — one Bangladeshi, one English — and their children navigating multicultural Britain at the millennium.",
   "imageUrl": "",
   "exploreAction": {
    "verb": "Read",
-   "targetName": "White Teeth, opening chapters",
-   "durationMinutes": 27,
-   "instruction": "Read the opening of White Teeth. Smith starts with a man trying to shoot himself in 1975 and cuts to 1990 - the novel is built on the accident that the gun didn't fire. Notice how the book's energy comes from its sentences: they run on jokes and swerves."
+   "targetName": "White Teeth, Part One",
+   "durationMinutes": 38,
+   "instruction": "Read Part One. Archibald Jones tries to kill himself in his car on New Year's Day 1975 but is interrupted by a halal butcher. This is how Smith introduces multicultural London — through absurd collisions. Notice how Smith writes in many voices at once — Jamaican patois, Bengali-inflected English, posh academic jargon — and somehow they all sound like the same book."
   },
   "tags": [
    "British",
-   "Novel",
-   "Contemporary"
+   "Fiction",
+   "Contemporary",
+   "21st Century",
+   "Novel"
   ],
   "tier": 2
  },
@@ -2600,27 +2690,6 @@
   "tier": 2
  },
  {
-  "id": "author-james-baldwin",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "James Baldwin",
-  "teaser": "Publishing 'Giovanni's Room' (1956), his publisher told him to burn it — it would ruin his career. He published anyway. His essay 'The Fire Next Time' was written as a letter to his 14-year-old nephew.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Fire Next Time, first essay",
-   "durationMinutes": 25,
-   "instruction": "Read the opening essay. Baldwin addresses his nephew James, named after him. Every paragraph moves between love and fury in the same sentence — notice how he writes about anger without ever losing tenderness."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Essays",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-italo-calvino",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -2638,27 +2707,6 @@
    "Fiction",
    "Postmodern",
    "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-elena-ferrante",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Elena Ferrante",
-  "teaser": "The world's most famous anonymous author — 15+ million copies sold, zero public appearances, only written interviews. Her Neapolitan Novels trace two women's friendship from 1950s Naples to the present. Her identity remains unknown.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "My Brilliant Friend, prologue + first chapter",
-   "durationMinutes": 25,
-   "instruction": "Read the prologue and first chapter. Lila has vanished, and Elena is writing their whole history out of spite. Childhood is built through small violences: a doll in a cellar, a broken arm, a race to be first. Ferrante makes the neighborhood feel like a planet."
-  },
-  "tags": [
-   "Italian",
-   "Fiction",
-   "Contemporary",
-   "21st Century"
   ],
   "tier": 2
  },
@@ -2684,48 +2732,6 @@
   "tier": 2
  },
  {
-  "id": "author-chimamanda-adichie",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Chimamanda Ngozi Adichie",
-  "teaser": "Nigerian writer whose TED talk 'We Should All Be Feminists' was sampled by Beyonce on 'Flawless.' Her novel 'Half of a Yellow Sun' won the Women's Prize and is about the Biafran War — a war her grandfathers fought on opposite sides.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Half of a Yellow Sun, Part One",
-   "durationMinutes": 35,
-   "instruction": "Read Part One. The novel opens in the early 1960s with a houseboy named Ugwu — through his eyes you see the buildup to war as domestic tension. Adichie wrote this because she grew up surrounded by Biafran veterans but never saw their story in fiction. Notice how the privileged dinner conversations slowly tip toward catastrophe."
-  },
-  "tags": [
-   "Nigerian",
-   "Fiction",
-   "Historical",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-clarice-lispector",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Clarice Lispector",
-  "teaser": "Brazilian writer born in Ukraine who fled pogroms as an infant. Her novels are more interior monologue than plot — 'The Hour of the Star' (1977) follows a poor girl from the northeast of Brazil who eats hot dogs and dreams of being a movie star. Lispector died the year it was published, at 56.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Hour of the Star, the whole novella",
-   "durationMinutes": 42,
-   "instruction": "Read the whole novella — it's only 96 pages. A male narrator invents Macabea, a typist so poor and plain she's almost invisible. The narrator keeps interrupting to tell you he doesn't know how to write this. Notice how Lispector makes you question who has the right to tell whose story — the frame narrator is the real subject."
-  },
-  "tags": [
-   "Brazilian",
-   "Fiction",
-   "Modernist",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-ngugi-wa-thiongo",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -2742,27 +2748,6 @@
    "Kenyan",
    "Fiction",
    "Postcolonial",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-ursula-le-guin",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Ursula K. Le Guin",
-  "teaser": "Wrote 'The Left Hand of Darkness' in 1969 — a sci-fi novel that treats gender as a social construct decades before that was mainstream. Her parents were anthropologists, and her fiction always reads like ethnography of imaginary cultures. Her Earthsea books proved fantasy could be literary before anyone else tried.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "A Wizard of Earthsea, first 3 chapters",
-   "durationMinutes": 25,
-   "instruction": "Read the opening. Ged, a boy with a gift for magic, goes to wizard school and in a fit of pride summons a shadow monster. The rest of the novel is the chase — but the shadow is hunting him too. Notice Le Guin's magic isn't a set of rules but a moral weight: every spell has a cost, and names are power."
-  },
-  "tags": [
-   "American",
-   "Fantasy",
-   "Science Fiction",
    "20th Century"
   ],
   "tier": 2
@@ -2810,114 +2795,6 @@
   "tier": 2
  },
  {
-  "id": "author-kazuo-ishiguro",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Kazuo Ishiguro",
-  "teaser": "British-Japanese novelist who won the Nobel Prize in 2017. His novels are narrated by people deceiving themselves — a butler who can't admit his loyalty was to a Nazi sympathizer, a clone who never questions her fate. He wrote 'The Remains of the Day' in 4 weeks during a self-imposed writing sprint called 'The Crash.'.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Remains of the Day, the first day's entries",
-   "durationMinutes": 40,
-   "instruction": "Read the opening entries of Stevens's motoring diary. He's driving through the English countryside having deep thoughts about what constitutes a 'great butler.' Every memory he shares is a carefully curated lie. Notice how his formal, precise prose is a cage — the emotion bleeds through what he refuses to name."
-  },
-  "tags": [
-   "British",
-   "Japanese",
-   "Fiction",
-   "Nobel",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-isabel-allende",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Isabel Allende",
-  "teaser": "Chilean writer who started her first novel 'The House of the Spirits' as a letter to her dying 99-year-old grandfather. It became a global bestseller and launched the Latin American literary boom's female voice. Her father's cousin was Salvador Allende — the Chilean president overthrown by Pinochet in 1973.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The House of the Spirits, first 3 chapters",
-   "durationMinutes": 35,
-   "instruction": "Read the opening. The novel begins with a family patriarch who keeps a diary of 'memorable events' and a clairvoyant girl named Clara who predicts deaths. Allende writes in the magical-realist tradition but the magic is domestic — ghosts sit at the dinner table. Notice how political history enters through family meals."
-  },
-  "tags": [
-   "Chilean",
-   "Fiction",
-   "Magical Realism",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-salman-rushdie",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Salman Rushdie",
-  "teaser": "Indian-British writer whose novel 'The Satanic Verses' (1988) earned a fatwa calling for his death from Iran's Ayatollah. He lived in hiding for 9 years under police protection. His writing mixes history, myth, and Bollywood — 'Midnight's Children' won the Booker of Bookers (best Booker winner in 25 years) for its story of children born at India's independence.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Midnight's Children, Book One",
-   "durationMinutes": 40,
-   "instruction": "Read Book One. The narrator, Saleem Sinai, was born exactly at midnight on August 15, 1947 — Indian independence — and his fate is magically tied to the nation's. Rushdie narrates in a breathless, overflowing voice. Notice how every historical event is refracted through Saleem's personal mythology. History is always a story someone is telling."
-  },
-  "tags": [
-   "Indian",
-   "British",
-   "Fiction",
-   "Magical Realism",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-margaret-atwood",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Margaret Atwood",
-  "teaser": "Canadian writer who has won the Booker Prize twice. Her dystopian novel 'The Handmaid's Tale' (1985) includes no event that hasn't happened somewhere in history — every horror is footnoted. She invented the LongPen, a remote book-signing robot, because she got tired of touring. Her father was an entomologist who took her to the woods instead of school.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Handmaid's Tale, opening section",
-   "durationMinutes": 35,
-   "instruction": "Read the opening. Offred narrates in present tense from a single room where she sleeps, eats, and waits. The regime of Gilead took everything — her name, her husband, her daughter, even the ability to read. Atwood wrote the novel in West Berlin during the Cold War. Notice how every detail is historically grounded: the 'Salvagings' echo the Salem witch trials."
-  },
-  "tags": [
-   "Canadian",
-   "Fiction",
-   "Dystopian",
-   "Feminist",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-zadie-smith",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Zadie Smith",
-  "teaser": "British novelist who wrote 'White Teeth' while at Cambridge — the unfinished manuscript sparked a bidding war and she got a 250,000-pound advance at 21. The novel is about two WWII buddies in London — one Bangladeshi, one English — and their children navigating multicultural Britain at the millennium.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "White Teeth, Part One",
-   "durationMinutes": 38,
-   "instruction": "Read Part One. Archibald Jones tries to kill himself in his car on New Year's Day 1975 but is interrupted by a halal butcher. This is how Smith introduces multicultural London — through absurd collisions. Notice how Smith writes in many voices at once — Jamaican patois, Bengali-inflected English, posh academic jargon — and somehow they all sound like the same book."
-  },
-  "tags": [
-   "British",
-   "Fiction",
-   "Contemporary",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-aleksandr-solzhenitsyn",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -2960,48 +2837,6 @@
   "tier": 2
  },
  {
-  "id": "author-ocean-vuong",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Ocean Vuong",
-  "teaser": "Vietnamese-American poet whose debut novel 'On Earth We're Briefly Gorgeous' (2019) is written as a letter from a son to his illiterate mother. His family fled Vietnam when he was 2 and settled in Hartford, Connecticut. He's the first Vietnamese-American writer to win a MacArthur Fellowship.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "On Earth We're Briefly Gorgeous, first 30 pages",
-   "durationMinutes": 28,
-   "instruction": "Read the opening letter: 'Let me begin again.' The narrator, Little Dog, writes to his mother Rose, a nail-salon worker who can't read English. Vuong was a poet first, and every paragraph is a poem. Notice how violence and beauty share the same sentence — a columbine flower and a memory of war, a kiss and a bruise."
-  },
-  "tags": [
-   "Vietnamese-American",
-   "Fiction",
-   "Poetry",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-franz-kafka",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Franz Kafka",
-  "teaser": "Prague-born writer who worked at an insurance company by day and wrote at night. He made his friend Max Brod promise to burn all his manuscripts after his death — Brod published them instead. His stories about bureaucracies crushing individuals gave us the word 'Kafkaesque.' He died of tuberculosis at 40, mostly unpublished.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Metamorphosis, the whole novella",
-   "durationMinutes": 25,
-   "instruction": "Read the whole novella — about 60 pages. Gregor Samsa wakes up as a giant insect. His first thought: how will I get to work? Kafka never explains the transformation; the horror is the family's reaction, not the bug. Notice the deadpan tone — Kafka tells the impossible like a police report. Gregor's humanity fades as his family's indifference grows."
-  },
-  "tags": [
-   "Czech",
-   "Fiction",
-   "Modernist",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-gabriel-garcia-marquez",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3018,90 +2853,6 @@
    "Colombian",
    "Fiction",
    "Magical Realism",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-milan-kundera",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Milan Kundera",
-  "teaser": "Czech-French novelist who wrote 'The Unbearable Lightness of Being' (1984) — a novel where the narrator is also a philosopher, interrupting the story to explain Nietzsche's concept of eternal return. He was exiled from Czechoslovakia in 1975 for his role in the Prague Spring. His Czech citizenship was revoked; France adopted him.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Unbearable Lightness of Being, Part One",
-   "durationMinutes": 30,
-   "instruction": "Read Part One. The narrator introduces Tomas, a surgeon, and Tereza, a waitress, and then starts philosophizing about lightness vs. weight. Kundera treats his characters like ideas — he'll describe them, then analyze what they mean. Notice how the 1968 Soviet invasion of Prague becomes a backdrop for a love story about whether commitment is heaviness or meaning."
-  },
-  "tags": [
-   "Czech",
-   "Fiction",
-   "Philosophical",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-leo-tolstoy",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Leo Tolstoy",
-  "teaser": "Russian novelist who wrote 'War and Peace' (1869) — one of the longest novels ever — while having 13 children. He wrestled it for six years and his wife Sonya hand-copied the manuscript seven times (about 3,000 pages each time). He renounced his wealth at 50, gave away his copyrights, and died at a train station after leaving home at 82.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "War and Peace, Book One, Part One",
-   "durationMinutes": 45,
-   "instruction": "Read the opening. Anna Pavlovna's soirée in 1805 St. Petersburg. Napoleon is threatening Russia; the aristocracy gossips in French. Pierre Bezukhov, the illegitimate son of a count, blunders into the room and starts arguing for Napoleon. Notice how Tolstoy introduces 20 characters in 30 pages — each one distinct, each one convinced they're the protagonist of history."
-  },
-  "tags": [
-   "Russian",
-   "Fiction",
-   "Historical",
-   "19th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-fyodor-dostoevsky",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Fyodor Dostoevsky",
-  "teaser": "Sentenced to death by firing squad in 1849 for reading banned books — at the last second a messenger arrived with a reprieve from the Tsar, commuting his sentence to Siberian exile. The mock execution broke him. He became one of the greatest psychological novelists, writing about guilt, God, and the darkest corners of human consciousness.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Crime and Punishment, Part One",
-   "durationMinutes": 40,
-   "instruction": "Read Part One. Raskolnikov, a destitute student in St. Petersburg, plans and executes a murder. Dostoevsky wrote the novel as he was gambling away his advance — the urgency is on every page. Raskolnikov doesn't feel guilt; he feels fever. Notice how the city itself is a character: the stifling rooms, the yellow walls, the crowds that see everything and nothing."
-  },
-  "tags": [
-   "Russian",
-   "Fiction",
-   "Psychological",
-   "19th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-kurt-vonnegut",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Kurt Vonnegut",
-  "teaser": "American satirist whose novel 'Slaughterhouse-Five' (1969) is based on his experience as a POW who survived the firebombing of Dresden — he witnessed the destruction from a meat locker underground. He called the book 'a failure' on the first page. The aliens in the novel — Tralfamadorians — see all time at once, so death is just 'so it goes.'.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Slaughterhouse-Five, chapters 1-2",
-   "durationMinutes": 25,
-   "instruction": "Read the first two chapters. Vonnegut introduces himself as a character struggling to write about Dresden. Billy Pilgrim has 'come unstuck in time.' Notice the refrain 'So it goes' — it appears after every mention of death. Vonnegut uses it 106 times. The novel is anti-war but refuses to dramatize: war is never glorious, just absurd and sad."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Satire",
    "20th Century"
   ],
   "tier": 2
@@ -3128,27 +2879,6 @@
   "tier": 2
  },
  {
-  "id": "author-albert-camus",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Albert Camus",
-  "teaser": "French-Algerian philosopher and novelist who won the Nobel Prize in 1957 at age 44. His novel 'The Stranger' (1942) opens with 'Mother died today. Or maybe yesterday, I don't know.' Camus called his philosophy 'absurdism' — the world is meaningless, and we must create meaning anyway. He died in a car crash at 46 with an unused train ticket in his pocket.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Stranger, Part One",
-   "durationMinutes": 22,
-   "instruction": "Read Part One. Meursault's mother dies; he shows no emotion. He goes to the beach; he kills a man 'because of the sun.' The novel is written in a flat, declarative style called 'white writing' — no metaphors, no interiority. Notice how the trial in Part Two judges Meursault not for murder but for not crying at his mother's funeral. The sun is the real culprit."
-  },
-  "tags": [
-   "French",
-   "Fiction",
-   "Philosophical",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-tayeb-salih",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3170,27 +2900,6 @@
   "tier": 2
  },
  {
-  "id": "author-roberto-bolano",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Roberto Bolaño",
-  "teaser": "Chilean novelist who died at 50 in 2003, just as his masterpiece '2666' was gaining global attention. He spent his youth as a vagabond poet in Mexico and Spain, once calling poetry 'braver than anyone.' His novel 'The Savage Detectives' (1998) follows a group of poets searching for a vanished writer in the Sonoran desert.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Savage Detectives, first section",
-   "durationMinutes": 30,
-   "instruction": "Read the first section — Juan García Madero's diary, 1975. He's 17, he joins a gang of visceral realist poets in Mexico City, and he's having sex for the first time. Bolaño writes youth as a fever: the poetry, the poverty, the conviction that literature is worth dying for. The novel's structure fractures after Part One — the diary gives way to a chorus of 50+ narrators."
-  },
-  "tags": [
-   "Chilean",
-   "Fiction",
-   "Contemporary",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-doris-lessing",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3207,27 +2916,6 @@
    "British",
    "Fiction",
    "Feminist",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-john-steinbeck",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "John Steinbeck",
-  "teaser": "American novelist who drove across the country to research 'The Grapes of Wrath' (1939) — he lived in migrant camps, ate what they ate, and filed reports. When the novel was published, some counties in California burned it. Steinbeck won the Nobel Prize in 1962. His dog ate the first draft of 'Of Mice and Men,' and he had to rewrite it from memory.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "East of Eden, chapters 1-5",
-   "durationMinutes": 40,
-   "instruction": "Read the opening chapters. Steinbeck calls it 'the only book I have ever written' — all his others were practice. Set in the Salinas Valley, it retells the Cain and Abel story across two generations. The first chapter is a pure description of the valley through seasons — it reads like the Old Testament. Notice the Hebrew word 'timshel' (thou mayest) — it becomes the novel's thesis about free will."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Literary",
    "20th Century"
   ],
   "tier": 2
@@ -3254,47 +2942,6 @@
   "tier": 2
  },
  {
-  "id": "author-han-kang",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Han Kang",
-  "teaser": "South Korean writer whose novel 'The Vegetarian' (2007) won the International Booker Prize in 2016. It's told in three parts about a woman who stops eating meat after a dream. Her family's reaction escalates to force-feeding and institutionalization. Han writes about bodies, violence, and refusal with unnerving stillness.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Vegetarian, Part One: The Vegetarian",
-   "durationMinutes": 28,
-   "instruction": "Read Part One, narrated by the husband — a dull man whose wife Yeong-hye stops eating meat after a dream of blood. He's not concerned for her; he's annoyed the dinner parties are awkward. Notice how Han uses the husband's banality as the real horror: his wife is in crisis and all he can think about is his professional standing. The spare prose leaves room for the unsaid."
-  },
-  "tags": [
-   "South Korean",
-   "Fiction",
-   "Contemporary",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-herman-melville",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Herman Melville",
-  "teaser": "American novelist who was hugely popular for his early sea adventures, then wrote 'Moby-Dick' (1851) and his career collapsed — the book sold 3,715 copies in his lifetime. At the time of his death, he was remembered — if at all — as 'the man who lived among the cannibals.' The 20th century rediscovered him as one of America's greatest writers.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Bartleby the Scrivener, the whole story",
-   "durationMinutes": 22,
-   "instruction": "Read the whole story — about 40 pages. A Wall Street lawyer hires Bartleby, a copyist who one day responds to a request with 'I would prefer not to.' That phrase becomes his only response to everything. Melville never explains Bartleby; he's a blank wall. Notice the lawyer-narrator's growing sympathy and frustration — Bartleby's passive resistance is unanswerable. It's a comedy until it isn't."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "19th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-anton-chekhov",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3312,90 +2959,6 @@
    "Fiction",
    "Short Stories",
    "19th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-yukio-mishima",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Yukio Mishima",
-  "teaser": "Japanese novelist, playwright, and bodybuilder who wrote 40 novels before attempting a coup at a military base in 1970. After his speech was mocked by soldiers, he committed ritual suicide (seppuku) on the general's balcony. His 'Sea of Fertility' tetralogy is a meditation on reincarnation across 20th-century Japan. His death shocked the world.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Spring Snow, first section",
-   "durationMinutes": 38,
-   "instruction": "Read the opening of Spring Snow — the first novel of the Sea of Fertility tetralogy. 1912 Tokyo: Kiyoaki Matsugae, a young aristocrat, falls in love with Satoko, the woman he's too proud to pursue until she's engaged to a prince. Mishima's prose is impossibly beautiful — cherry blossoms, kimonos, the dying elegance of the old Japan. Notice the cruelty beneath the beauty."
-  },
-  "tags": [
-   "Japanese",
-   "Fiction",
-   "Modernist",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-louise-erdrich",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Louise Erdrich",
-  "teaser": "Native American (Ojibwe) novelist who runs Birchbark Books, an independent bookstore in Minneapolis. Her novel 'The Round House' (2012) won the National Book Award and is about a 13-year-old boy seeking justice after his mother is attacked on a reservation — where tribal and federal law create a jurisdictional maze.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Round House, first half",
-   "durationMinutes": 40,
-   "instruction": "Read the first half. Joe's mother is attacked and won't speak about it. Joe and his friends start their own investigation, biking around the reservation. Erdrich embeds the legal injustice in the details — the crime happened in a round house (a sacred space) near the reservation boundary, and jurisdiction depends on whose land the rock was sitting on. Notice how humor coexists with horror."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Native American",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-wole-soyinka",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Wole Soyinka",
-  "teaser": "Nigerian playwright and poet who won the Nobel Prize in 1986 — the first African laureate. He was imprisoned for 22 months during the Nigerian Civil War (1967-69), mostly in solitary confinement, for attempting to broker peace. He wrote poems on toilet paper and hid them in his underwear. His prison memoir 'The Man Died' was published in 1972.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Death and the King's Horseman, the whole play",
-   "durationMinutes": 45,
-   "instruction": "Read the whole play — it's based on a real event in 1946 colonial Nigeria. The king's horseman must ritually commit suicide to accompany his king to the afterlife, but the British colonial officer intervenes. Soyinka says it's not about colonial clash but about the cosmic duty the horseman is failing. Notice the Yoruba poetry woven through the English — the play moves on two planes at once."
-  },
-  "tags": [
-   "Nigerian",
-   "Drama",
-   "Postcolonial",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-orhan-pamuk",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Orhan Pamuk",
-  "teaser": "Turkish novelist who won the Nobel Prize in 2006. His novel 'My Name Is Red' (1998) is a murder mystery set among 16th-century Ottoman miniature painters — and includes chapters narrated by a corpse, a coin, and the color red. He was charged with 'insulting Turkishness' in 2005 for mentioning the Armenian genocide; the charges were later dropped.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "My Name Is Red, first 8 chapters",
-   "durationMinutes": 40,
-   "instruction": "Read the first eight chapters. Each chapter has a different narrator: a corpse, a dog, a tree, a murderer, the color red. Pamuk uses this polyphonic structure to explore the clash between Islamic miniature painting and Western perspective — the murder is about art. Notice how magical the object-narrators feel: the coin's chapter is a miniature economic history of Istanbul."
-  },
-  "tags": [
-   "Turkish",
-   "Fiction",
-   "Historical",
-   "21st Century"
   ],
   "tier": 2
  },
@@ -3437,27 +3000,6 @@
    "Fiction",
    "Postcolonial",
    "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-miguel-de-cervantes",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Miguel de Cervantes",
-  "teaser": "Spanish writer whose 'Don Quixote' (1605, 1615) is considered the first modern novel. He published Part One at 58 after a life of extraordinary failure: he was wounded at the Battle of Lepanto (losing use of his left hand), captured by pirates and enslaved in Algiers for five years, imprisoned for debt, and excommunicated twice.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Don Quixote, chapters 1-10",
-   "durationMinutes": 42,
-   "instruction": "Read the first ten chapters. Alonso Quijano reads so many chivalric romances that he loses his mind and reinvents himself as Don Quixote, knight-errant. His first adventure: he 'frees' a boy being whipped by a farmer, rides away feeling heroic, and the farmer beats the boy twice as hard. Cervantes invents metafiction 400 years early — the characters in Part Two have read Part One and know they're famous."
-  },
-  "tags": [
-   "Spanish",
-   "Fiction",
-   "Classical",
-   "17th Century"
   ],
   "tier": 2
  },
@@ -3546,48 +3088,6 @@
   "tier": 2
  },
  {
-  "id": "author-rf-kuang",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "R.F. Kuang",
-  "teaser": "Chinese-American novelist who wrote 'Babel' (2022) — a dark academia fantasy about translation, colonialism, and the violence embedded in language — while still in her 20s. Her debut 'The Poppy War' (2018) sold to Harper Voyager when she was 21. She has a Marshall Scholarship and degrees from Cambridge and Oxford and is now at Yale Law School.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Babel, Book I",
-   "durationMinutes": 45,
-   "instruction": "Read Book I. Robin Swift, a Chinese orphan, is brought to Oxford to study at Babel — the Royal Institute of Translation, where silver bars inscribed with words in two languages produce magical effects. The magic is powered by what's lost in translation. Kuang builds a rigorous magical system out of linguistics. Notice the footnotes: they're scholarly asides that deepen the themes of empire, language, and violence."
-  },
-  "tags": [
-   "Chinese-American",
-   "Fantasy",
-   "Historical",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-marcel-proust",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Marcel Proust",
-  "teaser": "French novelist who wrote 'In Search of Lost Time' — seven volumes, 1.2 million words — while bedridden in a cork-lined room, dying of asthma. A madeleine dipped in tea triggers the entire novel. He spent the last three years of his life rewriting the ending. The novel was rejected by multiple publishers; he published the first volume at his own expense.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Swann's Way, the first section: Combray",
-   "durationMinutes": 40,
-   "instruction": "Read the Combray section. The narrator bites into a madeleine dipped in tea and his entire childhood in the village of Combray floods back. Proust's sentences are famously long — they spiral, subordinate, return — but they're built to reproduce the texture of consciousness. The Overture (first 50 pages) is about a man who can't fall asleep. Everything follows from that insomnia."
-  },
-  "tags": [
-   "French",
-   "Fiction",
-   "Modernist",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-edwidge-danticat",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3630,27 +3130,6 @@
   "tier": 2
  },
  {
-  "id": "author-sally-rooney",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Sally Rooney",
-  "teaser": "Irish novelist who published her debut 'Conversations with Friends' (2017) at 26 and was called 'the first great millennial novelist.' Her novels are about sex, class, and political conviction among young Irish people. Her third novel 'Beautiful World, Where Are You' (2021) incorporates emails debating Marxism and the purpose of art between the sex scenes.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Normal People, the whole novel",
-   "durationMinutes": 45,
-   "instruction": "Read the whole novel. Connell and Marianne — he's popular, she's weird — pretend not to know each other at school, then meet again at Trinity College where their roles reverse. Rooney writes without quotation marks and with surgical precision about class and desire. Notice the silences: Connell can't say what he feels, and the novel orbits around those unsaid sentences like a planet around a black hole."
-  },
-  "tags": [
-   "Irish",
-   "Fiction",
-   "Contemporary",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-samuel-beckett",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3672,27 +3151,6 @@
   "tier": 2
  },
  {
-  "id": "author-annie-ernaux",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Annie Ernaux",
-  "teaser": "French writer who won the Nobel Prize in 2022. She invented a genre she calls 'autosociobiography' — writing her own life as a document of class, gender, and time. Her novel 'The Years' (2008) is written without the pronoun 'I' — it's a collective autobiography of postwar France told through objects, songs, and meals.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Years, first half",
-   "durationMinutes": 42,
-   "instruction": "Read the first half. There is no 'I' — the narrator is 'we' and 'she,' describing a generation through photographs, advertisements, political slogans. Ernaux's prose is flat and forensic; she describes a family dinner with the same clinical precision as a political protest. Notice how public events (Algerian War, May '68, Mitterrand's election) intrude on private life like weather."
-  },
-  "tags": [
-   "French",
-   "Memoir",
-   "Literary",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-svetlana-alexievich",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -3710,27 +3168,6 @@
    "Nonfiction",
    "Oral History",
    "21st Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-mark-twain",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Mark Twain",
-  "teaser": "American novelist and humorist born Samuel Clemens — his pen name 'Mark Twain' is riverboat slang for 'two fathoms deep' (safe water). His novel 'Adventures of Huckleberry Finn' (1884) was banned from the Concord Public Library the month it was published. Hemingway said all American literature comes from one book: Huckleberry Finn.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Adventures of Huckleberry Finn, chapters 1-11",
-   "durationMinutes": 40,
-   "instruction": "Read the first eleven chapters. Huck narrates in his own dialect — Twain pioneered American vernacular in literature. Huck fakes his own murder and escapes on the Mississippi with Jim, a slave running toward freedom. Notice Huck's moral crisis: society has taught him that helping Jim is a sin, but his heart says otherwise. The river is freedom; the shore is hypocrisy."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Satire",
-   "19th Century"
   ],
   "tier": 2
  },
@@ -3924,90 +3361,6 @@
   "tier": 2
  },
  {
-  "id": "author-terry-pratchett",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Terry Pratchett",
-  "teaser": "British fantasy author who wrote the 41-novel Discworld series — a flat world balanced on four elephants standing on a giant turtle. His books are comedy that becomes philosophy if you're not careful. He sold over 85 million copies worldwide and was knighted in 2009. After being diagnosed with early-onset Alzheimer's, he campaigned for assisted dying and made a documentary about it.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Guards! Guards!, the whole novel",
-   "durationMinutes": 42,
-   "instruction": "Read Guards! Guards! Vimes, captain of the Night Watch — a cynical drunk in a city that doesn't want police — must stop a 60-foot dragon summoned by a secret society. Pratchett's worldbuilding is a joke-delivery system for ideas about power, justice, and why people obey bad laws. Vimes's 'Boots Theory of Socioeconomic Unfairness' is a better economics lesson than most textbooks. The humor is never cruel."
-  },
-  "tags": [
-   "British",
-   "Fantasy",
-   "Satire",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-eudora-welty",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Eudora Welty",
-  "teaser": "American short story writer and novelist from Mississippi who won the Pulitzer in 1973. She worked as a photographer for the WPA during the Depression, documenting rural Mississippi. Her story 'Why I Live at the P.O.' is the funniest monologue in American literature — narrated by a woman so aggrieved by her family that she moves into the post office where she works.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Collected Stories, first 5 stories",
-   "durationMinutes": 38,
-   "instruction": "Read the first five stories. 'Why I Live at the P.O.' — Sister narrates how her sister Stella-Rondo came home with an adopted child and turned the whole family against her. Welty's ear for Southern speech is perfect: the exaggerations, the self-pity, the dramatic exits. Her characters talk themselves into and out of revelation. Notice the humor never undercuts the loneliness — the post office is a fortress of grievance."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Short Stories",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-graham-greene",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Graham Greene",
-  "teaser": "British novelist and Catholic convert who divided his books into 'novels' and 'entertainments' — though the line was always blurry. He was a spy for MI6 during WWII, stationed in Sierra Leone and Portugal. His novel 'The Quiet American' (1955) predicted American failure in Vietnam years before the war escalated. He was shortlisted for the Nobel Prize multiple times but never won.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Power and the Glory, Part One",
-   "durationMinutes": 35,
-   "instruction": "Read Part One. A nameless 'whisky priest' — the last priest in a Mexican state that has outlawed religion — flees across the countryside, pursued by a police lieutenant. Greene's Catholicism is the novel's engine: the priest is a sinner (drunk, father of a child) but also a priest. His martyrdom is accidental and reluctant. Notice the scorching heat — Greene makes Mexico feel like hell with beautiful beaches."
-  },
-  "tags": [
-   "British",
-   "Fiction",
-   "Literary",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-nk-jemisin",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "N.K. Jemisin",
-  "teaser": "American science fiction and fantasy writer who won the Hugo Award for Best Novel three years in a row (2016-2018) — the first author, male or female, to do so. Her Broken Earth trilogy opens with 'The Fifth Season' (2015), set on a planet wracked by apocalyptic seismic events, and written partly in second person. Jemisin is also a counseling psychologist.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Fifth Season, chapters 1-5",
-   "durationMinutes": 40,
-   "instruction": "Read the first five chapters. The novel opens: 'This is the way the world ends. Again.' Essun discovers her son murdered by his own father and sets out for revenge across a continent fracturing into apocalypse. Jemisin uses three narrative strands — one in second person — that the reader slowly realizes are connected in an impossible way. The geology is rigorous, the oppression systemic, and the voice is searing."
-  },
-  "tags": [
-   "American",
-   "Fantasy",
-   "Science Fiction",
-   "21st Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-john-cheever",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -4197,69 +3550,6 @@
   "tier": 2
  },
  {
-  "id": "author-alice-munro",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Alice Munro",
-  "teaser": "Canadian short story writer who won the Nobel Prize in 2013 — the only short story writer to win the prize as a pure short story writer (not also a novelist). Her stories are set in rural Ontario and span entire lifetimes in 30 pages. She stopped writing in 2013 due to dementia. Her stories work like time machines: a gesture in the present opens a door to 40 years ago.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Dear Life, the first 4 stories",
-   "durationMinutes": 38,
-   "instruction": "Read the first four stories. 'To Reach Japan' — a poet on a train to Toronto makes a decision that will define her marriage. Munro's stories don't build to epiphanies; they reveal that the epiphany happened years ago and the character is only now understanding it. Notice the temporal leaps — Munro covers decades in a paragraph and a single afternoon in 10 pages. Time is her medium, not plot."
-  },
-  "tags": [
-   "Canadian",
-   "Fiction",
-   "Short Stories",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-milan-kundera-joke",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Milan Kundera",
-  "teaser": "Czech-French novelist who wrote 'The Unbearable Lightness of Being'.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Joke, the first section",
-   "durationMinutes": 30,
-   "instruction": "Read the first section of Kundera's debut novel (1967). Ludvik, a university student, writes a joke on a postcard to his girlfriend: 'Optimism is the opium of the people.' He's expelled from the Communist Party, sent to a penal battalion, and his life is derailed by a joke. Kundera writes ideology as farce with fatal consequences. The novel was banned in Czechoslovakia after the 1968 Soviet invasion."
-  },
-  "tags": [
-   "Czech",
-   "Fiction",
-   "Political",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-zora-neale-hurston",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Zora Neale Hurston",
-  "teaser": "African American novelist and anthropologist whose 'Their Eyes Were Watching God' (1937) was out of print and forgotten for decades before Alice Walker resurrected it in 1975. Hurston studied anthropology at Barnard with Franz Boas and conducted fieldwork in Haiti and Jamaica. She died in poverty in 1960 and was buried in an unmarked grave.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Their Eyes Were Watching God, chapters 1-6",
-   "durationMinutes": 40,
-   "instruction": "Read the first six chapters. Janie Crawford returns to Eatonville and tells her story to her best friend Pheoby. Hurston writes in two registers: the frame narration in lyrical standard English, Janie's dialogue in Black Southern vernacular. Janie's grandmother marries her off at 16 to an old farmer. 'She had been summoned to behold a revelation.' Hurston's Janie is seeking not a man but a horizon — a life big enough for her soul."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Harlem Renaissance",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
   "id": "author-richard-wright",
   "categoryId": "AUTHORS",
   "subtype": "Author",
@@ -4276,27 +3566,6 @@
    "American",
    "Fiction",
    "Protest Literature",
-   "20th Century"
-  ],
-  "tier": 2
- },
- {
-  "id": "author-flannery-oconnor",
-  "categoryId": "AUTHORS",
-  "subtype": "Author",
-  "name": "Flannery O'Connor",
-  "teaser": "Southern Gothic writer from Georgia who raised peacocks and died of lupus at 39. Her 31 short stories and 2 novels are populated by Bible salesmen, escaped convicts, and self-righteous old women — all of whom encounter violence as a form of grace. She was a devout Catholic in the Protestant South, and her fiction is theology by other means.",
-  "imageUrl": "",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "A Good Man Is Hard to Find, plus 3 other stories",
-   "durationMinutes": 30,
-   "instruction": "Read 'A Good Man Is Hard to Find' and three others. A grandmother manipulates her family into a detour to see a nonexistent plantation; they encounter an escaped convict called The Misfit. O'Connor's violence arrives with comic timing and theological weight: 'She would have been a good woman if it had been somebody there to shoot her every minute of her life.' Notice how her characters' self-deception is dismantled by brutality."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Southern Gothic",
    "20th Century"
   ],
   "tier": 2

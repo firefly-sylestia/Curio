@@ -1022,26 +1022,6 @@
   }
  },
  {
-  "id": "an-axolotl-regrowth",
-  "name": "Axolotl Regeneration",
-  "categoryId": "ANIMALS",
-  "subtype": "Amphibians",
-  "teaser": "An axolotl can regrow a lost limb in a matter of weeks, and the secret lies in how it heals. Instead of forming a scar like most animals, it grows a bud of unspecialized cells called a blastema at the wound, which then develops into a perfect new limb with bones, muscles, and nerves. It can do this dozens of times, and even regrow parts of its heart, eyes, and spinal cord. Researchers hope that decoding this trick could one day improve healing in humans.",
-  "imageUrl": "",
-  "byline": "The regrower",
-  "tags": [
-   "salamanders",
-   "regeneration"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Watch it regrow",
-   "durationMinutes": 11,
-   "instruction": "Learn how axolotls regrow body parts, then explain why scientists study them."
-  }
- },
- {
   "id": "animals-axolotl-regeneration",
   "categoryId": "ANIMALS",
   "subtype": "Amphibians",
@@ -1053,7 +1033,8 @@
   "tags": [
    "amphibians",
    "axolotl",
-   "regeneration"
+   "regeneration",
+   "salamanders"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -1293,38 +1274,20 @@
   }
  },
  {
-  "id": "an-bats-echolocation",
-  "name": "Bat Echolocation",
-  "categoryId": "ANIMALS",
-  "subtype": "Bats",
-  "teaser": "Bat echolocation is nature's sonar, and it is incredibly precise. A bat fires out high-frequency calls, up to two hundred per second when closing in on prey, and listens to the echoes that bounce back off objects. From the timing and pitch change of the returning sound, it builds a detailed picture in the dark, detecting a mosquito-sized insect from several meters away. Some bats use constant-frequency calls to detect wing flutters, and this system is so refined that bats can hunt in complete darkness at full speed.",
-  "imageUrl": "",
-  "byline": "The sound navigators",
-  "tags": [
-   "bats",
-   "sound"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Click with a bat",
-   "durationMinutes": 12,
-   "instruction": "Learn how bats echolocate, then explain what the returning echoes reveal."
-  }
- },
- {
   "id": "animals-bat-echolocation",
   "categoryId": "ANIMALS",
   "subtype": "Mammals",
   "name": "Bat Echolocation",
-  "teaser": "Echolocation lets bats see with sound in the dark, and their brains turn echoes into a living map. When a bat calls, sound waves bounce off obstacles and prey, and the bat reads the delay to judge distance, the shift in frequency to judge speed, and the loudness to judge size. The calls are far above human hearing, mostly, and different species use different frequencies so they can share the same sky without jamming each other. Some moths have evolved ears that hear bats coming, starting an evolutionary arms race.",
+  "teaser": "Bat echolocation is nature's sonar, and it is incredibly precise. A bat fires out high-frequency calls, up to two hundred per second when closing in on prey, and listens to the echoes that bounce back off objects. From the timing and pitch change of the returning sound, it builds a detailed picture in the dark, detecting a mosquito-sized insect from several meters away. Some bats use constant-frequency calls to detect wing flutters, and this system is so refined that bats can hunt in complete darkness at full speed.",
   "byline": "The sound seer",
   "imageUrl": "",
   "tier": 1,
   "tags": [
    "mammals",
    "bat",
-   "echolocation"
+   "echolocation",
+   "bats",
+   "sound"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -3007,26 +2970,6 @@
   }
  },
  {
-  "id": "an-cheetah-vs-leopard",
-  "name": "Cheetah vs Leopard",
-  "categoryId": "ANIMALS",
-  "subtype": "Big cats",
-  "teaser": "Cheetahs and leopards are Africa's two spotted cats, but they could not be more different. Look at the spots: a cheetah's are solid black dots on a pale coat, while a leopard wears darker 'rosettes' — rings with a spot in the middle. The build tells the story too. A cheetah is built like a greyhound: long legs, small head, deep chest, all for speed, and it hunts by day in open grassland. A leopard is stockier and heavier, with a thick neck and powerful forelimbs for dragging prey up trees, and it hunts by night in the bush.",
-  "imageUrl": "",
-  "byline": "The spotted rivals",
-  "tags": [
-   "cheetahs",
-   "leopards"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Compare the cats",
-   "durationMinutes": 10,
-   "instruction": "Compare cheetah and leopard builds, then explain how their hunting styles differ."
-  }
- },
- {
   "id": "animals-cheetah-vs-leopard",
   "categoryId": "ANIMALS",
   "subtype": "Big Cats",
@@ -3038,7 +2981,9 @@
   "tags": [
    "big cats",
    "cheetah",
-   "leopard"
+   "leopard",
+   "cheetahs",
+   "leopards"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -4208,26 +4153,6 @@
   }
  },
  {
-  "id": "an-dolphin-echolocation",
-  "name": "Dolphin Echolocation",
-  "categoryId": "ANIMALS",
-  "subtype": "Dolphins",
-  "teaser": "Dolphin echolocation is sonar with a musician's touch. A dolphin produces rapid clicks in its nasal passages, and the sound focuses through a fatty organ in its forehead called the melon, acting like a lens. The clicks bounce off objects, and the dolphin reads the echoes with its jaw, which conducts sound to its inner ear. From the returning signal it can tell an object's size, shape, distance, and even what it is made of, seeing with sound in dark, muddy water where eyes are useless.",
-  "imageUrl": "",
-  "byline": "The living sonar",
-  "tags": [
-   "dolphins",
-   "sound"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Click with a dolphin",
-   "durationMinutes": 12,
-   "instruction": "Learn how dolphins echolocate, then explain what they can detect about objects."
-  }
- },
- {
   "id": "animals-dolphin-echolocation",
   "categoryId": "ANIMALS",
   "subtype": "Marine Mammals",
@@ -4239,7 +4164,9 @@
   "tags": [
    "marine",
    "dolphin",
-   "echolocation"
+   "echolocation",
+   "dolphins",
+   "sound"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -4516,26 +4443,6 @@
   }
  },
  {
-  "id": "an-echidna-spines",
-  "name": "Echidna Spines",
-  "categoryId": "ANIMALS",
-  "subtype": "Monotremes",
-  "teaser": "An echidna's spines are its armor and its offense. They are modified hairs made of keratin, stiff and sharp, and when the echidna is threatened it curls into a ball or wedges itself into a crevice, spines bristling. The animal can also raise its spines to jab an attacker that gets too close. Its body is covered in thousands of them, and between the spines grows woolly fur that keeps it warm. Even its powerful digging legs, tipped with strong claws, double as weapons when cornered.",
-  "imageUrl": "",
-  "byline": "The spiny one",
-  "tags": [
-   "echidnas",
-   "defense"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the echidna",
-   "durationMinutes": 10,
-   "instruction": "Discover how echidnas use their spines, then explain their digging."
-  }
- },
- {
   "id": "animals-echidna-spines",
   "categoryId": "ANIMALS",
   "subtype": "Other Invertebrates",
@@ -4547,7 +4454,9 @@
   "tags": [
    "invertebrates",
    "echidna",
-   "spines"
+   "spines",
+   "echidnas",
+   "defense"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -4720,38 +4629,19 @@
   }
  },
  {
-  "id": "an-elephant-memory",
-  "name": "Elephant Memory",
-  "categoryId": "ANIMALS",
-  "subtype": "Elephants",
-  "teaser": "The saying 'an elephant never forgets' turns out to be close to the truth. Elephants have the largest brains of any land animal, and their memory is genuinely remarkable: matriarchs remember the routes to water holes they last visited decades earlier, and they recognize the calls and scents of individuals they have not seen for many years. Older matriarchs guide their herds through droughts because they remember where to find food when everything else is dry. Studies even show elephants can remember people who harmed or helped them long ago, responding with fear or affection accordingly.",
-  "imageUrl": "",
-  "byline": "The remembering giants",
-  "tags": [
-   "elephants",
-   "memory"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Test the memory",
-   "durationMinutes": 11,
-   "instruction": "Learn what studies show about elephant memory, then explain why it matters for survival."
-  }
- },
- {
   "id": "animals-elephant-memory",
   "categoryId": "ANIMALS",
   "subtype": "Mammals",
   "name": "Elephant Memory",
-  "teaser": "An elephant never forgets, and the science says the memory is real. Elephants recognize individual elephants and humans even after decades apart, and they remember the locations of waterholes and migration routes across vast distances, passing this knowledge down through the generations. The matriarch of a herd holds the collective memory, and herds with older matriarchs make better decisions in droughts. Elephants also remember kindness and cruelty, greeting old friends with joy and avoiding those who harmed them.",
+  "teaser": "The saying 'an elephant never forgets' turns out to be close to the truth. Elephants have the largest brains of any land animal, and their memory is genuinely remarkable: matriarchs remember the routes to water holes they last visited decades earlier, and they recognize the calls and scents of individuals they have not seen for many years. Older matriarchs guide their herds through droughts because they remember where to find food when everything else is dry. Studies even show elephants can remember people who harmed or helped them long ago, responding with fear or affection accordingly.",
   "byline": "The remembering giants",
   "imageUrl": "",
   "tier": 1,
   "tags": [
    "mammals",
    "elephant",
-   "memory"
+   "memory",
+   "elephants"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -5321,38 +5211,20 @@
   }
  },
  {
-  "id": "an-frog-calls",
-  "name": "Frog Calls",
-  "categoryId": "ANIMALS",
-  "subtype": "Frogs",
-  "teaser": "Frog calls are the voices of spring, and every species has its own song. Males call to attract females, each species singing a unique chorus of croaks, peeps, trills, and even whistles, so that frogs can find mates without confusion even when many species share the same pond. The calls are made by air pushed over vocal cords, and many frogs amplify them with inflatable throat sacs that balloon out like balloons. Some calls carry a kilometer or more, and a pond full of calling frogs can be heard from a long way off.",
-  "imageUrl": "",
-  "byline": "The croakers",
-  "tags": [
-   "frogs",
-   "communication"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Hear the chorus",
-   "durationMinutes": 10,
-   "instruction": "Discover how frogs call, then explain why males call at night."
-  }
- },
- {
   "id": "animals-frog-calls",
   "categoryId": "ANIMALS",
   "subtype": "Amphibians",
   "name": "Frog Calls",
-  "teaser": "A frog's call is one of the most recognizable sounds of the natural world, and it is a serious business. Male frogs call to advertise themselves to females and to warn off rival males, and each species has its own distinct song. The call is produced as air passes over the vocal cords, and throat sacs amplify it, turning a small frog into a surprisingly loud singer. Females listen for the calls of their own species, and in some species the females even prefer the deeper, larger, and stronger-sounding males.",
+  "teaser": "Frog calls are the voices of spring, and every species has its own song. Males call to attract females, each species singing a unique chorus of croaks, peeps, trills, and even whistles, so that frogs can find mates without confusion even when many species share the same pond. The calls are made by air pushed over vocal cords, and many frogs amplify them with inflatable throat sacs that balloon out like balloons. Some calls carry a kilometer or more, and a pond full of calling frogs can be heard from a long way off.",
   "byline": "The night singers",
   "imageUrl": "",
   "tier": 1,
   "tags": [
    "amphibians",
    "frog",
-   "calls"
+   "calls",
+   "frogs",
+   "communication"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -12572,26 +12444,6 @@
   }
  },
  {
-  "id": "an-snake-senses",
-  "name": "Snake Senses",
-  "categoryId": "ANIMALS",
-  "subtype": "Snakes",
-  "teaser": "Snakes sense the world in ways humans cannot. They taste the air with their forked tongues, flicking scent particles to a special organ in the roof of their mouths, building a detailed chemical map of their surroundings. Many have pit organs that detect the infrared heat of warm-blooded prey, letting them hunt in total darkness. They have no external ears, feeling vibrations through their jawbones instead, and some see well while others see little. Every sense is tuned for one thing: finding prey and avoiding becoming prey.",
-  "imageUrl": "",
-  "byline": "The sensing snake",
-  "tags": [
-   "snakes",
-   "senses"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Sense like a snake",
-   "durationMinutes": 11,
-   "instruction": "Discover how snakes smell with their tongues, then explain heat pits."
-  }
- },
- {
   "id": "animals-snake-senses",
   "categoryId": "ANIMALS",
   "subtype": "Reptiles",
@@ -12603,7 +12455,8 @@
   "tags": [
    "reptiles",
    "snake",
-   "senses"
+   "senses",
+   "snakes"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -19640,26 +19493,6 @@
   }
  },
  {
-  "id": "an-venomous-snakes",
-  "name": "Venomous Snakes",
-  "categoryId": "ANIMALS",
-  "subtype": "Snakes",
-  "teaser": "The world's deadliest snakes are masters of chemical warfare. The inland taipan of Australia has the most toxic venom of any land snake — a single bite contains enough to kill a hundred men — yet it is shy and rarely encountered. The black mamba is the fastest, slithering at up to 20 kilometers an hour, and its venom can kill within hours without antivenom. The saw-scaled viper is believed to kill more people than any other snake, because it lives near human settlements across Asia and Africa and bites readily. Sea snakes have the most potent venoms of all, evolved for fish, and the fierce little king cobra is the largest venomous snake, reaching over five meters.",
-  "imageUrl": "",
-  "byline": "The venomous ones",
-  "tags": [
-   "snakes",
-   "venom"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the vipers",
-   "durationMinutes": 12,
-   "instruction": "Learn how snake venom works, then explain the difference between venomous and poisonous."
-  }
- },
- {
   "id": "animals-venomous-snakes",
   "categoryId": "ANIMALS",
   "subtype": "Reptiles",
@@ -19671,7 +19504,8 @@
   "tags": [
    "reptiles",
    "snake",
-   "venom"
+   "venom",
+   "snakes"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -19867,26 +19701,6 @@
   }
  },
  {
-  "id": "an-walrus-tusks",
-  "name": "Walrus Tusks",
-  "categoryId": "ANIMALS",
-  "subtype": "Pinnipeds",
-  "teaser": "The walrus's tusks are its defining feature — two enormous canines that can grow over a meter long and weigh five kilograms each, and they're not just for show. Walruses use their tusks to haul their massive bodies out of the water and onto ice floes, hooking the tusks over the ice edge like climbing picks. They're also status symbols and weapons: males with the biggest tusks rank highest, and during mating season, bulls fight with dramatic tusk clashes.",
-  "imageUrl": "",
-  "byline": "The tusk master",
-  "tags": [
-   "walruses",
-   "arctic"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet the walrus",
-   "durationMinutes": 10,
-   "instruction": "Learn what walrus tusks are for, then explain how they haul out onto ice."
-  }
- },
- {
   "id": "animals-walrus-tusks",
   "categoryId": "ANIMALS",
   "subtype": "Marine Mammals",
@@ -19898,7 +19712,9 @@
   "tags": [
    "marine",
    "walrus",
-   "tusks"
+   "tusks",
+   "walruses",
+   "arctic"
   ],
   "exploreAction": {
    "verb": "Explore",

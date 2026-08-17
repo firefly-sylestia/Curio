@@ -2660,12 +2660,13 @@
   "imageUrl": ""
  },
  {
-  "id": "chem-emulsions",
+  "id": "chem-emulsion-chemistry",
   "name": "Emulsions",
   "categoryId": "CHEMISTRY",
-  "subtype": "Materials",
-  "teaser": "An emulsion is a mixture of two liquids that normally refuse to mix — oil and water — held together by a third ingredient called an emulsifier. Mayonnaise, milk, and vinaigrette are all emulsions; without the emulsifier they'd split into separate layers. The emulsifier's molecules coat the droplets of one liquid and keep them suspended in the other.",
-  "byline": "The unblendable blend",
+  "subtype": "Colloids",
+  "teaser": "An emulsion is a mixture of two liquids that normally don't mix — oil and water — stabilized so they stay blended: milk, mayonnaise, and salad dressing are emulsions. The trick is emulsifiers, molecules with a water-loving head and oil-loving tail that coat the droplets and keep them from merging. Without them, emulsions separate. Vinaigrette separates because it lacks emulsifiers; mayonnaise holds because egg yolk provides them.",
+  "imageUrl": "",
+  "byline": "The unblendable blends",
   "tags": [
    "emulsions",
    "food"
@@ -2673,11 +2674,10 @@
   "tier": 1,
   "exploreAction": {
    "verb": "Explore",
+   "targetName": "Meet emulsions",
    "durationMinutes": 11,
-   "instruction": "Learn what an emulsion is, then explain how mayonnaise stays mixed.",
-   "targetName": "Make an emulsion"
-  },
-  "imageUrl": ""
+   "instruction": "Learn how emulsifiers stabilize emulsions, then explain why shaking oil and water only works briefly."
+  }
  },
  {
   "id": "chem-mayonnaise-emulsion",
@@ -14878,26 +14878,6 @@
    "targetName": "Meet suspensions",
    "durationMinutes": 10,
    "instruction": "Discover what makes a suspension different from a colloid, then explain why mud settles."
-  }
- },
- {
-  "id": "chem-emulsion-chemistry",
-  "name": "Emulsions",
-  "categoryId": "CHEMISTRY",
-  "subtype": "Colloids",
-  "teaser": "An emulsion is a mixture of two liquids that normally don't mix — oil and water — stabilized so they stay blended: milk, mayonnaise, and salad dressing are emulsions. The trick is emulsifiers, molecules with a water-loving head and oil-loving tail that coat the droplets and keep them from merging. Without them, emulsions separate. Vinaigrette separates because it lacks emulsifiers; mayonnaise holds because egg yolk provides them.",
-  "imageUrl": "",
-  "byline": "The unblendable blends",
-  "tags": [
-   "emulsions",
-   "food"
-  ],
-  "tier": 1,
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Meet emulsions",
-   "durationMinutes": 11,
-   "instruction": "Learn how emulsifiers stabilize emulsions, then explain why shaking oil and water only works briefly."
   }
  },
  {
