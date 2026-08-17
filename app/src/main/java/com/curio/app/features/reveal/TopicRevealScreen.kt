@@ -612,34 +612,69 @@ fun TopicRevealScreen(
             // v36 — theme-aware treatment: the chip wears the category's
             // tinted card surface, matching the page cards instead of the
             // flat surfaceVariant.
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant),
-                modifier = Modifier.weight(1f, fill = false)
+            // v146 — the year qualifier ("1851") rides NEXT to the category
+            // chip here at the top-left, NOT in the hero's top corner — the
+            // progress pill sits at the hero's top-right and a long byline
+            // pushed the year pill under it on topics with reading progress.
+            Row(
+                modifier = Modifier.weight(1f, fill = false),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    // v51 — a touch larger so the corner chips read as real
-                    // controls next to the pin/close circles.
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    CurioIcon(
-                        name = cat.iconGlyph,
-                        contentDescription = null,
-                        tint = cat.categoryInk(),
-                        size = 18.dp
-                    )
-                    Text(
-                        text = cat.displayName.uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.2.sp
-                        ),
-                        color = cat.categoryInk(),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        // v51 — a touch larger so the corner chips read as real
+                        // controls next to the pin/close circles.
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    ) {
+                        CurioIcon(
+                            name = cat.iconGlyph,
+                            contentDescription = null,
+                            tint = cat.categoryInk(),
+                            size = 18.dp
+                        )
+                        Text(
+                            text = cat.displayName.uppercase(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.2.sp
+                            ),
+                            color = cat.categoryInk(),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                // v146 — the year pill, alongside the category at the top-left.
+                val yearQual = resolved?.titleAndYearQualifier()?.second?.takeIf { it.isNotBlank() }
+                if (yearQual != null) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Schedule,
+                                contentDescription = null,
+                                tint = cat.categoryInk(),
+                                size = 14.dp
+                            )
+                            Text(
+                                text = yearQual,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = cat.categoryInk()
+                            )
+                        }
+                    }
                 }
             }
 
@@ -1735,14 +1770,16 @@ private fun HeroCard(
                     .fillMaxSize()
                     .padding(20.dp)
             ) {
-                // ── Top — byline + year pills (v141) — the SAME top-left
-                // row the Spin ticket wears, so the shared-element morph
-                // reads as the pills staying put while the card grows. The
-                // year qualifier comes OUT of the title ("Moby-Dick (1851)"
-                // → "Moby-Dick" + an "1851" pill), and the action badge
-                // moved down to the bottom pill row. Same pill recipe as the
+                // ── Top — the byline pill (v141) — the SAME top-left
+                // corner the Spin ticket wears, so the shared-element morph
+                // reads as the pill staying put while the card grows. The
+                // YEAR qualifier ("Moby-Dick (1851)" → "Moby-Dick" + an
+                // "1851" pill) moved OUT of the hero in v146: it rides next
+                // to the category chip in the top bar, because the progress
+                // pill sits at the hero's top-right and a long byline pushed
+                // the year pill underneath it. Same pill recipe as the
                 // ticket (ink at 18%, labelMedium bold, h12/v6 padding) so
-                // the morph is pixel-identical.
+                // the byline morph is pixel-identical.
                 val byline = resolved?.byline?.takeIf { it.isNotBlank() }
                 val bylineLabel = when (cat.id) {
                     CategoryId.ALBUMS -> "Artist"
@@ -1752,54 +1789,20 @@ private fun HeroCard(
                     CategoryId.DISCOVERIES -> "Discovered by"
                     else -> null
                 }
-                val (_, yearQual) = resolved?.titleAndYearQualifier() ?: (null to null)
-                if ((byline != null && bylineLabel != null) || !yearQual.isNullOrBlank()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                if (byline != null && bylineLabel != null) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = ink.copy(alpha = 0.18f),
+                        shadowElevation = 0.dp
                     ) {
-                        if (byline != null && bylineLabel != null) {
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = ink.copy(alpha = 0.18f),
-                                shadowElevation = 0.dp
-                            ) {
-                                Text(
-                                    text = "$bylineLabel · $byline",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = ink,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
-                            }
-                        }
-                        if (!yearQual.isNullOrBlank()) {
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = ink.copy(alpha = 0.18f),
-                                shadowElevation = 0.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    CurioIcon(
-                                        name = CurioIcons.Schedule,
-                                        contentDescription = null,
-                                        tint = ink,
-                                        size = 14.dp
-                                    )
-                                    Text(
-                                        text = yearQual.orEmpty(),
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = ink
-                                    )
-                                }
-                            }
-                        }
+                        Text(
+                            text = "$bylineLabel · $byline",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = ink,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
                     }
                 }
 
@@ -1815,8 +1818,10 @@ private fun HeroCard(
                 // alone (no duplicate category inside the card).
                 Text(
                     // v141 — same as the ticket: a trailing year qualifier
-                    // lives in the top-corner pill, not the title, so the
-                    // two titles read identical during the morph.
+                    // never lives in the title, so the two titles read
+                    // identical during the morph. v146 — the year pill rides
+                    // in the top bar next to the category chip (see above),
+                    // out of the hero where the progress pill sits.
                     text = resolved?.titleAndYearQualifier()?.first ?: fallbackName.ifBlank { cat.displayName },
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontSize = 34.sp,

@@ -919,6 +919,19 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v146 — reveal year pill moves out of the hero into the top bar.**
+  The v141 hero top-left pill ROW (byline + year) collided with the
+  progress badge on the hero's TOP-RIGHT: a long byline ("Director ·
+  Christopher Nolan") pushed the year pill ("1941") under the progress
+  pill on topics with reading progress ("it's already covered by progress
+  pill"). The year pill now rides NEXT TO the category chip in the reveal's
+  top bar (left corner, `Row(weight(1f, fill=false))` wrapping the chip +
+  year pill; same frosted `categorySurface` recipe as the chip, Schedule
+  glyph + `categoryInk()`); the hero's top-left keeps ONLY the byline pill
+  (the morph element shared with the Spin ticket). LESSON: the hero's top
+  corners are shared with the morph (byline) AND the progress badge
+  (top-right) — the top BAR is the right home for secondary pills like the
+  year qualifier.
 - **v145 — mood board: quote cards independent per view; real resize
   (proportional height + 60% size limit); PNG/expanded dialog keep exact
   card sizes; Clear board wipes quotes; Quote chip moves up on content.**

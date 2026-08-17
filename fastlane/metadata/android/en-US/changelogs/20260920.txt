@@ -28,6 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Topic Reveal: the year pill ("1851") no longer sits in the hero's top corner where the progress badge covered it on long-byline topics — it now rides next to the category chip in the top bar, and the hero keeps just the byline pill for a clean morph.
 - Mood board (full-screen): quote cards are now fully independent from the small board — rearranging or resizing a card in the full-screen editor never changes the small board's cards (and vice versa), so each view keeps its own arrangement.
 - Mood board: resizing a quote card now scales the whole note (height follows width at the paper aspect) instead of just stretching it wider, with a size limit — a card can't balloon past 60% of the board.
 - Mood board PNG: saved/shared images keep quote cards at their exact size and spot now — the old render shrank resized cards and sat them out of place against the collage.

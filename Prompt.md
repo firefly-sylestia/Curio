@@ -47,7 +47,20 @@ quote cards at their true size and spot; (3) open the expanded saved board — s
 board on a board with images + quotes — confirm text mentions both, all wiped;
 (6) empty full-screen board — Quote chip at bottom; add an image — chip moves up.
 
+## Current request — v146: reveal year pill → top bar
+
+The user: "don't place the year pill in reveal hero top corner — it's already covered
+by progress pill, place it above alongside category at the top but to the left corner."
+The v141 hero top-left pill ROW (byline + year) collided with the progress badge at
+the hero's TOP-RIGHT on long-byline topics. Fixed in TopicRevealScreen.kt:
+- Top bar: the category chip's `weight(1f, fill=false)` now wraps a Row holding the
+  chip + the year pill (frosted `categorySurface`, Schedule glyph, `categoryInk()`),
+  so "1851" sits next to the category at the top-left.
+- Hero: top-left row reduced to the byline pill ONLY (the morph element shared with
+  the Spin ticket); the year pill block is gone from the hero.
+Title comment updated (year no longer "in the top-corner pill"). Ticket unchanged.
+
 ### Earlier completed request (v144)
 Tour Skip/Next dock → floating pill bar (rounded-50 surfaceContainerHigh capsule,
-12dp air gap), main nav bar yields during the tour. Plus v145 CI compile fix: import
+12dp air gap), main nav bar yields during the tour. Plus v143 CI compile fix: import
 `titleAndYearQualifier` in Spin/Reveal + `yearQual.orEmpty()` for the Text overload.
