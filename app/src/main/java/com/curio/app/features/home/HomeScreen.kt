@@ -235,10 +235,12 @@ fun HomeScreen(navController: NavController) {
     // (never a tinted light twin over the deep banner); light mode keeps the
     // pastel-aware on-accent ink.
     val questInk = homeReadableInk(heroFill)
-    // Publish the wash so the Scaffold-level bottom nav (which can't read
-    // this screen's state) blends with the lane-tinted Home page.
+    // Publish the page's real background (lane wash OR the rose-tinted
+    // default) so the Scaffold-level bottom nav blends with Home even
+    // without a lane — a plain-surface slot behind the floating pill read
+    // as a visible strip (v125).
     LaunchedEffect(homeBg) {
-        CurioNavTint.publishHomeWash(if (laneCat != null) homeBg else null)
+        CurioNavTint.publishHomeWash(homeBg)
     }
     val displayName = remember { AppPreferences.getDisplayName(context) }
     // Saved-shelf unsave confirmation — set when the user taps the remove

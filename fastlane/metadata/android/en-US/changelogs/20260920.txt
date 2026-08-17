@@ -27,6 +27,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Navigation: the floating pill bar no longer sits on a white (light) or black (dark) band — it blends straight into the page's own background, and only the newly active pill plays the expand animation (the pill you leave snaps back instantly).
 - The tiny dictation mic buttons on individual fields are gone — dictation now lives in one place: the floating mic on the note box in Save your take.
 - Tour: skipping the tour on the Spin page no longer breaks the Home tab — the tour's tab stops now navigate like real tab switches, so Home works right after a skip.
 - Drawer: the "Spin it. Explore it. Capture it." line is gone — your full name reads there instead, first name in the greeting and the middle + last names on their own lines below.

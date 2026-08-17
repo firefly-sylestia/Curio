@@ -31,6 +31,7 @@ import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -69,9 +70,10 @@ object CurioNavTint {
     // composed.
     var cabinetWash by mutableStateOf<Color?>(null)
         private set
-    // Home's category-tint wash — published by HomeScreen when the "Home
-    // tint" experiment is on so the nav bar blends with the tinted Home
-    // page. Null when the experiment is off (Home stays plain).
+    // Home's page background — published by HomeScreen (the lane wash when
+    // "Hero follows Spin lane" is active, otherwise the rose-tinted default)
+    // so the nav bar blends with the Home page in every mode. Never null
+    // while Home is composed.
     var homeWash by mutableStateOf<Color?>(null)
         private set
 
@@ -178,9 +180,17 @@ fun CurioFloatingNavBar(
 
     // Slot = 8dp top air + 72dp (48dp pill + 12dp float gap) + nav inset =
     // the old bar's 80dp + inset, so innerPadding stays identical.
+    //
+    // The slot is painted with the PAGE's own background (the same animated
+    // category wash the rail uses): the Scaffold otherwise shows the plain
+    // theme background here, which read as a WHITE (light) / BLACK (dark)
+    // strip behind the floating pill — the v125 complaint. Painting the slot
+    // with the page wash makes the pill look like it floats directly over
+    // the page (the wash band is the page's own color, so no seam).
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .background(curioNavContainerColor(routePrefix))
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(top = 8.dp)
             .height(72.dp),
@@ -232,8 +242,11 @@ fun CurioFloatingNavBar(
 /**
  * One pill in the floating bar: icon-only while inactive; the selected
  * pill springs wider and slides its label out (the indicator covers the
- * whole pill, icon + label). The spring morph + label slide are the
- * "smooth collapse and expand" the v124 design asked for.
+ * whole pill, icon + label). v125 — the morph plays ONLY on the pill
+ * becoming ACTIVE: the new active pill springs open + slides its label
+ * out, while the pill being DESELECTED snaps shut instantly (no closing
+ * animation) — "only the active pill text has the morph open animation,
+ * the closing pill switches instantly."
  */
 @Composable
 private fun FloatingNavPill(
@@ -241,12 +254,24 @@ private fun FloatingNavPill(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    // Direction-aware width: spring when this pill becomes the active one;
+    // tween(0) snap when it's being deselected. `wasSelected` tracks the
+    // previous state so the spring fires only on the false→true edge.
+    var wasSelected by remember { mutableStateOf(selected) }
+    val becomingActive = selected && !wasSelected
+    LaunchedEffect(selected) {
+        wasSelected = selected
+    }
     val pillWidth by animateDpAsState(
         targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
-        animationSpec = spring(
-            dampingRatio = 0.75f,
-            stiffness = Spring.StiffnessMediumLow
-        ),
+        animationSpec = if (becomingActive) {
+            spring(
+                dampingRatio = 0.75f,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        } else {
+            tween(durationMillis = 0)
+        },
         label = "floatingNavPillWidth"
     )
     val activeInk = MaterialTheme.colorScheme.onSecondaryContainer
@@ -272,10 +297,13 @@ private fun FloatingNavPill(
                 tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 22.dp
             )
+            // Enter keeps the slide-out morph for the newly active pill;
+            // exit is tween(0) so the label VANISHES the moment its pill is
+            // deselected (no closing shrink animation).
             AnimatedVisibility(
                 visible = selected,
                 enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
-                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(120))
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
             ) {
                 Text(
                     text = destination.label,
@@ -375,10 +403,14 @@ fun CurioNavigationRail(
 @Composable
 private fun curioNavContainerColor(routePrefix: String?): Color {
     val target = when (routePrefix) {
-        CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.surface
-        CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.surface
-        CurioRoutes.HOME -> CurioNavTint.homeWash ?: MaterialTheme.colorScheme.surface
-        else -> MaterialTheme.colorScheme.surface
+        // Fall back to the theme BACKGROUND (not surface): when a page
+        // publishes no wash its own background IS `colorScheme.background`
+        // (dark mode pitch black / light cream) — the nav slot must match
+        // it exactly or the pill floats on a visible strip. v125.
+        CurioRoutes.SPIN -> CurioNavTint.spinWash ?: MaterialTheme.colorScheme.background
+        CurioRoutes.CABINET -> CurioNavTint.cabinetWash ?: MaterialTheme.colorScheme.background
+        CurioRoutes.HOME -> CurioNavTint.homeWash ?: MaterialTheme.colorScheme.background
+        else -> MaterialTheme.colorScheme.background
     }
     return animateColorAsState(
         targetValue = target,

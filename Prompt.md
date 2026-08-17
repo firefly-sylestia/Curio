@@ -1,6 +1,42 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: Vosk offline transcription + floating dictation mic + plain quick title
+## Current request — COMPLETED: floating pill bar follow-up (page-wash slot + active-only morph)
+
+The user: "why theres a black or white strip behind the floating
+navigation pill remove that and only the active pill text have the
+morph open animation not the closing pill. it switches instantly."
+
+### 1 — The strip behind the pill (root cause + fix)
+The Scaffold's bottomBar slot is painted with
+`MaterialTheme.colorScheme.background` (white in light / black in dark).
+The old edge-to-edge NavigationBar covered that slot with its own
+surface color; the floating pill leaves it visible as a band behind the
+pill, contrasting with the category-washed pages. FIX in
+`CurioBottomNav.kt`: the slot `Box` now paints
+`curioNavContainerColor(routePrefix)` — the same animated page wash the
+rail already uses — so the pill appears to float directly over the
+page. `curioNavContainerColor`'s no-wash fallback changed `surface` →
+`background` (a page publishing no wash has `background` as its own
+background — Cabinet "All" otherwise kept a seam). HomeScreen now
+publishes its REAL background every composition (`homeBg`: the lane
+wash or the rose-tinted default), not only when a lane is active, so
+Home's slot matches too.
+
+### 2 — Only the active pill animates
+`FloatingNavPill` tracks `wasSelected`; the width morph uses the spring
+spec ONLY on the false→true edge (becoming active) and `tween(0)` snap
+on deselect. The label's `AnimatedVisibility` keeps the 160ms
+slide-out enter for the newly active pill but its exit is now
+`fadeOut(tween(0))` — the closing pill's label vanishes instantly, so
+the old pill switches shut with no animation.
+
+### Validation
+`git diff --check` clean; brace balance OK on both edited files; page
+backgrounds verified (`categoryBackgroundWash` = `background` in dark /
+pastel tint over cream in light; Home no-lane = rose-tinted lerp). No
+Gradle locally (env rule) — CI validates on push.
+
+## Previous request — COMPLETED: Vosk offline transcription + floating dictation mic + plain quick title
 
 The user: "okay lets keep os recognistion, and add whisper.cpp for
 recorded voice to text transcription in detail page, and remove that

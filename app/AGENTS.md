@@ -599,6 +599,25 @@ app/src/main/java/com/curio/app/
   `CurioNavigationRail` (user decision). Label width is FIXED (48↔96dp)
   so the bar's total width is constant and the morph is stable. The
   page-wash tint (`CurioNavTint`) now applies to the rail only.
+- **v124 follow-up — floating pill bar: page-wash slot + active-only
+  morph.** Two user fixes to `CurioFloatingNavBar`: (1) **The white/
+  black strip behind the pill is GONE.** Root cause: the Scaffold's
+  bottomBar slot is painted with `MaterialTheme.colorScheme.background`
+  (white in light / black in dark), and the old edge-to-edge bar
+  covered it — the floating pill leaves it visible as a strip against
+  the category-washed pages. FIX: the slot `Box` now paints
+  `curioNavContainerColor(routePrefix)` — the SAME animated page wash
+  the rail uses — and `curioNavContainerColor`'s no-wash fallback
+  changed `surface` → `background` (a page publishing no wash has
+  `background` as its own background; `surface` left a seam on Cabinet
+  "All"). HomeScreen now publishes its REAL background always (`homeBg`
+  — the lane wash OR the rose-tinted default), not just when a lane is
+  active. (2) **Only the ACTIVE pill animates.** The width morph now
+  plays only on the false→true edge (`wasSelected` remembered state →
+  spring spec on becoming active, `tween(0)` snap on deselect), and the
+  label's `AnimatedVisibility` exit is `fadeOut(tween(0))` so the
+  closing pill's text vanishes instantly — the old pill no longer
+  collapses with a visible shrink.
 - **v125 — offline transcription (Vosk) + floating dictation mic + plain
   quick title.** (1) **ENGINE CHOICE — Vosk, not whisper.cpp:** the user
   originally asked for whisper.cpp, but whisper.cpp has NO published
