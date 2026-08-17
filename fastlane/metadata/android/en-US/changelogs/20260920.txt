@@ -27,6 +27,9 @@ ADD
 - Quests: daily and journey quests, path chains, medals and a badge shelf.
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
+ADD
+- Drawer: redesigned as a tiny personal observatory — the hero banner is a dreamy pre-dawn sky (pale seafoam gradient, scattered stars, a crescent moon, faint constellation lines and a soft cream rolling horizon under your profile), a new "Your Curiosity Map" shows a constellation shaped like a brain with your REAL stats orbiting it (streak, saved, explored, topics, questions and overall curiosity score), the three nav rows got soft tinted icon chips with subtitles, and a hand-drawn planetary landscape with a telescope now sits at the bottom behind the version + "Made with curiosity".
+
 FIX
 - Navigation: the pill bar's morph is even slower and calmer now — the tab pills glide at half the previous pace (still zero bounce), and the Topic Reveal Like/Dislike pill and the Pet Designer studio bar move with the exact same slowed motion.
 - Navigation: Cabinet's "All" tab no longer turns yellow — the active pill now wears the same accent as the Spin screen ("whatever the spin screen color have set"), falling back to the coral brand when Spin hasn't been opened yet.

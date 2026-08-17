@@ -40,6 +40,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -67,9 +68,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
@@ -82,9 +86,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.curio.app.BuildConfig
+import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
+import com.curio.app.data.CurioQuests
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -1869,8 +1878,13 @@ private const val HOME_DRAWER_TEAR_SEED = 0xD2A7E
 internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     val context = LocalContext.current
     val displayName = AppPreferences.getDisplayName(context)
-    val heroFill = homeRoseAccent()
-    val drawerInk = homeReadableInk(heroFill)
+    // v174 — the drawer hero becomes a dreamy pre-dawn sky instead of the
+    // rose banner: pale seafoam gradient in light, deep twilight teal in
+    // dark. heroFill/drawerInk keep the sky's base + readable ink so the
+    // decoration layers below work untouched.
+    val (skyTop, skyBottom, skyInk) = drawerSkyColors()
+    val heroFill = skyTop
+    val drawerInk = skyInk
     val heroTornShape = remember(HOME_DRAWER_TEAR_SEED) {
         SoftTornBottomShape(HOME_DRAWER_TEAR_SEED, bold = true)
     }
@@ -1911,26 +1925,37 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     start = 16.dp,
                     end = 16.dp,
                     top = HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
-                    bottom = 64.dp
+                    bottom = 20.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // v174 — the curiosity map: a constellation shaped like a
+                // brain with the user's REAL stats orbiting it ("Your
+                // Curiosity Map").
+                item("curiosityMap") {
+                    DrawerCuriosityMap()
+                }
                 item("quests") {
-                    DrawerNavItem(
+                    DrawerNavRow(
                         icon = CurioIcons.WorkspacePremium,
                         label = "Quests & Levels",
-                        iconTint = curioGoldInk()
-                    ) { onNavigate(CurioRoutes.QUESTS) }
+                        subtitle = "Track your journey",
+                        iconTint = curioGoldInk(),
+                        onClick = { onNavigate(CurioRoutes.QUESTS) }
+                    )
                 }
                 // v118 — "Your Curiosity": Topic History + Manage Categories
                 // + Browse Topics fold under one collapsible header (collapsed
-                // by default per the user's request).
+                // by default per the user's request). v174 — restyled as a
+                // clean row with a subtitle + chevron.
                 item("curiosity") {
-                    DrawerSectionHeader(
+                    DrawerNavRow(
                         icon = CurioIcons.AutoAwesome,
                         label = "Your Curiosity",
+                        subtitle = "Stats, streaks & insights",
+                        iconTint = CurioColors.DustyBlue,
                         expanded = curiosityExpanded,
-                        onToggle = { curiosityExpanded = !curiosityExpanded }
+                        onClick = { curiosityExpanded = !curiosityExpanded }
                     )
                 }
                 // v135 — the expanded rows are ONE nested group that
@@ -1975,13 +2000,16 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     }
                 }
                 // v118 — "About": Support & diagnostics + Replay intro
-                // (user picked the name; also collapsed by default).
+                // (user picked the name; also collapsed by default). v174 —
+                // restyled as a clean row with a subtitle + chevron.
                 item("about") {
-                    DrawerSectionHeader(
+                    DrawerNavRow(
                         icon = CurioIcons.Info,
                         label = "About",
+                        subtitle = "App info & more",
+                        iconTint = curioRoseInk(),
                         expanded = aboutExpanded,
-                        onToggle = { aboutExpanded = !aboutExpanded }
+                        onClick = { aboutExpanded = !aboutExpanded }
                     )
                 }
                 item("aboutGroup") {
@@ -2016,6 +2044,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             }
                         }
                     }
+                }
+                // v174 — the illustrated planetary footer: the drawer's SVG
+                // landscape fades in behind the version + credits.
+                item("footer") {
+                    DrawerFooter()
                 }
             }
 
@@ -2052,15 +2085,27 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         .clip(heroTornShape)
                         .background(Color.Black.copy(alpha = 0.20f))
                 )
-                // Solid rose banner with the bold torn bottom edge.
-                Surface(
-                    shape = heroTornShape,
-                    color = heroFill,
-                    shadowElevation = 0.dp,
+                // Celestial sky banner with the bold torn bottom edge —
+                // v174: the rose banner becomes a dreamy pre-dawn sky (pale
+                // seafoam gradient, scattered stars, a crescent moon and a
+                // faint constellation; a cream rolling horizon sits just
+                // above the torn seam). The gradient fills the clipped
+                // banner, so the watermark glyphs + greeting read as the
+                // sky's scenery.
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(HomeDrawerHeroHeight)
+                        .clip(heroTornShape)
+                        .background(Brush.verticalGradient(listOf(skyTop, skyBottom)))
                 ) {
+                    // Stars, sparkles, constellation lines and the crescent
+                    // moon — clipped to the torn banner.
+                    DrawerCelestialSky(
+                        skyTop = skyTop,
+                        skyBottom = skyBottom,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Mirrored watermark collage - each pair scatters one
                         // glyph on the LEFT (-biasX, mirrored rotation) and
@@ -2090,6 +2135,9 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     .graphicsLayer { rotationZ = pair.rotation }
                             )
                         }
+                        // v174 — the cream rolling horizon at the bottom of
+                        // the banner (a little planet's hills before sunrise).
+                        DrawerRollingHorizon(modifier = Modifier.fillMaxSize())
                         // Brand + greeting (with the profile avatar) pinned
                         // just above the tear. v103 — the avatar photo (or the
                         // name initial) shows here too, matching the Profile
@@ -2109,12 +2157,16 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             // v122 — 56 → 64dp, the row sits a touch higher
                             // (bottom 28 → 40dp), and a long name auto-shrinks
                             // to fit instead of being cut.
+                            // v174 — a cream ring so the avatar pops against
+                            // the sky; the fallback initial uses the deep
+                            // seafoam ink (readable on the cream in BOTH
+                            // themes).
                             Box(
                                 modifier = Modifier
                                     .size(64.dp)
                                     .shadow(2.dp, CircleShape)
                                     .clip(CircleShape)
-                                    .background(heroFill),
+                                    .background(CurioColors.CreamWhite),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (avatarPath.isNotBlank()) {
@@ -2123,7 +2175,7 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     Text(
                                         displayName.firstOrNull()?.uppercase().orEmpty(),
                                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                        color = drawerInk
+                                        color = Color(0xFF2C5A53)
                                     )
                                 }
                             }
@@ -2182,112 +2234,519 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     }
                 }
             }
-
-            // -- Pinned footer - accurate build version + tagline -----------
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(vertical = 12.dp)
-            ) {
-                Text(
-                    "v${BuildConfig.VERSION_NAME}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
-                Text(
-                    "Made with curiosity",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
         }
     }
 }
 
-/** One collapsible section header inside the drawer (v118) — v135: a
- *  RAISED hierarchy pill (surfaceContainerHigh, fills solid when open) with
- *  a distinct circular toggle badge (▼ collapsed / ▲ open) so the collapse
- *  control reads as a real button, not a passive arrow. Tap toggles the
- *  section's rows inline. */
+/** v174 — one of the drawer's three navigation rows: a soft tinted icon
+ *  chip, a bold label with a quiet subtitle, and a chevron. `expanded`
+ *  null → direct navigation (chevron-right, e.g. Quests & Levels);
+ *  otherwise the row toggles its sub-group (chevron up/down), collapsed by
+ *  default per the drawer redesign ("no accordion expansion by default").
+ *  The wash is an OPAQUE blend (never translucent under the shadow). */
 @Composable
-private fun DrawerSectionHeader(
+private fun DrawerNavRow(
     icon: String,
     label: String,
-    expanded: Boolean,
-    onToggle: () -> Unit
+    subtitle: String,
+    iconTint: Color,
+    expanded: Boolean? = null,
+    onClick: () -> Unit
 ) {
-    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Surface(
-        onClick = onToggle,
-        shape = RoundedCornerShape(16.dp),
-        // Raised above the flat nav rows — solid when expanded, softened
-        // when collapsed — the hierarchy background the user asked for.
-        color = if (expanded)
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        else
-            // Opaque blend (never a translucent fill under a shadow — the
-            // shadow would bleed through as a blurry disc).
-            lerp(
-                MaterialTheme.colorScheme.surface,
-                MaterialTheme.colorScheme.surfaceContainerHigh,
-                0.55f
-            ),
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        color = lerp(
+            surface,
+            lerp(surface, iconTint, if (expanded == true) 0.16f else 0.10f),
+            0.55f
+        ),
         shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 9.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = ink.copy(alpha = if (expanded) 0.16f else 0.10f),
-                modifier = Modifier.size(36.dp)
+                shape = RoundedCornerShape(13.dp),
+                color = iconTint.copy(alpha = 0.14f),
+                modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(
-                        icon, null,
-                        tint = ink,
-                        size = 20.dp,
-                        modifier = Modifier.offset(y = (-1f).dp)
-                    )
+                    CurioIcon(icon, null, tint = iconTint, size = 22.dp)
                 }
             }
-            Text(
-                label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = ink,
-                modifier = Modifier.weight(1f)
-            )
-            // Distinct toggle badge — a filled circle (primary-tinted when
-            // open) so the collapse state reads at a glance.
-            Surface(
-                shape = CircleShape,
-                color = if (expanded)
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-                else
-                    MaterialTheme.colorScheme.surfaceContainerHighest,
-                modifier = Modifier.size(26.dp)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(
-                        if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-                        null,
-                        tint = if (expanded) MaterialTheme.colorScheme.primary
-                               else MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 18.dp
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = muted.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            CurioIcon(
+                name = when {
+                    expanded == null -> CurioIcons.ChevronRight
+                    expanded == true -> CurioIcons.KeyboardArrowUp
+                    else -> CurioIcons.KeyboardArrowDown
+                },
+                contentDescription = null,
+                tint = muted,
+                size = 20.dp
+            )
+        }
+    }
+}
+
+/** v174 — the drawer hero's celestial palette: a dreamy pre-dawn sky. Light
+ *  mode is a pale seafoam gradient with deep seafoam ink; dark mode is a
+ *  deep twilight teal with warm cream ink ("looking at a peaceful sky just
+ *  before sunrise"). Returns (skyTop, skyBottom, readableInk). */
+@Composable
+private fun drawerSkyColors(): Triple<Color, Color, Color> {
+    return if (isCurioDarkTheme()) {
+        Triple(Color(0xFF12313A), Color(0xFF1D4750), Color(0xFFF4F1E7))
+    } else {
+        Triple(Color(0xFFC2E8DE), Color(0xFFE9F6F0), Color(0xFF2C5A53))
+    }
+}
+
+/** v174 — the celestial scenery on the drawer's sky banner: scattered tiny
+ *  stars, a few four-point sparkles, a faint constellation drifting across
+ *  the sky, and a crescent moon toward the right. Deterministic seed so the
+ *  sky never re-scatters on recomposition. The moon's crescent is punched
+ *  with the local sky colour so it looks carved out of the gradient. */
+@Composable
+private fun DrawerCelestialSky(
+    skyTop: Color,
+    skyBottom: Color,
+    modifier: Modifier = Modifier
+) {
+    val starTint = Color(0xFFFFFDF4)
+    val stars = remember {
+        val rnd = Random(HOME_DRAWER_TEAR_SEED)
+        List(30) {
+            SkyStar(
+                x = 0.04f + rnd.nextFloat() * 0.92f,
+                y = 0.06f + rnd.nextFloat() * 0.84f,
+                r = 0.7f + rnd.nextFloat() * 1.1f,
+                a = 0.28f + rnd.nextFloat() * 0.45f
+            )
+        }
+    }
+    // A tiny fixed constellation drifting across the banner (a small
+    // dipper-like figure, low contrast so the greeting stays the focus).
+    val links = remember {
+        listOf(
+            SkyLink(0.16f, 0.30f, 0.24f, 0.22f),
+            SkyLink(0.24f, 0.22f, 0.34f, 0.26f),
+            SkyLink(0.34f, 0.26f, 0.38f, 0.36f),
+            SkyLink(0.38f, 0.36f, 0.30f, 0.44f),
+            SkyLink(0.30f, 0.44f, 0.16f, 0.30f),
+            SkyLink(0.16f, 0.30f, 0.10f, 0.38f)
+        )
+    }
+    val sparkles = remember {
+        listOf(
+            SkySparkle(0.78f, 0.28f, 7f),
+            SkySparkle(0.55f, 0.15f, 5f),
+            SkySparkle(0.90f, 0.56f, 4f)
+        )
+    }
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        links.forEach { l ->
+            drawLine(
+                color = starTint.copy(alpha = 0.14f),
+                start = Offset(l.x1 * w, l.y1 * h),
+                end = Offset(l.x2 * w, l.y2 * h),
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+        stars.forEach { s ->
+            drawCircle(
+                color = starTint.copy(alpha = s.a),
+                radius = s.r.dp.toPx(),
+                center = Offset(s.x * w, s.y * h)
+            )
+        }
+        sparkles.forEach { sp ->
+            drawSparkle(Offset(sp.x * w, sp.y * h), sp.s.dp.toPx(), starTint.copy(alpha = 0.75f))
+        }
+        // Crescent moon: cream disc punched by a circle in the LOCAL sky
+        // colour (the gradient colour at the moon's height).
+        val mc = Offset(0.84f * w, 0.28f * h)
+        val mr = 13.dp.toPx()
+        val localSky = lerp(skyTop, skyBottom, 0.28f)
+        drawCircle(color = starTint.copy(alpha = 0.85f), radius = mr, center = mc)
+        drawCircle(
+            color = localSky,
+            radius = mr,
+            center = Offset(mc.x + mr * 0.55f, mc.y - mr * 0.38f)
+        )
+    }
+}
+
+/** v174 — the soft cream rolling horizon at the bottom of the sky banner,
+ *  just above the torn seam: two gentle overlapping hill bands, like a
+ *  little planet's landscape before sunrise. Dark mode keeps a warm tan so
+ *  the cream ink stays readable. */
+@Composable
+private fun DrawerRollingHorizon(modifier: Modifier = Modifier) {
+    val (horizon, horizonShade) = if (isCurioDarkTheme()) {
+        Color(0xFF7A6A4E) to lerp(Color(0xFF7A6A4E), Color.Black, 0.30f)
+    } else {
+        CurioColors.CreamWhite to lerp(CurioColors.CreamWhite, Color(0xFFD9C4A0), 0.40f)
+    }
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val base = h * 0.80f
+        // Distant hills — fainter, sitting higher.
+        val back = Path().apply {
+            moveTo(0f, h)
+            lineTo(0f, base - 26f)
+            cubicTo(w * 0.25f, base - 52f, w * 0.45f, base - 18f, w * 0.62f, base - 40f)
+            cubicTo(w * 0.80f, base - 58f, w * 0.92f, base - 30f, w, base - 42f)
+            lineTo(w, h)
+            close()
+        }
+        drawPath(back, color = horizonShade.copy(alpha = 0.55f))
+        // Foreground rolling horizon.
+        val front = Path().apply {
+            moveTo(0f, h)
+            lineTo(0f, base + 6f)
+            cubicTo(w * 0.18f, base - 24f, w * 0.34f, base + 20f, w * 0.50f, base - 10f)
+            cubicTo(w * 0.66f, base - 34f, w * 0.80f, base + 12f, w, base - 18f)
+            lineTo(w, h)
+            close()
+        }
+        drawPath(front, color = horizon)
+    }
+}
+
+/** v174 — the drawer's "Your Curiosity Map": a constellation shaped like a
+ *  brain (glowing star nodes + thin connections, warm gold on the left
+ *  drifting to pale blue on the right) with the user's REAL stats orbiting
+ *  it. Real values come from [CurioQuests.lifetimeState] and
+ *  [StreakTracker]; stats the app doesn't track (Learned / Questions /
+ *  Shared) keep the design's placeholder numbers — per the user's choice.
+ *  Overall Curiosity is the sum of the six orbiting stats. */
+@Composable
+private fun DrawerCuriosityMap() {
+    val context = LocalContext.current
+    val lifetime = CurioQuests.lifetimeState
+    val learned = 128
+    val explored = lifetime.explores
+    val topics = lifetime.spins
+    val questions = 98
+    val saved = lifetime.saves
+    val shared = 72
+    val streak = StreakTracker.getStreak(context)
+    val overall = learned + explored + topics + questions + saved + shared
+
+    val ink = MaterialTheme.colorScheme.onSurface
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = if (isCurioDarkTheme())
+            lerp(MaterialTheme.colorScheme.surface, Color(0xFF1B3A40), 0.55f)
+        else
+            lerp(MaterialTheme.colorScheme.surface, Color(0xFFCFE9E2), 0.45f),
+        shadowElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        "Your Curiosity Map",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink
                     )
+                    Text(
+                        "A little galaxy of everything you've explored.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                }
+                // Period selector — decorative per the design ("This Week ˅").
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(top = 2.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                    ) {
+                        Text("This Week", style = MaterialTheme.typography.labelSmall, color = muted)
+                        CurioIcon(CurioIcons.KeyboardArrowDown, null, tint = muted, size = 14.dp)
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Orbiting labels — left column.
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    MapStat(CurioIcons.Lightbulb, "Learned", learned, Color(0xFFD9A85C))
+                    MapStat(CurioIcons.TravelExplore, "Explored", explored, CurioColors.CategorySky)
+                    MapStat(CurioIcons.AutoAwesome, "Topics", topics, Color(0xFF9B7BB8))
+                    MapStat(CurioIcons.MoodCurious, "Questions", questions, Color(0xFF7FA0C8))
+                }
+                // Constellation brain with the overall score at its centre.
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(190.dp)
+                        .padding(horizontal = 4.dp)
+                ) {
+                    ConstellationBrain(
+                        modifier = Modifier.fillMaxSize(),
+                        gold = Color(0xFFD9A85C),
+                        blue = Color(0xFF7FAFD8)
+                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Text("Overall", style = MaterialTheme.typography.labelSmall, color = muted)
+                        Text(
+                            "Curiosity",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = ink
+                        )
+                        Text(
+                            "$overall",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = Color(0xFF2C5A53)
+                        )
+                    }
+                }
+                // Orbiting labels — right column.
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    MapStat(CurioIcons.Bookmark, "Saved", saved, Color(0xFFB98A5E))
+                    MapStat(CurioIcons.Share, "Shared", shared, Color(0xFF7FAFD8))
+                    MapStat(CurioIcons.LocalFire, "Streak", streak, Color(0xFFC96F4A))
                 }
             }
         }
     }
+}
+
+/** v174 — one tiny orbiting statistic on the curiosity map: a small tinted
+ *  icon with the label and its bold value stacked under it. */
+@Composable
+private fun MapStat(icon: String, label: String, value: Int, tint: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        CurioIcon(icon, null, tint = tint, size = 14.dp)
+        Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                "$value",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+/** v174 — the curiosity constellation: an abstract brain built from glowing
+ *  star nodes and thin connections, warm gold on the left drifting to pale
+ *  blue on the right. Bigger nodes read as important interests; the softly
+ *  glowing pair in the middle reads as recent discoveries. */
+@Composable
+private fun ConstellationBrain(
+    modifier: Modifier = Modifier,
+    gold: Color,
+    blue: Color
+) {
+    // Normalized node positions sketching a brain: two hemisphere rings, a
+    // few inner nodes, the centre fissure and a short brainstem below.
+    val nodes = remember {
+        listOf(
+            Offset(0.30f, 0.32f), Offset(0.26f, 0.46f), Offset(0.30f, 0.60f),
+            Offset(0.37f, 0.66f), Offset(0.44f, 0.60f), Offset(0.44f, 0.46f),
+            Offset(0.38f, 0.36f), Offset(0.34f, 0.40f), Offset(0.37f, 0.52f),
+            Offset(0.70f, 0.32f), Offset(0.74f, 0.46f), Offset(0.70f, 0.60f),
+            Offset(0.63f, 0.66f), Offset(0.56f, 0.60f), Offset(0.56f, 0.46f),
+            Offset(0.62f, 0.36f), Offset(0.66f, 0.40f), Offset(0.63f, 0.52f),
+            Offset(0.50f, 0.22f), Offset(0.50f, 0.68f),
+            Offset(0.50f, 0.80f), Offset(0.48f, 0.90f)
+        )
+    }
+    val edges = remember {
+        listOf(
+            0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 5, 5 to 6, 6 to 0,
+            6 to 7, 7 to 8, 8 to 5,
+            9 to 10, 10 to 11, 11 to 12, 12 to 13, 13 to 14, 14 to 15, 15 to 9,
+            15 to 16, 16 to 17, 17 to 13,
+            6 to 18, 15 to 18, 18 to 5, 18 to 14,
+            5 to 8, 14 to 17, 8 to 17,
+            19 to 20, 20 to 21
+        )
+    }
+    // Bigger "important interest" stars + glowing "recent discovery" nodes.
+    val big = remember { setOf(18, 1, 10, 4, 13) }
+    val hot = remember { setOf(5, 14) }
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val pts = nodes.map { Offset(it.x * w, it.y * h) }
+        edges.forEach { (a, b) ->
+            val ca = pts[a]
+            val cb = pts[b]
+            val midX = ((ca.x + cb.x) / 2f / w).coerceIn(0f, 1f)
+            drawLine(
+                color = lerp(gold, blue, midX),
+                start = ca,
+                end = cb,
+                strokeWidth = 1.1.dp.toPx(),
+                alpha = 0.30f
+            )
+        }
+        pts.forEachIndexed { i, p ->
+            val n = nodes[i]
+            val color = lerp(gold, blue, n.x)
+            val r = (if (i in big) 3.6f else 2.2f).dp.toPx()
+            drawCircle(
+                color = color.copy(alpha = if (i in hot) 0.20f else 0.10f),
+                radius = r * (if (i in hot) 3.6f else 2.8f),
+                center = p
+            )
+            drawCircle(color = color, radius = r, center = p)
+            drawCircle(color = Color.White.copy(alpha = 0.85f), radius = r * 0.42f, center = p)
+        }
+    }
+}
+
+/** v174 — the drawer's illustrated footer: the hand-drawn SVG landscape (a
+ *  telescope left on a little planet) sits at the bottom BEHIND the version
+ *  and credits, fading into the surface at its top edge ("fading look") and
+ *  casting a soft shadow. The SVG loads through Coil's SvgDecoder. */
+@Composable
+private fun DrawerFooter() {
+    val context = LocalContext.current
+    val model = remember(context) {
+        ImageRequest.Builder(context)
+            .data(R.raw.drawer_footer)
+            .decoderFactory(SvgDecoder.Factory())
+            .crossfade(true)
+            .build()
+    }
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val footerInk = Color(0xFF7E6E50)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(188.dp)
+                .shadow(
+                    16.dp,
+                    RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp),
+                    clip = false
+                )
+                .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
+        ) {
+            AsyncImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            // Fade the illustration's top into the drawer surface so it
+            // reads as scenery behind the content, not a hard panel.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            0f to surfaceColor,
+                            1f to Color.Transparent
+                        )
+                    )
+            )
+            // Version + credits, nestled into the landscape.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 12.dp)
+            ) {
+                Text(
+                    "v${BuildConfig.VERSION_NAME}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = footerInk
+                )
+                Text("·", style = MaterialTheme.typography.labelSmall, color = footerInk.copy(alpha = 0.6f))
+                Text(
+                    "Made with curiosity",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = footerInk
+                )
+                CurioIcon("favorite", null, tint = footerInk.copy(alpha = 0.8f), size = 12.dp)
+            }
+        }
+    }
+}
+
+// ── v174 drawer-scenery data (deterministic, no per-frame Random) ───────
+private data class SkyStar(val x: Float, val y: Float, val r: Float, val a: Float)
+private data class SkyLink(val x1: Float, val y1: Float, val x2: Float, val y2: Float)
+private data class SkySparkle(val x: Float, val y: Float, val s: Float)
+
+/** v174 — a four-point sparkle star drawn as a concave 8-point star path. */
+private fun DrawScope.drawSparkle(center: Offset, size: Float, color: Color) {
+    val spike = size
+    val valley = size * 0.30f
+    val path = Path()
+    for (i in 0 until 8) {
+        val angle = i * (Math.PI / 4).toFloat()
+        val r = if (i % 2 == 0) spike else valley
+        val x = center.x + kotlin.math.cos(angle.toDouble()).toFloat() * r
+        val y = center.y + kotlin.math.sin(angle.toDouble()).toFloat() * r
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    drawPath(path, color)
 }
 
 @Composable

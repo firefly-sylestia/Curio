@@ -1,6 +1,38 @@
 # Prompt.md — Request log
 
-## Current request — pill morph slower again + Cabinet "All" wears the Spin accent
+## Current request — drawer redesigned as a tiny personal observatory
+
+User pasted a full design spec (celestial header, "Your Curiosity Map"
+constellation-brain, 3 clean nav rows, illustrated planetary footer) and
+added an SVG at the repo root, then said "ask if not understand the plan".
+
+ask_user answers: (1) map stats = REAL data where the app tracks it
+(streak, saves, spins/explores from CurioQuests.lifetimeState), falling
+back to the design's numbers (Learned 128 / Questions 98 / Shared 72)
+only where no counter exists — Overall = sum of the six; (2) the 3 nav
+rows KEEP tap-to-expand sub-rows (collapsed by default) so Topic History
+/ Manage Categories / Browse Topics / Support / Replay intro survive.
+
+Implementation (HomeScreen.kt HomeDrawerContent):
+1. HERO — rose torn banner → pre-dawn sky: seafoam gradient (dark =
+   twilight teal), seeded stars, 3 four-point sparkles, faint dipper
+   constellation, punched crescent moon, cream rolling horizon above the
+   tear; cream avatar ring; ink steps with the sky.
+2. CURIOSITY MAP — pastel card with header + decorative "This Week ˅",
+   ConstellationBrain Canvas (22 nodes, gold→blue, glow) + center
+   "Overall / Curiosity / N", 7 orbiting MapStat labels.
+3. NAV ROWS — DrawerNavRow (tinted icon chip + label + subtitle +
+   chevron): Quests & Levels direct (chevron-right), Your Curiosity +
+   About expandable (collapsed by default); the 5 sub-rows stay.
+4. FOOTER — res/raw/drawer_footer.svg (moved from repo root) via NEW
+   io.coil-kt:coil-svg:2.7.0 dependency, rounded + shadowed, top fades
+   into the surface, "v{version} · Made with curiosity ♥" on the
+   landscape; old pinned footer removed.
+
+Docs: changelog ADD bullet, AGENTS.md v174, this file. PUSH (no "dont
+push" in the request).
+
+## Completed request — pill morph slower again + Cabinet "All" wears the Spin accent
 
 User: "the navbar morphe open is still tooo rapid aah, make i even more
 sloer. and in cabinet all use blue or red or whatever the spin screen

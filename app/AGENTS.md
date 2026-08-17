@@ -1245,6 +1245,46 @@ app/src/main/java/com/curio/app/
     v170 commits rode along). LESSON: "photos option" = the entry's
     sessionScreenshots attachments; synchronous decode is mandatory for
     the off-screen card capture.
+- **v174 — drawer redesigned as a "tiny personal observatory".** User
+  pasted a full design spec + dropped an SVG (`svgviewer-output (10).svg`
+  → moved to `res/raw/drawer_footer.svg`) and said "ask if not understand
+  the plan". ask_user: stats = REAL data where it exists (fallback to the
+  design's numbers only where no counter exists); the 3 nav rows KEEP
+  tap-to-expand sub-rows (collapsed by default, per "no accordion
+  expansion by default" = restyled rows, not dropped functionality).
+  HomeScreen.kt (`HomeDrawerContent`):
+  - HERO: rose Surface → gradient sky Box (light seafoam #C2E8DE→
+    #E9F6F0, dark twilight #12313A→#1D4750) clipped to the torn shape;
+    `DrawerCelestialSky` paints 30 seeded stars, 3 four-point sparkles
+    (`drawSparkle`), a faint dipper constellation and a punched crescent
+    moon (punch uses lerp(skyTop, skyBottom, y) = the local gradient
+    colour); `DrawerRollingHorizon` adds two cream hill bands just above
+    the tear (dark = warm tan so cream ink stays readable). Avatar ring
+    is now cream; greeting ink steps with the sky.
+  - CURIOSITY MAP: `DrawerCuriosityMap` card (rounded 24, opaque pastel
+    lerp — shadow-safe) with "Your Curiosity Map" + subtitle + a
+    decorative "This Week ˅" pill; `ConstellationBrain` Canvas draws an
+    abstract brain (22 normalized nodes, gold→blue lerp by x, glow on
+    hot nodes, bigger "important" stars) with the "Overall / Curiosity /
+    N" score overlaid at the centre; 7 orbiting `MapStat`s (icon +
+    label + bold value): Learned/Questions/Shared = the DESIGN numbers
+    (no counters), Explored=explores, Topics=spins, Saved=saves,
+    Streak=StreakTracker.getStreak. Overall = sum of the six.
+  - NAV ROWS: `DrawerNavRow` replaces DrawerSectionHeader — tinted icon
+    chip, bold label + subtitle, chevron (right = direct nav for Quests
+    & Levels; up/down = tap-to-expand for Your Curiosity / About). The
+    5 sub-rows (Topic History / Manage Categories / Browse Topics /
+    Support / Replay intro) keep the existing AnimatedVisibility groups.
+  - FOOTER: `DrawerFooter` loads res/raw/drawer_footer.svg via Coil's
+    SvgDecoder (NEW dep io.coil-kt:coil-svg:2.7.0 — sibling of the
+    existing coil-compose; libs.versions.toml coilSvg) in a rounded,
+    shadowed box; a vertical surface→transparent gradient fades its top
+    ("fading look"); "v{version} · Made with curiosity ♥" sits on the
+    landscape (footerInk warm tan #7E6E50). Old pinned footer Column
+    removed.
+  - LESSON: SVG-at-runtime = coil-svg (keep the artist's file as-is); a
+    332KB hand-drawn SVG is NOT safe as a VectorDrawable (aapt2 path
+    blob). Pastel fills under shadows must be opaque lerps (rule 11).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin
