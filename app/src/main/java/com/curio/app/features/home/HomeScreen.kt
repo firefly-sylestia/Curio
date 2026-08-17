@@ -2681,7 +2681,7 @@ private fun DrawerLaneConstellation(
                 ),
                 shadowElevation = if (isSel) 3.dp else 1.dp,
                 modifier = Modifier
-                    .offset(x = n.x * w - chip / 2, y = n.y * h - chip / 2)
+                    .offset(x = w * n.x - chip / 2, y = h * n.y - chip / 2)
                     .size(chip)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
