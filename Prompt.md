@@ -47,7 +47,35 @@ quote cards at their true size and spot; (3) open the expanded saved board — s
 board on a board with images + quotes — confirm text mentions both, all wiped;
 (6) empty full-screen board — Quote chip at bottom; add an image — chip moves up.
 
-## Current request — v148: Pet Designer studio bar gets the nav-bar collapse animation
+## Current request — v149: (1) revert the progress UI redesign, keep only better page-count editing; (2) new saved-entry share UI with preview
+
+The user: "lets add a proper new share for saved entries with preview and a new share
+ui, also revert the progress ui and i only meant you to change the page count look and
+its editing way. no redesign it, the way to edit the page count is bad thats what i
+meant not the progress ui".
+
+### (1) Progress revert (CurioProgressPill.kt)
+The v135 stepper-first dialog (31e5fea) was over-reach. Restored the pre-redesign
+ring dialog via `git checkout 4558e99` (big % + count inside a 132dp ring, −/+ steppers,
+slider, Finish + Save only), then re-applied two improvements:
+- Slider snap fix KEPT: ≤200 total → whole-unit steps; big totals → continuous
+  (rounded) — the "editor isn't working" bug.
+- Page-count editing IMPROVED: the count is now a plain display and an explicit
+  "Edit total" chip + pencil under it opens the inline numeric field (the old hidden
+  tappable count read as plain text — the actual complaint).
+The editable-target FEATURE (TopicProgressStore.setTarget + alt-edition pill) stays.
+
+### (2) Share sheet (EntryDetailScreen.kt)
+EntryDetail's More → Share used to fire the chooser with no preview. Now:
+- `showShareSheet` state in DetailStickyBar; Share item opens `EntryShareSheet`
+  (ModalBottomSheet, theme surface, drag handle).
+- Sheet: title, live 320dp `CurioShareCard` preview on a shadowed stage, Image card /
+  Text pill picker (solid-secondary selected per v131), full-width Share button.
+- Image → existing `shareComposableCard` 400×400 PNG; Text → plain-text summary via
+  `entryShareText` (name, teaser, category · format · captured date, Curio footer).
+
+## Earlier completed request (v148)
+Pet Designer studio bar gets the nav-bar collapse animation
 
 The user clarified the "unify the pill style" ask: "when i meant to unify the pill
 style i also meant the animation i meant use similiar animation just like in home

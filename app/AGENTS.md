@@ -919,6 +919,32 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v149 — (1) progress editor REVERTED to the ring design, keeping only
+  the page-count EDITING improvement; (2) saved-entry SHARE gets a
+  preview sheet.** The user: "revert the progress ui — i only meant you to
+  change the page count look and its editing way, not redesign it; the way
+  to edit the page count is bad". The v135 stepper-first dialog (31e5fea)
+  was over-reach: `git checkout 4558e99` restored the ring dialog (big % +
+  count, −/+ steppers, slider, Finish/Save) and two improvements were
+  re-applied on top: the slider snap fix (≤200 total = whole-unit steps,
+  big totals = continuous rounded — the "editor isn't working" bug) and
+  the count is now a PLAIN display with an explicit "Edit total" chip +
+  pencil below it that opens the inline numeric field (the old hidden
+  tappable count read as plain text — the "way to edit the page count is
+  bad" complaint). Keep the TopicProgressStore/topic changes (the
+  editable-target feature itself stays). (2) Share: the EntryDetail More →
+  Share item used to fire the ACTION_SEND chooser with no preview; it now
+  opens `EntryShareSheet` — a ModalBottomSheet (theme surface, drag
+  handle) with a live 320dp `CurioShareCard` preview on a shadowed stage,
+  an Image card / Text pill picker (solid-secondary selected per the
+  v131 contract), and a Share button (image = the existing
+  `shareComposableCard` 400×400 PNG path; text = plain-text summary via
+  `entryShareText`). State lives in `DetailStickyBar` (`rememberSaveable`
+  `showShareSheet`); the sheet renders inside the sticky bar's Row but is
+  a Dialog window, so the bar's scroll graphicsLayer doesn't affect it.
+  LESSON: a "fix the editor" ask can balloon into a full UI redesign —
+  keep the original layout and fix the affordance; and a share action
+  deserves a preview step, not a blind chooser.
 - **v148 — the Pet Designer studio bar animates EXACTLY like the main
   nav bar ("unify the pill style" included the ANIMATION).** v142
   restyled `PetStudioBottomNav` to the floating pill container but kept

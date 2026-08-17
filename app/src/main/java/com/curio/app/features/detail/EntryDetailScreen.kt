@@ -1,6 +1,7 @@
 package com.curio.app.features.detail
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import org.json.JSONArray
 import org.json.JSONObject
@@ -40,13 +41,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.DisposableEffect
@@ -1050,6 +1056,9 @@ private fun BoxScope.DetailStickyBar(
     onDeleteRequest: () -> Unit
 ) {
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
+    // v149 — the new share UI: the More → Share item opens a share sheet
+    // with a live PREVIEW of the card before sharing (see EntryShareSheet).
+    var showShareSheet by rememberSaveable { mutableStateOf(false) }
     val stickyThresholdPx = with(LocalDensity.current) { DetailStickyBarThreshold.toPx() }
     val stickyProgress by remember {
         derivedStateOf { (detailScroll.value / stickyThresholdPx).coerceIn(0f, 1f) }
@@ -1147,12 +1156,7 @@ private fun BoxScope.DetailStickyBar(
                     },
                     onClick = {
                         menuExpanded = false
-                        shareComposableCard(
-                            context = context,
-                            cardSize = DpSize(400.dp, 400.dp),
-                            authority = authority,
-                            card = { CurioShareCard(entry = resolvedEntry, category = category) }
-                        )
+                        showShareSheet = true
                     }
                 )
                 if (isMultiSectionEntry(resolvedEntry)) {
@@ -1223,6 +1227,18 @@ private fun BoxScope.DetailStickyBar(
                     }
                 )
             }
+        }
+        // v149 — the share sheet (preview + Image/Text picker) opens from
+        // the More menu; it lives here so it survives the sticky bar's
+        // scroll-driven recompositions without re-arming.
+        if (showShareSheet) {
+            EntryShareSheet(
+                entry = resolvedEntry,
+                category = category,
+                context = context,
+                authority = authority,
+                onDismiss = { showShareSheet = false }
+            )
         }
     }
 }
@@ -4201,5 +4217,168 @@ private fun CurioShareCard(
                 )
             }
         }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Share sheet (v149) — preview + Image/Text picker before sharing
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * v149 — the NEW share UI for saved entries: a bottom sheet that shows a
+ * live PREVIEW of the exact card that gets shared, an Image card / Text
+ * format picker, and one Share action. Image renders the 400×400 category
+ * card PNG via [shareComposableCard] (same output as before); Text sends a
+ * plain-text summary. Opened from the entry's More menu (the old flow fired
+ * the chooser straight from the menu with no preview).
+ */
+@Composable
+private fun EntryShareSheet(
+    entry: CurioEntry,
+    category: CurioCategory,
+    context: Context,
+    authority: String,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var shareAsImage by rememberSaveable { mutableStateOf(true) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Share this entry",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // ── Preview — the exact card that gets shared, on a soft stage ──
+            Box(
+                modifier = Modifier
+                    .size(320.dp)
+                    .shadow(8.dp, RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(28.dp))
+            ) {
+                CurioShareCard(entry = entry, category = category)
+            }
+
+            // ── Image / Text format picker ──
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ShareFormatPill(
+                    label = "Image card",
+                    icon = CurioIcons.Image,
+                    selected = shareAsImage
+                ) { shareAsImage = true }
+                ShareFormatPill(
+                    label = "Text",
+                    icon = CurioIcons.FormatText,
+                    selected = !shareAsImage
+                ) { shareAsImage = false }
+            }
+
+            // ── Share action ──
+            Button(
+                onClick = {
+                    if (shareAsImage) {
+                        shareComposableCard(
+                            context = context,
+                            cardSize = DpSize(400.dp, 400.dp),
+                            authority = authority,
+                            card = { CurioShareCard(entry = entry, category = category) }
+                        )
+                    } else {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
+                            putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share entry"))
+                    }
+                    onDismiss()
+                },
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            ) {
+                Text(
+                    text = if (shareAsImage) "Share image card" else "Share as text",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                )
+            }
+        }
+    }
+}
+
+/** One Image/Text pill in the share sheet — selected wears the solid
+ *  secondary fill (v131 contract), unselected sits on the container. */
+@Composable
+private fun ShareFormatPill(
+    label: String,
+    icon: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (selected) MaterialTheme.colorScheme.secondary
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.height(40.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = if (selected) MaterialTheme.colorScheme.onSecondary
+                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = if (selected) MaterialTheme.colorScheme.onSecondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** Plain-text share payload for an entry (the sheet's Text format). */
+private fun entryShareText(entry: CurioEntry, category: CurioCategory): String {
+    val formatLabel = entry.format.name.replace(Regex("([a-z])([A-Z])"), "$1 $2")
+    val daysAgo = when (entry.capturedAtDaysAgo) {
+        0 -> "today"
+        1 -> "yesterday"
+        else -> "${entry.capturedAtDaysAgo}d ago"
+    }
+    return buildString {
+        append(entry.topic.name).append('\n')
+        append(entry.topic.teaser).append("\n\n")
+        append(category.displayName).append(" · ").append(formatLabel).append(" · captured ").append(daysAgo)
+        append("\n\nvia Curio — Stay curious")
     }
 }

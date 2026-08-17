@@ -1,5 +1,6 @@
 package com.curio.app.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -36,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -218,15 +220,19 @@ fun CurioProgressPill(
 }
 
 /**
- * v135 — the REDESIGNED progress editor: a clean stepper-first layout — a
- * big count with −/+ steppers, an explicit "of {target} {unit}" line with
- * an edit pencil (the old hidden tappable count inside the ring is gone),
- * a full-width progress bar + %, and a slider that snaps per whole unit
- * when the total is small and runs continuous (rounded) for big totals
- * (the old 600-step slider made the thumb fight a non-integer snap on
- * 1000-page books — the "editor isn't working" bug). Only Finish
- * (quick-set to the target) + Save (persist + close) — no Reset, no
- * Cancel. Dismiss is tap-outside / back.
+ * v149 — REVERTED to the ring layout (the v135 stepper-first redesign was
+ * too much — the user meant only the page-count EDITING, not the whole
+ * progress UI): the circular progress ring with the big % + count is back,
+ * with −/+ steppers, a slider, and only Finish + Save. Two improvements
+ * kept: (1) the slider snaps per whole unit on small totals and runs
+ * continuous (rounded) on big ones (the "editor isn't working" bug), and
+ * (2) editing the PAGE COUNT is now an EXPLICIT "Edit total" chip with an
+ * edit pencil under the count — the old hidden tappable count is gone.
+ *
+ * v29 — the redesigned progress editor: a circular progress ring with the
+ * big % + count, −/+ steppers for precise ±1 changes, a stepped slider for
+ * sweeping, and only Finish (quick-set to the target) + Save (persist +
+ * close) — no Reset, no Cancel. Dismiss is tap-outside / back.
  *
  * v66 — color fix: the dialog used to mix the caller's raw accent with the
  * theme's onSurface, which went dark-on-dark when the accent was a deep
@@ -236,12 +242,13 @@ fun CurioProgressPill(
  * 14% wash of it instead of solid circles, and the Save button pairs it
  * against the theme surface so the label always contrasts.
  *
- * v126 — the TARGET is no longer locked to the topic data: tapping the
- * "of {target} {unit}" line (the pencil, v135) opens an inline number
- * field to correct the total pages/episodes (wrong baked-in totals —
- * merged anime seasons, edition-dependent book page counts). The
+ * v126 — the TARGET is no longer locked to the topic data: an inline
+ * number field corrects the total pages/episodes (wrong baked-in totals
+ * — merged anime seasons, edition-dependent book page counts). The
  * corrected target persists per-topic via [TopicProgressStore.setTarget]
  * and overrides the baked-in count everywhere the pill/card shows it.
+ * v149 — the field is opened by the explicit "Edit total" chip under the
+ * count, not by tapping the count itself (which read as plain text).
  */
 @Composable
 fun CurioProgressEditorDialog(
@@ -262,8 +269,8 @@ fun CurioProgressEditorDialog(
     val start = TopicProgressStore.get(topic.id).coerceIn(0, target)
     var value by remember { mutableIntStateOf(start) }
     val fraction = (value.toFloat() / target).coerceIn(0f, 1f)
-    // v126 — the pencil on the "of {target} {unit}" line swaps it for an
-    // inline numeric field to correct the total (pages / episodes).
+    // v126 — tapping the count under the ring swaps it for an inline
+    // numeric field to correct the total (pages / episodes).
     var editingTarget by remember { mutableStateOf(false) }
     var targetText by remember { mutableStateOf(target.toString()) }
 
@@ -272,7 +279,7 @@ fun CurioProgressEditorDialog(
         // v53 — the dialog wears the standard page-background tint like
         // every other dialog (the accent container was too loud). v66 —
         // [contentColor] drives every element (readable category ink), so
-        // the steppers, bar, slider and Save all read in both modes.
+        // the ring, steppers, slider and Save all read in both modes.
         containerColor = curioDialogContainerColor(),
         shape = RoundedCornerShape(28.dp),
         title = {
@@ -287,37 +294,49 @@ fun CurioProgressEditorDialog(
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // ── Big count + −/+ steppers (the primary control) ──
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(18.dp)
+                // ── Circular progress ring + big % + count ──
+                Box(
+                    modifier = Modifier.size(132.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    StepButton(
-                        glyph = CurioIcons.Remove,
-                        contentDescription = "One less $unit",
-                        enabled = value > 0,
-                        contentColor = contentColor
-                    ) { value = (value - 1).coerceAtLeast(0) }
+                    Canvas(modifier = Modifier.size(132.dp)) {
+                        val stroke = 10.dp.toPx()
+                        // Track
+                        drawArc(
+                            color = contentColor.copy(alpha = 0.25f),
+                            startAngle = 0f,
+                            sweepAngle = 360f,
+                            useCenter = false,
+                            style = Stroke(width = stroke, cap = StrokeCap.Round)
+                        )
+                        // Progress arc
+                        drawArc(
+                            color = contentColor,
+                            startAngle = -90f,
+                            sweepAngle = 360f * fraction,
+                            useCenter = false,
+                            style = Stroke(width = stroke, cap = StrokeCap.Round)
+                        )
+                    }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
-                            text = "$value",
-                            style = MaterialTheme.typography.headlineLarge.copy(
+                            text = "${(fraction * 100).roundToInt()}%",
+                            style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 38.sp
+                                fontSize = 30.sp
                             ),
-                            color = contentColor,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.widthIn(min = 96.dp)
+                            color = contentColor
                         )
-                        // v126 — the target line: the pencil opens an inline
-                        // numeric field to correct the total pages/episodes
-                        // (the baked-in data is often wrong — merged anime
-                        // seasons, edition-dependent book page counts).
+                        // v149 — the count is a PLAIN display; the way to
+                        // edit the PAGE COUNT is now an explicit chip below
+                        // it (the old hidden tappable count read as plain
+                        // text — the user: "the way to edit the page count
+                        // is bad"). The inline field still opens here.
                         if (editingTarget) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -371,9 +390,16 @@ fun CurioProgressEditorDialog(
                                 }
                             }
                         } else {
-                            // v135 — an explicit "of {target} {unit}" chip
-                            // with an edit pencil (was a hidden tappable
-                            // count inside the ring).
+                            // The count — plain display (not tappable).
+                            Text(
+                                text = "$value / $target $unit",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = contentColor.copy(alpha = 0.85f),
+                                maxLines = 1
+                            )
+                            // v149 — the EXPLICIT page-count edit chip: a
+                            // labeled pill with an edit pencil opens the
+                            // inline field (no more hidden tap target).
                             Surface(
                                 onClick = {
                                     targetText = target.toString()
@@ -385,23 +411,43 @@ fun CurioProgressEditorDialog(
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
-                                        text = "of $target $unit",
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        text = "Edit total",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                         color = contentColor.copy(alpha = 0.85f)
                                     )
                                     CurioIcon(
                                         name = CurioIcons.Edit,
                                         contentDescription = "Edit total $unit",
                                         tint = contentColor.copy(alpha = 0.6f),
-                                        size = 13.dp
+                                        size = 12.dp
                                     )
                                 }
                             }
                         }
                     }
+                }
+
+                // ── − / + steppers for precise change ──
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    StepButton(
+                        glyph = CurioIcons.Remove,
+                        contentDescription = "One less $unit",
+                        enabled = value > 0,
+                        contentColor = contentColor
+                    ) { value = (value - 1).coerceAtLeast(0) }
+                    Text(
+                        text = "$value",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = contentColor,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(72.dp)
+                    )
                     StepButton(
                         glyph = CurioIcons.Add,
                         contentDescription = "One more $unit",
@@ -410,37 +456,11 @@ fun CurioProgressEditorDialog(
                     ) { value = (value + 1).coerceAtMost(target) }
                 }
 
-                // ── Full-width progress bar + % ──
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(8.dp)
-                            .clip(CircleShape)
-                            .background(contentColor.copy(alpha = 0.22f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(fraction)
-                                .height(8.dp)
-                                .clip(CircleShape)
-                                .background(contentColor)
-                        )
-                    }
-                    Text(
-                        text = "${(fraction * 100).roundToInt()}%",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = contentColor
-                    )
-                }
-
-                // ── Slider — v135: whole-unit steps only when the total is
-                //    small (≤ 200); big totals run continuous (rounded), so
-                //    the thumb never fights a non-integer snap position.
+                // ── Stepped slider — v135 fix kept after the v149 revert:
+                //    whole-unit steps only when the total is small (≤ 200);
+                //    big totals run continuous (rounded), so the thumb never
+                //    fights a non-integer snap position on 1000-page books
+                //    (the "editor isn't working" bug).
                 Slider(
                     value = value.toFloat(),
                     onValueChange = { value = it.roundToInt().coerceIn(0, target) },
