@@ -84,6 +84,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -2246,9 +2247,13 @@ private val RevealSentimentHeight = 48.dp
 // v162 — same ONE-spring-family fix as the nav bar: width, fill, icon tint
 // and the label expand/shrink all run identical spring params so the
 // segment moves in lockstep (before, the fill lagged on MediumLow and the
-// label/icon finished early on their own tweens).
+// label/icon finished early on their own tweens). v165 — specs typed per
+// animated value (spring<Color> for colors, spring<IntSize> for the
+// label's expand/shrink, spring<Float> for fades); same physics.
 private val RevealWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 private val RevealMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val RevealColorSpring = spring<Color>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val RevealExpandSpring = spring<IntSize>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
@@ -2276,12 +2281,12 @@ private fun SentimentSegment(
     // fill lagged on MediumLow, icon finished in 200ms — out of step).
     val fillColor by animateColorAsState(
         targetValue = accent.copy(alpha = if (active) 1f else 0f),
-        animationSpec = RevealMotionSpring,
+        animationSpec = RevealColorSpring,
         label = "revealSentimentFill"
     )
     val iconTint by animateColorAsState(
         targetValue = if (active) ink else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = RevealMotionSpring,
+        animationSpec = RevealColorSpring,
         label = "revealSentimentIconTint"
     )
     Surface(
@@ -2308,8 +2313,8 @@ private fun SentimentSegment(
             // so the label was done while the segment was still mid-flight).
             AnimatedVisibility(
                 visible = active,
-                enter = expandHorizontally(RevealMotionSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
-                exit = shrinkHorizontally(RevealMotionSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
+                enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
+                exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
             ) {
                 Text(
                     text = label,

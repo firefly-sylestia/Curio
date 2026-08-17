@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -222,9 +223,15 @@ private val FloatingPillHeight = 48.dp
 // icon tint ran their own 240/160ms tweens — the fill lagged the width
 // and the label finished ~3x early, which is what still read as janky
 // after v161. Identical spring params = identical trajectories from the
-// same start frame = perfect lockstep.
+// same start frame = perfect lockstep. v165 — the specs are typed per
+// animated value: the generic must match the target type (spring<Color>
+// for color animations, spring<IntSize> for the label's expand/shrink,
+// spring<Float> for fades); the physics are the same so the lockstep
+// holds across all four.
 private val PillWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 private val PillMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val PillColorSpring = spring<Color>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -361,12 +368,12 @@ private fun FloatingNavPill(
     // elements.
     val fillColor by animateColorAsState(
         targetValue = activeFill.copy(alpha = if (selected) 1f else 0f),
-        animationSpec = PillMotionSpring,
+        animationSpec = PillColorSpring,
         label = "floatingNavPillFill"
     )
     val iconTint by animateColorAsState(
         targetValue = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = PillMotionSpring,
+        animationSpec = PillColorSpring,
         label = "floatingNavPillIconTint"
     )
     Box(
@@ -395,8 +402,8 @@ private fun FloatingNavPill(
             // width all move as ONE piece.
             AnimatedVisibility(
                 visible = selected,
-                enter = expandHorizontally(PillMotionSpring, expandFrom = Alignment.Start) + fadeIn(PillMotionSpring),
-                exit = shrinkHorizontally(PillMotionSpring, shrinkTowards = Alignment.Start) + fadeOut(PillMotionSpring)
+                enter = expandHorizontally(PillExpandSpring, expandFrom = Alignment.Start) + fadeIn(PillMotionSpring),
+                exit = shrinkHorizontally(PillExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(PillMotionSpring)
             ) {
                 Text(
                     text = destination.label,

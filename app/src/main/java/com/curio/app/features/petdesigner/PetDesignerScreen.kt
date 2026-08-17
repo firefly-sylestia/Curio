@@ -72,6 +72,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
@@ -1424,8 +1425,11 @@ private val StudioPillHeight = 52.dp
 // and its label expand/shrink share identical spring params so the label
 // moves with the pill (before, the label ran its own 160ms tweens and
 // finished ~4x early). The fill stays a deliberate solid snap (v156 design).
+// v165 — specs typed per animated value (spring<IntSize> for the label's
+// expand/shrink, spring<Float> for fades); same physics.
 private val StudioWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 private val StudioMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+private val StudioExpandSpring = spring<IntSize>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 
 /**
  * One capsule tab in the studio pill bar — mirrors [CurioFloatingNavBar]'s
@@ -1475,8 +1479,8 @@ private fun RowScope.PetStudioTab(
             // leaving the pill to deflate around a dead box).
             AnimatedVisibility(
                 visible = selected,
-                enter = expandHorizontally(StudioMotionSpring, expandFrom = Alignment.Start) + fadeIn(StudioMotionSpring),
-                exit = shrinkHorizontally(StudioMotionSpring, shrinkTowards = Alignment.Start) + fadeOut(StudioMotionSpring)
+                enter = expandHorizontally(StudioExpandSpring, expandFrom = Alignment.Start) + fadeIn(StudioMotionSpring),
+                exit = shrinkHorizontally(StudioExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(StudioMotionSpring)
             ) {
                 Text(
                     text = label,

@@ -1,6 +1,15 @@
 # Prompt.md — Request log
 
-## Current request (completed) — bolder navbar tab labels
+## Current request (completed) — CI fix: typed springs for the pill motion
+
+CI failed on v162: SpringSpec<Float> passed where AnimationSpec<Color>
+(fill/icon tint) and FiniteAnimationSpec<IntSize> (label expand/shrink)
+were expected. Each pill now declares one spring per target type —
+spring<Dp> (width), spring<Color> (fill + icon), spring<IntSize>
+(expand/shrink), spring<Float> (fades) — same physics, so the lockstep
+is unchanged. IntSize imported in all three files. Committed + pushed.
+
+## Earlier completed request — bolder navbar tab labels
 
 User: "use new bold fonts for navbar texts material text". The floating
 pill bar's tab labels (and the rail, reveal Like/Dislike, pet studio)

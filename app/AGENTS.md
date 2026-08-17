@@ -1067,6 +1067,18 @@ app/src/main/java/com/curio/app/
   Geom (the app's display font) declares a real Bold face, so no fake-
   bold synthesis. LESSON: the pill label weight lives in FOUR copies
   (pill, rail, sentiment, studio) — bump them together.
+- **v165 — v162's one-spring-family CI fix: the specs are TYPED per
+  animated value.** CI failed: `SpringSpec<Float>` passed where
+  `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`
+  (the label's expand/shrinkHorizontally) were expected. The generic
+  type parameter of a spring MUST match the animated value's type. Fix:
+  each pill now declares `spring<Dp>` (width), `spring<Color>` (fill +
+  icon tint), `spring<IntSize>` (label expand/shrink) and
+  `spring<Float>` (fadeIn/fadeOut) — same 0.9 damping + Medium stiffness
+  everywhere, so the lockstep physics are unchanged. Added the `IntSize`
+  import in all three files. LESSON: `spring<Float>` is ONLY valid for
+  float animations; sharing one spec across color/size/fade animations
+  needs one spring per target type.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view
