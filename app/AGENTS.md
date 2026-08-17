@@ -919,6 +919,32 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v151 — bigger bottom pill + the nav bar MORPHS into the reveal's
+  Like/Dislike pill.** User: "the bottom pill can be more larger" and
+  "instead of hiding the navbar and showing dislike and like, morph
+  transform the pill with dislike and like icon when the reveal opens".
+  (1) `FloatingPillIconWidth/ExpandedWidth/Height` 52/112/52 → 60/128/60
+  (icon 24→26). (2) A SECOND shared element: `SentimentSharedElementKey`
+  ("nav-pill-sentiment") + `NavPillBoundsTransform` (the hero's 320ms
+  tween). The nav bar MOVED INSIDE the SharedTransitionLayout (wrapped in
+  a `Box(fillMaxSize)` so `align(BottomCenter)` still works) and is the
+  caller-managed SOURCE via `Modifier.sharedElementWithCallerManagedVisibility(state,
+  visible, boundsTransform)` — the NavHost keeps it composed for 500ms
+  after the reveal opens (`sentimentMorphVisible` LaunchedEffect keyed on
+  `isRevealRoutePrefix`, then it leaves composition) with its pills
+  non-interactive (`interactive = showBottomBar` gates `clickable(enabled)`)
+  so the morph has a source without the bar eating taps; the reveal's
+  `RevealSentimentPill` is the route-scoped TARGET
+  (`Modifier.sharedElement(state, animatedVisibilityScope, …)` via a new
+  `modifier` param). Both sit at bottom-center with the same 12dp air
+  gap, so the bar's capsule collapses into the sentiment pair — and the
+  reverse morphs back on pop. Graceful fallback: if the framework
+  doesn't pair them, the bar simply shows for the 500ms window then
+  leaves (pills disabled, taps pass through) — no worse than before.
+  LESSON: an overlay bar that must morph INTO a route's content needs to
+  live INSIDE the SharedTransitionLayout and use the caller-managed
+  visibility variant (the route scopes don't reach it); keep the source
+  composed+visible through the entrance, then remove it.
 - **v150 — floating pills go THEME-AWARE + DYNAMIC (user-confirmed:
   container follows the page tint, active pill follows the page color,
   dark-mode elevation), plus the reveal Like/Dislike pill gets the nav-bar

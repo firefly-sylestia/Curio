@@ -127,8 +127,10 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
+import com.curio.app.ui.adaptive.NavPillBoundsTransform
 import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
+import com.curio.app.ui.adaptive.SentimentSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -865,6 +867,15 @@ fun TopicRevealScreen(
                     sentiment = sentiment,
                     accent = cat.themedAccent(),
                     ink = cat.onAccent(),
+                    // v151 — the shared-element target: the pill's bounds
+                    // morph out of the bottom nav bar's capsule.
+                    modifier = sharedTransitionScope.run {
+                        Modifier.sharedElement(
+                            sentimentSharedState,
+                            animatedVisibilityScope,
+                            boundsTransform = NavPillBoundsTransform
+                        )
+                    },
                     onDislike = {
                         AppPreferences.setTopicSentiment(
                             context, cat.id, resolved.id,
@@ -1598,6 +1609,12 @@ private fun HeroCard(
     val sharedTransitionScope = LocalRevealSharedScope.current ?: return
     val animatedVisibilityScope = LocalRevealVisibilityScope.current ?: return
     val revealSharedState = sharedTransitionScope.rememberSharedContentState(RevealSharedElementKey)
+    // v151 — the nav-pill → sentiment-pill morph: the floating Like/Dislike
+    // pill is the TARGET of the shared element whose source is the bottom
+    // nav bar (the bar stays composed through the reveal's entrance, then
+    // leaves). Both sit at bottom-center, so the bar's capsule collapses
+    // into the sentiment pair when the reveal opens.
+    val sentimentSharedState = sharedTransitionScope.rememberSharedContentState(SentimentSharedElementKey)
 
     val action = resolved?.exploreAction
     // v28 — the reveal hero uses the SAME accent source as the Spin ticket
@@ -2195,10 +2212,13 @@ private fun RevealSentimentPill(
     accent: Color,
     ink: Color,
     onDislike: () -> Unit,
-    onLike: () -> Unit
+    onLike: () -> Unit,
+    // v151 — the shared-element modifier (the nav bar morphs into this
+    // pill); null-safe callers pass Modifier.
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {

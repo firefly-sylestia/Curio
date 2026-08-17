@@ -47,7 +47,37 @@ quote cards at their true size and spot; (3) open the expanded saved board — s
 board on a board with images + quotes — confirm text mentions both, all wiped;
 (6) empty full-screen board — Quote chip at bottom; add an image — chip moves up.
 
-## Current request — v150: theme-aware dynamic floating pills + reveal like/dislike animation + picker Manage-categories pill (+ CI fix)
+## Current request — v151: bigger bottom pill + nav pill morphs into the reveal Like/Dislike pill
+
+User: "the buttom pill can be more larger also when i enter the topic reveal instead of
+hiding the navbar and showing dislike and like why not just morph transform the pill
+with dislike and like icon when the topic reveal page opens".
+
+### Bigger pill
+FloatingPillIconWidth 52→60dp, ExpandedWidth 112→128dp, Height 52→60dp; icon 24→26.
+
+### Nav pill → sentiment pill morph (shared element #2)
+- RevealSharedScopes.kt: `SentimentSharedElementKey` + `NavPillBoundsTransform` (320ms
+  tween like the hero).
+- CurioNavHost: the bar MOVED INSIDE the SharedTransitionLayout (Box(fillMaxSize)
+  wrapper for align BottomCenter) — the old sibling block removed. New
+  `sentimentSharedState = sharedTransitionScope.rememberSharedContentState(key)` +
+  `sentimentMorphVisible` state (LaunchedEffect keyed on isRevealRoutePrefix: true for
+  500ms after the reveal opens, then false). The bar stays composed during that window
+  as the shared-element source, `interactive = showBottomBar` (pills not tappable over
+  the reveal).
+- CurioBottomNav: CurioFloatingNavBar gains `sharedElementState/visible/interactive`;
+  the bar applies `sharedScope.run { Modifier.sharedElementWithCallerManagedVisibility(
+  state, visible, boundsTransform) }` (LocalRevealSharedScope read in the composable);
+  FloatingNavPill gates its clickable with `enabled = interactive`.
+- TopicRevealScreen: second state `sentimentSharedState`; RevealSentimentPill gets a
+  `modifier` param and the call site applies `sharedElement(state, animatedVisibilityScope,
+  NavPillBoundsTransform)` — the pill is the route-scoped target.
+- Fallback if the framework doesn't pair: bar visible for the 500ms window (pills
+  disabled — taps pass through) then leaves; no worse than the old hide.
+
+## Earlier completed request (v150)
+theme-aware dynamic floating pills + reveal like/dislike animation + picker Manage-categories pill (+ CI fix)
 
 User: "fix that [CI: boardHasContent unresolved] and also theme aware dynamic floating
 nav pill and all floating pill. also make the manage category option in category picker
