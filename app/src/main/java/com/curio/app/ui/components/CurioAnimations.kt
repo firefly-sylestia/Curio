@@ -71,6 +71,35 @@ fun ScreenEntrance(content: @Composable () -> Unit) {
 }
 
 /**
+ * v163 — smooth OPEN for raw [androidx.compose.ui.window.Dialog] windows.
+ * M3 AlertDialogs and ModalBottomSheets already animate their entrance,
+ * but bare `Dialog(...)` content pops in with NO animation (the full-screen
+ * mood board, the floating quote editor). Fades the content in and scales
+ * it up from [scale] (default 0.96) on a near-critical spring — a soft,
+ * deliberate entrance instead of an instant cut-in. [scale] = 1f gives a
+ * pure fade for full-screen canvases that shouldn't zoom.
+ */
+@Composable
+fun CurioDialogEntrance(
+    scale: Float = 0.96f,
+    content: @Composable () -> Unit
+) {
+    // Same first-frame trick as ScreenEntrance: MutableTransitionState with
+    // targetState already true plays the enter on the first composition
+    // frame instead of leaving the dialog blank for one frame.
+    val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    AnimatedVisibility(
+        visibleState = state,
+        enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Standard)) +
+                scaleIn(
+                    initialScale = scale,
+                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 380f)
+                ),
+        content = { content() }
+    )
+}
+
+/**
  * Dramatic screen entrance — scale up from 0.85 + fade in, with an elastic
  * spring for that premium "morph into view" feel. Use for hero screens:
  * Topic Reveal, Spin landing, Splash → Home.

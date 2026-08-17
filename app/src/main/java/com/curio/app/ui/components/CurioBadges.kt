@@ -517,19 +517,22 @@ fun CurioBadgeMedal(
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
                 )
+                // v163 — the badge glyphs render at NORMAL weight: Material
+                // Symbols at Bold (wght 700) draw very heavy, and in the
+                // medal's tight inner ring they crowded the plate and read
+                // squished/clipped. Normal keeps the clean outlined stroke
+                // with visible breathing room around the ring.
                 unlocked -> CurioIcon(
                     name = badgeGlyph(stage),
                     contentDescription = null,
                     tint = Color.White,
-                    size = medalSize * 0.45f,
-                    weight = FontWeight.Bold
+                    size = medalSize * 0.45f
                 )
                 else -> CurioIcon(
                     name = CurioIcons.StarOutline,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    size = medalSize * 0.45f,
-                    weight = FontWeight.Bold
+                    size = medalSize * 0.45f
                 )
             }
         }
@@ -562,8 +565,8 @@ fun CurioBadgeMedal(
                     name = if (tier == BadgeTier.SECRET) CurioIcons.AutoAwesome else CurioIcons.Check,
                     contentDescription = null,
                     tint = if (tier == BadgeTier.SECRET) Color.White else Color(0xFF7A5A00),
-                    size = medalSize * 0.21f,
-                    weight = FontWeight.Bold
+                    // v163 — normal weight (the tiny check at Bold read blobby).
+                    size = medalSize * 0.21f
                 )
             }
         }

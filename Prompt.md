@@ -1,6 +1,26 @@
 # Prompt.md — Request log
 
-## Current request (completed) — tune the pill tab-switch motion to one spring family (v162)
+## Current request (completed) — smoother dialog/sheet opens + quest badge icon fix
+
+User: "more smoother open aniations of things and fix the badge icon just
+the quest badge icons". ask_user clarified: badge = CLIPPED/SQUISHED;
+open animations = DIALOGS & SHEETS.
+
+1. Badge icons (CurioBadges.kt): CurioBadgeMedal drew glyphs at Bold
+   (wght 700) — heavy strokes crowded the medal's inner ring and read
+   squished. All three icons (earned glyph, locked silhouette, earned
+   check) now render at NORMAL weight. (Glyph NAMES were fine — the font
+   is the full Material Symbols TTF.)
+2. Dialog/sheet opens: the raw `Dialog()` windows popped in instantly.
+   New shared `CurioDialogEntrance` (CurioAnimations.kt): fade + spring
+   scale (0.9/380) on the first frame. Wrapped the GalleryWall full-
+   screen board (scale 1f = pure fade), GalleryWall floating quote
+   editor (0.96), EntryDetail expanded mood board (1f). M3 AlertDialogs
+   / ModalBottomSheets already animate — untouched.
+
+Docs: changelog FIX lines, AGENTS.md v163, this file. Committed + pushed.
+
+## Earlier completed request — tune the pill tab-switch motion to one spring family (v162)
 
 User: "Record the tab-switch motion and tune the pill spring/fade until
 the collapse reads perfectly smooth". No device/screen-recording possible

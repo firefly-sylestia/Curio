@@ -72,6 +72,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.CurioMoodBoardBackdrop
 import com.curio.app.ui.components.MoodBoardFloatingCards
 import com.curio.app.ui.components.MoodBoardZoomOverlay
+import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.NotePaperCard
 import com.curio.app.ui.components.moodBoardPainter
 import com.curio.app.ui.components.rememberMoodBoardZoomState
@@ -456,6 +457,7 @@ fun GalleryWallFormat(
                 decorFitsSystemWindows = false
             )
         ) {
+            CurioDialogEntrance(scale = 1f) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -554,6 +556,7 @@ fun GalleryWallFormat(
                         fullQuotePositions[i] = CaptureData.QuotePos(p.x, p.y, w)
                     }
                 )
+            }
             }
         }
     }
@@ -1653,6 +1656,7 @@ private fun FloatingQuoteEditDialog(
             decorFitsSystemWindows = false
         )
     ) {
+        CurioDialogEntrance(scale = 0.96f) {
         Surface(
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
@@ -1711,6 +1715,7 @@ private fun FloatingQuoteEditDialog(
                     Text("Remove quote", color = MaterialTheme.colorScheme.error)
                 }
             }
+        }
         }
     }
 }

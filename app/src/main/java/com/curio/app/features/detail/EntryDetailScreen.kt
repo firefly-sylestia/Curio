@@ -150,6 +150,7 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
@@ -3513,6 +3514,7 @@ private fun ExpandedMoodBoardDialog(
             decorFitsSystemWindows = false
         )
     ) {
+        CurioDialogEntrance(scale = 1f) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -3690,6 +3692,7 @@ private fun ExpandedMoodBoardDialog(
                         .padding(bottom = 24.dp)
                 )
             }
+        }
         }
     }
 }

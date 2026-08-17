@@ -1032,6 +1032,31 @@ app/src/main/java/com/curio/app/
   the fix for perceived jank in multi-part morphs — check EVERY animated
   property (width, fill, icon, label) for its own spec, and pass the
   spring to expand/shrink, not just fade.
+- **v163 — quest badge glyphs un-squished (normal weight) + raw Dialog
+  windows get a springy open entrance.** User: "more smoother open
+  aniations of things and fix the badge icon just the quest badge icons".
+  ask_user clarified: badge icons looked CLIPPED/SQUISHED, and the open
+  animations that bothered them were DIALOGS & SHEETS. (1) BADGE:
+  `CurioBadgeMedal` drew every glyph at `weight = FontWeight.Bold` —
+  Material Symbols at wght 700 render very heavy, and inside the medal's
+  tight inner plate (0.80× with a 1.5dp ring) the heavy glyphs crowded
+  the ring and read squished/clipped. All three icons (earned glyph,
+  locked StarOutline silhouette, tiny earned check) now render at NORMAL
+  weight — the clean outlined stroke with breathing room. The full
+  material_symbols_outlined.ttf has every ligature, so glyph NAMES were
+  never the problem. LESSON: "icon looks clipped" inside a tight circle
+  + a heavy font weight = drop the weight, don't shrink the size.
+  (2) DIALOG/SHEET OPENS: the app's M3 AlertDialogs and ModalBottomSheets
+  already animate; the raw `androidx.compose.ui.window.Dialog` windows
+  (the full-screen mood board in GalleryWallFormat, its floating quote
+  editor, and EntryDetailScreen's expanded mood board) popped in with NO
+  animation. New shared `CurioDialogEntrance(scale, content)` in
+  CurioAnimations.kt — fade + near-critical scale-up (spring 0.9/380)
+  played on the first frame via MutableTransitionState (same trick as
+  ScreenEntrance); `scale = 1f` = pure fade for full-screen canvases that
+  shouldn't zoom, 0.96 for the floating quote card. Wrapped all three
+  raw Dialog sites. LESSON: audit the raw `Dialog(` call sites — they're
+  the only pop-in-instantly windows; M3's own dialogs/sheets animate.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view
