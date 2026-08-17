@@ -1,6 +1,28 @@
 # Prompt.md — Request log
 
-## Current request — reveal Like/Dislike pill dynamic tint + remove the nav pill tap ripple
+## Current request — progress editor dialog: single-count top corner + remove "0/pages" and "Edit total" — commit only, NO push
+
+User: "from the progress editor dialog remove the 0/pages option and move
+it to the top corner and just show one no. and tapping it automatically
+lets u edit and when u tap enter it saves and it lets u reset the number
+to default too. and also remove the edit total option too and dont push
+this".
+
+CurioProgressPill.kt — CurioProgressEditorDialog reworked:
+- Removed the "$value / $target $unit" line under the ring (the user's
+  "0/pages") and the v149 "Edit total" chip + its inline target field.
+- Top-right Row in the dialog content shows ONE number (the current
+  count): tap → BasicTextField opens in place (number keyboard, IME
+  Done); Enter → commitValueEdit persists immediately (set / clear on
+  0); a 26dp replay icon beside it resets to default (0) + persists.
+- Ring keeps just the big %; steppers/slider/Finish/Save unchanged.
+- The total now comes only from the topic data or the alt-edition pill's
+  initialTarget prefill (Save still persists target overrides).
+
+Docs: changelog FIX line, AGENTS.md v168, this file. COMMITTED ONLY —
+user said "dont push this".
+
+## Earlier completed request — reveal Like/Dislike pill dynamic tint + remove the nav pill tap ripple
 
 User: "the like and unlike button pill doesnt get the backgroud tint with
  dynamic theme fix it. and dont add the touch shado in nav bar".

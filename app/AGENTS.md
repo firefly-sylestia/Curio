@@ -1145,6 +1145,29 @@ app/src/main/java/com/curio/app/
     a spring's generic must match the ANIMATED value's type —
     slideInVertically/Out = IntOffset, scaleIn/Out + fade = Float,
     expand/shrinkHorizontally = IntSize, colors = Color.
+- **v168 — progress editor dialog: the count is a single number in the
+  top corner (tap → inline edit, Enter saves, replay icon resets), and
+  the "0 / pages" line + "Edit total" chip are removed.** User: "from
+  the progress editor dialog remove the 0/pages option and move it to
+  the top corner and just show one no. and tapping it automatically lets
+  u edit and when u tap enter it saves and it lets u reset the number to
+  default too. and also remove the edit total option too and dont push
+  this". CurioProgressPill.kt's CurioProgressEditorDialog:
+  - The "$value / $target $unit" line under the ring and the v149
+    "Edit total" chip + its inline target field are GONE (the target now
+    comes only from the topic data or the alternate-edition pill's
+    [initialTarget] prefill, which still persists via Save).
+  - A top-right Row in the dialog's content shows ONE number (the
+    current count, no suffix): tap → the BasicTextField opens in place
+    (number keyboard, IME Done), Enter → [commitValueEdit] persists
+    immediately (TopicProgressStore.set / clear on 0). A 26dp replay
+    icon beside it resets to the default (0) and persists.
+  - The ring keeps just the big %; −/+ steppers + slider unchanged;
+    Finish + Save unchanged.
+  - COMMIT ONLY — the user said "dont push this" (push rides with the
+    next real change). LESSON: the user's "0/pages" = the "0 / 350
+    pages" count line under the ring — shorthand for current/total
+    display.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`
