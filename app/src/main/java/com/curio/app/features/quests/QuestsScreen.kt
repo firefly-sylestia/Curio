@@ -111,6 +111,8 @@ import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import kotlinx.coroutines.delay
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioSpacing
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioDialogShape
@@ -364,11 +366,11 @@ fun QuestsScreen(navController: NavController) {
                 shadowElevation = 14.dp,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(28.dp)
+                    .padding(curioSpacing(28.dp, CurioSpacing.xl))
                     .fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    modifier = Modifier.padding(horizontal = curioSpacing(20.dp, CurioSpacing.lg), vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {

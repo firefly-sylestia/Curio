@@ -119,8 +119,10 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioSpacing
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
@@ -948,7 +950,7 @@ private fun ProfileHero(
                     // ProfileScreen — this spacer keeps the hero content
                     // clear of the overlaid pills (same footprint as the
                     // 42dp pills + top padding).
-                    Spacer(Modifier.height(52.dp))
+                    Spacer(Modifier.height(curioSpacing(52.dp, CurioSpacing.xxl)))
                     // ── Kicker — mirrors the quest card's "TODAY'S QUEST" ──
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

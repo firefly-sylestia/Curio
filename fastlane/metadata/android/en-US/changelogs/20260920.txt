@@ -51,7 +51,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
-- Material guidelines: the big page paddings and section gaps on the Pet Designer, entry detail, Home and Spin screens now re-tune to the M3 spacing scale when the guidelines toggle is on (18/20/22dp → 24, 28/36 → 32, 40 → 48) — the default look is unchanged.
+- Material guidelines: the big page paddings and section gaps now re-tune to the M3 spacing scale when the guidelines toggle is on (18/20/22dp → 24, 28/36 → 32, 40/52 → 48) across Pet Designer, entry detail, Home, Spin, Promo, Quests, Topic Reveal and Profile — the default look is unchanged.
 - Build: the layout-sweep branch compiles again — restored the `Random` import the deck pick needs (the removed drawer constellation wasn't its only caller) and dropped a stray orphan `@Composable` left by the constellation refactor.
 - Drawer: the footer planet art is slimmer (150dp vs 210dp) so it reads as a small bottom band instead of a big block.
 - Spin: the Filter button only shows its count when filters are actually selected — the badge used the always-non-zero matching-topics number, so it read "Filter · N" permanently even with nothing ticked.

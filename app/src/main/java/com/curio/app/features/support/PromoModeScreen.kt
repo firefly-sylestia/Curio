@@ -62,9 +62,11 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.CurioSpacing
 import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.CurioIcons
 
 /**
@@ -390,7 +392,7 @@ fun PromoShareCard(topicsTotal: Int) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 22.dp, vertical = 22.dp),
+                        .padding(horizontal = curioSpacing(22.dp, CurioSpacing.lg), vertical = curioSpacing(22.dp, CurioSpacing.lg)),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(Modifier.weight(0.08f))
@@ -582,7 +584,7 @@ private fun PromoShareButton(label: String, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = curioSpacing(18.dp, CurioSpacing.lg), vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -623,7 +625,7 @@ fun PromoFeatureGraphic(topicsTotal: Int) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 22.dp, vertical = 16.dp),
+                .padding(horizontal = curioSpacing(22.dp, CurioSpacing.lg), vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {

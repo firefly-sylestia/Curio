@@ -1,8 +1,19 @@
 # Current Request — Proper Material 3 theme system (2 new opt-in toggles)
 
-## Status: curioSpacing sweep pass 1 DONE (30 call sites) — committed + pushed
+## Status: curioSpacing sweep tier 2 DONE (44 total call sites) — committed + pushed
 
-## m3-layout-sweep (latest) — user: "Run the curioSpacing token sweep on
+## m3-layout-sweep (latest) — user: "Extend the curioSpacing sweep to the
+next tier of screens (Promo, Quests, Topic Reveal, Profile, Cabinet)".
+- Converted 10 more big paddings/gaps: PromoModeScreen 3 (18/22dp → lg),
+  QuestsScreen 2 (20dp → lg, 28dp → xl), TopicRevealScreen 4 (18/20dp →
+  lg), ProfileScreen 1 (52dp spacer → xxl). CabinetScreen: clean (no big
+  literals). Total curioSpacing call sites = 44.
+- Remaining big-literal screens: settings, managecategories, onboarding,
+  stats, updates, topichistory, lightbox, picker, recyclebin, recent,
+  capture, fieldmind (each small). Then step 2 curioCorner + step 3 micro
+  audit.
+
+## m3-layout-sweep (earlier) — user: "Run the curioSpacing token sweep on
 the biggest screens (Pet Designer, Entry Detail, Home, Spin) — replace
 the large page paddings and gaps with the CurioSpacing tokens".
 - Converted the BIG page paddings/gaps in the 4 biggest screens to

@@ -1704,6 +1704,15 @@ app/src/main/java/com/curio/app/
     Default look is byte-identical — the m3 arg only applies under the
     guidelines toggle. Still to go: step 2 `curioCorner` the per-screen
     card/dialog shapes, step 3 the micro-value audit.
+  - SPACING SWEEP TIER 2 (same rules): PromoModeScreen (3: 18/22dp
+    paddings → lg), QuestsScreen (2: 20dp → lg, 28dp → xl),
+    TopicRevealScreen (4: 18/20dp → lg), ProfileScreen (1: 52dp spacer →
+    xxl). CabinetScreen had no big literals (already on token values).
+    Total `curioSpacing(` call sites now **44**. Remaining big-literal
+    screens: settings, managecategories, onboarding, stats, updates,
+    topichistory, lightbox, picker, recyclebin, recent, capture,
+    fieldmind (each small, <10 sites) — then step 2 curioCorner + step 3
+    micro audit.
   - NOT swept (documented remainder): per-screen hardcoded paddings /
     radii across the 60+ feature files — the token helpers exist and the
     pattern is established; the sweep continues incrementally. Dialogs

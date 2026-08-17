@@ -142,6 +142,8 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
 import com.curio.app.ui.theme.CurioGradients
+import com.curio.app.ui.theme.CurioSpacing
+import com.curio.app.ui.theme.curioSpacing
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.brandRes
@@ -743,7 +745,7 @@ fun TopicRevealScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = curioSpacing(20.dp, CurioSpacing.lg)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
                 // ── 2. Hero card — category watermark + verb/duration badge ──
@@ -1781,7 +1783,7 @@ private fun HeroCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp)
+                    .padding(curioSpacing(20.dp, CurioSpacing.lg))
             ) {
                 // ── Top — the byline pill (v141) — the SAME top-left
                 // corner the Spin ticket wears, so the shared-element morph
@@ -2031,7 +2033,7 @@ private fun TeaserCard(
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(3.dp, RoundedCornerShape(24.dp))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(curioSpacing(20.dp, CurioSpacing.lg))) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -2100,7 +2102,7 @@ private fun ActionPromptCard(
         shadowElevation = 3.dp,
         modifier = modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(18.dp)) {
+        Column(modifier = Modifier.padding(curioSpacing(18.dp, CurioSpacing.lg))) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
