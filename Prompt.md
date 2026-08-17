@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — share card 3:4 portrait + name/note/photo; dialogs theme-aware in light mode
+## Current request — mood board quote cards: resize scales the whole note; export matches the editor
+
+User: "the moodboard quote cards are still very bugged. like aah its
+anpoyong both in editing and sharing.". ask_user: editing = resize
+"only expands from side and the text size stays the same"; sharing =
+"either gets big and looks differnt or its position is somewhere else".
+
+MoodBoardZoom.kt fixes (shared by editor + saved views + export):
+1. RESIZE — the slip sized to a fixed slot height with a fixed-size font,
+   so widening the card only stretched the paper. Now the slip sizes to
+   its content and the quote text scales with the card
+   (textScale = renderW / baseW, baseW = never-resized slot width × view
+   scale, floor 0.5) — a true uniform note scale. Removed the editor's
+   heightIn(h..1.5h) and the saved views' fixed height(h).
+2. EDITOR/EXPORT MISMATCH — removed the v60/v108 40%-of-canvas display
+   cap: displayScale is now just `scale` everywhere. The cap made a
+   resized card small in the inline editor but raw-sized in the export
+   ("gets big"), and the bigger card past the same top-left read as
+   "somewhere else". Cards are rawW × scale in every view now. rawSpace
+   param is inert (kept for API compat; export + GalleryWall still pass
+   it).
+
+Docs: changelog FIX line, AGENTS.md v172, this file. Pushed (no "dont
+push" this time).
+
+## Earlier completed request — share card 3:4 portrait + name/note/photo; dialogs theme-aware in light mode
 
 User: "now improve the share card and not squared but 3:4 and also use
 name and the note user added that option with photos option if added.

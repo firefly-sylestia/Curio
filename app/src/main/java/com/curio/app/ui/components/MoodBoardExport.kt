@@ -568,6 +568,10 @@ private fun MoodBoardShareCard(
                             // raw widths too — the old 40% display cap shrank
                             // resized cards in the PNG ("the quote card gets
                             // small / wrongly placed when saving").
+                            // v171 — rawSpace is inert now: display = raw ×
+                            // board scale in EVERY view (the cap is gone), so
+                            // the export renders cards at the same relative
+                            // size and spot as the editor.
                             rawSpace = true
                         )
                     }

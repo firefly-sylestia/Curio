@@ -701,6 +701,9 @@ fun MoodBoardFloatingCards(
     // at their exact raw width so precise placement works. All fit-scaled
     // views (inline editor, saved card, expanded dialog, export) leave it
     // false so the display-width cap below can bind huge resized cards.
+    // v171 — INERT: the display-width cap is gone (display = raw × board
+    // scale in every view, so the editor and the export match), so this
+    // flag no longer changes anything. Kept for API compatibility.
     rawSpace: Boolean = false,
     // v113 — the collage's RAW board extent (maxX/maxY). The deterministic
     // slot is computed in this space so never-dragged cards land ON the
@@ -713,6 +716,10 @@ fun MoodBoardFloatingCards(
     // v42 — commits a resized card's new width (RAW board px — the caller
     // divides the render-space width by the board scale, mirroring onMove).
     onResizeCard: ((index: Int, w: Float) -> Unit)? = null,
+    // v171 — the card's BASE display width (never-resized slot width ×
+    // view scale): the quote text scales with the card (renderW ÷ baseW)
+    // so resize = a uniform note scale, not a width-only stretch.
+    baseW: Float = 0f,
     // v7.22 — parallel per-card flag: false = the card renders BELOW the
     // board, so it must NOT float on the collage. Legacy entries lack the
     // list → null → every card floats (the v7.19 look).
@@ -752,18 +759,16 @@ fun MoodBoardFloatingCards(
         // stretching flat at the old slot height. Never-resized cards keep
         // the exact slot dimensions (cardW == slot.w → cardH == slot.h).
         val cardH = if (slot.w > 0f) cardW * (slot.h / slot.w) else slot.h
-        // v60/v108 — cap EVERY card's DISPLAY size on a scaled-up board.
-        // The slot width is ~41% of the raw board; when the collage is
-        // smaller than the canvas it zooms to fill (scale > 1), and the raw
-        // card width multiplies by that zoom — a quote card balloons to a
-        // huge slab in the small inline editor. v60 capped only the
-        // deterministic-slot cards; a card the user RESIZED kept the full
-        // scale and still ballooned ("the quote card is too big"): bind the
-        // displayed card to ≤ 40% of the canvas in any fitted view. The
-        // raw-space full-screen editor (rawSpace) keeps the exact raw width
-        // for precise placement.
-        val displayScale = if (rawSpace) scale
-            else scale.coerceAtMost((canvasWPx * 0.40f) / cardW.coerceAtLeast(1f))
+        // v171 — the display scale is the BOARD scale, always. The old
+        // 40%-of-canvas cap (v60/v108) made a resized card render small in
+        // the inline editor but at its raw size in the export — the shared
+        // PNG showed the card "getting big / looking different" and (a
+        // bigger card reaching past the same top-left) "being somewhere
+        // else". With v113's raw-space slots the board scale is already
+        // correct, so a card is always rawW × scale: the SAME relative size
+        // in the inline editor, the full-screen editor, the saved card and
+        // the export. The resize clamp (≤ 60% of the board) still bounds it.
+        val displayScale = scale
         MoodBoardFloatingCard(
             text = quote,
             style = styles.getOrElse(i) { NotePaperStyle.RULED },
@@ -773,6 +778,10 @@ fun MoodBoardFloatingCards(
             y = placed.y * scale + offsetY,
             w = cardW * displayScale,
             h = cardH * displayScale,
+            // v171 — the card's BASE display width (the never-resized slot
+            // width at this view's scale): the text scales with the card, so
+            // resizing reads as a true uniform note scale.
+            baseW = slot.w * displayScale,
             // v113 — the drag/resize clamps bound the VISIBLE display space:
             // the card for the inline editor is canvasWPx × canvasHPx, NOT
             // canvas × scale — the old formula let a card be dragged off the
@@ -819,7 +828,10 @@ private fun MoodBoardFloatingCard(
     onMove: ((Float, Float) -> Unit)? = null,
     // v42 — commit a resized card's new width (render-space px; the caller
     // divides by the board scale to store raw board px).
-    onResize: ((Float) -> Unit)? = null
+    onResize: ((Float) -> Unit)? = null,
+    // v171 — the card's base display width for text scaling (see
+    // [MoodBoardFloatingCards.baseW]).
+    baseW: Float = 0f
 ) {
     val density = LocalDensity.current
     var dragDelta by remember { mutableStateOf(Offset.Zero) }
@@ -866,25 +878,11 @@ private fun MoodBoardFloatingCard(
         modifier = Modifier
             .offset { IntOffset(renderX.roundToInt(), renderY.roundToInt()) }
             .zIndex(if (dragging || resizing) 55f else 50f)
+            // v171 — the slip sizes to its CONTENT: width renderW, height =
+            // up to two lines at the scaled font. The old fixed slot-height
+            // (min h / max 1.5h in the editor, exact h when saved) fought
+            // the scaled text — resize now scales the whole note uniformly.
             .width(with(density) { renderW.toDp() })
-            .then(
-                if (currentOnEdit != null) {
-                    // Editor cards keep the board slot's minimum height, but
-                    // the preview itself is capped at two lines (see below) —
-                    // so a long quote can never stretch the slip to the
-                    // board's full length. The explicit max makes that bound
-                    // structural: even if the preview's maxLines ever grew,
-                    // the slip stays at most 1.5× the slot height (two lines
-                    // at any sane font scale). Saved/read-only cards retain
-                    // the stable board slot height below.
-                    Modifier.heightIn(
-                        min = with(density) { h.toDp() },
-                        max = with(density) { h.toDp() * 1.5f }
-                    )
-                } else {
-                    Modifier.height(with(density) { h.toDp() })
-                }
-            )
             .rotate(rotation)
             .onSizeChanged { measuredHeightPx = it.height }
             // v57 — pinch-to-expand (EDITOR ONLY, when a resize handler
@@ -1010,9 +1008,18 @@ private fun MoodBoardFloatingCard(
             // copy (RichTextEditor enforces the real 280-char / five-line
             // input limit when editing).
             val previewText = limitQuoteContent(text).first
+            // v171 — the text scales WITH the card (renderW ÷ the card's
+            // base width), so a resized quote reads as a uniformly zoomed
+            // note instead of a fixed-size slip that only stretches wider.
+            val textScale = (renderW / baseW.coerceAtLeast(1f)).coerceAtLeast(0.5f)
+            val baseFont = MaterialTheme.typography.bodySmall
             Text(
                 text = if (previewText.isBlank()) "Quote…" else "“$previewText”",
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = PatrickHandFontFamily),
+                style = baseFont.copy(
+                    fontFamily = PatrickHandFontFamily,
+                    fontSize = baseFont.fontSize * textScale,
+                    lineHeight = baseFont.lineHeight * textScale
+                ),
                 color = notePaperInk(color),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis

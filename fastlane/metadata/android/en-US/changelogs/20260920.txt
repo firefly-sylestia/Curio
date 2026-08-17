@@ -28,6 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Mood board: resizing a quote card now scales the WHOLE note — the text grows and shrinks with the card (it used to only stretch the width with fixed-size text), and the saved/shared card renders at the same relative size and spot as the editor (the old editor-only display cap that made exported cards look bigger or misplaced is gone).
 - Share: the entry share card is a 3:4 portrait now (was square) and it carries your own touches — your display name, the session note you added, and the attached photo when one exists — with a quieter format · date line and the Curio branding below.
 - Dialogs: in light mode every dialog now wears the theme-aware elevated container (the warm surface tone the pills and chips use) instead of the old cream-white panel.
 - Edit profile: the dialog is restructured with clear sections — "Your name" and "Bio" headings (bold, larger, with icons), the name field below each; the tagline field is now the Bio, and the "Tagline" label, the "Use automatic tagline" button and both helper texts are gone (leaving it empty still falls back to the automatic streak line). The Profile photo label is a touch bigger and the layout breathes more.

@@ -1245,6 +1245,28 @@ app/src/main/java/com/curio/app/
     v170 commits rode along). LESSON: "photos option" = the entry's
     sessionScreenshots attachments; synchronous decode is mandatory for
     the off-screen card capture.
+- **v172 — mood board quote cards: resize scales the WHOLE note (text
+  included), and the export renders the same size/spot as the editor.**
+  User: "the moodboard quote cards are still very bugged... both in
+  editing and sharing". ask_user: resize "only expands from side and the
+  text size stays the same", export "either gets big and looks differnt
+  or its position is somewhere else". MoodBoardZoom.kt:
+  - RESIZE: the slip no longer forces a fixed slot height (heightIn
+    h..1.5h in the editor, exact h when saved) with a fixed-size font —
+    it now sizes to content and the quote TEXT scales with the card
+    (textScale = renderW ÷ baseW, baseW = the never-resized slot width
+    × view scale, floor 0.5). Resize = a true uniform note scale.
+  - EDITOR/EXPORT MISMATCH: removed the v60/v108 40%-of-canvas display
+    cap (`displayScale` is now just `scale` in every view). The cap made
+    a resized card render small in the inline editor but at raw size in
+    the export — the shared PNG showed it bigger and, reaching past the
+    same top-left, "somewhere else". With v113's raw-space slots the
+    board scale is already correct, so cards are rawW × scale everywhere
+    (inline editor, full-screen editor, saved card, export). rawSpace is
+    now an inert API param (kept for callers).
+  - LESSON: "text size stays the same" = the resize only changed the
+    slip width; "gets big in export" = the editor-only display cap
+    disagreed with the export's raw render.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`
