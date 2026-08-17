@@ -9,13 +9,15 @@
     canvas) — only the white frame is gone, matching the new source.
 
     The art is a ROUNDED CARD with transparent corners — at the
-    adaptive-icon canvas size (108dp) the card spans ~84–88%, which the
-    launcher's mask (66dp safe zone) would crop: the frame, top stars and
-    bottom waves were getting sliced ("broken / not properly placed"). So
-    the bitmap is inset 18dp on every side: the art fills the central
-    72dp, the card lands at ~60×63dp — still inside the safe circle (66dp)
-    but much larger than the v115 28dp inset (~44×47dp), which read as a
-    tiny "icon inside the icon" on the launcher. The card floats on the
+    adaptive-icon canvas size (108dp) the card spans ~84–88% of the layer.
+    v133 — inset tightened 18 → 8dp (v115 was 28dp, v126 18dp): the card
+    now lands at ~77×81dp, ~71–75% of the icon instead of ~58%, so the
+    sky ring around the card reads as a thin border rather than a big
+    empty halo — and the App Info screen (which draws the UNMASKED square)
+    shows the art at a proper size instead of a tiny card in a sea of
+    background. The card's corner arcs (~14% of canvas) still clear the
+    launcher's circular mask (54dp radius) with ~3.5dp to spare, so
+    Pixel-style masks don't slice the corners. The card floats on the
     full-bleed sky in ic_launcher_background.xml (whose gradient matches
     the card's own sky, so the two composite seamlessly behind the card).
     The 2048px source downscales cleanly to every density.
@@ -24,5 +26,5 @@
     art) directly — the old bordered raster is gone (v126).
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:inset="18dp"
+    android:inset="8dp"
     android:drawable="@drawable/ic_launcher_icon" />

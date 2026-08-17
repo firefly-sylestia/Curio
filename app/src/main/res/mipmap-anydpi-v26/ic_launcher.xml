@@ -2,8 +2,9 @@
 <!--
     Adaptive-icon declaration for Curio (API 26+).
     Background = the full-bleed midnight sky + stars, foreground = the
-    v113 cosmic card art (the designer's PNG, drawn inset so the whole
-    card + frame fits the mask safe zone) in ic_launcher_foreground.xml.
+    v113 cosmic card art (the designer's PNG, drawn inset 8dp so the card
+    fills ~74% of the icon while its rounded corners still clear the
+    launcher mask — v133) in ic_launcher_foreground.xml.
     The adaptive-icon framework composites these two layers per the
     launcher's chosen mask shape (circle/squircle/teardrop/etc.) and
     handles foreground parallax for Pixel-style launchers.

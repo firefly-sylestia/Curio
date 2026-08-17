@@ -743,6 +743,21 @@ app/src/main/java/com/curio/app/
   `-dontwarn` rules for `java.awt.**`, `java.beans.**`, `javax.swing.**`,
   `java.applet.**`, `java.nio.file.**` (the AWT interop is desktop-only
   and never invoked on-device).
+- **v133 — launcher icon art bigger again (foreground inset 18 → 8dp).**
+  The v126 card at ~60×63dp of the 108dp adaptive canvas left a wide sky
+  ring around it ("the icon still has a border"), and the App Info screen
+  — which composites the adaptive icon UNMASKED as a square — showed the
+  card tiny in a sea of background. Measured the source PNG
+  (`drawable-nodpi/ic_launcher_icon.png`, 2048px RGBA): the art is a
+  rounded rect spanning 84–88% of its OWN canvas with ~14%-of-canvas
+  corner arcs (not a small inset card). So the fix is purely the inset:
+  18 → 8dp puts the card at ~77×81dp (~71–75% of the icon), and the
+  corner arcs still clear the circular launcher mask (radius 54dp in
+  canvas units) by ~3.5dp — no slicing on Pixel-style masks. LESSON: the
+  adaptive-icon 66dp safe zone is a GUARANTEE, not the target size — the
+  visible mask (circle radius 54dp, squircle wider) shows far more, and
+  App Info shows the raw unmasked square, so art should fill ~70%+ of
+  the 108dp canvas.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

@@ -28,6 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- App icon: the cosmic mark now fills about three-quarters of the icon tile instead of half — the ring of background around it reads as a slim border, and it looks properly sized on the App Info screen too.
 - Topic Reveal: the Like/Dislike pair now floats in a pill over the page — it slides out of the way while you scroll down and slides back in when you scroll up (the old fixed bottom strip is gone).
 - Topic Reveal: the tag chips sit directly below the hero again, and the hero's pills (verb + duration, author, subtype) now match the Spin card's pills in light and dark.
 - Dictation: taking a pause no longer wipes what you already said — the transcript keeps building, and each pause becomes a full stop (so speak, pause, speak again flows as two sentences).

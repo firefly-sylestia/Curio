@@ -3,9 +3,9 @@
     v113 — Curio's new cosmic launcher mark. This layer is the full-bleed
     backdrop: the midnight sky gradient + stars fill the whole mask so the
     adaptive icon reads as a seamless cosmic scene AROUND the rounded card
-    (the designer's PNG, drawn inset in ic_launcher_foreground.xml at ~44×47dp
-    so the launcher mask never crops the card's frame). The gradient matches
-    the card's own sky, so the two composite behind the white frame.
+    (the designer's PNG, drawn inset 8dp in ic_launcher_foreground.xml — the
+    card lands at ~77×81dp of the 108dp canvas, v133). The gradient matches
+    the card's own sky, so the two composite seamlessly behind the card.
     viewport 1024×1024 mirrors the source SVG 1:1.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
