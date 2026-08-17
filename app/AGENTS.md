@@ -801,6 +801,27 @@ app/src/main/java/com/curio/app/
   light, cream in dark), fixing Profile, the Settings hub, every settings
   sub-page, Support, Updates, Experiments, Quests, Backup and Onboarding
   cards in one edit.
+- **v131 follow-up — bigger nav pill, solid indicator + the dim-flash fix.**
+  (1) **The floating pill bar grew a little:** pills 48→52dp (height +
+  resting icon width), the expanded active pill 96→112dp, icons 22→24dp,
+  row padding/spacing 6/4 → 7/6dp; the tab pages' pill clearances grew
+  with it (Home 92→100dp, Spin/Cabinet 76→84dp). (2) **The active
+  indicator is now a SOLID `secondary` fill with `onSecondary` ink** (the
+  v27q selection contract — never a translucent container) instead of the
+  washed `secondaryContainer` overlay, so the active tab reads as a
+  defined amber pill in light AND dark; the wide `CurioNavigationRail`
+  uses the same pair (selected icon/label `onSecondary`, indicator
+  `secondary`). (3) **Dim-flash fix (root cause):** v129 removed the
+  Scaffold, which used to paint `colorScheme.background` behind the
+  content — the root Box became TRANSPARENT, so the window's dark-navy
+  bootstrap color (`curio_deep_plum` #081B33 in themes.xml) showed
+  through the NavHost page transitions mid-fade (every tab crossfade and
+  push/pop dimmed toward navy). The root Box now paints
+  `MaterialTheme.colorScheme.background` again (invisible in practice —
+  every page paints its own full-bleed background; it only shows during
+  transitions and wide gutters). LESSON: when a Scaffold is removed, its
+  `containerColor = colorScheme.background` fill must be replaced
+  explicitly or the window bootstrap color shows through fades.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

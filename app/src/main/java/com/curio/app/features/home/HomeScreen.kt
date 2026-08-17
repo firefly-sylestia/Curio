@@ -1069,7 +1069,8 @@ fun HomeScreen(navController: NavController) {
             // v129 — the pill bar floats over the page now (Scaffold slot
             // removed), so on phones the content clears it with extra room;
             // wide windows use the rail instead and keep the old spacing.
-            Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 32.dp else 92.dp))
+            // v131 — clearance grew with the bigger pill (92 → 100dp).
+            Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 32.dp else 100.dp))
             Spacer(Modifier.height(navInsets.calculateBottomPadding()))
             }
 

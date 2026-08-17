@@ -134,12 +134,14 @@ object CurioBottomNavItems {
 // (spring width morph + label slide-out) while the previously active pill
 // collapses back to an icon. The active indicator fills the WHOLE pill
 // (icon + label), not just the icon. Colors are pure colorScheme tokens
-// (surfaceContainerHigh pill + secondaryContainer indicator +
-// onSecondaryContainer ink), so the bar follows the Curio / AMOLED /
-// Material (dynamic) themes and dark mode out of the box.
-private val FloatingPillIconWidth = 48.dp
-private val FloatingPillExpandedWidth = 96.dp
-private val FloatingPillHeight = 48.dp
+// (surfaceContainerHigh pill + v131 SOLID secondary indicator +
+// onSecondary ink), so the bar follows the Curio / AMOLED / Material
+// (dynamic) themes and dark mode out of the box.
+// v131 — the pills grew a touch (52dp tall/icons, 112dp expanded) so the
+// bar reads chunkier and the active tab's label has more room.
+private val FloatingPillIconWidth = 52.dp
+private val FloatingPillExpandedWidth = 112.dp
+private val FloatingPillHeight = 52.dp
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -188,9 +190,9 @@ fun CurioFloatingNavBar(
             shadowElevation = 6.dp
         ) {
             Row(
-                modifier = Modifier.padding(6.dp),
+                modifier = Modifier.padding(7.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 CurioBottomNavItems.all.forEach { destination ->
                     // The hierarchy walk handles nested-graph destinations;
@@ -248,14 +250,18 @@ private fun FloatingNavPill(
         ),
         label = "floatingNavPillWidth"
     )
-    val activeInk = MaterialTheme.colorScheme.onSecondaryContainer
+    // v131 — the active indicator is a SOLID secondary fill with its on-color
+    // ink (the v27q selection contract — never a translucent container), so
+    // the active tab reads as a defined amber pill in light AND dark instead
+    // of the washed-out translucent container it wore before.
+    val activeInk = MaterialTheme.colorScheme.onSecondary
     Box(
         modifier = Modifier
             .width(pillWidth)
             .height(FloatingPillHeight)
             .clip(RoundedCornerShape(50))
             .background(
-                if (selected) MaterialTheme.colorScheme.secondaryContainer
+                if (selected) MaterialTheme.colorScheme.secondary
                 else Color.Transparent
             )
             .clickable(onClick = onClick),
@@ -269,7 +275,7 @@ private fun FloatingNavPill(
                 name = if (selected) destination.selectedIcon else destination.icon,
                 contentDescription = destination.label,
                 tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 22.dp
+                size = 24.dp
             )
             // Enter keeps the slide-out morph for the newly active pill;
             // exit is tween(0) so the label VANISHES the moment its pill is
@@ -341,8 +347,10 @@ fun CurioNavigationRail(
                         CurioIcon(
                             name = if (selected) destination.selectedIcon else destination.icon,
                             contentDescription = destination.label,
+                            // v131 — solid secondary indicator + on-secondary
+                            // ink, matching the phone pill bar.
                             tint = if (selected)
-                                MaterialTheme.colorScheme.onSecondaryContainer
+                                MaterialTheme.colorScheme.onSecondary
                             else
                                 MaterialTheme.colorScheme.onSurfaceVariant,
                             size = 24.dp
@@ -355,9 +363,9 @@ fun CurioNavigationRail(
                         )
                     },
                     colors = NavigationRailItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )

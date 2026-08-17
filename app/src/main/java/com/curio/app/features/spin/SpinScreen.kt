@@ -1206,7 +1206,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 // slot), so the phone layout clears the gesture bar + the
                 // floating pill itself; wide windows use the rail instead.
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = 76.dp)
+                // v131 — clearance grew with the bigger pill (76 → 84dp).
+                .padding(bottom = 84.dp)
         ) {
         if (compactHeight) {
             // ── Compact layout (small screens) ────────────────────────

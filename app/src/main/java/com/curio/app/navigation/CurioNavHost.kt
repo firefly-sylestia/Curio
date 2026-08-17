@@ -13,6 +13,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -356,7 +357,18 @@ fun CurioNavHost(
     // pet's eyes follow the cursor anywhere on screen (Chromebook / desktop).
     // v129 — no Scaffold: the root Box hosts the page Row directly and the
     // floating pill bar as an overlay on top (see below).
-    Box(modifier = Modifier.fillMaxSize().then(PetPointer.trackerModifier())) {
+    // v131 — the root paints the THEME background again: the Scaffold used
+    // to paint `colorScheme.background` behind the content, and removing it
+    // left the root transparent — so the window's dark-navy bootstrap color
+    // showed through the NavHost page transitions (the "dim flash" mid-fade
+    // on every page switch). The pages paint their own full-bleed
+    // backgrounds, so this only ever shows during transitions + gutters.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .then(PetPointer.trackerModifier())
+    ) {
         Row(modifier = Modifier.fillMaxSize()) {
             if (wide && showBottomBar) {
                 // Wide windows: the rail sits at the left edge, full height,

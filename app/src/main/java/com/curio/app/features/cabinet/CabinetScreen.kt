@@ -335,7 +335,8 @@ fun CabinetScreen(navController: NavController) {
                 // pill on phones; wide windows use the rail and just need
                 // the gesture-bar inset (which windowInsetsPadding provides).
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = if (wide) 0.dp else 76.dp)
+                // v131 — clearance grew with the bigger pill (76 → 84dp).
+                .padding(bottom = if (wide) 0.dp else 84.dp)
         ) {
         // ── Grid or empty state — the scroll content fills the screen and
         // runs UNDER the torn hero banner and the sticky chip bar (both are
