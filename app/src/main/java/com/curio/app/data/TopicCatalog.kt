@@ -67,16 +67,28 @@ object TopicCatalog {
     }
 
     /**
-     * Looks up a topic by exact name across all categories.
-     * Searches the already-loaded pools; returns null if no pool
-     * with [name] has been loaded yet.
+     * Looks up a topic by name across all categories. Searches the
+     * already-loaded pools; returns null if no pool with [name] has been
+     * loaded yet.
+     *
+     * v135 — tolerant matching: saved entries reference the topic name AS
+     * IT WAS when saved, and data edits (the books dedupe collapsed
+     * year-less entries into canonical "Name (Year)" entries) rename
+     * topics underneath them — an old entry's "The Odyssey" would fail an
+     * exact-name lookup against "The Odyssey (c. 8th century BCE)" and
+     * the reveal would show "Loading topic…" forever. Exact match first,
+     * then base-name (strip a trailing "(…)" qualifier) + containment
+     * ("Moby-Dick; or, The Whale" ↔ "Moby-Dick (1851)") via
+     * [CurioTopic.matchesSavedName].
      *
      * Use [findByNameAcrossAll] for a guaranteed exhaustive search
      * (suspends to load every category).
      */
     fun findByName(name: String): CurioTopic? {
+        val wanted = name.trim()
+        if (wanted.isEmpty()) return null
         CategoryId.values().forEach { id ->
-            TopicJsonLoader.cached(id)?.firstOrNull { it.name == name }
+            TopicJsonLoader.cached(id)?.firstOrNull { it.matchesSavedName(wanted) }
                 ?.let { return it }
         }
         return null
@@ -100,6 +112,7 @@ object TopicCatalog {
      * the Spin screen to render dynamic filter chips (replaces the
      * old hardcoded MusicGenre enum).
      */
+
     suspend fun tagsFor(id: CategoryId): List<String> =
         poolFor(id).flatMap { it.tags }.distinct().sorted()
 
@@ -181,8 +194,39 @@ object TopicCatalog {
                     subFormat = CaptureFormat.ReelNotes,
                     subData = CaptureData.ReelNotes(3, "Quick notebook entry about ${topic.name}", 0)
                 )
-            },
-            capturedAtMillis = capturedAt
+            },            capturedAtMillis = capturedAt
         )
     }
+}
+
+/**
+ * v135 — tolerant saved-name matching for topics whose canonical name
+ * changed under a saved entry (the books dedupe collapsed "The Odyssey"
+ * into "The Odyssey (c. 8th century BCE)", "Moby-Dick; or, The Whale"
+ * into "Moby-Dick (1851)", etc.). Tiered: exact (case-insensitive) →
+ * base-name (strip a trailing "(…)" / "— …" qualifier from either side)
+ * → containment (min 4 chars, so a bare "The" can never match
+ * everything). Used by [TopicCatalog.findByName] and the reveal's
+ * per-pool fallback.
+ */
+internal fun CurioTopic.matchesSavedName(requested: String): Boolean {
+    val wanted = requested.trim()
+    if (wanted.isEmpty()) return false
+    if (name.equals(wanted, ignoreCase = true)) return true
+
+    fun base(s: String): String {
+        val cut = s.substringBefore(" (").substringBefore(" — ")
+        return cut.trim().removeSuffix(";")
+    }
+    val nameBase = base(name)
+    val wantedBase = base(wanted)
+    if (nameBase.isNotBlank() && nameBase.equals(wantedBase, ignoreCase = true)) return true
+
+    // Containment needs a real word to anchor on — never match on a
+    // 1–3 char fragment ("The", "198", "La").
+    if (nameBase.length >= 4 && wantedBase.length >= 4) {
+        if (nameBase.contains(wantedBase, ignoreCase = true)) return true
+        if (wantedBase.contains(nameBase, ignoreCase = true)) return true
+    }
+    return false
 }

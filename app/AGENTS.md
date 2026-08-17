@@ -761,6 +761,44 @@ app/src/main/java/com/curio/app/
   visible mask (circle radius 54dp, squircle wider) shows far more, and
   App Info shows the raw unmasked square, so art should fill ~70%+ of
   the 108dp canvas.
+- **v135 — progress editor redesign; tolerant saved-topic lookup; all
+  reveal tags + decade chip; browser icon tiles; drawer above navbar +
+  section hierarchy.** (1) **Progress editor rebuilt** (CurioProgressPill):
+  the ring + hidden tappable count is gone — a big count flanked by −/+
+  steppers, an explicit "of {target} {unit}" chip with an edit pencil, a
+  full-width progress bar + %, and a slider whose `steps` are only used
+  when `target <= 200` (big totals run continuous + round) — the old
+  `(target - 1).coerceAtMost(600)` steps made a 1000-page book snap to
+  non-integer positions that fought the rounded Int state ("the editor
+  isn't working"), and the inline target field overflowed the 132dp ring
+  Box. (2) **Tolerant topic lookup** (`CurioTopic.matchesSavedName` +
+  `TopicCatalog.findByName` + the reveal's pool fallback): the books
+  dedupe renamed topics under saved entries ("The Odyssey" → "The
+  Odyssey (c. 8th century BCE)"), so exact-name lookups hung on
+  "Loading topic…". Tiers: case-insensitive exact → base-name (strip a
+  trailing "(…)"/"— …" qualifier) → containment (both sides ≥ 4 chars;
+  "Moby-Dick; or, The Whale" ↔ "Moby-Dick (1851)"). An unresolvable
+  topic now shows its requested NAME in the hero (HeroCard
+  `fallbackName`) and hides the teaser instead of a permanent
+  placeholder. (3) **Reveal tags** (per user): ALL tags now render
+  (FlowRow wrap — the old `take(3)` thirds cap is gone) plus a derived
+  decade chip (`CurioTopic.publicationYear` + `derivedDecadeTag`,
+  shared with the Topic Database sort which now delegates to it). (4)
+  **Browser icon tiles** (DatabaseTopicRow + DatabaseSectionHeader): the
+  old raw `cat.accent` fill/tint (deep accent on a 14% deep-accent tile
+  = invisible in dark) now uses the modern theme-aware recipe
+  `categorySurface(...)` + `categoryInk()` / `themedAccent()`. (5)
+  **Drawer above the navbar**: HomeScreen publishes its drawer state via
+  a new `CurioDrawerState` object (mirrors `CurioNavTint`), and the
+  NavHost skips `CurioFloatingNavBar` while it's open. (6) **Drawer
+  section hierarchy**: section headers are now raised
+  `surfaceContainerHigh` pills (solid when open) with a distinct filled
+  circle toggle badge, and the expanded rows animate in
+  (`expandVertically`) as ONE grouped card (`surfaceContainerHigh`
+  45%) — the drawer visibly grows instead of rows silently appearing in
+  a same-size sheet. LESSON: a modal drawer covers the whole screen —
+  anything the NavHost draws after it (the floating nav bar) sits ON
+  TOP of it unless explicitly gated.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

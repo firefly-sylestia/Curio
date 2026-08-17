@@ -1,8 +1,13 @@
 package com.curio.app.features.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,6 +52,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -120,6 +126,7 @@ import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -325,6 +332,16 @@ fun HomeScreen(navController: NavController) {
     }
 
     val navInsets = WindowInsets.navigationBars.asPaddingValues()
+
+    // v135 — the drawer covers the whole screen INCLUDING the floating pill
+    // bar: publish its open state so the NavHost hides the bar while the
+    // drawer is up (the drawer must sit ABOVE the navbar).
+    LaunchedEffect(drawerState.isOpen) {
+        CurioDrawerState.publishOpen(drawerState.isOpen)
+    }
+    DisposableEffect(Unit) {
+        onDispose { CurioDrawerState.publishOpen(false) }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -1918,27 +1935,40 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         onToggle = { curiosityExpanded = !curiosityExpanded }
                     )
                 }
-                if (curiosityExpanded) {
-                    item("history") {
-                        DrawerNavItem(
-                            icon = CurioIcons.History,
-                            label = "Topic History",
-                            iconTint = CurioColors.DustyBlue
-                        ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
-                    }
-                    item("manage") {
-                        DrawerNavItem(
-                            icon = CurioIcons.DragHandle,
-                            label = "Manage Categories",
-                            iconTint = curioSageInk()
-                        ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
-                    }
-                    item("database") {
-                        DrawerNavItem(
-                            icon = CurioIcons.Database,
-                            label = "Browse Topics",
-                            iconTint = CurioColors.CategorySky
-                        ) { onNavigate(CurioRoutes.DATABASE) }
+                // v135 — the expanded rows are ONE nested group that
+                // animates open (expandVertically) inside a soft card: the
+                // drawer visibly GROWS when a section opens instead of rows
+                // silently appearing in a same-size sheet, and the group
+                // card gives the rows their hierarchy background.
+                item("curiosityGroup") {
+                    AnimatedVisibility(
+                        visible = curiosityExpanded,
+                        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
+                        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                .padding(vertical = 2.dp)
+                        ) {
+                            DrawerNavItem(
+                                icon = CurioIcons.History,
+                                label = "Topic History",
+                                iconTint = CurioColors.DustyBlue
+                            ) { onNavigate(CurioRoutes.TOPIC_HISTORY) }
+                            DrawerNavItem(
+                                icon = CurioIcons.DragHandle,
+                                label = "Manage Categories",
+                                iconTint = curioSageInk()
+                            ) { onNavigate(CurioRoutes.MANAGE_CATEGORIES) }
+                            DrawerNavItem(
+                                icon = CurioIcons.Database,
+                                label = "Browse Topics",
+                                iconTint = CurioColors.CategorySky
+                            ) { onNavigate(CurioRoutes.DATABASE) }
+                        }
                     }
                 }
                 // v118 — "About": Support & diagnostics + Replay intro
@@ -1951,24 +1981,34 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         onToggle = { aboutExpanded = !aboutExpanded }
                     )
                 }
-                if (aboutExpanded) {
-                    item("support") {
-                        DrawerNavItem(
-                            icon = CurioIcons.SupportAgent,
-                            label = "Support & diagnostics",
-                            iconTint = curioRoseInk()
-                        ) { onNavigate(CurioRoutes.SUPPORT) }
-                    }
-                    item("replay") {
-                        DrawerNavItem(
-                            icon = CurioIcons.Replay,
-                            label = "Replay intro",
-                            iconTint = CurioColors.HomeRosewood
+                item("aboutGroup") {
+                    AnimatedVisibility(
+                        visible = aboutExpanded,
+                        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(tween(200)),
+                        exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(tween(140))
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 4.dp, end = 4.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                .padding(vertical = 2.dp)
                         ) {
-                            // Re-show the welcome screens: reset the completed
-                            // flag, then open onboarding like Settings' replay.
-                            CurioOnboardingState.reset(context)
-                            onNavigate(CurioRoutes.ONBOARDING)
+                            DrawerNavItem(
+                                icon = CurioIcons.SupportAgent,
+                                label = "Support & diagnostics",
+                                iconTint = curioRoseInk()
+                            ) { onNavigate(CurioRoutes.SUPPORT) }
+                            DrawerNavItem(
+                                icon = CurioIcons.Replay,
+                                label = "Replay intro",
+                                iconTint = CurioColors.HomeRosewood
+                            ) {
+                                // Re-show the welcome screens: reset the completed
+                                // flag, then open onboarding like Settings' replay.
+                                CurioOnboardingState.reset(context)
+                                onNavigate(CurioRoutes.ONBOARDING)
+                            }
                         }
                     }
                 }
@@ -2163,9 +2203,11 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     }
 }
 
-/** One collapsible section header inside the drawer (v118) — a label row
- *  with a leading icon chip and a trailing chevron (▼ collapsed / ▲ open,
- *  the filter-sheet convention). Tap toggles the section's rows inline. */
+/** One collapsible section header inside the drawer (v118) — v135: a
+ *  RAISED hierarchy pill (surfaceContainerHigh, fills solid when open) with
+ *  a distinct circular toggle badge (▼ collapsed / ▲ open) so the collapse
+ *  control reads as a real button, not a passive arrow. Tap toggles the
+ *  section's rows inline. */
 @Composable
 private fun DrawerSectionHeader(
     icon: String,
@@ -2177,26 +2219,38 @@ private fun DrawerSectionHeader(
     Surface(
         onClick = onToggle,
         shape = RoundedCornerShape(16.dp),
-        color = Color.Transparent,
+        // Raised above the flat nav rows — solid when expanded, softened
+        // when collapsed — the hierarchy background the user asked for.
+        color = if (expanded)
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        else
+            // Opaque blend (never a translucent fill under a shadow — the
+            // shadow would bleed through as a blurry disc).
+            lerp(
+                MaterialTheme.colorScheme.surface,
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                0.55f
+            ),
+        shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 11.dp),
+                .padding(horizontal = 10.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = ink.copy(alpha = 0.10f),
-                modifier = Modifier.size(40.dp)
+                color = ink.copy(alpha = if (expanded) 0.16f else 0.10f),
+                modifier = Modifier.size(36.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     CurioIcon(
                         icon, null,
                         tint = ink,
-                        size = 22.dp,
+                        size = 20.dp,
                         modifier = Modifier.offset(y = (-1f).dp)
                     )
                 }
@@ -2207,12 +2261,26 @@ private fun DrawerSectionHeader(
                 color = ink,
                 modifier = Modifier.weight(1f)
             )
-            CurioIcon(
-                if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-                null,
-                tint = ink.copy(alpha = 0.5f),
-                size = 20.dp
-            )
+            // Distinct toggle badge — a filled circle (primary-tinted when
+            // open) so the collapse state reads at a glance.
+            Surface(
+                shape = CircleShape,
+                color = if (expanded)
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                else
+                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                modifier = Modifier.size(26.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    CurioIcon(
+                        if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                        null,
+                        tint = if (expanded) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 18.dp
+                    )
+                }
+            }
         }
     }
 }

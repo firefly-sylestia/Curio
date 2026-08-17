@@ -87,6 +87,21 @@ object CurioNavTint {
 }
 
 /**
+ * v135 — Home drawer visibility, published by HomeScreen so the NavHost can
+ * hide the floating pill bar while the drawer is open: the drawer must sit
+ * ABOVE the nav bar (it covers the whole screen), so the bar yields while
+ * the drawer is up and returns when it closes.
+ */
+object CurioDrawerState {
+    var isOpen by mutableStateOf(false)
+        private set
+
+    fun publishOpen(open: Boolean) {
+        isOpen = open
+    }
+}
+
+/**
  * Curio's persistent bottom navigation — see Curio navigation contract.
  *
  * Three destinations:

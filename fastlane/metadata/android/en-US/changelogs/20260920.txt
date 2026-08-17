@@ -28,6 +28,11 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Progress: the progress editor got a clean redesign — a big count with −/+ steppers, an explicit "of N pages" line with an edit pencil, a progress bar, and a slider that stays responsive on 1,000-page books (the old slider stuttered against non-integer steps on big totals).
+- Saved entries from before the book dedupe no longer hang on "Loading…" — old names like "The Odyssey" now resolve to the current entry ("The Odyssey (c. 8th century BCE)") automatically.
+- Topic Reveal: all of a topic's tags now show as chips (no more 3-chip cap, wrapping to multiple rows), plus a derived decade chip (e.g. "1940s") when the year is recoverable.
+- Topic Database: the category icon tiles use the current theme-aware look — the glyph and its tile stay visible in dark mode too.
+- Drawer: it now opens above the floating nav bar (the bar hides while it's up), the collapsible sections got a raised header with a clear toggle badge, and the expanded rows appear in a grouped card — opening a section visibly grows the drawer instead of rows silently appearing.
 - Drawer: your full name reads on one line under the greeting — the middle and last names no longer wrap onto separate lines.
 - App icon: the cosmic mark now fills about three-quarters of the icon tile instead of half — the ring of background around it reads as a slim border, and it looks properly sized on the App Info screen too.
 - Topic Reveal: the Like/Dislike pair now floats in a pill over the page — it slides out of the way while you scroll down and slides back in when you scroll up (the old fixed bottom strip is gone).

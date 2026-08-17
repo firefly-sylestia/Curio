@@ -111,6 +111,7 @@ import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioFloatingNavBar
 import com.curio.app.ui.components.CurioInAppToastHost
 import com.curio.app.ui.components.CurioNavigationRail
@@ -754,7 +755,10 @@ fun CurioNavHost(
         // the bottom center, so no painted slot / strip sits behind it. It
         // draws over the page's own full-bleed background; the tab pages
         // clear it themselves (see Home / Spin / Cabinet bottom padding).
-        if (!wide && showBottomBar) {
+        // v135 — the bar YIELDS while the Home drawer is open: the drawer
+        // covers the whole screen and must sit above the navbar (HomeScreen
+        // publishes its open state via [CurioDrawerState]).
+        if (!wide && showBottomBar && !CurioDrawerState.isOpen) {
             CurioFloatingNavBar(
                 navController = navController,
                 modifier = Modifier.align(Alignment.BottomCenter)

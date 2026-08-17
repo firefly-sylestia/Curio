@@ -230,3 +230,42 @@ val CaptureFormat.shortName: String
         CaptureFormat.FieldNotes -> "Field notes"
         CaptureFormat.OpenNotebook -> "Wildcard"
     }
+
+// ── Derived year/decade helpers (shared by the Topic Database sort + the
+//    reveal's decade tag chip, v135) ────────────────────────────────────────
+
+private val PARENTHESIZED_YEAR = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
+private val BARE_YEAR = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
+private val DECADE_YEAR = Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b")
+
+/**
+ * Best-effort publication/birth year. Topics have no dedicated year field,
+ * so read it from the first available source: a `(Year)` in the name
+ * ("Citizen Kane (1941)"), a `(Year)` in the explore target ("Vespertine
+ * (2001) end-to-end"), the first 4-digit year in the teaser, then the
+ * explore instruction (boosts people categories like Authors / Painters
+ * where the teaser often omits dates), and finally a decade tag ("1960s"
+ * → 1960). Returns null when nothing is recoverable.
+ */
+fun CurioTopic.publicationYear(): Int? {
+    PARENTHESIZED_YEAR.find(name)?.let { return it.groupValues[1].toInt() }
+    PARENTHESIZED_YEAR.find(exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
+    BARE_YEAR.find(teaser)?.let { return it.value.toInt() }
+    BARE_YEAR.find(exploreAction.instruction)?.let { return it.value.toInt() }
+    tags.forEach { tag ->
+        DECADE_YEAR.find(tag)?.let { return it.groupValues[1].toInt() * 10 }
+    }
+    return null
+}
+
+/**
+ * v135 — the reveal's decade tag chip: "1941" → "1940s". Null when no
+ * year is recoverable, or when the topic already carries that decade as a
+ * tag (no duplicate chip).
+ */
+fun CurioTopic.derivedDecadeTag(): String? {
+    val year = publicationYear() ?: return null
+    val decade = year / 10 * 10
+    val label = "${decade}s"
+    return if (tags.any { it.equals(label, ignoreCase = true) }) null else label
+}

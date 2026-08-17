@@ -64,6 +64,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
+import com.curio.app.data.publicationYear
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
@@ -84,6 +85,8 @@ import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.pastelFillInk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -884,29 +887,12 @@ private fun DatabaseChipPop(
 }
 
 /**
- * Best-effort publication/birth year for sorting. Topics have no dedicated
- * year field, so read it from the first available source: a `(Year)` in the
- * name ("Citizen Kane (1941)"), a `(Year)` in the explore target
- * ("Vespertine (2001) end-to-end"), the first 4-digit year in the teaser,
- * then the explore instruction (boosts people categories like Authors /
- * Painters where the teaser often omits dates), and finally a decade tag
- * ("1960s" → 1960). Returns null when nothing is recoverable (unknowns
- * sort last, alphabetically within that bucket).
+ * Best-effort publication/birth year for sorting — v135: shared
+ * [CurioTopic.publicationYear] (the reveal's decade tag chip uses the same
+ * extraction, so the two surfaces can never drift). Unknowns sort last,
+ * alphabetically within that bucket.
  */
-private val PARENTHESIZED_YEAR = Regex("\\((1[89]\\d{2}|20\\d{2})\\)")
-private val BARE_YEAR = Regex("\\b(1[89]\\d{2}|20[0-2]\\d)\\b")
-private val DECADE_YEAR = Regex("\\b(1[89]\\d|20[0-2]\\d)0s\\b")
-
-private fun topicYear(topic: CurioTopic): Int? {
-    PARENTHESIZED_YEAR.find(topic.name)?.let { return it.groupValues[1].toInt() }
-    PARENTHESIZED_YEAR.find(topic.exploreAction.targetName)?.let { return it.groupValues[1].toInt() }
-    BARE_YEAR.find(topic.teaser)?.let { return it.value.toInt() }
-    BARE_YEAR.find(topic.exploreAction.instruction)?.let { return it.value.toInt() }
-    topic.tags.forEach { tag ->
-        DECADE_YEAR.find(tag)?.let { return it.groupValues[1].toInt() * 10 }
-    }
-    return null
-}
+private fun topicYear(topic: CurioTopic): Int? = topic.publicationYear()
 
 /** Category section header shown while browsing All. */
 @Composable
@@ -923,7 +909,9 @@ private fun DatabaseSectionHeader(cat: CurioCategory, count: Int) {
         Box(
             modifier = Modifier
                 .size(10.dp)
-                .background(cat.accent, CircleShape)
+                // v135 — themed accent so the marker stays visible in dark
+                // mode (raw deep accent disappears on the black page).
+                .background(cat.themedAccent(), CircleShape)
         )
         Text(
             text = cat.displayName.uppercase(),
@@ -957,15 +945,19 @@ private fun DatabaseTopicRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 9.dp)
         ) {
+            // v135 — the icon tile wears the MODERN theme-aware category
+            // recipe (tinted card surface + readable category ink) instead
+            // of the old raw-accent fill, which went dark-on-dark in dark
+            // mode (deep accent on a 14% deep-accent tile on a black page).
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = cat.accent.copy(alpha = 0.14f),
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     CurioIcon(
                         cat.iconGlyph, null,
-                        tint = cat.accent,
+                        tint = cat.categoryInk(),
                         size = 22.dp
                     )
                 }

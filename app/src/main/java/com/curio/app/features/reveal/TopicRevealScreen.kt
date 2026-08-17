@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -109,7 +111,9 @@ import com.curio.app.data.buildExploreQuery
 import com.curio.app.data.buildExploreSearchUrl
 import com.curio.app.data.buildMusicServiceSearchUrl
 import com.curio.app.data.buildYouTubeSearchUrl
+import com.curio.app.data.derivedDecadeTag
 import com.curio.app.data.isMusicTopic
+import com.curio.app.data.matchesSavedName
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
@@ -213,9 +217,13 @@ fun TopicRevealScreen(
             return@produceState
         }
         val pool = TopicJsonLoader.load(cat.id)
-        // Graceful fallback: an unknown topic stays null so the screen
-        // shows the neutral category fallback instead of a wrong topic.
-        value = pool.firstOrNull { it.name == topicName }
+        // v135 — tolerant match: a saved entry's topic name can differ from
+        // the current canonical name (the books dedupe collapsed "The
+        // Odyssey" into "The Odyssey (c. 8th century BCE)"), so an old
+        // entry must still resolve instead of hanging on "Loading…". A
+        // genuinely unknown topic stays null and the screen falls back to
+        // showing the requested name (see HeroCard).
+        value = pool.firstOrNull { it.matchesSavedName(topicName) }
     }
 
     val resolved = topic
@@ -707,6 +715,10 @@ fun TopicRevealScreen(
                     HeroCard(
                         cat = cat,
                         resolved = resolved,
+                        // v135 — an unresolvable legacy topic (renamed under
+                        // a saved entry) still shows its own name, not the
+                        // category name.
+                        fallbackName = topicName,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
@@ -719,13 +731,15 @@ fun TopicRevealScreen(
                 // (books: pages, anime: episodes) the floating progress
                 // button straddles the hero's bottom edge, so the tags row
                 // drops a little lower to stay clear of it.
-                val hasTags = !resolved?.tags.isNullOrEmpty()
+                // v135 — tags OR the derived decade chip (a tag-less topic
+                // with a recoverable year still gets its chip row).
+                val hasTags = !resolved?.tags.isNullOrEmpty() || resolved?.derivedDecadeTag() != null
                 val progressFloatGap = if (resolved?.progressTarget != null) 40.dp else 16.dp
                 if (hasTags) {
                     RevealContentEntrance(delayMillis = 40) {
                         TagsRow(
                             cat = cat,
-                            tags = resolved?.tags,
+                            resolved = resolved,
                             modifier = Modifier.padding(top = progressFloatGap)
                         )
                     }
@@ -754,12 +768,17 @@ fun TopicRevealScreen(
                 // directly.
 
                 // ── 5. Teaser card ──────────────────────────────────────────
-                RevealContentEntrance(delayMillis = 160) {
-                    TeaserCard(
-                        cat = cat,
-                        teaser = resolved?.teaser,
-                        modifier = Modifier.padding(top = 20.dp)
-                    )
+                // v135 — only rendered once the topic resolves: an
+                // unresolvable legacy topic shows its name + actions instead
+                // of a permanent "Loading topic…" placeholder.
+                if (resolved != null) {
+                    RevealContentEntrance(delayMillis = 160) {
+                        TeaserCard(
+                            cat = cat,
+                            teaser = resolved.teaser,
+                            modifier = Modifier.padding(top = 20.dp)
+                        )
+                    }
                 }
 
                 // ── 6. Action prompt card ──────────────────────────────────
@@ -1525,7 +1544,10 @@ private val RevealHeroBaseHeight = 260.dp
 private fun HeroCard(
     cat: com.curio.app.data.CurioCategory,
     resolved: CurioTopic?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v135 — shown when the topic can't be resolved (renamed under a
+    // saved entry) so the page never reads as "the wrong category".
+    fallbackName: String = ""
 ) {
     // ── Shared-element handoff (Topic Reveal morph) ──────────────────────
     // Matches the Spin front ticket's "reveal-hero" element: when this
@@ -1755,7 +1777,7 @@ private fun HeroCard(
                 // already shows the category chip, so the hero title stands
                 // alone (no duplicate category inside the card).
                 Text(
-                    text = resolved?.name ?: cat.displayName,
+                    text = resolved?.name ?: fallbackName.ifBlank { cat.displayName },
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontSize = 34.sp,
                         lineHeight = 38.sp,
@@ -1884,40 +1906,60 @@ private fun HeroCard(
 // Tags row — directly below the hero (v132, restored to the scroll body)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Compact tag chips directly under the hero card — instant context for
- *  genres / eras (e.g. "1970s · British · Art Rock"). Same chip recipe the
- *  bottom band used: an opaque accent-tinted surface with a 2dp lift; each
- *  chip caps at a third of the row width with ellipsis so the row never
- *  runs off small screens. */
+/** Tag chips directly under the hero card — v135: ALL of the topic's tags
+ *  (no more 3-chip cap) plus a derived decade chip ("1940s") when a year is
+ *  recoverable from the name/teaser. FlowRow wraps to multiple rows so a
+ *  long tag set never runs off-screen. Same chip recipe the bottom band
+ *  used: an opaque accent-tinted surface with a 2dp lift. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TagsRow(
     cat: com.curio.app.data.CurioCategory,
-    tags: List<String>?,
+    resolved: CurioTopic?,
     modifier: Modifier = Modifier
 ) {
-    if (tags.isNullOrEmpty()) return
-    Row(
+    val tags = resolved?.tags.orEmpty()
+    val decade = resolved?.derivedDecadeTag()
+    if (tags.isEmpty() && decade == null) return
+    FlowRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        tags.take(3).forEach { tag ->
-            Surface(
-                modifier = Modifier.weight(1f, fill = false),
-                shape = RoundedCornerShape(50),
-                color = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.32f),
-                shadowElevation = 2.dp
-            ) {
-                Text(
-                    text = tag,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                )
-            }
+        tags.forEach { tag ->
+            RevealTagChip(
+                text = tag,
+                fill = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.32f)
+            )
         }
+        if (decade != null) {
+            RevealTagChip(
+                text = decade,
+                fill = lerp(MaterialTheme.colorScheme.surface, cat.themedAccent(), 0.32f)
+            )
+        }
+    }
+}
+
+/** One tag chip inside [TagsRow] — opaque accent-tinted surface, 2dp lift. */
+@Composable
+private fun RevealTagChip(
+    text: String,
+    fill: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = fill,
+        shadowElevation = 2.dp
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        )
     }
 }
 
