@@ -12,16 +12,17 @@
     adaptive-icon canvas size (108dp) the card spans ~84–88%, which the
     launcher's mask (66dp safe zone) would crop: the frame, top stars and
     bottom waves were getting sliced ("broken / not properly placed"). So
-    the bitmap is inset 28dp on every side: the art fills the central
-    52dp, the card lands at ~44×47dp — fully inside the safe circle —
-    floating on the full-bleed sky in ic_launcher_background.xml (whose
-    gradient matches the card's own sky, so the two composite seamlessly
-    behind the card). The 2048px source downscales cleanly to every
-    density.
+    the bitmap is inset 18dp on every side: the art fills the central
+    72dp, the card lands at ~60×63dp — still inside the safe circle (66dp)
+    but much larger than the v115 28dp inset (~44×47dp), which read as a
+    tiny "icon inside the icon" on the launcher. The card floats on the
+    full-bleed sky in ic_launcher_background.xml (whose gradient matches
+    the card's own sky, so the two composite seamlessly behind the card).
+    The 2048px source downscales cleanly to every density.
 
-    The SPLASH screen keeps rendering @drawable/ic_launcher_art (the
-    previous raster) directly — the user approved it as-is.
+    The SPLASH screen renders @drawable/ic_launcher_icon (the same new
+    art) directly — the old bordered raster is gone (v126).
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:inset="28dp"
+    android:inset="18dp"
     android:drawable="@drawable/ic_launcher_icon" />

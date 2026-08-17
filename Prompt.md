@@ -1,6 +1,46 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: editable progress target + topic data audit + alternate-edition pill
+## Current request — COMPLETED: launcher icon bigger + splash border removed + R8 JNA fix
+
+The user: "the app icon itself is placed inside the icon, like it looks
+small can u fix it and when opening the app icon looks bigger why the
+differce, mean the icon inside icon thats only in app screen, and the
+splash screen icon is good but it have the old border. lemme send the
+file again and redo the icon and also fix this cl and commit and push
+everything even the scema" — with a CI log showing
+`minifyReleaseWithR8` FAILED.
+
+### 1 — R8 failure (JNA java.awt missing classes) — fixed
+`vosk-android` (v125) pulls in JNA; `com.sun.jna.Native$AWT` references
+`java.awt.Component / GraphicsEnvironment / HeadlessException / Window`,
+which don't exist on Android, so the RELEASE minification failed.
+Added the standard JNA `-dontwarn` rules (java.awt.**, java.beans.**,
+javax.swing.**, java.applet.**, java.nio.file.**) to proguard-rules.pro
+(the AWT interop is desktop-only, never invoked on-device).
+
+### 2 — Icon "icon inside icon" (root cause + fix)
+The user re-sent `svgviewer-output (5).svg` — byte-identical (md5) to
+the archived `design/launcher-icon/curio-launcher-icon-v2.svg`, so the
+ART is already current. The "small icon inside the icon" was the v115
+`ic_launcher_foreground.xml` INSET: 28dp on every side drew the card at
+only ~44×47dp inside the 108dp adaptive canvas (while the splash
+rendered the raw art at 112dp — hence "why is it bigger when the app
+opens"). FIX: inset 28 → 18dp (art fills 72dp, card ~60×63dp — still
+inside the 66dp safe zone, so no mask cropping).
+
+### 3 — Splash old border
+`SplashScreen.kt` rendered `R.drawable.ic_launcher_art` — the OLD v1
+raster that still carried the previous WHITE border. It now renders
+`R.drawable.ic_launcher_icon` (the v2 art, same source as the launcher
+foreground). `ic_launcher_art.png` deleted (dead).
+
+### Validation
+`git diff --check` clean; SCHEMA.md was already committed in b7bcc17
+(the alt-page rows + the user's tier edits ride along); the deleted
+raster has zero remaining refs (grep); no Gradle locally (env rule) —
+CI validates compile + R8 on push.
+
+## Previous request — COMPLETED: editable progress target + topic data audit + alternate-edition pill
 
 The user: "add a feature to edit the number of pages and episode number
 when tapping the number in the dialog box. also many anime series etc

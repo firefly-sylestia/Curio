@@ -690,6 +690,27 @@ app/src/main/java/com/curio/app/
   (704 Fagles / 574 Lombardo), War and Peace (1392 / 1104 Wordsworth),
   Moby-Dick (635 / 720 Penguin Classics), Ulysses (732 / 649 Corrected
   text), The Count of Monte Cristo (1276 / 1462 Modern Library).
+- **v126 — launcher icon no longer tiny + splash drops the old border +
+  R8 JNA fix.** (1) **Launcher icon:** `ic_launcher_foreground.xml` inset
+  28 → 18dp. The v115 inset drew the card at only ~44×47dp inside the
+  108dp adaptive canvas ("the icon inside the icon / looks small") while
+  the splash rendered the raw art at 112dp ("why is it bigger when the
+  app opens"). At 18dp the art fills 72dp and the card lands ~60×63dp —
+  still inside the 66dp safe zone, but matching the splash's presence.
+  (2) **Splash:** `SplashScreen.kt` now renders
+  `R.drawable.ic_launcher_icon` (the v2 art) instead of the OLD
+  `ic_launcher_art` raster, which still carried the previous WHITE BORDER.
+  `ic_launcher_art.png` deleted (dead). The user re-sent
+  `svgviewer-output (5).svg` — byte-identical (md5) to the archived
+  `design/launcher-icon/curio-launcher-icon-v2.svg`, so no re-render was
+  needed; the fix was which raster each surface used + the inset.
+  (3) **R8:** the v125 `vosk-android` dependency pulls in JNA, whose
+  `com.sun.jna.Native$AWT` references `java.awt.*` (Component /
+  GraphicsEnvironment / HeadlessException / Window) — missing on
+  Android, so `minifyReleaseWithR8` FAILED. Added the standard JNA
+  `-dontwarn` rules for `java.awt.**`, `java.beans.**`, `javax.swing.**`,
+  `java.applet.**`, `java.nio.file.**` (the AWT interop is desktop-only
+  and never invoked on-device).
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

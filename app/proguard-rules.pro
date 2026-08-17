@@ -41,6 +41,17 @@
 -keepclassmembers class * implements com.sun.jna.Callback { *; }
 -keepclassmembers class * implements com.sun.jna.Structure { *; }
 
+# v126 — JNA's desktop-only AWT interop (com.sun.jna.Native$AWT references
+# java.awt.Component / GraphicsEnvironment / HeadlessException / Window,
+# which don't exist on Android) tripped R8's missing-class check on the
+# release build. These are never used on-device — silence the missing-class
+# warnings (the standard JNA-Android rules).
+-dontwarn java.awt.**
+-dontwarn java.beans.**
+-dontwarn javax.swing.**
+-dontwarn java.applet.**
+-dontwarn java.nio.file.**
+
 # Vosk's own binding classes extend com.sun.jna.PointerType and are resolved
 # through JNA reflection — keep them whole too.
 -keep class org.vosk.** { *; }
