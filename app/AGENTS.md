@@ -569,9 +569,12 @@ app/src/main/java/com/curio/app/
   self-restores the tab you left. (2) **Drawer greeting:** the "Spin
   it. Explore it. Capture it." tagline is GONE; the first name stays in
   the greeting position ("Hi First") and the remaining name parts
-  (middle, last) render one per line at the tagline's old size
-  (`bodyMedium`, alpha 0.78) in its spot — a long name reads on its own
-  lines instead of one ellipsized greeting. (3) **Pet:** random LONG
+  (middle, last) render at the tagline's old size (`bodyMedium`, alpha
+  0.78) in its spot. **v134 — the remaining parts now join onto ONE
+  line** (`joinToString(" ")`, single `Text`, `maxLines = 1` +
+  ellipsis) instead of one line per name part — the user found the
+  per-part wrapping weird ("middle 2nd 3rd name into 2 different lines").
+  (3) **Pet:** random LONG
   teleports (`walkTo`'s `LONG_JUMP_FRACTION` branch) now `burstPoof` at
   the old spot, `delay(160)`, teleport, then poof again at the target —
   no more instant snap; the chameleon game POOFS and teleports to a

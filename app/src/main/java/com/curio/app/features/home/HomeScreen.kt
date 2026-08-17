@@ -2103,9 +2103,10 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 // it." tagline is GONE: the first name stays
                                 // in the greeting's position, and the middle +
                                 // last names fill the tagline's spot at the
-                                // tagline's size (bodyMedium), so a long name
-                                // reads on its own lines instead of one
-                                // ellipsized greeting.
+                                // tagline's size (bodyMedium).
+                                // v134 — the rest of the name (middle + last)
+                                // reads on ONE line below the greeting, not
+                                // one line per name part.
                                 val nameParts = displayName.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
                                 val firstName = nameParts.firstOrNull() ?: displayName
                                 val greeting = "Hi $firstName"
@@ -2121,9 +2122,10 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                nameParts.drop(1).forEach { part ->
+                                val restOfName = nameParts.drop(1).joinToString(" ")
+                                if (restOfName.isNotBlank()) {
                                     Text(
-                                        part,
+                                        restOfName,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = drawerInk.copy(alpha = 0.78f),
                                         maxLines = 1,
