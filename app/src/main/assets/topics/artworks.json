@@ -13774,5 +13774,803 @@
       "Domestic"
     ],
     "tier": 1
+  },
+  {
+    "id": "artw-milkmaid-1658",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Milkmaid (1658)",
+    "teaser": "A kitchen maid pouring milk with a concentration so still that the room seems to hold its breath. Vermeer painted the light itself — the window's cool daylight, the bread's crust, the nail shadow on the wall. The maid is not looking at anything, and that is the whole subject.",
+    "imageUrl": "",
+    "byline": "Johannes Vermeer",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Milkmaid (1658) up close",
+      "durationMinutes": 8,
+      "instruction": "Look at the wall behind the maid — the light there is Vermeer's real subject, not the figure. Notice how the nail's shadow tells you exactly where the window is."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-laughing-cavalier-1624",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Laughing Cavalier (1624)",
+    "teaser": "A portrait so lively that the sitter seems about to speak — the swaggering pose, the tilted hat, the embroidered sleeve painted with astonishing speed. The title is a mistake: the man is not laughing, just smirking. Hals's loose brushwork made him the anti-thesis of stiff court portraiture.",
+    "imageUrl": "",
+    "byline": "Frans Hals",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Laughing Cavalier (1624) details",
+      "durationMinutes": 8,
+      "instruction": "Look at the sleeve's embroidery — Hals painted it with quick, confident strokes that read as detail only from a distance. Notice how the pose breaks the portrait's 'still life' rule."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-primavera-1482",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Primavera (1482)",
+    "teaser": "Nine mythological figures in an orange grove: Venus at the centre, the Three Graces dancing, Mercury dispersing clouds, and Flora scattering flowers from her dress. Nobody agrees what it means — a wedding allegory, a Neoplatonic poem, a calendar of spring. It was rediscovered in a country villa after 400 years of obscurity.",
+    "imageUrl": "",
+    "byline": "Sandro Botticelli",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Primavera (1482) figure by figure",
+      "durationMinutes": 10,
+      "instruction": "Look at the Three Graces — the painting's movement all lives in their dance. Then notice Zephyr, the wind god on the right: the painting starts and ends with him."
+    },
+    "tags": [
+      "Renaissance",
+      "Mythology",
+      "Painting"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-vitruvian-man-1490",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Vitruvian Man (1490)",
+    "teaser": "The perfect human: a man inscribed in both a circle and a square, Leonardo's attempt to prove that the human body follows geometry. Based on the Roman architect Vitruvius's proportions, it is part anatomy study, part manifesto. The drawing survives in Venice, and the image has become the symbol of humanism itself.",
+    "imageUrl": "",
+    "byline": "Leonardo da Vinci",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Vitruvian Man (1490) proportions",
+      "durationMinutes": 8,
+      "instruction": "Look at the two poses — arms outstretched in a square, then raised in a circle — and notice the notes: Leonardo wrote the proportions beside the figure in mirror script."
+    },
+    "tags": [
+      "Renaissance",
+      "Drawing",
+      "Anatomy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-woman-in-gold-1907",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Woman in Gold (1907)",
+    "teaser": "Adele Bloch-Bauer's portrait, a shimmering mosaic of gold leaf, spirals and Egyptian motifs — the most expensive painting ever sold when it fetched $135 million in 2006. It was looted by the Nazis, and the fight to recover it became a landmark restitution case. Klimt painted Adele twice; this is the first, more famous, version.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Woman in Gold (1907) gold details",
+      "durationMinutes": 8,
+      "instruction": "Look at how the gold is not just background but texture — every patch of leaf catches light differently. Notice Adele's hands, folded so tightly they disappear into the pattern."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Portrait",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-oath-of-horatii-1784",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Oath of the Horatii (1784)",
+    "teaser": "Three Roman brothers swear on their father's swords to defend Rome — while the women weep behind them. David's neo-classical masterpiece made him the most famous painter in Europe and a revolutionary propaganda machine. The rigid geometry of the composition was deliberate: it is about duty crushing feeling.",
+    "imageUrl": "",
+    "byline": "Jacques-Louis David",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Oath of the Horatii (1784) composition",
+      "durationMinutes": 8,
+      "instruction": "Look at the two halves of the canvas: the rigid, vertical men versus the slumped, curved women. The painting is a diagram of a moral argument, not a scene."
+    },
+    "tags": [
+      "Neoclassicism",
+      "History",
+      "1700s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-monk-by-the-sea-1810",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Monk by the Sea (1810)",
+    "teaser": "A lone monk facing an almost empty horizon — sky, sea, sand, and one tiny figure. The painting reduces landscape to its absolute minimum, which is exactly why it terrified viewers at the time. Heinrich von Kleist called it 'the sublime in a state of stillness'. The monk's back is turned: we are meant to take his place.",
+    "imageUrl": "",
+    "byline": "Caspar David Friedrich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Monk by the Sea (1810) emptiness",
+      "durationMinutes": 8,
+      "instruction": "Look at how little is actually painted — the composition is almost empty, and the figure is a vertical dash. That emptiness is the subject; stand in the monk's place."
+    },
+    "tags": [
+      "Romanticism",
+      "Landscape",
+      "1800s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-kiss-1898",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Kiss (1898)",
+    "teaser": "Two lovers frozen mid-embrace, carved from white marble so smooth it looks wet. Rodin based it on Dante's Paolo and Francesca — lovers who were killed for their affair. The original stands in the Rodin Museum; the embrace is so complete that faces almost disappear into the stone.",
+    "imageUrl": "",
+    "byline": "Auguste Rodin",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Kiss (1898) marble carving",
+      "durationMinutes": 8,
+      "instruction": "Look at how the figures melt into each other — the marble is carved so the boundary between them blurs. Then walk around it: the composition changes from every angle."
+    },
+    "tags": [
+      "Sculpture",
+      "Romanticism",
+      "1800s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-balloon-dog-2013",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Balloon Dog (2013)",
+    "teaser": "A 10-foot steel sculpture of a balloon animal, polished to a mirror shine — one of five coloured editions, each a different colour. The orange version sold for $58.4 million, then the most expensive sculpture by a living artist. It looks like a child's party trick blown up to monumental scale, which is exactly the point.",
+    "imageUrl": "",
+    "byline": "Jeff Koons",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Balloon Dog (2013) mirrored surface",
+      "durationMinutes": 8,
+      "instruction": "Look at the reflections — the polished steel makes the sculpture a funhouse mirror of the room. Then walk around it: it reads as weightless metal, which it is not."
+    },
+    "tags": [
+      "Contemporary",
+      "Sculpture",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-brillo-box-1964",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Brillo Box (1964)",
+    "teaser": "Wooden boxes stacked like supermarket stock, screen-printed with the Brillo pad logo — indistinguishable from the real thing until you touch them. Warhol's point was that the factory and the gallery now made the same object. The philosopher Arthur Danto used it to ask what makes art art: 'the Brillo box' became philosophy's favourite example.",
+    "imageUrl": "",
+    "byline": "Andy Warhol",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Brillo Box (1964) up close",
+      "durationMinutes": 8,
+      "instruction": "Look at the difference between this and the real product — there is almost none, which is the point. Then consider: what did Warhol add by hand-making a factory object?"
+    },
+    "tags": [
+      "Pop Art",
+      "Sculpture",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-no-5-1948",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "No. 5, 1948",
+    "teaser": "A 2.4-metre web of dripped paint — beige, grey and red lines tangled so densely the surface looks like a map of weather. Pollock laid the canvas on the floor and poured from above, making the first 'action painting'. It sold for $140 million in 2006, then the most expensive painting ever.",
+    "imageUrl": "",
+    "byline": "Jackson Pollock",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "No. 5, 1948 (1948) drip structure",
+      "durationMinutes": 8,
+      "instruction": "Look at the depth — layers of drips overlap into a dense weave, not a flat pattern. Notice how the red cuts through the grey like a lightning strike."
+    },
+    "tags": [
+      "Abstract Expressionism",
+      "Painting",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-number-1a-1948",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Number 1A (1948)",
+    "teaser": "Pollock's breakthrough: the first painting where he abandoned the easel entirely and poured paint across a floor canvas — the moment abstract expressionism was born. Black and white enamel tangled with skeins of colour, the whole surface in motion. It entered MoMA in 1951 as the museum's first major Pollock purchase.",
+    "imageUrl": "",
+    "byline": "Jackson Pollock",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Number 1A (1948) poured-paint surface",
+      "durationMinutes": 8,
+      "instruction": "Look at the black enamel lines — they run on top of the colour like drawn ink. Then step back: the chaos resolves into a rhythm of loops and drips."
+    },
+    "tags": [
+      "Abstract Expressionism",
+      "Painting",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-bal-du-moulin-de-la-galette-1876",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Bal du moulin de la Galette (1876)",
+    "teaser": "A Sunday dance at a Montmartre windmill — friends, workers and dancers under dappled light, painted with the loose brushwork that made Renoir the Impressionists' most joyful member. The light filtering through the trees is the real subject: it falls on shoulders, hats and faces in scattered dots.",
+    "imageUrl": "",
+    "byline": "Pierre-Auguste Renoir",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Bal du moulin de la Galette (1876) light",
+      "durationMinutes": 10,
+      "instruction": "Look at the light patches — Renoir painted the shade of the trees as blobs of colour on clothes and faces. Then find the girl in blue at the front: she was a real laundress he knew."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-luncheon-on-the-grass-1863",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Luncheon on the Grass (1863)",
+    "teaser": "A nude woman picnicking with two fully dressed men — the painting that scandalized Paris and helped launch modern art. The figures are real people in a real setting, deliberately mismatched, with classical poses quoted from Raphael. The Salon rejected it; the public laughed at it; art never looked the same.",
+    "imageUrl": "",
+    "byline": "Édouard Manet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Luncheon on the Grass (1863) composition",
+      "durationMinutes": 8,
+      "instruction": "Look at the tonal logic: the woman's skin matches the man's shirt, and the fruit in the foreground echoes the nude. The outrage was the point — Manet wanted to provoke."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-third-class-carriage-1864",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Third-Class Carriage (1864)",
+    "teaser": "Working Parisians packed into a railway carriage — a grandmother, a nursing mother, exhausted labourers — painted with the empathy that made Daumier the century's great social observer. The light falls on the family's faces, not the crowd. It is one of the earliest paintings of the everyday poor as a serious subject.",
+    "imageUrl": "",
+    "byline": "Honoré Daumier",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Third-Class Carriage (1864) faces",
+      "durationMinutes": 8,
+      "instruction": "Look at the three generations in the foreground — the grandmother's face is carved by labour. Then notice how the crowd behind dissolves into shadow, keeping the family the focus."
+    },
+    "tags": [
+      "Realism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-erased-de-kooning-drawing-1953",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Erased de Kooning Drawing (1953)",
+    "teaser": "A drawing by Willem de Kooning that Rauschenberg erased — carefully, over a month, leaving only smudges in a gold frame. De Kooning gave him the drawing knowing it would be destroyed. It is one of the most radical gestures in art: the first conceptual artwork, where the act matters more than the object.",
+    "imageUrl": "",
+    "byline": "Robert Rauschenberg",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Erased de Kooning Drawing (1953) traces",
+      "durationMinutes": 8,
+      "instruction": "Look at the residue — faint graphite lines that were once a drawing. The frame is the museum case for a crime scene: the artwork is the absence itself."
+    },
+    "tags": [
+      "Conceptual Art",
+      "Drawing",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-dove-1949",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Dove (1949)",
+    "teaser": "A hanging mobile of cut steel and wire that drifts in the air currents — part sculpture, part weather vane. Calder invented the mobile in the 1930s, giving sculpture the one thing it never had: motion. This one hangs in the Museum of Modern Art, and its balance is so fine that a breath sets it moving.",
+    "imageUrl": "",
+    "byline": "Alexander Calder",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Dove (1949) mobile balance",
+      "durationMinutes": 8,
+      "instruction": "Look at how the painted shapes balance each other — each arm of the mobile is tuned like a scale. Then wait: the piece never hangs still twice."
+    },
+    "tags": [
+      "Kinetic Art",
+      "Sculpture",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-i-shop-therefore-i-am-1987",
+    "categoryId": "ARTWORKS",
+    "subtype": "Print",
+    "name": "Untitled (I Shop Therefore I Am) (1987)",
+    "teaser": "White-on-red text over a storefront hand — a slogan that reads like a corporate ad and hits like a diagnosis. Kruger's work pastes feminist critique into the visual language of advertising: big type, borrowed photographs, punchlines that bite. 'I shop therefore I am' remains her most quoted line.",
+    "imageUrl": "",
+    "byline": "Barbara Kruger",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Untitled (I Shop Therefore I Am) (1987) text",
+      "durationMinutes": 6,
+      "instruction": "Look at how the piece borrows advertising's exact look — red background, white type — so the critique lands inside the language it attacks."
+    },
+    "tags": [
+      "Conceptual Art",
+      "Print",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-bicycle-wheel-1913",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Bicycle Wheel (1913)",
+    "teaser": "A bicycle wheel mounted on a kitchen stool — the first 'readymade': a factory object declared art by an artist's choice. Duchamp made it not to be beautiful but to ask what art is. Spinning the wheel was the point: the movement was the sculpture. It changed art's question from 'how?' to 'why?'.",
+    "imageUrl": "",
+    "byline": "Marcel Duchamp",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Bicycle Wheel (1913) readymade",
+      "durationMinutes": 8,
+      "instruction": "Look at it as Duchamp did: the wheel and stool are nothing special — the art is the choice to put them together. Then spin the wheel; the motion is half the piece."
+    },
+    "tags": [
+      "Dada",
+      "Sculpture",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-lobster-telephone-1936",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Lobster Telephone (1936)",
+    "teaser": "A working telephone with a plaster lobster glued to the receiver — Dalí's surrealist joke about sexual frustration and communication. He chose the lobster because it looked like a phone's handset and was 'in love' with telephones. One version sits in the Tate; it famously still rings, when the museum lets it.",
+    "imageUrl": "",
+    "byline": "Salvador Dalí",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Lobster Telephone (1936) absurdity",
+      "durationMinutes": 6,
+      "instruction": "Look at the unlikely pairing — a crustacean and a telephone — and let the question sit: why does it feel like it should work? That unease is surrealism's engine."
+    },
+    "tags": [
+      "Surrealism",
+      "Sculpture",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-mae-west-lips-sofa-1937",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Mae West Lips Sofa (1937)",
+    "teaser": "A sofa shaped like the lips of actress Mae West, pink and pouting, designed by Dalí for his own living room. It was part of a whole room built around West's face. The lips are exactly the right size to sit on — the absurdity is that they're furniture. A surrealist's tribute to the most famous mouth in Hollywood.",
+    "imageUrl": "",
+    "byline": "Salvador Dalí",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Mae West Lips Sofa (1937) form",
+      "durationMinutes": 6,
+      "instruction": "Look at the scale — the lips are life-size, so sitting on them feels transgressive. Notice how the furniture's function makes the surrealism stick."
+    },
+    "tags": [
+      "Surrealism",
+      "Sculpture",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-angel-of-the-north-1998",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Angel of the North (1998)",
+    "teaser": "A 20-metre steel angel with wings angled like a plane's, standing over a Gateshead motorway — 200 tonnes of weathering steel with the footprint of a jumbo jet. Gormley based the pose on his own body. It is one of the most visited public sculptures in Britain, and its rusted colour is intentional: the steel is designed to oxidize.",
+    "imageUrl": "",
+    "byline": "Antony Gormley",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Angel of the North (1998) in situ",
+      "durationMinutes": 8,
+      "instruction": "Look at the wings' angle — tilted forward, not spread flat, so the angel reads as about to take off. Then notice the rust: it is the steel's protective coat, meant to be."
+    },
+    "tags": [
+      "Contemporary",
+      "Sculpture",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-kelpies-2013",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Kelpies (2013)",
+    "teaser": "Two 30-metre horse-head sculptures rising beside a canal in Falkirk — the largest equine sculptures in the world, each made of 600 tonnes of steel plates. They depict kelpies, shape-shifting water spirits from Scottish folklore. The heads are built from over 900 individual plates, each one curved like a living animal's hide.",
+    "imageUrl": "",
+    "byline": "Andy Scott",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Kelpies (2013) steel plates",
+      "durationMinutes": 8,
+      "instruction": "Look at how the plates are angled to catch light differently — the heads shimmer as you walk around them. Then notice the scale: the horse's eye is taller than a person."
+    },
+    "tags": [
+      "Contemporary",
+      "Sculpture",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-psyche-revived-1793",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Psyche Revived by Cupid's Kiss (1793)",
+    "teaser": "Cupid leaning over the sleeping Psyche, lifting her hair to wake her with a kiss — marble carved so finely that the cloth looks soft and the skin looks warm. Canova's neo-classical masterpiece is built like a spiral: walk around it and the embrace unfolds in a continuous line. It was commissioned by a British colonel who never took delivery.",
+    "imageUrl": "",
+    "byline": "Antonio Canova",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Psyche Revived by Cupid's Kiss (1793) spiral",
+      "durationMinutes": 10,
+      "instruction": "Look at the sculpture's spiral composition — from every angle the two bodies form a different continuous line. Then look at Psyche's hand: it reaches up to touch Cupid's face mid-dream."
+    },
+    "tags": [
+      "Neoclassicism",
+      "Sculpture",
+      "1790s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-rape-of-proserpina-1622",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Rape of Proserpina (1622)",
+    "teaser": "Pluto's hand gripping Proserpina's thigh so convincingly that the marble seems to dent — Bernini was 23 when he carved it. The abduction of Proserpina into the underworld explains winter in Greek myth. The sculpture's drama is the point: every muscle strained, every finger pressing into real flesh.",
+    "imageUrl": "",
+    "byline": "Gian Lorenzo Bernini",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Rape of Proserpina (1622) marble illusion",
+      "durationMinutes": 10,
+      "instruction": "Look at the fingers pressing into Proserpina's thigh — the marble is carved so the flesh appears to give way. That illusion of softness in hard stone is Bernini's whole game."
+    },
+    "tags": [
+      "Baroque",
+      "Sculpture",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-apollo-daphne-1625",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Apollo and Daphne (1625)",
+    "teaser": "The moment Daphne transforms into a laurel tree to escape Apollo — her fingers sprouting leaves, her legs turning to bark, her mouth opening mid-metamorphosis. Bernini carved the transition so finely that the stone seems to be changing as you watch. The sculpture is designed to be circled: the story unfolds as you walk.",
+    "imageUrl": "",
+    "byline": "Gian Lorenzo Bernini",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Apollo and Daphne (1625) transformation",
+      "durationMinutes": 10,
+      "instruction": "Look at the hands and feet — leaves growing from fingers, roots from toes. Then walk around the base: the chase and the transformation read as a sequence, not a still."
+    },
+    "tags": [
+      "Baroque",
+      "Sculpture",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-lion-of-lucerne-1821",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Lion of Lucerne (1821)",
+    "teaser": "A dying lion carved into a cliff face in Lucerne, a spear in its flank, mourning the Swiss Guards who fell defending the Tuileries in 1792. Mark Twain called it 'the most mournful and moving piece of stone in the world'. The 10-metre relief was carved directly into the sandstone of the quarry where the stone was cut.",
+    "imageUrl": "",
+    "byline": "Bertel Thorvaldsen",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Lion of Lucerne (1821) relief",
+      "durationMinutes": 8,
+      "instruction": "Look at the lion's face — grief rendered at monumental scale. Then notice the shield bearing the fleur-de-lis: the sculpture mourns a loyalty that ended in massacre."
+    },
+    "tags": [
+      "Neoclassicism",
+      "Sculpture",
+      "1800s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-mount-rushmore-1941",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Mount Rushmore (1941)",
+    "teaser": "Four presidents carved into a South Dakota mountain — Washington, Jefferson, Roosevelt and Lincoln — each face 18 metres tall, visible for miles. Borglum blew off 450,000 tons of rock with dynamite, then refined the faces with jackhammers. It took 14 years and the original plan called for the presidents down to their waists.",
+    "imageUrl": "",
+    "byline": "Gutzon Borglum",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Mount Rushmore (1941) carving technique",
+      "durationMinutes": 8,
+      "instruction": "Look at the scale: each face is the height of a six-storey building, and the eyes are large enough to hold a person. The granite was chosen because it weathers slowly."
+    },
+    "tags": [
+      "Public Art",
+      "Sculpture",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-christ-the-redeemer-1931",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "Christ the Redeemer (1931)",
+    "teaser": "The 30-metre Art Deco Christ on Corcovado mountain, watching over Rio de Janeiro — built from reinforced concrete and six million soapstone tiles, engineered by the French sculptor Landowski and the Brazilian Heitor da Silva Costa. The statue is struck by lightning several times a year and has been repaired repeatedly. It is one of the New Seven Wonders.",
+    "imageUrl": "",
+    "byline": "Paul Landowski",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Christ the Redeemer (1931) engineering",
+      "durationMinutes": 8,
+      "instruction": "Look at the outstretched arms — the span is 28 metres, wider than the statue is tall. Then notice the soapstone mosaic: thousands of tiles, each cut by hand to follow the body."
+    },
+    "tags": [
+      "Public Art",
+      "Sculpture",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-motherland-calls-1967",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Motherland Calls (1967)",
+    "teaser": "An 85-metre sword-wielding woman on the Volga — the tallest statue in the world when built, and still the tallest of a woman. She marks the site of the Battle of Stalingrad, the deadliest battle in history. The sword alone is 33 metres and weighs 14 tons. Engineers had to brace the figure's base after the foundations settled.",
+    "imageUrl": "",
+    "byline": "Yevgeny Vuchetich",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Motherland Calls (1967) scale",
+      "durationMinutes": 8,
+      "instruction": "Look at the figure's forward stride — she is stepping toward the Volga, calling the soldiers forward. Then look up: the raised sword makes the statue visible from kilometres away."
+    },
+    "tags": [
+      "Public Art",
+      "Sculpture",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-falling-soldier-1936",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "The Falling Soldier (1936)",
+    "teaser": "A Republican militiaman at the instant a bullet hits him — the most famous war photograph ever taken, and one of the most debated. Capa shot it on a Spanish hillside in 1936; sceptics later argued it was staged. Whoever is right, the image fixed the Spanish Civil War in the world's memory. The identity of the soldier was only established decades later.",
+    "imageUrl": "",
+    "byline": "Robert Capa",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Falling Soldier (1936) context",
+      "durationMinutes": 8,
+      "instruction": "Look at the falling body's geometry — the rifle, the arm, the ground all meeting at one point. Then read the debate: the photo's power survives even the doubt about its staging."
+    },
+    "tags": [
+      "Photography",
+      "War",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-raising-flag-iwo-jima-1945",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Raising the Flag on Iwo Jima (1945)",
+    "teaser": "Six Marines raising the Stars and Stripes on Mount Suribachi — the most reproduced photograph in American history, model for the Marine Corps War Memorial. Rosenthal shot it almost by instinct, then worried he'd missed it. Three of the six men died days later on the island. It won the Pulitzer and became a symbol of the Pacific war.",
+    "imageUrl": "",
+    "byline": "Joe Rosenthal",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Raising the Flag on Iwo Jima (1945) story",
+      "durationMinutes": 8,
+      "instruction": "Look at the composition — the pole's diagonal against the sky, the six men braced as one. Then read the caption drama: the photo was nearly never taken, and nearly misidentified after."
+    },
+    "tags": [
+      "Photography",
+      "War",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-vj-day-times-square-1945",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "V-J Day in Times Square (1945)",
+    "teaser": "A sailor kissing a nurse in Times Square on the day the war ended — the war's most joyful photograph, snapped by Eisenstaedt in seconds while scanning for a shot. Neither subject was ever reliably identified for decades; several sailors and nurses claimed the roles. The kiss was a stranger's impulse, frozen as a nation's release.",
+    "imageUrl": "",
+    "byline": "Alfred Eisenstaedt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "V-J Day in Times Square (1945) story",
+      "durationMinutes": 8,
+      "instruction": "Look at the spontaneity — the sailor's bent back, the nurse's lifted leg, everyone around them celebrating. Then consider the debate: who exactly they were stayed a mystery for fifty years."
+    },
+    "tags": [
+      "Photography",
+      "1940s",
+      "History"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-dali-atomicus-1948",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Dali Atomicus (1948)",
+    "teaser": "Salvador Dalí frozen mid-air beside a floating chair, three cats and a bucket of water — an image that took six hours and 28 attempts, with assistants throwing cats and water on cue. The photograph was a response to the atomic age: everything hovering, nothing touching. The final print shows the thrown water and the cats' terror mid-flight.",
+    "imageUrl": "",
+    "byline": "Philippe Halsman",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Dali Atomicus (1948) outtakes",
+      "durationMinutes": 8,
+      "instruction": "Look at what is airborne — Dalí, the chair, the easel, the cats, the water — everything defying gravity. Then know: it took 28 takes and the studio was soaked by the time it worked."
+    },
+    "tags": [
+      "Photography",
+      "Surrealism",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-burning-monk-1963",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "The Burning Monk (1963)",
+    "teaser": "Thích Quảng Đức, a Buddhist monk, immolating himself in a Saigon intersection to protest the South Vietnamese government's persecution of Buddhists. Associated Press photographer Malcolm Browne's image circled the world within hours. President Kennedy later said the photo influenced US policy more than any report. It won the Pulitzer and is among the century's most consequential images.",
+    "imageUrl": "",
+    "byline": "Malcolm Browne",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Burning Monk (1963) story",
+      "durationMinutes": 8,
+      "instruction": "Look at the stillness of the figure amid the flames — the monk does not move as the fire takes him. Then read what came after: the image changed the course of a war."
+    },
+    "tags": [
+      "Photography",
+      "History",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-earthrise-1968",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "Earthrise (1968)",
+    "teaser": "The Earth rising over the Moon's horizon, photographed from Apollo 8 — the first time humans saw their whole planet from another world. The crew were orbiting the Moon when the sight appeared; Anders grabbed a camera with colour film on impulse. The image helped birth the environmental movement: a fragile blue marble in black space.",
+    "imageUrl": "",
+    "byline": "William Anders",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Earthrise (1968) story",
+      "durationMinutes": 8,
+      "instruction": "Look at the contrast — the grey lunar horizon against the blue-white Earth. Then sit with the effect: no one had seen this before, and it changed how we see home."
+    },
+    "tags": [
+      "Photography",
+      "Space",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-blue-marble-1972",
+    "categoryId": "ARTWORKS",
+    "subtype": "Photograph",
+    "name": "The Blue Marble (1972)",
+    "teaser": "The full Earth, cloud-swirled and sunlit, photographed from 45,000 kilometres away by the Apollo 17 crew — the last time humans travelled far enough to see the whole planet in one frame. It became the most reproduced photograph in history, the icon of the environmental era. It was taken, almost casually, on the mission's way out.",
+    "imageUrl": "",
+    "byline": "NASA (Apollo 17 crew)",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Blue Marble (1972) story",
+      "durationMinutes": 8,
+      "instruction": "Look at the weather systems — the swirls are real storms wrapping the planet. Then notice: no human has seen this exact view since 1972."
+    },
+    "tags": [
+      "Photography",
+      "Space",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-water-lilies-1916",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Water Lilies (1916)",
+    "teaser": "One panel from Monet's obsessive final project: the lily pond at Giverny, painted hundreds of times as his eyesight failed. The surface dissolves into pure colour — reflections of sky, willow and cloud mixed with the pads. Monet gave a set of the giant panels to France as a peace offering after the First World War; they hang in the Orangerie in a curved room.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Water Lilies (1916) surface",
+      "durationMinutes": 8,
+      "instruction": "Look at the painting's surface as water — there is no horizon, no sky, just reflection. Monet painted the same pond for thirty years as it became less a place and more an idea."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1900s"
+    ],
+    "tier": 1
   }
 ]
