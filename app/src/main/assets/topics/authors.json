@@ -13391,5 +13391,505 @@
    "20th century"
   ],
   "tier": 1
+ },
+ {
+  "id": "author-louise-gluck",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Louise Glück",
+  "teaser": "The poet who won the Nobel Prize in 2020 — her work (The Wild Iris, Ararat, Meadowlands) retells myth and family with a spare, devastating voice. She began as a precocious teenager in workshops, struggled with anorexia, and made her illness into her material. She taught at Yale and was Poet Laureate of the United States. The Wild Iris, her book of poems spoken to and by God, is her masterpiece. She died in 2023.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Wild Iris — the poems of Louise Glück",
+   "durationMinutes": 120,
+   "instruction": "Read the sequence in The Wild Iris — flowers speak to God, God answers, and the garden becomes theology. Glück's plainness is the hardest-won style in modern poetry."
+  },
+  "tags": [
+   "American",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-sharon-olds",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Sharon Olds",
+  "teaser": "The poet of the body — her poems about her parents, her children and her own flesh ('The Dead and the Living') made confessional poetry visceral and won the Pulitzer for Stag's Leap, her book about her divorce. She was New York State Poet Laureate and founded the creative writing program at NYU. Her frankness about family and sex scandalized and liberated readers. She is the most direct poet of her generation.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Stag's Leap — the poems of the divorce",
+   "durationMinutes": 120,
+   "instruction": "Read the opening poems of Stag's Leap — the divorce told from the wife's side, with the title as the animal metaphor. Olds's honesty is total, and the Pulitzer committee agreed."
+  },
+  "tags": [
+   "American",
+   "Poetry",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-billy-collins",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Billy Collins",
+  "teaser": "The most popular American poet of his generation — as Poet Laureate 2001-03, he made poetry approachable with his funny, conversational poems ('Introduction to Poetry', 'The Lanyard'). He hosts the Poetry 180 program for schools and has sold more poetry books than almost any living poet. Critics sometimes sniff; readers keep buying. His poems are the doorway into poetry for millions.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Sailing Alone Around the Room — the poems of Billy Collins",
+   "durationMinutes": 120,
+   "instruction": "Read 'Introduction to Poetry' — the poem about how readers should not torture poems. Then 'The Lanyard', where a mother's gift of a lanyard outweighs all gratitude. Collins's lightness hides real depth."
+  },
+  "tags": [
+   "American",
+   "Poetry",
+   "21st century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-john-ashbery",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "John Ashbery",
+  "teaser": "The most influential American poet of the late century — his Self-Portrait in a Convex Mirror (1975) won all three major prizes, and his long, drifting, collage-like poems ('Flow Chart') redefined what a poem could be. He was also an art critic for New York magazine. His poems are notoriously difficult and secretly funny; he said he wanted his poems to be 'as fresh and surprising as a dream'. He died in 2017, the elder statesman of the avant-garde.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Self-Portrait in a Convex Mirror — the poems of John Ashbery",
+   "durationMinutes": 180,
+   "instruction": "Read the title poem — a meditation on a Parmigianino painting that becomes a meditation on consciousness. Ashbery's sentences wander into meaning like water finding its level."
+  },
+  "tags": [
+   "American",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-frank-ohara",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Frank O'Hara",
+  "teaser": "The poet of New York and of the everyday — his 'I do this, I do that' poems ('Having a Coke with You', 'The Day Lady Died') treat lunch, movies and friends as material for art. He worked as a curator at MoMA and was the center of the New York School. He was killed at 40, run over by a dune buggy on Fire Island. His Lunch Poems (1964) remain the most alive poetry of the mid-century.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Lunch Poems — the poems of Frank O'Hara",
+   "durationMinutes": 90,
+   "instruction": "Read 'The Day Lady Died' — the poem of a lunch hour that ends with the news of Billie Holiday's death. O'Hara's casualness is the art; the poem is a walk through New York that becomes an elegy."
+  },
+  "tags": [
+   "American",
+   "Poetry",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-allen-ginsberg",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Allen Ginsberg",
+  "teaser": "The poet of Howl (1956) — the poem that was put on trial for obscenity and won, freeing American literature. Ginsberg was the bard of the Beats, the friend of Kerouac and Burroughs, a Buddhist and a gay pioneer who wrote 'A Supermarket in California' and 'Kaddish', his elegy for his mother. He read at the 1967 Human Be-In, marched against the war, and remained America's public poet until his death in 1997.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Howl and Other Poems — the poem that won its trial",
+   "durationMinutes": 120,
+   "instruction": "Read the first section of Howl aloud — 'I saw the best minds of my generation destroyed by madness' — then read about the obscenity trial that made the poem a landmark of free speech."
+  },
+  "tags": [
+   "American",
+   "Beat",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-william-burroughs",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "William S. Burroughs",
+  "teaser": "The cut-up writer of Naked Lunch (1959) — the novel that survived its own obscenity trial and became the Beat Generation's dark bible. Burroughs was a Harvard heir, a heroin addict, and an accidental killer (he shot his wife in a William Tell game in Mexico City). His cut-up method — slicing texts and rearranging — influenced everyone from the Beatles to David Bowie. He was the most dangerous mind of the Beats and died in 1997.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Naked Lunch — the novel of the virus",
+   "durationMinutes": 180,
+   "instruction": "Read the opening and surrender — Burroughs's novel has no plot, only a fever of addiction, control and horror. The obscenity trial that followed its publication is a landmark of free expression."
+  },
+  "tags": [
+   "American",
+   "Beat",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-joan-didion",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Joan Didion",
+  "teaser": "The essayist of California and of grief — her Slouching Towards Bethlehem (1968) defined New Journalism, and The Year of Magical Thinking (2005), about the sudden death of her husband, won the National Book Award. She wrote about the counterculture, the Manson murders, and her own collapse with a cool that became the model of American prose. She died in 2021; her sunglasses are now in a museum.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Year of Magical Thinking — the memoir of grief",
+   "durationMinutes": 180,
+   "instruction": "Read the opening pages — Didion describes the ordinary moment her husband died, and the magical thinking that followed. The book is grief made prose, and it won every prize."
+  },
+  "tags": [
+   "American",
+   "Essay",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-susan-sontag",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Susan Sontag",
+  "teaser": "The intellectual of the image — her Against Interpretation (1966), On Photography (1977) and Illness as Metaphor (1978) changed how we think about art, cameras and disease. She wrote novels too, and her essay on the Iraq war, 'Regarding the Torture of Others', was a landmark. She was a New York intellectual of the old school, famous and fiercely argued with. She died in 2004 of cancer, which she wrote about in Illness as Metaphor and its sequel.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "On Photography — the book about what cameras do",
+   "durationMinutes": 180,
+   "instruction": "Read the first essay — Sontag argues that to photograph is to appropriate, and that photographs have changed the meaning of reality. The book is 50 years old and more true every year."
+  },
+  "tags": [
+   "American",
+   "Essay",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-harriet-beecher-stowe",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Harriet Beecher Stowe",
+  "teaser": "The author of Uncle Tom's Cabin (1852) — the novel that Abraham Lincoln reportedly called 'the book that started this great war'. It was the best-selling novel of the 19th century and the most powerful piece of abolitionist propaganda ever written. Stowe was a preacher's daughter and mother of seven who wrote the book in installments. Its title character's name became a slur, a bitter irony for a novel that humanized the enslaved. She died in 1896.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Uncle Tom's Cabin — the novel that changed a nation",
+   "durationMinutes": 300,
+   "instruction": "Read the opening and feel the book's power — Stowe's novel made slavery's cruelty vivid to millions of readers. Lincoln's greeting to her in 1862 — 'so this is the little lady who made this big war' — is the most famous author anecdote in American history."
+  },
+  "tags": [
+   "American",
+   "Novel",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-louisa-may-alcott",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Louisa May Alcott",
+  "teaser": "The author of Little Women (1868) — the novel of the four March sisters that has never been out of print and is a founding text of American girlhood. Alcott wrote it in six weeks at her publisher's request, based on her own family; Jo March is her. She was also a nurse in the Civil War, wrote thrillers under a pen name to pay the bills, and supported her family her whole life. She never married and died in 1888, two days after her father.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Little Women — the novel of the four sisters",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters and meet Meg, Jo, Beth and Amy — Alcott wrote the book in six weeks, and Jo March, the tomboy writer, is the author herself. The sequel, Good Wives, is part of the same volume."
+  },
+  "tags": [
+   "American",
+   "Children",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-harriet-jacobs",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Harriet Jacobs",
+  "teaser": "The author of Incidents in the Life of a Slave Girl (1861) — the first autobiography by an enslaved woman in America, published under the pseudonym Linda Brent. Jacobs hid for seven years in a crawlspace above her grandmother's shed to escape her enslaver, then escaped north. Her account of the sexual predation of slavery was doubted by white abolitionists until historians confirmed it. She worked as a nurse and abolitionist in the North.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Incidents in the Life of a Slave Girl — the memoir of the crawlspace",
+   "durationMinutes": 240,
+   "instruction": "Read the chapters of the seven years in the garret — Jacobs's account of hiding to save her children is the most harrowing and most necessary American autobiography. She wrote it herself, which was the controversy."
+  },
+  "tags": [
+   "American",
+   "Memoir",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-frederick-douglass",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Frederick Douglass",
+  "teaser": "The escaped slave who became the most photographed American of the 19th century — his Narrative (1845) is the great American autobiography, and his speeches ('What to the Slave Is the Fourth of July?') are among the most powerful oratory in the language. He taught himself to read against the law, escaped by train, and became an abolitionist, editor and diplomat. He was the most famous Black American of his century and died in 1895.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Narrative of the Life of Frederick Douglass",
+   "durationMinutes": 180,
+   "instruction": "Read the chapters on learning to read — the master's wife teaches him, then is forbidden, and Douglass learns anyway from the white boys. The book is freedom made prose."
+  },
+  "tags": [
+   "American",
+   "Memoir",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-web-du-bois",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "W.E.B. Du Bois",
+  "teaser": "The scholar who founded Black sociology — The Souls of Black Folk (1903) coined the concept of 'double consciousness' and the phrase 'the color line', and his monumental Black Reconstruction (1935) rewrote the history of the era. He was the first Black man to earn a Harvard PhD, a founder of the NAACP, and the editor of The Crisis. He moved to Ghana at 93 and died there in 1963, the day before the March on Washington.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Souls of Black Folk — the book of double consciousness",
+   "durationMinutes": 240,
+   "instruction": "Read the first chapters — 'The problem of the twentieth century is the problem of the color line'. Du Bois's prose is the most eloquent in American social thought."
+  },
+  "tags": [
+   "American",
+   "Essay",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-malcolm-x",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Malcolm X",
+  "teaser": "The Autobiography of Malcolm X (1965), as told to Alex Haley, is one of the great American life stories — from street hustler to Nation of Islam minister to, in his last year, a man who broke with the Nation and was assassinated at 39. The book's ending, written with Haley while the assassins were closing in, is the most moving final chapter in American autobiography. His daughter and the film adaptation by Spike Lee kept the story alive.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Autobiography of Malcolm X — the life story",
+   "durationMinutes": 300,
+   "instruction": "Read the early chapters of his hustling years in Boston and Harlem — the book's power is the arc: the con man becomes the minister becomes the pilgrim. The final chapter, written days before his death, is unbearable."
+  },
+  "tags": [
+   "American",
+   "Memoir",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-mlk",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Martin Luther King Jr.",
+  "teaser": "The leader of the American civil rights movement — his 'Letter from Birmingham Jail' (1963) and 'I Have a Dream' speech are among the greatest American documents, and his books (Stride Toward Freedom, Where Do We Go from Here) are the movement's theology. He was assassinated in 1968 at 39. His philosophy of nonviolence was rooted in Gandhi and the black church. He was awarded the Nobel Peace Prize at 35, the youngest winner at the time.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Why We Can't Wait — the book of the Birmingham campaign",
+   "durationMinutes": 240,
+   "instruction": "Read the Letter from Birmingham Jail in full — written on the margins of a newspaper in a cell, it answers the clergy who called his protests untimely. The letter is the movement's mind."
+  },
+  "tags": [
+   "American",
+   "Civil Rights",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-arthur-rimbaud",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Arthur Rimbaud",
+  "teaser": "The prodigy who stopped writing at 20 — Rimbaud wrote all his poetry as a teenager, including 'Le Bateau ivre' (The Drunken Boat) and A Season in Hell, then abandoned literature for gun-running in Africa. He was Verlaine's lover and the subject of the most famous literary scandal of the century (Verlaine shot him in the wrist). He died at 37 of cancer in Marseille. His 'dérèglement de tous les sens' (derangement of all the senses) became the charter of modern poetry.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "A Season in Hell — the memoir of the visionary",
+   "durationMinutes": 150,
+   "instruction": "Read 'The Drunken Boat' — the poem of a boat running wild on the seas, written when Rimbaud was 17. Then the prose of A Season in Hell, which he called his 'farewell to literature'."
+  },
+  "tags": [
+   "French",
+   "Poetry",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-paul-verlaine",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Paul Verlaine",
+  "teaser": "The poet of music — his Romances sans paroles and Fêtes galantes made poetry almost purely musical, and his affair with Rimbaud and his shooting of him made him notorious. He was a civil servant who drank, served prison time, and wrote some of the most delicate poems in French ('Il pleure dans mon cœur'). He was elected 'Prince of Poets' in 1894. He died in 1896, mourned by the poets he had influenced.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Romances sans paroles — the poems of Verlaine",
+   "durationMinutes": 90,
+   "instruction": "Read 'Il pleure dans mon cœur' — the poem of rain as the heart's weeping. Verlaine's art is suggestion; he said 'music before everything'."
+  },
+  "tags": [
+   "French",
+   "Poetry",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-stephan-mallarme",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Stéphane Mallarmé",
+  "teaser": "The most hermetic of the French symbolists — his poem 'Un coup de dés' (A Roll of the Dice, 1897) scattered words across the page and is the ancestor of concrete poetry and every experimental text since. He was a schoolteacher who hosted the famous Tuesday salons of Paris. His 'L'Après-midi d'un faune' became Debussy's orchestral prelude. He said poetry was the language reduced to its essential state. He died in 1898.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Un coup de dés — the poem printed as a constellation",
+   "durationMinutes": 120,
+   "instruction": "Read the facsimile of the poem — the type sizes and page layout are the meaning. Mallarmé said the poem was 'a constellation' and it changed typography forever."
+  },
+  "tags": [
+   "French",
+   "Poetry",
+   "19th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-andre-breton",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "André Breton",
+  "teaser": "The pope of surrealism — his Manifesto of Surrealism (1924) defined the movement ('pure psychic automatism'), and his novel Nadja (1928) is the surrealist masterpiece of walking through Paris with a mysterious woman. He was a doctor who treated shell shock in World War I, which convinced him of the unconscious. He quarreled with everyone (he expelled members for political disagreements) and remained the movement's center until his death in 1966.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Nadja — the novel of the surreal encounter",
+   "durationMinutes": 180,
+   "instruction": "Read the opening pages and feel the method — Breton describes his walks through Paris and his meeting with Nadja, who may be mad or may be the point. The book is philosophy as a walk."
+  },
+  "tags": [
+   "French",
+   "Surrealism",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-georges-perec",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Georges Perec",
+  "teaser": "The novelist of constraint — his Life: A User's Manual (1978) builds a Paris apartment building through 99 chapters of interlocking stories, and his novel La Disparition (1969) was written entirely without the letter 'e'. He was an orphan of the Holocaust (his parents died in the camps) who turned loss into games. He also wrote the famous 'I remember' lists. He died at 45 in 1982. He is the most playful serious writer of the century.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Life: A User's Manual — the novel of the building",
+   "durationMinutes": 360,
+   "instruction": "Read the first chapters and meet the tenants of 11 Rue Simon-Crubellier — Perec's novel is structured like a knight's tour of a chessboard, and every apartment contains a life. The 'e'-less novel is the same author's impossible feat."
+  },
+  "tags": [
+   "French",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-michel-montaigne",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Michel de Montaigne",
+  "teaser": "The inventor of the essay — his Essays (1580) created the form as a way of thinking on the page, and his 'Que sais-je?' ('What do I know?') is the motto of skepticism. He was a French nobleman and mayor of Bordeaux who retired to his tower to write about himself, and in writing about himself he wrote about everyone. His essay 'Of Cannibals' argues that 'barbarians' are not the ones he expected. He died in 1592.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Essays of Montaigne — the book of the self",
+   "durationMinutes": 240,
+   "instruction": "Read 'Of Cannibals' — Montaigne's argument that the Tupinambá are more civilized than Europeans is the founding document of cultural relativism. Then read any essay; the form is the freedom."
+  },
+  "tags": [
+   "French",
+   "Essay",
+   "16th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-blaise-pascal",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Blaise Pascal",
+  "teaser": "The mathematician-philosopher of the Pensées — his unfinished book of fragments (1670) contains the 'wager' on God's existence and the line 'the heart has its reasons which reason knows nothing of'. He built one of the first calculating machines, pioneered probability, and then had a mystical vision in 1654 that turned him to religion. His Provincial Letters are the first great modern polemic. He died at 39, his Pensées unfinished.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Pensées — the fragments of Pascal",
+   "durationMinutes": 180,
+   "instruction": "Read the fragments in any order — the wager is the most famous: if God exists you gain everything by believing; if not, you lose little. Pascal's mathematics and his faith meet in the fragments."
+  },
+  "tags": [
+   "French",
+   "Philosophy",
+   "17th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-eugene-ionesco",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Eugène Ionesco",
+  "teaser": "The playwright of the absurd — his The Bald Soprano (1950) and Rhinoceros (1959) made nonsense a dramatic form. He was a Romanian who moved to Paris and said his first play was written when he tried to learn English from a phrasebook — the platitudes became the dialogue. Rhinoceros, about a town turning into rhinoceroses, is his allegory of fascism. He was elected to the Académie française, the absurdist who became an institution. He died in 1994.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Rhinoceros — the play of the town turning into beasts",
+   "durationMinutes": 150,
+   "instruction": "Read the first act — one rhinoceros passes, then another, and the townspeople argue about it. Ionesco's allegory of conformity was written after watching his hometown embrace fascism."
+  },
+  "tags": [
+   "French",
+   "Drama",
+   "20th century"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "author-kawabata-yasunari",
+  "categoryId": "AUTHORS",
+  "subtype": "Author",
+  "name": "Kawabata Yasunari",
+  "teaser": "The first Japanese Nobel laureate in literature (1968) — his Snow Country (1948), Thousand Cranes and The Old Capital are masterpieces of a prose so delicate it is almost silence. He was an orphan who wrote of beauty and loneliness, and he took his own life in 1972 by gas, leaving no note. The Palm-of-the-Hand Stories, his miniatures, are among the most perfect short works in any language. His influence on modern Japanese prose is total.",
+  "imageUrl": "",
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Snow Country — the novel of the mountain resort",
+   "durationMinutes": 180,
+   "instruction": "Read the first pages and feel the snow — the novel opens with the train through the tunnel. Kawabata's prose is the finest in modern Japanese, and his love story of the geisha and the dilettante is its purest example."
+  },
+  "tags": [
+   "Japanese",
+   "Novel",
+   "20th century"
+  ],
+  "tier": 1
  }
 ]
