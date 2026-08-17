@@ -129,6 +129,7 @@ import com.curio.app.data.SmartDensityMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -1014,7 +1015,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     val onSpinClick: () -> Unit = {
         if (TourController.consumeTap("spin")) {
             TourController.routeForCurrentStep()?.let { nextRoute ->
-                navController.navigate(nextRoute) { launchSingleTop = true }
+                // v123 — the tour's tab steps go through navigateToQuestRoute
+                // (navigateToTab for tabs) so HOME is never left out of the
+                // saved-state map — a plain push there made the later
+                // Home-tab tap restore the popped Spin stack instead of
+                // navigating (see CurioNavHost's tour comment).
+                navController.navigateToQuestRoute(nextRoute)
             }
         } else if (!shuffling && filteredPool.isNotEmpty()) {
             shuffleCount++

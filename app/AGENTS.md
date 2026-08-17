@@ -546,6 +546,39 @@ app/src/main/java/com/curio/app/
   on this project's Compose classpath (despite the 2026.05.01 BOM), so
   the manual length-based font steps are the shipped approach. Do NOT
   reintroduce TextAutoSize without first confirming it resolves.
+- **v123 — tour tab steps navigate like REAL tab switches; drawer name
+  lines; pet teleport/chameleon/auto-flow.** (1) **FIX — skipping the
+  tour on the Spin page made the Home tab "dead" afterwards.** Root
+  cause (read from Navigation 2.9.8's `NavControllerImpl.navigate`,
+  not a guess): `navigateToTab` calls
+  `navigate(route){ popUpTo(HOME){ saveState=true }; launchSingleTop;
+  restoreState }`. The tour previously PUSHED Spin with a plain
+  `navigate("spin")` (no popUpTo), so HOME never entered the
+  controller's `backStackMap`. The first Home-tab tap after the skip
+  then popped Spin with `saveState=true` — which maps the popped stack
+  UNDER HOME's key — and `restoreState=true` immediately RESTORED that
+  stack, landing back on Spin (the tap looks dead). In the normal flow
+  the first `navigateToTab` plants a NULL mapping for HOME (its no-op
+  popUpTo saveState), so the later Home restore is a no-op — that's why
+  only the tour-created Spin stack broke. FIX: all THREE tour
+  navigation sites (`CurioNavHost.advanceTourAndNavigate`, SpinScreen's
+  `onSpinClick` consumeTap, HomeScreen's quest-card consumeTap) now use
+  `navigateToQuestRoute` (tabs → `navigateToTab`, pushes stay plain).
+  RULE: never plain-`navigate` a TAB route (Spin/Cabinet) from the tour
+  — use `navigateToTab`/`navigateToQuestRoute`, or the Home tab
+  self-restores the tab you left. (2) **Drawer greeting:** the "Spin
+  it. Explore it. Capture it." tagline is GONE; the first name stays in
+  the greeting position ("Hi First") and the remaining name parts
+  (middle, last) render one per line at the tagline's old size
+  (`bodyMedium`, alpha 0.78) in its spot — a long name reads on its own
+  lines instead of one ellipsized greeting. (3) **Pet:** random LONG
+  teleports (`walkTo`'s `LONG_JUMP_FRACTION` branch) now `burstPoof` at
+  the old spot, `delay(160)`, teleport, then poof again at the target —
+  no more instant snap; the chameleon game POOFS and teleports to a
+  random on-screen spot BEFORE fading to its ghost outline (was: fade
+  in place); and the idle AUTO-FLOW scheduler only picks
+  `HIDE_SEEK`/`CHAMELEON` — star-catch (a 10s round) stays reachable
+  via game mode's cycle + manual taps, never the auto-flow.
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

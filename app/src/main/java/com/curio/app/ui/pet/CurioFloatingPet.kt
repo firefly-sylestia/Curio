@@ -682,7 +682,14 @@ fun CurioFloatingPet(
                     maxOf(maxW, maxH) * LONG_JUMP_FRACTION
                 ) {
                     if (dragged || gliding || !CurioPet.awake) return
+                    // v123 — long random teleports POOF instead of snapping:
+                    // a burst at the old spot, a short beat so the vanish
+                    // reads, then the pet reappears at the target with a
+                    // fresh burst (the squish stays as the landing pop).
+                    burstPoof(pos)
+                    delay(160)
                     pos = target
+                    burstPoof(pos)
                     squishKey++
                     return
                 }
@@ -772,15 +779,24 @@ fun CurioFloatingPet(
             }
 
             /**
-             * v120 — CHAMELEON: the pet fades into the background IN PLACE
-             * and waits up to 5s to be found; tap the ghost to win, drag to
-             * grab it. Missed — it fades out, poofs to a fresh edge and
-             * returns with a flourish.
+             * v120 — CHAMELEON: the pet fades into the background and waits
+             * up to 5s to be found; tap the ghost to win, drag to grab it.
+             * v123 — it POOFS and teleports to a fresh random spot FIRST,
+             * then camouflages in place there (no more fading in place).
+             * Missed — it fades out, poofs to a fresh edge and returns with
+             * a flourish.
              */
             suspend fun playChameleon() {
                 CurioPet.notePlay(context, react = false)
                 if (CurioPet.shouldSpeak(0.6f)) queueReaction(CurioPet.findMePromptLine())
                 squishKey++
+                // Poof out where it stands, hop to a random on-screen spot,
+                // then fade to the ghost outline there.
+                burstPoof(pos)
+                val hideX = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                val hideY = marginPx + Random.nextFloat() * (maxH - petPx - 2 * marginPx).coerceAtLeast(0f)
+                pos = Offset(hideX, hideY)
+                burstPoof(pos)
                 chameleonAlpha.snapTo(1f)
                 chameleonAlpha.animateTo(0.12f, tween(420, easing = FastOutSlowInEasing))
                 delay(320)
@@ -1467,7 +1483,11 @@ fun CurioFloatingPet(
                 if (watching || CurioPet.spinning) continue
                 if (TourController.currentStep != null) continue
                 if (System.currentTimeMillis() - lastGameAt < GAME_MIN_SPACING_MS) continue
-                gameRequest = PetGame.entries.random()
+                // v123 — the idle auto-flow only picks hide-and-seek and
+                // chameleon (the pet never runs a 10s star round on its own);
+                // star-catch stays reachable via game mode's cycle and manual
+                // taps.
+                gameRequest = listOf(PetGame.HIDE_SEEK, PetGame.CHAMELEON).random()
             }
         }
 

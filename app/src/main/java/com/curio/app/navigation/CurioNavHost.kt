@@ -768,7 +768,17 @@ fun CurioNavHost(
             TourController.advance()
             val nextRoute = TourController.routeForCurrentStep()
             if (nextRoute != null && nextRoute != currentRoute) {
-                navController.navigate(nextRoute) { launchSingleTop = true }
+                // v123 — tab steps (Spin / Cabinet) must navigate like REAL
+                // tab switches (navigateToTab), never a plain push. A plain
+                // `navigate("spin")` left HOME out of the NavController's
+                // saved-state map, so the next Home-tab tap ran
+                // popUpTo(HOME){saveState} (which maps the popped stack to
+                // HOME) + restoreState (which then RESTORED that stack) —
+                // landing back on Spin and making "Home" look dead after
+                // skipping the tour there. navigateToTab plants HOME's
+                // null mapping on its first popUpTo, so the later Home tap
+                // restores nothing (see CurioRoutes.navigateToTab).
+                navController.navigateToQuestRoute(nextRoute)
             } else if (wasLastStep) {
                 // Tour finished — the tour always starts on the Home hub, so
                 // pop the whole tour stack back to Home (a clean finish

@@ -113,6 +113,7 @@ import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.features.recent.RecentFeedItem
 import com.curio.app.features.recent.buildRecentFeed
@@ -721,7 +722,13 @@ fun HomeScreen(navController: NavController) {
                         onShuffle = {
                             if (TourController.consumeTap("quest")) {
                                 TourController.routeForCurrentStep()?.let { nextRoute ->
-                                    navController.navigate(nextRoute) { launchSingleTop = true }
+                                    // v123 — the tour's tab steps navigate via
+                                    // navigateToQuestRoute so HOME stays in the
+                                    // NavController's saved-state map; a plain
+                                    // push made the later Home-tab tap restore
+                                    // the popped Spin stack ("Home dead" after
+                                    // skipping the tour on Spin).
+                                    navController.navigateToQuestRoute(nextRoute)
                                 }
                             } else {
                                 // v7.94 — shuffle only VISIBLE lanes: hidden
@@ -2086,7 +2093,16 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 // resort). The manual steps avoid the
                                 // TextAutoSize API, which isn't resolvable on
                                 // this project's Compose classpath.
-                                val greeting = "Hi $displayName"
+                                // v123 — the "Spin it. Explore it. Capture
+                                // it." tagline is GONE: the first name stays
+                                // in the greeting's position, and the middle +
+                                // last names fill the tagline's spot at the
+                                // tagline's size (bodyMedium), so a long name
+                                // reads on its own lines instead of one
+                                // ellipsized greeting.
+                                val nameParts = displayName.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+                                val firstName = nameParts.firstOrNull() ?: displayName
+                                val greeting = "Hi $firstName"
                                 val greetingStyle = when {
                                     greeting.length <= 16 -> MaterialTheme.typography.headlineMedium
                                     greeting.length <= 26 -> MaterialTheme.typography.titleLarge
@@ -2099,13 +2115,15 @@ private fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                Text(
-                                    "Spin it. Explore it. Capture it.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = drawerInk.copy(alpha = 0.78f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                                nameParts.drop(1).forEach { part ->
+                                    Text(
+                                        part,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = drawerInk.copy(alpha = 0.78f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
                         }
                     }
