@@ -14572,5 +14572,824 @@
       "1900s"
     ],
     "tier": 1
+  },
+  {
+    "id": "artw-supper-at-emmaus-1601",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Supper at Emmaus (1601)",
+    "teaser": "The moment two disciples recognize the risen Christ — and the table explodes: the basket tips, the man lunges, and light blasts from Christ's bare head. Caravaggio painted the scene as a street-level miracle in a dark inn, not a heavenly vision. The realism — dusty clothes, cracked bread, an innkeeper who has no idea what's happening — is the point.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Supper at Emmaus (1601) light",
+      "durationMinutes": 8,
+      "instruction": "Look at the light source: it comes from Christ himself, not the window. Then notice the still-life — the fruit basket teeters at the table's edge, a moment away from spilling."
+    },
+    "tags": [
+      "Baroque",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-cardsharps-1594",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Cardsharps (1594)",
+    "teaser": "A naive boy losing a card game to a cheat who signals his partner from behind — painted when Caravaggio was in his early twenties and broke. The picture is a manual of deception: the cheat hides a card behind his back while the older man peers at the boy's hand. It made Caravaggio's name and invented the genre of low-life scenes.",
+    "imageUrl": "",
+    "byline": "Caravaggio",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Cardsharps (1594) details",
+      "durationMinutes": 8,
+      "instruction": "Look at the three faces — each tells a different story of the same game. Then find the hidden card and the finger signals: the painting is a crime diagram."
+    },
+    "tags": [
+      "Baroque",
+      "Painting",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-return-of-prodigal-1678",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Return of the Prodigal Son (1668)",
+    "teaser": "The father's hands on his returned son's shoulders — one hand strong, one hand soft, a lifetime of forgiveness in a single gesture. Rembrandt painted it near the end of his life, broke and bereaved, and it shows: the light falls only on the embrace. The elder brother stands apart in shadow, excluded by his own resentment.",
+    "imageUrl": "",
+    "byline": "Rembrandt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Return of the Prodigal Son (1668) hands",
+      "durationMinutes": 10,
+      "instruction": "Look at the father's two hands — different pressures, different meanings. Then notice the composition: every figure is still, and the whole painting rests on one gesture."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-jewish-bride-1665",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Jewish Bride (1665)",
+    "teaser": "A couple so absorbed in each other that the viewer is a trespasser — his hand flat on her breast, her hand covering his. The title is a guess; the subjects are unknown. Rembrandt painted the cloth with such thick strokes that the robe's gold seems to glow from within. Van Gogh said he'd give ten years of his life to sit and stare at it.",
+    "imageUrl": "",
+    "byline": "Rembrandt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Jewish Bride (1665) texture",
+      "durationMinutes": 10,
+      "instruction": "Look at the gold sleeve — Rembrandt's paint is so thick it catches real light, not just painted light. Then notice the tenderness: the couple's eyes are averted, lost in each other."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-self-portrait-two-circles-1665",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Self-Portrait with Two Circles (1665)",
+    "teaser": "The last and greatest of Rembrandt's self-portraits: the ageing painter, brush and palette in hand, standing before two chalk circles on a wall. Nobody agrees what the circles mean — the world, the eye, the perfect line no artist can draw. The face is unsparing: he painted himself as he was, not as he wished to be seen.",
+    "imageUrl": "",
+    "byline": "Rembrandt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Self-Portrait with Two Circles (1665) the circles",
+      "durationMinutes": 8,
+      "instruction": "Look at the circles — blank, perfect, unexplained. Then look at the face: sixty years of self-scrutiny, rendered without flattery. The painting is a question no one has answered."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-mill-1645",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Mill (1645)",
+    "teaser": "A windmill on a rise against a storm-lit sky — one of Rembrandt's few pure landscapes, and the only one that reads as a monument. The mill is dark against the light, its arms catching the last of the sun. For two centuries it was considered Rembrandt's greatest landscape and the equal of any history painting.",
+    "imageUrl": "",
+    "byline": "Rembrandt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Mill (1645) sky",
+      "durationMinutes": 8,
+      "instruction": "Look at the sky — the storm and the light are fighting over the mill. Then notice how the windmill's dark silhouette makes it a character, not a backdrop."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Landscape",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-polish-rider-1655",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Polish Rider (1655)",
+    "teaser": "A young rider in a fur cap and Eastern dress riding through a dark landscape — no one knows who he is, where he's going, or whether Rembrandt even painted the horse. The uncertainty has never dimmed its power: the rider is youth itself, lit against the gloom. It is the most enigmatic of Rembrandt's works.",
+    "imageUrl": "",
+    "byline": "Rembrandt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Polish Rider (1655) mystery",
+      "durationMinutes": 8,
+      "instruction": "Look at the rider's face — serene, unreadable, lit from an unknown source. Then weigh the attribution debate: even the horse's authorship is argued, and the mystery is part of the art."
+    },
+    "tags": [
+      "Dutch Golden Age",
+      "Painting",
+      "1600s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-little-dancer-1881",
+    "categoryId": "ARTWORKS",
+    "subtype": "Sculpture",
+    "name": "The Little Dancer of Fourteen Years (1881)",
+    "teaser": "A bronze ballerina in a real tutu, real slippers and a real ribbon — the only sculpture Degas exhibited in his lifetime, and it scandalized Paris. Critics called her ugly, a monkey, a rat of the opera. Degas modelled her in wax with actual fabric; the bronzes were cast only after his death. She stands with her chin up, and she has never stopped being judged.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Little Dancer of Fourteen Years (1881) materials",
+      "durationMinutes": 8,
+      "instruction": "Look at the real fabric — the tutu is not carved, it's sewn. Then meet her gaze: Degas gave a working child of the ballet a dignity the critics refused her."
+    },
+    "tags": [
+      "Impressionism",
+      "Sculpture",
+      "1800s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-ballet-rehearsal-1873",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Ballet Rehearsal (1873)",
+    "teaser": "Dancers at the Paris Opera rehearsing in a wash of diffused light — some practising, some waiting, some adjusting a shoe. Degas painted the ballet hundreds of times, always as labour rather than spectacle: the discipline, the boredom, the ache. The composition is deliberately off-centre, a snapshot before snapshots existed.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Ballet Rehearsal (1873) composition",
+      "durationMinutes": 8,
+      "instruction": "Look at the empty space in the centre — the action happens around the gap, not in it. Then notice the waiting dancers: the ballet's unglamorous half is Degas's real subject."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-railway-1873",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Railway (1873)",
+    "teaser": "A woman with a book and a sleeping puppy at the new Gare Saint-Lazare, a girl watching steam through the fence — the modern city as a subject for art. Manet's friend Victorine Meurent posed for the woman; the steam is painted as white clouds, not smoke. The painting is about looking at what's behind a fence and never seeing it.",
+    "imageUrl": "",
+    "byline": "Édouard Manet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Railway (1873) steam",
+      "durationMinutes": 8,
+      "instruction": "Look at the steam — it fills the background like weather, hiding the trains entirely. Then notice the girl at the fence: she sees what we can't, and the painting never tells us what it is."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-music-in-tuileries-1862",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Music in the Tuileries (1862)",
+    "teaser": "A crowd at a Paris park concert — not a single famous face, but a society caught in paint: artists, critics, composers and dandies mingling under the trees. Manet painted himself and his friends into the crowd, and the picture is one of the first modern paintings of modern leisure. The music is nowhere to be seen; the occasion is everything.",
+    "imageUrl": "",
+    "byline": "Édouard Manet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Music in the Tuileries (1862) crowd",
+      "durationMinutes": 8,
+      "instruction": "Look at the crowd as a cast list — Manet's friends are all here, including the painter himself. Then notice the format: a frieze of society, with the trees doing the composition."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-execution-maximilian-1867",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Execution of Emperor Maximilian (1867)",
+    "teaser": "A firing squad executing the French-installed emperor of Mexico — a contemporary political atrocity painted as a flat, dispassionate line of men and rifles. Manet based it on newspaper accounts and a photograph of the execution. The Mexican soldiers wear French uniforms, a bitter joke about who really pulled the trigger. The French state suppressed it for years.",
+    "imageUrl": "",
+    "byline": "Édouard Manet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Execution of Emperor Maximilian (1867) composition",
+      "durationMinutes": 8,
+      "instruction": "Look at the execution squad — they wear French uniforms, Manet's accusation aimed at his own government. Then notice the flatness: the horror is delivered without drama."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-rue-mosnier-flags-1878",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Rue Mosnier with Flags (1878)",
+    "teaser": "A Paris street hung with tricolour flags on a national holiday — and, in the foreground, a one-legged man on crutches crossing through the celebration. The flags are the joy; the crippled man is the cost. Manet painted the same street several times; only this version includes the passer-by who makes it a statement.",
+    "imageUrl": "",
+    "byline": "Édouard Manet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Rue Mosnier with Flags (1878) the man",
+      "durationMinutes": 8,
+      "instruction": "Look for the man on crutches in the foreground — the painting's title promises celebration, and he punctures it. Then notice the flags: painted in a single confident pass, each one a stroke of colour."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-houses-of-parliament-1904",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Houses of Parliament series (1904)",
+    "teaser": "Monet painting the same building at every hour of the day — smoke, fog and Thames light turning stone into colour. He painted nearly a hundred views of the Palace of Westminster from a hotel balcony. Each canvas is the same building and a different atmosphere; the series was about light, never architecture.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Houses of Parliament series (1904) light",
+      "durationMinutes": 8,
+      "instruction": "Look at how the building dissolves into the sky — for Monet the stone and the fog are the same material. Then compare two paintings of the same view: the difference is the light, and nothing else."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-japanese-bridge-1899",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Japanese Bridge (1899)",
+    "teaser": "The green footbridge over Monet's lily pond at Giverny, painted from the water's edge — the view that became his obsession for thirty years. The bridge appears in dozens of versions as his sight failed and the pond became abstract. This early version is still recognizably a bridge in a garden; the later ones are pure colour.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Japanese Bridge (1899) reflections",
+      "durationMinutes": 8,
+      "instruction": "Look at the arch reflected in the water — the pond doubles the bridge. Then notice the willows and irises: this is the garden Monet built to paint."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1800s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-poppies-1873",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Poppies (1873)",
+    "teaser": "A field of red poppies in two quick bands of colour, with a woman and child walking through — a summer afternoon reduced to its essence. Monet painted the poppies as scattered red dabs, not flowers; the field reads as a staccato rhythm. It is one of the most reproduced of all Impressionist images.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Poppies (1873) red dabs",
+      "durationMinutes": 8,
+      "instruction": "Look at how the poppies are painted — dabs of red, not petals. Then find the second pair of walkers on the hill: the painting contains the same figures twice."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-seine-argenteuil-1874",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Seine at Argenteuil (1874)",
+    "teaser": "Sailing boats on the Seine at the village where Monet kept a studio — the river as a mirror of sky, painted in the summer light he loved. Monet lived at Argenteuil for seven years and painted its bridges, boats and banks obsessively. The water here is almost pure reflection; the boats float on sky.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Seine at Argenteuil (1874) reflections",
+      "durationMinutes": 8,
+      "instruction": "Look at the water — it is painted as horizontal strokes of sky-colour, not wetness. Then notice the rowing boat and the sail: leisure is the subject, and the light is the real content."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-bordighera-1884",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Bordighera (1884)",
+    "teaser": "Palm trees and Mediterranean light on the Italian Riviera — Monet's escape from the grey winter of Giverny, painted in a single visit. The palms were a new subject and he wrestled with them, calling the light 'barbarous'. The result is a painting of heat: the sea, the palms and the walls all tremble in the same glare.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Bordighera (1884) light",
+      "durationMinutes": 8,
+      "instruction": "Look at the palms — Monet complained he couldn't paint them, then made them the whole picture. The heat is almost visible: the colours vibrate against each other."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-woman-in-garden-1867",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Woman in the Garden (1867)",
+    "teaser": "A woman in a white dress turning in a sunlit garden, her skirt catching the light — painted outdoors with a trench dug in the lawn so Monet could paint the full figure without changing his viewpoint. The light through the leaves breaks the white dress into coloured patches. It was rejected by the Salon, which was Monet's first taste of the battle to come.",
+    "imageUrl": "",
+    "byline": "Claude Monet",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Woman in the Garden (1867) light",
+      "durationMinutes": 8,
+      "instruction": "Look at the white dress — it is really made of colour: green shadows, yellow sun, blue sky. Then imagine the trench: Monet literally dug to keep his sightline."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-swing-1876",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Swing (1876)",
+    "teaser": "A woman on a garden swing, her dress flying, watched by two men in the shade — a moment of pure flirtation in dappled light. Renoir painted the light falling through leaves as loose strokes of colour that dissolve the scene. The swing's motion is implied by the dress and the shadow; the picture seems to move as you look.",
+    "imageUrl": "",
+    "byline": "Pierre-Auguste Renoir",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Swing (1876) dappled light",
+      "durationMinutes": 8,
+      "instruction": "Look at the light patches across the dress and the ground — Renoir's brush breaks the garden into colour. Then find the little girl watching from the left: an audience inside the painting."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1870s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-dance-at-bougival-1883",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Dance at Bougival (1883)",
+    "teaser": "A couple dancing at an open-air café — she in a red dress tilted back in his arms, he with his hat tipped forward. The woman is Suzanne Valadon, who would become a painter herself. Renoir painted three large dance pictures that year; this one is the most intimate, the couple locked mid-turn.",
+    "imageUrl": "",
+    "byline": "Pierre-Auguste Renoir",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Dance at Bougival (1883) the couple",
+      "durationMinutes": 8,
+      "instruction": "Look at the woman's face — tilted up, eyes half-closed, completely trusting the turn. Then notice the background: the dance floor is a blur of other couples, and the two of them are the only clear figures."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-the-umbrellas-1885",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Umbrellas (1885)",
+    "teaser": "A crowd of Parisians under umbrellas in a rain shower — painted over several years, in two different styles: the right side is crisp and linear, the left softer and more Impressionist. Renoir abandoned the canvas midway and returned to it later, and the two halves betray the gap. The little girl with the hoop is his future wife's sister.",
+    "imageUrl": "",
+    "byline": "Pierre-Auguste Renoir",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Umbrellas (1885) two styles",
+      "durationMinutes": 8,
+      "instruction": "Look for the seam — the right side of the canvas is tighter, the left looser, painted years apart. Then find the girl with the hoop: she's looking straight at us, the only figure who does."
+    },
+    "tags": [
+      "Impressionism",
+      "Painting",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-la-goulue-arriving-1892",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "La Goulue arriving at the Moulin Rouge (1892)",
+    "teaser": "The queen of the can-can sweeping into the Moulin Rouge with her sister, her chin up, the crowd parting — painted by the aristocrat dwarf who lived among the dancers. Toulouse-Lautrec's poster of La Goulue made her and him famous. This painting shows the star offstage, still performing.",
+    "imageUrl": "",
+    "byline": "Henri de Toulouse-Lautrec",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "La Goulue arriving at the Moulin Rouge (1892) entrance",
+      "durationMinutes": 8,
+      "instruction": "Look at La Goulue's chin — held high, expecting the room to notice. Then look at the faces around her: Lautrec painted his friends as a gallery of Paris nightlife."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "Painting",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-jane-avril-1893",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Jane Avril (1893)",
+    "teaser": "The dancer Jane Avril in a black dress and feathered hat, her profile sharp against a yellow wall — a poster made for her cabaret appearances that became an icon of the Belle Époque. Lautrec painted the dancer who became his close friend dozens of times. This poster's bold flat shapes made it a landmark of graphic design.",
+    "imageUrl": "",
+    "byline": "Henri de Toulouse-Lautrec",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Jane Avril (1893) poster",
+      "durationMinutes": 8,
+      "instruction": "Look at the flat shapes — the yellow wall, the black dress, the red hair: no shading, pure silhouette. Then notice the bassist's neck and scroll at the bottom: the music is folded into the design."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "Print",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-dancer-adjusting-shoe-1890",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "Dancer Adjusting Her Shoe (1890)",
+    "teaser": "A ballerina bending to fix her slipper, caught mid-movement in pastel — the unglamorous moment Degas made his subject. The pastel lets the figure dissolve at the edges, as if glimpsed in motion. The pose is awkward, almost painful; that's the point. The ballet's beauty, Degas insisted, was in its effort.",
+    "imageUrl": "",
+    "byline": "Edgar Degas",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Dancer Adjusting Her Shoe (1890) pastel",
+      "durationMinutes": 8,
+      "instruction": "Look at the figure's edges — the pastel dissolves the outline so the dancer seems to be moving. Then notice the effort in the pose: Degas painted the work, not the glamour, of ballet."
+    },
+    "tags": [
+      "Impressionism",
+      "Drawing",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-basket-of-apples-1893",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Basket of Apples (1893)",
+    "teaser": "A tilted basket of apples, a bottle, a cloth — the most famous still life in the history of still life, where the tabletop itself refuses to lie flat. Cézanne's apples are painted as volumes, not fruits, and the perspective shifts between objects on purpose. He said he wanted to 'astonish Paris with an apple'.",
+    "imageUrl": "",
+    "byline": "Paul Cézanne",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Basket of Apples (1893) perspective",
+      "durationMinutes": 8,
+      "instruction": "Look at the table's edges — they don't line up, because Cézanne painted each object from a slightly different angle. The apples are the true subject: solid, round, almost touchable."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "Still Life",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-boy-red-vest-1889",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Boy in the Red Vest (1889)",
+    "teaser": "A boy in a scarlet waistcoat leaning on his elbow — painted four times, each version turning the same pose into a different rhythm of colour and space. The red vest against the grey-blue background is Cézanne's purest colour experiment. The boy's name is unknown; he was a model, paid to hold a pose Cézanne couldn't stop painting.",
+    "imageUrl": "",
+    "byline": "Paul Cézanne",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Boy in the Red Vest (1889) the red",
+      "durationMinutes": 8,
+      "instruction": "Look at the red vest — it's the only bright colour in the painting, and the whole composition orbits it. Then notice the pose: the boy's twisted body gives the flat picture its depth."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "Painting",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-jug-and-fruit-1894",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Jug and Fruit (1894)",
+    "teaser": "A jug, a fruit dish and a crumpled cloth on a table — Cézanne's lifelong subject, painted as a study in volumes and the spaces between them. The objects are solid, the cloth is a landscape of folds. Cézanne made the still life his laboratory: 'I will astonish Paris with an apple', he said, and he did.",
+    "imageUrl": "",
+    "byline": "Paul Cézanne",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Jug and Fruit (1894) volumes",
+      "durationMinutes": 8,
+      "instruction": "Look at the jug's symmetry against the cloth's chaos — Cézanne set the two against each other. Then notice how the fruit is painted as pure volume: spheres, not apples."
+    },
+    "tags": [
+      "Post-Impressionism",
+      "Still Life",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-three-musicians-1921",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Three Musicians (1921)",
+    "teaser": "Three masked musicians — a harlequin, a pierrot and a monk — cut from flat planes of colour, painted in Picasso's synthetic Cubist style. The figures collapse into the picture plane yet hold together like a band mid-song. Picasso painted two versions in the same year, one in Philadelphia, one at MoMA, and both are considered masterpieces.",
+    "imageUrl": "",
+    "byline": "Pablo Picasso",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Three Musicians (1921) flat planes",
+      "durationMinutes": 8,
+      "instruction": "Look at how the three figures interlock — the shapes share edges, so the group reads as one cut-out. Then find the dog under the table: a sliver of Cubist humour in the pattern."
+    },
+    "tags": [
+      "Cubism",
+      "Painting",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-weeping-woman-1937",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Weeping Woman (1937)",
+    "teaser": "A woman sobbing, her face broken into sharp planes, her handkerchief pressed to her teeth — Picasso's image of grief distilled into geometry. Painted in the same year as Guernica, it belongs to the same series of suffering. The subject is Dora Maar, the photographer who documented Guernica's creation. Picasso painted her weeping again and again; she said he never painted her smiling.",
+    "imageUrl": "",
+    "byline": "Pablo Picasso",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Weeping Woman (1937) the face",
+      "durationMinutes": 8,
+      "instruction": "Look at the tears — painted as sharp shards of blue and white, not soft drops. Then notice the teeth and the handkerchief: grief here is a machine of angles."
+    },
+    "tags": [
+      "Cubism",
+      "Painting",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-portrait-dora-maar-1937",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Portrait of Dora Maar (1937)",
+    "teaser": "Dora Maar, photographer, Surrealist and Picasso's companion, painted as a queen of angles — her profile split, her face both profile and front view at once. The portrait turns a real person into a diagram of looking. Maar photographed the making of Guernica, then Picasso's portraits of her grew increasingly distorted as their relationship soured.",
+    "imageUrl": "",
+    "byline": "Pablo Picasso",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Portrait of Dora Maar (1937) double profile",
+      "durationMinutes": 8,
+      "instruction": "Look at the face — you see it from two sides at once, which is impossible and utterly convincing. Then notice the painted nail: one detail of the real woman survives the geometry."
+    },
+    "tags": [
+      "Cubism",
+      "Painting",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-girl-with-mandolin-1910",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Girl with a Mandolin (1910)",
+    "teaser": "A figure dissolved into a lattice of facets — the painting that pushed Cubism to its limit, where the girl and her mandolin are almost unrecognizable. Only the instrument's sound-hole keeps the subject readable. Picasso said he wanted to paint 'not the girl, but the angles'. The background and figure share the same planes.",
+    "imageUrl": "",
+    "byline": "Pablo Picasso",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Girl with a Mandolin (1910) facets",
+      "durationMinutes": 8,
+      "instruction": "Look for the mandolin's sound-hole — the single curve that anchors the whole lattice. Then notice how the background and the figure are built from the same shapes: space and body are one material."
+    },
+    "tags": [
+      "Cubism",
+      "Painting",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-puberty-1894",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Puberty (1894)",
+    "teaser": "A naked girl on the edge of a bed, her hands clasped over herself, a shadow looming behind her — one of the most uncomfortable paintings in art. Munch painted the moment between childhood and the world's expectations. The shadow is the future; the girl's stare is the present. It was banned, burned and censored for decades.",
+    "imageUrl": "",
+    "byline": "Edvard Munch",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Puberty (1894) the shadow",
+      "durationMinutes": 8,
+      "instruction": "Look at the shadow — it looms where the bed ends, bigger than the girl. Then look at her hands: clasped, guarded, the only defence in the room. Munch painted anxiety before it had a name."
+    },
+    "tags": [
+      "Expressionism",
+      "Painting",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-kiss-munch-1897",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Kiss (1897)",
+    "teaser": "Two figures fused into one dark mass, their faces melting together in a kiss — Munch's image of love as merger and loss of self. Unlike Klimt's glittering embrace, this kiss erases identity: the two heads become a single shape. Munch painted it repeatedly, each version darker. It is love seen from the inside of a panic attack.",
+    "imageUrl": "",
+    "byline": "Edvard Munch",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Kiss (1897) the fusion",
+      "durationMinutes": 8,
+      "instruction": "Look at the faces — they have no features left, just two silhouettes become one. Then notice the room: bare, dark, closing in. For Munch, the kiss was also a disappearing."
+    },
+    "tags": [
+      "Expressionism",
+      "Painting",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-death-and-life-1915",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Death and Life (1915)",
+    "teaser": "A column of sleeping figures — mothers, lovers, children — facing a grinning skeleton wrapped in fabric. Klimt painted the figures as a cascade of pattern and flesh, the death as a cold cartoon. He reworked the painting in 1915, adding the grey background that isolates the two halves. It is his meditation on the one subject he couldn't gild.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Death and Life (1915) the two halves",
+      "durationMinutes": 8,
+      "instruction": "Look at the skeleton — flat, patterned, almost an ornament, while the bodies are full of pattern and colour. Then notice the empty gap between them: the two sides never touch."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Painting",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-three-ages-woman-1905",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "The Three Ages of Woman (1905)",
+    "teaser": "A child, a woman and an old woman in a single composition of flesh and ornament — childhood glowing, maturity flowering, age folding in on itself. Klimt painted the three ages as one continuous body of work, and the old woman's despair is deliberately unsparing. It won the gold medal at the 1911 International Exhibition in Rome.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Three Ages of Woman (1905) the old woman",
+      "durationMinutes": 8,
+      "instruction": "Look at the old woman — she covers her face while the other two glow. Then notice the ornament: the younger figures are wrapped in Klimt's pattern, the oldest stripped bare of it."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Painting",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-adele-bloch-bauer-ii-1912",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Adele Bloch-Bauer II (1912)",
+    "teaser": "Adele Bloch-Bauer a second time — standing in a green gown against a garden of colour, a softer and more modern portrait than the gold-leaf first version. Painted four years apart, the two portraits show the same woman through Klimt's changing style. It sold for $87.9 million in 2006, hours after the gold portrait set the record.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Adele Bloch-Bauer II (1912) colour",
+      "durationMinutes": 8,
+      "instruction": "Look at the background — a mosaic of greens, pinks and blues that turns the wall into a garden. Then compare the two portraits: this Adele stands in colour where the first sits in gold."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Portrait",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-beethoven-frieze-1902",
+    "categoryId": "ARTWORKS",
+    "subtype": "Artwork",
+    "name": "The Beethoven Frieze (1902)",
+    "teaser": "A 34-metre mural painted for an exhibition celebrating Beethoven — a wall-length allegory of humanity's struggle toward joy, ending with a kiss that has become one of Klimt's most reproduced images. The frieze was meant to be temporary; it was rescued, cut into sections and reassembled. The 'kiss' at the end is the embrace of the whole world.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "The Beethoven Frieze (1902) the final kiss",
+      "durationMinutes": 10,
+      "instruction": "Look at the sequence: suffering, longing, then the final embrace. The figures are painted flat with gold and mother-of-pearl, like a page from a giant illuminated manuscript."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Installation",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "artw-hope-ii-1908",
+    "categoryId": "ARTWORKS",
+    "subtype": "Painting",
+    "name": "Hope II (1908)",
+    "teaser": "A pregnant woman in a patterned robe, her hands pressed to her belly, three figures at her feet — painted the same year a scandal greeted Klimt's first 'Hope' painting, which showed a nude pregnant woman. This version wraps her in gold and pattern, the pregnancy abstracted into ornament. It is one of the few major paintings of pregnancy in Western art.",
+    "imageUrl": "",
+    "byline": "Gustav Klimt",
+    "exploreAction": {
+      "verb": "Look at",
+      "targetName": "Hope II (1908) the robe",
+      "durationMinutes": 8,
+      "instruction": "Look at the robe — the pattern draws the eye to the belly like a map. Then look at her hands: folded over the child, the composition's true centre."
+    },
+    "tags": [
+      "Art Nouveau",
+      "Painting",
+      "1900s"
+    ],
+    "tier": 1
   }
 ]
