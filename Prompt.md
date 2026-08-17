@@ -47,7 +47,24 @@ quote cards at their true size and spot; (3) open the expanded saved board — s
 board on a board with images + quotes — confirm text mentions both, all wiped;
 (6) empty full-screen board — Quote chip at bottom; add an image — chip moves up.
 
-## Current request — v147: drawer floats ABOVE the nav bar (bar stays composed)
+## Current request — v148: Pet Designer studio bar gets the nav-bar collapse animation
+
+The user clarified the "unify the pill style" ask: "when i meant to unify the pill
+style i also meant the animation i meant use similiar animation just like in home
+screen nav bar use similiar stle collapse". v142 had restyled the studio bar to the
+floating pill CONTAINER but kept static `weight(1f)` tabs with always-visible labels.
+`PetStudioTab` now mirrors `FloatingNavPill` (CurioBottomNav.kt) verbatim:
+- Pills rest icon-only at 52dp; the ACTIVE pill springs to 112dp (same spring:
+  dampingRatio 0.75, StiffnessMediumLow) and slides its label out
+  (expandHorizontally(Start) + fadeIn(160)); deselected label vanishes instantly
+  (exit tween(0)). Solid `secondary` fill + `onSecondary` ink, same as the main bar.
+- The studio Row now CENTERS its content-sized pills (was weight(1f)), so the total
+  width change stays balanced in the floating container.
+Added animation imports (AnimatedVisibility, expand/shrinkHorizontally, fadeIn/Out,
+Spring, animateDpAsState, spring). Brace balance verified.
+
+## Earlier completed request (v147)
+Drawer floats ABOVE the nav bar (bar stays composed)
 
 The user: "why the navbar disappears in drawer, i meant you to place the drawer above
 it not disappear the nav bar itself and reappear." v135 had hidden the floating pill

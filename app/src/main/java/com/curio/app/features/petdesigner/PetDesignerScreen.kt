@@ -103,12 +103,20 @@ import com.curio.app.data.PetAnimationFrame
 import com.curio.app.data.PetDefinition
 import com.curio.app.data.PetRegistry
 import com.curio.app.data.ReactionAnim
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import com.curio.app.data.animationById
 import com.curio.app.data.definition
@@ -1365,6 +1373,13 @@ fun PetDesignerScreen(navController: NavController) {
  * v8.56 — the Pet studio's bottom navigation bar (icons + labels, mirroring
  * the main app's bar). Switching pages clears the editor target so every
  * page lands on its picker first.
+ * v147b — the bar now animates EXACTLY like the main app's floating nav
+ * bar ([com.curio.app.ui.components.CurioFloatingNavBar], v124/v129): the
+ * tabs render icon-only at rest, the ACTIVE tab springs wider and slides
+ * its label out (same spring width morph + label slide-out), and the
+ * previously active pill collapses back to an icon — the "collapse"
+ * animation the user meant by "unify the style". Same solid secondary
+ * fill + onSecondary ink on the active pill.
  */
 @Composable
 private fun PetStudioBottomNav(
@@ -1373,10 +1388,9 @@ private fun PetStudioBottomNav(
 ) {
     // v142 — restyled to the app's FLOATING PILL BAR language (the main
     // app replaced its stock M3 bar with this in v124/v129): a rounded,
-    // elevated container with capsule tabs — the active tab wears the
-    // SOLID secondary fill + onSecondary ink. Same recipe as
-    // CurioFloatingNavBar. The NavHost content is already padded above the
-    // system nav-bar inset, so the bar floats without consuming it again.
+    // elevated container with capsule tabs. The NavHost content is already
+    // padded above the system nav-bar inset, so the bar floats without
+    // consuming it again.
     Surface(
         shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -1388,7 +1402,10 @@ private fun PetStudioBottomNav(
         Row(
             modifier = Modifier.padding(7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            // Content-sized pills (like the nav bar): the row centers so
+            // the total width change as a tab expands/collapses stays
+            // balanced in the floating container.
+            horizontalArrangement = Arrangement.Center
         ) {
             PetStudioTab(CurioIcons.Pets, "Pets", page == PetDesignerPage.PETS) {
                 onSelect(PetDesignerPage.PETS)
@@ -1403,8 +1420,18 @@ private fun PetStudioBottomNav(
     }
 }
 
-/** One capsule tab in the studio pill bar — active wears the solid
- *  secondary fill (onSecondary ink), inactive stays transparent. */
+// Same pill geometry as the main bar (v131: 52dp tall, 112dp expanded).
+private val StudioPillIconWidth = 52.dp
+private val StudioPillExpandedWidth = 112.dp
+private val StudioPillHeight = 52.dp
+
+/**
+ * One capsule tab in the studio pill bar — mirrors [CurioFloatingNavBar]'s
+ * pill exactly: icon-only while inactive, the selected tab springs wider
+ * and slides its label out (expandHorizontally + fade, exit instant) with
+ * the SOLID secondary fill + onSecondary ink. Both pills animate with the
+ * same spring so the bar's total width never dips or jumps.
+ */
 @Composable
 private fun RowScope.PetStudioTab(
     icon: String,
@@ -1412,12 +1439,19 @@ private fun RowScope.PetStudioTab(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val tabInk = if (selected) MaterialTheme.colorScheme.onSecondary
-                 else MaterialTheme.colorScheme.onSurfaceVariant
+    val pillWidth by animateDpAsState(
+        targetValue = if (selected) StudioPillExpandedWidth else StudioPillIconWidth,
+        animationSpec = spring(
+            dampingRatio = 0.75f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "studioPillWidth"
+    )
+    val activeInk = MaterialTheme.colorScheme.onSecondary
     Box(
         modifier = Modifier
-            .weight(1f)
-            .height(52.dp)
+            .width(pillWidth)
+            .height(StudioPillHeight)
             .clip(RoundedCornerShape(50))
             .background(
                 if (selected) MaterialTheme.colorScheme.secondary
@@ -1428,21 +1462,30 @@ private fun RowScope.PetStudioTab(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
             CurioIcon(
                 name = icon,
                 contentDescription = label,
-                tint = tabInk,
+                tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 22.dp
             )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
-                ),
-                color = tabInk
-            )
+            // Enter keeps the slide-out morph for the newly active pill;
+            // exit is tween(0) so the label VANISHES the moment its pill is
+            // deselected (no closing shrink animation) — the nav bar recipe.
+            AnimatedVisibility(
+                visible = selected,
+                enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(tween(160)),
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut(tween(0))
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = activeInk,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                )
+            }
         }
     }
 }

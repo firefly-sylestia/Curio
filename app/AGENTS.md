@@ -919,6 +919,20 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v148 — the Pet Designer studio bar animates EXACTLY like the main
+  nav bar ("unify the pill style" included the ANIMATION).** v142
+  restyled `PetStudioBottomNav` to the floating pill container but kept
+  static `weight(1f)` tabs with always-visible labels; the user
+  clarified: "use similar animation just like in home screen nav bar —
+  similar style collapse". `PetStudioTab` now mirrors `FloatingNavPill`
+  verbatim: icon-only 52dp pills at rest, the ACTIVE pill springs to
+  112dp (same spring: dampingRatio 0.75, StiffnessMediumLow) and slides
+  its label out (expandHorizontally(Start) + fadeIn(160), exit
+  tween(0) so the deselected label vanishes), solid `secondary` fill +
+  `onSecondary` ink; the Row centers so the width change stays balanced
+  in the container. LESSON: "same style" for a restyle means the pill's
+  BEHAVIOR too — icons-at-rest + active-expands-label is the app's
+  signature pill animation, not just the rounded container.
 - **v147 — the Home drawer is HOISTED to the NavHost root so it draws
   ABOVE the floating pill bar, which stays composed underneath.** v135 had
   "hidden" the bar while the drawer was up (NavHost dropped it from
