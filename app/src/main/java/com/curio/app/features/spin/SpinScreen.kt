@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -1199,7 +1200,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             }
         } else {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                // v129 — the pill bar floats over the page now (no Scaffold
+                // slot), so the phone layout clears the gesture bar + the
+                // floating pill itself; wide windows use the rail instead.
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = 76.dp)
         ) {
         if (compactHeight) {
             // ── Compact layout (small screens) ────────────────────────

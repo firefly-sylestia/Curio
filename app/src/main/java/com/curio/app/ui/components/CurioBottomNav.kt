@@ -16,13 +16,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
@@ -31,10 +28,8 @@ import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -158,10 +153,13 @@ private val FloatingPillHeight = 48.dp
  * switches and avoids re-creating the screen UI from scratch.
  *
  * The bar is hidden outside of [CurioRoutes.bottomNavRoutes] by the
- * parent scaffold (see CurioNavHost). This composable assumes it IS visible.
- * It reserves the SAME 80dp + nav-bar inset footprint the old edge-to-edge
- * bar did, so Scaffold innerPadding (and the Reveal placeholder) never
- * changes. Wide windows use [CurioNavigationRail] instead.
+ * parent NavHost (see CurioNavHost). This composable assumes it IS visible.
+ * v129 — no Scaffold slot and no painted band: the bar is a floating
+ * overlay drawn ON TOP of the page's own full-bleed background (the page
+ * clears it with bottom padding). It sizes to the pill row, floats above
+ * the gesture bar via [androidx.compose.foundation.layout.navigationBarsPadding]
+ * with a 12dp air gap, and the page shows through around it — no strip.
+ * Wide windows use [CurioNavigationRail] instead.
  */
 @Composable
 fun CurioFloatingNavBar(
@@ -179,29 +177,15 @@ fun CurioFloatingNavBar(
         routePrefix
     }
 
-    // Slot = 8dp top air + 72dp (48dp pill + 12dp float gap) + nav inset =
-    // the old bar's 80dp + inset, so innerPadding stays identical.
-    //
-    // The slot is painted with the PAGE's own background (the same animated
-    // category wash the rail uses): the Scaffold otherwise shows the plain
-    // theme background here, which read as a WHITE (light) / BLACK (dark)
-    // strip behind the floating pill — the v125 complaint. Painting the slot
-    // with the page wash makes the pill look like it floats directly over
-    // the page (the wash band is the page's own color, so no seam).
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .background(curioNavContainerColor(routePrefix))
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(top = 8.dp)
-            .height(72.dp),
-        contentAlignment = Alignment.BottomCenter
+            .navigationBarsPadding()
+            .padding(bottom = 12.dp)
     ) {
         Surface(
             shape = RoundedCornerShape(50),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shadowElevation = 6.dp,
-            modifier = Modifier.padding(bottom = 12.dp)
+            shadowElevation = 6.dp
         ) {
             Row(
                 modifier = Modifier.padding(6.dp),
@@ -243,11 +227,12 @@ fun CurioFloatingNavBar(
 /**
  * One pill in the floating bar: icon-only while inactive; the selected
  * pill springs wider and slides its label out (the indicator covers the
- * whole pill, icon + label). v125 — the morph plays ONLY on the pill
- * becoming ACTIVE: the new active pill springs open + slides its label
- * out, while the pill being DESELECTED snaps shut instantly (no closing
- * animation) — "only the active pill text has the morph open animation,
- * the closing pill switches instantly."
+ * whole pill, icon + label). v129 — BOTH pills animate with the SAME
+ * spring: the deselected pill shrinks at exactly the rate the newly
+ * selected one grows, so the bar's total width never dips and it never
+ * re-centers (the "squeeze" the old snap-close + springy-open caused).
+ * The label exit stays instant (the closing pill's text vanishes, per
+ * v125: "only the active pill text has the morph open animation").
  */
 @Composable
 private fun FloatingNavPill(
@@ -255,24 +240,12 @@ private fun FloatingNavPill(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    // Direction-aware width: spring when this pill becomes the active one;
-    // tween(0) snap when it's being deselected. `wasSelected` tracks the
-    // previous state so the spring fires only on the false→true edge.
-    var wasSelected by remember { mutableStateOf(selected) }
-    val becomingActive = selected && !wasSelected
-    LaunchedEffect(selected) {
-        wasSelected = selected
-    }
     val pillWidth by animateDpAsState(
         targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
-        animationSpec = if (becomingActive) {
-            spring(
-                dampingRatio = 0.75f,
-                stiffness = Spring.StiffnessMediumLow
-            )
-        } else {
-            tween(durationMillis = 0)
-        },
+        animationSpec = spring(
+            dampingRatio = 0.75f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
         label = "floatingNavPillWidth"
     )
     val activeInk = MaterialTheme.colorScheme.onSecondaryContainer

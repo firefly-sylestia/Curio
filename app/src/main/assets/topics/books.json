@@ -87,7 +87,9 @@
       "Novel"
     ],
     "tier": 1,
-    "pageCount": 992
+    "pageCount": 992,
+    "altPageCount": 1072,
+    "altPageLabel": "Penguin"
   },
   {
     "id": "book-jane-eyre",
@@ -131,7 +133,9 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "altPageCount": 464,
+    "altPageLabel": "Norton"
   },
   {
     "id": "book-frankenstein",
@@ -1519,7 +1523,9 @@
       "19th Century"
     ],
     "tier": 2,
-    "pageCount": 672
+    "pageCount": 672,
+    "altPageCount": 608,
+    "altPageLabel": "Penguin"
   },
   {
     "id": "book-heart-of-darkness-1899-176",
@@ -2897,7 +2903,9 @@
       "Literary"
     ],
     "tier": 2,
-    "pageCount": 864
+    "pageCount": 864,
+    "altPageCount": 752,
+    "altPageLabel": "Dover"
   },
   {
     "id": "book-the-wind-up-bird-chronicle",
@@ -4021,7 +4029,9 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 1463
+    "pageCount": 1463,
+    "altPageCount": 1232,
+    "altPageLabel": "Penguin"
   },
   {
     "id": "book-count-of-monte-cristo",

@@ -30,6 +30,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -325,7 +328,14 @@ fun CabinetScreen(navController: NavController) {
             )
         }
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                // v129 — the pill bar floats over the page now (no Scaffold
+                // slot), so the grid clears the gesture bar + the floating
+                // pill on phones; wide windows use the rail and just need
+                // the gesture-bar inset (which windowInsetsPadding provides).
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = if (wide) 0.dp else 76.dp)
         ) {
         // ── Grid or empty state — the scroll content fills the screen and
         // runs UNDER the torn hero banner and the sticky chip bar (both are

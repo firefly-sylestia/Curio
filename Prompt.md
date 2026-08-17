@@ -1,6 +1,60 @@
 # Prompt.md — Request log
 
-## Current request — COMPLETED: books.json deduped (500 → 444)
+## Current request — COMPLETED: floating pill bar — Scaffold removed (no strip) + no switch squeeze
+
+The user: "the navigation pill i asked why it have a backgroud strip or
+whatever it is behind that why it not floating on top of the backgroud
+only? and also its animation is janky now, when switching it squuzes
+again and that too fast and then expands again. so fix it" — then "the
+whole pill squuzes btw" and "remove that scaffhold".
+
+### 1 — The strip (root cause + fix)
+The v125 fix painted the Scaffold's bottomBar slot with the page wash
+(`curioNavContainerColor`), but the flat solid band still read as a
+strip — the pages carry watermarks / gradients / tears above it, so a
+solid band below is visible. Per the user's direction the Scaffold is
+GONE: `CurioNavHost` now hosts the page `Row` full-bleed directly in
+the root Box, and `CurioFloatingNavBar` is a true overlay
+(`Modifier.align(Alignment.BottomCenter)`) drawn ON TOP of the page's
+own background — no painted slot at all. The bar wraps its content (no
+`fillMaxWidth`, no 72dp slot, no wash band) and floats with
+`navigationBarsPadding()` + a 12dp air gap.
+
+Inset semantics preserved: the content Box applies
+`windowInsetsPadding(WindowInsets.navigationBars)` whenever the pill is
+hidden (push / reveal / splash / wide), exactly what the Scaffold's
+`contentWindowInsets` used to deliver; on compact tab routes the page
+runs full-bleed (backgrounds paint under the gesture bar) and each tab
+clears the pill itself: Home's final spacer 92dp on phones (32 wide),
+Spin's phone `Column` `windowInsetsPadding` + 76dp, Cabinet's `Column`
+inset + 76dp on phones (0 wide). Reveal's 80dp placeholder unchanged.
+
+### 2 — The squeeze (root cause + fix)
+The v125 "instant close + springy open" made the bar's total width DIP
+(the deselected pill snapped to 48dp) then grow back (the new pill
+springs to 96dp, overshooting) — the whole bar re-centered = the
+squeeze. Both pills now animate with the SAME spring
+(`spring(0.75, StiffnessMediumLow)`): the shrinking pill's width loss
+equals the growing pill's gain at every frame, so the total stays
+constant and the bar never moves. The label exit stays instant (v125
+preference: closing pill's text vanishes) — only the width animation
+changed.
+
+### 3 — Also committed: the interrupted v128 alt-edition work
+This session also completed + committed the v128 request ("Add
+alternate-edition pills to more books"): the `altGapHuge` threshold
+came down 20% → 8% (real translation gaps run 8–16%; 4 of the 5
+v126 alt-field books were hidden under the old rule), and 5 new books
+(Don Quixote 1072 Rutherford, Les Misérables 1232 Denny, Anna Karenina
+752 Maude, Crime and Punishment 608 Ready, Wuthering Heights 464
+Norton) got verified alt data in `books.json`. Web mirror skipped (its
+schema has no pageCount/progress pill).
+
+### Validation
+`git diff --check` clean; brace balance verified on all 5 edited Kotlin
+files; no Gradle locally (env rule) — CI validates compile on push.
+
+## Previous request — COMPLETED: books.json deduped (500 → 444)
 
 The user: "Deduplicate the ~55 books that appear twice in books.json
 (e.g. The Odyssey listed with and without the year)" — the follow-up to

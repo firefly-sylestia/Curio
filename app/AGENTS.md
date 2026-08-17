@@ -690,6 +690,21 @@ app/src/main/java/com/curio/app/
   (704 Fagles / 574 Lombardo), War and Peace (1392 / 1104 Wordsworth),
   Moby-Dick (635 / 720 Penguin Classics), Ulysses (732 / 649 Corrected
   text), The Count of Monte Cristo (1276 / 1462 Modern Library).
+- **v128 — alternate-edition pill threshold 20% → 8% + 5 new books.**
+  Real translation/edition gaps for classic novels run 8–16% (Rutherford
+  vs Grossman Don Quixote 992/1072, Denny vs Signet Les Misérables
+  1463/1232, P&V vs Dover Maude Anna Karenina 864/752), so the v126
+  `altGapHuge` rule (≥20% of the baked target) HID 4 of the 5 books that
+  already carried `altPageCount` (Iliad 18.5%, Moby-Dick 13.4%, Monte
+  Cristo 14.6%, Ulysses 11.3% — only War and Peace 20.7% showed).
+  `CurioProgressPill.kt`: `(bakedTarget * 0.20)` → `(bakedTarget *
+  0.08)` — still excludes trivial trim/font variance (3–5%). Data
+  added for the named + verified cases: Don Quixote (992 → 1072
+  Penguin, Rutherford), Les Misérables (1463 → 1232 Penguin, Denny),
+  Anna Karenina (864 → 752 Dover, Maude), Crime and Punishment (672 →
+  608 Penguin, Ready), Wuthering Heights (416 → 464 Norton). All 10
+  alt-field books now render their pill. Web mirror untouched (its
+  schema has no `pageCount`/progress pill).
 - **v127 — books.json deduped (500 → 444).** Every duplicate book (54
   normalized-name groups, 56 entries — e.g. "The Odyssey" + "The
   Odyssey (c. 8th century BCE)", "Moby-Dick; or, The Whale" + "Moby-
@@ -728,6 +743,32 @@ app/src/main/java/com/curio/app/
   `-dontwarn` rules for `java.awt.**`, `java.beans.**`, `javax.swing.**`,
   `java.applet.**`, `java.nio.file.**` (the AWT interop is desktop-only
   and never invoked on-device).
+- **v129 — floating pill bar: Scaffold removed (no strip) + no more
+  switch squeeze.** (1) **The strip is gone for real.** The v125 fix
+  painted the nav slot with the page wash, but the flat band still read
+  as a strip (the page has watermarks/gradients/tears above it, so a
+  solid band below is visible). `CurioNavHost` no longer wraps content
+  in a `Scaffold`: the page Row runs full-bleed, and
+  `CurioFloatingNavBar` is now a true overlay in the root `Box`
+  (`Modifier.align(Alignment.BottomCenter)`) drawn ON TOP of the page's
+  own background — no painted slot at all. The bar wraps its content
+  (no `fillMaxWidth`, no 72dp slot, no wash band) and floats with
+  `navigationBarsPadding()` + a 12dp air gap. (2) **The squeeze fix.**
+  v125 made the newly active pill spring open while the deselected one
+  snapped shut (`tween(0)`), so the bar's total width DIPPED then grew
+  back — re-centering the whole bar ("it squeezes"). Both pills now
+  animate with the SAME spring (`spring(0.75, StiffnessMediumLow)`):
+  the shrinking pill's width loss equals the growing pill's gain at
+  every frame, so the total stays constant and the bar never moves.
+  The label exit stays instant (closing pill's text vanishes — v125
+  preference kept). (3) **Page clearances.** With no Scaffold slot, the
+  tab pages clear the pill themselves: Home's final spacer is 92dp on
+  phones (32 wide), Spin's phone `Column` gets
+  `windowInsetsPadding(navigationBars)` + 76dp, Cabinet's `Column`
+  gets the inset + 76dp on phones (0 on wide). Non-tab routes keep the
+  nav-bar inset the Scaffold used to deliver (content Box applies
+  `windowInsetsPadding(navigationBars)` whenever the pill is hidden).
+  The reveal's 80dp placeholder is unchanged (it paints its own band).
 - **v116 — CI compile fix: Kotlin NESTED block comments.** A KDoc in
   `UpdatesScreen.kt` contained the literal sequence `-/*` ("# headers,
   -/* bullets"): Kotlin block comments NEST (unlike Java), so that `/*`

@@ -18,16 +18,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -37,7 +34,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -204,8 +200,9 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
 /**
  * The Curio NavHost — single-NavHost scaffold for the active app.
  *
- * All routes are flat. The bottom nav is rendered by a [Scaffold] wrapper
- * and is conditionally visible based on the current route (see
+ * All routes are flat. The bottom nav is a floating overlay bar
+ * (v129 — no Scaffold slot; see [CurioFloatingNavBar]) and is
+ * conditionally visible based on the current route (see
  * [CurioRoutes.bottomNavRoutes]). Topic Reveal renders its own plain
  * bottom band at navbar height instead of the bar (see TopicRevealScreen);
  * other push destinations like Picker/Capture/Detail/Settings/Lightbox
@@ -354,27 +351,12 @@ fun CurioNavHost(
     }
 
     // The floating explore bubble now lives in the explore service's overlay
-    // window (over other apps), so the Scaffold simply fills the screen.
+    // window (over other apps), so the root Box simply fills the screen.
     // v27t — the root also tracks the pointer (hover / press / wheel) so the
     // pet's eyes follow the cursor anywhere on screen (Chromebook / desktop).
+    // v129 — no Scaffold: the root Box hosts the page Row directly and the
+    // floating pill bar as an overlay on top (see below).
     Box(modifier = Modifier.fillMaxSize().then(PetPointer.trackerModifier())) {
-        Scaffold(
-            bottomBar = {
-                if (!wide && showBottomBar) {
-                    // v124 — the phone bottom nav is the floating pill bar
-                    // (icons, active tab expands its label).
-                    CurioFloatingNavBar(navController = navController)
-                }
-            },
-            // Every screen applies its own statusBarsPadding().  This Scaffold
-            // has no topBar, so without pinning the insets to the bottom only
-            // M3 would add the status-bar inset to innerPadding AND the screens
-            // would add it again — a double top gap (huge empty space above the
-            // status bar).  Screens without a bottom bar still get the nav-bar
-            // inset from here.
-            contentWindowInsets = WindowInsets.navigationBars,
-            modifier = Modifier.fillMaxSize()
-        ) { innerPadding ->
         Row(modifier = Modifier.fillMaxSize()) {
             if (wide && showBottomBar) {
                 // Wide windows: the rail sits at the left edge, full height,
@@ -385,13 +367,20 @@ fun CurioNavHost(
                 )
             }
             Box(
-                // The content area keeps the scaffold insets (bottom bar
-                // height + nav-bar inset) exactly as before; wide windows
-                // just add the centered max-width cap.
+                // v129 — no Scaffold: page content runs full-bleed and the
+                // floating pill bar is a true overlay drawn ON TOP of the
+                // page (no painted bottom slot, so no strip behind the
+                // pill). Tab pages paint their own backgrounds to the very
+                // bottom and clear the pill themselves; every other route
+                // keeps the nav-bar inset the Scaffold's contentWindowInsets
+                // used to deliver.
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(innerPadding)
+                    .then(
+                        if (showBottomBar && !wide) Modifier
+                        else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                    )
                     .padding(bottom = revealBottomBarPlaceholder),
                 contentAlignment = Alignment.Center
             ) {
@@ -759,7 +748,17 @@ fun CurioNavHost(
         }
             }
         }
-    }
+        // v129 — the floating pill bar is now a true overlay on the page
+        // (Scaffold removed): it sits above the NavHost content, aligned to
+        // the bottom center, so no painted slot / strip sits behind it. It
+        // draws over the page's own full-bleed background; the tab pages
+        // clear it themselves (see Home / Spin / Cabinet bottom padding).
+        if (!wide && showBottomBar) {
+            CurioFloatingNavBar(
+                navController = navController,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
 
     // Keep the tour controls inside the existing root Box. The Row is a
     // small direct child, not a full-screen transparent hit-test layer.
@@ -874,7 +873,7 @@ fun CurioNavHost(
     }
 
     // v8.8 — the floating Curio pet: a global overlay drawn above the whole
-    // Scaffold (over the bottom bar too). Renders only while the pet layer,
+    // NavHost (over the floating pill bar too). Renders only while the pet layer,
     // the floating toggle and the pet's awake state are on; it wanders, can
     // be dragged anywhere, long-pressed home into its house, and naps back
     // after a long idle. v10 — it stays out only during splash/crash gates.

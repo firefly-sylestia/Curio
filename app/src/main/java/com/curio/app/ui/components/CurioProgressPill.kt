@@ -104,13 +104,17 @@ fun CurioProgressPill(
     // untouched).
     var editorPrefill by remember { mutableStateOf<Int?>(null) }
     // v126 — an alternate-edition pill (books): when the topic data carries
-    // a second common edition with a HUGE page gap, a small "or N pp ·
+    // a second common edition with a big page gap, a small "or N pp ·
     // Edition" pill renders beside the main one. Tapping it opens the
-    // editor pre-set to that count (Save applies it). Only shown when the
-    // gap is genuinely large (≥ 20% of the primary target).
+    // editor pre-set to that count (Save applies it).
+    // v128 — threshold lowered 20% → 8%: real translation/edition gaps
+    // (Rutherford vs Grossman Don Quixote, Denny vs Signet Les Misérables,
+    // etc.) run 8–16%, so the old ≥20% rule hid 4 of the 5 books that
+    // carried alt data. 8% still excludes trivial trim/font variance
+    // (3–5%).
     val altCount = topic.altPageCount
     val altGapHuge = altCount != null && altCount > 0 &&
-        abs(altCount - bakedTarget) >= (bakedTarget * 0.20).toInt()
+        abs(altCount - bakedTarget) >= (bakedTarget * 0.08).toInt()
 
     if (showEditor) {
         CurioProgressEditorDialog(
