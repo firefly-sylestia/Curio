@@ -2121,6 +2121,10 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     // hit-circle there toggles the theme mode directly.
                     // Always-on per the user (no Settings toggle).
                     val sunMoonTap = 48.dp
+                    // v181 — resolve the theme in COMPOSITION: isCurioDarkTheme
+                    // is @Composable and can't run inside the clickable lambda
+                    // (CI caught it at 2132).
+                    val isDarkNow = isCurioDarkTheme()
                     Box(
                         modifier = Modifier
                             .offset(x = 268.8.dp - sunMoonTap / 2, y = 52.08.dp - sunMoonTap / 2)
@@ -2129,7 +2133,7 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             .clickable {
                                 AppPreferences.setThemeMode(
                                     context,
-                                    if (isCurioDarkTheme()) AppPreferences.THEME_LIGHT
+                                    if (isDarkNow) AppPreferences.THEME_LIGHT
                                     else AppPreferences.THEME_DARK
                                 )
                             }

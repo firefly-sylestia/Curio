@@ -492,6 +492,14 @@ private fun CategoryConstellation(
     // can't run inside the Canvas draw lambda below; recomputing the small
     // map per recomposition is cheap).
     val accents = nodes.associate { (id, _) -> id to CurioCategories.byId(id).themedAccent() }
+    // v181 — theme-aware link inks (audit fix, same as the drawer map: the
+    // old steel-blue at 0.22 alpha vanished on the light card surface).
+    // Resolved in COMPOSITION — isCurioDarkTheme can't run in the Canvas
+    // draw lambda below.
+    val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.32f)
+                    else Color(0xFF5F7E9A).copy(alpha = 0.50f)
+    val fissureColor = if (isCurioDarkTheme()) Color(0xFFD9A85C).copy(alpha = 0.30f)
+                       else Color(0xFFA97F3C).copy(alpha = 0.45f)
 
     Canvas(
         modifier = modifier.pointerInput(explored, laneCounts, laneRecent) {
@@ -511,21 +519,37 @@ private fun CategoryConstellation(
         val w = size.width
         val h = size.height
         val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
-        // Connect neighbours in lane order + one cross-fissure link.
+        // v181 — nearest-neighbour WEB: every star links to its 2 closest
+        // stars, so the constellation reads as one connected map (the old
+        // lane-order chain + single fissure were nearly invisible in light
+        // mode). Each pair is deduped; the gold fissure below bridges the
+        // two hemispheres.
+        val links = LinkedHashSet<Pair<Int, Int>>()
         nodes.indices.forEach { i ->
-            val a = pts[i]
-            val b = pts[(i + 1) % nodes.size]
+            val nearest = nodes.indices
+                .filter { it != i }
+                .sortedBy { j ->
+                    val dx = pts[i].x - pts[j].x
+                    val dy = pts[i].y - pts[j].y
+                    dx * dx + dy * dy
+                }
+                .take(2)
+            nearest.forEach { j ->
+                links.add(if (i < j) i to j else j to i)
+            }
+        }
+        links.forEach { (a, b) ->
             drawLine(
-                color = Color(0xFF7FAFD8).copy(alpha = 0.22f),
-                start = a,
-                end = b,
+                color = linkColor,
+                start = pts[a],
+                end = pts[b],
                 strokeWidth = 1.dp.toPx()
             )
         }
         if (nodes.size >= 3) {
             val mid = nodes.size / 2
             drawLine(
-                color = Color(0xFFD9A85C).copy(alpha = 0.20f),
+                color = fissureColor,
                 start = pts[mid - 1],
                 end = pts[mid],
                 strokeWidth = 1.dp.toPx()

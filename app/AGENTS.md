@@ -1625,6 +1625,29 @@ app/src/main/java/com/curio/app/
     that corner is free), alphas bumped 0.07/0.10 → 0.10/0.14. NOTE: the
     FilterSheet hero (line ~1814) has the SAME placement bug — left
     unfixed (user asked about the picker only).
+- **v181 — CI compile fix (moon/sun tap) + Stats constellation web.**
+  User pasted the CI failure: `HomeScreen.kt:2132:41 @Composable
+  invocations can only happen from the context of a @Composable function`
+  — "fix this too", plus "Connect the stars" for the Stats page.
+  - CI FIX: the v177 moon/sun tap called `isCurioDarkTheme()` INSIDE the
+    `clickable {}` lambda (non-composable context) — a direct violation
+    of COMPILE-SAFETY rule 3 ("onClick lambdas are NOT @Composable
+    contexts"). Fixed by resolving `val isDarkNow = isCurioDarkTheme()`
+    in composition before the clickable. LESSON: it shipped because CI
+    runs async — the local "verification" (grep for references) didn't
+    catch a @Composable call inside a lambda; ALWAYS grep for composable
+    helpers (isCurioDarkTheme/themedAccent/…) with `-B2 -A2` context and
+    eyeball every occurrence that lands inside a lambda. A full scan of
+    the four files touched this session found no other violations.
+  - STATS WEB (`CategoryConstellation` in StatsScreen.kt): the old
+    lane-order chain + one gold fissure used `#7FAFD8 @ 0.22` — the same
+    light-mode invisibility the drawer map had. The stars are now linked
+    as a NEAREST-NEIGHBOUR web (each star → its 2 closest stars,
+    deduped via `LinkedHashSet<Pair<Int,Int>>` — kotlin.collections
+    typealias, auto-imported) with theme-aware inks resolved in
+    composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
+    `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
+    fissure still bridges the two hemispheres).
 - **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
   accent.** User: "the navbar morphe open is still tooo rapid aah, make i
   even more sloer. and in cabinet all use blue or red or whatever the spin
