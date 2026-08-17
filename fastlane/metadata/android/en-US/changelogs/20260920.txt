@@ -1,7 +1,9 @@
 ADD
-- Drawer: the curiosity map is now real — a constellation of your explored lanes with rounded lane icons (tap a dot for that lane's stats), no placeholder numbers, and an empty state until you've explored something.
+- Drawer: the curiosity galaxy is a constant sky now — the card box is gone, the stars always show, and the lane points only light up as lanes get something added (tap a point for that lane's stats).
+- Drawer: the galaxy now carries your lifetime totals — spins, explores, saves, quotes, pins, likes, dislikes, daily quests and the badge count.
+- Drawer: every menu button is opaque now — no more transparent rows or see-through group cards.
 - Drawer: the banner's sky now runs all the way to the torn edge (a sky tear), and the stars/moon are visible in light mode too.
-- Drawer: new background-less footer illustration, placed lower and more transparent so the version + credits read clearly.
+- Drawer: the footer illustration is flat and fully opaque — cropped a little shorter, no shadow or border, with the version + credits sitting cleanly below it.
 - Stats: the "Your Curiosity" header's stars/moon are tuned for light mode.
 - Offline voice-to-text: recorded voice notes transcribe straight on your device (Vosk) — a Transcribe button on the entry page and the transcript lives in its own box below the recording with an Expand button for the full text.
 - Offline model: Settings → Recording lets you pick a model by quality and size (English / multilingual / Indian English), download it in-app with a progress bar, and delete it anytime — no internet needed while transcribing.
