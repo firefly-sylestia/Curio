@@ -125,7 +125,6 @@ import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -312,6 +311,15 @@ fun PetDesignerScreen(navController: NavController) {
     var importDraft by rememberSaveable { mutableStateOf<String?>(null) }
     // A transient confirmation ("Saved!" / "Copied!") shown under the actions.
     var toast by remember { mutableStateOf<String?>(null) }
+    // v156 — the toast shows as a transient pill under the floating action
+    // capsule; it auto-clears after ~3s (the old toolbar's persistent status
+    // line is gone).
+    LaunchedEffect(toast) {
+        if (toast != null) {
+            delay(3000)
+            toast = null
+        }
+    }
     // Preview mood so the user can see the design in different poses.
     var previewMood by rememberSaveable { mutableStateOf(CurioPet.Mood.HAPPY) }
 
@@ -606,12 +614,9 @@ fun PetDesignerScreen(navController: NavController) {
             )
         }
         val wide = windowWidthSizeClass().isWide
-        // v109 — the list state drives the hero's scroll-away translation
-        // (the tear now scrolls with the content instead of staying pinned).
-        // Declared in the OUTER Box scope, not inside the Column lambda: the
-        // LazyColumn (inside the Column) AND the overlaid hero Box (a Column
-        // SIBLING, drawn on top) both read it — a val inside the Column's
-        // content lambda is invisible to the sibling overlay.
+        // v156 — the list drives the whole page now: the torn banner is the
+        // FIRST ITEM (see below), so the tear rides away with the content
+        // when the user scrolls — no overlay translation anymore.
         val listState = rememberLazyListState()
         Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -622,73 +627,23 @@ fun PetDesignerScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = SettingsHeroTotalHeight + 8.dp,
                 bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // ── Sticky studio toolbar: the ONE place for save / import /
-            //    export / undo / redo / reset (v8.52 — the old pinned
-            //    footer SaveArea is gone, so no duplicate buttons). ──────
-            // v109 — the hero scrolls away now, so the pinned toolbar must
-            // clear the status bar (it used to hide behind the overlaid
-            // hero); the container wears the page background so the pinned
-            // bar reads as a solid strip.
-            stickyHeader {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    EditorToolbar(
-                        design = design,
-                        dirty = design != initialDesign,
-                        toast = toast,
-                        canUndo = undoStack.isNotEmpty(),
-                        canRedo = redoStack.isNotEmpty(),
-                        onUndo = { undo() },
-                        onRedo = { redo() },        onReset = {
-            pushUndo()
-                activeCustomSlot = null
-            design = PetDesign.DEFAULT
-        },
-                        onSave = {
-                            if (design.isCustom) {
-                                // v27v — saving into a custom slot reapplies
-                                // the custom-pet defaults (accessories /
-                                // antenna / tail / belly off, effects on);
-                                // the plain Curie save keeps the working
-                                // design exactly as edited.
-                                val slot = activeCustomSlot
-                                val saved = if (slot != null) design.withCustomPetDefaults() else design
-                                AppPreferences.setPetDesign(context, saved.toText())
-                                // v8.56 — saving while editing a custom pet
-                                // also refreshes its slot so the Pets page
-                                // card always shows the latest look.
-                                if (slot != null) {
-                                    AppPreferences.setCustomPet(context, slot, saved.toText())
-                                    toast = "Saved — Custom ${slot + 1} updated"
-                                } else {
-                                    toast = "Saved — Curie wears it everywhere"
-                                }
-                            } else {
-                                AppPreferences.clearPetDesign(context)
-                                // Using the default look also detaches from
-                                // any custom pet slot being edited.
-                                activeCustomSlot = null
-                                toast = "Default look restored"
-                            }
-                        },
-                        onImport = { importMenuOpen = true },
-                        onExport = {
-                            val exportMood = previewMood.name
-                            val exportGrid = if (previewMood == CurioPet.Mood.SLEEPY) "curled" else "body"
-                            val uri = exportPngUri(context, design, exportGrid, exportMood, CurioPet.currentStage())
-                            if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
-                        }
-                    )
-                }
+            // ── The torn rose banner (v156) — the FIRST scrollable item:
+            //    the tear is part of the page's background itself, and it
+            //    scrolls away with the content. The floating action capsule
+            //    (save / undo / redo / share) is a fixed overlay pinned to
+            //    the top of the screen, so it stays while the banner rides
+            //    away under it.
+            item {
+                SettingsHeroHeader(
+                    title = "Pet designer",
+                    subtitle = "Draw your own Curie",
+                    onBack = { navController.popBackStack() },
+                    compact = wide
+                )
             }
 
             // ── Editor page: picker trigger / Editing header (v8.56) ──
@@ -1174,32 +1129,59 @@ fun PetDesignerScreen(navController: NavController) {
         )
         }
 
-        // v109 — the hero tear is now SCROLLABLE, not sticky: it translates
-        // up 1:1 with the list so it rides away with the content instead of
-        // staying pinned while rows slide under the seam. Drawn on top of
-        // the list as before, so the tear stays crisp over the content it
-        // leaves behind.
-        // v113 — FIX: `viewportStartOffset` is the viewport start in CONTENT
-        // coordinates, NOT the scroll position — with this list's top content
-        // padding (SettingsHeroTotalHeight + 8) it reads NEGATIVE at rest, so
-        // the old `-viewportStartOffset` translated the hero DOWN by the
-        // whole hero height and it floated mid-screen. Adding
-        // `beforeContentPadding` (the same top padding) recovers the true
-        // scroll: 0 at rest, +S once scrolled — the hero starts pinned to
-        // the top and rides up 1:1 from there.
-        Box(
-            modifier = Modifier.graphicsLayer {
-                val info = listState.layoutInfo
-                translationY = -(info.viewportStartOffset + info.beforeContentPadding).toFloat()
+        // v156 — the floating action capsule pinned to the TOP of the
+        // screen: save / undo / redo / reset / share / import. At rest it
+        // floats over the torn banner's top row (the back pill rides inside
+        // the banner itself); as the banner scrolls away, the capsule stays
+        // pinned to the top.
+        StudioFloatingToolbar(
+            design = design,
+            dirty = design != initialDesign,
+            toast = toast,
+            canUndo = undoStack.isNotEmpty(),
+            canRedo = redoStack.isNotEmpty(),
+            onUndo = { undo() },
+            onRedo = { redo() },
+            onReset = {
+                pushUndo()
+                activeCustomSlot = null
+                design = PetDesign.DEFAULT
+            },
+            onSave = {
+                if (design.isCustom) {
+                    // v27v — saving into a custom slot reapplies
+                    // the custom-pet defaults (accessories /
+                    // antenna / tail / belly off, effects on);
+                    // the plain Curie save keeps the working
+                    // design exactly as edited.
+                    val slot = activeCustomSlot
+                    val saved = if (slot != null) design.withCustomPetDefaults() else design
+                    AppPreferences.setPetDesign(context, saved.toText())
+                    // v8.56 — saving while editing a custom pet
+                    // also refreshes its slot so the Pets page
+                    // card always shows the latest look.
+                    if (slot != null) {
+                        AppPreferences.setCustomPet(context, slot, saved.toText())
+                        toast = "Saved — Custom ${slot + 1} updated"
+                    } else {
+                        toast = "Saved — Curie wears it everywhere"
+                    }
+                } else {
+                    AppPreferences.clearPetDesign(context)
+                    // Using the default look also detaches from
+                    // any custom pet slot being edited.
+                    activeCustomSlot = null
+                    toast = "Default look restored"
+                }
+            },
+            onImport = { importMenuOpen = true },
+            onExport = {
+                val exportMood = previewMood.name
+                val exportGrid = if (previewMood == CurioPet.Mood.SLEEPY) "curled" else "body"
+                val uri = exportPngUri(context, design, exportGrid, exportMood, CurioPet.currentStage())
+                if (uri != null) sharePng(context, uri) else toast = "Couldn't render PNG"
             }
-        ) {
-            SettingsHeroHeader(
-                title = "Pet designer",
-                subtitle = "Draw your own Curie",
-                onBack = { navController.popBackStack() },
-                compact = wide
-            )
-        }
+        )
 
         // ── Draw & switch preview picker overlay (v8.49) ─────────────
         pickerCategory?.let { category ->
@@ -1393,6 +1375,15 @@ private fun PetStudioBottomNav(
     // elevated container with capsule tabs. The NavHost content is already
     // padded above the system nav-bar inset, so the bar floats without
     // consuming it again.
+    // v156 — the user found the old full-width capsule "stretched all the
+    // way": the bar is now a CONTENT-SIZED capsule centered at the bottom,
+    // exactly like the main floating nav bar (the wrapping Box centers it).
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
     Surface(
         shape = RoundedCornerShape(50),
         // v149 — same dynamic container as the floating nav bar (the pet
@@ -1403,10 +1394,7 @@ private fun PetStudioBottomNav(
         border = if (isCurioDarkTheme())
             BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
         else null,
-        shadowElevation = 6.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+        shadowElevation = 6.dp
     ) {
         Row(
             modifier = Modifier.padding(7.dp),
@@ -1426,6 +1414,7 @@ private fun PetStudioBottomNav(
                 onSelect(PetDesignerPage.SETTINGS)
             }
         }
+    }
     }
 }
 
@@ -1500,12 +1489,16 @@ private fun RowScope.PetStudioTab(
 }
 
 /**
- * v8.52 — the sticky studio toolbar: ONE compact row with Save, Undo, Redo,
- * Reset, Export and Import, plus a slim status line. Replaces the old pinned
- * footer SaveArea — every action has exactly one home (no duplicate buttons).
+ * v156 — the floating studio action capsule: save / undo / redo / reset /
+ * share / import in ONE compact pill pinned to the TOP of the screen (the
+ * old full-width sticky strip is gone — the user asked for the actions at
+ * the top and sticky). At rest it floats over the torn banner's top row; it
+ * stays pinned while the banner scrolls away. The Save pill wears a small
+ * dot while there are unsaved changes; [toast] messages show as a transient
+ * pill just below the capsule (auto-cleared by the caller).
  */
 @Composable
-private fun EditorToolbar(
+private fun StudioFloatingToolbar(
     design: PetDesign,
     dirty: Boolean,
     toast: String?,
@@ -1518,69 +1511,81 @@ private fun EditorToolbar(
     onImport: () -> Unit,
     onExport: () -> Unit
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.background,
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .align(Alignment.TopEnd)
+            .statusBarsPadding()
+            .padding(top = 8.dp, end = 12.dp)
     ) {
-        Column(modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)) {
+        Surface(
+            shape = RoundedCornerShape(50),
+            // v149 — same dynamic container as the floating nav bar (the pet
+            // page publishes no wash, so this resolves to the elevated
+            // surface) + a dark-mode hairline rim.
+            color = curioFloatingNavContainer(null),
+            border = if (isCurioDarkTheme())
+                BorderStroke(1.dp, Color.White.copy(alpha = 0.10f))
+            else null,
+            shadowElevation = 6.dp
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // Save — the primary action: a compact accent pill with a
+                // dirty dot while there are unsaved changes.
                 Surface(
                     shape = RoundedCornerShape(50),
                     color = MaterialTheme.colorScheme.primary,
                     onClick = onSave,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.height(38.dp)
                 ) {
-                    Text(
-                        if (design.isCustom) "Save design" else "Use default",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(vertical = 10.dp)
-                    )
-                }
-                ToolbarIcon(CurioIcons.Undo, "Undo", canUndo) { onUndo() }
-                ToolbarIcon(CurioIcons.Redo, "Redo", canRedo) { onRedo() }
-                ToolbarIcon(CurioIcons.Refresh, "Reset", design.isCustom) { onReset() }
-                ToolbarIcon(CurioIcons.Share, "Export PNG", true) { onExport() }
-                ToolbarIcon(CurioIcons.Download, "Import", true) { onImport() }
-            }
-            Spacer(Modifier.height(2.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                when {
-                    dirty -> Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(7.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                        )
-                        Spacer(Modifier.width(6.dp))
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
-                            "Unsaved changes",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            if (design.isCustom) "Save" else "Default",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            maxLines = 1
                         )
+                        if (dirty) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f))
+                            )
+                        }
                     }
-                    toast != null -> Text(
-                        toast,
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    else -> Text(
-                        "Edits apply to your pet — Save keeps them",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
-                    )
                 }
+                ToolbarIcon(CurioIcons.Undo, "Undo", canUndo, size = 38.dp) { onUndo() }
+                ToolbarIcon(CurioIcons.Redo, "Redo", canRedo, size = 38.dp) { onRedo() }
+                ToolbarIcon(CurioIcons.Refresh, "Reset", design.isCustom, size = 38.dp) { onReset() }
+                ToolbarIcon(CurioIcons.Share, "Share design", true, size = 38.dp) { onExport() }
+                ToolbarIcon(CurioIcons.Download, "Import", true, size = 38.dp) { onImport() }
+            }
+        }
+        // Transient feedback — a small pill under the capsule, auto-cleared
+        // by the caller's LaunchedEffect(toast).
+        if (toast != null) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 6.dp,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 58.dp)
+            ) {
+                Text(
+                    text = toast,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
             }
         }
     }
@@ -1592,6 +1597,7 @@ private fun ToolbarIcon(
     icon: String,
     contentDescription: String,
     enabled: Boolean,
+    size: Dp = 44.dp,
     onClick: () -> Unit
 ) {
     Surface(
@@ -1600,7 +1606,7 @@ private fun ToolbarIcon(
         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         onClick = onClick,
         enabled = enabled,
-        modifier = Modifier.size(44.dp)
+        modifier = Modifier.size(size)
     ) {
         Box(contentAlignment = Alignment.Center) {
             CurioIcon(

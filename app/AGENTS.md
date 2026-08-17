@@ -919,6 +919,32 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
+- **v156 — Pet Designer layout rework (user-confirmed): compact bottom
+  nav, floating top action capsule, tear scrolls away in-flow.** User:
+  "the pet designer floating nav is stretched all the way fix that. and
+  place the save undo redo save and share at the top and sticky, and
+  make the tear design be on the background itself and it scrolls away
+  when i scroll down". Confirmed via ask: bottom nav = compact centered
+  capsule (like the main bar); actions = floating pill over the banner
+  (pinned while scrolling); tear = banner becomes the first scrollable
+  item (scrolls away in-flow). (1) `PetStudioBottomNav` lost its
+  `fillMaxWidth()` capsule — a wrapping `Box(fillMaxWidth, Center)` now
+  holds a CONTENT-SIZED capsule centered at the bottom. (2) The old
+  full-width `EditorToolbar` (a stickyHeader inside the list, below the
+  hero at rest) became `StudioFloatingToolbar`: ONE rounded capsule
+  (`curioFloatingNavContainer` + dark rim) pinned `TopEnd` below the
+  status bar — compact Save text pill (with a dirty dot) + 38dp
+  Undo/Redo/Reset/Share/Import icon circles (`ToolbarIcon` gained a
+  `size` param). Toasts now auto-clear (`LaunchedEffect(toast) { delay(3000) }`)
+  and show as a transient pill under the capsule. (3) The torn banner
+  moved from the overlay graphicsLayer-translation Box (v109/v113) INTO
+  the list as its first `item` — the tear is part of the page background
+  and scrolls away naturally; the overlay Box, the stickyHeader, and the
+  `SettingsHeroTotalHeight` top padding are gone. LESSON: a "sticky
+  hero that scrolls away" is simpler and more robust as the list's first
+  item than an overlay Box with `viewportStartOffset` translation math —
+  and a floating action capsule pinned to the screen edge replaces a
+  sticky-header strip without the status-bar dance.
 - **v155 — light-mode nav capsule finally shows the page tint + pill
   animations smoothed.** User: "the active indicator gets the theme
   dynamic color but in light mode the background of it doesn't so make it

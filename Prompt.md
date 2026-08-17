@@ -1,6 +1,37 @@
 # Prompt.md — Request log
 
-## Current request — light-mode nav capsule tint + smoother pill animations
+## Current request — Pet Designer layout rework (compact nav, floating top actions, tear scrolls away) — commit only, NO push
+
+User: "the pet designer floating nav is stretched all the way fix that. and
+place the save undo redo save and share at the top and sticky, and make the
+tear design be on the background itself and it scrolls away when i scroll
+down, dont push this".
+
+Confirmed via ask_user: bottom nav = compact centered capsule; actions =
+floating pill over the banner pinned while scrolling; tear = banner becomes
+the first scrollable item.
+
+### Changes (PetDesignerScreen.kt)
+1. `PetStudioBottomNav`: dropped `fillMaxWidth()` — a wrapping
+   `Box(fillMaxWidth, contentAlignment = Center)` holds a content-sized
+   capsule centered at the bottom (like the main nav bar).
+2. `EditorToolbar` (full-width stickyHeader strip below the hero) replaced
+   by `StudioFloatingToolbar`: ONE rounded capsule pinned `TopEnd` below
+   the status bar — compact Save text pill (dirty dot) + 38dp
+   Undo/Redo/Reset/Share/Import icon circles (`ToolbarIcon` gained a
+   `size` param). Toasts auto-clear (`LaunchedEffect(toast)` + delay(3000))
+   and render as a transient pill under the capsule.
+3. The torn banner moved OUT of the overlay graphicsLayer-translation Box
+   INTO the list as its first `item` — the tear is part of the page
+   background and scrolls away naturally. Removed: the overlay hero Box,
+   the stickyHeader, the `SettingsHeroTotalHeight` import/top padding.
+
+### Notes
+- No Gradle build here (CI validates on push). User said DO NOT push —
+  committed only.
+- Docs: changelog FIX line, AGENTS.md v156 note, Prompt.md.
+
+## Earlier completed request — light-mode nav capsule tint + smoother pill animations
 
 User: "the active indicator gets the theme dynamic color but in light mode the
 background of it doesn't so make it get the background tint. and also the

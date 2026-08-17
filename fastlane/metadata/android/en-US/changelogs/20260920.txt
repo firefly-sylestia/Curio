@@ -28,6 +28,7 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Pet Designer: the studio bottom bar is a compact centered capsule now (the old full-width capsule read stretched), the Save / Undo / Redo / Share actions float in one pill pinned to the top of the screen (it stays while you scroll), and the torn rose banner is part of the scrolling page — the tear rides away as you scroll down.
 - Navigation: the floating pill bar's background now actually shows the page's tint in light mode (the old lifted capsule washed it out to a plain parchment), and the tab pills glide smoother — the active fill fades in with the pill's expansion instead of snapping, the icon tint crossfades, and the width spring no longer bounces on settle.
 - Navigation: the bottom pill bar is bigger (60dp pills, 128dp expanded) so the tabs read proper and the active label has real room — the Topic Reveal Like/Dislike pill matches the same 60dp size now.
 - Navigation: the floating pill bar is now theme-aware and dynamic — the bar's container follows each page's tint (the Spin lane's wash, the Cabinet's filter wash, Home's rose) and the active tab wears the page's category color with readable ink; in dark mode the bar draws a hairline rim so it reads elevated on the near-black pages.
