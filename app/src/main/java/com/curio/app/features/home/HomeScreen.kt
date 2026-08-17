@@ -134,6 +134,7 @@ import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.ProfileAvatarImage
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.SpinPickerRequest
 import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -1018,7 +1019,14 @@ fun HomeScreen(navController: NavController) {
                 if (recentPreview.isEmpty()) {
                     FirstTimeEmpty(
                         surface = MaterialTheme.colorScheme.surfaceContainerLow,
-                        onPickCategory = { navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true } },
+                        onPickCategory = {
+                            // v142 — wire the first-run "Pick a lane" to the
+                            // SPIN screen's own category picker sheet (the same
+                            // lane chips + Mix presets the deck uses) instead
+                            // of the separate full-screen picker page.
+                            SpinPickerRequest.pending = true
+                            navController.navigateToTab(CurioRoutes.SPIN)
+                        },
                         onShuffleSurprise = { navController.navigateToTab(CurioRoutes.SPIN) }
                     )
                 } else {

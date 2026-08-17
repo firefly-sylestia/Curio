@@ -138,6 +138,7 @@ import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.SpinPickerRequest
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
@@ -538,6 +539,17 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     }
     var showFilters by remember { mutableStateOf(false) }
     var showCategoryPicker by remember { mutableStateOf(false) }
+
+    // v142 — consume the one-shot "open the picker" request from Home's
+    // first-run "Pick a lane" (it navigates to the Spin tab with the flag
+    // set); keyed on the flag so it also fires when the tab was already
+    // composed. Opens the SAME category picker sheet the lane chips use.
+    LaunchedEffect(SpinPickerRequest.pending) {
+        if (SpinPickerRequest.pending) {
+            SpinPickerRequest.pending = false
+            showCategoryPicker = true
+        }
+    }
 
     // Broader OR-based filtering: a topic matches if it has ANY of the
     // selected tags AND its subtype is in the selected subtypes (or no

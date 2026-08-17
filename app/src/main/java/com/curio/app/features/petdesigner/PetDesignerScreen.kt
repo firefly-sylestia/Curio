@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -45,9 +44,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -1375,27 +1371,40 @@ private fun PetStudioBottomNav(
     page: PetDesignerPage,
     onSelect: (PetDesignerPage) -> Unit
 ) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 3.dp,
-        // The NavHost content is already padded above the system nav-bar
-        // inset, so the bar must not consume it again (double padding).
-        windowInsets = WindowInsets(0.dp),
-        modifier = Modifier.fillMaxWidth()
+    // v142 — restyled to the app's FLOATING PILL BAR language (the main
+    // app replaced its stock M3 bar with this in v124/v129): a rounded,
+    // elevated container with capsule tabs — the active tab wears the
+    // SOLID secondary fill + onSecondary ink. Same recipe as
+    // CurioFloatingNavBar. The NavHost content is already padded above the
+    // system nav-bar inset, so the bar floats without consuming it again.
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 6.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
-        PetStudioTab(CurioIcons.Pets, "Pets", page == PetDesignerPage.PETS) {
-            onSelect(PetDesignerPage.PETS)
-        }
-        PetStudioTab(CurioIcons.Brush, "Editor", page == PetDesignerPage.EDITOR) {
-            onSelect(PetDesignerPage.EDITOR)
-        }
-        PetStudioTab(CurioIcons.Settings, "Settings", page == PetDesignerPage.SETTINGS) {
-            onSelect(PetDesignerPage.SETTINGS)
+        Row(
+            modifier = Modifier.padding(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            PetStudioTab(CurioIcons.Pets, "Pets", page == PetDesignerPage.PETS) {
+                onSelect(PetDesignerPage.PETS)
+            }
+            PetStudioTab(CurioIcons.Brush, "Editor", page == PetDesignerPage.EDITOR) {
+                onSelect(PetDesignerPage.EDITOR)
+            }
+            PetStudioTab(CurioIcons.Settings, "Settings", page == PetDesignerPage.SETTINGS) {
+                onSelect(PetDesignerPage.SETTINGS)
+            }
         }
     }
 }
 
-/** One icon + label tab in the studio bottom bar. */
+/** One capsule tab in the studio pill bar — active wears the solid
+ *  secondary fill (onSecondary ink), inactive stays transparent. */
 @Composable
 private fun RowScope.PetStudioTab(
     icon: String,
@@ -1403,32 +1412,39 @@ private fun RowScope.PetStudioTab(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    NavigationBarItem(
-        selected = selected,
-        onClick = onClick,
-        icon = {
+    val tabInk = if (selected) MaterialTheme.colorScheme.onSecondary
+                 else MaterialTheme.colorScheme.onSurfaceVariant
+    Box(
+        modifier = Modifier
+            .weight(1f)
+            .height(52.dp)
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (selected) MaterialTheme.colorScheme.secondary
+                else Color.Transparent
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             CurioIcon(
                 name = icon,
                 contentDescription = label,
+                tint = tabInk,
                 size = 22.dp
             )
-        },
-        label = {
             Text(
-                label,
-                style = MaterialTheme.typography.labelSmall.copy(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
-                )
+                ),
+                color = tabInk
             )
-        },
-        colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            selectedTextColor = MaterialTheme.colorScheme.onSurface,
-            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    )
+        }
+    }
 }
 
 /**

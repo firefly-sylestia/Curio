@@ -138,6 +138,10 @@ private fun safeDecode(raw: String?): String =
 private fun isRevealRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route == CurioRoutes.REVEAL
 
+/** v142 — the Pet Designer opens with the reveal's clean fade (see below). */
+private fun isPetDesignerRoute(entry: NavBackStackEntry): Boolean =
+    entry.destination.route?.substringBefore("/") == CurioRoutes.PET_DESIGNER
+
 /** True when the route is the saved-entry detail page (any entry id). */
 private fun isDetailRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route?.substringBefore("/") == CurioRoutes.ENTRY_DETAIL.substringBefore("/")
@@ -248,6 +252,14 @@ fun CurioNavHost(
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
     val showBottomBar =
         routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+    // v142 — full-bleed-bottom routes: like the tab pages and the Topic
+    // Reveal, these pages paint their own backgrounds to the very bottom
+    // edge and clear the gesture bar themselves — no reserved nav-bar slot
+    // from the NavHost (the reveal's old 80dp band was removed in v132;
+    // Manage Categories gets the same edge-to-edge treatment).
+    val fullBleedBottomRoutePrefixes = setOf(
+        CurioRoutes.MANAGE_CATEGORIES.substringBefore("/")
+    )
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showDoneDialog by rememberSaveable { mutableStateOf(false) }
@@ -381,7 +393,7 @@ fun CurioNavHost(
                     .weight(1f)
                     .fillMaxHeight()
                     .then(
-                        if (showBottomBar && !wide) Modifier
+                        if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
                     ),
                 contentAlignment = Alignment.Center
@@ -433,6 +445,10 @@ fun CurioNavHost(
                     // the hero (its staggered entrance) reads cleanly.
                     isRevealRoute(targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                    // v142 — Pet Designer opens with the reveal's clean fade
+                    // (the scale-pop read as a mechanical zoom beside it).
+                    isPetDesignerRoute(targetState) ->
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Entry Detail and the modal-style push screens pop up
                     // from the screen center (scale + fade) like a modal — they
                     // never slide in from the side (v8.38 detail; v8.4x the
@@ -472,6 +488,8 @@ fun CurioNavHost(
                     // vanish under the ~450ms morph).
                     isRevealRoute(targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                    isPetDesignerRoute(targetState) ->
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // The screen under the detail pop-up / modal push dims out
                     // over the SAME 450ms as the pop — no slide, and the longer
                     // fade masks the bottom-bar space release as a gentle dim
@@ -505,6 +523,8 @@ fun CurioNavHost(
                     // directional slide would fight it.
                     initialState.destination.route == CurioRoutes.REVEAL ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                    isPetDesignerRoute(initialState) ->
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping back from Entry Detail / a pop screen: the page
                     // below fades back in while the modal shrinks away (v8.38
                     // detail; v8.4x pop screens).
@@ -528,6 +548,8 @@ fun CurioNavHost(
                     // Popping Topic Reveal: fade the page out under the
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                    isPetDesignerRoute(initialState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // The detail page / pop screen shrinks back down as it
                     // pops away — the matched fade keeps the shrink smooth over

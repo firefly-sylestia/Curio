@@ -102,6 +102,17 @@ object CurioDrawerState {
 }
 
 /**
+ * v142 — one-shot "open the Spin category picker" request. Home's first-run
+ * "Pick a lane" sets [pending] before navigating to the Spin tab, and
+ * SpinScreen consumes it (opens its CategoryPickerSheet — the same lane
+ * chips + Mix presets the deck uses) when it observes it. Lives here with
+ * the other cross-screen UI state (see [CurioDrawerState]).
+ */
+object SpinPickerRequest {
+    var pending by mutableStateOf(false)
+}
+
+/**
  * Curio's persistent bottom navigation — see Curio navigation contract.
  *
  * Three destinations:

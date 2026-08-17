@@ -891,6 +891,34 @@ app/src/main/java/com/curio/app/
   when content in the SAME position has the SAME content on both ends —
   matching the card's bounds alone isn't enough if pills/titles swap
   inside it.
+- **v142 — Manage Categories full-bleed bottom; Pet Designer floating
+  pill bar + fade open; first-run "Pick a lane" wired to the Spin picker.**
+  (1) **Manage Categories full-bleed** (per user, confirmed): the NavHost
+  no longer applies `windowInsetsPadding(navigationBars)` to the
+  MANAGE_CATEGORIES route (new `fullBleedBottomRoutePrefixes` set — the
+  v132 reveal precedent); the page's wash runs to the bottom edge and the
+  screen clears the gesture bar itself (`navigationBarsPadding()` on the
+  LazyColumn + scroll indicator). LESSON: the NavHost's generic nav-bar
+  inset for push routes shows as a reserved strip under pages that paint
+  their own wash — full-bleed pages opt out and pad their own list.
+  (2) **Pet Designer** (per user, confirmed "both"): the studio's
+  bottom nav (`PetStudioBottomNav`) was the app's OLD stock M3
+  `NavigationBar` — restyled to the v124/v129 floating pill bar recipe
+  (`surfaceContainerHigh` rounded-50 container, 6dp shadow, solid
+  `secondary` fill + `onSecondary` ink active capsule, 52dp tabs); the
+  removed NavigationBar/WindowInsets imports are gone. The route also
+  opens with the reveal's clean fade (new `isPetDesignerRoute` branches
+  in enter/exit/popEnter/popExit before the scale-pop group) instead of
+  the mechanical zoom. (3) **First-run "Pick a lane"** (HomeScreen
+  `FirstTimeEmpty`) previously opened the separate full-screen
+  `CurioRoutes.PICKER` page; it now sets a one-shot `SpinPickerRequest.pending`
+  flag (new object in CurioBottomNav beside `CurioDrawerState`) and
+  navigates to the Spin TAB, whose `LaunchedEffect(SpinPickerRequest.pending)`
+  opens its own `CategoryPickerSheet` (lane chips + Mix presets). The
+  `LaunchedEffect` is keyed on the flag so it fires even when the Spin
+  tab was already composed. LESSON: a cross-screen "open this sheet"
+  request belongs in a shared state object (the `CurioDrawerState`
+  pattern), not a route arg.
 - **v129 — floating pill bar: Scaffold removed (no strip) + no more
   switch squeeze.** (1) **The strip is gone for real.** The v125 fix
   painted the nav slot with the page wash, but the flat band still read

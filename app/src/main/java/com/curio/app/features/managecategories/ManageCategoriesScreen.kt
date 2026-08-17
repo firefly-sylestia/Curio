@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -147,7 +148,12 @@ fun ManageCategoriesScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                // v142 — full-bleed bottom: the NavHost no longer reserves
+                // the nav-bar slot for this route, so the page clears the
+                // gesture bar itself (the wash runs to the bottom edge).
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding(),
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
@@ -246,6 +252,7 @@ fun ManageCategoriesScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
+                .navigationBarsPadding()
                 .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
         )
 

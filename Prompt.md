@@ -1,36 +1,43 @@
 # Prompt.md — Request log
 
-## Current request — IN PROGRESS (part 1 done): reveal morph pill unification + year pill
+## Current request — COMPLETED: reveal morph pills, pet designer pill bar + fade, manage-categories full-bleed, first-run pick-a-lane wiring
 
-The user asked (three messages, clarifying as they went): (1) make the topic reveal open
-smooth by morphing the pill properly and unifying its style/animation; (2) show the year
-as a pill instead of inside the shuffle-card title; (3) replace the reveal's "Watch for /
-Listen for" with "Director / Author" and vice versa — clarified: the swap is reveal-only,
-keeping the byline at the top corner in BOTH ticket and reveal for a smooth morph.
+The user asked (refined across several messages): (1) make the topic reveal open smoothly
+by morphing the pill properly and unifying its style/animation; (2) show a topic's year as
+a pill instead of inside the shuffle-card title; (3) swap the reveal hero's action pill and
+byline so the byline ("Director / Author") stays in the top corner in BOTH the ticket and
+the reveal (reveal-only change); (4) apply the same style in the Pet Designer (user
+confirmed: pill style AND smoother open); (5) make the Manage Categories page (opened from
+the Spin picker's "Manage categories" button) match the Scaffold-removed full-bleed
+treatment (user confirmed); (6) wire the first-run "Pick a lane" to the Spin screen's
+category picker.
 
-### Part 1 — DONE (v141)
-- **`CurioTopic.titleAndYearQualifier()`** — splits a trailing " (…)" / " — …" qualifier:
-  "Moby-Dick (1851)" → ("Moby-Dick", "1851"); "The Odyssey (c. 8th century BCE)" →
-  ("The Odyssey", "c. 8th century BCE").
-- **Spin ticket (SpinScreen)**: the title renders the BASE name (no year); the top-left
-  corner is now a pill ROW — byline ("Director · Nolan") + year pill (Schedule icon +
-  "1851"), same recipe as before (ink@18%, shape 50, labelMedium bold, h12/v6).
-- **Reveal hero (TopicRevealScreen HeroCard)**: the top-left action badge was REPLACED by
-  the same byline + year pill row (identical recipe — dropped the reveal's old Person
-  icon variant); the title renders the base name; the action pill ("Watch for ~25 min")
-  moved DOWN to the bottom pill row (left slot, weight(1f, fill=false)) next to the
-  subtype. Progress badge at top-right unchanged; the v135 decade tag chip untouched.
-- Net effect: the pill row and title are now IDENTICAL at the same position on both ends
-  of the shared-element morph → the pills stay put while the card grows.
+### Part 1 — reveal morph (v141, pushed fee1fb8)
+- `CurioTopic.titleAndYearQualifier()` — splits a trailing " (…)" / " — …" qualifier.
+- Ticket + hero BOTH show the base title (no year) and a top-left pill ROW: byline +
+  year pill (Schedule icon), identical recipe (ink@18%, shape 50, labelMedium bold,
+  h12/v6) → the pills and titles read identical during the shared-element morph.
+- The reveal hero's action pill ("Watch for ~25 min") moved DOWN to the bottom pill row
+  next to the subtype.
 
-### Remaining parts (from the earlier message, NOT yet started)
-- Apply the same pill style in the Pet Designer.
-- Make "Manage category" in the category-explore option match the Scaffold-removed
-  full-bleed treatment.
-- Wire the first-run "Pick a lane" to the Spin screen's category picker.
+### Part 2 — v142 (this commit)
+- **Manage Categories full-bleed**: NavHost drops the nav-bar inset for the
+  MANAGE_CATEGORIES route (`fullBleedBottomRoutePrefixes`); the page pads its own
+  LazyColumn + scroll indicator with `navigationBarsPadding()` and the wash runs to the
+  bottom edge — no reserved strip (the reveal's v132 precedent).
+- **Pet Designer**: `PetStudioBottomNav` restyled from the stock M3 NavigationBar to the
+  app's floating pill bar (rounded-50 surfaceContainerHigh container, solid secondary
+  active capsule + onSecondary ink, 52dp tabs); unused NavigationBar/WindowInsets
+  imports removed. Route opens with the reveal's clean fade (`isPetDesignerRoute`
+  branches in enter/exit/popEnter/popExit before the scale-pop group).
+- **First-run "Pick a lane"**: Home's FirstTimeEmpty now sets `SpinPickerRequest.pending`
+  (new one-shot object beside `CurioDrawerState`) and navigates to the Spin tab;
+  SpinScreen's `LaunchedEffect(SpinPickerRequest.pending)` opens its own
+  `CategoryPickerSheet` (lane chips + Mix presets) instead of the separate PICKER page.
 
 ### Verification
 No Gradle build in this environment (project rule — CI validates on push). On-device:
-open a year-qualified topic (e.g. Moby-Dick) from the deck — title should read
-"Moby-Dick" with "1851" pill top-left on ticket AND reveal, byline pill at top-left in
-both, action pill bottom-right area of the hero.
+open a year-qualified topic (Moby-Dick) from the deck (byline + year pill top-left on
+both, action pill bottom); open the Pet Designer (floating pill bar + fade open); open
+Manage Categories from the Spin picker (full-bleed bottom); fresh install → Home "Pick a
+lane" opens the Spin sheet.
