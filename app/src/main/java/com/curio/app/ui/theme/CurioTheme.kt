@@ -219,9 +219,11 @@ fun CurioTheme(
 val CurioDialogShape: RoundedCornerShape = RoundedCornerShape(24.dp)
 
 /**
- * Theme-aware AlertDialog container — blends the surface container toward
- * the page background so the dialog melts into the tinted page instead of
- * floating a separate panel. LIGHT: toward the soft cream. DARK (v81):
+ * Theme-aware AlertDialog container. LIGHT (v170): the theme's own
+ * elevated container (surfaceContainerHigh — the warm tan the floating
+ * pills/chips wear) instead of the old 72% blend toward the cream
+ * background, which read as a cream-white panel (the user: dialogs
+ * should be theme-aware, not cream white). DARK (v81):
  * toward the pitch-black background, so dialogs read as near-black glass
  * on the black page (with the hero pill edge-glow on top). v116 — the dark
  * fill is now the SETTINGS OPTION CARD construction (the same
@@ -241,15 +243,10 @@ fun curioDialogContainerColor(): Color {
             0.30f
         )
     }
-    // v11 — light: a soft near-background sheet that matches the page wash
-    // family (the cream background) instead of the deeper #E4D7BF container.
-    // v31 — pulled a touch further toward the background (0.60 → 0.72) so
-    // the light dialog stops reading as a separate cream panel.
-    return lerp(
-        MaterialTheme.colorScheme.surfaceContainerHigh,
-        MaterialTheme.colorScheme.background,
-        0.72f
-    )
+    // v170 — light: the THEME-AWARE elevated container itself (the same
+    // surfaceContainerHigh the floating pills and chips wear) — the old
+    // 72% blend toward the cream background read as a cream-white panel.
+    return MaterialTheme.colorScheme.surfaceContainerHigh
 }
 
 /**

@@ -1217,6 +1217,34 @@ app/src/main/java/com/curio/app/
     "line under the name" = the custom streak tagline — the user calls
     it "Bio"; no bio model exists, so the tagline field is renamed, not
     a new field.
+- **v171 — share card is a 3:4 portrait with the sharer's name, session
+  note and attached photo; light-mode dialogs wear the theme-aware
+  container (not cream white).** User: "now improve the share card and
+  not squared but 3:4 and also use name and the note user added that
+  option with photos option if added. just more beautiful to share. and
+  also give each dialog in light mode the theme aware backgroud not
+  cream white".
+  - CurioShareCard (EntryDetailScreen): exported at 450×600 dp (3:4,
+    was 400×400 square; the sheet preview Box matches at 280 × 3:4).
+    New content: the sharer's display name (AppPreferences.getDisplayName,
+    bottom), the session note (entry.sessionNote, a rounded note block
+    under the teaser), and the FIRST attached photo
+    (entry.sessionScreenshots, a 200×150 rounded block). The photo is
+    decoded SYNCHRONOUSLY via BitmapFactory → asImageBitmap inside
+    remember — Coil's async painter would miss shareComposableCard's
+    single-frame capture (the preview and the PNG must show the same
+    photo). Format + date chips collapsed into one quiet "Format ·
+    Captured..." text line.
+  - curioDialogContainerColor (CurioTheme): the light branch returned
+    lerp(surfaceContainerHigh, background, 0.72) — 72% toward the cream
+    background read as a cream-white panel. Now returns
+    surfaceContainerHigh directly (the warm tan the floating pills /
+    chips wear) — theme-aware, applies to EVERY AlertDialog via this
+    shared function. Dark branch untouched.
+  - PUSHED (this request had no "dont push" — the accumulated v168/v169/
+    v170 commits rode along). LESSON: "photos option" = the entry's
+    sessionScreenshots attachments; synchronous decode is mandatory for
+    the off-screen card capture.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`

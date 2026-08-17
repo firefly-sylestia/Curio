@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — Edit profile dialog restructure: Your name + Bio sections, tagline removed — commit only, NO push
+## Current request — share card 3:4 portrait + name/note/photo; dialogs theme-aware in light mode
+
+User: "now improve the share card and not squared but 3:4 and also use
+name and the note user added that option with photos option if added.
+just more beautiful to share. and also give each dialog in light mode the
+theme aware backgroud not cream white" (no "dont push" this time — pushed).
+
+1. CurioShareCard (EntryDetailScreen): export cardSize 400×400 →
+   450×600 (3:4); preview Box 320 square → 280 × 3:4 aspect. Card now
+   shows: the sharer's display name (AppPreferences.getDisplayName,
+   bottom), the session note (entry.sessionNote — rounded note block
+   with a note icon), and the FIRST attached photo
+   (entry.sessionScreenshots — 200×150 rounded block). Photo decodes
+   SYNCHRONOUSLY (BitmapFactory → asImageBitmap in remember) because
+   shareComposableCard captures a single frame — Coil's async painter
+   would miss it. Format + date chips collapsed to one "Format ·
+   Captured…" text line (declutter).
+2. curioDialogContainerColor (CurioTheme) light branch: was
+   lerp(surfaceContainerHigh, background, 0.72) = cream white. Now
+   surfaceContainerHigh directly (theme-aware, matches pill/chip
+   language). Affects every AlertDialog.
+
+Docs: changelog FIX lines, AGENTS.md v171, this file. PUSHED (the held
+v168/v169/v170 commits rode along on this push).
+
+## Earlier completed request — Edit profile dialog restructure: Your name + Bio sections, tagline removed — commit only, NO push
 
 User: "now in edit profile dialog, make the your name and the line under
 it text ith Your name and in bold and larger text then below Bio similiar

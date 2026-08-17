@@ -2,6 +2,7 @@ package com.curio.app.features.detail
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,6 +20,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -77,6 +79,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
@@ -4043,6 +4047,15 @@ private fun OpenNotebookRender(entry: CurioEntry, category: CurioCategory, navCo
  *   - Format badge
  *   - "Curio ✦" branding footer
  */
+/**
+ * v170 — the share card is a 3:4 PORTRAIT now (was square 1:1) and it
+ * carries the sharer's own touches: their display name, the session note
+ * they added, and the first attached photo (a session screenshot) when
+ * one exists — a richer, more personal card. The photo decodes
+ * SYNCHRONOUSLY ([BitmapFactory]) so BOTH the live sheet preview and the
+ * off-screen captured PNG show it (Coil's async painter would miss the
+ * single-frame capture in [com.curio.app.ui.components.shareComposableCard]).
+ */
 @Composable
 private fun CurioShareCard(
     entry: CurioEntry,
@@ -4053,6 +4066,7 @@ private fun CurioShareCard(
     // flips from white to a deep ink of the accent. White when pastel mode
     // is off, preserving the exact pre-pastel share card.
     val ink = pastelFillInk(category.themedAccent())
+    val context = LocalContext.current
 
     // v22 — the explore-session duration joins the captured-date line when
     // one was recorded ("Captured today · explored 12m"), matching the
@@ -4067,6 +4081,18 @@ private fun CurioShareCard(
         1 -> "Captured yesterday"
         else -> "Captured ${entry.capturedAtDaysAgo}d ago"
     } + sessionPart
+
+    // v170 — the sharer's display name (falls back to the default).
+    val displayName = remember(entry.id) {
+        AppPreferences.getDisplayName(context).ifBlank { "Curious Explorer" }
+    }
+    // v170 — the first attached photo, decoded synchronously (see above).
+    val photo = remember(entry.id) {
+        entry.sessionScreenshots.firstOrNull()?.let { path ->
+            runCatching { BitmapFactory.decodeFile(path)?.asImageBitmap() }.getOrNull()
+        }
+    }
+    val note = entry.sessionNote?.trim().orEmpty()
 
     Box(
         modifier = Modifier
@@ -4086,7 +4112,7 @@ private fun CurioShareCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp),
+                .padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top: category chip + sparkle
@@ -4127,12 +4153,29 @@ private fun CurioShareCard(
                 )
             }
 
-            // Middle: topic name + teaser
+            // Middle: photo (optional) + topic name + teaser + note
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // v170 — the user's photo, a rounded block on the card.
+                if (photo != null) {
+                    Box(
+                        modifier = Modifier
+                            .width(200.dp)
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(ink.copy(alpha = 0.14f))
+                    ) {
+                        Image(
+                            bitmap = photo,
+                            contentDescription = "Attached photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
                 Text(
                     text = entry.topic.name,
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -4148,49 +4191,63 @@ private fun CurioShareCard(
                     style = MaterialTheme.typography.bodyLarge,
                     color = ink.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center,
-                    maxLines = 3,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+                // Compact meta line: format · captured date (v170 — chips
+                // became one quiet text line to declutter the portrait card).
+                Text(
+                    text = "${entry.format.name.replace(Regex("([a-z])([A-Z])"), "$1 $2")} · $daysAgoText",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ink.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+                // v170 — the note the user added.
+                if (note.isNotEmpty()) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = ink.copy(alpha = 0.12f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Note,
+                                contentDescription = null,
+                                tint = ink.copy(alpha = 0.7f),
+                                size = 16.dp
+                            )
+                            Text(
+                                text = note,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = ink,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
             }
 
-            // Bottom: format badge + branding
+            // Bottom: the sharer's name + branding
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Format + date row
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = ink.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = entry.format.name.replace(Regex("([a-z])([A-Z])"), "$1 $2"),
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = ink,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = ink.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = daysAgoText,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = ink.copy(alpha = 0.8f),
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-
-                // Branding
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = ink.copy(alpha = 0.95f),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -4199,7 +4256,7 @@ private fun CurioShareCard(
                         name = CurioIcons.AutoAwesome,
                         contentDescription = null,
                         tint = ink.copy(alpha = 0.6f),
-                        size = 18.dp
+                        size = 16.dp
                     )
                     Text(
                         text = "Curio",
@@ -4264,9 +4321,11 @@ private fun EntryShareSheet(
             )
 
             // ── Preview — the exact card that gets shared, on a soft stage ──
+            // v170 — 3:4 portrait to match the exported card (was square).
             Box(
                 modifier = Modifier
-                    .size(320.dp)
+                    .width(280.dp)
+                    .aspectRatio(3f / 4f)
                     .shadow(8.dp, RoundedCornerShape(28.dp))
                     .clip(RoundedCornerShape(28.dp))
             ) {
@@ -4296,7 +4355,8 @@ private fun EntryShareSheet(
                     if (shareAsImage) {
                         shareComposableCard(
                             context = context,
-                            cardSize = DpSize(400.dp, 400.dp),
+                            // v170 — 3:4 portrait (was 400×400 square).
+                            cardSize = DpSize(450.dp, 600.dp),
                             authority = authority,
                             card = { CurioShareCard(entry = entry, category = category) }
                         )
