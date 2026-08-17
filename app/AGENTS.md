@@ -1067,6 +1067,57 @@ app/src/main/java/com/curio/app/
   Geom (the app's display font) declares a real Bold face, so no fake-
   bold synthesis. LESSON: the pill label weight lives in FOUR copies
   (pill, rail, sentiment, studio) — bump them together.
+- **v166 — nav collapse gentler + SAME animation on all pills; muted
+  active-pill colors (Cabinet "All" fallback is no longer pink); calm
+  page openings; dark-mode session-note editor.** User: "make the nav bar
+  collapse animation slower a little not violent and smoother. and also
+  chnage the bright colors to use muted colors and in cabinet all use the
+  default theme aware color. not pink. from the spin shuffle option, and
+  fix the dark mode session note text box..." then "also same animation
+  for all pills, and also the page opening have become too violent did u
+  edit it?"
+  - PILLS — the whole family now runs `spring(dampingRatio = 1f,
+    stiffness = 750f)`: CRITICALLY damped (zero overshoot/bounce — the
+    old 0.9 damping still snapped) and half of Medium stiffness ("slower
+    a little", still ~3.5x snappier than the MediumLow that dragged a
+    second). Applied IDENTICALLY to the nav pill bar (4 typed specs),
+    the reveal Like/Dislike segments (4) and the pet studio bar (3) —
+    every animated pill moves with the exact same physics.
+  - MUTED COLORS — the active pill wore the raw saturated page accent
+    (loud/neon). New `curioActivePillFill()` (CurioBottomNav): light
+    mode pulls saturation ~45% via `toHsl/fromHsl` (hue + lightness
+    preserved so deep accents keep white ink); dark keeps the already-
+    muted deep jewel tone, pastel keeps its airy twin. The reveal
+    SentimentSegment got the same mute. Rail shares the same helper.
+  - CABINET "ALL" FALLBACK — plain pages (Cabinet "All") fell back to
+    `colorScheme.primary` = CoralBlush, which read as a stray PINK pill
+    (v161 had swapped butter-yellow → coral; the user calls the coral
+    "pink from the spin shuffle option"). Fallback is now the MUTED
+    `secondaryContainer` + `onSecondaryContainer` ink — a standard
+    theme-aware M3 pair (soft warm in light, subtle glow on black),
+    never a bright hue.
+  - PAGE OPENINGS — answer to "did u edit it?": the NavHost screen
+    transitions were NOT touched (they've been tween-based since v7.17;
+    detail/pop screens used a 0.88 scale pop). But three spring
+    entrances DID read violent: the NavHost detail/pop scaleIn/scaleOut
+    now opens at 0.94 (half the zoom), `CurioDialogEntrance` (v163,
+    mine) dropped its underdamped 0.9/380 spring for the shared
+    `Springs.Calm` (1.0/750 — zero overshoot), `MorphEntrance`'s
+    non-bouncy path (category grids) swapped the overshooting
+    `Springs.Deliberate` (0.85/250 — slow + zoom-back) for `Calm` at a
+    closer 0.92 start, and `ScreenEntrance` (Support/Promo/TopicHistory)
+    slid on `Calm` too. New `CurioMotion.Springs.Calm` = the pill
+    family's exact physics, so screens and pills share ONE spring
+    signature.
+  - SESSION NOTE — `SessionNoteFloatingPill`'s popup editor was a BRIGHT
+    cream paper sheet in dark mode (the note-paper palette is theme-
+    agnostic for SAVED notes, but this floating popup is a UI control).
+    Dark mode now swaps the sheet to `surfaceContainerHigh` + `onSurface`
+    ink, and the `OutlinedTextField` gets explicit paper-paired colors
+    (focused/unfocused text, placeholder, cursor via
+    `paperControlAccent`, paper-derived borders) — the M3 defaults were
+    painting light text over the bright cream (invisible-text bug).
+    Light mode keeps the cream paper exactly.
 - **v165 — v162's one-spring-family CI fix: the specs are TYPED per
   animated value.** CI failed: `SpringSpec<Float>` passed where
   `AnimationSpec<Color>` (fill/icon tint) and `FiniteAnimationSpec<IntSize>`

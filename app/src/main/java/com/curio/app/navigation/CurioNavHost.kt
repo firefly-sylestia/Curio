@@ -492,9 +492,14 @@ fun CurioNavHost(
                     // from the screen center (scale + fade) like a modal — they
                     // never slide in from the side (v8.38 detail; v8.4x the
                     // same pop for the screens in popScreenRoutePrefixes).
+                    // v166 — the modal pop is GENTLER: 0.94 instead of 0.88
+                    // (half the zoom) so the screen lifts in with the fade
+                    // instead of springing from 12% smaller — the "violent
+                    // page opening" the user flagged. The exit mirrors it
+                    // below so the pop language stays symmetric.
                     isDetailRoute(targetState) || isPopScreenRoute(targetState) ->
                         scaleIn(
-                            initialScale = 0.88f,
+                            initialScale = 0.94f,
                             animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
                         ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Splash → Home / Onboarding: special elastic morph
@@ -543,7 +548,7 @@ fun CurioNavHost(
                     // modal language stays consistent (v8.4x).
                     isPopScreenRoute(initialState) ->
                         scaleOut(
-                            targetScale = 0.88f,
+                            targetScale = 0.94f,
                             animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     isTabSwitch(initialState, targetState) ->
@@ -596,7 +601,7 @@ fun CurioNavHost(
                     // (v8.38 detail; v8.4x pop screens).
                     isDetailRoute(initialState) || isPopScreenRoute(initialState) ->
                         scaleOut(
-                            targetScale = 0.88f,
+                            targetScale = 0.94f,
                             animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     isTabSwitch(initialState, targetState) ->

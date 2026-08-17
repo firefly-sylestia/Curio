@@ -1,6 +1,55 @@
 # Prompt.md — Request log
 
-## Current request (completed) — CI fix: typed springs for the pill motion
+## Current request — calmer nav collapse (same for all pills), muted colors (Cabinet "All" not pink), dark-mode session note, calmer page openings
+
+User: "make the nav bar collapse animation slower a little not violent and
+smoother. and also chnage the bright colors to use muted colors and in
+cabinet all use the default theme aware color. not pink. from the spin
+shuffle option, and fix the dark mode session note text box and text color
+visibility in save your take, its bright in dark mode and before doing it
+do a pull" + "also same animation for all pills, and also the page opening
+have become too violent did u edit it?"
+
+git pull first (fast-forward to 5eb2330). Changes:
+
+1. PILLS — one spring family everywhere:
+   `spring(dampingRatio = 1f, stiffness = 750f)` — CRITICALLY damped
+   (zero overshoot = not violent) at half Medium stiffness (slower a
+   little). Applied IDENTICALLY to the nav pill bar (CurioBottomNav,
+   4 typed specs), reveal Like/Dislike (TopicRevealScreen, 4) and pet
+   studio bar (PetDesignerScreen, 3). No other animated pills exist
+   (tour dock is static; grep for expandHorizontally found only the
+   three families).
+
+2. MUTED COLORS — new `curioActivePillFill()`/`curioActivePillInk()`
+   (CurioBottomNav): light mode pulls saturation ~45% via toHsl/fromHsl
+   (hue + lightness preserved — deep accents keep white ink); dark keeps
+   the deep jewel tone, pastel keeps the airy twin. Reveal
+   SentimentSegment got the same mute. Rail shares the helpers.
+
+3. CABINET "ALL" FALLBACK — was colorScheme.primary (CoralBlush = the
+   "pink from the spin shuffle option"). Now secondaryContainer +
+   onSecondaryContainer (standard theme-aware M3 pair, muted soft warm).
+
+4. PAGE OPENINGS — answer: NO, the NavHost screen transitions were not
+   touched (tween-based since v7.17). But softened what reads violent:
+   NavHost detail/pop scaleIn+scaleOut 0.88 → 0.94 (half the zoom);
+   CurioDialogEntrance (v163) 0.9/380 spring → Springs.Calm (1.0/750);
+   MorphEntrance non-bouncy (category grids) Deliberate (0.85/250) →
+   Springs.Calm at 0.92 start; ScreenEntrance slide → Springs.Calm.
+   Added CurioMotion.Springs.Calm = the pill family's exact physics.
+
+5. SESSION NOTE (dark) — SessionNoteFloatingPill popup: dark mode swaps
+   the cream paper sheet for surfaceContainerHigh + onSurface ink, and
+   the OutlinedTextField gets explicit paper-paired colors (text,
+   placeholder, cursor via paperControlAccent, paper borders) — M3
+   defaults painted light text over the bright cream (invisible text).
+   Light mode keeps the cream paper.
+
+Docs: changelog FIX lines (4 new), AGENTS.md v166 entry, this file.
+Committed + pushed. CI validates.
+
+## Earlier completed request — CI fix: typed springs for the pill motion
 
 CI failed on v162: SpringSpec<Float> passed where AnimationSpec<Color>
 (fill/icon tint) and FiniteAnimationSpec<IntSize> (label expand/shrink)

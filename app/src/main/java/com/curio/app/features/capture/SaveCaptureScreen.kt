@@ -32,6 +32,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -111,8 +112,12 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.notePaperBorder
 import com.curio.app.ui.theme.notePaperInk
+import com.curio.app.ui.theme.notePaperRule
 import com.curio.app.ui.theme.notePaperSurface
+import com.curio.app.ui.theme.paperControlAccent
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import com.google.gson.Gson
@@ -1402,10 +1407,21 @@ private fun SessionNoteFloatingPill(
     ) {
         // ── Compact note editor popup — paper look, same copy as before ──
         if (expanded) {
-            val paperInkColor = notePaperInk(NotePaperColor.CREAM)
+            // v166 — dark mode: the note-paper palette is deliberately
+            // theme-agnostic for SAVED notes, but this floating popup is a
+            // UI CONTROL — the bright cream sheet glared on the pitch-black
+            // page, so dark mode swaps to a dark elevated sheet (light mode
+            // keeps the cream paper). The text field gets explicit paper-
+            // paired colors so typed text / placeholder / borders always
+            // read on the sheet (M3 defaults painted light-on-dark text
+            // over the bright cream — the invisible-text bug).
+            val dark = isCurioDarkTheme()
+            val paperInkColor = if (dark) MaterialTheme.colorScheme.onSurface
+                                else notePaperInk(NotePaperColor.CREAM)
             Surface(
                 shape = RoundedCornerShape(18.dp),
-                color = notePaperSurface(NotePaperColor.CREAM),
+                color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh
+                        else notePaperSurface(NotePaperColor.CREAM),
                 shadowElevation = 6.dp,
                 modifier = Modifier.fillMaxWidth(0.94f)
             ) {
@@ -1425,6 +1441,19 @@ private fun SessionNoteFloatingPill(
                         minLines = 2,
                         maxLines = 4,
                         shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = paperInkColor,
+                            unfocusedTextColor = paperInkColor,
+                            cursorColor = paperControlAccent(),
+                            focusedBorderColor = if (dark) MaterialTheme.colorScheme.outline
+                                                else notePaperBorder(NotePaperColor.CREAM),
+                            unfocusedBorderColor = if (dark) MaterialTheme.colorScheme.outlineVariant
+                                                   else notePaperRule(NotePaperColor.CREAM),
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedPlaceholderColor = paperInkColor.copy(alpha = 0.45f),
+                            unfocusedPlaceholderColor = paperInkColor.copy(alpha = 0.45f)
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(

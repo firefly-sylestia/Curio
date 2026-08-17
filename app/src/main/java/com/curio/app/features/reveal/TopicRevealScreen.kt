@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -151,12 +150,14 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.lightAccentTint
 import com.curio.app.ui.theme.oklabGradientStops
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
+import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.themedButtonFill
 import com.curio.app.ui.theme.themedButtonInk
 
@@ -2250,10 +2251,13 @@ private val RevealSentimentHeight = 48.dp
 // label/icon finished early on their own tweens). v165 — specs typed per
 // animated value (spring<Color> for colors, spring<IntSize> for the
 // label's expand/shrink, spring<Float> for fades); same physics.
-private val RevealWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val RevealMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val RevealColorSpring = spring<Color>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val RevealExpandSpring = spring<IntSize>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+// v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
+// critically damped (1.0) so the Like/Dislike segments glide with zero
+// overshoot — same feel as the bottom bar's collapse.
+private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 750f)
+private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 750f)
+private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 750f)
+private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 750f)
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
@@ -2279,8 +2283,15 @@ private fun SentimentSegment(
     )
     // v162 — fill + icon tint fade on the SAME spring as the width (before:
     // fill lagged on MediumLow, icon finished in 200ms — out of step).
+    // v166 — the fill is CALMED like the nav pill (light mode pulls
+    // saturation ~45% so the bright accent reads muted, not neon; dark +
+    // pastel modes keep their already-muted tones).
+    val fill = if (!isCurioDarkTheme() && !AppPreferences.pastelColorsState) {
+        val a = toHsl(accent)
+        fromHsl(a.h, (a.s * 0.55f).coerceAtMost(0.55f), a.l)
+    } else accent
     val fillColor by animateColorAsState(
-        targetValue = accent.copy(alpha = if (active) 1f else 0f),
+        targetValue = fill.copy(alpha = if (active) 1f else 0f),
         animationSpec = RevealColorSpring,
         label = "revealSentimentFill"
     )

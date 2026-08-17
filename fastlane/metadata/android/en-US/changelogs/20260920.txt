@@ -28,6 +28,10 @@ ADD
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
 
 FIX
+- Navigation: the pill bar's collapse is calmer now — the tab pills glide at a slower, critically damped pace (no snap, no bounce), and the exact same motion runs on the Topic Reveal Like/Dislike pill and the Pet Designer studio bar so every animated pill moves as one.
+- Navigation: the active tab's bright accent colors are muted — the pill wears a softened same-hue tone instead of the loud saturated lane colors, and on plain pages (Cabinet's "All" view) the active pill uses the theme's default soft container instead of the bright pink/coral (the old fallback matched the spin shuffle brand pink).
+- Dark mode: the Shared session note editor in Save your take is no longer a bright cream sheet on the black page — it renders on a dark elevated sheet with readable light text, and the typed text, placeholder and borders always show clearly in both themes.
+- Page openings: screens that pop open (saved entries, settings sub-pages, the category pickers, Support/Promo/Topic History) now lift in with a gentler, zero-overshoot motion — the modal pop's zoom is half what it was, and every spring-based entrance (dialog/quote editor, grids, page slides) runs critically damped so nothing bounces or snaps on the way in.
 - Explore bubble: the session note box now keeps a readable width — the text you type stays visible in the field instead of collapsing into a sliver.
 - Dark mode: the hairline borders on the floating surfaces are all gone — the nav bar, the detail page's quick-fact plate, the tour dock, the Topic Reveal Like/Dislike pill, the category picker's Manage pill, and the pet designer's studio bar + action capsule now read defined by their own fill (no more thin outlines in dark mode).
 - Pet Designer: the studio bottom bar is a compact centered capsule now (the old full-width capsule read stretched), the Save / Undo / Redo / Share actions float in one pill pinned to the top of the screen (it stays while you scroll), and the torn rose banner is part of the scrolling page — the tear rides away as you scroll down.

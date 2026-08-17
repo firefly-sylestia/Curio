@@ -2,7 +2,6 @@ package com.curio.app.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -43,12 +42,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.curio.app.data.AppPreferences
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.pastelFillInk
+import com.curio.app.ui.theme.toHsl
 
 /**
  * Out-of-band handoff for the Spin page's category tint wash — published by
@@ -228,10 +230,18 @@ private val FloatingPillHeight = 48.dp
 // for color animations, spring<IntSize> for the label's expand/shrink,
 // spring<Float> for fades); the physics are the same so the lockstep
 // holds across all four.
-private val PillWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val PillMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val PillColorSpring = spring<Color>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val PillExpandSpring = spring<IntSize>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+// v166 — the pill family runs SLOWER and CRITICALLY damped. Stiffness
+// Medium (1500) snapped the collapse shut in a beat — the violence the
+// user flagged. The family now runs 750 (half of Medium — "slower a
+// little", still ~3.5x snappier than the old MediumLow 400 that dragged a
+// full second) at damping 1.0, so the width/fill/label glide to rest with
+// ZERO overshoot or bounce: smooth, never violent. Same physics across all
+// four specs keeps the v162/v165 lockstep (every element finishes with the
+// pill).
+private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 750f)
+private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 750f)
+private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 750f)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 750f)
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -352,15 +362,16 @@ private fun FloatingNavPill(
         animationSpec = PillWidthSpring,
         label = "floatingNavPillWidth"
     )
-    // v149 — the active indicator follows the PAGE: when the page publishes
+    // v166 — the active indicator follows the PAGE: when the page publishes
     // a category accent (Spin lane / Cabinet filter / Home rose) the active
-    // pill wears it with the theme-aware fill-ink contract; plain pages
-    // (Cabinet "All") fall back to the theme's PRIMARY (coral) — v161: the
-    // old secondary fallback (butter yellow) looked like a stray yellow
-    // pill on the plain Cabinet page. Never a translucent container.
-    val activeFill = activeAccent ?: MaterialTheme.colorScheme.primary
-    val activeInk = if (activeAccent != null) pastelFillInk(activeAccent)
-                    else MaterialTheme.colorScheme.onPrimary
+    // pill wears it CALMED (saturation pulled in light mode — the muted
+    // look the user asked for); plain pages (Cabinet "All") fall back to
+    // the theme's MUTED secondaryContainer, NOT the coral primary — the
+    // v161→v166 history: solid butter read as a stray yellow, coral read as
+    // a stray pink (same pink family as the spin shuffle brand) — the soft
+    // warm container reads right in both themes. See [curioActivePillFill].
+    val activeFill = curioActivePillFill(activeAccent)
+    val activeInk = curioActivePillInk(activeAccent)
     // v162 — the fill fades with the SAME spring as the width (before v162
     // it still ran the old MediumLow spring and lagged the pill), and the
     // icon tint crossfades on the same spring too (it used to finish in
@@ -441,13 +452,13 @@ fun CurioNavigationRail(
     } else {
         routePrefix
     }
-    // v161 — the rail's active indicator mirrors the phone pill bar: the
-    // current page's category accent when published, else the theme PRIMARY
-    // (the old hard-coded secondary read as a stray yellow on Cabinet "All").
+    // v161/v166 — the rail's active indicator mirrors the phone pill bar:
+    // the current page's accent CALMED (v166 muted the bright accents), else
+    // the theme's muted secondaryContainer (the old hard-coded secondary /
+    // primary fallbacks read as stray yellow / pink on Cabinet "All").
     val pageAccent = curioNavActiveAccent(selectedRoute)
-    val railActiveFill = pageAccent ?: MaterialTheme.colorScheme.primary
-    val railActiveInk = if (pageAccent != null) pastelFillInk(pageAccent)
-                        else MaterialTheme.colorScheme.onPrimary
+    val railActiveFill = curioActivePillFill(pageAccent)
+    val railActiveInk = curioActivePillInk(pageAccent)
 
     NavigationRail(
         modifier = modifier,
@@ -566,4 +577,38 @@ private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePref
     CurioRoutes.CABINET -> CurioNavTint.cabinetAccent
     CurioRoutes.HOME -> CurioNavTint.homeAccent
     else -> null
+}
+
+/**
+ * v166 — the ACTIVE indicator's fill. The page accent is CALMED before it
+ * paints: light mode pulls saturation ~45% (hue + lightness preserved) so
+ * the loud lane colors read muted, not neon — the bright saturated accents
+ * were exactly the "bright colors" the user wanted toned down. Dark mode
+ * keeps the theme's deep jewel tone (already muted by design) and pastel
+ * mode keeps the airy pastel twin (already calm). Null (plain pages —
+ * Cabinet "All") falls back to the theme's MUTED default container:
+ * secondaryContainer (soft warm butter at low alpha, light + dark aware)
+ * with its proper [curioActivePillInk] — v166 replaced the PRIMARY/coral
+ * fallback, which read as a stray PINK pill on Cabinet "All" (the same
+ * pink family as the spin shuffle brand color).
+ */
+@Composable
+private fun curioActivePillFill(accent: Color?): Color {
+    if (accent != null) {
+        if (!isCurioDarkTheme() && !AppPreferences.pastelColorsState) {
+            val a = toHsl(accent)
+            return fromHsl(a.h, (a.s * 0.55f).coerceAtMost(0.55f), a.l)
+        }
+        return accent
+    }
+    return MaterialTheme.colorScheme.secondaryContainer
+}
+
+/** Ink that pairs with [curioActivePillFill] — the accent's pastel-aware
+ *  deep/light twin on a category fill, the theme's onSecondaryContainer on
+ *  the plain-page fallback (proper M3 pair, guaranteed contrast). */
+@Composable
+private fun curioActivePillInk(accent: Color?): Color {
+    if (accent != null) return pastelFillInk(accent)
+    return MaterialTheme.colorScheme.onSecondaryContainer
 }

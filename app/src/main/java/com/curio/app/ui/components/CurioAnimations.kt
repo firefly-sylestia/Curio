@@ -59,11 +59,15 @@ fun ScreenEntrance(content: @Composable () -> Unit) {
     // delayed blank flash on every navigation. MutableTransitionState with
     // targetState already true plays the enter transition immediately.
     val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    // v166 — the slide runs the CALM spring family (critically damped, the
+    // same 750 stiffness as the nav pill) so pages lift in with zero
+    // overshoot — the old 0.85 damping spring bounced slightly past the
+    // target, one of the "violent page opening" feels.
     AnimatedVisibility(
         visibleState = state,
         enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Standard)) +
                 slideInVertically(
-                    animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f),
+                    animationSpec = CurioMotion.Springs.Calm,
                     initialOffsetY = { it / 8 }
                 ),
         content = { content() }
@@ -88,12 +92,15 @@ fun CurioDialogEntrance(
     // targetState already true plays the enter on the first composition
     // frame instead of leaving the dialog blank for one frame.
     val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    // v166 — critically damped (1.0) on the SAME 750 stiffness as the nav
+    // pill family: zero overshoot, so the scale never pops past its target
+    // (the old 0.9 damping spring could read as a violent bounce on open).
     AnimatedVisibility(
         visibleState = state,
         enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Standard)) +
                 scaleIn(
                     initialScale = scale,
-                    animationSpec = spring(dampingRatio = 0.9f, stiffness = 380f)
+                    animationSpec = CurioMotion.Springs.Calm
                 ),
         content = { content() }
     )
@@ -117,6 +124,12 @@ fun MorphEntrance(
     // v7.94 — same first-frame fix as ScreenEntrance: start the morph on
     // composition instead of one frame later.
     val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    // v166 — the non-bouncy path runs the new CALM spring (critically
+    // damped, zero overshoot — the old Deliberate at 0.85 damping still
+    // zoomed back ~1% and dragged past 700ms, reading violent) and starts
+    // closer to full size (0.92 instead of 0.85, so the grid gently lifts
+    // in instead of zooming 15%). The explicit bouncy path keeps its
+    // dramatic Elastic spring + deeper 0.85 start.
     AnimatedVisibility(
         visibleState = state,
         enter = fadeIn(
@@ -125,9 +138,9 @@ fun MorphEntrance(
                 easing = FastOutSlowInEasing
             )
         ) + scaleIn(
-            initialScale = 0.85f,
+            initialScale = if (bouncy) 0.85f else 0.92f,
             animationSpec = if (bouncy) CurioMotion.Springs.Elastic
-                else CurioMotion.Springs.Deliberate
+                else CurioMotion.Springs.Calm
         ),
         content = { content() }
     )

@@ -67,6 +67,20 @@ object CurioMotion {
         )
 
         /**
+         * v166 — CRITICALLY damped calm spring: identical physics to the
+         * nav-pill family (damping 1.0 = zero overshoot, stiffness 750 =
+         * half of Medium) so screen entrances settle smoothly with NO
+         * zoom-back. Used by the page/grid openings that used to run the
+         * [Deliberate] spring (0.85 damping still overshoots ~1% and 250
+         * stiffness dragged the settle past 700ms — the "violent page
+         * opening" feel).
+         */
+        val Calm: SpringSpec<Float> = spring(
+            dampingRatio = 1.0f,
+            stiffness = 750f
+        )
+
+        /**
          * Organic morph spring — very low stiffness, high damping.
          * Like a water droplet settling; slow, smooth, no bounce.
          * Use for shape/size morphing, screen-to-screen transitions.

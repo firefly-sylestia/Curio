@@ -113,7 +113,6 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -1427,9 +1426,11 @@ private val StudioPillHeight = 52.dp
 // finished ~4x early). The fill stays a deliberate solid snap (v156 design).
 // v165 — specs typed per animated value (spring<IntSize> for the label's
 // expand/shrink, spring<Float> for fades); same physics.
-private val StudioWidthSpring = spring<Dp>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val StudioMotionSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
-private val StudioExpandSpring = spring<IntSize>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
+// v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
+// critically damped (1.0) so the studio tabs glide with zero overshoot.
+private val StudioWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 750f)
+private val StudioMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 750f)
+private val StudioExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 750f)
 
 /**
  * One capsule tab in the studio pill bar — mirrors [CurioFloatingNavBar]'s
