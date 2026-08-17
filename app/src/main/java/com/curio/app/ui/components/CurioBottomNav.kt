@@ -209,9 +209,12 @@ object CurioBottomNavItems {
 // v131 — the pills grew a touch (52dp tall/icons, 112dp expanded).
 // v151 — the user asked for a LARGER bottom pill: 60dp icon/height and
 // 128dp expanded so the bar reads proper and the label has real room.
+// v159 — the pill got SLIMMER: same 60/128dp widths (the length is what
+// the user wanted kept) but the height dropped 60 → 48dp so the bar reads
+// shorter; the 26dp icon still breathes inside.
 private val FloatingPillIconWidth = 60.dp
 private val FloatingPillExpandedWidth = 128.dp
-private val FloatingPillHeight = 60.dp
+private val FloatingPillHeight = 48.dp
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).

@@ -1,6 +1,17 @@
 # Prompt.md — Request log
 
-## Current request (completed) — remove Full Vosk models + dictation mic on every note/quote box — commit only, NO push
+## Current request (completed) — slim the nav pill + reveal Like/Dislike pill (60 → 48dp tall, lengths kept)
+
+User: "the navbar pill height is too much keep its lengh but decrase the
+heigh the widneness same in like and dislike".
+
+- `FloatingPillHeight` (CurioBottomNav.kt): 60 → 48dp (v159 comment).
+- `RevealSentimentHeight` (TopicRevealScreen.kt): 60 → 48dp with it.
+- Widths unchanged (icon 60dp / expanded 128dp), icon 26dp unchanged.
+- Docs: changelog FIX line, AGENTS.md v159, this file.
+- Committed only — user still holds the push.
+
+## Earlier completed request — remove Full Vosk models + dictation mic on every note/quote box — commit only, NO push
 
 User: "remove the full models as they are laggy and crashing the app along
 with my phone. and add medium model if theres more. in voice model. and the

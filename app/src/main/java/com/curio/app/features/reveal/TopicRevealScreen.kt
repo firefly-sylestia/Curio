@@ -2242,9 +2242,10 @@ private fun RevealSentimentPill(
 // v149 — sentiment segment geometry, mirroring the nav bar's pill sizes.
 // v154 — bumped to EXACTLY the nav bar's sizes (60dp/128dp/60dp + 26dp
 // icon) so the reveal Like/Dislike pill matches the bigger bottom pill.
+// v159 — height slimmed 60 → 48dp WITH the nav bar (lengths unchanged).
 private val RevealSentimentIconWidth = 60.dp
 private val RevealSentimentExpandedWidth = 128.dp
-private val RevealSentimentHeight = 60.dp
+private val RevealSentimentHeight = 48.dp
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE

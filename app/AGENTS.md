@@ -958,6 +958,16 @@ app/src/main/java/com/curio/app/
   machinery once into a self-contained composable and reuse it — the
   caller keeps only the state var + an append lambda, and the busy-state
   callback is the one thing the shared piece must surface back.
+- **v159 — nav pill height slimmed 60 → 48dp (lengths kept), bar + reveal
+  Like/Dislike together.** User: "the navbar pill height is too much keep
+  its lengh but decrase the heigh the widneness same in like and dislike".
+  `FloatingPillHeight` (CurioBottomNav) and `RevealSentimentHeight`
+  (TopicRevealScreen) both 60 → 48dp; the widths stay 60/128dp and the
+  icon stays 26dp (fits fine with 11dp of breathing room). The bar's
+  capsule container has its own padding, so a shorter pill just shrinks
+  the capsule — nothing else needed. LESSON: pill geometry is three
+  independent constants; the user's "keep length, shrink height" is a
+  single constant change applied to both copies of the size trio.
 - **v157 — dark-mode hairline rims removed from the floating nav bar and
   the detail quick-fact plate.** User: "why in dark mode the navbar
   floating one have borders? remove that", plus "i notices in detail view
