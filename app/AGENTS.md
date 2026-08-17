@@ -919,62 +919,45 @@ app/src/main/java/com/curio/app/
   tab was already composed. LESSON: a cross-screen "open this sheet"
   request belongs in a shared state object (the `CurioDrawerState`
   pattern), not a route arg.
-- **v151 — bigger bottom pill + the nav bar MORPHS into the reveal's
-  Like/Dislike pill.** User: "the bottom pill can be more larger" and
-  "instead of hiding the navbar and showing dislike and like, morph
-  transform the pill with dislike and like icon when the reveal opens".
-  (1) `FloatingPillIconWidth/ExpandedWidth/Height` 52/112/52 → 60/128/60
-  (icon 24→26). (2) A SECOND shared element: `SentimentSharedElementKey`
-  ("nav-pill-sentiment") + `NavPillBoundsTransform` (the hero's 320ms
-  tween). The nav bar MOVED INSIDE the SharedTransitionLayout (wrapped in
-  a `Box(fillMaxSize)` so `align(BottomCenter)` still works) and is the
-  caller-managed SOURCE via `Modifier.sharedElementWithCallerManagedVisibility(state,
-  visible, boundsTransform)` — the NavHost keeps it composed for 500ms
-  after the reveal opens (`sentimentMorphVisible` LaunchedEffect keyed on
-  `isRevealRoutePrefix`, then it leaves composition) with its pills
-  non-interactive (`interactive = showBottomBar` gates `clickable(enabled)`)
-  so the morph has a source without the bar eating taps; the reveal's
-  `RevealSentimentPill` is the route-scoped TARGET
-  (`Modifier.sharedElement(state, animatedVisibilityScope, …)` via a new
-  `modifier` param). Both sit at bottom-center with the same 12dp air
-  gap, so the bar's capsule collapses into the sentiment pair — and the
-  reverse morphs back on pop. Graceful fallback: if the framework
-  doesn't pair them, the bar simply shows for the 500ms window then
-  leaves (pills disabled, taps pass through) — no worse than before.
-  LESSON: an overlay bar that must morph INTO a route's content needs to
-  live INSIDE the SharedTransitionLayout and use the caller-managed
-  visibility variant (the route scopes don't reach it); keep the source
-  composed+visible through the entrance, then remove it.
-- **v152 — CI fix for the v151 morph + the remaining topic files
-  deduped (178 groups, 181 entries).** (1) The v151 shared-element code
-  FAILED CI: `SharedContentState` was imported from the wrong package
-  (it is a NESTED interface — `SharedTransitionScope.SharedContentState`,
-  top-level import is unresolved in animation 1.11), the
-  `sharedElementWithCallerManagedVisibility` call used the OLD param
-  name `state` (renamed to `sharedContentState` since Compose 1.8), and
-  the reveal's sentiment pill referenced `sharedTransitionScope` /
-  `sentimentSharedState` / `animatedVisibilityScope` that only existed
-  in `HeroCard` — the pill lives in `TopicRevealScreen` proper. Fixed:
-  `CurioBottomNav` param typed `SharedTransitionScope.SharedContentState?`
-  and the call passes `sharedContentState =`; the reveal pulls
-  `LocalRevealSharedScope` / `LocalRevealVisibilityScope` + `rememberSharedContentState(SentimentSharedElementKey)`
-  in the pill's own scope (null-guarded → plain pill fallback); the dead
-  `sentimentSharedState` in `HeroCard` removed. LESSON: shared-element
-  state + scopes must be created in the SAME composable that applies the
-  modifier — copying the pattern from another function leaves undefined
-  references. (2) The batch-duplication pattern v127 flagged ("other
-  topic files… but only books were deduped") is now fixed for every
-  file that had it: authors 38 groups, astronomy 89, songs 26 (two
-  triplets), geology 11, animals 10, technologies 3, chemistry 1 — 178
-  groups / 181 entries collapsed to one each, mirroring the books rule
-  (richest entry wins: longest teaser + richest exploreAction + most
-  tags; tags unioned keeper-first; tier preserves 1; first-position
-  placement; per-file indent preserved — astronomy/technologies use
-  indent 2, the rest 1 — so untouched content stays byte-identical).
-  `topic_index.json` rebuilt (`scripts/build_topic_index.py`, 16,833
-  topics, fully in sync both ways — the old index was stale, predating
-  recent content commits). Android assets ONLY — the web mirror was NOT
-  touched per the root AGENTS.md 🔒 scope rail (web/ is on hold).
+- **v153 — nav-bar → reveal sentiment-pill morph REVERTED (the bigger
+  pill stays).** User: "revert this just keep the size large but revert
+  the shared morph one". The v151 shared-element morph (the nav bar's
+  capsule collapsing into the reveal's Like/Dislike pill) is fully
+  removed: `SentimentSharedElementKey` + `NavPillBoundsTransform`
+  deleted from RevealSharedScopes; `CurioFloatingNavBar` /
+  `FloatingNavPill` lose the `sharedElementState` / `visible` /
+  `interactive` params (back to plain `clickable`); CurioNavHost drops
+  `sentimentMorphVisible` + `sentimentSharedState` and renders the bar
+  with the plain `if (!wide && showBottomBar && …)` block (the bar hides
+  and the reveal pill slides up as it did before); `RevealSentimentPill`
+  loses its `modifier` param. KEPT: the 60dp/128dp pill + 26dp icon.
+  LESSON: a shared-element morph that pairs an overlay bar with a
+  route's content is a big structural change (bar inside the
+  SharedTransitionLayout, caller-managed visibility, 500ms hold) — the
+  user may prefer the simple hide-and-slide-up; ask before committing
+  to that scale of refactor.
+- **v151 — bigger bottom pill (60dp/128dp).** User: "the bottom pill
+  can be more larger". `FloatingPillIconWidth/ExpandedWidth/Height`
+  52/112/52 → 60/128/60, icon 24→26 so the bar reads proper and the
+  active tab's label has real room. The same commit also tried a
+  shared-element morph (nav bar capsule → reveal Like/Dislike pill,
+  `SentimentSharedElementKey` + `NavPillBoundsTransform`, bar kept
+  composed 500ms as the caller-managed source) — the user reverted the
+  morph after seeing it (see the v153 note); only the SIZE shipped.
+- **v152 — the remaining topic files deduped (178 groups, 181
+  entries).** The batch-duplication pattern v127 flagged ("other topic
+  files… but only books were deduped") is now fixed for every file that
+  had it: authors 38 groups, astronomy 89, songs 26 (two triplets),
+  geology 11, animals 10, technologies 3, chemistry 1 — 178 groups /
+  181 entries collapsed to one each, mirroring the books rule (richest
+  entry wins: longest teaser + richest exploreAction + most tags; tags
+  unioned keeper-first; tier preserves 1; first-position placement;
+  per-file indent preserved — astronomy/technologies use indent 2, the
+  rest 1 — so untouched content stays byte-identical). `topic_index.json`
+  rebuilt (`scripts/build_topic_index.py`, 16,833 topics, fully in sync
+  both ways — the old index was stale, predating recent content
+  commits). Android assets ONLY — the web mirror was NOT touched per the
+  root AGENTS.md 🔒 scope rail (web/ is on hold).
 - **v150 — floating pills go THEME-AWARE + DYNAMIC (user-confirmed:
   container follows the page tint, active pill follows the page color,
   dark-mode elevation), plus the reveal Like/Dislike pill gets the nav-bar

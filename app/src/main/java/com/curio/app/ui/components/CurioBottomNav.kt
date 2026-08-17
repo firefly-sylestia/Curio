@@ -1,7 +1,6 @@
 package com.curio.app.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -45,8 +44,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
-import com.curio.app.ui.adaptive.LocalRevealSharedScope
-import com.curio.app.ui.adaptive.NavPillBoundsTransform
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -239,16 +236,7 @@ private val FloatingPillHeight = 60.dp
 @Composable
 fun CurioFloatingNavBar(
     navController: NavHostController,
-    modifier: Modifier = Modifier,
-    // v151 — the nav-pill → sentiment-pill morph SOURCE: when the Topic
-    // Reveal opens, the NavHost keeps this bar composed (and VISIBLE, so
-    // the shared element has a source to morph) for the entrance, then
-    // removes it — instead of the bar vanishing and the Like/Dislike pill
-    // sliding up as a separate element. Both sit at bottom-center, so the
-    // bar's capsule collapses into the sentiment pair.
-    sharedElementState: SharedTransitionScope.SharedContentState? = null,
-    visible: Boolean = true,
-    interactive: Boolean = true
+    modifier: Modifier = Modifier
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -265,24 +253,8 @@ fun CurioFloatingNavBar(
     // (published via [CurioNavTint]); null on plain pages → secondary.
     val pageAccent = curioNavActiveAccent(selectedRoute)
 
-    // v151 — the caller-managed shared element: while the caller keeps the
-    // bar composed with [visible] = true, it participates as the source of
-    // the morph into the reveal's sentiment pill (see
-    // [com.curio.app.ui.adaptive.SentimentSharedElementKey]).
-    val sharedScope = LocalRevealSharedScope.current
-    val sharedModifier = if (sharedElementState != null && sharedScope != null) {
-        sharedScope.run {
-            Modifier.sharedElementWithCallerManagedVisibility(
-                sharedContentState = sharedElementState,
-                visible = visible,
-                boundsTransform = NavPillBoundsTransform
-            )
-        }
-    } else Modifier
-
     Box(
         modifier = modifier
-            .then(sharedModifier)
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {
@@ -316,10 +288,6 @@ fun CurioFloatingNavBar(
                         destination = destination,
                         selected = selected,
                         activeAccent = pageAccent,
-                        // v151 — while the bar is the morph source over the
-                        // reveal it must not be tappable (the pills would
-                        // sit under the user's fingers at bottom-center).
-                        interactive = interactive,
                         onClick = {
                             // Compare the route PREFIX: the Shuffle tab is also
                             // the current screen when the deck was opened via a
@@ -358,9 +326,6 @@ private fun FloatingNavPill(
     // v149 — the current page's category accent (see [curioNavActiveAccent]);
     // null → the theme's secondary (butter) with onSecondary ink.
     activeAccent: Color?,
-    // v151 — false while the bar is the reveal-morph source (drawn but not
-    // tappable over the reveal page).
-    interactive: Boolean,
     onClick: () -> Unit
 ) {
     val pillWidth by animateDpAsState(
@@ -387,7 +352,7 @@ private fun FloatingNavPill(
                 if (selected) activeFill
                 else Color.Transparent
             )
-            .clickable(enabled = interactive, onClick = onClick),
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Row(

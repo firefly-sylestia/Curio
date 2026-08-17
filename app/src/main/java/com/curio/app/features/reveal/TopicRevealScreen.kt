@@ -127,10 +127,8 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.NavPillBoundsTransform
 import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
-import com.curio.app.ui.adaptive.SentimentSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -853,16 +851,6 @@ fun TopicRevealScreen(
         // in on scroll-up. Hidden in Browse-Topics mode: reading from the
         // database must not shape the shuffle (pure read-only).
         if (!browseMode && resolved != null) {
-            // v151 — the sentiment pill is the shared-element TARGET of the
-            // nav-pill-bar morph: the bar (source) remembers its state with
-            // the same key inside the same SharedTransitionLayout, so opening
-            // the reveal morphs the bar's capsule into this pill. Null-
-            // guarded — outside the NavHost layout (deep links/tests) there's
-            // no source to morph from, so the pill just renders in place.
-            val morphScope = LocalRevealSharedScope.current
-            val morphVisibilityScope = LocalRevealVisibilityScope.current
-            val sentimentMorphState =
-                morphScope?.rememberSharedContentState(SentimentSharedElementKey)
             AnimatedVisibility(
                 visible = !sentimentPillHidden,
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -877,17 +865,6 @@ fun TopicRevealScreen(
                     sentiment = sentiment,
                     accent = cat.themedAccent(),
                     ink = cat.onAccent(),
-                    // v151 — the shared-element target: the pill's bounds
-                    // morph out of the bottom nav bar's capsule.
-                    modifier = if (morphScope != null && morphVisibilityScope != null && sentimentMorphState != null) {
-                        morphScope.run {
-                            Modifier.sharedElement(
-                                sentimentMorphState,
-                                morphVisibilityScope,
-                                boundsTransform = NavPillBoundsTransform
-                            )
-                        }
-                    } else Modifier,
                     onDislike = {
                         AppPreferences.setTopicSentiment(
                             context, cat.id, resolved.id,
@@ -2218,13 +2195,10 @@ private fun RevealSentimentPill(
     accent: Color,
     ink: Color,
     onDislike: () -> Unit,
-    onLike: () -> Unit,
-    // v151 — the shared-element modifier (the nav bar morphs into this
-    // pill); null-safe callers pass Modifier.
-    modifier: Modifier = Modifier
+    onLike: () -> Unit
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {

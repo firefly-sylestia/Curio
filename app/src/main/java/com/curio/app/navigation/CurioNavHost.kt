@@ -118,7 +118,6 @@ import com.curio.app.features.fieldmind.FieldMindObservationScreen
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
-import com.curio.app.ui.adaptive.SentimentSharedElementKey
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDrawerState
@@ -278,21 +277,6 @@ fun CurioNavHost(
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
     val showBottomBar =
         routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
-    // v151 — the nav bar stays composed for a beat after the reveal opens
-    // so its pill can MORPH into the reveal's Like/Dislike pill (the
-    // shared-element source must be composed + VISIBLE when the route
-    // transition starts — it is drawn, but its buttons are disabled); then
-    // it leaves composition and the sentiment pill stays.
-    var sentimentMorphVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(isRevealRoutePrefix) {
-        if (isRevealRoutePrefix) {
-            sentimentMorphVisible = true
-            delay(500)
-            sentimentMorphVisible = false
-        } else {
-            sentimentMorphVisible = false
-        }
-    }
     // v142 — full-bleed-bottom routes: like the tab pages and the Topic
     // Reveal, these pages paint their own backgrounds to the very bottom
     // edge and clear the gesture bar themselves — no reserved nav-bar slot
@@ -477,10 +461,6 @@ fun CurioNavHost(
                 .widthIn(max = CurioContentMaxWidth)
         ) {
             val sharedTransitionScope = this
-            // v151 — the nav bar ↔ reveal sentiment pill morph state (the
-            // bar is the caller-managed source, the reveal pill the target).
-            val sentimentSharedState =
-                sharedTransitionScope.rememberSharedContentState(SentimentSharedElementKey)
         NavHost(
             navController = navController,
             startDestination = CurioRoutes.SPLASH,
@@ -830,33 +810,25 @@ fun CurioNavHost(
                 LightboxScreen(navController = navController)
             }
         }
-            // v129 — the floating pill bar is a true overlay on the page
-            // (Scaffold removed): it sits above the page content, aligned
-            // to the bottom center, so no painted slot / strip sits behind
-            // it. v147 — the drawer draws OVER it (stays composed beneath).
-            // v144 — it YIELDS while the tour is running (the tour dock
-            // floats at the same bottom-center spot).
-            // v151 — the bar lives INSIDE the SharedTransitionLayout now so
-            // its pill can MORPH into the reveal's Like/Dislike pill when
-            // the reveal opens (instead of the bar vanishing and the pill
-            // sliding up as a separate element): it stays composed for the
-            // reveal's entrance ([sentimentMorphVisible]) as the shared-
-            // element source — drawn but not tappable — then leaves.
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (!wide && (showBottomBar || sentimentMorphVisible) && TourController.currentStep == null) {
-                    CompositionLocalProvider(LocalRevealSharedScope provides sharedTransitionScope) {
-                        CurioFloatingNavBar(
-                            navController = navController,
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                            sharedElementState = sentimentSharedState,
-                            visible = true,
-                            interactive = showBottomBar
-                        )
-                    }
-                }
-            }
         }
             }
+        }
+        // v129 — the floating pill bar is now a true overlay on the page
+        // (Scaffold removed): it sits above the NavHost content, aligned to
+        // the bottom center, so no painted slot / strip sits behind it. It
+        // draws over the page's own full-bleed background; the tab pages
+        // clear it themselves (see Home / Spin / Cabinet bottom padding).
+        // v147 — the drawer now lives at the NavHost root and draws OVER
+        // this bar (which stays composed underneath) — no more yielding.
+        // v144 — the bar YIELDS while the tour is running: the tour's
+        // floating pill dock floats at the same bottom-center spot, and the
+        // old opaque dock covered the bar anyway, so the bar must not show
+        // behind/around the tour pill on tab stops.
+        if (!wide && showBottomBar && TourController.currentStep == null) {
+            CurioFloatingNavBar(
+                navController = navController,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
 
     // Keep the tour controls inside the existing root Box. The Row is a
