@@ -1245,6 +1245,27 @@ app/src/main/java/com/curio/app/
     v170 commits rode along). LESSON: "photos option" = the entry's
     sessionScreenshots attachments; synchronous decode is mandatory for
     the off-screen card capture.
+- **v173 — pill morph slowed again (400) + Cabinet "All" wears the SPIN
+  accent.** User: "the navbar morphe open is still tooo rapid aah, make i
+  even more sloer. and in cabinet all use blue or red or whatever the spin
+  screen color have set not yellow or anything else."
+  - SPRINGS: all four nav-pill specs (PillWidth/Motion/Color/Expand) and
+    the mirrored Reveal* + Studio* families in TopicRevealScreen.kt /
+    PetDesignerScreen.kt dropped stiffness 750 → 400 (damping stays 1.0
+    — critically damped, zero bounce). ~35% slower settle, still lockstep
+    (same physics across all four specs per file). Do NOT touch
+    `Springs.Calm` (750, in CurioMotion.kt) — that's the page/dialog
+    entrance family, not the pills.
+  - CABINET "ALL" COLOR: `curioActivePillFill(null)` fell back to
+    secondaryContainer = ButterYellow@30% — the stray yellow. Fix in
+    `curioNavActiveAccent`: CABINET returns `cabinetAccent ?:
+    (spinAccent ?: primary)` — the pill inherits the SPIN deck's
+    published accent ("whatever the spin screen color have set"; default
+    wildcard deck = CoralBlush, the brand primary) and gets the same
+    light-mode 55% saturation mute as Spin's own pill. The butter
+    fallback now only reaches Home-without-hero / non-tab routes. LESSON:
+    the theme's secondaryContainer is BUTTER (yellow) — any "stray
+    yellow" on a plain page is this fallback, not the nav code.
 - **v172 — mood board quote cards: resize scales the WHOLE note (text
   included), and the export renders the same size/spot as the editor.**
   User: "the moodboard quote cards are still very bugged... both in

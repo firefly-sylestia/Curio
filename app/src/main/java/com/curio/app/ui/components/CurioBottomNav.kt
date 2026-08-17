@@ -234,16 +234,15 @@ private val FloatingPillHeight = 48.dp
 // holds across all four.
 // v166 — the pill family runs SLOWER and CRITICALLY damped. Stiffness
 // Medium (1500) snapped the collapse shut in a beat — the violence the
-// user flagged. The family now runs 750 (half of Medium — "slower a
-// little", still ~3.5x snappier than the old MediumLow 400 that dragged a
-// full second) at damping 1.0, so the width/fill/label glide to rest with
-// ZERO overshoot or bounce: smooth, never violent. Same physics across all
-// four specs keeps the v162/v165 lockstep (every element finishes with the
-// pill).
-private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 750f)
-private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 750f)
-private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 750f)
-private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 750f)
+// user flagged. The family now runs 400 (v173 — even slower than the v166
+// 750, which the user still called "too rapid") at damping 1.0, so the
+// width/fill/label glide to rest with ZERO overshoot or bounce: smooth,
+// never violent. Same physics across all four specs keeps the v162/v165
+// lockstep (every element finishes with the pill).
+private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
+private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
+private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 400f)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -596,7 +595,13 @@ internal fun curioFloatingNavContainerFor(wash: Color): Color {
 @Composable
 private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePrefix) {
     CurioRoutes.SPIN -> CurioNavTint.spinAccent
+    // v173 — Cabinet "All" (no active filter) inherits the SPIN screen's
+    // accent ("blue or red or whatever the spin screen color have set"),
+    // not the muted butter fallback that read as a stray yellow. If Spin
+    // hasn't published yet, falls back to the theme primary — the coral
+    // brand, which IS the default wildcard deck's own accent.
     CurioRoutes.CABINET -> CurioNavTint.cabinetAccent
+        ?: (CurioNavTint.spinAccent ?: MaterialTheme.colorScheme.primary)
     CurioRoutes.HOME -> CurioNavTint.homeAccent
     else -> null
 }
@@ -607,12 +612,13 @@ private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePref
  * the loud lane colors read muted, not neon — the bright saturated accents
  * were exactly the "bright colors" the user wanted toned down. Dark mode
  * keeps the theme's deep jewel tone (already muted by design) and pastel
- * mode keeps the airy pastel twin (already calm). Null (plain pages —
- * Cabinet "All") falls back to the theme's MUTED default container:
- * secondaryContainer (soft warm butter at low alpha, light + dark aware)
- * with its proper [curioActivePillInk] — v166 replaced the PRIMARY/coral
- * fallback, which read as a stray PINK pill on Cabinet "All" (the same
- * pink family as the spin shuffle brand color).
+ * mode keeps the airy pastel twin (already calm). Null (Home without a
+ * published hero tint, non-tab routes) falls back to the theme's MUTED
+ * default container: secondaryContainer (soft warm butter at low alpha,
+ * light + dark aware) with its proper [curioActivePillInk]. v173 —
+ * Cabinet "All" no longer reaches this fallback: it inherits the SPIN
+ * deck's accent (see [curioNavActiveAccent]), so the stray-yellow path is
+ * Home-only now.
  */
 @Composable
 private fun curioActivePillFill(accent: Color?): Color {

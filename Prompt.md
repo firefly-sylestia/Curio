@@ -1,6 +1,31 @@
 # Prompt.md — Request log
 
-## Current request — mood board quote cards: resize scales the whole note; export matches the editor
+## Current request — pill morph slower again + Cabinet "All" wears the Spin accent
+
+User: "the navbar morphe open is still tooo rapid aah, make i even more
+sloer. and in cabinet all use blue or red or whatever the spin screen
+color have set not yellow or anything else." (no "dont push" → push).
+
+1. SPRINGS: all four nav-pill specs in CurioBottomNav.kt
+   (PillWidth/PillMotion/PillColor/PillExpand) + the mirrored
+   Reveal* family (TopicRevealScreen.kt) + Studio* family
+   (PetDesignerScreen.kt) dropped stiffness 750 → 400, damping stays
+   1.0 (critically damped — zero bounce, just slower). All pills stay
+   in lockstep (same physics per file). Springs.Calm (CurioMotion.kt,
+   page/dialog entrances) untouched.
+2. CABINET "ALL" YELLOW: `curioActivePillFill(null)` returned
+   secondaryContainer = ButterYellow@30% — the stray yellow. Fix in
+   `curioNavActiveAccent`: CABINET → `cabinetAccent ?: (spinAccent ?:
+   primary)`. Cabinet "All" now inherits the Spin deck's published
+   accent (default wildcard deck = CoralBlush, the coral brand) with
+   the same light-mode 55% saturation mute as Spin's own pill; coral
+   primary as the never-opened-Spin fallback. Butter fallback now only
+   reaches Home-without-hero / non-tab routes. The wide-window rail
+   shares the function, so it matches too.
+
+Docs: changelog FIX lines, AGENTS.md v173, this file. Push.
+
+## Completed request — mood board quote cards: resize scales the whole note; export matches the editor
 
 User: "the moodboard quote cards are still very bugged. like aah its
 anpoyong both in editing and sharing.". ask_user: editing = resize

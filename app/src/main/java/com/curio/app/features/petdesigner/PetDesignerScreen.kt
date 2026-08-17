@@ -1428,9 +1428,10 @@ private val StudioPillHeight = 52.dp
 // expand/shrink, spring<Float> for fades); same physics.
 // v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
 // critically damped (1.0) so the studio tabs glide with zero overshoot.
-private val StudioWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 750f)
-private val StudioMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 750f)
-private val StudioExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 750f)
+// v173 — slowed to 400 with the nav pill family ("still too rapid").
+private val StudioWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
+private val StudioMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
+private val StudioExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
 
 /**
  * One capsule tab in the studio pill bar — mirrors [CurioFloatingNavBar]'s

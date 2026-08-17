@@ -2262,11 +2262,12 @@ private val RevealSentimentHeight = 48.dp
 // label's expand/shrink, spring<Float> for fades); same physics.
 // v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
 // critically damped (1.0) so the Like/Dislike segments glide with zero
-// overshoot — same feel as the bottom bar's collapse.
-private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 750f)
-private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 750f)
-private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 750f)
-private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 750f)
+// overshoot — same feel as the bottom bar's collapse. v173 — slowed to
+// 400 with the nav pill family ("still too rapid").
+private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
+private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
+private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 400f)
+private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
