@@ -1648,6 +1648,45 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v191 — drawer constellation as a BRAIN NEURAL WEB + floating tap
+  popover. (branch Alpha)** User: "in drawer we have your constellation
+  right but its random? isnt it. and it doesnt show real data yet. but i
+  want to draw the costellation pattern as a brain neural connection. and
+  when i tap the dot it shows me the info belo but i want that to sho as
+  a floating small thing and also less data. and also in future i will be
+  replacing the category with real knowledge based things just like brain
+  knowlegde you get it right?" Clarified via ask_user: explored-only
+  neurons (keep), popover = name + saved count (both later replaceable by
+  knowledge nodes), and the drawer widens a little if the brain feels
+  squished.
+  - BRAIN NEURAL WEB (`ui/components/CurioConstellation.kt`): the old arc
+    scatter sat every star in a flat bottom band of the canvas (looked
+    random/squished). Neurons now fill two hemisphere ELLIPSE lobes
+    (phi sweeps -π/2..π/2, radial 0.3..1.0 fills the lobe interior; lobes
+    bulge outward at mid-height and taper to the midline top/bottom — the
+    brain silhouette with the fissure gap). Links are CURVED quadratic
+    beziers (perpendicular sag 0.12) instead of straight lines: every
+    neuron → its 2 nearest neighbours (synapses) + its nearest neuron on
+    the OTHER hemisphere (corpus-callosum bridges, deduped). The gold
+    fissure is now a soft curve down the centre line. Data unchanged —
+    stars = explored lanes, size = saves, glow = active (real passport
+    data, deterministic positions).
+  - FLOATING POPOVER: `CurioConstellation` gained a
+    `popoverContent: (@Composable (CategoryId) -> Unit)? = null` slot —
+    when provided, the selected neuron shows a small floating card
+    anchored just above the dot (below when near the top), clamped inside
+    the canvas, tap-to-dismiss (BoxWithConstraints + onSizeChanged for the
+    clamp). The DRAWER passes a compact name + "N saved" chip and its
+    richer below-panel (the 4 stat chips + last-explored line +
+    `DrawerMapStat`) is DELETED — "a floating small thing and also less
+    data". The Stats page passes null and keeps its own below-panel.
+  - DRAWER WIDTH: `ModalDrawerSheet` 320 → 336dp so the neural web has
+    room to breathe (user's "extend the drawer a little more to the
+    right" contingency).
+  - FUTURE NOTE: the neurons are fed by [CategoryId] + count maps today;
+    the user plans to replace category lanes with real knowledge-based
+    nodes — the component only reads the id list + maps, so swapping the
+    data model later is caller-side only.
 - **v190 — Material theme polish: pastel-softened material cards, mixes
   collapse to the scheme primary, readable adaptive-hero contrast, M3 nav
   roles. (branch Alpha)** User: "the material main card colors are good

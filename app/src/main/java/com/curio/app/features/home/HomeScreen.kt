@@ -1900,7 +1900,10 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     var aboutExpanded by rememberSaveable { mutableStateOf(false) }
 
     ModalDrawerSheet(
-        modifier = Modifier.width(320.dp),
+        // v190 — a little wider so the brain neural web has room to breathe
+        // (user: "if the brain neuron look feels squished extend the drawer
+        // a little more to the right").
+        modifier = Modifier.width(336.dp),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
         // The hero banner tears from the very top edge — run the sheet
@@ -2371,101 +2374,33 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             onSelect = { selected = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(230.dp)
-        )
-        // Selected lane's data — richer passport panel.
-        AnimatedVisibility(
-            visible = selected != null,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            selected?.let { id ->
+                .height(230.dp),
+            // v190 — the tap detail is now a small FLOATING card anchored to
+            // the neuron (name + saved count — user: "a floating small thing
+            // and also less data") instead of the richer panel below. Tap the
+            // card (or empty sky) to dismiss.
+            popoverContent = { id ->
                 val cat = CurioCategories.byId(id)
-                val accent = cat.themedAccent()
                 val p = progress[id] ?: CurioPassport.CategoryProgress()
-                val ink = MaterialTheme.colorScheme.onSurface
-                val muted = MaterialTheme.colorScheme.onSurfaceVariant
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, 0.14f),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            CurioIcon(cat.iconGlyph, null, tint = accent, size = 20.dp)
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(1.dp)
-                            ) {
-                                Text(
-                                    cat.displayName,
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = ink
-                                )
-                                Text(
-                                    if (p.lastAt > 0) "Last explored ${formatElapsed(System.currentTimeMillis() - p.lastAt)} ago"
-                                    else "Explored, nothing saved yet",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = muted
-                                )
-                            }
-                            Surface(
-                                onClick = { selected = null },
-                                shape = CircleShape,
-                                color = muted.copy(alpha = 0.10f),
-                                modifier = Modifier.size(26.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                    CurioIcon(CurioIcons.Close, null, tint = muted, size = 16.dp)
-                                }
-                            }
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            DrawerMapStat("${p.spins}", "spins", Color(0xFF9B7BB8))
-                            DrawerMapStat("${p.reveals}", "peeked", Color(0xFF7FA0C8))
-                            DrawerMapStat("${p.explores}", "explores", Color(0xFF5F9EA0))
-                            DrawerMapStat("${p.saves}", "saved", Color(0xFFB98A5E))
-                        }
-                    }
+                    CurioIcon(cat.iconGlyph, null, tint = cat.themedAccent(), size = 18.dp)
+                    Text(
+                        cat.displayName,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "${p.saves} saved",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
-        }
-    }
-}
-
-
-/** v176 — one compact stat pane inside the map's tap panel. */
-@Composable
-private fun DrawerMapStat(value: String, label: String, tint: Color) {
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = tint.copy(alpha = 0.14f)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
-        ) {
-            Text(
-                value,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        )
     }
 }
 

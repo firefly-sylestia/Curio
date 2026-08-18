@@ -50,6 +50,8 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Drawer: the curiosity constellation is now a brain neural web — explored lanes sit as neurons in two hemisphere lobes, linked by curved synaptic connections with inter-hemispheric bridges, instead of the old flat scatter.
+- Drawer: tapping a neuron shows a small floating card with the lane and its saved count (the big panel below is gone), and the drawer is a touch wider so the brain has room to breathe.
 - Material theme: in pastel mode the deck's main card and fills now soften to pastels like the rest of the app (the material family colors were staying full-strength).
 - Material theme: a mixed deck now wears the theme's single primary color instead of a blended mix color.
 - Material theme: the light-mode adaptive hero reads crisp again — the banner wears the rich material family color with dark title text and glyphs instead of the washed-out pale look.
