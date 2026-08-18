@@ -1648,6 +1648,28 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v197 — hole-ring coil redrawn from the user's REVISED SVG (a truncated
+  arch, no bottom curl) and it now PEEKS OUT of the card's left edge.
+  (branch Alpha)** User: "now i added a better ring this time can u use
+  that instead of the previous one, and also the ring should be come out
+  from the left of it like peek out from the left not entirely inside the
+  stat card" + a revised SVG (same 150×420, three coils — but each coil's
+  path is now `M38 62 C38 39 54 24 76 24 C98 24 111 37 111 52`: the
+  bottom curl `C111 66 102 75 90 75 …` is GONE, the box is 73×38 instead
+  of 73×51, and the dark depth pass uses the SAME truncated path).
+  - `ui/components/PaperStatCard.kt` [drawCoilRing]: `CoilOutlineNorm` and
+    `CoilSpecularNorm` re-normalized to the revised 73×38 box (outline:
+    0,1.0 → 0,0.395 / 0.219,0 / 0.521,0 / 0.822,0 / 1,0.342 / 1,0.737;
+    specular unchanged in SVG space but re-normalized: 0.068,0.868 …).
+    The wire now rises up the left, over the top and down the right as a
+    clean arch (no curl-in at the bottom); `coilH` aspect 51/73 → 38/73.
+  - PEEK-OUT: the coil is pushed LEFT past the card edge (`leftPeek`
+    ≈ 9dp → its left arc + leg protrude ~6.5dp past the card's left
+    edge, like a spiral binding sticking out of the paper) instead of
+    sitting entirely inside. The hole stays centered vertically under the
+    arch; the wire's right leg dives through it. Works because the
+    fill's `drawWithCache` isn't clipped to the card shape (the Surface
+    doesn't clip its content here — see the Home v74 note).
 - **v196 — category picker: tap-to-open always (hold to mix), cancel +
   back applies the cleared mix, and a cancelled mix no longer resurrects
   after a topic visit. (branch Alpha)** User: "even when i cancel the
