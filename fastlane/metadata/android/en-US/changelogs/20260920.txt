@@ -50,6 +50,9 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Category picker: it always opens in tap-to-open mode now — tap a category to open it (even when the deck is a mix), and only tap-and-hold enters mix selection (the old auto-tick forced every tap to toggle the mix).
+- Category picker: pressing Cancel and leaving via back now applies the cancellation — the mixed deck clears back to a single category instead of the sheet closing with the old mix intact.
+- Category picker: changing away from a mixed deck (from the Home shuffle) and opening a topic no longer brings the mix back when you return — the new category sticks.
 - Drawer + Stats: the curiosity constellation's brain mesh now reads whole — decorative filler neurons fill both hemispheres and join the neural web, so the brain shows its full shape even when few lanes are explored (the real explored-lane neurons stay the tappable ones).
 - Navigation: leaving a tab for the Topic Reveal now fully collapses the nav pill — the reveal no longer keeps the Shuffle pill popped open during the close, and the bar's collapse-hold is shorter so it doesn't linger.
 - Detail: the saved-entry hero's tear edge now reads the same as every other screen — the warm paper-colored band under the seam is gone, replaced by the same subtle dark hairline the Home, Profile, Cabinet and Settings heroes use.

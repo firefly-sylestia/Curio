@@ -120,6 +120,11 @@ fun CurioConstellation(
                     else Color(0xFF5F7E9A).copy(alpha = 0.50f)
     val fissureColor = if (isCurioDarkTheme()) Color(0xFFD9A85C).copy(alpha = 0.30f)
                        else Color(0xFFA97F3C).copy(alpha = 0.45f)
+    // v195 — decorative filler dots wear the same neutral steel ink as the
+    // links. Resolved in COMPOSITION (isCurioDarkTheme can't run in the
+    // Canvas draw lambda below).
+    val fillerColor = if (isCurioDarkTheme()) Color(0xFF8FA6BC).copy(alpha = 0.55f)
+                      else Color(0xFF5F7E9A).copy(alpha = 0.55f)
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -182,8 +187,6 @@ fun CurioConstellation(
             // Decorative fillers — small neutral dots, drawn UNDER the real
             // neurons. They complete the mesh but carry no data: dim, no
             // accent, no glow, no white core, never tappable.
-            val fillerColor = if (isCurioDarkTheme()) Color(0xFF8FA6BC).copy(alpha = 0.55f)
-                              else Color(0xFF5F7E9A).copy(alpha = 0.55f)
             fillers.forEach { f ->
                 drawCircle(
                     color = fillerColor,

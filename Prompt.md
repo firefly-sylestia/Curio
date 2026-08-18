@@ -1,27 +1,30 @@
-# Current Request — Brain mesh fillers + nav pill full collapse on Topic Reveal
+# Current Request — Category picker: tap-to-open, cancel+back applies, no mix resurrection + CI fix for the constellation
 
 ## Status: DONE (committed + pushed to Alpha)
 
 ## Request (user, verbatim)
-"the neruons dot doesnt create the brain mesh. and i told you to add extra dots for decoration and completion of the neuron mesh, and the home nav doesnt collapse fully in topic reveal screen it stays for too long, neither it collapse"
+"even when i cancel the selected in category picker and i tap back make it apply too. and also when its mixed and after that i open the category picker to slecet dont let me tap to select for mix let it be open the category when i tap and only tap and hold should select for next mic or override mix, also theres a bug suppos i have a mixed selected and its from the home shuffle button and then i cancel it and chnage it to other category and i opened the topic and then when i tap back it goes back to the mixed one even though i have chnaged it. so fix that."
 
-## What changed (v195)
+Then: CI failed on the v195 constellation commit — `@Composable invocations can only happen from the context of a @Composable function` at CurioConstellation.kt:185:35 — "fix this too".
 
-### 1. Brain mesh filler neurons (`ui/components/CurioConstellation.kt`)
-- User asked (earlier, via ask_user) for explored-only interactive neurons PLUS decorative extras to complete the mesh. With few explored lanes the web read as scattered dots.
-- NEW `brainFillerDots()`: deterministic fixed-seed ring layout per hemisphere lobe (radial 0.35 → 0.89, 5/7/9 dots per ring) filling both lobes on the same lobe-ellipse math as the real neurons.
-- Fillers join the SAME link web — nearest-2 synapses + inter-hemispheric bridges computed over ALL dots (real nodes still split left/right by index) — so the mesh outlines the whole brain even at zero explored lanes.
-- Fillers draw as small neutral steel dots UNDER the real neurons (dim, no accent/glow/white core); NOT tappable; the real explored neurons stay the only interactive data (popover untouched).
+## What changed (v196)
 
-### 2. Nav pill full collapse on the Topic Reveal (`ui/components/CurioBottomNav.kt` + `navigation/CurioNavHost.kt`)
-- ROOT CAUSE: v193 kept the bar composed 500ms after leaving the tab set, but `CurioFloatingNavBar`'s internal `selectedRoute` maps the reveal route → SPIN ("keep Shuffle selected"). So Home → reveal made the SPIN pill POP OPEN during the hold, and the bar vanished with a pill stuck expanded.
-- FIX: new `collapsing` param on `CurioFloatingNavBar`; NavHost passes `collapsing = !showBottomBar`. While off the tab set, `selectedRoute = null` → every pill glides closed, bar unmounts with nothing expanded.
-- Hold shortened 500 → 380ms (the 240-stiffness critically-damped collapse spring's settle time) so the bar doesn't linger.
+### 1. Tap-to-open always (`CategoryPickerSheet` in SpinScreen.kt)
+- The v26 auto-tick reopened the sheet in multi-select with every mix lane pre-ticked whenever the persisted deck was a mix. Now `multiSelectMode` starts false and `selectedSlugs` empty on every open; tap OPENS a category (replacing the deck), and long-press (both Original/New pages) is the ONLY way into multi-select, starting a fresh selection for the next / overriding mix.
+
+### 2. Cancel + back applies the cleared mix
+- Cancel button sets a `mixCancelled` flag; `onDismissRequest` applies a cleared state (`onCategoriesSelected(emptyList())`) when cancelled OR when every lane was deselected in multi-select — SpinScreen reverts to the last single category and persists it. Fresh selections (presets, long-press) reset the flag. A pop in single-select mode (never entered multi-select) still just closes.
+
+### 3. No mix resurrection (the Home-shuffle back bug)
+- Root cause: the v5.14 slug-authority `LaunchedEffect(categorySlug)` and the v5.5 persist effect re-ran on every pop-back from a pushed route (the topic reveal) and re-forced the launch slug over the user's in-session category change. A new `slugApplied` rememberSaveable flag gates both: the slug (and its prefs persist) apply ONCE per navigation; returning from the reveal restores the flag true so the deck keeps the user's change.
+
+### 4. CI fix — constellation filler color (`ui/components/CurioConstellation.kt`)
+- v195 called `isCurioDarkTheme()` (a @Composable) inside the Canvas draw lambda for the new decorative filler dots. Moved `fillerColor` resolution to composition next to `linkColor`/`fissureColor` (which already follow that pattern).
 
 ## Docs
-- `app/AGENTS.md` — v195 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 2 FIX bullets.
+- `app/AGENTS.md` — v196 entry (picker fixes).
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 4 FIX bullets.
 - This Prompt.md.
 
 ## Verification
-- Static only (no Gradle here — CI validates on push). `CurioFloatingNavBar` has a single call site (CurioNavHost) so the new param can't break other callers; `curioNavActiveAccent(null)` already handles null. Fillers are remembered once (fixed seed) and share the existing `sqDist`/`norm`/`drawCurvedLink` helpers — no new imports needed.
+- CI reported only the one constellation error (fixed); the picker changes are static-safe (no new @Composable misuse: the sheet edits are plain remember/mutableState + callbacks). Committed and pushed; CI will validate.

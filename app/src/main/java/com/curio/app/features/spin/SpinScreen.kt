@@ -430,8 +430,16 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // Spin tab opens where the user left off on the next launch. Persist the
     // FULL launch set (single or mixed) when a slug (single or multi) is
     // present so multi-select decks survive too.
+    // v196 — the slug authority (v5.14 below) and this persist must apply
+    // ONCE per navigation, not on every pop-back: rememberSaveable survives
+    // the reveal round-trip, so returning from a pushed route (topic reveal)
+    // keeps the user's in-session category change instead of re-forcing the
+    // launch slug — which resurrected a cancelled mix (user: "i cancel it
+    // and chnage it to other category … when i tap back it goes back to the
+    // mixed one even though i have chnaged it").
+    var slugApplied by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (categorySlug != null) {
+        if (categorySlug != null && !slugApplied) {
             AppPreferences.setLastSpinCategories(context, initialCats.map { it.id })
         }
     }
@@ -461,9 +469,14 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     }
     LaunchedEffect(categorySlug) {
         // Guard: on a normal fresh launch the value already matches; only
-        // write when restoreState resurrected a stale set.
-        if (slugCatIds != null && activeCatIds != slugCatIds) {
-            activeCatIds = slugCatIds
+        // write when restoreState resurrected a stale set. v196 — runs only
+        // once per navigation (slugApplied): returning from a pushed route
+        // must NOT re-force the launch slug over an in-session change.
+        if (slugCatIds != null && !slugApplied) {
+            slugApplied = true
+            if (activeCatIds != slugCatIds) {
+                activeCatIds = slugCatIds
+            }
         }
         // v5.15 — the plain Shuffle tab is equally authoritative from
         // prefs: the category picker ("What are we exploring?") now lands
@@ -1369,11 +1382,21 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 showCategoryPicker = false
             },
             onCategoriesSelected = { cats ->
-                activeCatIds = cats.map { it.id }
-                // v5.15 — persist the FULL mixed set (not just the first)
-                // so a multi-select deck survives back navigation, tab
-                // switches and app restarts.
-                AppPreferences.setLastSpinCategories(context, cats.map { it.id })
+                if (cats.isEmpty()) {
+                    // v196 — a CANCELLED mix: the user cleared the ticks in
+                    // the picker and left via back — the mix is gone, the
+                    // deck reverts to the last single category (and that
+                    // single is persisted so it can't resurrect).
+                    val single = AppPreferences.getLastSpinCategory(context)
+                    activeCatIds = listOf(single)
+                    AppPreferences.setLastSpinCategories(context, listOf(single))
+                } else {
+                    activeCatIds = cats.map { it.id }
+                    // v5.15 — persist the FULL mixed set (not just the first)
+                    // so a multi-select deck survives back navigation, tab
+                    // switches and app restarts.
+                    AppPreferences.setLastSpinCategories(context, cats.map { it.id })
+                }
                 showCategoryPicker = false
             },
         )
@@ -4229,16 +4252,22 @@ private fun CategoryPickerSheet(
     // the mix instead of it collapsing to the single first category. Hidden
     // lanes are filtered out so they never show as pre-selected.
     val context = LocalContext.current
-    val persistedVisible = remember {
-        AppPreferences.getLastSpinCategories(context)
-            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
-    }
-    // Wide windows (tablet / landscape) spread the deck grid and cap the
-    // sheet's content width so the picker stays readable on large screens.
-    val wide = windowWidthSizeClass().isWide
-    // Default = tap-to-open (single). Long-press enters multi-select mode.
-    var multiSelectMode by remember { mutableStateOf(persistedVisible.size > 1) }
-    var selectedSlugs by remember { mutableStateOf(persistedVisible.map { it.id.routeSlug }.toSet()) }
+    // v196 — the picker ALWAYS opens in tap-to-open (single) mode, even when
+    // the current deck is a MIX. The old v26 auto-tick reopened the sheet in
+    // multi-select with every mix lane pre-ticked — the user: "when its mixed
+    // and after that i open the category picker to select dont let me tap to
+    // select for mix let it be open the category when i tap and only tap and
+    // hold should select for next mic or override mix". Tap OPENS a category
+    // (replacing the deck with it); tap-and-hold is the ONLY way into
+    // multi-select, starting a fresh selection for the next / overriding mix.
+    var multiSelectMode by remember { mutableStateOf(false) }
+    var selectedSlugs by remember { mutableStateOf(emptySet<String>()) }
+    // v196 — the user pressed Cancel (cleared the ticks, exited multi-select)
+    // and then left via back: the cancellation must APPLY (deck reverts to
+    // the last single category) instead of the sheet closing with the old mix
+    // intact — user: "even when i cancel the selected in category picker and
+    // i tap back make it apply too". Reset whenever a fresh selection starts.
+    var mixCancelled by remember { mutableStateOf(false) }
     // v27k — the two pages (Original lanes / New lanes) behind the same grid,
     // and a scope for tab jumps. Same split as the full-screen picker.
     val newLanes = CurioCategories.all.filter {
@@ -4283,14 +4312,20 @@ private fun CategoryPickerSheet(
         onDismissRequest = {
             // v189 — popping the sheet back (swipe / scrim tap / back)
             // while lanes are ticked APPLIES the mix instead of dropping
-            // the selection. A pop with nothing selected (or single-select
-            // mode) just closes, keeping the current deck.
-            if (multiSelectMode && selectedSlugs.isNotEmpty()) {
-                onCategoriesSelected(
-                    categories.filter { it.id.routeSlug in selectedSlugs }
-                )
-            } else {
-                onDismiss()
+            // the selection. v196 — a CANCELLED selection applies too (the
+            // deck reverts to the last single category — the mix is gone)
+            // instead of closing with the old mix intact: the Cancel button
+            // sets [mixCancelled], and deselecting EVERY lane while in
+            // multi-select is the same intent. A pop in single-select mode
+            // (never entered multi-select) just closes, keeping the deck.
+            when {
+                mixCancelled || (multiSelectMode && selectedSlugs.isEmpty()) ->
+                    onCategoriesSelected(emptyList())
+                multiSelectMode && selectedSlugs.isNotEmpty() ->
+                    onCategoriesSelected(
+                        categories.filter { it.id.routeSlug in selectedSlugs }
+                    )
+                else -> onDismiss()
             }
         },
         sheetState = sheetState,
@@ -4524,6 +4559,10 @@ private fun CategoryPickerSheet(
                                     // the shadow behind them).
                                     idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f),
                                     onClick = {
+                                        // v196 — a fresh selection (preset or
+                                        // clear) cancels any pending mix-cancel
+                                        // so back applies THIS state instead.
+                                        mixCancelled = false
                                         if (preset.clearAll) {
                                             multiSelectMode = true
                                             selectedSlugs = emptySet()
@@ -4614,6 +4653,13 @@ private fun CategoryPickerSheet(
                                                 }
                                             },
                                             onLongClick = {
+                                                // v196 — long-press starts a
+                                                // FRESH mix selection (tap-to-open
+                                                // is the default; only hold
+                                                // enters multi-select). Any
+                                                // pending cancel is cleared so
+                                                // back applies this new state.
+                                                mixCancelled = false
                                                 multiSelectMode = true
                                                 if (slug !in selectedSlugs) {
                                                     selectedSlugs = selectedSlugs + slug
@@ -4653,6 +4699,12 @@ private fun CategoryPickerSheet(
                                             },
                                             onLongClick = if (comingSoon) null else {
                                                 {
+                                                    // v196 — long-press starts a
+                                                    // FRESH mix selection (hold
+                                                    // is the only way into
+                                                    // multi-select); clears any
+                                                    // pending mix-cancel.
+                                                    mixCancelled = false
                                                     multiSelectMode = true
                                                     if (slug !in selectedSlugs) {
                                                         selectedSlugs = selectedSlugs + slug
@@ -4718,10 +4770,15 @@ private fun CategoryPickerSheet(
                                 }
                             }
                             // Cancel — plain text, no background, same height.
+                            // v196 — marks the mix as cancelled so leaving via
+                            // back APPLIES the cleared state (deck reverts to
+                            // the last single category) instead of closing
+                            // with the old mix intact.
                             TextButton(
                                 onClick = {
                                     multiSelectMode = false
                                     selectedSlugs = emptySet()
+                                    mixCancelled = true
                                 },
                                 modifier = Modifier.heightIn(min = 44.dp)
                             ) {

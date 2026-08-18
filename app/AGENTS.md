@@ -1648,6 +1648,37 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v196 — category picker: tap-to-open always (hold to mix), cancel +
+  back applies the cleared mix, and a cancelled mix no longer resurrects
+  after a topic visit. (branch Alpha)** User: "even when i cancel the
+  selected in category picker and i tap back make it apply too. and also
+  when its mixed and after that i open the category picker to slecet dont
+  let me tap to select for mix let it be open the category when i tap and
+  only tap and hold should select for next mic or override mix, also theres
+  a bug suppos i have a mixed selected and its from the home shuffle button
+  and then i cancel it and chnage it to other category and i opened the
+  topic and then when i tap back it goes back to the mixed one even though
+  i have chnaged it".
+  - TAP-TO-OPEN ALWAYS (`CategoryPickerSheet` in SpinScreen.kt): the v26
+    auto-tick reopened the sheet in multi-select with every mix lane
+    pre-ticked whenever the persisted deck was a mix — the user wanted tap
+    to OPEN a category (replacing the deck) and only tap-and-hold to enter
+    multi-select. `multiSelectMode` now starts false and `selectedSlugs`
+    empty on every open; long-press (both pages) is the ONLY way into
+    multi-select, starting a fresh selection for the next / overriding mix.
+  - CANCEL + BACK APPLIES: the Cancel button now sets a `mixCancelled`
+    flag, and `onDismissRequest` applies a cleared state when cancelled OR
+    when every lane was deselected in multi-select — the deck reverts to
+    the last single category (`onCategoriesSelected(emptyList())` →
+    SpinScreen persists the single) instead of closing with the old mix
+    intact. Fresh selections (presets, long-press) reset the flag.
+  - NO MIX RESURRECTION (root cause of the back-to-mixed bug): the v5.14
+    slug-authority `LaunchedEffect(categorySlug)` and the v5.5 persist
+    effect re-ran on every pop-back from a pushed route (the topic reveal)
+    and re-forced the launch slug over the user's in-session category
+    change. A new `slugApplied` rememberSaveable flag gates both: the slug
+    (and its prefs persist) apply ONCE per navigation; returning from the
+    reveal restores the flag true, so the deck keeps the user's change.
 - **v195 — constellation gets decorative filler neurons (the mesh reads
   whole); nav pill fully collapses on the Topic Reveal and the hold is
   shorter. (branch Alpha)** User: "the neruons dot doesnt create the
