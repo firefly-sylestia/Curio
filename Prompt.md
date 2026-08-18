@@ -1,33 +1,30 @@
-# Current Request — Home/Recents tag pills shaded + Material theme buttons/filters use family tones
+# Current Request — Topic resolution fixes ("Flow" → "Flower Boy") + Browse-Topics persistence
 
-## Status: DONE (committed + pushed to Alpha) — plus a CI regression fix: the v196 tap-to-open rewrite dropped `val wide` from `CategoryPickerSheet` (CI: "Unresolved reference 'wide'" at the grid sites) — restored after `val context` in SpinScreen.kt.
+## Status: DONE (committed + pushed to Alpha)
 
 ## Request (user, verbatim)
-"in light mode home screen the recents unplored pills make it get the color of the category it sits on with a shade and in dark mode why it looks transparent fix that, and in material theme in light mode and dark mode the category button in spin screen and filters looks bad and even worse when mixed is selected the category button"
+"when i tap flow in topic browser movie 2024 in fimls why its opening flower boy, fix more similiar issues like this and also make the category selected and expaddned setting persistent untill restart"
 
-## What changed (v198)
+## What changed (v199)
 
-### 1. Tag pills (Home `ExploreTopicRow` + Recents `RecentTopicRow`)
-The old fill `lerp(surfaceContainerLow, accent, 0.14f)` vanished on the tinted card in light and read transparent in dark. Now the pill pulls the accent toward the card surface:
-- Light: ~30% → a solid SHADED category chip on the tinted card (the user's "color of the category it sits on, with a shade").
-- Dark: ~38% → visibly tinted on the dark card (the "transparent" fix).
-- Pastel light: shades with the deep same-hue ink (`category.categoryInk()`) so the airy pastel twin can't wash the pill away.
-- Text stays `category.categoryInk()` (deep accent light / light twin dark / family ink under Material).
+### 1. "Flow" → "Flower Boy" resolution bug (root cause)
+`TopicCatalog.findByName` scanned `CategoryId.values()` in order and returned the FIRST lane's first tolerant match. ALBUMS scans before FILMS, and "Flower Boy" contains "flow" (4-char containment tier) — so the Films reveal for "Flow" (films.json has "Flow (2024)") opened the ALBUMS topic. Even the full name "Flow (2024)" base-collided the same way.
+- `TopicCatalog.findByName` → TWO passes: strict (exact name / base-name, new `matchesSavedNameStrict` + shared `savedNameBase` helper) across ALL categories first, then the tolerant pass (containment last). An exact/base hit in any lane always beats a loose containment hit in an earlier lane.
+- `TopicRevealScreen` + `SaveCaptureScreen` → resolve within the route's own category pool FIRST (`pool.firstOrNull { it.matchesSavedName(name) }`), falling back to the global `findByName` only for legacy saved entries whose lane changed (v135).
 
-### 2. Material theme — category buttons + filters (root cause)
-`MaterialFamilies.kt` v185 scheme-role branches are GONE:
-- `materialAccent()` wore scheme `secondary`/`tertiary` for rose/green lanes (the baseline secondary is an AMBER companion → a Movies deck got an amber button while its card was rose-family) and a translucent `onSurfaceVariant` for neutrals. The Spin deck buttons (Categories/Filter), Spin filter-sheet chips and Cabinet/Topic-History filter chips all painted off-hue vs the family-toned cards.
-- Mixed decks collapse to the scheme primary → the button re-mapped primary through the rose branch and wore secondary while the deck wore primary ("even worse when mixed").
-- Fix: `materialAccent()` / `materialOnAccent()` / `materialInk()` now resolve the lane's OWN family tonal tone (T40/T80 fills, on-fill ink, T45/T80 text ink) — the exact fills `CurioGradients.cardGradient` already uses — so buttons, chips, filters and text match the deck. Pastel mode softens the fills to their pastel twins like the cards. `materialAccentFor` drops its neutral special-case tones so watermarks/blends align.
+### 2. Browse-Topics persistence until restart
+The browser route is a plain `composable` — every reopen from the drawer creates a fresh backstack entry, so rememberSaveable reset the category selection + chip bar. New `TopicBrowserSession` (process-scoped static, same pattern as `SpinPickerRequest`) seeds `selectedCat` / `categoryFilterOpen` and syncs back on change — survives close-and-reopen until the app restarts (statics die with the process).
 
 ## Files
-- `ui/theme/MaterialFamilies.kt` — materialAccent / materialOnAccent / materialInk / materialAccentFor.
-- `features/home/HomeScreen.kt` + `features/recent/RecentScreen.kt` — tag pill fill (+ imports in Recent).
+- `data/TopicCatalog.kt` — two-pass findByName, matchesSavedNameStrict, savedNameBase.
+- `features/reveal/TopicRevealScreen.kt` — category-first resolution.
+- `features/capture/SaveCaptureScreen.kt` — category-first resolution (+ import).
+- `features/database/TopicDatabaseScreen.kt` — TopicBrowserSession + seed/sync.
 
 ## Docs
-- `app/AGENTS.md` — v198 entry + v185 bullet updated (family tones for all six families).
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 3 FIX bullets.
+- `app/AGENTS.md` — v199 entry.
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 2 FIX bullets.
 - This Prompt.md.
 
 ## Verification
-- Static only (no Gradle here — CI validates on push). Trace check: mixed-deck button = `materialFamilyFor(primary).fill(dark)` === `cardGradient(primary)`'s material branch → deck card and button now match; single lanes match too.
+- Static only (no Gradle here — CI validates on push). Trace check: reveal/films/Flow → Films pool matchesSavedName("Flow") → "Flow (2024)" base-name match ✓; findByName("Flow (2024)") strict pass → Films "Flow (2024)" exact ✓ (albums "Flower Boy" only matches in the tolerant pass, never reached first).

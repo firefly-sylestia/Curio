@@ -222,19 +222,19 @@ fun TopicRevealScreen(
     }
 
     val topic by produceState<CurioTopic?>(initialValue = null, topicName, cat.id) {
-        val cached = TopicCatalog.findByName(topicName)
-        if (cached != null) {
-            value = cached
-            return@produceState
-        }
+        // v199 — resolve WITHIN the route's own category FIRST. The old
+        // code asked the global TopicCatalog.findByName first, which scans
+        // every lane and returns the first tolerant match — "Flow" (the
+        // 2024 film) opened "Flower Boy" (an album) because ALBUMS scans
+        // before FILMS and "flower" contains "flow" (and even the full
+        // name "Flow (2024)" base-collided the same way). The category
+        // pool now owns the match (exact → base-name → containment, see
+        // matchesSavedName); the global lookup stays only as the legacy
+        // saved-entry fallback (v135: an old entry whose lane changed must
+        // still resolve instead of hanging on "Loading…").
         val pool = TopicJsonLoader.load(cat.id)
-        // v135 — tolerant match: a saved entry's topic name can differ from
-        // the current canonical name (the books dedupe collapsed "The
-        // Odyssey" into "The Odyssey (c. 8th century BCE)"), so an old
-        // entry must still resolve instead of hanging on "Loading…". A
-        // genuinely unknown topic stays null and the screen falls back to
-        // showing the requested name (see HeroCard).
         value = pool.firstOrNull { it.matchesSavedName(topicName) }
+            ?: TopicCatalog.findByName(topicName)
     }
 
     val resolved = topic

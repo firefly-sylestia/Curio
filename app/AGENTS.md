@@ -1648,6 +1648,34 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v199 — topic name resolution: exact/base matches beat containment
+  across lanes, and the reveal/capture resolve within the route's own
+  category first ("Flow" no longer opens "Flower Boy"); the Browse-Topics
+  category + chip-bar state persists until app restart. (branch Alpha)**
+  User: "when i tap flow in topic browser movie 2024 in fimls why its
+  opening flower boy, fix more similiar issues like this and also make the
+  category selected and expaddned setting persistent untill restart".
+  - FLOW → FLOWER BOY (root cause): `TopicCatalog.findByName` scanned
+    `CategoryId.values()` in order and returned the FIRST lane's first
+    tolerant match; ALBUMS scans before FILMS and "Flower Boy" contains
+    "flow" (and even the full "Flow (2024)" base-collided the same way),
+    so the Films reveal opened the album. Fixes:
+    - `TopicCatalog.findByName` is now TWO passes — strict matches
+      (exact name / base-name equality, new `matchesSavedNameStrict` +
+      shared `savedNameBase` helper) across ALL categories, THEN the
+      tolerant pass (containment still last). An exact/base hit in any
+      lane always beats a loose containment hit in an earlier lane.
+    - `TopicRevealScreen` + `SaveCaptureScreen` now resolve within the
+      route's own category pool FIRST (`pool.firstOrNull { it.matchesSavedName(name) }`),
+      falling back to the global `findByName` only for legacy saved
+      entries whose lane changed (v135).
+  - BROWSE-TOPICS PERSISTENCE: the browser is a plain `composable`, so
+    every reopen from the drawer creates a fresh backstack entry and
+    rememberSaveable reset the category selection + chip bar. New
+    `TopicBrowserSession` (process-scoped static, same pattern as
+    `SpinPickerRequest`) seeds `selectedCat` / `categoryFilterOpen` and
+    syncs back on change — the state now survives close-and-reopen until
+    the app restarts (statics die with the process).
 - **v198 — Home/Recents "Unexplored" tag pills wear a SHADED category
   chip; Material theme: category buttons, filter chips and ink now use
   the family tonal tones — the scheme-role amber/mint/translucent paints

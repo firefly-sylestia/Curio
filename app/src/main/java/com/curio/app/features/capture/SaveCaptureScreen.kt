@@ -82,6 +82,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.matchesSavedName
 import com.curio.app.data.formatSessionShort
 import com.curio.app.data.shortName
 import android.util.Log
@@ -172,15 +173,17 @@ fun SaveCaptureScreen(
             value = existing.topic
             return@produceState
         }
-        val cached = TopicCatalog.findByName(topicName)
-        if (cached != null) {
-            value = cached
-            return@produceState
-        }
+        // v199 — resolve WITHIN the route's own category first: the global
+        // TopicCatalog.findByName used to scan every lane and could resolve
+        // "Flow" (films) to "Flower Boy" (an album) — same class of bug as
+        // the reveal. The category pool owns the match (exact → base-name
+        // → containment); the global lookup stays as the legacy saved-entry
+        // fallback. Graceful fallback: a genuinely unknown topic stays null
+        // so the save CTA stays disabled instead of silently capturing the
+        // wrong topic.
         val pool = TopicJsonLoader.load(cat.id)
-        // Graceful fallback: an unknown topic stays null so the save CTA
-        // stays disabled instead of silently capturing the wrong topic.
-        value = pool.firstOrNull { it.name == topicName }
+        value = pool.firstOrNull { it.matchesSavedName(topicName) }
+            ?: TopicCatalog.findByName(topicName)
     }
 
     var canSave by remember { mutableStateOf(false) }
