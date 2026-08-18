@@ -1724,6 +1724,26 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v206 — splash redesign: bigger gradient wordmark, warm tagline, warm
+  ground band at the bottom. (branch Alpha, NOT pushed — user: "dont
+  push it")** User: "make the Curio tet bigger and with gradient basced
+  on the dark or light mode. and at the buttom it have a similiar
+  gradient backgroud of the app backgroud. not full just at the buttom
+  and also discover something that text gets a little bigger too and
+  warmer in dark mode light mode you figure it out."
+  - WORDMARK: "Curio" 36 → 72sp (same Geom Bold displaySmall family),
+    now painted with a theme-aware horizontal GRADIENT echoing the
+    cosmic mark — dark: bright SkyMint → ButterYellow on the dark sky;
+    light: deep CoralInk → GoldInk on the cream (readable deep tones).
+  - BOTTOM GROUND: a bottom-anchored band (bottom 34% of the screen)
+    fading transparent → a warmed app-background tone (dark: background
+    lerped 5% toward CoralBlush; light: 14% toward ButterYellow), so the
+    splash reads grounded instead of a flat void. Not full-bleed.
+  - TAGLINE: 14 → 18sp and WARMER in both themes — parchment
+    #D8CDB4 on dark, warm khaki #7E6E50 on light (replaces the cool
+    onBackground @ 0.62).
+  - Everything else (logomark + shimmer, animated halo, 3-dot loader)
+    unchanged. Brace/paren-balanced.
 - **v205 — app-size diet: the 40MB was Vosk, not the topics. (branch
   Alpha)** User: "the app size is still 40mb and why. dont tell me its
   the topic ik its alot but still not alot to make it 40mb" (+ "its not
