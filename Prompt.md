@@ -27,6 +27,12 @@
 ## NOTE
 Pushed. (v206 splash + v207 were pushed earlier in the session.)
 
+## CI FIX (v208b) — pushed `ea44bba`+1
+- `BrainStats.kt`: `CaptureData`'s subclasses are NESTED — the
+  `wordCount()` `when` needed `CaptureData.`-qualified branches.
+- `SplashScreen.kt`: wordmark gradient `brush` moved into
+  `style.copy(brush = …)` (Text has no `brush` param).
+
 ---
 
 # Previous — v207: drawer footer float + About-behind-footer, coil left-end hook, stats sun/moon, smoother nav collapse, Like/Dislike height

@@ -288,8 +288,10 @@ fun SplashScreen(navController: NavHostController) {
                     }
                     Text(
                         text = "Curio",
-                        style = MaterialTheme.typography.displaySmall.copy(fontSize = 72.sp),
-                        brush = wordmarkBrush
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontSize = 72.sp,
+                            brush = wordmarkBrush
+                        )
                     )
 
                     // ── Tagline — the app's identity line under the name ─────

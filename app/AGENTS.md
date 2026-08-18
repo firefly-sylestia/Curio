@@ -1756,6 +1756,11 @@ app/src/main/java/com/curio/app/
     color-coded dimension bars + levels + tips + a words-written line);
     constellation star SIZE is now sqrt-scaled knowledge (the old linear
     `min(count,60)` pinned everything at max once scores ran past 60).
+  - CI FIX (v208b): `CaptureData`'s subclasses are NESTED — the
+    `wordCount()` `when` branches needed `CaptureData.` qualification
+    (`is CaptureData.SoundBite` etc.); the splash wordmark's gradient
+    `brush` moved from the `Text(...)` param (doesn't exist) into
+    `style.copy(brush = …)`.
 - **v207 — drawer footer in normal flow (no float / no rows behind it),
   coil left-end hook, standalone sun/moon on the stats page, even
   smoother nav collapse, Like/Dislike exact capsule height. (branch

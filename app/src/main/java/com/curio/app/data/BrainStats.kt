@@ -44,13 +44,13 @@ fun CaptureData.wordCount(): Int {
     fun words(s: String?): Int =
         if (s.isNullOrBlank()) 0 else s.trim().split(Regex("\\s+")).size
     return when (this) {
-        is SoundBite -> words(note) + quotes.orEmpty().sumOf { words(it) }
-        is ReelNotes -> words(reviewText) + quotes.orEmpty().sumOf { words(it) }
-        is Marginalia -> words(journalText) + quotes.orEmpty().sumOf { words(it) }
-        is GalleryWall -> words(caption) + quotes.orEmpty().sumOf { words(it) }
-        is FieldNotes -> words(observed) + words(surprised) + words(learnNext)
-        is OpenNotebook -> subData.wordCount()
-        is Portfolio -> sections.orEmpty().sumOf { it.data.wordCount() }
+        is CaptureData.SoundBite -> words(note) + quotes.orEmpty().sumOf { words(it) }
+        is CaptureData.ReelNotes -> words(reviewText) + quotes.orEmpty().sumOf { words(it) }
+        is CaptureData.Marginalia -> words(journalText) + quotes.orEmpty().sumOf { words(it) }
+        is CaptureData.GalleryWall -> words(caption) + quotes.orEmpty().sumOf { words(it) }
+        is CaptureData.FieldNotes -> words(observed) + words(surprised) + words(learnNext)
+        is CaptureData.OpenNotebook -> subData.wordCount()
+        is CaptureData.Portfolio -> sections.orEmpty().sumOf { it.data.wordCount() }
     }
 }
 
