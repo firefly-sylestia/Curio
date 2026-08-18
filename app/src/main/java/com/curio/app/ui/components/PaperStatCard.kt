@@ -88,14 +88,14 @@ fun Modifier.paperStatCardFill(
         }
         onDrawBehind {
             drawPath(path, fill)
-            // v27u+ — the rings sit ~3dp LEFT of the hole center so they
-            // visually align with the punched opening (the coil's arch +
-            // left peek read as centered when the wire center is offset).
-            val ringOffX = 3.dp.toPx()
+            // v27u+ — the rings sit ~4dp LEFT and ~3dp UP of the hole center
+            // so they visually align above the punched opening.
+            val ringOffX = 4.dp.toPx()
+            val ringOffY = 3.dp.toPx()
             repeat(3) { i ->
                 val cy = size.height * (i + 1) / 4f
                 val center = Offset(holeX, cy)
-                val ringCenter = Offset(holeX - ringOffX, cy)
+                val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
                 if (ringsOn) {
                     when (ringStyle) {
                         "split" -> drawSplitRing(ringCenter, holeR, ink, dark)
