@@ -1681,6 +1681,12 @@ app/src/main/java/com/curio/app/
     buttons, chips, filters and text match the deck; pastel mode softens
     the fills to their pastel twins like the cards. `materialAccentFor`
     drops its neutral special-case tones so watermarks/blends align.
+  - CI REGRESSION FIX (v198): the v196 tap-to-open rewrite accidentally
+    dropped the sheet's `val wide = windowWidthSizeClass().isWide` (it rode
+    in the replaced `persistedVisible` block) — the grid's `columns = if
+    (wide) …` then failed to compile (CI: "Unresolved reference 'wide'" at
+    the two grid sites). Restored in `CategoryPickerSheet` right after
+    `val context`.
 - **v197 — hole-ring coil redrawn from the user's REVISED SVG (a truncated
   arch, no bottom curl) and it now PEEKS OUT of the card's left edge.
   (branch Alpha)** User: "now i added a better ring this time can u use

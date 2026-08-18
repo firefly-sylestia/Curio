@@ -4252,6 +4252,13 @@ private fun CategoryPickerSheet(
     // the mix instead of it collapsing to the single first category. Hidden
     // lanes are filtered out so they never show as pre-selected.
     val context = LocalContext.current
+    // v198 — REGRESSION FIX: the v196 tap-to-open rewrite accidentally
+    // dropped this `val wide` (the old persistedVisible block that carried
+    // it was replaced) — CI: Unresolved reference 'wide' at the grid
+    // columns. Wide windows (tablet / landscape) spread the deck grid and
+    // cap the sheet's content width so the picker stays readable on large
+    // screens.
+    val wide = windowWidthSizeClass().isWide
     // v196 — the picker ALWAYS opens in tap-to-open (single) mode, even when
     // the current deck is a MIX. The old v26 auto-tick reopened the sheet in
     // multi-select with every mix lane pre-ticked — the user: "when its mixed

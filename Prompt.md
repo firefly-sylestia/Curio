@@ -1,6 +1,6 @@
 # Current Request — Home/Recents tag pills shaded + Material theme buttons/filters use family tones
 
-## Status: DONE (committed + pushed to Alpha)
+## Status: DONE (committed + pushed to Alpha) — plus a CI regression fix: the v196 tap-to-open rewrite dropped `val wide` from `CategoryPickerSheet` (CI: "Unresolved reference 'wide'" at the grid sites) — restored after `val context` in SpinScreen.kt.
 
 ## Request (user, verbatim)
 "in light mode home screen the recents unplored pills make it get the color of the category it sits on with a shade and in dark mode why it looks transparent fix that, and in material theme in light mode and dark mode the category button in spin screen and filters looks bad and even worse when mixed is selected the category button"
