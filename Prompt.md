@@ -1,44 +1,22 @@
-# Current Request — Cut lines shorter + right-shifted; hole rings redrawn as the spiral-coil SVG
+# Current Request — Detail hero tear reads the same as every other screen
 
 ## Status: DONE (committed + pushed to Alpha)
 
-## Request (user, paraphrased)
-"now we have two cut lines lets improve it even more. make it little more
-shorter and more to the right of the header text. and the hole rings. so i
-think the problem is stamped pin holes so as it creates holes which is see
-through the 3d ring doesnt show over it. lemme share the rings which you
-can adjust and put above the holes to give it a good look and tune the
-ring colors on your own. the ring itself isnt perfect its too much rounded
-and the view is also wrong so youve to fix the svg rings" + pasted SVG
-reference (3 spiral coils, 150×420).
+## Request (user, verbatim)
+"the tear logic of detail screen seems totally differnt from rest of the screens, can u fix it"
 
-## What changed (v194)
-- **Cut lines** (`ui/components/PaperTitleLines.kt`): the two hand-drawn
-  underlines now start ~a quarter in from the title's left edge and span
-  only the right ~70% of the line — top stroke 0.22→0.90w, bottom
-  0.26→0.94w (was 0.02/0.06 → 0.90/0.96). Shorter + more to the right of
-  the header text, same pen-sag shapes and -2° tilt.
-- **Hole rings** (`ui/components/PaperStatCard.kt`, the default "coil"
-  style): redrawn as the user's reference SVG — a FORESHORTENED
-  spiral-notebook wire (73:51 aspect) looping up the left, over the top,
-  down the right, curling in at the bottom. Drawn OVER the shaded hole
-  interior so the punched hole shows through the coil's inner opening
-  ("put above the holes"). Three SVG passes:
-  1. dark depth stroke behind (18px pass) — #101B27 light / #22282F dark;
-  2. metal tube gradient on top (8 stops tuned from the SVG palette, cool
-     polished steel; dark mode flips to light steel);
-  3. white specular along the upper-left (3px pass, 0.75 light / 0.60
-     dark).
-  Coil outer loop = holeR × 4.2 (~2.1× the hole diameter). Old arc-based
-  coil + CoilBackDark deleted; "split" / "oblique" styles untouched.
+## What was found
+- "Detail screen" = the saved-entry `EntryDetailScreen` (the Topic Reveal has no tear).
+- The detail hero's shape construction was ALREADY aligned with Home (v104): `SoftTornBottomShape` + `SoftTornSheetShape` with `bold = true`, same tearSeed for both, same 10dp lip / 14dp baseline, same v108 `heroTearSheetState` gate, same banner height/lip offsets.
+- The ONE remaining divergence was the **torn-edge shadow rim** under the seam: every other hero (Home, Profile, Cabinet, Settings, Onboarding, TopicHistory, Spin) draws `Color.Black.copy(alpha = 0.20f)`, but the detail hero drew `heroSheetColor.copy(alpha = 0.72f)` — a warm paper-colored band (near-black in dark mode) that made the seam read as a totally different tear.
+
+## What changed (v192)
+- `app/src/main/java/com/curio/app/features/detail/EntryDetailScreen.kt` — the torn-edge shadow rim under the detail hero now draws the same `Color.Black.copy(alpha = 0.20f)` hairline as every other screen (the old warm 72% paper band is gone). `heroSheetColor` stays in use (sheet + meta card), so no unused-variable fallout.
 
 ## Docs
-- `app/AGENTS.md` — v194 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 2 FIX bullets.
+- `app/AGENTS.md` — v192 entry.
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 1 FIX bullet.
 - This Prompt.md.
 
 ## Verification
-- Static only (no Gradle here — CI validates on push). The coil paths are
-  transcribed 1:1 from the SVG (normalized to the 73×51 box, verified
-  point-by-point); the specular line likewise. No leftover references to
-  CoilBackDark; all imports (Path/Brush/Stroke/StrokeCap) already present.
+- Static only (no Gradle here — CI validates on push). Confirmed via code_search that every other torn hero uses `Color.Black.copy(alpha = 0.20f)` and the detail hero is now the only place the rim color is referenced at that call site.

@@ -1698,6 +1698,18 @@ app/src/main/java/com/curio/app/
   shuffle card — the byline pill stays. The Topic Reveal hero keeps its
   year pill (top bar, next to the category chip), and the card title
   still drops the trailing year, so the shared-element morph stays clean.
+- **v192 — detail hero tear rim matches every other hero. (branch
+  Alpha)** User: "the tear logic of detail screen seems totally differnt
+  from rest of the screens, can u fix it". The detail hero's shape
+  construction was ALREADY aligned with Home (v104: `SoftTornBottomShape`
+  + `SoftTornSheetShape` with `bold = true`, same seed, same 10dp lip /
+  14dp baseline, same v108 sheet gate) — the ONE remaining divergence was
+  the torn-edge shadow rim under the seam: every other hero (Home,
+  Profile, Cabinet, Settings, Onboarding, TopicHistory, Spin) draws
+  `Color.Black.copy(alpha = 0.20f)`, but the detail hero drew a warm
+  paper-colored `heroSheetColor.copy(alpha = 0.72f)` band (near-black in
+  dark mode) that read as a totally different tear. Now it draws the same
+  20% black hairline.
 - **v191 — drawer constellation as a BRAIN NEURAL WEB + floating tap
   popover. (branch Alpha)** User: "in drawer we have your constellation
   right but its random? isnt it. and it doesnt show real data yet. but i

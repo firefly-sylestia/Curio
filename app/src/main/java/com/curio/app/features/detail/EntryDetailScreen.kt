@@ -428,17 +428,17 @@ fun EntryDetailScreen(
             // sheet. Hidden behind the opaque banner everywhere except the
             // sliver under the tear; through the up-bites the rim hugs the
             // bite's bottom edge while the white still reads above it.
+            // v109 — the SAME 20% black hairline as every other hero
+            // (Home, Profile, Cabinet, Settings…): the old warm paper-
+            // colored 72% band made the detail seam read differently from
+            // the rest of the app.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(EntryDetailHeroHeight)
                     .offset(y = 1.dp)
                     .clip(heroTornShape)
-                    .background(
-                // The seam is paper, not a shadow: keep the up-bites visibly
-                // warm against the bright sheet below the banner.
-                heroSheetColor.copy(alpha = 0.72f)
-            )
+                    .background(Color.Black.copy(alpha = 0.20f))
             )
 
             // ── Hero backdrop — the SOLID category color + symbol scatter.
