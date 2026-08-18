@@ -269,14 +269,15 @@ private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 120f
 private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 120f)
 private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 120f)
 
-// v208d — how long the collapsed pill bar stays composed after the route
-// leaves the tab set (the collapse spring's settle time, ~460ms at the
-// 120-stiffness family). CurioNavHost unmounts the bar after this hold,
-// and the Topic Reveal's Like/Dislike pill delays its own entrance by
-// this same amount — so the nav pill finishes cinching closed and the
-// bar VANISHES at the exact moment the Like/Dislike slides in (the
-// handoff: no overlap of the two pills).
-const val FloatingNavCollapseHoldMillis = 460
+// v208e — how long the collapsed pill bar stays composed after the route
+// leaves the tab set, then unmounts. Tuned to the Topic Reveal's
+// Like/Dislike entrance: the pill slides in over 220ms at its NATURAL
+// time, and the bar vanishes right as it lands (240 = 220 + a hair), so
+// the nav pill syncs TO the pill — the collapse motion is still visible
+// beneath it (overlap), then the bar is gone the moment the pill arrives.
+// The reveal's pill renders ABOVE the bar via the [SentimentPillHost]
+// overlay, so the overlap reads clean.
+const val FloatingNavCollapseHoldMillis = 240
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).

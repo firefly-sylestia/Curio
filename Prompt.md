@@ -1,23 +1,44 @@
-# Current Request — v208d: nav pill vanish syncs with the Like/Dislike appearance
+# Current Request — v208e: nav pill syncs TO the Like/Dislike + pill z-index above the nav pill
 
 ## Status: DONE (committed, pushed)
 
 ## Request (user, verbatim)
-"the nav pill collapse is fine, but the vanishing can be done more better, like the exact moment the like and dislike appears?"
+"no bro the like and dislike starting time was fine i just asked you to tune the navpil home one to sync properly. and also how about place the like and dislike pill z index above the home nav pill. so it looks even smoother. and also keep it overlap"
 
-## What changed
-- New shared constant `FloatingNavCollapseHoldMillis = 460` in CurioBottomNav.kt.
-- CurioNavHost: bar-unmount `delay(460)` → `delay(FloatingNavCollapseHoldMillis)`.
-- TopicRevealScreen: the Like/Dislike pill's FIRST entrance is gated on
-  `sentimentPillEntered` (flips after the same hold) — so the nav pill
-  cinches closed and the bar vanishes at the exact moment the pill slides
-  in (handoff, no overlap). Scroll hide/show unaffected.
+## What changed (rejected v208d's pill-delay; different approach)
+- REVERTED the v208d `sentimentPillEntered` gating — the Like/Dislike
+  keeps its natural start time (t≈0, 220ms slide).
+- TUNED THE NAV PILL instead: `FloatingNavCollapseHoldMillis` 460 → 240ms
+  (the pill's 220ms entrance + a hair) — the bar vanishes right as the
+  pill lands.
+- Z-INDEX: new `SentimentPillHost` (CurioRoutes.kt, LightboxTarget-style
+  out-of-band object) holds the pill composable; the reveal registers it
+  in a `SideEffect` (+ `DisposableEffect` clears on route leave) and the
+  NavHost composes the slot AFTER the floating bar — the Like/Dislike
+  draws ON TOP of the collapsing nav pill during the overlap. Slot's
+  wrapper Box has no pointer input (touches pass through); the pill's
+  scroll hide/show is captured by the lambda.
 
 ## Files
-- `ui/components/CurioBottomNav.kt` (constant)
-- `navigation/CurioNavHost.kt` (hold uses the constant)
-- `features/reveal/TopicRevealScreen.kt` (gated first entrance)
-- Docs: `app/AGENTS.md` (v208d), changelog ADD bullet, this Prompt.md.
+- `navigation/CurioRoutes.kt` (SentimentPillHost)
+- `navigation/CurioNavHost.kt` (slot after the bar + hold comment)
+- `ui/components/CurioBottomNav.kt` (constant 240)
+- `features/reveal/TopicRevealScreen.kt` (revert + portal)
+- Docs: `app/AGENTS.md` (v208e), changelog ADD bullet, this Prompt.md.
+
+---
+
+# Previous — v208d: nav pill vanish syncs with the Like/Dislike appearance
+
+## Status: SUPERSEDED by v208e (user rejected the pill-delay approach)
+
+## Request (user, verbatim)
+"the nav pill collapse is fine, but the vanishing can be done more better, like the exact moment the like and dislike appears?"
+
+## What changed (v208d, now reverted)
+- Shared constant `FloatingNavCollapseHoldMillis = 460`; NavHost used it;
+  the pill's first entrance was gated on the same hold. User said the
+  pill's starting time was fine — REVERTED; the nav pill is tuned instead.
 
 ---
 

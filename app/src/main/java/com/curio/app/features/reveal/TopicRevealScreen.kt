@@ -55,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -127,6 +128,7 @@ import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.SentimentPillHost
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
@@ -135,7 +137,6 @@ import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
@@ -597,17 +598,6 @@ fun TopicRevealScreen(
         // on scroll-up so it never covers the content being read.
         val revealScroll = rememberScrollState()
         var sentimentPillHidden by remember { mutableStateOf(false) }
-        // v208d — the Like/Dislike pill WAITS for the nav pill's collapse
-        // hold before its first entrance, so it slides in at the EXACT
-        // moment the floating nav bar vanishes (the handoff: the nav pill
-        // cinches closed and the bar unmounts, then the sentiment pill
-        // appears — no overlap of the two pills). The scroll hide/show
-        // below is unaffected — only the first entrance waits.
-        var sentimentPillEntered by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) {
-            delay(FloatingNavCollapseHoldMillis)
-            sentimentPillEntered = true
-        }
         LaunchedEffect(Unit) {
             var last = revealScroll.value
             snapshotFlow { revealScroll.value }.collect { value ->
@@ -873,42 +863,56 @@ fun TopicRevealScreen(
         // in on scroll-up. Hidden in Browse-Topics mode: reading from the
         // database must not shape the shuffle (pure read-only).
         if (!browseMode && resolved != null) {
-            AnimatedVisibility(
-                visible = sentimentPillEntered && !sentimentPillHidden,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                enter = slideInVertically(
-                    animationSpec = tween(220, easing = FastOutSlowInEasing)
-                ) { it } + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(
-                    animationSpec = tween(180, easing = FastOutSlowInEasing)
-                ) { it } + fadeOut(animationSpec = tween(180))
-            ) {
-                RevealSentimentPill(
-                    sentiment = sentiment,
-                    accent = cat.themedAccent(),
-                    ink = cat.onAccent(),
-                    // v167 — the pill's capsule wears the reveal page's own
-                    // dynamic tint (same lift rule as the nav bar capsule),
-                    // instead of a static surface color that ignored the
-                    // page tint in light mode.
-                    container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
-                    onDislike = {
-                        AppPreferences.setTopicSentiment(
-                            context, cat.id, resolved.id,
-                            if (sentiment == AppPreferences.SENTIMENT_DISLIKE)
-                                AppPreferences.SENTIMENT_NONE
-                            else AppPreferences.SENTIMENT_DISLIKE
-                        )
-                    },
-                    onLike = {
-                        AppPreferences.setTopicSentiment(
-                            context, cat.id, resolved.id,
-                            if (sentiment == AppPreferences.SENTIMENT_LIKE)
-                                AppPreferences.SENTIMENT_NONE
-                            else AppPreferences.SENTIMENT_LIKE
+            // v208e — the pill is registered into the NavHost's TOP overlay
+            // (SentimentPillHost), which composes it AFTER the floating nav
+            // bar — so it slides in ON TOP of the collapsing nav pill
+            // (z-index above it) and keeps its natural start time (user:
+            // "place the like and dislike pill z index above the home nav
+            // pill… keep it overlap"). The scroll hide/show state is
+            // captured by the lambda, so hiding on scroll-down still works;
+            // the pill's own timing is untouched.
+            SideEffect {
+                SentimentPillHost.content = {
+                    AnimatedVisibility(
+                        visible = !sentimentPillHidden,
+                        enter = slideInVertically(
+                            animationSpec = tween(220, easing = FastOutSlowInEasing)
+                        ) { it } + fadeIn(animationSpec = tween(220)),
+                        exit = slideOutVertically(
+                            animationSpec = tween(180, easing = FastOutSlowInEasing)
+                        ) { it } + fadeOut(animationSpec = tween(180))
+                    ) {
+                        RevealSentimentPill(
+                            sentiment = sentiment,
+                            accent = cat.themedAccent(),
+                            ink = cat.onAccent(),
+                            // v167 — the pill's capsule wears the reveal
+                            // page's own dynamic tint (same lift rule as the
+                            // nav bar capsule), instead of a static surface
+                            // color that ignored the page tint in light mode.
+                            container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
+                            onDislike = {
+                                AppPreferences.setTopicSentiment(
+                                    context, cat.id, resolved.id,
+                                    if (sentiment == AppPreferences.SENTIMENT_DISLIKE)
+                                        AppPreferences.SENTIMENT_NONE
+                                    else AppPreferences.SENTIMENT_DISLIKE
+                                )
+                            },
+                            onLike = {
+                                AppPreferences.setTopicSentiment(
+                                    context, cat.id, resolved.id,
+                                    if (sentiment == AppPreferences.SENTIMENT_LIKE)
+                                        AppPreferences.SENTIMENT_NONE
+                                    else AppPreferences.SENTIMENT_LIKE
+                                )
+                            }
                         )
                     }
-                )
+                }
+            }
+            DisposableEffect(Unit) {
+                onDispose { SentimentPillHost.content = null }
             }
         }
     }

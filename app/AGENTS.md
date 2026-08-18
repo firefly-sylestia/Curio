@@ -1761,16 +1761,21 @@ app/src/main/java/com/curio/app/
     (`is CaptureData.SoundBite` etc.); the splash wordmark's gradient
     `brush` moved from the `Text(...)` param (doesn't exist) into
     `style.copy(brush = …)`.
-  - NAV→SENTIMENT HANDOFF (v208d): user: "the nav pill collapse is
-    fine, but the vanishing can be done more better, like the exact
-    moment the like and dislike appears?". The bar's unmount hold is now
-    the shared `FloatingNavCollapseHoldMillis` (460) in CurioBottomNav;
-    CurioNavHost uses it for the bar-unmount delay, and the Topic
-    Reveal's Like/Dislike pill gates its FIRST entrance on the same
-    constant (`sentimentPillEntered` flips after the hold) — so the nav
-    pill cinches closed and the bar VANISHES at the exact moment the
-    Like/Dislike slides in (no overlap). Scroll hide/show is unaffected
-    (only the first entrance waits).
+  - NAV→SENTIMENT HANDOFF (v208e): user (v208d attempt rejected): "no
+    bro the like and dislike starting time was fine i just asked you to
+    tune the navpil home one to sync properly… place the like and dislike
+    pill z index above the home nav pill… keep it overlap". So the pill
+    KEEPS its natural entrance; the NAV pill syncs TO it:
+    - `FloatingNavCollapseHoldMillis` retuned 460 → 240ms (the pill's
+      220ms slide + a hair) — the bar vanishes right as the pill lands.
+    - Z-INDEX: the pill is portaled into the NavHost's own overlay via
+      the new `SentimentPillHost` (CurioRoutes.kt, out-of-band like
+      LightboxTarget): the reveal registers its pill composable in a
+      `SideEffect` (+ `DisposableEffect` clears it on route leave) and
+      the NavHost composes the slot AFTER the floating bar — so the
+      Like/Dislike draws ON TOP of the collapsing nav pill during the
+      overlap. The slot's wrapper Box has no pointer input (touches pass
+      through); the pill's scroll hide/show is captured by the lambda.
   - RING SVG v3 (v208c): user supplied `svgviewer-output (15).svg` —
     `CoilOutlineNorm` now matches it exactly: the wire starts at the
     box's bottom-LEFT corner (the v207 left hook is GONE), rises up,

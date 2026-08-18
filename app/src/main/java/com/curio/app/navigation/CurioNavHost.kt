@@ -302,10 +302,12 @@ fun CurioNavHost(
             barVisible = true
         } else {
             // Let the collapse spring + label retract finish before unmount.
-            // v208d — the hold is the shared [FloatingNavCollapseHoldMillis]:
-            // the Topic Reveal's Like/Dislike pill delays its entrance by the
-            // SAME amount, so the bar vanishes at the exact moment the pill
-            // appears (the handoff — no overlap).
+            // v208e — the hold is [FloatingNavCollapseHoldMillis], tuned to
+            // the reveal's Like/Dislike entrance (220ms slide + a hair), so
+            // the bar VANISHES right as the pill lands — the pill keeps its
+            // natural start time; the nav pill syncs TO it (user: "the like
+            // and dislike starting time was fine i just asked you to tune the
+            // navpil home one to sync properly").
             delay(FloatingNavCollapseHoldMillis)
             barVisible = false
         }
@@ -874,6 +876,17 @@ fun CurioNavHost(
                 collapsing = !showBottomBar,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
+        }
+        // v208e — the reveal's Like/Dislike pill renders in THIS overlay,
+        // composed AFTER the bar, so it draws ON TOP of the collapsing nav
+        // pill during the handoff (z-index above the nav pill — user
+        // request). The reveal registers its pill via [SentimentPillHost];
+        // the wrapper Box has no pointer input, so touches pass through
+        // everywhere except the pill itself.
+        SentimentPillHost.content?.let { pill ->
+            Box(Modifier.fillMaxSize()) {
+                Box(Modifier.align(Alignment.BottomCenter)) { pill() }
+            }
         }
 
     // Keep the tour controls inside the existing root Box. The Row is a
