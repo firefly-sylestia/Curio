@@ -1030,13 +1030,8 @@ fun SaveCaptureScreen(
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
                                 )
                             } else {
-                                CurioIcon(
-                                    name = CurioIcons.Check,
-                                    contentDescription = null,
-                                    tint = if (tintWash) cat.categoryInk() else cat.onAccent(),
-                                    size = 20.dp
-                                )
-                                Spacer(Modifier.width(8.dp))
+                                // v203 — text-only CTA: the leading check tick is
+                                // gone (same language as the Manage / Apply pills).
                                 Text(
                                     text = if (editEntryId != null) "Save changes" else "Save entry",
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)

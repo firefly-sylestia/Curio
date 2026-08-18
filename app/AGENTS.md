@@ -1724,6 +1724,19 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v204 — compile fix (PetStudio `sp` import) + Save CTA tick removed.
+  (branch Alpha)** User: CI failure "PetDesignerScreen.kt:1533:39
+  Unresolved reference 'sp'" + "fix this too then push everything. and
+  also remove the tick from the save your entry button".
+  - The v201 PetStudio label change (`fontSize = 15.sp`) was missing the
+    `androidx.compose.ui.unit.sp` import — added. (CI caught it because
+    the v201..v203 commits were sitting UNPUSHED; this push carries
+    v201–v204.)
+  - Save CTA (SaveCaptureScreen): the leading check tick
+    (`CurioIcons.Check` + Spacer) is gone — the button is text-only
+    ("Save entry" / "Save changes"), matching the Manage / Apply pills.
+    `CurioIcon` still used elsewhere (12 sites) so its import stays.
+  - Brace/paren-balanced; PUSHED with v201–v203 in one go.
 - **v203 — Your Curiosity page: back pill REMOVED (system back already
   works); drawer footer PINNED to the bottom + theme-aware credits ink.
   (branch Alpha)** User: "fix the back button in your cusriocity page.

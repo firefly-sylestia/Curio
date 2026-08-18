@@ -1,4 +1,23 @@
-# Current Request — v203: drawer footer pinned to the bottom + visible credits
+# Current Request — v204: PetStudio sp import fix + Save CTA tick removed, push everything
+
+## Status: DONE (committed + PUSHED — user: "fix this too then push everything")
+
+## Request (user, verbatim)
+CI: "PetDesignerScreen.kt:1533:39 Unresolved reference 'sp'" + "fix this too then push everything. and also remove the tick from the save your entry button."
+
+## What changed
+1. **Compile fix** — the v201 PetStudio label change (`fontSize = 15.sp`) was missing `import androidx.compose.ui.unit.sp` in PetDesignerScreen.kt; added. CI caught it because v201–v203 were sitting unpushed.
+2. **Save CTA tick removed** — SaveCaptureScreen's Save entry / Save changes button lost the leading `CurioIcons.Check` + Spacer; now text-only (matches Manage / Apply pills). `CurioIcon` still used at 12 sites.
+3. **PUSHED everything** — v201 (ring/pill), v202 (constellation), v203 (back pill + drawer footer), v204 all went up together.
+
+## Files
+- `features/petdesigner/PetDesignerScreen.kt` (import)
+- `features/capture/SaveCaptureScreen.kt` (tick removal)
+- Docs: `app/AGENTS.md` (v204), changelog FIX bullet, this Prompt.md.
+
+---
+
+# Previous — v203: drawer footer pinned to the bottom + visible credits
 
 ## Status: DONE (committed, NOT pushed — user: "dont push this")
 
