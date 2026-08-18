@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
@@ -55,6 +56,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
 
 /** A single unified item for the Home preview and the full Recents page. */
@@ -345,11 +347,22 @@ private fun RecentTopicRow(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     if (tag != null) {
+                        // v198 — the same shaded category pill as Home's
+                        // explore-topic rows: the accent pulled toward the
+                        // card surface (~30% light / ~38% dark) so the pill
+                        // reads as a solid shaded chip on the tinted card in
+                        // light and a visibly tinted pill on the dark card
+                        // (the old 14% blend read transparent). Pastel light
+                        // uses the deep same-hue ink as the shade.
+                        val tagShade = if (AppPreferences.pastelColorsState && !isCurioDarkTheme())
+                            category.categoryInk() else accent
                         Surface(
                             shape = RoundedCornerShape(50),
-                            // v27n — opaque tinted pill (was 14% alpha, which
-                            // let the elevation shadow bleed through).
-                            color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
+                            color = lerp(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                tagShade,
+                                if (isCurioDarkTheme()) 0.38f else 0.30f
+                            ),
                             // Same hairline rim as Home's explore-topic rows —
                             // the deep ink text + pastel fill alone read
                             // muddy on the tinted card.

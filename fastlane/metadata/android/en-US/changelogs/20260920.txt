@@ -50,6 +50,9 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Home + Recents: the "Unexplored" / "Resumed" tag pills now wear a shaded version of the category color they sit on — solid shaded chips on the tinted cards in light mode (the old pale blend vanished) and visibly tinted pills in dark mode (the old fill read transparent).
+- Material theme: the Spin Categories/Mixed button, the Filter button, the filter-sheet chips and the Cabinet/Topic-History filter chips now use the same muted family colors as the category cards — the rose-family buttons no longer paint amber (scheme secondary), green lanes no longer paint mint (tertiary), neutral lanes are no longer translucent, and a MIXED deck's button now matches the deck's primary color exactly.
+- Material theme: category text and icons (Home row arrows, tag pills, unselected chip labels) now use the lane's own muted family ink instead of the off-hue scheme companions.
 - Paper: the "Hole rings" coil is redrawn from the revised reference — a clean arch over the hole (no bottom curl) that now PEEKS OUT of the card's left edge like a real spiral binding instead of sitting entirely inside.
 - Category picker: it always opens in tap-to-open mode now — tap a category to open it (even when the deck is a mix), and only tap-and-hold enters mix selection (the old auto-tick forced every tap to toggle the mix).
 - Category picker: pressing Cancel and leaving via back now applies the cancellation — the mixed deck clears back to a single category instead of the sheet closing with the old mix intact.

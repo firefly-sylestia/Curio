@@ -2601,11 +2601,23 @@ private fun ExploreTopicRow(
                     if (tag != null) {
                         // Small accent pill — signals a topic the user left
                         // unexplored earlier and came back to (resumed).
+                        // v198 — the pill wears a SHADED category chip: the
+                        // accent pulled toward the card surface — ~30% in
+                        // light (a solid shaded chip on the tinted card,
+                        // replacing the old 14% blend that vanished) and
+                        // ~38% in dark (visibly tinted on the dark card,
+                        // never the old near-invisible blend). Pastel light
+                        // uses the deep same-hue ink as the shade so the
+                        // airy pastel twin doesn't wash the pill away.
+                        val tagShade = if (AppPreferences.pastelColorsState && !isCurioDarkTheme())
+                            category.categoryInk() else accent
                         Surface(
                             shape = RoundedCornerShape(50),
-                            // v27n — opaque tinted pill (was 14% alpha, which
-                            // let the elevation shadow bleed through).
-                            color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
+                            color = lerp(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                tagShade,
+                                if (isCurioDarkTheme()) 0.38f else 0.30f
+                            ),
                             // Same hairline rim as the detail page's #tag
                             // chips — the deep ink text + pastel fill alone
                             // read muddy on the tinted card (v7.32).

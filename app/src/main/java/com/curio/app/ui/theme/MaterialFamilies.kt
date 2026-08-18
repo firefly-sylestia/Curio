@@ -3,6 +3,7 @@ package com.curio.app.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategory
 
@@ -75,17 +76,15 @@ internal fun MaterialFamily.headerFill(dark: Boolean): Color {
 
 /**
  * Non-composable twins for the remember-block paths (watermark backdrops,
- * mixed-deck blends): the family tone WITHOUT the scheme roles — the two
- * scheme-expressed families (rose→secondary, green→tertiary) fall back to
- * their own tonal tone here, a negligible difference on watermarks/blends.
+ * mixed-deck blends): the family tone directly — same resolution as the
+ * composable accessors since v198 (all six families use their own tonal
+ * tone; no scheme-role branches).
  */
-internal fun CurioCategory.materialAccentFor(dark: Boolean): Color {
-    val f = materialFamilyFor(accent)
-    return when (f) {
-        MaterialFamily.NEUTRAL -> materialTone(f.hue, f.saturation, if (dark) 70 else 50)
-        else -> f.fill(dark)
-    }
-}
+internal fun CurioCategory.materialAccentFor(dark: Boolean): Color =
+    // v198 — the neutral-family branch used different tones (50/70 vs
+    // fill's 40/80); align it to the family fill so watermarks/blends
+    // match the chips and buttons exactly.
+    materialFamilyFor(accent).fill(dark)
 
 internal fun CurioCategory.materialOnAccentFor(dark: Boolean): Color =
     materialFamilyFor(accent).onFill(dark)
@@ -106,43 +105,60 @@ internal fun CurioCategory.materialFamily(): MaterialFamily =
 
 /**
  * The single muted color a lane wears under the Material theme — the
- * family fill, or the scheme's own secondary/tertiary accents for the
- * two families the seed palette already expresses (rose→secondary,
- * green→tertiary), so those lanes read as native M3 roles.
+ * family's own tonal tone (T40 light / T80 dark), the SAME fill the
+ * cards and gradients resolve ([CurioGradients.cardGradient] uses the
+ * family tone directly).
+ *
+ * v198 — the scheme-role branches are GONE: rose lanes wore the scheme
+ * SECONDARY (an amber companion in the baseline seed) and green lanes
+ * the scheme TERTIARY (mint), so every button, chip and filter under
+ * Material painted a DIFFERENT hue than the lane's family-toned cards
+ * (a Movies deck: rose card, amber button), and neutral lanes rendered
+ * as translucent onSurfaceVariant. The family tone is the lane's
+ * Material color everywhere (user verdict: the family-toned cards are
+ * good — the buttons and filters must match them). Pastel mode softens
+ * the fill to its pastel twin like the cards.
  */
 @Composable
 fun CurioCategory.materialAccent(): Color {
     val dark = isCurioDarkTheme()
-    return when (materialFamily()) {
-        MaterialFamily.ROSE -> MaterialTheme.colorScheme.secondary
-        MaterialFamily.GREEN -> MaterialTheme.colorScheme.tertiary
-        MaterialFamily.NEUTRAL -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
-        else -> materialFamily().fill(dark)
-    }
+    val fill = materialFamily().fill(dark)
+    return if (AppPreferences.pastelColorsState) pastelAccent(fill, dark) else fill
 }
 
-/** Ink on a lane's Material fill — pairs with [materialAccent]. */
+/**
+ * Ink that reads on a lane's Material fill — the family's on-fill tone
+ * (near-white on the T40 light fill, deep on the T80 dark fill), the
+ * same pairing the cards use. v198 — the scheme-role ink branches are
+ * gone (same reason as [materialAccent]); pastel mode flips to the deep
+ * same-hue ink on the airy light pastels and the light twin on the
+ * muted dark pastels — the exact pastel ink language of
+ * [CurioCategory.onAccent].
+ */
 @Composable
 fun CurioCategory.materialOnAccent(): Color {
     val dark = isCurioDarkTheme()
-    return when (materialFamily()) {
-        MaterialFamily.ROSE -> MaterialTheme.colorScheme.onSecondary
-        MaterialFamily.GREEN -> MaterialTheme.colorScheme.onTertiary
-        MaterialFamily.NEUTRAL -> MaterialTheme.colorScheme.onSurfaceVariant
-        else -> materialFamily().onFill(dark)
+    val fill = materialFamily().fill(dark)
+    return when {
+        !AppPreferences.pastelColorsState -> materialFamily().onFill(dark)
+        dark -> lerp(fill, Color.White, 0.85f)
+        else -> readableLightInk(fill)
     }
 }
 
-/** Muted accent ink for category text/icons under the Material theme. */
+/**
+ * Muted accent ink for category text/icons on plain surfaces under the
+ * Material theme — the family's own ink tone (T45 light / T80 dark),
+ * hue-consistent with the family fills. v198 — the scheme-role branches
+ * (rose→secondary, green→tertiary) painted rose-family TEXT in the
+ * scheme's amber/mint companions — off-hue next to the family-toned
+ * fills; the family ink tone keeps every text/icon on the lane's own
+ * muted hue.
+ */
 @Composable
 fun CurioCategory.materialInk(): Color {
     val dark = isCurioDarkTheme()
-    return when (materialFamily()) {
-        MaterialFamily.ROSE -> MaterialTheme.colorScheme.secondary
-        MaterialFamily.GREEN -> MaterialTheme.colorScheme.tertiary
-        MaterialFamily.NEUTRAL -> MaterialTheme.colorScheme.onSurfaceVariant
-        else -> materialFamily().ink(dark)
-    }
+    return materialFamily().ink(dark)
 }
 
 /**

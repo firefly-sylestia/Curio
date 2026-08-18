@@ -1,21 +1,33 @@
-# Current Request — Hole-ring coil redrawn from the revised SVG (truncated arch) + peeks out the card's left edge
+# Current Request — Home/Recents tag pills shaded + Material theme buttons/filters use family tones
 
 ## Status: DONE (committed + pushed to Alpha)
 
 ## Request (user, verbatim)
-"now i added a better ring this time can u use that instead of the previous one, and also the ring should be come out from the left of it like peek out from the left not entirely inside the stat card." + a revised SVG (`svgviewer-output (12).svg` — same 150×420, three coils, but each coil's path is now truncated: `M38 62 C38 39 54 24 76 24 C98 24 111 37 111 52` — the bottom curl `C111 66 102 75 90 75 …` is GONE; the bounding box is 73×38 instead of 73×51, and the dark depth pass uses the SAME truncated path).
+"in light mode home screen the recents unplored pills make it get the color of the category it sits on with a shade and in dark mode why it looks transparent fix that, and in material theme in light mode and dark mode the category button in spin screen and filters looks bad and even worse when mixed is selected the category button"
 
-## What changed (v197)
-`ui/components/PaperStatCard.kt` → `drawCoilRing` (the default "coil" ring style):
-- **New shape**: `CoilOutlineNorm` re-normalized to the revised 73×38 box — start (0,1.0), cubics (0,0.395 / 0.219,0 / 0.521,0) and (0.822,0 / 1,0.342 / 1,0.737). The wire is now a clean arch: up the left, over the top, down the right — no curl-in at the bottom. `coilH` aspect 51/73 → 38/73.
-- **New specular**: `CoilSpecularNorm` re-normalized to the same 73×38 box (the SVG's highlight line is unchanged in SVG space: 0.068,0.868 / 0.096,0.395 / 0.274,0.132 / 0.521,0.132 / 0.740,0.132 / 0.890,0.342 / 0.932,0.632).
-- **PEEK-OUT from the left**: the coil is pushed LEFT past the card edge — `leftPeek ≈ 9dp`, so its left arc + leg protrude ~6.5dp past the card's left edge like a real spiral binding sticking out of the paper, instead of sitting entirely inside the card. The hole stays centered vertically under the arch; the wire's right leg dives through it. (Works because the fill's `drawWithCache` drawing isn't clipped to the card shape — the Surface doesn't clip its content here, see Home's v74 note.)
-- Depth/metal/specular passes unchanged (dark depth + metal + white specular), same wire widths.
+## What changed (v198)
+
+### 1. Tag pills (Home `ExploreTopicRow` + Recents `RecentTopicRow`)
+The old fill `lerp(surfaceContainerLow, accent, 0.14f)` vanished on the tinted card in light and read transparent in dark. Now the pill pulls the accent toward the card surface:
+- Light: ~30% → a solid SHADED category chip on the tinted card (the user's "color of the category it sits on, with a shade").
+- Dark: ~38% → visibly tinted on the dark card (the "transparent" fix).
+- Pastel light: shades with the deep same-hue ink (`category.categoryInk()`) so the airy pastel twin can't wash the pill away.
+- Text stays `category.categoryInk()` (deep accent light / light twin dark / family ink under Material).
+
+### 2. Material theme — category buttons + filters (root cause)
+`MaterialFamilies.kt` v185 scheme-role branches are GONE:
+- `materialAccent()` wore scheme `secondary`/`tertiary` for rose/green lanes (the baseline secondary is an AMBER companion → a Movies deck got an amber button while its card was rose-family) and a translucent `onSurfaceVariant` for neutrals. The Spin deck buttons (Categories/Filter), Spin filter-sheet chips and Cabinet/Topic-History filter chips all painted off-hue vs the family-toned cards.
+- Mixed decks collapse to the scheme primary → the button re-mapped primary through the rose branch and wore secondary while the deck wore primary ("even worse when mixed").
+- Fix: `materialAccent()` / `materialOnAccent()` / `materialInk()` now resolve the lane's OWN family tonal tone (T40/T80 fills, on-fill ink, T45/T80 text ink) — the exact fills `CurioGradients.cardGradient` already uses — so buttons, chips, filters and text match the deck. Pastel mode softens the fills to their pastel twins like the cards. `materialAccentFor` drops its neutral special-case tones so watermarks/blends align.
+
+## Files
+- `ui/theme/MaterialFamilies.kt` — materialAccent / materialOnAccent / materialInk / materialAccentFor.
+- `features/home/HomeScreen.kt` + `features/recent/RecentScreen.kt` — tag pill fill (+ imports in Recent).
 
 ## Docs
-- `app/AGENTS.md` — v197 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 1 FIX bullet.
+- `app/AGENTS.md` — v198 entry + v185 bullet updated (family tones for all six families).
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 3 FIX bullets.
 - This Prompt.md.
 
 ## Verification
-- Static only (no Gradle here — CI validates on push). Normalized coordinates verified point-by-point against the revised SVG (box x 38→111 = 73 wide, y 24→62 = 38 tall). "split" / "oblique" styles untouched.
+- Static only (no Gradle here — CI validates on push). Trace check: mixed-deck button = `materialFamilyFor(primary).fill(dark)` === `cardGradient(primary)`'s material branch → deck card and button now match; single lanes match too.
