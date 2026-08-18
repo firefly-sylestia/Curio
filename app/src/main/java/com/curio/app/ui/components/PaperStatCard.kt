@@ -91,7 +91,7 @@ fun Modifier.paperStatCardFill(
             // v27u+ — the rings sit ~3dp LEFT of the hole center so they
             // visually align with the punched opening (the coil's arch +
             // left peek read as centered when the wire center is offset).
-            val ringOffX = 3.dp.toPx()
+            val ringOffX = 3.dp.toPy()
             repeat(3) { i ->
                 val cy = size.height * (i + 1) / 4f
                 val center = Offset(holeX, cy)
