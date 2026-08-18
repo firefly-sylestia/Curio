@@ -1,57 +1,25 @@
-# Current Request — v201.1: CI validator fix for hyphenated category file
+# Current Request — v202: constellation redrawn as a human brain
 
-## Status: DONE (committed + pushed)
-
-## Issue (user, verbatim)
-CI `validateTopics` failure: `animated-movies.json: topic 'film-wall-e-2008' categoryId 'ANIMATED_MOVIES' does not match filename 'ANIMATED-MOVIES'` + "wall e is animated movies right" — yes, Wall-E (Pixar, 2008) belongs in Animated Movies; the entry stays.
-
-## Root cause
-Gradle `validateTopics` derived the expected categoryId as the bare uppercased FILENAME (`json.nameWithoutExtension.uppercase()`), so the first hyphenated slug tripped CI: `animated-movies.json` → expected `ANIMATED-MOVIES`, but entries carry the enum name `ANIMATED_MOVIES` (underscore). All prior files were single-word, so the naive mapping never surfaced.
-
-## Fix
-- `app/build.gradle.kts` — `uppercase().replace("-", "_")` maps the slug to the enum name (films.json → FILMS unaffected).
-- `scripts/validate_topics.js` — same hyphen→underscore mapping + `animated-movies` added to EXPECTED_CATEGORIES (dev-time validator).
-- App-side loader was already correct (`TopicJsonLoader` resolves via `CategoryId.valueOf(entry.categoryId)` and `load` routes through the slug `animated-movies`).
-- Verified: `node scripts/validate_topics.js` (8222 topics / 12 files OK) and `python3 scripts/check_assets.py` (ALL FILES VALID).
-
-## Files
-- `app/build.gradle.kts`, `scripts/validate_topics.js`, `app/AGENTS.md` (v200 validator-fix note), changelog FIX bullet, this Prompt.md.
-
----
-
-# Previous — v201: ring cut fix + nav pill collapse + pill-size parity
-
-## Status: DONE (committed + pushed, 2e53377)
+## Status: DONE (committed, push follows)
 
 ## Request (user, verbatim)
-- "the 3d ring should be shouwn fully without getting cut thats what i meant"
-- "make the home nav pill collapse even smoother like make it collape even more and make the like dislike button match the text and size of the nav bar pill and same in pet designer" (plus "okay thats fine for now, you can push it and remove the useless dump files" — the v200 content push happened first)
+"also the mesh is too much and why it doesnt look like a brain like the human brain design it should follow that and the dots should be random not some in left and some in right."
 
-## What changed (v201)
+## What changed (v202) — `ui/components/CurioConstellation.kt`
+The old design: two side-by-side ellipses (generic blobs), filler dots in rigid per-lobe rings, ~114 links (2-nearest + a cross-bridge per dot), gold midline fissure.
 
-### 1. Hole-ring coil cut at card edge — ROOT CAUSE FOUND
-Material3 1.5's `Surface` ALWAYS clips children to the shape (`.clip(shape)` at the end of its implementation) — the v74 "Surface does not clip" note was true only for M3 1.0/1.1. The coil's left peek (drawn at −6.5dp) was being cut at the card edge. Fix: the three stat-pane call sites (Home, Profile, EntryDetail) swap the clipping `Surface` for a plain `Box` carrying `Modifier.shadow(elevation, shape, clip = false)` + the paper fill — the fill self-clips to the outline path, so the coil escapes past the left edge. All three sites have ≥28dp container padding, so the peek clears the screen edge.
+1. **Human-brain silhouette** — `BRAIN_SILHOUETTE`, the classic anatomy side profile (frontal pole → cerebrum dome → occipital pole → cerebellum bump), drawn as a faint outline (`drawBrainOutline`, quadratic curves through midpoints) so the shape reads as a brain instantly.
+2. **Random dots everywhere** — all 16 decorative fillers + every real lane neuron are scattered RANDOMLY inside the silhouette via seeded rejection sampling (`randomInBrain` / `pointInBrain`). The per-lobe rings and left/right flag are gone. Real neurons keep per-id deterministic spots, stay tappable, keep saved-count sizing + recent glow.
+3. **Light web** — nearest-neighbour graph (one synapse per dot): 13–32 links vs the old ~114 (~70% cut). Gold fissure removed with the two-lobe layout.
 
-### 2. Nav pill collapse — smoother + deeper
-- Pill spring family 240 → 150 stiffness (longest calm critically-damped glide).
-- The leave-hold collapse now targets `FloatingPillCollapsedWidth` (44dp — tighter than the idle 64dp icon pill), so the pill visibly cinches in before the bar unmounts. `FloatingNavPill` gained a `collapsing` param; the NavHost leave-hold extended 380 → 420ms to match the slower settle (still exactly the spring's settle time — no dead pause).
-
-### 3. Like/Dislike + Pet Studio bars match the nav pill exactly
-- `RevealSentimentPill` (Topic Reveal): 64/136dp + 52dp height + 26dp icon, springs 400 → 150, label → Changa One 15sp Normal (was labelMedium Bold).
-- `PetStudioTab` (Pet Designer): same 64/136dp + 26dp icon, springs 400 → 150, label → Changa One 15sp Normal.
+## Validation
+- Silhouette x-monotone (no self-intersection), area fill 77%, rejection acceptance ~76%.
+- Link counts simulated for 3/8/16/30 explored lanes → 13/16/23/32 links.
+- Brace-balanced; unused trig imports (PI/cos/sin) removed.
 
 ## Files
-- `ui/components/CurioBottomNav.kt` — collapsing param + collapsed width + 150 springs.
-- `navigation/CurioNavHost.kt` — hold 380 → 420ms.
-- `features/reveal/TopicRevealScreen.kt` — sentiment pill parity.
-- `features/petdesigner/PetDesignerScreen.kt` — studio tab parity.
-- `features/home/HomeScreen.kt`, `features/profile/ProfileScreen.kt`, `features/detail/EntryDetailScreen.kt` — Surface → Box + shadow(clip=false) at the three stat-pane sites.
+- `ui/components/CurioConstellation.kt` — the redesign.
+- Docs: `app/AGENTS.md` (v202), changelog FIX bullet, this Prompt.md.
 
-## Docs
-- `app/AGENTS.md` — v201 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — FIX bullets.
-- This Prompt.md.
-
-## Verification
-- All touched files brace-balanced (tokenizer check) — Home/Profile/Detail 300/220/518, nav/reveal/pet clean.
-- CI validates the compile on push.
+## Next steps (queued)
+- (user may want to see it on-device before the 1000+ animated-movies top-up continues)

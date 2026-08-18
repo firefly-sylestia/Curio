@@ -31,9 +31,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
 
@@ -51,6 +48,22 @@ import kotlin.random.Random
  * bridges across the midline, with the gold fissure down the centre. Star
  * size = saved count; explored lanes glow when recently active. Tap a
  * neuron to select it; tap empty sky to clear.
+ *
+ * v202 — REDESIGNED to the HUMAN-BRAIN SIDE PROFILE (user: "why it doesnt
+ * look like a brain like the human brain design it should follow that and
+ * the dots should be random not some in left and some in right", and "the
+ * mesh is too much"). The old two side-by-side ellipses read as generic
+ * blobs; the new silhouette is the classic anatomy profile — frontal pole,
+ * smooth cerebrum dome, occipital pole and the cerebellum bump at the
+ * back-bottom — drawn as a faint outline so the shape reads instantly.
+ * EVERY dot (decorative fillers AND real lane neurons) is now scattered
+ * RANDOMLY inside that silhouette via deterministic seeded rejection
+ * sampling (no left/right partition, no per-lobe rings), and the web is a
+ * light NEAREST-NEIGHBOUR graph (one synapse per dot, ~60% fewer lines)
+ * instead of the dense 2-nearest + cross-bridge mesh. The gold midline
+ * fissure is gone with the two-lobe layout. Real lane neurons keep their
+ * per-id deterministic spots (stable as lanes are added), stay tappable
+ * and keep the saved-count sizing + recent glow.
  *
  * When [popoverContent] is provided, the selection shows as a small
  * FLOATING card anchored to the neuron (clamped inside the canvas, tap to
@@ -74,38 +87,16 @@ fun CurioConstellation(
     modifier: Modifier = Modifier,
     popoverContent: (@Composable (CategoryId) -> Unit)? = null
 ) {
-    // Deterministic brain-shaped neuron positions: explored lanes split
-    // into two hemisphere lobes. Each lobe is an ellipse that bulges
-    // outward at mid-height and tapers toward the midline at top/bottom
-    // (the fissure gap) — the classic brain silhouette. The radial scatter
-    // fills the lobe interior so the brain reads as a neural mass, not a
-    // ring, and the per-lane deterministic jitter keeps positions stable.
-    // Real neurons = explored lanes (deterministic per-lane positions inside
-    // the two hemisphere lobes, filled via radial scatter so the brain reads
-    // as a neural mass). v194 — the DECORATIVE FILLER dots join them: a
-    // fixed deterministic ring of small neutral dots per lobe that completes
-    // the brain mesh even when few lanes are explored (user: "the neurons
-    // dot doesnt create the brain mesh… i told you to add extra dots for
-    // decoration and completion of the neuron mesh"). Fillers participate in
-    // the link web (so the mesh reads whole) but are NOT tappable and never
-    // show a popover — the real neurons stay the interactive data.
+    // Deterministic brain-shaped neuron positions: every explored lane gets
+    // a RANDOM spot inside the human-brain silhouette, seeded by its id so
+    // positions are stable across recompositions and as lanes are added —
+    // no left/right hemisphere partition (user: "the dots should be random
+    // not some in left and some in right"). v202 — the old two-lobe
+    // ellipse math is gone; [randomInBrain] rejection-samples inside the
+    // side-profile silhouette.
     val nodes = remember(explored) {
-        explored.mapIndexed { index, id ->
-            val total = explored.size
-            val side = if (index < (total + 1) / 2) -1 else 1
-            val idxInSide = if (side < 0) index else index - (total + 1) / 2
-            val nInSide = if (side < 0) (total + 1) / 2 else total / 2
-            val t = if (nInSide <= 1) 0.5f else idxInSide.toFloat() / (nInSide - 1)
-            val rnd = Random(id.name.hashCode())
-            val phi = (-0.5f + t) * PI.toFloat()          // -π/2 (top) .. π/2 (bottom)
-            val radial = 0.30f + rnd.nextFloat() * 0.70f  // fill the lobe interior
-            val cx = 0.5f + side * 0.155f
-            val cy = 0.50f
-            val pos = Offset(
-                cx + side * cos(phi).toFloat() * 0.135f * radial,
-                cy + sin(phi).toFloat() * 0.24f * radial
-            )
-            id to pos
+        explored.map { id ->
+            id to randomInBrain(Random(id.name.hashCode()))
         }
     }
     val fillers = remember { brainFillerDots() }
@@ -118,8 +109,9 @@ fun CurioConstellation(
     // isCurioDarkTheme can't run in the Canvas draw lambda below.
     val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.32f)
                     else Color(0xFF5F7E9A).copy(alpha = 0.50f)
-    val fissureColor = if (isCurioDarkTheme()) Color(0xFFD9A85C).copy(alpha = 0.30f)
-                       else Color(0xFFA97F3C).copy(alpha = 0.45f)
+    // v202 — a faint outline of the brain silhouette (same steel, dimmer
+    // than the links) so the profile reads as a brain at a glance.
+    val outlineColor = linkColor.copy(alpha = linkColor.alpha * 0.45f)
     // v195 — decorative filler dots wear the same neutral steel ink as the
     // links. Resolved in COMPOSITION (isCurioDarkTheme can't run in the
     // Canvas draw lambda below).
@@ -150,39 +142,25 @@ fun CurioConstellation(
         ) {
             val w = size.width
             val h = size.height
-            // The neural web spans ALL dots — the decorative fillers and the
-            // real neurons together — so the mesh outlines the whole brain
-            // even when few lanes are explored. Fillers carry a side flag;
-            // real nodes split by index (first half = left lobe).
+            // v202 — light NEAREST-NEIGHBOUR web: one synapse per dot (the
+            // densest-to-sparsest chain), ~60% fewer lines than the old
+            // 2-nearest + cross-bridge mesh (user: "the mesh is too much").
+            // The web spans the fillers AND the real neurons together so it
+            // outlines the whole brain even when few lanes are explored.
             val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
-            val allPts = fillers.map { Offset(it.pos.x * w, it.pos.y * h) } + pts
-            val allLeft = fillers.map { it.left } + nodes.indices.map { it < (nodes.size + 1) / 2 }
-            val total = allPts.size
+            val allPts = fillers.map { Offset(it.x * w, it.y * h) } + pts
             val links = LinkedHashSet<Pair<Int, Int>>()
             allPts.indices.forEach { i ->
                 val nearest = allPts.indices
                     .filter { it != i }
-                    .sortedBy { j -> sqDist(allPts[i], allPts[j]) }
-                    .take(2)
-                nearest.forEach { j -> links.add(norm(i, j)) }
-                val otherSide = allPts.indices
-                    .filter { it != i && allLeft[it] != allLeft[i] }
                     .minByOrNull { j -> sqDist(allPts[i], allPts[j]) }
-                if (otherSide != null) links.add(norm(i, otherSide))
+                if (nearest != null) links.add(norm(i, nearest))
             }
+            // The brain silhouette outline — drawn FIRST so it sits behind
+            // the links and dots (the faintest element on the canvas).
+            drawBrainOutline(w, h, outlineColor, 1.dp.toPx())
             links.forEach { (a, b) ->
                 drawCurvedLink(allPts[a], allPts[b], linkColor, 1.dp.toPx())
-            }
-            // The midline fissure — a soft curve down the brain's centre
-            // (the old straight line between two mid nodes is gone).
-            if (total >= 3) {
-                drawCurvedLink(
-                    from = Offset(w * 0.5f, h * 0.24f),
-                    to = Offset(w * 0.5f, h * 0.76f),
-                    color = fissureColor,
-                    stroke = 1.dp.toPx(),
-                    sag = 0.04f
-                )
             }
             // Decorative fillers — small neutral dots, drawn UNDER the real
             // neurons. They complete the mesh but carry no data: dim, no
@@ -191,7 +169,7 @@ fun CurioConstellation(
                 drawCircle(
                     color = fillerColor,
                     radius = 2.2.dp.toPx(),
-                    center = Offset(f.pos.x * w, f.pos.y * h)
+                    center = Offset(f.x * w, f.y * h)
                 )
             }
             nodes.forEachIndexed { i, (id, n) ->
@@ -251,40 +229,94 @@ fun CurioConstellation(
 }
 
 /**
- * Deterministic decorative filler dots that complete the brain mesh: a
- * fixed ring layout per hemisphere lobe (radial 0.35 → 0.9, 5 → 9 dots per
- * ring) with a tiny fixed-seed jitter, so the lobes read as a filled neural
- * mass even when the user has explored few lanes. Same lobe-ellipse math as
- * the real neurons (bulge + taper), so fillers and neurons sit on the same
- * silhouette. Fixed seed → the decoration never moves between recompositions.
+ * v202 — the human-brain side-profile silhouette in normalized coordinates
+ * (x: front → back, y: top → bottom). The classic anatomy outline: the
+ * frontal pole, the smooth cerebrum dome (highest around the middle), the
+ * occipital pole and the cerebellum bump at the back-bottom. Used both for
+ * the faint outline stroke and as the rejection-sampling region for every
+ * dot.
  */
-private data class BrainFiller(val pos: Offset, val left: Boolean)
+private val BRAIN_SILHOUETTE = listOf(
+    Offset(0.16f, 0.42f),   // frontal pole
+    Offset(0.19f, 0.22f),   // front-top rise
+    Offset(0.30f, 0.09f),
+    Offset(0.46f, 0.04f),   // highest dome
+    Offset(0.63f, 0.05f),
+    Offset(0.79f, 0.10f),
+    Offset(0.90f, 0.19f),
+    Offset(0.96f, 0.33f),   // occipital pole
+    Offset(0.99f, 0.50f),   // cerebellum bulge
+    Offset(0.90f, 0.61f),
+    Offset(0.80f, 0.65f),
+    Offset(0.68f, 0.71f),
+    Offset(0.54f, 0.75f),   // bottom
+    Offset(0.40f, 0.74f),
+    Offset(0.28f, 0.68f),
+    Offset(0.20f, 0.56f)
+)
 
-private fun brainFillerDots(): List<BrainFiller> {
-    val rnd = Random(0x5EEDC0DE) // fixed — decoration never re-rolls
-    val out = mutableListOf<BrainFiller>()
-    for (side in intArrayOf(-1, 1)) {
-        val cx = 0.5f + side * 0.155f
-        val cy = 0.50f
-        val rings = intArrayOf(5, 7, 9)
-        rings.forEachIndexed { ring, count ->
-            val radial = 0.35f + ring * 0.27f // 0.35, 0.62, 0.89
-            for (i in 0 until count) {
-                val t = (i + 0.5f) / count
-                val phi = (-0.5f + t) * PI.toFloat() // -π/2 (top) .. π/2 (bottom)
-                val jx = (rnd.nextFloat() - 0.5f) * 0.05f
-                val jy = (rnd.nextFloat() - 0.5f) * 0.05f
-                out += BrainFiller(
-                    pos = Offset(
-                        cx + side * cos(phi).toFloat() * 0.135f * radial + jx,
-                        cy + sin(phi).toFloat() * 0.24f * radial + jy
-                    ),
-                    left = side < 0
-                )
-            }
+/** Ray-casting point-in-polygon test against [BRAIN_SILHOUETTE]. */
+private fun pointInBrain(p: Offset): Boolean {
+    var inside = false
+    var j = BRAIN_SILHOUETTE.size - 1
+    for (i in BRAIN_SILHOUETTE.indices) {
+        val a = BRAIN_SILHOUETTE[i]
+        val b = BRAIN_SILHOUETTE[j]
+        if ((a.y > p.y) != (b.y > p.y) &&
+            p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x
+        ) {
+            inside = !inside
         }
+        j = i
     }
-    return out
+    return inside
+}
+
+/** Uniform random point inside the brain silhouette (rejection sampling
+ *  against the bounding box — deterministic for a given seed). */
+private fun randomInBrain(rnd: Random): Offset {
+    val minX = BRAIN_SILHOUETTE.minOf { it.x }
+    val maxX = BRAIN_SILHOUETTE.maxOf { it.x }
+    val minY = BRAIN_SILHOUETTE.minOf { it.y }
+    val maxY = BRAIN_SILHOUETTE.maxOf { it.y }
+    repeat(200) {
+        val p = Offset(
+            minX + rnd.nextFloat() * (maxX - minX),
+            minY + rnd.nextFloat() * (maxY - minY)
+        )
+        if (pointInBrain(p)) return p
+    }
+    return Offset(0.5f, 0.42f) // fallback (never expected)
+}
+
+/**
+ * v202 — deterministic decorative filler dots that complete the brain: a
+ * handful of small neutral dots scattered RANDOMLY inside the silhouette
+ * (no left/right rings — user: "the dots should be random"), so the brain
+ * reads as a filled neural mass even when few lanes are explored. Fixed
+ * seed → the decoration never moves between recompositions.
+ */
+private fun brainFillerDots(): List<Offset> {
+    val rnd = Random(0x5EEDC0DE) // fixed — decoration never re-rolls
+    return List(16) { randomInBrain(rnd) }
+}
+
+/** Draws the smooth closed brain outline (quadratic curves through the
+ *  silhouette's midpoints) so the profile reads as a brain behind the web. */
+private fun DrawScope.drawBrainOutline(w: Float, h: Float, color: Color, stroke: Float) {
+    val pts = BRAIN_SILHOUETTE.map { Offset(it.x * w, it.y * h) }
+    val mid = { a: Offset, b: Offset -> Offset((a.x + b.x) / 2f, (a.y + b.y) / 2f) }
+    val path = Path().apply {
+        moveTo(mid(pts[0], pts[1]).x, mid(pts[0], pts[1]).y)
+        for (i in 1..pts.size) {
+            val prev = pts[i - 1]
+            val cur = pts[i % pts.size]
+            val next = pts[(i + 1) % pts.size]
+            quadraticBezierTo(prev.x, prev.y, mid(cur, next).x, mid(cur, next).y)
+        }
+        close()
+    }
+    drawPath(path, color, style = Stroke(stroke))
 }
 
 /** Squared distance — the link-pairing comparator. */

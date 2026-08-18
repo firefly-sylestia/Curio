@@ -1724,6 +1724,31 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v202 — curiosity constellation REDRAWN as a human-brain side profile:
+  random dot scatter (no left/right partition), light nearest-neighbour
+  web. (branch Alpha)** User: "also the mesh is too much and why it doesnt
+  look like a brain like the human brain design it should follow that and
+  the dots should be random not some in left and some in right".
+  - The old design was two side-by-side ellipses (generic blobs) with
+    filler dots in rigid per-lobe rings, ~114 links (2-nearest + a
+    cross-bridge per dot), and a gold midline fissure.
+  - NEW: `BRAIN_SILHOUETTE` — the classic anatomy side profile (frontal
+    pole, smooth cerebrum dome, occipital pole, cerebellum bump), drawn
+    as a faint outline (`drawBrainOutline`, quadratic curves through the
+    midpoints) so the shape reads as a brain instantly.
+  - EVERY dot (16 decorative fillers + the real lane neurons) is now
+    scattered RANDOMLY inside the silhouette via seeded rejection
+    sampling (`randomInBrain` / `pointInBrain`, ~77% acceptance) — the
+    per-lobe rings and left/right flag are gone. Real neurons stay
+    per-id deterministic (stable as lanes are added), tappable, with
+    saved-count sizing + recent glow. Fillers are NOT tappable.
+  - The web is now a NEAREST-NEIGHBOUR graph (one synapse per dot):
+    13–32 links depending on explored count vs the old ~114 — a ~70%
+    cut ("the mesh is too much"). The gold midline fissure is gone with
+    the two-lobe layout.
+  - Verified: silhouette is x-monotone (no self-intersection), fill
+    ratio 77%, link counts simulated (3/8/16/30 explored → 13/16/23/32
+    links). Brace-balanced.
 - **v201 — nav pill collapse cinches tighter + slower; Like/Dislike and
   Pet Studio bars match the nav pill exactly; hole-ring coil no longer
   cut at the card edge. (branch Alpha)** User: "the 3d ring should be
