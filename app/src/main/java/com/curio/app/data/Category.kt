@@ -35,7 +35,6 @@ enum class CategoryId {
     ALBUMS,
     DIRECTORS,
     FILMS,
-    ANIMATED_MOVIES,
     AUTHORS,
     BOOKS,
     PAINTERS,
@@ -77,12 +76,9 @@ enum class CategoryId {
         /**
          * v27i — the 15 lanes added in the content-expansion pass. The
          * category picker splits its deck grid into the original 21 lanes
-         * and these new lanes (a swipeable second page). v200 —
-         * ANIMATED_MOVIES joins as a 16th new lane (the Animated Movies
-         * content-expansion pass).
+         * and these new lanes (a swipeable second page).
          */
         val newLanes: Set<CategoryId> = setOf(
-            ANIMATED_MOVIES,
             BIOLOGY, CHEMISTRY, ANIMALS, PLANTS, TECHNOLOGIES,
             ASTRONOMY, HISTORY, GEOLOGY, MEDICINE, PSYCHOLOGY,
             MATHEMATICS, ECONOMICS, LANGUAGE, ENGINEERING, OCEANS
@@ -91,7 +87,7 @@ enum class CategoryId {
         /** Default chip order on Home + Category Picker. Wildcard stays last. */
         val defaultOrder: List<CategoryId> = listOf(
             ARTISTS, ALBUMS, SONGS,
-            DIRECTORS, FILMS, ANIMATED_MOVIES, SERIES,
+            DIRECTORS, FILMS, SERIES,
             AUTHORS, BOOKS,
             PAINTERS, ARTWORKS,
             SCIENTISTS, DISCOVERIES,
@@ -114,7 +110,6 @@ enum class CategoryId {
         ALBUMS      -> "albums"
         DIRECTORS   -> "directors"
         FILMS       -> "films"
-        ANIMATED_MOVIES -> "animated-movies"
         AUTHORS     -> "authors"
         BOOKS       -> "books"
         PAINTERS    -> "painters"
@@ -175,8 +170,7 @@ enum class CategoryFamily {
     companion object {
         fun of(id: CategoryId): CategoryFamily = when (id) {
             CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS -> MUSIC
-            CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.ANIMATED_MOVIES,
-            CategoryId.SERIES -> MOVIES
+            CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.SERIES -> MOVIES
             CategoryId.AUTHORS, CategoryId.BOOKS -> BOOKS
             CategoryId.PAINTERS, CategoryId.ARTWORKS -> VISUAL_ART
             CategoryId.SCIENTISTS, CategoryId.DISCOVERIES -> SCIENCE
@@ -313,21 +307,6 @@ object CurioCategories {
             iconGlyph     = "movie",
             family        = CategoryFamily.MOVIES,
             defaultFormat = CaptureFormat.Marginalia
-        ),
-        // ── Movies family — Animated Movies (v200): its own lane so
-        //    non-anime animated films stop living inside Films. Anime
-        //    (Japanese animation) stays its own ANIME category — this lane
-        //    is the Western/world animation side of the Movies domain.
-        CurioCategory(
-            id            = CategoryId.ANIMATED_MOVIES,
-            displayName   = "Animated Movies",
-            accent        = CurioColors.CategoryAnimation,
-            lightAccent   = CurioColors.CategoryAnimationInk,
-            tint          = CurioColors.CategoryAnimationTint,
-            iconGlyph     = "theater_comedy",
-            family        = CategoryFamily.MOVIES,
-            defaultFormat = CaptureFormat.Marginalia,
-            isReady       = true  // v200 — 1000+ topics shipped in assets/topics/animated-movies.json
         ),
         // ── Books family (Amber) ────────────────────────────────────────
         CurioCategory(

@@ -170,15 +170,10 @@ fun isCurioDarkThemeForContext(context: Context): Boolean = when (AppPreferences
  * by [CurioTheme] and the floating explore bubble, which renders outside
  * an Activity window and therefore can't use the [CurioTheme] window
  * SideEffect.
- * v185 — when the opt-in Material theme toggle is on, the whole scheme
- * becomes the proper M3 system (dynamic device palette on Android 12+,
- * seeded baseline fallback): neutral surfaces, one primary, muted
- * category families (see [MaterialFamilies]).
  */
 @Composable
 fun curioColorScheme(): ColorScheme =
-    if (materialThemeOn) materialColorScheme()
-    else if (isCurioDarkTheme()) CurioDarkColorScheme else CurioLightColorScheme
+    if (isCurioDarkTheme()) CurioDarkColorScheme else CurioLightColorScheme
 
 @Composable
 fun CurioTheme(

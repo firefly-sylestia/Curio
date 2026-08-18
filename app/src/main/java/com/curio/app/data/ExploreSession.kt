@@ -67,8 +67,7 @@ data class ExploreSession(
 fun ExploreSession.reflectionQuestion(): String = when (categoryId) {
     CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS ->
         "Finished listening? What track or lyric landed hardest?"
-    CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.ANIMATED_MOVIES,
-    CategoryId.SERIES, CategoryId.ANIME ->
+    CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.SERIES, CategoryId.ANIME ->
         "Finished watching? What scene or shot stayed with you?"
     CategoryId.AUTHORS, CategoryId.BOOKS, CategoryId.MANGA, CategoryId.MANHWA,
     CategoryId.MYTHOLOGY ->

@@ -59,10 +59,6 @@ object AppPreferences {
     private const val KEY_SAVES_WEEK_COUNTS = "saves_week_counts"
     private const val KEY_PASTEL_COLORS_ENABLED = "pastel_colors_enabled"
     private const val KEY_PASTEL_CROWN_DEPTH = "pastel_crown_depth"
-    // v185 — proper M3 Material theme (opt-in, default OFF): the whole
-    // color system re-does per M3 guidelines (single primary, neutral
-    // surfaces, 36 lane accents collapsed to ~6 muted families).
-    private const val KEY_MATERIAL_THEME = "material_theme"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
     // v28 — dark-mode elevation visibility: black shadows vanish on
@@ -262,12 +258,6 @@ object AppPreferences {
     var pastelColorsState by mutableStateOf(true)
         private set
 
-    // v185 — proper M3 Material theme (default OFF): the whole color system
-    // re-does per M3 guidelines when on. Opt-in — the default app look is
-    // untouched.
-    var materialThemeState by mutableStateOf(false)
-        private set
-
     // Sky-azure hero variant (v27l) — when ON, the shared torn hero
     // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
     // azure instead of the rose-wood. v42 — azure is back AND the DEFAULT
@@ -362,11 +352,6 @@ object AppPreferences {
     // paper under-sheet (the extra layered lip below the seam) is an opt-in
     // experiment in Settings → Experiments → Paper & headers.
     var heroTearSheetState by mutableStateOf(false)
-    // v208 — experiment: the Spin Categories/Filter buttons (and their
-    // vertical variants) wear the floating NAV-PILL look (capsule, calmed
-    // accent active fill, elevated container) instead of the category
-    // rounded-24 buttons. Default OFF.
-    var navPillButtonsState by mutableStateOf(false)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
     var homeTintState by mutableStateOf(false)
@@ -604,7 +589,6 @@ object AppPreferences {
         themeModeState = getThemeMode(context)
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
-        materialThemeState = isMaterialThemeEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
@@ -625,7 +609,6 @@ object AppPreferences {
         paperStatTearState = isPaperStatTearEnabled(context)
         pillGlowSubtleState = isPillGlowSubtleEnabled(context)
         heroTearSheetState = isHeroTearSheetEnabled(context)
-        navPillButtonsState = isNavPillButtonsEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
         homeTintFollowLaneState = isHomeTintFollowLaneEnabled(context)
@@ -696,16 +679,6 @@ object AppPreferences {
     fun setPastelColorsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PASTEL_COLORS_ENABLED, enabled).apply()
         pastelColorsState = enabled
-    }
-
-    // ── v185 — proper M3 Material theme (opt-in, default OFF) ──────────
-    /** Whether the proper M3 Material color theme is on (default off). */
-    fun isMaterialThemeEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_MATERIAL_THEME, false)
-
-    fun setMaterialThemeEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_MATERIAL_THEME, enabled).apply()
-        materialThemeState = enabled
     }
 
     // ── Pastel crown depth (v7.12 experimental) ───────────────────────
@@ -916,7 +889,6 @@ object AppPreferences {
     private const val KEY_HOME_TINT_CATEGORY = "home_tint_category"
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
     private const val KEY_HEADER_DEEP = "header_deep"
-    private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -962,15 +934,6 @@ object AppPreferences {
     fun setHomeTintEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HOME_TINT, enabled).apply()
         homeTintState = enabled
-    }
-
-    /** Whether the Spin Categories/Filter buttons wear the nav-pill look (experimental, default off). */
-    fun isNavPillButtonsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_NAV_PILL_BUTTONS, false)
-
-    fun setNavPillButtonsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_NAV_PILL_BUTTONS, enabled).apply()
-        navPillButtonsState = enabled
     }
 
     /** Whether the Home quest hero ALSO wears the tint (experimental, default off). */

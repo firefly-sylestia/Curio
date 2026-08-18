@@ -2,11 +2,7 @@ package com.curio.app.navigation
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 
 /**
@@ -29,22 +25,6 @@ import androidx.navigation.NavController
  */
 object LightboxTarget {
     var uri: String? = null
-}
-
-/**
- * v208e — out-of-band Z-INDEX slot for the Topic Reveal's Like/Dislike pill.
- *
- * The floating nav bar is composed ABOVE the NavHost destinations, so the
- * pill (deep inside the reveal destination) would slide in BEHIND the
- * collapsing nav pill. The reveal registers its pill composable here and
- * the NavHost composes the slot in its own overlay layer AFTER the bar — so
- * the Like/Dislike renders ON TOP of the collapsing nav pill during the
- * handoff (user: "place the like and dislike pill z index above the home
- * nav pill… keep it overlap"). The slot clears when the reveal route
- * leaves (the reveal's DisposableEffect) so no stale pill can linger.
- */
-object SentimentPillHost {
-    var content: (@Composable () -> Unit)? by mutableStateOf(null)
 }
 
 /**

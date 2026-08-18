@@ -113,20 +113,6 @@ import kotlinx.coroutines.withContext
  * backdrop, content scrolling under the ragged tear, ScreenEntrance
  * entrance animation.
  */
-
-/**
- * v199 — the Browse-Topics session: the selected category filter and the
- * chip bar's expanded flag survive closing and REOPENING the screen within
- * the app session (a fresh backstack entry resets rememberSaveable, so the
- * v7.97 saveable state only survived in-place round-trips like the Topic
- * Reveal push). Process-scoped — an app restart clears it, matching the
- * user's "persistent until restart".
- */
-object TopicBrowserSession {
-    var selectedSlug by mutableStateOf<String?>(null)
-    var chipBarOpen by mutableStateOf(false)
-}
-
 @Composable
 fun TopicDatabaseScreen(navController: NavController) {
     // v7.97 — SAVEABLE state: the selected category filter and the scroll
@@ -134,18 +120,7 @@ fun TopicDatabaseScreen(navController: NavController) {
     // switches, rotation, process death) instead of resetting to a fresh
     // blank list every time you come back. v26 — the search query moved into
     // [searchQuery] (the hero search field) but stays saveable here.
-    // v199 — the category selection also seeds from + syncs to the
-    // [TopicBrowserSession] so a fully closed-and-reopened browser restores
-    // it (rememberSaveable dies with the backstack entry).
-    var selectedCat by rememberSaveable {
-        mutableStateOf(
-            TopicBrowserSession.selectedSlug
-                ?.let { CurioCategories.byRouteSlug(it)?.id }
-        )
-    }
-    LaunchedEffect(selectedCat) {
-        TopicBrowserSession.selectedSlug = selectedCat?.routeSlug
-    }
+    var selectedCat by rememberSaveable { mutableStateOf<CategoryId?>(null) }
     // v105 — the sort control is removed; the browser keeps its default
     // per-lane A–Z order (see the rows builder).
     // v26 — hero search: the search pill morphs the hero into a search field
@@ -156,14 +131,7 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v30 — the Category pill (second row under the hero pills) toggles the
     // sticky category chips; they also show while searching. Hidden by
     // default (matches the Cabinet), so the Category pill is the way in.
-    // v199 — the chip bar's expanded flag rides the session too, so the
-    // browser reopens with the chips in the same state the user left them.
-    var categoryFilterOpen by rememberSaveable {
-        mutableStateOf(TopicBrowserSession.chipBarOpen)
-    }
-    LaunchedEffect(categoryFilterOpen) {
-        TopicBrowserSession.chipBarOpen = categoryFilterOpen
-    }
+    var categoryFilterOpen by rememberSaveable { mutableStateOf(false) }
     // v30 — the chip-bar reservation only applies while the chips are
     // visible (the pill or search); collapsed, content starts right below
     // the (taller) hero.
