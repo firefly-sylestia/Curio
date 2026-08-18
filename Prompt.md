@@ -1,6 +1,27 @@
-# Current Request — v202: constellation redrawn as a human brain
+# Current Request — v203: remove the back pill on Your Curiosity page
 
-## Status: DONE (committed, push follows)
+## Status: DONE (committed, NOT pushed — user: "dont push this")
+
+## Request (user, verbatim)
+"fix the back button in your cusriocity page. maybe jut remove the back button. dont push this"
+
+## What changed
+- The stats page is a plain NavHost destination (`composable(CurioRoutes.STATS)`), so the system back gesture/button already pops it. The custom cream circle pill in `StatsSkyHeader` (Surface + ArrowBack, calling `popBackStack()`) was a redundant second path.
+- Removed: the pill, the `onBack` param from `StatsSkyHeader`, the call-site arg, and the `horizontalArrangement` (only one child left). `CircleShape` import stays (used by the range pill). Brace-balanced.
+- Confirmed via ask_user: "Remove it entirely".
+
+## Files
+- `features/stats/StatsScreen.kt`
+- Docs: `app/AGENTS.md` (v203), changelog FIX bullet, this Prompt.md.
+
+## NOTE
+Committed locally only — NOT pushed (explicit user instruction).
+
+---
+
+# Previous — v202: constellation redrawn as a human brain
+
+## Status: DONE (committed + pushed, 7aa4a25)
 
 ## Request (user, verbatim)
 "also the mesh is too much and why it doesnt look like a brain like the human brain design it should follow that and the dots should be random not some in left and some in right."

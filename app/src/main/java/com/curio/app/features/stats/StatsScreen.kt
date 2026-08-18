@@ -160,8 +160,7 @@ fun StatsScreen(navController: NavController) {
         StatsSkyHeader(
             skyTop = skyTop,
             skyBottom = skyBottom,
-            skyInk = skyInk,
-            onBack = { navController.popBackStack() }
+            skyInk = skyInk
         )
     }
 }
@@ -180,14 +179,16 @@ private val StatsHeaderHeight = 148.dp
 
 /** v178 — the fixed sky band: the SAME theme-picked sky artwork as the
  *  drawer hero (night sky in dark mode, day sky in light) behind the page
- *  title + back pill. The design (rounded tear, pill, ink) is unchanged —
- *  only the banner's art style changed. */
+ *  title. The design (rounded tear, ink) is unchanged — only the banner's
+ *  art style changed. v202 — the back pill is GONE: the page is a plain
+ *  NavHost destination, so the system back gesture/button already pops it
+ *  (user: "fix the back button in your curiosity page… just remove the
+ *  back button"). */
 @Composable
 private fun StatsSkyHeader(
     skyTop: Color,
     skyBottom: Color,
-    skyInk: Color,
-    onBack: () -> Unit
+    skyInk: Color
 ) {
     val context = LocalContext.current
     // v178 — theme-picked drawer-hero sky SVG (dark → night, light → day).
@@ -220,22 +221,11 @@ private fun StatsSkyHeader(
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .statusBarsPadding()
                 .padding(start = 16.dp, end = 16.dp, bottom = 22.dp)
         ) {
-            Surface(
-                onClick = onBack,
-                shape = CircleShape,
-                color = Color(0xFFFFFDF4).copy(alpha = 0.85f),
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(CurioIcons.ArrowBack, null, tint = skyInk, size = 22.dp)
-                }
-            }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     "Your Curiosity",

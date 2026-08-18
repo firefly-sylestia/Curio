@@ -1724,6 +1724,17 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v203 — Your Curiosity page: back pill REMOVED (system back already
+  works). (branch Alpha)** User: "fix the back button in your cusriocity
+  page. maybe jut remove the back button" (+ confirmed via ask_user:
+  remove entirely). The stats page is a plain NavHost destination
+  (`composable(CurioRoutes.STATS)`), so the system back gesture/button
+  pops it — the custom cream circle pill in [StatsSkyHeader] was a
+  redundant second path calling `popBackStack()`. Removed the pill
+  (Surface + ArrowBack icon + the `onBack` param + call-site arg); the
+  header Row keeps just the title/subtitle column. `CircleShape` stays
+  (used by the range pill at line 410); brace-balanced. COMMITTED BUT
+  NOT PUSHED (user: "dont push this").
 - **v202 — curiosity constellation REDRAWN as a human-brain side profile:
   random dot scatter (no left/right partition), light nearest-neighbour
   web. (branch Alpha)** User: "also the mesh is too much and why it doesnt

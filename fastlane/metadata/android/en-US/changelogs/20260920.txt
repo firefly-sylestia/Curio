@@ -51,6 +51,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Stats: the back pill on the "Your Curiosity" header is gone — the system back gesture handles it, so the redundant circle button is removed.
 - Drawer + Stats: the curiosity constellation is now a human brain — a real side-profile silhouette (frontal lobe, cerebrum dome, cerebellum) with the dots scattered randomly across the whole shape instead of rigid left/right rings, and a light neural web instead of the dense mesh.
 - Build: the topic validator now accepts hyphenated category files — the Animated Movies lane (animated-movies.json → ANIMATED_MOVIES) validates instead of failing the build.
 - Paper: the "Hole rings" coil now shows FULLY — it peeks out of the card's left edge without being cut (the card surface no longer clips its own drawing), so the spiral binding reads complete.
