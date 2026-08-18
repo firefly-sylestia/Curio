@@ -1725,16 +1725,30 @@ app/src/main/java/com/curio/app/
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
 - **v203 — Your Curiosity page: back pill REMOVED (system back already
-  works). (branch Alpha)** User: "fix the back button in your cusriocity
-  page. maybe jut remove the back button" (+ confirmed via ask_user:
-  remove entirely). The stats page is a plain NavHost destination
-  (`composable(CurioRoutes.STATS)`), so the system back gesture/button
-  pops it — the custom cream circle pill in [StatsSkyHeader] was a
-  redundant second path calling `popBackStack()`. Removed the pill
-  (Surface + ArrowBack icon + the `onBack` param + call-site arg); the
-  header Row keeps just the title/subtitle column. `CircleShape` stays
-  (used by the range pill at line 410); brace-balanced. COMMITTED BUT
-  NOT PUSHED (user: "dont push this").
+  works); drawer footer PINNED to the bottom + theme-aware credits ink.
+  (branch Alpha)** User: "fix the back button in your cusriocity page.
+  maybe jut remove the back button" (+ confirmed via ask_user: remove
+  entirely), then "the footer is still sitting like floating above the
+  buttom part of the draer page. and also the v1.10 made with curiocity
+  text sint visible".
+  - BACK PILL: the stats page is a plain NavHost destination
+    (`composable(CurioRoutes.STATS)`), so the system back gesture/button
+    pops it — the custom cream circle pill in [StatsSkyHeader] was a
+    redundant second path calling `popBackStack()`. Removed the pill
+    (Surface + ArrowBack icon + the `onBack` param + call-site arg); the
+    header Row keeps just the title/subtitle column. `CircleShape` stays
+    (used by the range pill).
+  - FOOTER FLOATING: the footer was the LAST LAZYCOLUMN ITEM, so it
+    floated above the drawer's bottom whenever the list content was
+    shorter than the sheet. It's now PINNED: removed the `item("footer")`
+    from the list and added a `Box(Modifier.align(Alignment.BottomCenter))`
+    at the drawer-sheet level (drawn after the list so rows scroll under
+    its fade); the list's bottom contentPadding = `DrawerFooterHeight`
+    (150dp, the shared constant) so the last row never hides behind it.
+  - CREDITS INVISIBLE: the fixed khaki `#7E6E50` vanished on the
+    near-black surface in dark mode. `DrawerFooter` ink is now
+    theme-aware — warm parchment `#C9BC9D` in dark, khaki in light.
+  - COMMITTED BUT NOT PUSHED (user: "dont push this").
 - **v202 — curiosity constellation REDRAWN as a human-brain side profile:
   random dot scatter (no left/right partition), light nearest-neighbour
   web. (branch Alpha)** User: "also the mesh is too much and why it doesnt

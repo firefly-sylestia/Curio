@@ -1917,9 +1917,12 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     start = 16.dp,
                     end = 16.dp,
                     top = HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
-                    // v176 — the footer is the last item and now anchors to
-                    // the very bottom edge of the drawer (no gap below it).
-                    bottom = 0.dp
+                    // v203 — the footer is PINNED to the drawer's bottom edge
+                    // (see the aligned Box below), so the list reserves its
+                    // height here instead of carrying the footer as its own
+                    // item (that let it float above the bottom whenever the
+                    // drawer content was shorter than the sheet).
+                    bottom = DrawerFooterHeight
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -2046,11 +2049,19 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         }
                     }
                 }
-                // v174 — the illustrated planetary footer: the drawer's SVG
-                // landscape fades in behind the version + credits.
-                item("footer") {
-                    DrawerFooter()
-                }
+            }
+
+            // -- v203 — the illustrated planetary footer, PINNED to the very
+            // bottom of the drawer sheet (it used to be the last scrolling
+            // item, so it floated above the bottom when the drawer content
+            // was shorter than the sheet). Drawn after the list so the last
+            // rows scroll under its fade.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+            ) {
+                DrawerFooter()
             }
 
             // -- Torn rose hero - drawn on top, rows vanish at the seam -----
@@ -2408,6 +2419,10 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
  *  doesn't look like it's floating. The version + "Made with curiosity"
  *  line sits inside that fade, at the end of the footer. The SVG loads
  *  through Coil's SvgDecoder. */
+// v203 — the footer's height is shared with the list's bottom padding so
+// the pinned footer never covers the last row.
+private val DrawerFooterHeight = 150.dp
+
 @Composable
 private fun DrawerFooter() {
     val context = LocalContext.current
@@ -2419,14 +2434,18 @@ private fun DrawerFooter() {
             .build()
     }
     val surfaceColor = MaterialTheme.colorScheme.surface
-    val footerInk = Color(0xFF7E6E50)
+    // v203 — theme-aware credits ink: the fixed khaki (#7E6E50) vanished on
+    // the near-black surface in dark mode (user: "the v1.10 made with
+    // curiocity text sint visible"). Dark mode now uses a warm parchment
+    // light so the credits read over the fade in both themes.
+    val footerInk = if (isCurioDarkTheme()) Color(0xFFC9BC9D) else Color(0xFF7E6E50)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             // v186 — the user said the footer "looks big": 210 → 150dp tall
             // (the planet art reads as a smaller bottom band, the credits
             // still sit in the fade).
-            .height(150.dp)
+            .height(DrawerFooterHeight)
     ) {
         // The art, bottom-anchored and filling the drawer's full width —
         // cropped from the top so the planet reads at the bottom end.

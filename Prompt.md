@@ -1,4 +1,24 @@
-# Current Request — v203: remove the back pill on Your Curiosity page
+# Current Request — v203: drawer footer pinned to the bottom + visible credits
+
+## Status: DONE (committed, NOT pushed — user: "dont push this")
+
+## Request (user, verbatim)
+"the footer is still sitting like floating above the buttom part of the draer page. and also the v1.10 made with curiocity text sint visible"
+
+## What changed
+1. **Footer floating** — `DrawerFooter` was the LAST LAZYCOLUMN ITEM in the drawer sheet, so it floated above the bottom whenever the list content was shorter than the sheet. Fix: removed the `item("footer")`, added a pinned `Box(Modifier.align(Alignment.BottomCenter))` at the drawer-sheet level (drawn after the list so rows scroll under its fade), and set the list's bottom contentPadding to `DrawerFooterHeight` (150dp, a new shared constant) so the last row never hides behind the footer.
+2. **Credits invisible** — the fixed khaki `#7E6E50` vanished on the near-black surface in dark mode. `DrawerFooter` ink is now theme-aware: warm parchment `#C9BC9D` in dark, khaki in light.
+
+## Files
+- `features/home/HomeScreen.kt` (HomeDrawerContent + DrawerFooter)
+- Docs: `app/AGENTS.md` (v203), changelog FIX bullet, this Prompt.md.
+
+## NOTE
+Committed locally only — NOT pushed (user: "dont push this"; the v203 back-pill commit is also queued unpushed).
+
+---
+
+# Previous — v203: remove the back pill on Your Curiosity page
 
 ## Status: DONE (committed, NOT pushed — user: "dont push this")
 
