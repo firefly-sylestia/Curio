@@ -51,6 +51,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- App size: the APK is ~20MB smaller — the release build no longer bundles the x86/x86_64 native libraries (emulator-only legacy; every real device is arm64), which nearly halves the bundled offline speech engine.
 - Save your take: the Save entry / Save changes button is text-only now — the leading check tick is gone.
 - Drawer: the planet footer now sits FLAT at the very bottom edge of the drawer (it used to float above the bottom when the drawer content was short), and the "v·version · Made with curiosity" credits are visible again in dark mode (warm parchment ink instead of the dark khaki that vanished).
 - Stats: the back pill on the "Your Curiosity" header is gone — the system back gesture handles it, so the redundant circle button is removed.

@@ -182,7 +182,10 @@ jobs:
           # Hard guard: every expected split APK must exist after renaming, so a
           # naming drift in AGP (which cannot be verified locally per repo rules)
           # fails the release loudly instead of publishing a partial set.
-          for expected in universal armeabi-v7a arm64-v8a x86_64 x86; do
+          # v204 — the release buildType's ndk abiFilters restrict native libs
+          # to armeabi-v7a + arm64-v8a (x86/x86_64 are emulator-only legacy),
+          # so the release emits ONLY the two arm splits + universal.
+          for expected in universal armeabi-v7a arm64-v8a; do
             if [ ! -f "Curio-${vname}-${vcode}-${expected}-Android${min_android}+.apk" ]; then
               echo "::error::Expected release APK missing after rename: $expected"
               exit 1

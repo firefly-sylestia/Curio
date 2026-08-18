@@ -1724,6 +1724,27 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v205 — app-size diet: the 40MB was Vosk, not the topics. (branch
+  Alpha)** User: "the app size is still 40mb and why. dont tell me its
+  the topic ik its alot but still not alot to make it 40mb" (+ "its not
+  the release the pr builds im talking about" — the PR/push CI artifact).
+  - DIAGNOSIS: Vosk (offline ASR, `com.alphacephei:vosk-android:0.3.47`,
+    11.7MB AAR) ships a ~10MB `libvosk.so` PER ABI, and Android stores
+    `.so` UNCOMPRESSED (mmap). The universal release APK (the PR/push
+    CI artifact and the release universal) bundled ALL FOUR ABIs
+    (armeabi-v7a, arm64-v8a, x86, x86_64) ≈ 38MB of native libs — that
+    is the 40MB. The 17MB of topics compress to ~6MB in the APK; code
+    ~8-10MB; fonts/icon ~1MB.
+  - FIX: the `release` buildType now sets `ndk.abiFilters =
+    [armeabi-v7a, arm64-v8a]` — x86/x86_64 are emulator-only legacy,
+    every real device since ~2017 is arm64. Universal release APK drops
+    ~20MB (→ ~22-25MB total). DEBUG builds keep all four ABIs so x86_64
+    emulator testing still works. The `splits.abi` include list is
+    unchanged; the release.yml hard guard now expects only
+    `universal armeabi-v7a arm64-v8a`.
+  - NOT DONE (deferred): the in-app updater still downloads the first
+    `.apk` asset (the universal) — a follow-up could match
+    `Build.SUPPORTED_ABIS` to the per-ABI asset (~10-12MB updates).
 - **v204 — compile fix (PetStudio `sp` import) + Save CTA tick removed.
   (branch Alpha)** User: CI failure "PetDesignerScreen.kt:1533:39
   Unresolved reference 'sp'" + "fix this too then push everything. and
