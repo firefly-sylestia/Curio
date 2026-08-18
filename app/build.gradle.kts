@@ -91,17 +91,6 @@ android {
             // field names and generated database contracts.
             isMinifyEnabled = true
             isShrinkResources = true
-            // v204 — native-lib DIET: every real device since ~2017 is arm64
-            // (or an older 32-bit armeabi-v7a); x86/x86_64 are emulator-only
-            // legacy. Restricting the RELEASE native libs to the two arm ABIs
-            // halves the bundled Vosk libvosk.so footprint (~4 ABIs ≈ 38MB →
-            // 2 ABIs ≈ 19MB in the universal release APK — the PR/push CI
-            // artifact and the release universal both shrink by ~20MB).
-            // Debug builds keep ALL four ABIs so x86_64 emulator testing
-            // still works locally.
-            ndk {
-                abiFilters += listOf("armeabi-v7a", "arm64-v8a")
-            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -300,11 +289,7 @@ tasks.register("validateTopics") {
         val seenIds = mutableMapOf<String, String>()  // id -> first filename
         var populatedFileCount = 0
         jsonFiles.forEach { json ->
-            // Filename is the category SLUG (animated-movies.json); the
-            // topics' categoryId is the enum name (ANIMATED_MOVIES) — so
-            // hyphenated slugs map to underscores. Single-word filenames
-            // (films.json → FILMS) are unaffected.
-            val expectedCategoryId = json.nameWithoutExtension.uppercase().replace("-", "_")
+            val expectedCategoryId = json.nameWithoutExtension.uppercase()
             @Suppress("UNCHECKED_CAST")
             val topics = parser.parse(json) as? List<Map<String, Any?>>
                 ?: throw GradleException(

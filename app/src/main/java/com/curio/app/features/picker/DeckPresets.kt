@@ -71,7 +71,7 @@ val deckPresets = listOf(
         CategoryId.ENGINEERING, CategoryId.ECONOMICS
     )),
     DeckPreset("Entertainment", "movie", listOf(
-        CategoryId.FILMS, CategoryId.ANIMATED_MOVIES, CategoryId.SERIES,
+        CategoryId.FILMS, CategoryId.SERIES,
         CategoryId.ANIME, CategoryId.MANGA, CategoryId.MANHWA,
         CategoryId.GAMES, CategoryId.SPORTS,
         CategoryId.SONGS, CategoryId.ALBUMS, CategoryId.INTERNET

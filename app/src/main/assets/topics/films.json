@@ -632,6 +632,50 @@
     "tier": 1
   },
   {
+    "id": "film-wall-e-2008",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "WALL-E (2008)",
+    "teaser": "Pixar made a feature with the first 40 minutes having no dialogue. The opening is a 40-minute love story between two robots and a cockroach. The film won Pixar its second Best Picture nomination.",
+    "imageUrl": "",
+    "byline": "Andrew Stanton",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "WALL-E (2008) — first 40 minutes",
+      "durationMinutes": 40,
+      "instruction": "Watch with no commentary. The first 40 minutes is gesture, sound, and the machines' reading of human artifacts. Pixar was betting that cinema can sustain a feature without dialogue — and they were right."
+    },
+    "tags": [
+      "Animation",
+      "2000s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-up-2009",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Up (2009)",
+    "teaser": "Pixar's opening montage is the most-deconstructed 9 minutes in animation history. They tested it on the toughest crowd they had and still made it 20 seconds longer. Children sat silently for the whole thing.",
+    "imageUrl": "",
+    "byline": "Pete Docter",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Up (2009) — opening montage to end of opening credits (11 min)",
+      "durationMinutes": 11,
+      "instruction": "Watch carefully. The opening montage tells a 60-year love story in 9 minutes without a single line of dialogue. They tested this with the most distracted audience at Pixar — children — and the kids sat still for the whole thing."
+    },
+    "tags": [
+      "Animation",
+      "2000s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-parasite-2019",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -1617,6 +1661,28 @@
       "Romance",
       "2010s",
       "Italian"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-soul-2020-159",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Soul (2020)",
+    "teaser": "Pixar's film — a jazz pianist who dies before his big break and must help a reluctant soul find its 'spark' — won the Oscars for Best Animated Feature and Best Original Score (Jon Batiste and Trent Reznor). It became Pixar's most philosophical film: the argument, delivered through a Manhattan music teacher and a lost soul named 22, is that the 'spark' isn't a purpose — it's the willingness to live.",
+    "imageUrl": "",
+    "byline": "Pete Docter",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Soul (2020) — the Great Before and the ending",
+      "durationMinutes": 179,
+      "instruction": "Watch the opening — Joe's rehearsal, the phone call, the manhole — and notice how the film's two worlds are set: the real New York, photographed with texture and music, and the Great Before, designed as a blue abstract."
+    },
+    "tags": [
+      "Animation",
+      "2020s",
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 2
   },
@@ -3189,6 +3255,29 @@
       "Thriller",
       "2010s",
       "Korean"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-coco-2017",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Coco (2017)",
+    "teaser": "The 'Remember Me' twist is the film's heart: a lullaby disguised as a pop song, and the truth about who really wrote it. Pixar built the Land of the Dead from real Mexican artisans' work and spent years researching Día de los Muertos — the marigold bridge was their hardest technical challenge. It's the rare film that makes you cry twice: once for family, once for memory.",
+    "imageUrl": "",
+    "byline": "Lee Unkrich",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Coco (2017) — the opening and the Remember Me scene",
+      "durationMinutes": 105,
+      "instruction": "Watch the papel picado prologue, then the final Remember Me performance. Notice how the song's meaning flips completely once you know who really wrote it — and how the marigold bridge is both a visual and an emotional threshold."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2010s",
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -6723,6 +6812,29 @@
     "tier": 1
   },
   {
+    "id": "film-the-little-mermaid-1989",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Little Mermaid (1989)",
+    "teaser": "The film that saved Disney animation — after a decade of decline, this underwater fairy tale about a mermaid who trades her voice for legs launched the 'Disney Renaissance' and changed the industry. Howard Ashman's songs ('Part of Your World,' 'Under the Sea') and the villain Ursula made it a musical first, and its box office ($211 million) proved animation could rival live action. It was the first animated film with a Broadway-style score.",
+    "imageUrl": "",
+    "byline": "Ron Clements & John Musker",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Little Mermaid (1989) — the 'Part of Your World' scene and the ending",
+      "durationMinutes": 83,
+      "instruction": "Watch the 'Part of Your World' sequence — Ariel's grotto, the treasures, the longing — and notice how the song establishes the film's theme in one number: the desire to be part of the human world is the whole story, and the animation (the underwater movement was a technical breakthrough) sells every note."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "1980s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-dances-with-wolves-1990",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -6806,6 +6918,29 @@
       "Crime",
       "1990s",
       "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-beauty-and-the-beast-1991",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Beauty and the Beast (1991)",
+    "teaser": "The first animated film ever nominated for Best Picture — Disney's fairy tale with the most ambitious animation ever attempted (the ballroom scene was the first extensive use of CGI in a feature). The songs by Alan Menken and the late Howard Ashman ('Be Our Guest,' 'Belle,' and the title song that won the Oscar) made it a musical masterpiece, and its 'Tale as Old as Time' ballroom dance is the most romantic sequence in animation.",
+    "imageUrl": "",
+    "byline": "Gary Trousdale & Kirk Wise",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Beauty and the Beast (1991) — the ballroom scene and the ending",
+      "durationMinutes": 84,
+      "instruction": "Watch the ballroom sequence — the gown, the dance, the computer-animated camera sweep — and notice how the film's technology serves its emotion: the CGI camera move (the first of its kind) makes the dance feel like a dream, and the song's lyrics ('Tale as Old as Time') are the film's thesis."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "1990s",
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -6934,6 +7069,29 @@
       "Western",
       "1990s",
       "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-aladdin-1992",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Aladdin (1992)",
+    "teaser": "The most purely entertaining of the Disney Renaissance — Robin Williams' Genie, whose improvised, pop-culture-saturated performance rewrote what animation voice acting could be, and the film's 'A Whole New World' (the first Disney song to hit #1). The animation (the 'Never Had a Friend Like Me' number is a showcase) and the film's $504 million gross made it the year's biggest hit.",
+    "imageUrl": "",
+    "byline": "Ron Clements & John Musker",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Aladdin (1992) — the 'Friend Like Me' scene",
+      "durationMinutes": 90,
+      "instruction": "Watch the 'Friend Like Me' number — the Genie's shapeshifting showcase, the chorus, the pure animation virtuosity — and notice how Williams' improvisation drives the sequence: the animators worked from his audio tracks, and the result is the most energetic scene in Disney history."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "1990s",
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -7129,6 +7287,29 @@
     "tier": 1
   },
   {
+    "id": "film-the-lion-king-1994",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Lion King (1994)",
+    "teaser": "The highest-grossing animated film of its era and the most beloved of the Disney Renaissance — Hamlet with lions, Elton John's songs, and the most famous death scene in animation (Mufasa's stampede). The film's 'Circle of Life' opening, its 'Hakuna Matata,' and its 'Can You Feel the Love Tonight' (which won the Oscar) made it a cultural constant, and its 1994 gross ($763 million) was a record for an animated film. It ran on Broadway for 25 years.",
+    "imageUrl": "",
+    "byline": "Roger Allers & Rob Minkoff",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Lion King (1994) — the stampede and the ending",
+      "durationMinutes": 88,
+      "instruction": "Watch the stampede sequence — the wildebeests, Mufasa's fall, Simba's 'Dad, wake up' — and notice how the film earns its grief: the animation (a stampede of millions of wildebeests) was a technical milestone, and the scene's silence after the roar is the film's emotional core."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "1990s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-three-colours-red-1994",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -7168,6 +7349,29 @@
       "Drama",
       "1990s",
       "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-toy-story-1995",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Toy Story (1995)",
+    "teaser": "The first feature film made entirely on computers — Pixar's story of a cowboy doll (Tom Hanks) jealous of the new spaceman (Tim Allen) changed animation forever. John Lasseter's film proved CGI could carry emotion, and its box office ($373 million) launched the most successful animation studio in history.",
+    "imageUrl": "",
+    "byline": "John Lasseter",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Toy Story (1995) — the ending",
+      "durationMinutes": 81,
+      "instruction": "Watch the film's opening act — Andy's room, the toys' secret life, Woody's jealousy — and notice how the film's technology serves the story: the toys' limited movement (the first CGI had to work within plastic logic) became character, and the animation's warmth was a breakthrough."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "1990s",
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -7842,6 +8046,29 @@
     "tier": 1
   },
   {
+    "id": "film-finding-nemo-2003",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Finding Nemo (2003)",
+    "teaser": "Pixar's ocean epic — a clownfish father (Albert Brooks) crosses the Pacific to rescue his son, with a forgetful blue tang (Ellen DeGeneres's Dory) as his guide. The film's rendering of water — the most difficult animation challenge of its era — won the Oscar for Best Animated Feature, and its 'P. Sherman, 42 Wallaby Way, Sydney' became a global catchphrase. It grossed $940 million, making it the best-selling DVD of all time.",
+    "imageUrl": "",
+    "byline": "Andrew Stanton",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Finding Nemo (2003) — the ending",
+      "durationMinutes": 100,
+      "instruction": "Watch the film's first act — the coral reef, the 'right whale' lecture, the boat — and notice how Pixar's water simulation (a technical milestone: the light, the current, the physics) makes the ocean the film's real star: the animation was so convincing it won the Oscar. Then watch the ending, where Marlin finally lets Nemo go ('You're free."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2000s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-kill-bill-vol-1-2003",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -7904,6 +8131,29 @@
       "Horror",
       "2000s",
       "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-the-incredibles-2004",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Incredibles (2004)",
+    "teaser": "The superhero film that worked as a family drama — Brad Bird's story of a retired caped crusader (Craig T. Nelson) and his superpowered family, forced back into action. The film's 'No capes!' warning, its midlife-crisis satire, and its baby (Jack-Jack's scene is the decade's funniest animation) made it the best-reviewed film of its year.",
+    "imageUrl": "",
+    "byline": "Brad Bird",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Incredibles (2004) — the ending and the 'no capes' scene",
+      "durationMinutes": 115,
+      "instruction": "Watch the 'No capes!' scene — Edna Mode's rant, the montage of superhero deaths — and notice how the film's comedy is its philosophy: the film argues that costumes (and the heroics they imply) kill people, and that real heroism is family."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2000s",
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8040,6 +8290,29 @@
     "tier": 1
   },
   {
+    "id": "film-ratatouille-2007",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Ratatouille (2007)",
+    "teaser": "The greatest film ever made about food — Brad Bird's story of Remy, a rat who wants to be a chef in Paris, and the 'anyone can cook' philosophy. The film's critical scene — the food critic Anton Ego's childhood bite of ratatouille, which unlocks his memory — is the decade's most moving single image, and the film won the Oscar for Best Animated Feature.",
+    "imageUrl": "",
+    "byline": "Brad Bird",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ratatouille (2007) — the Ego scene and the ending",
+      "durationMinutes": 111,
+      "instruction": "Watch the film's final act — the dish, the critic, the flashback — and notice how the film builds to its most famous moment: Ego's bite of ratatouille transports him to his childhood, and the film's argument — that food is memory, and that greatness is a matter of taste, not class — is delivered in that one bite."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2000s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-zodiac-2007",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -8170,6 +8443,29 @@
     "tier": 1
   },
   {
+    "id": "film-inside-out-2015",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Inside Out (2015)",
+    "teaser": "Pixar's most profound film — the story of an 11-year-old girl told from inside her head, where the emotions (Joy, Sadness, Anger, Fear, Disgust) run headquarters. The film's thesis — that sadness is essential, not an enemy — is delivered in the film's most devastating scene (Bing Bong's farewell, 'Take her to the moon for me') and won it the Oscar for Best Animated Feature.",
+    "imageUrl": "",
+    "byline": "Pete Docter",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Inside Out (2015) — the Bing Bong scene and the ending",
+      "durationMinutes": 95,
+      "instruction": "Watch the Bing Bong scene — the imaginary friend, the rocket, the 'take her to the moon for me' — and notice how the film's most famous moment is built from pure emotional mathematics: the character's sacrifice is the film's thesis made literal, and the scene's place in the 'core memory' structure makes it land like a grenade."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2010s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-hereditary-2018",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -8209,6 +8505,29 @@
       "Drama",
       "2010s",
       "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-toy-story-3-2010",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Toy Story 3 (2010)",
+    "teaser": "The animated film that made grown adults weep in theaters — Andy's toys, facing the trash heap when their owner goes to college, and the incinerator scene that seemed ready to end them all. It became the first animated film to gross over $1 billion, won the Oscar for Best Animated Feature, and its closing act — Andy's slow goodbye, handing his toys to Bonnie — is the most moving ten minutes Pixar has ever made.",
+    "imageUrl": "",
+    "byline": "Lee Unkrich",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Toy Story 3 (2010) — the incinerator scene and the ending",
+      "durationMinutes": 103,
+      "instruction": "Watch the film's final act — the incinerator, the joined hands, the acceptance — and notice how the film earns its darkness: the toys are facing real death, and their decision to face it together is the film's argument made literal."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2010s",
+      "Hollywood",
+      "Pixar"
     ],
     "tier": 1
   },
@@ -8387,6 +8706,30 @@
       "Drama",
       "2010s",
       "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-frozen-2013",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Frozen (2013)",
+    "teaser": "The Disney phenomenon that took over the world — two sisters, one ice palace, and 'Let It Go,' the anthem that made Elsa (originally written as the villain until the song changed the story) the most beloved character of the decade. It won 2 Oscars, became the highest-grossing animated film in history at the time ($1.28 billion), and its twist — that the true love that saves Anna is her sister's, not a prince's — quietly modernized the fairy tale.",
+    "imageUrl": "",
+    "byline": "Chris Buck & Jennifer Lee",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Frozen (2013) — 'Let It Go' and the ending",
+      "durationMinutes": 102,
+      "instruction": "Watch 'Let It Go' — the ice palace rising, Elsa's transformation — and notice how the song is the film's thesis made spectacle: the animators built a new simulation for the ice, and the sequence's visual freedom (her hair down, her dress changing) is her liberation."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "Musical",
+      "2010s",
+      "Hollywood",
+      "Disney"
     ],
     "tier": 1
   },
@@ -8693,6 +9036,28 @@
       "Fantasy",
       "Romance",
       "Drama",
+      "2010s",
+      "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-spiderman-into-the-spider-verse-2018",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Spider-Man: Into the Spider-Verse (2018)",
+    "teaser": "The superhero film that looked like nothing else — every frame drawn like a comic book panel, with halftone dots, onomatopoeia, and a hero (Miles Morales) who learns that anyone can wear the mask. The animators broke the industry's 'two frames per drawing' rule, drawing each frame individually so the motion feels like a living comic.",
+    "imageUrl": "",
+    "byline": "Bob Persichetti, Peter Ramsey & Rodney Rothman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Spider-Man: Into the Spider-Verse (2018) — the leap of faith",
+      "durationMinutes": 117,
+      "instruction": "Watch the 'leap of faith' sequence — Miles stepping off the skyscraper, the music swelling, the dive into the city — and notice how the film earns its most famous moment: the animators studied how spider movements and skateboard physics collide, and the frame's halftone dots and skewed perspectives make the leap feel like a comic page coming alive."
+    },
+    "tags": [
+      "Animation",
+      "Action",
       "2010s",
       "Hollywood"
     ],
@@ -9144,6 +9509,29 @@
     "tier": 1
   },
   {
+    "id": "film-marcel-the-shell-with-shoes-on-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Marcel the Shell with Shoes On (2022)",
+    "teaser": "The most tender film of the decade, and it's about a one-inch-tall shell with one googly eye and tiny shoes — Marcel (voiced by Jenny Slate, in a feature spun off from the viral shorts she created with director Dean Fleischer Camp) lives in an Airbnb and narrates his tiny life: the tennis ball, the lint, the search for his family.",
+    "imageUrl": "",
+    "byline": "Dean Fleischer Camp",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Marcel the Shell with Shoes On (2022) — the ending",
+      "durationMinutes": 90,
+      "instruction": "Watch the film's blend of scales — Marcel tiny against real kitchens, the camera peering at him like he's a national treasure — and notice how the film's documentary framing is the joke and the heart: everyone who meets Marcel falls for him instantly, and the film's quiet humor (the '60 Minutes' satire, the group chat) makes room for its real subject."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "Family",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-john-wick-chapter-4-2023",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -9160,6 +9548,28 @@
     "tags": [
       "Action",
       "Crime",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-spiderman-across-the-spider-verse-2023",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Spider-Man: Across the Spider-Verse (2023)",
+    "teaser": "The sequel that outdid the masterpiece — Miles Morales returns, and the film's multiverse of Spider-People (hundreds of them, each in their own animation style) is the most audacious visual experiment in mainstream animation history. The film's first half is a buddy movie, its second half a tragedy about fate, and its cliffhanger ending made audiences scream in theaters.",
+    "imageUrl": "",
+    "byline": "Joaquim Dos Santos, Kemp Powers & Justin K. Thompson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Spider-Man: Across the Spider-Verse (2023) — the chase sequence and the ending",
+      "durationMinutes": 140,
+      "instruction": "Watch the chase through the Spider-Society — hundreds of Spider-People, each in their own style, Miles dodging through them — and notice how the film makes its visual language its plot: the different universes are different animation schools colliding, and the chase's changing styles (Indian Spider-Man's watercolor, the Spider-Punk's collages) are the film's argument that no single story is the only one."
+    },
+    "tags": [
+      "Animation",
+      "Action",
       "2020s",
       "Hollywood"
     ],
@@ -9475,6 +9885,29 @@
     "tier": 1
   },
   {
+    "id": "film-monsters-inc-2001",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Monsters, Inc. (2001)",
+    "teaser": "Pixar's second-biggest idea: monsters scare children for a living because screams power their city. The crew studied real toddler laughter to build the Laugh Floor, and every door in the vault is perspective-exact so the chase works as pure geometry.",
+    "imageUrl": "",
+    "byline": "Pete Docter",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Monsters, Inc. (2001) end-to-end",
+      "durationMinutes": 92,
+      "instruction": "Watch Sulley and Mike's friendship against the scare-floor rules, then pay attention to the door chase — the animators made each door's perspective mathematically real so the sequence reads as spatial logic, not magic."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2000s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-ocean-s-eleven-2001",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -9490,6 +9923,28 @@
     },
     "tags": [
       "Crime",
+      "Comedy",
+      "2000s",
+      "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-shrek-2001",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Shrek (2001)",
+    "teaser": "DreamWorks' fairy-tale satire won the first-ever Best Animated Feature Oscar — a category created partly because the studio campaigned so hard against its rival. Mike Myers re-recorded Shrek in a Glaswegian accent after his first take sounded too generic.",
+    "imageUrl": "",
+    "byline": "Andrew Adamson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Shrek (2001) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Watch the film's running argument: fairy-tale rules vs. real feelings. The scene where Shrek mishears Fiona's love as pity is the whole movie in one exchange — and the onion speech lands even harder after it."
+    },
+    "tags": [
+      "Animation",
       "Comedy",
       "2000s",
       "Hollywood"
@@ -10073,6 +10528,28 @@
     "tier": 2
   },
   {
+    "id": "film-shrek-2-2004",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Shrek 2 (2004)",
+    "teaser": "The sequel is considered better than the original by many — Puss in Boots was written for Antonio Banderas after a single casting call. The film's fairy-tale-brand satire (Fairy Godmother's 'I Need a Hero') is pure showbiz parody.",
+    "imageUrl": "",
+    "byline": "Andrew Adamson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Shrek 2 (2004) end-to-end",
+      "durationMinutes": 93,
+      "instruction": "Watch the film as a commentary on marriage and insecurity — Fiona's parents' reaction is the plot. The 'I Need a Hero' performance is the movie's thesis: even villains want to be the hero of their own story."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2000s",
+      "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-sideways-2004",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -10294,6 +10771,51 @@
     "tier": 1
   },
   {
+    "id": "film-how-to-train-your-dragon-2010",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "How to Train Your Dragon (2010)",
+    "teaser": "The animators studied real dogs, cats, and horses to build Toothless's body language — and the famous 'no one lands him' scene was the first test of their motion language. The film's flight scenes were rendered with a custom camera rig that made the world feel weightless.",
+    "imageUrl": "",
+    "byline": "Dean DeBlois",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "How to Train Your Dragon (2010) end-to-end",
+      "durationMinutes": 98,
+      "instruction": "Watch Toothless's eyes as the film's entire emotional system — every feeling is telegraphed through pupil movement before a single word. Then notice how the dragon-training scenes teach you the same thing Hiccup learns: dominance fails, trust works."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2010s",
+      "Hollywood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-tangled-2010",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Tangled (2010)",
+    "teaser": "Tangled's hair took a new software system to simulate — 70,000 individual strands that took 3 days per frame. The studio behind it, Glen Keane, left Disney in 2012 partly because he felt the industry had moved past hand-drawn animation.",
+    "imageUrl": "",
+    "byline": "Nathan Greno",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tangled (2010) end-to-end",
+      "durationMinutes": 100,
+      "instruction": "Watch the lantern scene as the film's thesis — two people finally seeing each other for real. Then notice how every song in the film is about the same thing: wanting to be seen, not kept."
+    },
+    "tags": [
+      "Animation",
+      "Musical",
+      "2010s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-127-hours-2010",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -10419,6 +10941,28 @@
     },
     "tags": [
       "Action",
+      "Comedy",
+      "2010s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-despicable-me-2010",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Despicable Me (2010)",
+    "teaser": "The Minions were originally written as a small army of workers, but the animators loved their gibberish so much they gave them a whole movie to themselves two years later. The film's voice cast included Steve Carell doing a voice he based on a real European accent he heard on vacation.",
+    "imageUrl": "",
+    "byline": "Pierre Coffin",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Despicable Me (2010) end-to-end",
+      "durationMinutes": 95,
+      "instruction": "Watch Gru's arc as a story about earned love — every scheme he runs fails because he's secretly running toward the girls. Then notice the Minions' gibberish: it's actually a blend of several real languages, and the animators tracked which syllables mean what."
+    },
+    "tags": [
+      "Animation",
       "Comedy",
       "2010s",
       "Hollywood"
@@ -11020,6 +11564,29 @@
       "Comedy",
       "2010s",
       "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-wreck-it-ralph-2012",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Wreck-It Ralph (2012)",
+    "teaser": "The film's game worlds are built from real arcade classics, and the animators studied actual game code to make the film's fictional games feel authentic. The film's tagline, 'Going Turbo,' is a reference to a real arcade legend.",
+    "imageUrl": "",
+    "byline": "Rich Moore",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wreck-It Ralph (2012) end-to-end",
+      "durationMinutes": 108,
+      "instruction": "Watch the film as a story about roles — Ralph's whole arc is learning that he's not defined by his job. Then notice the film's rule: the game worlds have rules, and the film is about what happens when someone breaks them."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2010s",
+      "Hollywood",
+      "Disney"
     ],
     "tier": 2
   },
@@ -11644,6 +12211,73 @@
     "tier": 2
   },
   {
+    "id": "film-big-hero-6-2014",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Big Hero 6 (2014)",
+    "teaser": "The film's Baymax was designed from a real inflatable robot, and the animators studied actual robotics to make him move like a balloon. The film won the Oscar for Best Animated Feature.",
+    "imageUrl": "",
+    "byline": "Don Hall",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Big Hero 6 (2014) end-to-end",
+      "durationMinutes": 102,
+      "instruction": "Watch Baymax's movement as the film's emotional center — his 'I will scan you' is a whole character in three words. Then notice the film's San Fransokyo: it's a mashup of two cities that mirrors the film's mashup of heart and tech."
+    },
+    "tags": [
+      "Animation",
+      "Action",
+      "2010s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-how-to-train-your-dragon-2-2014",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "How to Train Your Dragon 2 (2014)",
+    "teaser": "The film's animation was a leap forward — the dragons' fire was simulated with real physics, and the flight scenes used a new camera system. The film's twist, involving Hiccup's mother, was planned from the first film.",
+    "imageUrl": "",
+    "byline": "Dean DeBlois",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "How to Train Your Dragon 2 (2014) end-to-end",
+      "durationMinutes": 102,
+      "instruction": "Watch the film as a story about growing up — Hiccup's arc is about choosing his own path. Then notice the film's message: the dragons' peace is a fragile thing, and the film is about protecting it."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2010s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-the-lego-movie-2014",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Lego Movie (2014)",
+    "teaser": "The film was shot entirely in LEGO — every brick is a real LEGO piece, and the animators used actual LEGO sets for reference. The film's twist, that the story is being played by a real boy, was kept secret until release.",
+    "imageUrl": "",
+    "byline": "Phil Lord",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Lego Movie (2014) end-to-end",
+      "durationMinutes": 100,
+      "instruction": "Watch the film as a story about creativity vs. conformity — the Master Builders are the film's thesis. Then notice the film's ending: it's a meditation on play, and the LEGO pieces are the point."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2010s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
     "id": "film-chef-2014",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -11952,6 +12586,74 @@
       "2010s",
       "Hollywood",
       "MCU"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-zootopia-2016",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Zootopia (2016)",
+    "teaser": "The film's world is a fully realized animal city, and the animators studied real animals to build the characters — the film's racial allegory was praised by critics. The film won the Oscar for Best Animated Feature.",
+    "imageUrl": "",
+    "byline": "Byron Howard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Zootopia (2016) end-to-end",
+      "durationMinutes": 108,
+      "instruction": "Watch the film as a story about prejudice — every character's animal nature is a metaphor for bias. Then notice the film's structure: it's a buddy cop movie where the mystery is the city's own assumptions."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2010s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-moana-2016",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Moana (2016)",
+    "teaser": "The film's ocean was animated with a custom physics system, and the Polynesian culture was researched with real cultural advisors. The film's music was written by Lin-Manuel Miranda, who also wrote the film's title song.",
+    "imageUrl": "",
+    "byline": "Ron Clements",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Moana (2016) end-to-end",
+      "durationMinutes": 107,
+      "instruction": "Watch the film as a story about finding your path — Moana's arc is about the call to the sea. Then notice the film's ocean: it's a character with a personality, and the film's best scenes are the ones where it plays."
+    },
+    "tags": [
+      "Animation",
+      "Musical",
+      "2010s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-kubo-and-the-two-strings-2016",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Kubo and the Two Strings (2016)",
+    "teaser": "The film was stop-motion — every frame was shot with real puppets, and the film's famous origami scene took 6 months to animate. The film was nominated for two Oscars.",
+    "imageUrl": "",
+    "byline": "Travis Knight",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kubo and the Two Strings (2016) end-to-end",
+      "durationMinutes": 101,
+      "instruction": "Watch the film as a story about memory — Kubo's music brings the past to life. Then notice the film's craftsmanship: every scene is a hand-made object, and the film's beauty is its message."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2010s",
+      "Hollywood"
     ],
     "tier": 2
   },
@@ -12819,6 +13521,28 @@
     "tier": 2
   },
   {
+    "id": "film-onward-2020",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Onward (2020)",
+    "teaser": "Pixar's film was inspired by director Dan Scanlon's own loss of his father — the story of two brothers who get one more day with theirs. The film's magic system runs on a visual language of staffs, gems, and spells.",
+    "imageUrl": "",
+    "byline": "Dan Scanlon",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Onward (2020) end-to-end",
+      "durationMinutes": 102,
+      "instruction": "Watch the film as a story about what you carry from the people you lose — the quest is really about the brothers' relationship. Then notice the film's final act: it's built entirely around a choice that redefines what the quest was for."
+    },
+    "tags": [
+      "Animation",
+      "Fantasy",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
     "id": "film-hamilton-2020",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -13307,6 +14031,75 @@
     "tier": 2
   },
   {
+    "id": "film-encanto-2021",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Encanto (2021)",
+    "teaser": "Lin-Manuel Miranda's songs for the film were written during quarantine, and 'We Don't Talk About Bruno' became a global phenomenon — it was the first Disney song to top the Billboard Hot 100. The film's setting is a real Colombian style of home.",
+    "imageUrl": "",
+    "byline": "Byron Howard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Encanto (2021) end-to-end",
+      "durationMinutes": 102,
+      "instruction": "Watch the film as a story about family pressure and generational trauma — every member of the Madrigals is crushed by expectation. Then notice the film's house: it's a character, and its crumbling mirrors the family's fractures."
+    },
+    "tags": [
+      "Animation",
+      "Musical",
+      "2020s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-luca-2021",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Luca (2021)",
+    "teaser": "The film was inspired by director Enrico Casarosa's childhood summers on the Italian Riviera, and its sea monsters are a metaphor for feeling different. The film's Vespa obsession is a love letter to 1950s Italian culture.",
+    "imageUrl": "",
+    "byline": "Enrico Casarosa",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Luca (2021) end-to-end",
+      "durationMinutes": 95,
+      "instruction": "Watch the film as a story about friendship and belonging — Luca's arc is about being seen for who he is. Then notice the film's design: the Italian town is drawn with the same warmth as the water scenes are drawn with mystery."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2020s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-raya-and-the-last-dragon-2021",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Raya and the Last Dragon (2021)",
+    "teaser": "The film's Southeast Asian setting was researched with a cultural team of experts from across the region — the animation includes real martial arts styles from five countries. The film's dragon, Sisu, was voiced by Awkwafina.",
+    "imageUrl": "",
+    "byline": "Don Hall",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Raya and the Last Dragon (2021) end-to-end",
+      "durationMinutes": 107,
+      "instruction": "Watch the film as a story about trust — Raya's arc is about unlearning her distrust of the world. Then notice the film's message: it's a rare Disney film where the villain's perspective has a point, and reconciliation is the goal."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2020s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 2
+  },
+  {
     "id": "film-in-the-heights-2021",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -13565,6 +14358,28 @@
     "tags": [
       "Musical",
       "Drama",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-the-mitchells-vs-the-machines-2021",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Mitchells vs. the Machines (2021)",
+    "teaser": "The film was originally made for theatrical release before the pandemic sent it to Netflix — its distinctive visual style mixes 3D animation with hand-drawn chaos. The film was praised as one of the best animated films of the year.",
+    "imageUrl": "",
+    "byline": "Mike Rianda",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Mitchells vs. the Machines (2021) end-to-end",
+      "durationMinutes": 114,
+      "instruction": "Watch the film as a story about family and technology — the robot apocalypse is a metaphor for the communication gap between parents and kids. Then notice the film's style: it looks like a sketchbook exploded, and that's intentional."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
       "2020s",
       "Hollywood"
     ],
@@ -13905,6 +14720,119 @@
     "tier": 2
   },
   {
+    "id": "film-turning-red-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Turning Red (2022)",
+    "teaser": "Pixar's first film directed solely by a woman, Domee Shi's coming-of-age story about a girl who turns into a giant red panda is a metaphor for puberty. The film's 2002 Toronto setting is rich with period detail.",
+    "imageUrl": "",
+    "byline": "Domee Shi",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Turning Red (2022) end-to-end",
+      "durationMinutes": 100,
+      "instruction": "Watch the film as a story about the messiness of growing up — Mei's panda is her feelings made visible. Then notice the film's honesty: it's a kids' movie that takes a teenager's emotions completely seriously."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2020s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-lightyear-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Lightyear (2022)",
+    "teaser": "The film is presented as the in-universe movie that inspired the Buzz Lightyear toy — the premise was pitched by Tim Allen's toy in the original Toy Story. Chris Evans voices the human Buzz.",
+    "imageUrl": "",
+    "byline": "Angus MacLane",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lightyear (2022) end-to-end",
+      "durationMinutes": 105,
+      "instruction": "Watch the film as a story about accepting your mistakes — Buzz's arc is about a failure he can't undo. Then notice the film's framing: the opening text explains the toy connection, and the film honors the character's earnestness."
+    },
+    "tags": [
+      "Animation",
+      "Sci-Fi",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-puss-in-boots-the-last-wish-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Puss in Boots: The Last Wish (2022)",
+    "teaser": "The film's animation style was inspired by Spider-Verse's limited-frame look — the stylized rendering was praised as a leap forward for DreamWorks. The film's villain, the Wolf, is a genuinely menacing presence.",
+    "imageUrl": "",
+    "byline": "Joel Crawford",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Puss in Boots: The Last Wish (2022) end-to-end",
+      "durationMinutes": 102,
+      "instruction": "Watch the film as a story about mortality — Puss's nine lives are running out, and the film is about facing death. Then notice the film's villain: the Wolf is death itself, and the film's refusal to defeat him is its strength."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2020s",
+      "Hollywood",
+      "Disney"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-pinocchio-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Pinocchio (2022)",
+    "teaser": "Guillermo del Toro's stop-motion Pinocchio took 15 years to make and won the Oscar for Best Animated Feature. Del Toro set the story in fascist Italy, making it a meditation on obedience and individuality.",
+    "imageUrl": "",
+    "byline": "Guillermo del Toro",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pinocchio (2022) end-to-end",
+      "durationMinutes": 116,
+      "instruction": "Watch the film as a story about what it means to be human — Pinocchio's journey is about choosing disobedience over obedience. Then notice the film's politics: the fascist backdrop makes every choice about conformity matter more."
+    },
+    "tags": [
+      "Animation",
+      "Fantasy",
+      "2020s",
+      "Mexican",
+      "Disney"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-the-bad-guys-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Bad Guys (2022)",
+    "teaser": "The film's heist-movie structure and stylish animation were praised — the opening heist sequence is a standout. The film is based on the popular children's book series about reformed villains.",
+    "imageUrl": "",
+    "byline": "Pierre Perifel",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Bad Guys (2022) end-to-end",
+      "durationMinutes": 100,
+      "instruction": "Watch the film as a story about whether people can change — the Bad Guys are trying to be good and failing hilariously. Then notice the film's style: it's a heist movie in animal form, and the action is genuinely slick."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
     "id": "film-the-woman-king-2022",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -14009,6 +14937,28 @@
     "tags": [
       "Comedy",
       "Action",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-chip-n-dale-rescue-rangers-2022",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Chip 'n Dale: Rescue Rangers (2022)",
+    "teaser": "The film's premise — the cartoon duo as middle-aged actors in the real world — was praised for its commentary on animation history. The film's cameos include characters from across decades of cartoon copyright law.",
+    "imageUrl": "",
+    "byline": "Akiva Schaffer",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Chip 'n Dale: Rescue Rangers (2022) end-to-end",
+      "durationMinutes": 97,
+      "instruction": "Watch the film as a story about a duo who went their separate ways — the reunion is the film's engine. Then notice the film's visual mix: 2D and 3D animation coexist, and the film uses that to tell its story about the industry."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
       "2020s",
       "Hollywood"
     ],
@@ -14388,6 +15338,96 @@
       "MCU"
     ],
     "tier": 1
+  },
+  {
+    "id": "film-elemental-2023",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Elemental (2023)",
+    "teaser": "Pixar's film about fire and water falling in love was drawn from director Peter Sohn's own immigrant family story. The film's cultural specificity — Ember's parents run a corner store — was praised.",
+    "imageUrl": "",
+    "byline": "Peter Sohn",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Elemental (2023) end-to-end",
+      "durationMinutes": 109,
+      "instruction": "Watch the film as a story about honoring your parents while becoming yourself — Ember's arc is about both. Then notice the film's metaphor: the elements are literal, and the fire-water romance is the whole point."
+    },
+    "tags": [
+      "Animation",
+      "Romance",
+      "2020s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-nimona-2023",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Nimona (2023)",
+    "teaser": "The film was rescued from Disney's shelving and released by Netflix after its story — a shapeshifter who refuses to be defined — was seen as too queer for the studio. The film was praised as a triumph of adaptation.",
+    "imageUrl": "",
+    "byline": "Nick Bruno",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nimona (2023) end-to-end",
+      "durationMinutes": 99,
+      "instruction": "Watch the film as a story about refusing to be the monster they say you are — Nimona's shapeshifting is identity made literal. Then notice the film's villain: the institution that fears difference is the real monster."
+    },
+    "tags": [
+      "Animation",
+      "Fantasy",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-tmnt-mutant-mayhem-2023",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "TMNT: Mutant Mayhem (2023)",
+    "teaser": "The film's animation style, which looks like hand-drawn teenage sketchbooks, was praised as a fresh take on the franchise — the turtles are voiced by actual teenagers. The film's humor was compared to Spider-Verse.",
+    "imageUrl": "",
+    "byline": "Jeff Rowe",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "TMNT: Mutant Mayhem (2023) end-to-end",
+      "durationMinutes": 99,
+      "instruction": "Watch the film as a story about being teenagers first and heroes second — the turtles' desire to be accepted is the film's engine. Then notice the film's style: the sketchy animation is a deliberate choice about youth and mess."
+    },
+    "tags": [
+      "Animation",
+      "Action",
+      "2020s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-the-super-mario-bros-movie-2023",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Super Mario Bros. Movie (2023)",
+    "teaser": "The film became one of the highest-grossing animated films ever, despite mixed reviews — it was designed as a love letter to the games, packed with references. Chris Pratt's Mario voice was a controversy before release.",
+    "imageUrl": "",
+    "byline": "Aaron Horvath",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Super Mario Bros. Movie (2023) end-to-end",
+      "durationMinutes": 92,
+      "instruction": "Watch the film as a story about family — Mario and Luigi's bond is the emotional core beneath the game references. Then notice the film's craft: it's built to make fans point at the screen, and the references are the plot."
+    },
+    "tags": [
+      "Animation",
+      "Comedy",
+      "2020s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 2
   },
   {
     "id": "film-wonka-2023",
@@ -14874,6 +15914,29 @@
     "tier": 2
   },
   {
+    "id": "film-inside-out-2-2024",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Inside Out 2 (2024)",
+    "teaser": "The sequel added Anxiety, Envy, Embarrassment, and Ennui to Riley's emotional crew — the film's portrayal of an anxiety attack was praised by mental health professionals. It became the highest-grossing animated film ever.",
+    "imageUrl": "",
+    "byline": "Kelsey Mann",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Inside Out 2 (2024) end-to-end",
+      "durationMinutes": 96,
+      "instruction": "Watch the film as a story about growing up and the emotions that come with it — Anxiety's arc is about learning to coexist. Then notice the film's ending: the 'self' belief is rebuilt, and the film's message is that feelings are information, not identity."
+    },
+    "tags": [
+      "Animation",
+      "Family",
+      "2020s",
+      "Hollywood",
+      "Pixar"
+    ],
+    "tier": 1
+  },
+  {
     "id": "film-deadpool-wolverine-2024",
     "categoryId": "FILMS",
     "subtype": "Film",
@@ -14893,6 +15956,28 @@
       "2020s",
       "Hollywood",
       "MCU"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-the-wild-robot-2024",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "The Wild Robot (2024)",
+    "teaser": "The film's painterly animation, inspired by the book's illustrations, was praised as a new high for DreamWorks — Roz's journey raising a gosling was an emotional hit. The film was nominated for three Oscars.",
+    "imageUrl": "",
+    "byline": "Chris Sanders",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Wild Robot (2024) end-to-end",
+      "durationMinutes": 102,
+      "instruction": "Watch the film as a story about motherhood and belonging — Roz's arc is about becoming something her programming never intended. Then notice the film's visual style: the backgrounds look painted, and the contrast with the robot is the point."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2020s",
+      "Hollywood"
     ],
     "tier": 1
   },
@@ -15355,6 +16440,50 @@
       "Silent",
       "2020s",
       "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-flow-2024",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Flow (2024)",
+    "teaser": "The Latvian animated film — a wordless story of a cat surviving a flood — won the Oscar for Best Animated Feature. The film was made with open-source software and no dialogue at all.",
+    "imageUrl": "",
+    "byline": "Gints Zilbalodis",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Flow (2024) end-to-end",
+      "durationMinutes": 85,
+      "instruction": "Watch the film as a story told entirely through movement — the cat's journey is pure visual storytelling. Then notice the film's craft: the animation is stylized, and the film's lack of dialogue makes every sound a character."
+    },
+    "tags": [
+      "Animation",
+      "Adventure",
+      "2020s",
+      "Latvian"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-memoir-of-a-snail-2024",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Memoir of a Snail (2024)",
+    "teaser": "Adam Elliot's stop-motion film about loneliness and connection won the Oscar for Best Animated Feature — its handcrafted, melancholic style was praised. The film's snail is a metaphor for its protagonist's withdrawn life.",
+    "imageUrl": "",
+    "byline": "Adam Elliot",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Memoir of a Snail (2024) end-to-end",
+      "durationMinutes": 94,
+      "instruction": "Watch the film as a story about coming out of your shell — Grace's arc is about letting people in. Then notice the film's craft: it's stop-motion with a handmade soul, and the film's sadness is always warm."
+    },
+    "tags": [
+      "Animation",
+      "Drama",
+      "2020s",
+      "Australian"
     ],
     "tier": 2
   },
@@ -16169,6 +17298,28 @@
     "tags": [
       "Horror",
       "Drama",
+      "2010s",
+      "Hollywood"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "film-klaus-2019",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Klaus (2019)",
+    "teaser": "The Netflix animated film was hand-drawn with a new lighting technique — it was praised as a return to classic 2D animation and was nominated for the Oscar. The film reimagines the origin of Santa Claus.",
+    "imageUrl": "",
+    "byline": "Sergio Pablos",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Klaus (2019) end-to-end",
+      "durationMinutes": 96,
+      "instruction": "Watch the film as a story about how kindness spreads — every act of generosity in the town creates another. Then notice the film's animation: the hand-drawn style with volumetric lighting is the film's quiet revolution."
+    },
+    "tags": [
+      "Animation",
+      "Family",
       "2010s",
       "Hollywood"
     ],
@@ -19778,6 +20929,27 @@
     "tags": [
       "Thriller",
       "Crime",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "film-anomalisa-2015",
+    "categoryId": "FILMS",
+    "subtype": "Film",
+    "name": "Anomalisa (2015)",
+    "teaser": "A customer-service expert who hears everyone as the same voice and face meets a woman whose voice is different, and falls into a brief, strange love. Charlie Kaufman's stop-motion film, with puppets, is the most human movie about loneliness ever animated. It was the first animated film to compete for the Best Picture Oscar.",
+    "imageUrl": "",
+    "byline": "Charlie Kaufman, Duke Johnson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Anomalisa (2015) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Watch the hotel-room scene — the film's emotional peak happens between two puppets. Notice how the identical voices make every other character a blur around the one exception."
+    },
+    "tags": [
+      "Drama",
+      "Animation",
       "2010s"
     ],
     "tier": 1

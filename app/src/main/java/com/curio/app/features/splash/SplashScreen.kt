@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -36,13 +34,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.curio.app.R
 import com.curio.app.features.onboarding.CurioOnboardingState
@@ -51,7 +47,6 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.CurioTheme
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
@@ -202,28 +197,6 @@ fun SplashScreen(navController: NavHostController) {
                         )
                 )
 
-                // v205 — a warm GROUND at the bottom: a soft gradient band in
-                // the app-background family (transparent → a warmed background
-                // tone), so the splash reads grounded instead of a flat void.
-                // Not full-bleed — just the bottom third (user: "at the buttom
-                // it have a similiar gradient backgroud of the app backgroud.
-                // not full just at the buttom").
-                val appBg = MaterialTheme.colorScheme.background
-                val bottomWarm = if (isCurioDarkTheme()) lerp(appBg, CurioColors.CoralBlush, 0.05f)
-                                 else lerp(appBg, CurioColors.ButterYellow, 0.14f)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.34f)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                1f to bottomWarm
-                            )
-                        )
-                )
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -272,40 +245,17 @@ fun SplashScreen(navController: NavHostController) {
                     }
 
                     // ── App name ──────────────────────────────────────────────
-                    // v205 — the wordmark is BIGGER (36 → 72sp, same Geom Bold)
-                    // and wears a theme-aware GRADIENT echoing the cosmic mark:
-                    // bright mint → butter on the dark sky, deep rose → gold on
-                    // the light cream (user: "make the Curio tet bigger and with
-                    // gradient basced on the dark or light mode").
-                    val wordmarkBrush = if (isCurioDarkTheme()) {
-                        Brush.horizontalGradient(
-                            listOf(CurioColors.SkyMint, CurioColors.ButterYellow)
-                        )
-                    } else {
-                        Brush.horizontalGradient(
-                            listOf(CurioColors.CoralInk, CurioColors.GoldInk)
-                        )
-                    }
                     Text(
                         text = "Curio",
-                        style = MaterialTheme.typography.displaySmall.copy(
-                            fontSize = 72.sp,
-                            brush = wordmarkBrush
-                        )
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     // ── Tagline — the app's identity line under the name ─────
-                    // v205 — a little bigger (14 → 18sp) and WARMER in both
-                    // themes: parchment on the dark sky, warm khaki on the light
-                    // cream (user: "discover something that text gets a little
-                    // bigger too and warmer in dark mode light mode you figure
-                    // it out").
-                    val taglineColor = if (isCurioDarkTheme()) Color(0xFFD8CDB4).copy(alpha = 0.90f)
-                                       else Color(0xFF7E6E50).copy(alpha = 0.92f)
                     Text(
                         text = stringResource(R.string.app_tagline),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 18.sp),
-                        color = taglineColor,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.62f),
                         textAlign = TextAlign.Center
                     )
 

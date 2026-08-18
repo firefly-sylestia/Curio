@@ -76,27 +76,23 @@ fun PaperTitleLines(
             drawPath(path, main, style = Stroke(width = weightPx, cap = cap))
         }
 
-        // Two hand-drawn strokes in the lower half, SHORTER and shifted
-        // toward the RIGHT of the header text (v27w — user: "make it little
-        // more shorter and more to the right of the header text"): they now
-        // start ~a quarter in from the title's left edge and span only the
-        // right ~70% of the line — a partial right-side underline instead of
-        // a full-width one. The top line runs a touch shorter with a gentle
-        // sag; the bottom line starts a little further right, ends further
-        // right, and rises gently — a single-pen-motion double underline
-        // that never crosses itself.
+        // Two hand-drawn strokes in the lower half, converging slightly
+        // toward the right: the top line runs nearly the full width with a
+        // gentle sag; the bottom line starts a touch further right, is a
+        // little longer, and rises gently — a single-pen-motion double
+        // underline that never crosses itself.
         stroke(
-            p0 = Offset(w * 0.22f, h * 0.34f),
-            c1 = Offset(w * 0.44f, h * 0.47f),
-            c2 = Offset(w * 0.72f, h * 0.45f),
+            p0 = Offset(w * 0.02f, h * 0.34f),
+            c1 = Offset(w * 0.30f, h * 0.46f),
+            c2 = Offset(w * 0.68f, h * 0.45f),
             p3 = Offset(w * 0.90f, h * 0.40f),
             weightPx = textPx * 0.10f
         )
         stroke(
-            p0 = Offset(w * 0.26f, h * 0.74f),
-            c1 = Offset(w * 0.50f, h * 0.64f),
-            c2 = Offset(w * 0.76f, h * 0.67f),
-            p3 = Offset(w * 0.94f, h * 0.68f),
+            p0 = Offset(w * 0.06f, h * 0.74f),
+            c1 = Offset(w * 0.34f, h * 0.64f),
+            c2 = Offset(w * 0.72f, h * 0.67f),
+            p3 = Offset(w * 0.96f, h * 0.68f),
             weightPx = textPx * 0.09f
         )
     }

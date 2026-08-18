@@ -53,7 +53,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
@@ -145,13 +144,9 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
-import com.curio.app.ui.components.curioActivePillFill
-import com.curio.app.ui.components.curioActivePillInk
-import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -166,7 +161,6 @@ import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.lightAccentTint
-import com.curio.app.ui.theme.materialThemeOn
 import com.curio.app.ui.theme.oklabGradientStops
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -433,16 +427,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // Spin tab opens where the user left off on the next launch. Persist the
     // FULL launch set (single or mixed) when a slug (single or multi) is
     // present so multi-select decks survive too.
-    // v196 — the slug authority (v5.14 below) and this persist must apply
-    // ONCE per navigation, not on every pop-back: rememberSaveable survives
-    // the reveal round-trip, so returning from a pushed route (topic reveal)
-    // keeps the user's in-session category change instead of re-forcing the
-    // launch slug — which resurrected a cancelled mix (user: "i cancel it
-    // and chnage it to other category … when i tap back it goes back to the
-    // mixed one even though i have chnaged it").
-    var slugApplied by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (categorySlug != null && !slugApplied) {
+        if (categorySlug != null) {
             AppPreferences.setLastSpinCategories(context, initialCats.map { it.id })
         }
     }
@@ -472,14 +458,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     }
     LaunchedEffect(categorySlug) {
         // Guard: on a normal fresh launch the value already matches; only
-        // write when restoreState resurrected a stale set. v196 — runs only
-        // once per navigation (slugApplied): returning from a pushed route
-        // must NOT re-force the launch slug over an in-session change.
-        if (slugCatIds != null && !slugApplied) {
-            slugApplied = true
-            if (activeCatIds != slugCatIds) {
-                activeCatIds = slugCatIds
-            }
+        // write when restoreState resurrected a stale set.
+        if (slugCatIds != null && activeCatIds != slugCatIds) {
+            activeCatIds = slugCatIds
         }
         // v5.15 — the plain Shuffle tab is equally authoritative from
         // prefs: the category picker ("What are we exploring?") now lands
@@ -693,19 +674,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // v81 — dark: the deck accent resolves its dark mixed shade (resolved
     // outside the remember — it's not a @Composable context).
     val darkMode = isCurioDarkTheme()
-    // v190 — Material: a MIXED deck wears ONE material color — the scheme
-    // primary (user: "make it the material color when they get mixed") —
-    // instead of a blend; single lanes keep their muted family fill.
-    val materialPrimary = if (materialThemeOn && activeCatIds.distinct().size > 1) {
-        MaterialTheme.colorScheme.primary
-    } else null
-    val deckAccent = remember(deckAccents, pastelMode, darkMode, materialPrimary) {
-        CurioMixedDeck.mixedDeckAccent(
-            deckAccents,
-            pastel = pastelMode,
-            dark = darkMode,
-            materialPrimary = materialPrimary
-        )
+    val deckAccent = remember(deckAccents, pastelMode, darkMode) {
+        CurioMixedDeck.mixedDeckAccent(deckAccents, pastel = pastelMode, dark = darkMode)
     }
 
     // ── Mixed-deck identity (v5.13) ───────────────────────────────────────
@@ -760,7 +730,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             )
         }
     } else {
-        CurioMixedDeck.mixedDeckGradient(deckAccents, materialPrimary = materialPrimary)
+        CurioMixedDeck.mixedDeckGradient(deckAccents)
     }
     val deckCat = remember(activeCatIds, deckAccent, activeCategory) {
         if (isMixedDeck) {
@@ -1385,21 +1355,11 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 showCategoryPicker = false
             },
             onCategoriesSelected = { cats ->
-                if (cats.isEmpty()) {
-                    // v196 — a CANCELLED mix: the user cleared the ticks in
-                    // the picker and left via back — the mix is gone, the
-                    // deck reverts to the last single category (and that
-                    // single is persisted so it can't resurrect).
-                    val single = AppPreferences.getLastSpinCategory(context)
-                    activeCatIds = listOf(single)
-                    AppPreferences.setLastSpinCategories(context, listOf(single))
-                } else {
-                    activeCatIds = cats.map { it.id }
-                    // v5.15 — persist the FULL mixed set (not just the first)
-                    // so a multi-select deck survives back navigation, tab
-                    // switches and app restarts.
-                    AppPreferences.setLastSpinCategories(context, cats.map { it.id })
-                }
+                activeCatIds = cats.map { it.id }
+                // v5.15 — persist the FULL mixed set (not just the first)
+                // so a multi-select deck survives back navigation, tab
+                // switches and app restarts.
+                AppPreferences.setLastSpinCategories(context, cats.map { it.id })
                 showCategoryPicker = false
             },
         )
@@ -1747,17 +1707,7 @@ private fun FilterSheet(
     }
 
     ModalBottomSheet(
-        onDismissRequest = {
-            // v189 — popping the sheet back (swipe / scrim tap / back)
-            // with chips ticked APPLIES the draft instead of silently
-            // dropping it (same behavior as the picker's mix-on-pop). Only
-            // a pop with nothing changed keeps the previous selection.
-            if (draftFilters != initialFilters || draftSubtypes != initialSubtypes) {
-                onApply(draftFilters, draftSubtypes)
-            } else {
-                onDismiss()
-            }
-        },
+        onDismissRequest = onDismiss,
         sheetState = sheetState,
         // v33 — the sheet uses the SOFT page wash (the same background tint
         // as the Spin page behind it), not the stronger card-level
@@ -3125,13 +3075,11 @@ private fun HeroTicketCard(
                         else -> null
                     }
                     // v141 — the top-left corner is a pill ROW: the byline
-                    // ("Director · Nolan"). v192 — the YEAR qualifier pill
-                    // is gone from the shuffle card (user: "in shuffle main
-                    // card dont show the year pill just inside the topic
-                    // reveal") — the Topic Reveal hero keeps its year pill;
-                    // the title still drops the trailing year ("Moby-Dick
-                    // (1851)" → "Moby-Dick") so the morph stays clean.
-                    if (byline != null && bylineLabel != null) {
+                    // plus the topic's year qualifier ("Moby-Dick (1851)"
+                    // shows "Moby-Dick" in the title and "1851" here), so
+                    // the reveal hero's matching top row morphs 1:1.
+                    val (_, yearQual) = topic?.titleAndYearQualifier() ?: (null to null)
+                    if ((byline != null && bylineLabel != null) || !yearQual.isNullOrBlank()) {
                         Row(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
@@ -3139,19 +3087,46 @@ private fun HeroTicketCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = ink.copy(alpha = 0.18f),
-                                shadowElevation = 0.dp
-                            ) {
-                                Text(
-                                    text = "$bylineLabel · $byline",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = ink,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
+                            if (byline != null && bylineLabel != null) {
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = ink.copy(alpha = 0.18f),
+                                    shadowElevation = 0.dp
+                                ) {
+                                    Text(
+                                        text = "$bylineLabel · $byline",
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = ink,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
+                                }
+                            }
+                            if (!yearQual.isNullOrBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = ink.copy(alpha = 0.18f),
+                                    shadowElevation = 0.dp
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        CurioIcon(
+                                            name = CurioIcons.Schedule,
+                                            contentDescription = null,
+                                            tint = ink,
+                                            size = 14.dp
+                                        )
+                                        Text(
+                                            text = yearQual.orEmpty(),
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = ink
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -4130,40 +4105,19 @@ private fun VerticalDeckButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // v208 — opt-in experiment (Settings → Experiments → Nav-style buttons):
-    // the vertical pill wears the floating NAV-PILL look — full capsule,
-    // the nav bar's CALMED accent fill when selected, the elevated floating
-    // container when idle, Changa One label — instead of the category
-    // rounded-24 button.
-    val navPill = AppPreferences.navPillButtonsState
-    val shape = if (navPill) RoundedCornerShape(50) else RoundedCornerShape(24.dp)
-    val fill = if (navPill) {
-        if (selected) curioActivePillFill(cat.themedAccent())
-        else curioFloatingNavContainerFor(cat.categoryBackgroundWash())
-    } else {
-        // Selected controls wear the bright accent fill; unselected get the
-        // tinted surface.
-        if (selected) cat.themedButtonFill() else deckControlSurface(cat)
-    }
-    val ink = if (navPill) {
-        if (selected) curioActivePillInk(cat.themedAccent()) else cat.categoryInk()
-    } else {
-        deckControlInk(cat, selected)
-    }
     Surface(
         onClick = onClick,
-        shape = shape,
-        color = fill,
+        shape = RoundedCornerShape(24.dp),
+        // Selected controls wear the bright accent fill; unselected get the
+        // tinted surface.
+        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
         // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = if (navPill) 4.dp else 2.dp,
+        shadowElevation = 2.dp,
         modifier = modifier
             .size(width = 54.dp, height = 112.dp)
-            .then(
-                if (navPill) Modifier.curioGlassEdge(shape)
-                // v9.x — Material buttons keep their category identity as the
-                // accent rim shine on the device primary.
-                else Modifier.categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
-            )
+            // v9.x — Material buttons keep their category identity as the
+            // accent rim shine on the device primary.
+            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
     ) {
         Column(
             modifier = Modifier
@@ -4174,26 +4128,15 @@ private fun VerticalDeckButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = ink,
+                tint = deckControlInk(cat, selected),
                 size = 22.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
-                // v208 — nav-pill mode uses the nav bar's Changa One label
-                // (13sp fits the narrow vertical pill); otherwise the stock
-                // bold label.
-                style = if (navPill) {
-                    MaterialTheme.typography.labelMedium.copy(
-                        fontFamily = ChangaOneFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 13.sp
-                    )
-                } else {
-                    MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold)
-                },
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
                 // v32 — pastel dark flips to the bright cream ([deckControlInk]).
-                color = ink,
+                color = deckControlInk(cat, selected),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -4212,40 +4155,23 @@ private fun DeckControlButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // v208 — opt-in experiment (Settings → Experiments → Nav-style buttons):
-    // the button wears the floating NAV-PILL look — full capsule, the nav
-    // bar's CALMED accent fill when selected, the elevated floating
-    // container when idle, Changa One label — instead of the category
-    // rounded-24 button.
-    val navPill = AppPreferences.navPillButtonsState
-    val shape = if (navPill) RoundedCornerShape(50) else RoundedCornerShape(24.dp)
-    val fill = if (navPill) {
-        if (selected) curioActivePillFill(cat.themedAccent())
-        else curioFloatingNavContainerFor(cat.categoryBackgroundWash())
-    } else {
-        // Solid fills — no translucent tint, no border. Selected buttons get
-        // the full accent color; unselected get a solid surface fill.
-        if (selected) cat.themedButtonFill() else deckControlSurface(cat)
-    }
-    val ink = if (navPill) {
-        if (selected) curioActivePillInk(cat.themedAccent()) else cat.categoryInk()
-    } else {
-        deckControlInk(cat, selected)
-    }
+    // Solid fills — no translucent tint, no border. Selected buttons get the
+    // full accent color with white content; unselected buttons get a solid
+    // surface fill with theme-aware accent ink (stays readable on the
+    // midnight dark surfaces).
     Surface(
         onClick = onClick,
-        shape = shape,
-        color = fill,
+        shape = RoundedCornerShape(24.dp),
+        // Selected controls wear the bright accent fill; unselected get the
+        // tinted surface.
+        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
         // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = if (navPill) 4.dp else 2.dp,
+        shadowElevation = 2.dp,
         modifier = modifier
             .height(62.dp)
-            .then(
-                if (navPill) Modifier.curioGlassEdge(shape)
-                // v9.x — Material buttons keep their category identity as the
-                // accent rim shine on the device primary.
-                else Modifier.categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
-            )
+            // v9.x — Material buttons keep their category identity as the
+            // accent rim shine on the device primary.
+            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
     ) {
         Row(
             // The icon + label group sits CENTERED in the pill box (not
@@ -4258,32 +4184,24 @@ private fun DeckControlButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = ink,
+                tint = deckControlInk(cat, selected),
                 size = 24.dp
             )
             Text(
                 text = label,
-                // v208 — nav-pill mode uses the nav bar's Changa One label
-                // (15sp, exactly like the bar); otherwise the stock label.
-                style = if (navPill) {
-                    MaterialTheme.typography.labelMedium.copy(
-                        fontFamily = ChangaOneFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 15.sp
-                    )
-                } else {
-                    MaterialTheme.typography.labelLarge.copy(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                },
+                // Text-only bump: 14sp → 16sp (icon stays 24dp) so the
+                // button labels read a little larger per user request.
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
                 // v11 — the label pairs with the icon's [themedButtonInk]
                 // (the device onPrimary in Material) instead of the old
                 // onAccent, whose Material value (onPrimaryContainer) left
                 // the text dark-on-primary in light and light-on-primary in
                 // dark — mismatched siblings on the same fill.
                 // v32 — pastel dark flips to the bright cream ([deckControlInk]).
-                color = ink,
+                color = deckControlInk(cat, selected),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -4312,29 +4230,16 @@ private fun CategoryPickerSheet(
     // the mix instead of it collapsing to the single first category. Hidden
     // lanes are filtered out so they never show as pre-selected.
     val context = LocalContext.current
-    // v198 — REGRESSION FIX: the v196 tap-to-open rewrite accidentally
-    // dropped this `val wide` (the old persistedVisible block that carried
-    // it was replaced) — CI: Unresolved reference 'wide' at the grid
-    // columns. Wide windows (tablet / landscape) spread the deck grid and
-    // cap the sheet's content width so the picker stays readable on large
-    // screens.
+    val persistedVisible = remember {
+        AppPreferences.getLastSpinCategories(context)
+            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
+    }
+    // Wide windows (tablet / landscape) spread the deck grid and cap the
+    // sheet's content width so the picker stays readable on large screens.
     val wide = windowWidthSizeClass().isWide
-    // v196 — the picker ALWAYS opens in tap-to-open (single) mode, even when
-    // the current deck is a MIX. The old v26 auto-tick reopened the sheet in
-    // multi-select with every mix lane pre-ticked — the user: "when its mixed
-    // and after that i open the category picker to select dont let me tap to
-    // select for mix let it be open the category when i tap and only tap and
-    // hold should select for next mic or override mix". Tap OPENS a category
-    // (replacing the deck with it); tap-and-hold is the ONLY way into
-    // multi-select, starting a fresh selection for the next / overriding mix.
-    var multiSelectMode by remember { mutableStateOf(false) }
-    var selectedSlugs by remember { mutableStateOf(emptySet<String>()) }
-    // v196 — the user pressed Cancel (cleared the ticks, exited multi-select)
-    // and then left via back: the cancellation must APPLY (deck reverts to
-    // the last single category) instead of the sheet closing with the old mix
-    // intact — user: "even when i cancel the selected in category picker and
-    // i tap back make it apply too". Reset whenever a fresh selection starts.
-    var mixCancelled by remember { mutableStateOf(false) }
+    // Default = tap-to-open (single). Long-press enters multi-select mode.
+    var multiSelectMode by remember { mutableStateOf(persistedVisible.size > 1) }
+    var selectedSlugs by remember { mutableStateOf(persistedVisible.map { it.id.routeSlug }.toSet()) }
     // v27k — the two pages (Original lanes / New lanes) behind the same grid,
     // and a scope for tab jumps. Same split as the full-screen picker.
     val newLanes = CurioCategories.all.filter {
@@ -4376,25 +4281,7 @@ private fun CategoryPickerSheet(
     // the old 184dp crushed the preset chips into a squished, thin row.
     val pickerHeroHeight = 208.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     ModalBottomSheet(
-        onDismissRequest = {
-            // v189 — popping the sheet back (swipe / scrim tap / back)
-            // while lanes are ticked APPLIES the mix instead of dropping
-            // the selection. v196 — a CANCELLED selection applies too (the
-            // deck reverts to the last single category — the mix is gone)
-            // instead of closing with the old mix intact: the Cancel button
-            // sets [mixCancelled], and deselecting EVERY lane while in
-            // multi-select is the same intent. A pop in single-select mode
-            // (never entered multi-select) just closes, keeping the deck.
-            when {
-                mixCancelled || (multiSelectMode && selectedSlugs.isEmpty()) ->
-                    onCategoriesSelected(emptyList())
-                multiSelectMode && selectedSlugs.isNotEmpty() ->
-                    onCategoriesSelected(
-                        categories.filter { it.id.routeSlug in selectedSlugs }
-                    )
-                else -> onDismiss()
-            }
-        },
+        onDismissRequest = onDismiss,
         sheetState = sheetState,
         // v6.6 — the full-screen category selection page wears the
         // same category tint wash as the Spin page it sits on, so
@@ -4626,10 +4513,6 @@ private fun CategoryPickerSheet(
                                     // the shadow behind them).
                                     idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f),
                                     onClick = {
-                                        // v196 — a fresh selection (preset or
-                                        // clear) cancels any pending mix-cancel
-                                        // so back applies THIS state instead.
-                                        mixCancelled = false
                                         if (preset.clearAll) {
                                             multiSelectMode = true
                                             selectedSlugs = emptySet()
@@ -4720,13 +4603,6 @@ private fun CategoryPickerSheet(
                                                 }
                                             },
                                             onLongClick = {
-                                                // v196 — long-press starts a
-                                                // FRESH mix selection (tap-to-open
-                                                // is the default; only hold
-                                                // enters multi-select). Any
-                                                // pending cancel is cleared so
-                                                // back applies this new state.
-                                                mixCancelled = false
                                                 multiSelectMode = true
                                                 if (slug !in selectedSlugs) {
                                                     selectedSlugs = selectedSlugs + slug
@@ -4766,12 +4642,6 @@ private fun CategoryPickerSheet(
                                             },
                                             onLongClick = if (comingSoon) null else {
                                                 {
-                                                    // v196 — long-press starts a
-                                                    // FRESH mix selection (hold
-                                                    // is the only way into
-                                                    // multi-select); clears any
-                                                    // pending mix-cancel.
-                                                    mixCancelled = false
                                                     multiSelectMode = true
                                                     if (slug !in selectedSlugs) {
                                                         selectedSlugs = selectedSlugs + slug
@@ -4789,72 +4659,53 @@ private fun CategoryPickerSheet(
                 }
                 // v180 — nothing sits below the category cards anymore (the
                 // "Manage categories" pill is gone entirely). Multi-select
-                // shows Mix + Cancel as a FLOATING row over the grid.
-                // v189 — the pair now lives in ONE capsule styled like the
-                // bottom nav bar (page-wash lift, 50% radius, 6dp shadow),
-                // with Mix as the accent-filled active pill inside it.
+                // shows Mix + Cancel as a FLOATING row over the grid — nav-
+                // bar-style controls with NO background capsule behind them.
                 if (multiSelectMode) {
-                    val capsuleShape = RoundedCornerShape(50)
-                    Surface(
+                    Row(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = 18.dp),
-                        shape = capsuleShape,
-                        color = curioFloatingNavContainerFor(
-                            currentCat.categoryBackgroundWash()
-                        ),
-                        shadowElevation = 6.dp
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        // Mix — a solid category pill (theme-aware fill + ink).
+                        Surface(
+                            onClick = {
+                                if (selectedSlugs.isEmpty()) return@Surface
+                                onCategoriesSelected(
+                                    categories.filter { it.id.routeSlug in selectedSlugs }
+                                )
+                            },
+                            enabled = selectedSlugs.isNotEmpty(),
+                            shape = RoundedCornerShape(50),
+                            color = currentCat.themedButtonFill(),
+                            contentColor = currentCat.themedButtonInk()
                         ) {
-                            // Mix — a solid category pill (theme-aware fill +
-                            // ink), the capsule's active-pill.
-                            Surface(
-                                onClick = {
-                                    if (selectedSlugs.isEmpty()) return@Surface
-                                    onCategoriesSelected(
-                                        categories.filter { it.id.routeSlug in selectedSlugs }
-                                    )
-                                },
-                                enabled = selectedSlugs.isNotEmpty(),
-                                shape = capsuleShape,
-                                color = currentCat.themedButtonFill(),
-                                contentColor = currentCat.themedButtonInk()
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                                ) {
-                                    CurioIcon(CurioIcons.Check, null, size = 16.dp)
-                                    Text(
-                                        text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
-                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
-                                    )
-                                }
-                            }
-                            // Cancel — plain text, no background, same height.
-                            // v196 — marks the mix as cancelled so leaving via
-                            // back APPLIES the cleared state (deck reverts to
-                            // the last single category) instead of closing
-                            // with the old mix intact.
-                            TextButton(
-                                onClick = {
-                                    multiSelectMode = false
-                                    selectedSlugs = emptySet()
-                                    mixCancelled = true
-                                },
-                                modifier = Modifier.heightIn(min = 44.dp)
-                            ) {
+                                CurioIcon(CurioIcons.Check, null, size = 16.dp)
                                 Text(
-                                    "Cancel",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = if (selectedSlugs.isEmpty()) "Mix" else "Mix · $selectedTopicCount",
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                                 )
                             }
+                        }
+                        // Cancel — plain text, no background.
+                        TextButton(
+                            onClick = {
+                                multiSelectMode = false
+                                selectedSlugs = emptySet()
+                            }
+                        ) {
+                            Text(
+                                "Cancel",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
