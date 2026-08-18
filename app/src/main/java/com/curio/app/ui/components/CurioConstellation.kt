@@ -80,6 +80,15 @@ fun CurioConstellation(
     // (the fissure gap) — the classic brain silhouette. The radial scatter
     // fills the lobe interior so the brain reads as a neural mass, not a
     // ring, and the per-lane deterministic jitter keeps positions stable.
+    // Real neurons = explored lanes (deterministic per-lane positions inside
+    // the two hemisphere lobes, filled via radial scatter so the brain reads
+    // as a neural mass). v194 — the DECORATIVE FILLER dots join them: a
+    // fixed deterministic ring of small neutral dots per lobe that completes
+    // the brain mesh even when few lanes are explored (user: "the neurons
+    // dot doesnt create the brain mesh… i told you to add extra dots for
+    // decoration and completion of the neuron mesh"). Fillers participate in
+    // the link web (so the mesh reads whole) but are NOT tappable and never
+    // show a popover — the real neurons stay the interactive data.
     val nodes = remember(explored) {
         explored.mapIndexed { index, id ->
             val total = explored.size
@@ -99,6 +108,7 @@ fun CurioConstellation(
             id to pos
         }
     }
+    val fillers = remember { brainFillerDots() }
     // Accents must resolve in COMPOSITION (themedAccent is @Composable and
     // can't run inside the Canvas draw lambda below; recomputing the small
     // map per recomposition is cheap).
@@ -135,36 +145,50 @@ fun CurioConstellation(
         ) {
             val w = size.width
             val h = size.height
+            // The neural web spans ALL dots — the decorative fillers and the
+            // real neurons together — so the mesh outlines the whole brain
+            // even when few lanes are explored. Fillers carry a side flag;
+            // real nodes split by index (first half = left lobe).
             val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
-            // Neural web: every neuron links to its 2 closest neighbours
-            // (synapses) PLUS its nearest neuron on the OTHER hemisphere
-            // (the corpus callosum bridges), deduped — drawn as gentle
-            // curves so the web reads as neural wiring, not a grid.
-            val leftCount = (nodes.size + 1) / 2
+            val allPts = fillers.map { Offset(it.pos.x * w, it.pos.y * h) } + pts
+            val allLeft = fillers.map { it.left } + nodes.indices.map { it < (nodes.size + 1) / 2 }
+            val total = allPts.size
             val links = LinkedHashSet<Pair<Int, Int>>()
-            nodes.indices.forEach { i ->
-                val nearest = nodes.indices
+            allPts.indices.forEach { i ->
+                val nearest = allPts.indices
                     .filter { it != i }
-                    .sortedBy { j -> sqDist(pts[i], pts[j]) }
+                    .sortedBy { j -> sqDist(allPts[i], allPts[j]) }
                     .take(2)
                 nearest.forEach { j -> links.add(norm(i, j)) }
-                val otherSide = nodes.indices
-                    .filter { it != i && (it < leftCount) != (i < leftCount) }
-                    .minByOrNull { j -> sqDist(pts[i], pts[j]) }
+                val otherSide = allPts.indices
+                    .filter { it != i && allLeft[it] != allLeft[i] }
+                    .minByOrNull { j -> sqDist(allPts[i], allPts[j]) }
                 if (otherSide != null) links.add(norm(i, otherSide))
             }
             links.forEach { (a, b) ->
-                drawCurvedLink(pts[a], pts[b], linkColor, 1.dp.toPx())
+                drawCurvedLink(allPts[a], allPts[b], linkColor, 1.dp.toPx())
             }
             // The midline fissure — a soft curve down the brain's centre
             // (the old straight line between two mid nodes is gone).
-            if (nodes.size >= 3) {
+            if (total >= 3) {
                 drawCurvedLink(
                     from = Offset(w * 0.5f, h * 0.24f),
                     to = Offset(w * 0.5f, h * 0.76f),
                     color = fissureColor,
                     stroke = 1.dp.toPx(),
                     sag = 0.04f
+                )
+            }
+            // Decorative fillers — small neutral dots, drawn UNDER the real
+            // neurons. They complete the mesh but carry no data: dim, no
+            // accent, no glow, no white core, never tappable.
+            val fillerColor = if (isCurioDarkTheme()) Color(0xFF8FA6BC).copy(alpha = 0.55f)
+                              else Color(0xFF5F7E9A).copy(alpha = 0.55f)
+            fillers.forEach { f ->
+                drawCircle(
+                    color = fillerColor,
+                    radius = 2.2.dp.toPx(),
+                    center = Offset(f.pos.x * w, f.pos.y * h)
                 )
             }
             nodes.forEachIndexed { i, (id, n) ->
@@ -221,6 +245,43 @@ fun CurioConstellation(
             }
         }
     }
+}
+
+/**
+ * Deterministic decorative filler dots that complete the brain mesh: a
+ * fixed ring layout per hemisphere lobe (radial 0.35 → 0.9, 5 → 9 dots per
+ * ring) with a tiny fixed-seed jitter, so the lobes read as a filled neural
+ * mass even when the user has explored few lanes. Same lobe-ellipse math as
+ * the real neurons (bulge + taper), so fillers and neurons sit on the same
+ * silhouette. Fixed seed → the decoration never moves between recompositions.
+ */
+private data class BrainFiller(val pos: Offset, val left: Boolean)
+
+private fun brainFillerDots(): List<BrainFiller> {
+    val rnd = Random(0x5EEDC0DE) // fixed — decoration never re-rolls
+    val out = mutableListOf<BrainFiller>()
+    for (side in intArrayOf(-1, 1)) {
+        val cx = 0.5f + side * 0.155f
+        val cy = 0.50f
+        val rings = intArrayOf(5, 7, 9)
+        rings.forEachIndexed { ring, count ->
+            val radial = 0.35f + ring * 0.27f // 0.35, 0.62, 0.89
+            for (i in 0 until count) {
+                val t = (i + 0.5f) / count
+                val phi = (-0.5f + t) * PI.toFloat() // -π/2 (top) .. π/2 (bottom)
+                val jx = (rnd.nextFloat() - 0.5f) * 0.05f
+                val jy = (rnd.nextFloat() - 0.5f) * 0.05f
+                out += BrainFiller(
+                    pos = Offset(
+                        cx + side * cos(phi).toFloat() * 0.135f * radial + jx,
+                        cy + sin(phi).toFloat() * 0.24f * radial + jy
+                    ),
+                    left = side < 0
+                )
+            }
+        }
+    }
+    return out
 }
 
 /** Squared distance — the link-pairing comparator. */

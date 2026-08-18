@@ -278,14 +278,24 @@ private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 24
 @Composable
 fun CurioFloatingNavBar(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v194 — while the bar is in its leave-hold phase (the route left the
+    // tab set but the bar stays composed so the selected pill can COLLAPSE
+    // with its spring), NO pill stays selected — they all glide closed. The
+    // old code forced SPIN selected on the reveal route, so leaving Home for
+    // a topic reveal made the SPIN pill POP OPEN during the hold and the bar
+    // then vanished with a pill stuck expanded ("neither it collapse").
+    collapsing: Boolean = false
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val routePrefix = currentRoute?.substringBefore("/")
     // Reveal is entered from the Shuffle deck, so keep Shuffle selected while
-    // the reveal page is open instead of leaving every tab unselected.
-    val selectedRoute = if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+    // the reveal page is open instead of leaving every tab unselected — but
+    // only while the bar is actually ON a page (see [collapsing]).
+    val selectedRoute = if (collapsing) {
+        null
+    } else if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
         CurioRoutes.SPIN
     } else {
         routePrefix

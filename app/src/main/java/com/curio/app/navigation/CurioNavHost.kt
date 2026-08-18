@@ -286,13 +286,17 @@ fun CurioNavHost(
     // When the route is a tab again the bar remounts immediately (the pill
     // expands as before); the rail keeps the instant `showBottomBar` gate
     // (rail items never expand/collapse).
+    // v194 — the hold is the collapse spring's settle time (~380ms, the
+    // 240-stiffness critically-damped family), not a fixed half-second: the
+    // pill glides fully closed and then the bar unmounts — no dead pause
+    // with the bar sitting there (user: "it stays for too long").
     var barVisible by remember { mutableStateOf(showBottomBar) }
     LaunchedEffect(showBottomBar) {
         if (showBottomBar) {
             barVisible = true
         } else {
             // Let the collapse spring + label retract finish before unmount.
-            delay(500)
+            delay(380)
             barVisible = false
         }
     }
@@ -854,6 +858,10 @@ fun CurioNavHost(
         if (!wide && barVisible && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
+                // While the bar lingers after leaving the tab set, force the
+                // collapse: NO pill stays selected (they all glide closed),
+                // so the reveal route can't keep the Spin pill popped open.
+                collapsing = !showBottomBar,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }

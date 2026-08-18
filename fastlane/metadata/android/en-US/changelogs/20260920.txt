@@ -50,6 +50,8 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Drawer + Stats: the curiosity constellation's brain mesh now reads whole — decorative filler neurons fill both hemispheres and join the neural web, so the brain shows its full shape even when few lanes are explored (the real explored-lane neurons stay the tappable ones).
+- Navigation: leaving a tab for the Topic Reveal now fully collapses the nav pill — the reveal no longer keeps the Shuffle pill popped open during the close, and the bar's collapse-hold is shorter so it doesn't linger.
 - Detail: the saved-entry hero's tear edge now reads the same as every other screen — the warm paper-colored band under the seam is gone, replaced by the same subtle dark hairline the Home, Profile, Cabinet and Settings heroes use.
 - Paper: the "Title cut lines" under headers are shorter and sit to the right of the title text — a partial right-side underline.
 - Paper: the "Hole rings" are redrawn as the real spiral-coil binding wire from the reference SVG — a foreshortened metal coil drawn over the punched holes with a tuned steel gradient and specular (the old rounded ring look is gone).

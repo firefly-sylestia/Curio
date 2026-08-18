@@ -1648,6 +1648,37 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v195 — constellation gets decorative filler neurons (the mesh reads
+  whole); nav pill fully collapses on the Topic Reveal and the hold is
+  shorter. (branch Alpha)** User: "the neruons dot doesnt create the
+  brain mesh. and i told you to add extra dots for decoration and
+  completion of the neuron mesh, and the home nav doesnt collapse fully
+  in topic reveal screen it stays for too long, neither it collapse".
+  - BRAIN MESH FILLERS (`ui/components/CurioConstellation.kt`): with few
+    explored lanes the neural web read as scattered dots, not a brain —
+    the user explicitly asked for decorative extras. A fixed
+    deterministic ring layout per hemisphere lobe (radial 0.35 → 0.89,
+    5/7/9 dots per ring, tiny fixed-seed jitter) now fills both lobes;
+    the fillers join the SAME link web as the real neurons (nearest-2
+    synapses + inter-hemispheric bridges over all dots, with real nodes
+    still splitting left/right by index), so the mesh outlines the whole
+    brain even at zero explored lanes. Fillers draw as small neutral
+    dots UNDER the real neurons (dim steel, no accent / glow / white
+    core) and are NOT tappable — the real explored neurons stay the only
+    interactive data (popover untouched).
+  - NAV COLLAPSE ON REVEAL (`ui/components/CurioBottomNav.kt` +
+    `navigation/CurioNavHost.kt`): v193 kept the bar composed for 500ms
+    after leaving the tab set so the selected pill could collapse, but
+    `CurioFloatingNavBar`'s internal `selectedRoute` mapping forces SPIN
+    selected on the reveal route — so leaving Home for a topic reveal
+    made the SPIN pill POP OPEN during the hold and the bar then
+    vanished with a pill stuck expanded ("neither it collapse"). FIX: a
+    new `collapsing` parameter — while the route is off the tab set the
+    bar forces NO selection (`selectedRoute = null`), so every pill
+    glides closed and the bar unmounts with nothing expanded. The hold
+    also dropped 500 → 380ms (the 240-stiffness critically-damped
+    collapse spring's settle time) so the bar doesn't linger ("stays
+    for too long").
 - **v194 — cut lines shorter + right-shifted; hole rings redrawn as the
   spiral-coil SVG.** User: "now we have two cut lines lets improve it even
   more. make it little more shorter and more to the right of the header
