@@ -957,7 +957,7 @@ object AppPreferences {
 
     /** Whether Home's background + bottom nav wear the category tint (experimental, default off). */
     fun isHomeTintEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_HOME_TINT, false)
+        prefs(context).getBoolean(KEY_HOME_TINT, true)
 
     fun setHomeTintEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HOME_TINT, enabled).apply()
