@@ -1,4 +1,27 @@
-# Current Request — v208: CURIO BRAIN STATS — science-based cognitive system replaces constellation save-count stars
+# Current Request — v208d: nav pill vanish syncs with the Like/Dislike appearance
+
+## Status: DONE (committed, pushed)
+
+## Request (user, verbatim)
+"the nav pill collapse is fine, but the vanishing can be done more better, like the exact moment the like and dislike appears?"
+
+## What changed
+- New shared constant `FloatingNavCollapseHoldMillis = 460` in CurioBottomNav.kt.
+- CurioNavHost: bar-unmount `delay(460)` → `delay(FloatingNavCollapseHoldMillis)`.
+- TopicRevealScreen: the Like/Dislike pill's FIRST entrance is gated on
+  `sentimentPillEntered` (flips after the same hold) — so the nav pill
+  cinches closed and the bar vanishes at the exact moment the pill slides
+  in (handoff, no overlap). Scroll hide/show unaffected.
+
+## Files
+- `ui/components/CurioBottomNav.kt` (constant)
+- `navigation/CurioNavHost.kt` (hold uses the constant)
+- `features/reveal/TopicRevealScreen.kt` (gated first entrance)
+- Docs: `app/AGENTS.md` (v208d), changelog ADD bullet, this Prompt.md.
+
+---
+
+# Previous — v208: CURIO BRAIN STATS — science-based cognitive system replaces constellation save-count stars
 
 ## Status: DONE (committed, pushed)
 

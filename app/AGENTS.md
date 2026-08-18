@@ -1761,6 +1761,16 @@ app/src/main/java/com/curio/app/
     (`is CaptureData.SoundBite` etc.); the splash wordmark's gradient
     `brush` moved from the `Text(...)` param (doesn't exist) into
     `style.copy(brush = …)`.
+  - NAV→SENTIMENT HANDOFF (v208d): user: "the nav pill collapse is
+    fine, but the vanishing can be done more better, like the exact
+    moment the like and dislike appears?". The bar's unmount hold is now
+    the shared `FloatingNavCollapseHoldMillis` (460) in CurioBottomNav;
+    CurioNavHost uses it for the bar-unmount delay, and the Topic
+    Reveal's Like/Dislike pill gates its FIRST entrance on the same
+    constant (`sentimentPillEntered` flips after the hold) — so the nav
+    pill cinches closed and the bar VANISHES at the exact moment the
+    Like/Dislike slides in (no overlap). Scroll hide/show is unaffected
+    (only the first entrance waits).
   - RING SVG v3 (v208c): user supplied `svgviewer-output (15).svg` —
     `CoilOutlineNorm` now matches it exactly: the wire starts at the
     box's bottom-LEFT corner (the v207 left hook is GONE), rises up,

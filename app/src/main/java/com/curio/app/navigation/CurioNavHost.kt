@@ -121,6 +121,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioFloatingNavBar
+import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.CurioInAppToastHost
 import com.curio.app.ui.components.CurioNavigationRail
@@ -301,7 +302,11 @@ fun CurioNavHost(
             barVisible = true
         } else {
             // Let the collapse spring + label retract finish before unmount.
-            delay(460)
+            // v208d — the hold is the shared [FloatingNavCollapseHoldMillis]:
+            // the Topic Reveal's Like/Dislike pill delays its entrance by the
+            // SAME amount, so the bar vanishes at the exact moment the pill
+            // appears (the handoff — no overlap).
+            delay(FloatingNavCollapseHoldMillis)
             barVisible = false
         }
     }

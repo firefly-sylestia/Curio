@@ -135,6 +135,7 @@ import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
@@ -596,6 +597,17 @@ fun TopicRevealScreen(
         // on scroll-up so it never covers the content being read.
         val revealScroll = rememberScrollState()
         var sentimentPillHidden by remember { mutableStateOf(false) }
+        // v208d — the Like/Dislike pill WAITS for the nav pill's collapse
+        // hold before its first entrance, so it slides in at the EXACT
+        // moment the floating nav bar vanishes (the handoff: the nav pill
+        // cinches closed and the bar unmounts, then the sentiment pill
+        // appears — no overlap of the two pills). The scroll hide/show
+        // below is unaffected — only the first entrance waits.
+        var sentimentPillEntered by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            delay(FloatingNavCollapseHoldMillis)
+            sentimentPillEntered = true
+        }
         LaunchedEffect(Unit) {
             var last = revealScroll.value
             snapshotFlow { revealScroll.value }.collect { value ->
@@ -862,7 +874,7 @@ fun TopicRevealScreen(
         // database must not shape the shuffle (pure read-only).
         if (!browseMode && resolved != null) {
             AnimatedVisibility(
-                visible = !sentimentPillHidden,
+                visible = sentimentPillEntered && !sentimentPillHidden,
                 modifier = Modifier.align(Alignment.BottomCenter),
                 enter = slideInVertically(
                     animationSpec = tween(220, easing = FastOutSlowInEasing)
