@@ -39,11 +39,12 @@ import com.curio.app.ui.theme.toHsl
  * real THREADED ring: a dark shaded hole interior with the wire drawn
  * OVER the opening. The [ringStyle] selects the look: "coil" — the
  * spiral-notebook binding wire from the user's reference SVG (v27w +
- * v197: a foreshortened ARCH rising up the left, over the top and down
- * the right — the revised SVG dropped the bottom curl — that PEEKS OUT
- * of the card's left edge like a real spiral binding instead of sitting
- * entirely inside, with a dark depth pass, a metal tube gradient and a
- * white specular — see [drawCoilRing]); "split" — a
+ * v197 + v208: a clean open hook rising up the left, over the top and
+ * down the right, with the right leg DIVING below the box through the
+ * hole and ending open — no curl-back, no blunt mid-air stop — that
+ * PEEKS OUT of the card's left edge like a real spiral binding instead
+ * of sitting entirely inside, with a dark depth pass, a metal tube
+ * gradient and a white specular — see [drawCoilRing]); "split" — a
  * closed keyring / split-ring loop (top half over paper, bottom half
  * inside the hole, split gap near the top); "oblique" — the coil
  * foreshortened at an angle, bulging out of the hole toward the viewer.
@@ -297,22 +298,20 @@ private val CoilMetalDark = listOf(
 )
 
 /**
- * The coil OUTLINE from the user's REVISED reference SVG, normalized to
- * its 73×38 bounding box: `M38 62 C38 39 54 24 76 24 C98 24 111 37
- * 111 52` — the bottom curl is gone; the wire is now a clean arch up the
- * left, over the top and down the right. Each cubic is c1/c2/end triples
- * of normalized coordinates.
+ * The coil OUTLINE from the user's LATEST reference SVG (svgviewer-output
+ * (15).svg), normalized to the 73×38 bounding box: `M38 62 C38 39 54 24
+ * 76 24 C98 24 111 37 111 52 C111 66 102 75 90 75`. The wire is a clean
+ * open hook: it starts at the bottom-LEFT corner of the box, rises up the
+ * left side, arches over the top and down the right, then the right leg
+ * DIVES below the box through the hole and ends OPEN with a round cap —
+ * the old curl-back is gone AND the leg no longer stops blunt mid-air at
+ * y=0.737. Each cubic is c1/c2/end triples of normalized coordinates.
  */
 private val CoilOutlineNorm = floatArrayOf(
-    // v206 — the protruding LEFT end now curves a little (a small hook
-    // dipping down-outward before rising into the arch) so the wire reads
-    // as wrapping around the card edge instead of ending blunt — user:
-    // "make the left end the side its out curve a little so it looks
-    // seemless connected". The rest of the arch is unchanged.
-    0.16f, 1.34f,
-    0.00f, 1.26f, 0.00f, 1.10f, 0.00f, 1.00f,
+    0.000f, 1.000f,
     0.000f, 0.395f, 0.219f, 0.000f, 0.521f, 0.000f,
-    0.822f, 0.000f, 1.000f, 0.342f, 1.000f, 0.737f
+    0.822f, 0.000f, 1.000f, 0.342f, 1.000f, 0.737f,
+    1.000f, 1.105f, 0.877f, 1.342f, 0.712f, 1.342f
 )
 
 /** The coil's specular line — `M43 57 C45 39 58 29 76 29 C92 29 103 37 106 48`. */

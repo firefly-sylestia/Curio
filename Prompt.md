@@ -33,6 +33,17 @@ Pushed. (v206 splash + v207 were pushed earlier in the session.)
 - `SplashScreen.kt`: wordmark gradient `brush` moved into
   `style.copy(brush = …)` (Text has no `brush` param).
 
+## RING SVG v3 (v208c) — pushed `d5f57f4`+1
+- User supplied `svgviewer-output (15).svg` (the new coil reference).
+  `CoilOutlineNorm` in PaperStatCard.kt now matches it EXACTLY: no left
+  hook (start at the box's bottom-left corner, round cap), arch up/over,
+  and the right leg DIVES below the box through the hole to an open end
+  at (0.712, 1.342) — the old blunt stop at (1.0, 0.737) is gone.
+- Verified numerically: start protrudes 6.6dp past the card's left edge;
+  the dive threads the hole; the open end stays inside the card.
+- Colors untouched (user: "later we will tweak its color"). The dump SVG
+  was removed from the repo (git rm).
+
 ---
 
 # Previous — v207: drawer footer float + About-behind-footer, coil left-end hook, stats sun/moon, smoother nav collapse, Like/Dislike height

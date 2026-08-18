@@ -1,4 +1,5 @@
 ADD
+- Paper: the hole-ring coil now matches the latest reference — the wire starts at the paper's left edge, arches over the top, and its right leg dives down through the hole and ends open below it (no more blunt mid-air stop).
 - Stats: a new "Your Brain Profile" card on the "Your Curiosity" page — six real cognitive dimensions (Knowledge, Memory, Expression, Focus, Consistency, Curiosity) scored from your actual activity (lanes explored, saves, words you've written, streaks, daily quests), each with a level and a science-based tip for growing it, plus your lifetime words-written line.
 - Drawer + Stats: constellation stars are now sized by KNOWLEDGE built in each lane (explores + saves + words written there) instead of just saved count — the drawer's star popover shows "N knowledge" — and a gentler sqrt scale keeps small lanes distinguishable.
 - Splash: the Curio wordmark is bigger now and wears a theme-aware gradient (bright mint → butter on the dark sky, deep rose → gold on the light cream), the tagline is larger and warmer in both themes, and a soft warm ground band fades in at the bottom of the screen.

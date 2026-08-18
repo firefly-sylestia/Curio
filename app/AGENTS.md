@@ -1761,6 +1761,15 @@ app/src/main/java/com/curio/app/
     (`is CaptureData.SoundBite` etc.); the splash wordmark's gradient
     `brush` moved from the `Text(...)` param (doesn't exist) into
     `style.copy(brush = …)`.
+  - RING SVG v3 (v208c): user supplied `svgviewer-output (15).svg` —
+    `CoilOutlineNorm` now matches it exactly: the wire starts at the
+    box's bottom-LEFT corner (the v207 left hook is GONE), rises up,
+    arches over, and the RIGHT leg DIVES below the box through the hole
+    to an open round-capped end at (0.712, 1.342) — replacing the old
+    blunt stop at (1.0, 0.737). Verified numerically: start protrudes
+    6.6dp past the card's left edge, the dive threads the hole, and the
+    open end stays inside the card. Colors untouched (user will tweak
+    later). The dump SVG was removed from the repo.
 - **v207 — drawer footer in normal flow (no float / no rows behind it),
   coil left-end hook, standalone sun/moon on the stats page, even
   smoother nav collapse, Like/Dislike exact capsule height. (branch
