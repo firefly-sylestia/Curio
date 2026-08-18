@@ -93,6 +93,8 @@ import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioPassport
+import com.curio.app.data.LaneKnowledge
+import com.curio.app.data.laneKnowledge
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -2352,6 +2354,14 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     // All-time per-lane counters from the passport (spins/reveals/explores/
     // saves/lastAt) — the "more available data" behind the map.
     val progress = remember(context) { CurioPassport.allProgress(context) }
+    // v208 — the constellation is fed by KNOWLEDGE (the same science-based
+    // stats as the Your Curiosity page): star size = the lane's knowledge
+    // score (explores + saves + words written there), glow = recency. Words
+    // come from the user's saved captures (the generation effect).
+    val allEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
+    }
+    val knowledge = remember(progress, allEntries) { laneKnowledge(progress, allEntries) }
     val lanes = remember(progress) { progress.keys.sortedBy { it.ordinal } }
     // Explored = real activity (started an explore or saved a capture).
     val explored = remember(progress) {
@@ -2359,9 +2369,9 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     }
     // v186 — the drawer now draws THE SAME constellation as the "Your
     // Curiosity" page (the shared [CurioConstellation]): explored lanes in
-    // the brain two-lobe layout, star size = saved count, all-time window
+    // the brain layout, star size = knowledge score, all-time window
     // (recentCutoff 0 → every explored lane glows recent), nearest-neighbour
-    // web + gold fissure. The grid-web "map" is gone.
+    // web. The grid-web "map" is gone.
     val exploredList = remember(progress) { lanes.filter { it in explored } }
     var selected by remember { mutableStateOf<CategoryId?>(null) }
 
@@ -2373,8 +2383,8 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
         // ── The constellation: the Stats page's brain web ───────────────
         CurioConstellation(
             explored = exploredList,
-            laneCounts = progress.mapValues { it.value.saves },
-            laneRecent = progress.mapValues { it.value.lastAt },
+            laneCounts = knowledge.mapValues { it.value.score },
+            laneRecent = knowledge.mapValues { it.value.lastAt },
             recentCutoff = 0L,
             selected = selected,
             onSelect = { selected = it },
@@ -2387,7 +2397,7 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             // card (or empty sky) to dismiss.
             popoverContent = { id ->
                 val cat = CurioCategories.byId(id)
-                val p = progress[id] ?: CurioPassport.CategoryProgress()
+                val k = knowledge[id] ?: LaneKnowledge(0, 0, 0, 0, 0L)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -2400,7 +2410,7 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        "${p.saves} saved",
+                        "${k.score} knowledge",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

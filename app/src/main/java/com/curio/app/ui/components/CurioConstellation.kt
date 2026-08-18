@@ -46,7 +46,7 @@ import kotlin.random.Random
  * arc scatter sat every star in a flat bottom band), linked by curved
  * nearest-neighbour synapses plus inter-hemispheric "corpus callosum"
  * bridges across the midline, with the gold fissure down the centre. Star
- * size = saved count; explored lanes glow when recently active. Tap a
+ * size = knowledge score; explored lanes glow when recently active. Tap a
  * neuron to select it; tap empty sky to clear.
  *
  * v202 — REDESIGNED to the HUMAN-BRAIN SIDE PROFILE (user: "why it doesnt
@@ -177,7 +177,13 @@ fun CurioConstellation(
                 val accent = accents[id] ?: Color(0xFF7FAFD8)
                 val count = laneCounts[id] ?: 0
                 val recent = (laneRecent[id] ?: 0L) >= recentCutoff
-                val r = (5.5f + kotlin.math.min(count, 60).toFloat() * 0.30f).dp.toPx()
+                // v208 — stars are sized by KNOWLEDGE score now (explores +
+                // saves + words written in the lane), which runs far higher
+                // than raw saved counts. A sqrt scale keeps small scores
+                // distinguishable and saturates gently past ~60 instead of
+                // pinning everything at max.
+                val r = (5.5f + kotlin.math.sqrt(count.coerceAtLeast(0).toFloat()) * 7f)
+                    .coerceAtMost(60f).dp.toPx()
                 val isSel = selected == id
                 drawCircle(
                     color = accent.copy(alpha = if (recent) 0.20f else 0.10f),

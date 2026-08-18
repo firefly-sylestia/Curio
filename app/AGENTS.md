@@ -1724,6 +1724,38 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v208 — CURIO BRAIN STATS: a real science-based cognitive model
+  replaces the constellation's save-count stars (user: "a fresh system of
+  my on, i want a real science based stats system that will help user
+  improve their brain in a certain ways and it shows the knowledge based
+  on the category user explored and the amout of wrting user does etc
+  etc, and this will be rplaced the category stars glow from
+  costelation").** New `data/BrainStats.kt`:
+  - PER-LANE KNOWLEDGE (`LaneKnowledge` + `laneKnowledge`): how much
+    knowledge you BUILT in each lane — explores + saves + words written
+    in that lane (`score = explores*30 + saves*40 + words/20 + spins*2`),
+    with `lastAt` driving the recent glow. Both the drawer and the Your
+    Curiosity page feed the SHARED `CurioConstellation` from this
+    (`laneCounts = knowledge scores`, `laneRecent = lastAt`) so they can
+    never drift; the drawer's floating popover now shows "N knowledge"
+    instead of "N saved".
+  - THE BRAIN PROFILE (`BrainProfile` + `BrainDimension`): six cognitive
+    dimensions, each mapped to a real learning-science mechanism —
+    Knowledge (breadth×depth of explored domains), Memory (saves+pins+
+    quotes, retrieval-practice effect), Expression (words written,
+    generation effect), Focus (explores + daily quests), Consistency
+    (best streak, spacing effect), Curiosity (spins + lanes sampled).
+    Each scored 0–100 from REAL data (passport counters, saved captures,
+    lifetime counters, streak) with a level label (Awakening → Mastered)
+    and a science-based improvement tip.
+  - WORD COUNT: `CaptureData.wordCount()` — real words across every text
+    field (journal, review, notes, field notes, captions, quotes),
+    recursive through portfolios and the wildcard notebook; voice
+    transcripts NOT counted (machine-transcribed, not user writing).
+  - UI: a new `BrainProfileCard` on the Your Curiosity page (six
+    color-coded dimension bars + levels + tips + a words-written line);
+    constellation star SIZE is now sqrt-scaled knowledge (the old linear
+    `min(count,60)` pinned everything at max once scores ran past 60).
 - **v207 — drawer footer in normal flow (no float / no rows behind it),
   coil left-end hook, standalone sun/moon on the stats page, even
   smoother nav collapse, Like/Dislike exact capsule height. (branch
