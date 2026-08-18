@@ -51,6 +51,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Build: the topic validator now accepts hyphenated category files — the Animated Movies lane (animated-movies.json → ANIMATED_MOVIES) validates instead of failing the build.
 - Paper: the "Hole rings" coil now shows FULLY — it peeks out of the card's left edge without being cut (the card surface no longer clips its own drawing), so the spiral binding reads complete.
 - Navigation: the pill bar's collapse is even calmer and cinches tighter now — the tab pills glide ~40% slower and pull in below their idle size while leaving a page, and the Like/Dislike pill + Pet Designer studio bar match the nav bar's exact size and Changa One labels.
 - Topic opening: tapping "Flow" in Films no longer opens "Flower Boy" (an album) — topics now resolve in the lane they were tapped in, and exact/base-name matches always beat loose word matches across lanes (same fix protects the capture page).

@@ -289,7 +289,11 @@ tasks.register("validateTopics") {
         val seenIds = mutableMapOf<String, String>()  // id -> first filename
         var populatedFileCount = 0
         jsonFiles.forEach { json ->
-            val expectedCategoryId = json.nameWithoutExtension.uppercase()
+            // Filename is the category SLUG (animated-movies.json); the
+            // topics' categoryId is the enum name (ANIMATED_MOVIES) — so
+            // hyphenated slugs map to underscores. Single-word filenames
+            // (films.json → FILMS) are unaffected.
+            val expectedCategoryId = json.nameWithoutExtension.uppercase().replace("-", "_")
             @Suppress("UNCHECKED_CAST")
             val topics = parser.parse(json) as? List<Map<String, Any?>>
                 ?: throw GradleException(

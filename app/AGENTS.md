@@ -1697,10 +1697,18 @@ app/src/main/java/com/curio/app/
     slug `animated-movies` + family Entertainment), `CurioColors.kt`
     (ANIMATED_MOVIES palette constants), the three exhaustive `when`s
     (CaptureEntity.kt, ExploreSession.kt, TopicRevealScreen.kt) and the
-    Entertainment quick-mix preset (DeckPresets.kt). The Gradle
-    `validateTopics` derives the expected categoryId from the FILENAME
-    (animated-movies.json → ANIMATED_MOVIES) so no validator list change
-    was needed; the topic_index builder globs all files.
+    Entertainment quick-mix preset (DeckPresets.kt). The topic_index
+    builder globs all files.
+  - VALIDATOR FIX (v200.1): the Gradle `validateTopics` derived the
+    expected categoryId as the bare uppercased FILENAME, so the first
+    hyphenated slug tripped CI — `animated-movies.json` expected
+    `ANIMATED-MOVIES` but entries carry the enum name `ANIMATED_MOVIES`.
+    The derivation now maps hyphens → underscores
+    (`uppercase().replace("-", "_")`) — single-word filenames
+    (films.json → FILMS) are unaffected. The dev-time
+    `scripts/validate_topics.js` got the same hyphen→underscore mapping
+    and `animated-movies` added to its EXPECTED_CATEGORIES list. (All
+    prior files were single-word, so this never surfaced before.)
   - CONTENT: 52 non-anime animated films moved out of films.json (948
     remaining, anime intact) into the new animated-movies.json via
     `scripts/extract_animated_from_films.py` (explicit-title list — the

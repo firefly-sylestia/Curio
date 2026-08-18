@@ -1,6 +1,27 @@
-# Current Request — v201: ring cut fix + nav pill collapse + pill-size parity
+# Current Request — v201.1: CI validator fix for hyphenated category file
 
-## Status: DONE (committed, push follows)
+## Status: DONE (committed + pushed)
+
+## Issue (user, verbatim)
+CI `validateTopics` failure: `animated-movies.json: topic 'film-wall-e-2008' categoryId 'ANIMATED_MOVIES' does not match filename 'ANIMATED-MOVIES'` + "wall e is animated movies right" — yes, Wall-E (Pixar, 2008) belongs in Animated Movies; the entry stays.
+
+## Root cause
+Gradle `validateTopics` derived the expected categoryId as the bare uppercased FILENAME (`json.nameWithoutExtension.uppercase()`), so the first hyphenated slug tripped CI: `animated-movies.json` → expected `ANIMATED-MOVIES`, but entries carry the enum name `ANIMATED_MOVIES` (underscore). All prior files were single-word, so the naive mapping never surfaced.
+
+## Fix
+- `app/build.gradle.kts` — `uppercase().replace("-", "_")` maps the slug to the enum name (films.json → FILMS unaffected).
+- `scripts/validate_topics.js` — same hyphen→underscore mapping + `animated-movies` added to EXPECTED_CATEGORIES (dev-time validator).
+- App-side loader was already correct (`TopicJsonLoader` resolves via `CategoryId.valueOf(entry.categoryId)` and `load` routes through the slug `animated-movies`).
+- Verified: `node scripts/validate_topics.js` (8222 topics / 12 files OK) and `python3 scripts/check_assets.py` (ALL FILES VALID).
+
+## Files
+- `app/build.gradle.kts`, `scripts/validate_topics.js`, `app/AGENTS.md` (v200 validator-fix note), changelog FIX bullet, this Prompt.md.
+
+---
+
+# Previous — v201: ring cut fix + nav pill collapse + pill-size parity
+
+## Status: DONE (committed + pushed, 2e53377)
 
 ## Request (user, verbatim)
 - "the 3d ring should be shouwn fully without getting cut thats what i meant"
