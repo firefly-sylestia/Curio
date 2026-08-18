@@ -1804,6 +1804,7 @@ private fun HeroCard(
                     CategoryId.ALBUMS -> "Artist"
                     CategoryId.BOOKS -> "Author"
                     CategoryId.FILMS -> "Director"
+                    CategoryId.ANIMATED_MOVIES -> "Director"
                     CategoryId.ARTWORKS -> "Painter"
                     CategoryId.DISCOVERIES -> "Discovered by"
                     else -> null

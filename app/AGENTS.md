@@ -1679,6 +1679,43 @@ app/src/main/java/com/curio/app/
     `SpinPickerRequest`) seeds `selectedCat` / `categoryFilterOpen` and
     syncs back on change — the state now survives close-and-reopen until
     the app restarts (statics die with the process).
+- **v200 — NEW CATEGORY: Animated Movies (ANIMATED_MOVIES) — a 1000+
+  lane: non-anime animation split out of Films; real films, real quick
+  facts. (branch Alpha)** User: "continue the expansion of topics and add
+  animated movies section as a ne category and separate animated movies
+  from films and make them 1000+ and anduse real quick facts and push
+  after its fully done" (+ "anime and animation movies are differnt btw").
+  - ANIME ≠ ANIMATED MOVIES (user note): the 6 anime films in films.json
+    (Akira, Grave of the Fireflies, Totoro, Princess Mononoke, Spirited
+    Away, The Boy and the Heron) STAY in Films — the new lane is
+    non-anime animation only (Disney, Pixar, DreamWorks, Illumination,
+    Blue Sky, Sony, Aardman, Laika, Don Bluth, classic US, Rankin/Bass,
+    European, Chinese, Latin American, Indian, Australian, stop-motion,
+    DTV/franchise: Barbie, Scooby-Doo, Tom & Jerry, DC/Marvel animated,
+    DisneyToon sequels).
+  - CATEGORY REGISTRATION: `Category.kt` (enum + newLanes + order +
+    slug `animated-movies` + family Entertainment), `CurioColors.kt`
+    (ANIMATED_MOVIES palette constants), the three exhaustive `when`s
+    (CaptureEntity.kt, ExploreSession.kt, TopicRevealScreen.kt) and the
+    Entertainment quick-mix preset (DeckPresets.kt). The Gradle
+    `validateTopics` derives the expected categoryId from the FILENAME
+    (animated-movies.json → ANIMATED_MOVIES) so no validator list change
+    was needed; the topic_index builder globs all files.
+  - CONTENT: 52 non-anime animated films moved out of films.json (948
+    remaining, anime intact) into the new animated-movies.json via
+    `scripts/extract_animated_from_films.py` (explicit-title list — the
+    first tag-based attempt false-positived on live-action "Pixar"-
+    tagged films like Braveheart and was reverted), then ~540 more real
+    entries authored across scripts/batch_animated_1..11.py (Disney
+    theatrical + DTV, Pixar, DreamWorks, Illumination, Blue Sky, Sony,
+    Aardman, Laika, stop-motion indie, Don Bluth + 80s/90s classics,
+    international, Chinese, franchise DTV). 591 entries total in this
+    push (1000+ top-up continues in a later pass). All ids unique across
+    the catalog (18,071 total) — validated with check_assets.py + a
+    cross-file id scan.
+  - HOUSEKEEPING: removed the root-level reference dump SVGs
+    (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
+    `footer.svg`) — the real drawer art lives in res/raw/.
 - **v198 — Home/Recents "Unexplored" tag pills wear a SHADED category
   chip; Material theme: category buttons, filter chips and ink now use
   the family tonal tones — the scheme-role amber/mint/translucent paints

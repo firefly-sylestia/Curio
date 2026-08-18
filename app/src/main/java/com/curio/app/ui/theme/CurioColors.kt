@@ -51,6 +51,7 @@ object CurioColors {
     val CategorySong     = Color(0xFF0E7490)  // Music — Songs (cyan — distinct from the indigo family)
     val CategoryRose     = Color(0xFFBE123C)  // Movies — Directors / Films
     val CategorySeries   = Color(0xFFBE185D)  // Movies — Series (pink-magenta, distinct from rose)
+    val CategoryAnimation = Color(0xFF701A75) // Movies — Animated Movies (deep fuchsia-magenta, distinct from rose/series/games)
     val CategoryAmber    = Color(0xFFB45309)  // Books — Authors / Books
     val CategoryTeal     = Color(0xFF0F766E)  // Visual Art — Painters / Artworks
     val CategorySky      = Color(0xFF0369A1)  // Science — Scientists / Discoveries
@@ -86,6 +87,7 @@ object CurioColors {
     val CategorySongInk   = Color(0xFF67E8F9)  // cyan-300
     val CategoryRoseInk   = Color(0xFFFDA4AF)
     val CategorySeriesInk = Color(0xFFF9A8D4)  // pink-300
+    val CategoryAnimationInk = Color(0xFFF5D0FE)  // fuchsia-200
     val CategoryAmberInk  = Color(0xFFFCD34D)
     val CategoryTealInk   = Color(0xFF5EEAD4)
     val CategorySkyInk    = Color(0xFF7DD3FC)
@@ -117,6 +119,7 @@ object CurioColors {
 
     /** Tinted (20% alpha) washes of the researched category accents. */
     val CategoryIndigoTint = CategoryIndigo.copy(alpha = 0.20f)
+    val CategoryAnimationTint = CategoryAnimation.copy(alpha = 0.20f)
     val CategoryAlbumTint  = CategoryAlbum.copy(alpha = 0.20f)
     val CategorySongTint   = CategorySong.copy(alpha = 0.20f)
     val CategoryRoseTint   = CategoryRose.copy(alpha = 0.20f)

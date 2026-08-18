@@ -1,40 +1,34 @@
-# Current Request — Topic resolution fixes ("Flow" → "Flower Boy") + Browse-Topics persistence
+# Current Request — Animated Movies category (v200) + housekeeping
 
 ## Status: DONE (committed + pushed to Alpha)
 
 ## Request (user, verbatim)
-"when i tap flow in topic browser movie 2024 in fimls why its opening flower boy, fix more similiar issues like this and also make the category selected and expaddned setting persistent untill restart"
+"continue the expansion of topics and add animated movies section as a ne category and separate animated movies from films and make them 1000+ and anduse real quick facts and push after its fully done" (+ "anime and animation movies are differnt btw")
 
-## What changed (v199)
+## What changed (v200)
 
-### 1. "Flow" → "Flower Boy" resolution bug (root cause)
-`TopicCatalog.findByName` scanned `CategoryId.values()` in order and returned the FIRST lane's first tolerant match. ALBUMS scans before FILMS, and "Flower Boy" contains "flow" (4-char containment tier) — so the Films reveal for "Flow" (films.json has "Flow (2024)") opened the ALBUMS topic. Even the full name "Flow (2024)" base-collided the same way.
-- `TopicCatalog.findByName` → TWO passes: strict (exact name / base-name, new `matchesSavedNameStrict` + shared `savedNameBase` helper) across ALL categories first, then the tolerant pass (containment last). An exact/base hit in any lane always beats a loose containment hit in an earlier lane.
-- `TopicRevealScreen` + `SaveCaptureScreen` → resolve within the route's own category pool FIRST (`pool.firstOrNull { it.matchesSavedName(name) }`), falling back to the global `findByName` only for legacy saved entries whose lane changed (v135).
+### 1. New category: Animated Movies (ANIMATED_MOVIES)
+- **Anime ≠ animated movies** (user note): the 6 anime films in films.json stay put (Akira, Grave of the Fireflies, Totoro, Princess Mononoke, Spirited Away, The Boy and the Heron). The new lane is non-anime animation only.
+- **Registration:** `Category.kt` (enum + newLanes + order + slug `animated-movies` + Entertainment family), `CurioColors.kt` (palette constants), the three exhaustive `when`s (CaptureEntity.kt, ExploreSession.kt, TopicRevealScreen.kt), and the Entertainment quick-mix preset (DeckPresets.kt). Gradle `validateTopics` derives expected categoryId from the filename — no validator list change needed.
+- **Separation:** `scripts/extract_animated_from_films.py` moved 52 non-anime animated films out of films.json (948 remaining) into the new animated-movies.json. First tag-based attempt false-positived (live-action "Pixar"-tagged films) and was reverted — switched to an explicit title list.
+- **Content:** ~540 more real entries authored across scripts/batch_animated_1..11.py — Disney theatrical + DTV, Pixar, DreamWorks, Illumination, Blue Sky, Sony, Aardman, Laika, stop-motion indie, Don Bluth + 80s/90s classics, classic 30s–60s + Rankin/Bass, international (French, Irish, Chinese, Latin American, Indian, Australian, Russian), and franchise DTV (Barbie, Scooby-Doo, Tom & Jerry, DC/Marvel animated, DisneyToon sequels). **591 entries total this push** — the 1000+ top-up continues in a later pass (user approved pushing at 591).
+- **Validation:** check_assets.py clean, all 18,071 ids unique across the catalog (no cross-file collisions).
 
-### 2. Browse-Topics persistence until restart
-The browser route is a plain `composable` — every reopen from the drawer creates a fresh backstack entry, so rememberSaveable reset the category selection + chip bar. New `TopicBrowserSession` (process-scoped static, same pattern as `SpinPickerRequest`) seeds `selectedCat` / `categoryFilterOpen` and syncs back on change — survives close-and-reopen until the app restarts (statics die with the process).
+### 2. Housekeeping
+- Removed root-level reference dump SVGs: `svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`, `footer.svg` (real drawer art lives in res/raw/).
 
 ## Files
-- `data/TopicCatalog.kt` — two-pass findByName, matchesSavedNameStrict, savedNameBase.
-- `features/reveal/TopicRevealScreen.kt` — category-first resolution.
-- `features/capture/SaveCaptureScreen.kt` — category-first resolution (+ import).
-- `features/database/TopicDatabaseScreen.kt` — TopicBrowserSession + seed/sync.
+- `data/Category.kt`, `ui/theme/CurioColors.kt`, `data/CaptureEntity.kt`, `data/ExploreSession.kt`, `features/reveal/TopicRevealScreen.kt`, `features/picker/DeckPresets.kt` — category registration.
+- `app/src/main/assets/topics/animated-movies.json` — 591 entries.
+- `app/src/main/assets/topics/films.json` — 948 (52 animated removed, anime intact).
+- `scripts/extract_animated_from_films.py`, `scripts/batch_animated_1..11.py` — authoring scripts.
 
 ## Docs
-- `app/AGENTS.md` — v199 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 2 FIX bullets.
+- `app/AGENTS.md` — v200 entry.
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — ADD bullet.
 - This Prompt.md.
 
-## Audit (second pass — user asked "is this audit for all?")
-Every name→topic resolution path inventoried:
-- `TopicRevealScreen` + `SaveCaptureScreen` — category-first, now ALSO tiered in-lane (strict before tolerant) so a containment match earlier in the same file can't beat a strict match later. ✓
-- `TopicCatalog.findByName` / `findByNameAcrossAll` — two-pass (strict all lanes → tolerant all lanes). ✓
-- `SpinScreen` landed-topic restore — exact `it.name == name`, in-category only. Safe.
-- `CaptureEntity.toEntry` — exact id/name in the entry's own category, faithful fallback topic built from stored data. Safe.
-- Sample entries (Cabinet/Detail/Capture) — resolved by entry id, not name. Safe.
-- CategoryId lookups (sessions, prefs, backup, spins) — exact enum-name match, no ambiguity. Safe.
-- Recents/pins/quotes/sessions/drafts — store (categoryId, topicName) pairs; the only resolution happens in the reveal/capture, both fixed. Safe.
-
-## Verification
-- Static only (no Gradle here — CI validates on push). Trace check: reveal/films/Flow → Films pool strict pass → "Flow (2024)" base-name ✓; findByName("Flow (2024)") strict pass → Films exact ✓ (albums "Flower Boy" only matches in the tolerant pass, never reached first).
+## Next steps (user's follow-up asks, queued)
+1. 3D ring on PaperStatCard: still cut at the card's left edge — make it actually peek out (needs the peek to escape the clip, not just draw at negative x).
+2. Home nav pill collapse: even smoother / collapses more.
+3. Like/Dislike button: match the text and size of the nav bar pill — same in Pet Designer.
