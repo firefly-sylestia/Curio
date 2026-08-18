@@ -90,7 +90,7 @@ fun Modifier.paperStatCardFill(
             drawPath(path, fill)
             // v27u+ — the rings sit ~4dp LEFT and ~3dp UP of the hole center
             // so they visually align above the punched opening.
-            val ringOffX = 4.dp.toPx()
+           
             val ringOffY = 3.dp.toPx()
             repeat(3) { i ->
                 val cy = size.height * (i + 1) / 4f
@@ -98,9 +98,9 @@ fun Modifier.paperStatCardFill(
                 val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
                 if (ringsOn) {
                     when (ringStyle) {
-                        "split" -> drawSplitRing(ringCenter, holeR, ink, dark)
-                        "oblique" -> drawObliqueCoil(ringCenter, holeR, ink, dark, index = i)
-                        else -> drawCoilRing(ringCenter, holeR, ink, dark)
+                        "split" -> drawSplitRing(Center, holeR, ink, dark)
+                        "oblique" -> drawObliqueCoil(Center, holeR, ink, dark, index = i)
+                        else -> drawCoilRing(Center, holeR, ink, dark)
                     }
                 } else {
                     drawPressedRim(center, holeR, ink)
