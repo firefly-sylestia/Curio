@@ -883,9 +883,16 @@ fun CurioNavHost(
         // request). The reveal registers its pill via [SentimentPillHost];
         // the wrapper Box has no pointer input, so touches pass through
         // everywhere except the pill itself.
-        SentimentPillHost.content?.let { pill ->
-            Box(Modifier.fillMaxSize()) {
-                Box(Modifier.align(Alignment.BottomCenter)) { pill() }
+        // v208f — gated on the reveal route so the pill VANISHES the moment
+        // you tap back (the route flips before the screen finishes its exit
+        // transition — the old gate waited for the screen to fully dispose,
+        // so the pill lingered: "why the like and dislike pill now staying
+        // longer… make it vanish like before just when i tap back").
+        if (isRevealRoutePrefix) {
+            SentimentPillHost.content?.let { pill ->
+                Box(Modifier.fillMaxSize()) {
+                    Box(Modifier.align(Alignment.BottomCenter)) { pill() }
+                }
             }
         }
 

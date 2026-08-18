@@ -1761,6 +1761,37 @@ app/src/main/java/com/curio/app/
     (`is CaptureData.SoundBite` etc.); the splash wordmark's gradient
     `brush` moved from the `Text(...)` param (doesn't exist) into
     `style.copy(brush = …)`.
+  - v208f — four follow-ups (user: "see the svg its inverted of what its
+    in the app youre plaing it wrngly fix it. and why th elike and dislike
+    pill now staying longer make it vanish like before just when i tap
+    back from the reveal screen… make the costeellation dots smaller they
+    are too big give it a size limit… why my drawer footer is floating??
+    please fix it and the collapsed options is sghowing behind the
+    drawer, fix it, and also cut the footer from button 44 units the
+    footer svg cut it from buttom and place it properly"):
+    - RING MIRROR: `CoilOutlineNorm`/`CoilSpecularNorm` in PaperStatCard
+      now MATCH the SVG's own `matrix(-1,0,0,1,0,0)` (the app rendered
+      the coil inverted vs the author's art): wire starts bottom-RIGHT
+      inside the hole, arches over the top, and the LEFT leg dives below
+      the box past the card's left edge to an open round-capped end.
+    - SENTIMENT PILL VANISH: the NavHost's SentimentPillHost overlay is
+      now gated on `isRevealRoutePrefix` — the pill disappears the
+      moment you tap back (route flips before the screen's exit
+      transition ends; the old gate waited for full dispose and the pill
+      lingered).
+    - CONSTELLATION DOTS: radius ramp retuned `5.5+sqrt×7` capped 60 →
+      `4.5+sqrt×2.4` capped 12dp (24dp across max) — the dots were
+      ballooning to ~120dp; now score 0→4.5dp … 10+→12dp.
+    - DRAWER FOOTER: (a) the footer Box now wears `navigationBarsPadding`
+      (the sheet is edge-to-edge with zeroed insets, so the footer's
+      bottom band hid behind the gesture bar and the planet read as
+      floating — now the art sits flush above the gesture bar; the
+      credits' own navBarPadding removed); (b) `drawer_footer.svg`
+      viewBox cut 44 units off the bottom (760 → 716) per the user's
+      explicit "cut the footer svg from the bottom 44 units". The v207
+      Column/weight structure (footer in normal flow below the list) is
+      confirmed intact — expanded sections scroll above the footer, never
+      behind it.
   - NAV→SENTIMENT HANDOFF (v208e): user (v208d attempt rejected): "no
     bro the like and dislike starting time was fine i just asked you to
     tune the navpil home one to sync properly… place the like and dislike

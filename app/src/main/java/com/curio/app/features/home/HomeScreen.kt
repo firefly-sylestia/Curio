@@ -2453,6 +2453,13 @@ private fun DrawerFooter() {
             // (the planet art reads as a smaller bottom band, the credits
             // still sit in the fade).
             .height(DrawerFooterHeight)
+            // v208f — the drawer sheet runs edge-to-edge (windowInsets
+            // zeroed), so the footer's bottom band was hiding BEHIND the
+            // system gesture bar and the planet read as FLOATING above the
+            // drawer bottom. The nav-bar inset now pads the footer content
+            // up above the gesture bar: the art sits flush, nothing is cut
+            // (user: "why my drawer footer is floating?? please fix it…").
+            .navigationBarsPadding()
     ) {
         // The art, bottom-anchored and filling the drawer's full width —
         // cropped from the top so the planet reads at the bottom end.
@@ -2478,12 +2485,13 @@ private fun DrawerFooter() {
                 )
         )
         // Version + credits, sitting in the fade at the end of the footer.
+        // (v208f — the footer Box now carries the navigationBarsPadding, so
+        // the credits no longer need their own inset.)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
                 .padding(bottom = 14.dp)
         ) {
             Text(

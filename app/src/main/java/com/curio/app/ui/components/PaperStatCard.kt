@@ -39,12 +39,13 @@ import com.curio.app.ui.theme.toHsl
  * real THREADED ring: a dark shaded hole interior with the wire drawn
  * OVER the opening. The [ringStyle] selects the look: "coil" — the
  * spiral-notebook binding wire from the user's reference SVG (v27w +
- * v197 + v208: a clean open hook rising up the left, over the top and
- * down the right, with the right leg DIVING below the box through the
- * hole and ending open — no curl-back, no blunt mid-air stop — that
- * PEEKS OUT of the card's left edge like a real spiral binding instead
- * of sitting entirely inside, with a dark depth pass, a metal tube
- * gradient and a white specular — see [drawCoilRing]); "split" — a
+ * v197 + v208 + v208f: a clean open hook MIRRORED to the author's art
+ * (start bottom-right, rising up the right side, over the top and down
+ * the left, with the left leg DIVING below the box past the card's
+ * left edge and ending open — no curl-back, no blunt mid-air stop —
+ * that PEEKS OUT of the card's left edge like a real spiral binding
+ * instead of sitting entirely inside, with a dark depth pass, a metal
+ * tube gradient and a white specular — see [drawCoilRing]); "split" — a
  * closed keyring / split-ring loop (top half over paper, bottom half
  * inside the hole, split gap near the top); "oblique" — the coil
  * foreshortened at an angle, bulging out of the hole toward the viewer.
@@ -231,9 +232,12 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color, dar
     // spiral binding sticking out of the paper, instead of sitting
     // entirely inside the card (user: "the ring should be come out from
     // the left of it like peek out from the left not entirely inside the
-    // stat card"). The hole stays centered vertically under the arch; the
-    // wire's right leg dives through it. Foreshortened to the revised
-    // reference's 73:38 aspect.
+    // stat card"). v208f — the path is MIRRORED to the SVG's own
+    // `matrix(-1,0,0,1,0,0)` (the app was rendering it inverted vs the
+    // author's art): the wire STARTS inside the hole at the right
+    // (bottom-right corner of the box), arches up over the top, and the
+    // LEFT leg dives down past the card's left edge to an open round-capped
+    // end. Foreshortened to the revised reference's 73:38 aspect.
     val coilW = holeR * 4.2f
     val coilH = coilW * (38f / 73f)
     val leftPeek = 9.dp.toPx()
@@ -299,26 +303,31 @@ private val CoilMetalDark = listOf(
 
 /**
  * The coil OUTLINE from the user's LATEST reference SVG (svgviewer-output
- * (15).svg), normalized to the 73×38 bounding box: `M38 62 C38 39 54 24
- * 76 24 C98 24 111 37 111 52 C111 66 102 75 90 75`. The wire is a clean
- * open hook: it starts at the bottom-LEFT corner of the box, rises up the
- * left side, arches over the top and down the right, then the right leg
- * DIVES below the box through the hole and ends OPEN with a round cap —
- * the old curl-back is gone AND the leg no longer stops blunt mid-air at
- * y=0.737. Each cubic is c1/c2/end triples of normalized coordinates.
+ * (15).svg), normalized to the 73×38 bounding box and MIRRORED to match
+ * the SVG's own `matrix(-1,0,0,1,0,0)` transform (v208f — the app was
+ * rendering the ring inverted vs the author's art: "see the svg its
+ * inverted of what its in the app youre plaing it wrngly"). So the wire
+ * starts at the bottom-RIGHT corner (inside the paper, near the hole),
+ * rises up the right side, arches over the top and down the LEFT side,
+ * then the LEFT leg DIVES below the box past the card's left edge and
+ * ends OPEN with a round cap — the old curl-back is gone AND the leg no
+ * longer stops blunt mid-air at y=0.737. Each cubic is c1/c2/end triples
+ * of normalized coordinates.
  */
 private val CoilOutlineNorm = floatArrayOf(
-    0.000f, 1.000f,
-    0.000f, 0.395f, 0.219f, 0.000f, 0.521f, 0.000f,
-    0.822f, 0.000f, 1.000f, 0.342f, 1.000f, 0.737f,
-    1.000f, 1.105f, 0.877f, 1.342f, 0.712f, 1.342f
+    1.000f, 1.000f,
+    1.000f, 0.395f, 0.781f, 0.000f, 0.479f, 0.000f,
+    0.178f, 0.000f, 0.000f, 0.342f, 0.000f, 0.737f,
+    0.000f, 1.105f, 0.123f, 1.342f, 0.288f, 1.342f
 )
 
-/** The coil's specular line — `M43 57 C45 39 58 29 76 29 C92 29 103 37 106 48`. */
+/** The coil's specular line — the SVG's `M43 57 C45 39 58 29 76 29 C92
+ *  29 103 37 106 48` mirrored horizontally (x → 1−x) to ride the flipped
+ *  outline's upper-LEFT curve. */
 private val CoilSpecularNorm = floatArrayOf(
-    0.068f, 0.868f,
-    0.096f, 0.395f, 0.274f, 0.132f, 0.521f, 0.132f,
-    0.740f, 0.132f, 0.890f, 0.342f, 0.932f, 0.632f
+    0.932f, 0.868f,
+    0.904f, 0.395f, 0.726f, 0.132f, 0.479f, 0.132f,
+    0.260f, 0.132f, 0.110f, 0.342f, 0.068f, 0.632f
 )
 
 /** Scales one of the normalized coil paths into [topLeft] + [w]×[h]. */

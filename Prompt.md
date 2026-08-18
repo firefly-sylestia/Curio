@@ -1,4 +1,39 @@
-# Current Request — v208e: nav pill syncs TO the Like/Dislike + pill z-index above the nav pill
+# Current Request — v208f: ring mirror, pill vanish-on-back, smaller constellation dots, drawer footer flush
+
+## Status: DONE (committed, pushed)
+
+## Request (user, verbatim)
+"see the svg its inverted of what its in the app youre plaing it wrngly fix it. and why th elike and dislike pill now staying longer make it vanish like before just when i tap back from the reveal screen. the open is fine for now. and make the costeellation dots smaller they are too big give it a size limit"
+"also please why my drawer footer is floating?? please fix it and the collapsed options is sghowing behind the drawer, fix it, and also cut the footer from button 44 units the footer svg cut it from buttom and place it properly"
+
+## What changed
+1. **Ring mirrored** — PaperStatCard CoilOutlineNorm + CoilSpecularNorm
+   flipped to match the SVG's `matrix(-1,0,0,1,0,0)`: start bottom-right
+   (inside the hole), arch over the top, LEFT leg dives past the card's
+   left edge to an open round-capped end.
+2. **Sentiment pill vanish-on-back** — NavHost SentimentPillHost overlay
+   gated on `isRevealRoutePrefix`; the pill disappears the moment you tap
+   back (route flips before the exit transition ends).
+3. **Constellation dots** — radius `4.5+sqrt(count)×2.4` capped 12dp
+   (was 5.5+sqrt×7 capped 60 → dots ballooned to ~120dp).
+4. **Drawer footer** — (a) footer Box gets `navigationBarsPadding()`
+   (sheet is edge-to-edge; the art's bottom hid behind the gesture bar
+   → floating; now flush above it; credits' own navBarPadding removed);
+   (b) `drawer_footer.svg` viewBox 760 → 716 (cut 44 units from the
+   bottom, per the user's explicit instruction). v207 structure
+   (footer in normal flow below the weight(1f) list) confirmed intact.
+
+## Files
+- `ui/components/PaperStatCard.kt` (mirrored coil + specular)
+- `navigation/CurioNavHost.kt` (pill slot gated on reveal route)
+- `ui/components/CurioConstellation.kt` (dot size limit)
+- `features/home/HomeScreen.kt` (footer navBarPadding + credits)
+- `app/src/main/res/raw/drawer_footer.svg` (viewBox 760 → 716)
+- Docs: `app/AGENTS.md` (v208f), changelog ADD bullets, this Prompt.md.
+
+---
+
+# Previous — v208e: nav pill syncs TO the Like/Dislike + pill z-index above the nav pill
 
 ## Status: DONE (committed, pushed)
 

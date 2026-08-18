@@ -1,4 +1,8 @@
 ADD
+- Drawer: the planet footer now sits flush above the gesture bar — the art is no longer cut off behind the system nav area, and the footer SVG is trimmed 44 units from the bottom so it reads as one clean band.
+- Paper: the hole-ring coil is mirrored to match the reference art — the wire now starts inside the hole on the right, arches over, and the left leg dives past the card's left edge to an open end.
+- Reveal: the Like/Dislike pill now vanishes the instant you tap back (it no longer lingers through the exit transition), while still floating ABOVE the collapsing nav pill when you arrive.
+- Stats: the constellation's stars are smaller — a real size limit keeps the dots neat instead of ballooning with high knowledge scores.
 - Reveal: the Like/Dislike pill now floats ABOVE the collapsing nav pill (it slides in on top of it, overlapping) and the nav bar vanishes at the exact moment the pill lands — the handoff reads smooth instead of two pills fighting for space.
 - Paper: the hole-ring coil now matches the latest reference — the wire starts at the paper's left edge, arches over the top, and its right leg dives down through the hole and ends open below it (no more blunt mid-air stop).
 - Stats: a new "Your Brain Profile" card on the "Your Curiosity" page — six real cognitive dimensions (Knowledge, Memory, Expression, Focus, Consistency, Curiosity) scored from your actual activity (lanes explored, saves, words you've written, streaks, daily quests), each with a level and a science-based tip for growing it, plus your lifetime words-written line.

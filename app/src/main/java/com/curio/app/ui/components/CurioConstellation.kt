@@ -182,8 +182,14 @@ fun CurioConstellation(
                 // than raw saved counts. A sqrt scale keeps small scores
                 // distinguishable and saturates gently past ~60 instead of
                 // pinning everything at max.
-                val r = (5.5f + kotlin.math.sqrt(count.coerceAtLeast(0).toFloat()) * 7f)
-                    .coerceAtMost(60f).dp.toPx()
+                // v208f — the dots were too big: the sqrt×7 ramp hit 60dp
+                // radius (~120dp across) and every explored star ballooned.
+                // Now a gentler ramp capped at 12dp radius (24dp across):
+                // score 0 → 4.5dp, 1 → 6.9, 4 → 9.3, 9 → 11.7, 10+ → 12
+                // (user: "make the costeellation dots smaller they are too
+                // big give it a size limit").
+                val r = (4.5f + kotlin.math.sqrt(count.coerceAtLeast(0).toFloat()) * 2.4f)
+                    .coerceAtMost(12f).dp.toPx()
                 val isSel = selected == id
                 drawCircle(
                     color = accent.copy(alpha = if (recent) 0.20f else 0.10f),
