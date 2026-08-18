@@ -122,6 +122,7 @@ import com.curio.app.data.derivedDecadeTag
 import com.curio.app.data.isMusicTopic
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
+import com.curio.app.data.matchesSavedNameStrict
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
@@ -228,12 +229,15 @@ fun TopicRevealScreen(
         // 2024 film) opened "Flower Boy" (an album) because ALBUMS scans
         // before FILMS and "flower" contains "flow" (and even the full
         // name "Flow (2024)" base-collided the same way). The category
-        // pool now owns the match (exact → base-name → containment, see
-        // matchesSavedName); the global lookup stays only as the legacy
-        // saved-entry fallback (v135: an old entry whose lane changed must
-        // still resolve instead of hanging on "Loading…").
+        // pool owns the match, TIERED exactly like findByName: strict
+        // (exact / base-name) hits before tolerant (containment) hits, so
+        // a loose match earlier in the file can't beat a precise one later
+        // in the same lane either. The global lookup stays only as the
+        // legacy saved-entry fallback (v135: an old entry whose lane
+        // changed must still resolve instead of hanging on "Loading…").
         val pool = TopicJsonLoader.load(cat.id)
-        value = pool.firstOrNull { it.matchesSavedName(topicName) }
+        value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
+            ?: pool.firstOrNull { it.matchesSavedName(topicName) }
             ?: TopicCatalog.findByName(topicName)
     }
 

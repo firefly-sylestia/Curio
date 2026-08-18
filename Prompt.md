@@ -26,5 +26,15 @@ The browser route is a plain `composable` — every reopen from the drawer creat
 - `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 2 FIX bullets.
 - This Prompt.md.
 
+## Audit (second pass — user asked "is this audit for all?")
+Every name→topic resolution path inventoried:
+- `TopicRevealScreen` + `SaveCaptureScreen` — category-first, now ALSO tiered in-lane (strict before tolerant) so a containment match earlier in the same file can't beat a strict match later. ✓
+- `TopicCatalog.findByName` / `findByNameAcrossAll` — two-pass (strict all lanes → tolerant all lanes). ✓
+- `SpinScreen` landed-topic restore — exact `it.name == name`, in-category only. Safe.
+- `CaptureEntity.toEntry` — exact id/name in the entry's own category, faithful fallback topic built from stored data. Safe.
+- Sample entries (Cabinet/Detail/Capture) — resolved by entry id, not name. Safe.
+- CategoryId lookups (sessions, prefs, backup, spins) — exact enum-name match, no ambiguity. Safe.
+- Recents/pins/quotes/sessions/drafts — store (categoryId, topicName) pairs; the only resolution happens in the reveal/capture, both fixed. Safe.
+
 ## Verification
-- Static only (no Gradle here — CI validates on push). Trace check: reveal/films/Flow → Films pool matchesSavedName("Flow") → "Flow (2024)" base-name match ✓; findByName("Flow (2024)") strict pass → Films "Flow (2024)" exact ✓ (albums "Flower Boy" only matches in the tolerant pass, never reached first).
+- Static only (no Gradle here — CI validates on push). Trace check: reveal/films/Flow → Films pool strict pass → "Flow (2024)" base-name ✓; findByName("Flow (2024)") strict pass → Films exact ✓ (albums "Flower Boy" only matches in the tolerant pass, never reached first).

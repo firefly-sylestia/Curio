@@ -1666,7 +1666,10 @@ app/src/main/java/com/curio/app/
       tolerant pass (containment still last). An exact/base hit in any
       lane always beats a loose containment hit in an earlier lane.
     - `TopicRevealScreen` + `SaveCaptureScreen` now resolve within the
-      route's own category pool FIRST (`pool.firstOrNull { it.matchesSavedName(name) }`),
+      route's own category pool FIRST, TIERED like `findByName` — strict
+      (`pool.firstOrNull { it.matchesSavedNameStrict(name) }`) before
+      tolerant (`matchesSavedName`), so a loose containment match earlier
+      in the same file can't beat a precise one later in the lane either —
       falling back to the global `findByName` only for legacy saved
       entries whose lane changed (v135).
   - BROWSE-TOPICS PERSISTENCE: the browser is a plain `composable`, so
