@@ -163,6 +163,7 @@ import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.lightAccentTint
+import com.curio.app.ui.theme.materialThemeOn
 import com.curio.app.ui.theme.oklabGradientStops
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.pastelFillInk
@@ -676,8 +677,19 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // v81 — dark: the deck accent resolves its dark mixed shade (resolved
     // outside the remember — it's not a @Composable context).
     val darkMode = isCurioDarkTheme()
-    val deckAccent = remember(deckAccents, pastelMode, darkMode) {
-        CurioMixedDeck.mixedDeckAccent(deckAccents, pastel = pastelMode, dark = darkMode)
+    // v190 — Material: a MIXED deck wears ONE material color — the scheme
+    // primary (user: "make it the material color when they get mixed") —
+    // instead of a blend; single lanes keep their muted family fill.
+    val materialPrimary = if (materialThemeOn && activeCatIds.distinct().size > 1) {
+        MaterialTheme.colorScheme.primary
+    } else null
+    val deckAccent = remember(deckAccents, pastelMode, darkMode, materialPrimary) {
+        CurioMixedDeck.mixedDeckAccent(
+            deckAccents,
+            pastel = pastelMode,
+            dark = darkMode,
+            materialPrimary = materialPrimary
+        )
     }
 
     // ── Mixed-deck identity (v5.13) ───────────────────────────────────────
@@ -732,7 +744,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             )
         }
     } else {
-        CurioMixedDeck.mixedDeckGradient(deckAccents)
+        CurioMixedDeck.mixedDeckGradient(deckAccents, materialPrimary = materialPrimary)
     }
     val deckCat = remember(activeCatIds, deckAccent, activeCategory) {
         if (isMixedDeck) {

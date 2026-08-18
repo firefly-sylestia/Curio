@@ -50,6 +50,10 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Material theme: in pastel mode the deck's main card and fills now soften to pastels like the rest of the app (the material family colors were staying full-strength).
+- Material theme: a mixed deck now wears the theme's single primary color instead of a blended mix color.
+- Material theme: the light-mode adaptive hero reads crisp again — the banner wears the rich material family color with dark title text and glyphs instead of the washed-out pale look.
+- Material theme: the nav bar now uses proper Material 3 colors — a neutral container with a soft indicator instead of the muddy per-lane pill.
 - Navigation: switching tabs now gives a light haptic tick — on the bottom pill bar, the wide-window rail, the Topic Reveal Like/Dislike pill and the Pet Designer studio bar.
 - Spin: the picker's Mix + Cancel now sit in ONE floating capsule styled like the bottom nav bar (page-tint lift, rounded, soft shadow), and popping the sheet back (swipe / scrim / back) APPLIES the mix instead of silently dropping your selection — the filter sheet does the same: pop back with chips ticked applies the filters.
 - Drawer: the footer planet art is slimmer (150dp vs 210dp) so it reads as a small bottom band instead of a big block.

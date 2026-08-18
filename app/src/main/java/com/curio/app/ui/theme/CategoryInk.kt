@@ -177,6 +177,9 @@ fun CurioCategory.heroHeaderInk(): Color {
     // v81 — dark mode always reads cream-white on the dark banner (the same
     // blend the shared rose heroes use), never the tinted light twin.
     if (isCurioDarkTheme()) return pastelFillInk(themedAccent())
+    // v190 — Material light: dark ink on the rich family banner (the pale
+    // container + near-white ink washed out — user verdict).
+    if (materialThemeOn) return materialHeroInk()
     // Light: the pastel-aware [onAccent].
     return onAccent()
 }

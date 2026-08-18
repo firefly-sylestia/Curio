@@ -512,12 +512,17 @@ object CurioGradients {
         // v185 — Material theme: the muted family fill over the NEUTRAL
         // scheme background (M3: surfaces stay neutral, one restrained
         // accent family per lane — no vivid per-lane gradients).
+        // v190 — pastel mode softens the material family fill to its
+        // pastel twin too (user: the material main card colors are good,
+        // but in pastel mode they aren't — they must follow the pastel
+        // story like every other card).
         if (materialThemeOn) {
             val dark = isCurioDarkTheme()
             // accent is a raw Color here (not a CurioCategory) — resolve its
             // muted family tone directly (the CI fix: materialAccentFor is a
             // CurioCategory extension and won't take a Color receiver).
-            val familyStart = materialFamilyFor(accent).fill(dark)
+            val family = materialFamilyFor(accent).fill(dark)
+            val familyStart = if (AppPreferences.pastelColorsState) pastelAccent(family, dark) else family
             val start = lerp(familyStart, Color.Black, if (dark) 0.08f else 0.03f)
             val end = MaterialTheme.colorScheme.background
             return listOf(start, lerp(start, end, 0.30f))
@@ -566,12 +571,14 @@ object CurioGradients {
     fun heroBlendGradient(accent: Color): List<Color> {
         // v185 — Material theme: a quiet two-tone family gradient over the
         // neutral scheme background (no golden companion, no vivid crown).
+        // v190 — pastel mode softens the family fill like the card fills.
         if (materialThemeOn) {
             val dark = isCurioDarkTheme()
             // accent is a raw Color — see cardGradient's material branch.
             val family = materialFamilyFor(accent).fill(dark)
-            val crown = lerp(family, Color.White, if (dark) 0.05f else 0.10f)
-            return listOf(crown, family, MaterialTheme.colorScheme.background)
+            val base = if (AppPreferences.pastelColorsState) pastelAccent(family, dark) else family
+            val crown = lerp(base, Color.White, if (dark) 0.05f else 0.10f)
+            return listOf(crown, base, MaterialTheme.colorScheme.background)
         }
         val pastel = AppPreferences.pastelColorsState
         val dark = isCurioDarkTheme()
@@ -719,17 +726,27 @@ object CurioMixedDeck {
      * twin ([pastelAccent]) — airy pastels in light mode, muted deep pastels
      * in dark.
      */
-    fun mixedDeckAccent(accents: List<Color>, pastel: Boolean = false, dark: Boolean = false): Color {
-        // v185 — Material theme: every lane collapses to its muted M3 family
-        // and the mix blends the FAMILY tones (perceptual centroid), so a
-        // multi-category deck reads as restrained M3 tones, never a vivid
-        // rainbow.
+    fun mixedDeckAccent(
+        accents: List<Color>,
+        pastel: Boolean = false,
+        dark: Boolean = false,
+        // v190 — Material: the scheme primary a MIXED deck wears instead of
+        // a blend (the caller resolves it in composition; null keeps the
+        // family-tone centroid fallback for non-material callers).
+        materialPrimary: Color? = null
+    ): Color {
+        // v185 — Material theme: every lane collapses to its muted M3 family.
+        // v190 — a MIXED deck wears ONE material color — the scheme primary
+        // (user: "make it the material color when they get mixed") — never a
+        // family-tone blend. Pastel mode softens the resolved fill to its
+        // pastel twin like the rest of the app.
         if (materialThemeOn) {
             val d = accents.distinct()
             if (d.isEmpty()) return CurioColors.CategoryCoral
             val families = d.map { materialFamilyFor(it) }.distinct()
-            if (families.size == 1) return families.first().fill(dark)
-            return oklabCentroid(families.map { it.fill(dark) })
+            val raw = if (families.size == 1) families.first().fill(dark)
+                      else materialPrimary ?: oklabCentroid(families.map { it.fill(dark) })
+            return if (pastel) pastelAccent(raw, dark) else raw
         }
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
@@ -767,26 +784,24 @@ object CurioMixedDeck {
      * color family per deck, no light seams on dark cards.
      */
     @Composable
-    fun mixedDeckGradient(accents: List<Color>): List<Color> {
+    fun mixedDeckGradient(accents: List<Color>, materialPrimary: Color? = null): List<Color> {
         // Color is a value class — value-based equality means distinct() alone
         // dedupes (toArgb() isn't part of the Compose BOM resolved here).
         val distinct = accents.distinct()
-        // v185 — Material theme: blend the muted FAMILY tones (no vivid
-        // multi-accent sweep — M3 restraint).
+        // v185 — Material theme: lanes collapse to their muted M3 families.
+        // v190 — a MIXED deck wears ONE material color — the scheme primary
+        // (user verdict) — rendered as the standard quiet card gradient, so
+        // the multi-hue family sweep is gone. Pastel softening happens inside
+        // [CurioGradients.cardGradient].
         if (materialThemeOn) {
             val dark = isCurioDarkTheme()
-            if (distinct.size <= 1) {
-                return CurioGradients.cardGradient(mixedDeckAccent(distinct, dark = dark))
+            val families = distinct.map { materialFamilyFor(it) }.distinct()
+            val raw = when {
+                families.isEmpty() -> CurioColors.CategoryCoral
+                families.size == 1 -> families.first().fill(dark)
+                else -> materialPrimary ?: oklabCentroid(families.map { it.fill(dark) })
             }
-            val fam = distinct.map { materialFamilyFor(it) }.distinct().take(4)
-            val stops = mutableListOf<Color>()
-            fam.forEachIndexed { i, f ->
-                if (i == 0) stops.add(f.fill(dark))
-                if (i < fam.size - 1) {
-                    stops.addAll(oklabGradientStops(f.fill(dark), fam[i + 1].fill(dark), steps = 7).drop(1))
-                }
-            }
-            return stops
+            return CurioGradients.cardGradient(raw)
         }
         val pastel = AppPreferences.pastelColorsState
         val dark = isCurioDarkTheme()

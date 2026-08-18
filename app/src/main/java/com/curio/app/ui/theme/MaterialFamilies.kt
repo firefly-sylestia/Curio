@@ -145,15 +145,41 @@ fun CurioCategory.materialInk(): Color {
     }
 }
 
-/** Torn-hero banner fill under the Material theme. */
+/**
+ * Torn-hero banner fill under the Material theme.
+ *
+ * DARK keeps the scheme containers (deep T30 tones — crisp under the light
+ * ink). LIGHT — v190: the pale T90 containers washed out under the old
+ * near-white ink (user verdict: "washed out along with the glyphs and the
+ * texts"), so the banner now wears the RICH family color — the family
+ * fill lifted to a deep pastel (lightness 0.70, saturation held) — paired
+ * with the dark [materialHeroInk]. The material hue stays; the hero reads.
+ */
 @Composable
-fun CurioCategory.materialHeaderAccent(): Color =
-    when (materialFamily()) {
-        MaterialFamily.ROSE -> MaterialTheme.colorScheme.secondaryContainer
-        MaterialFamily.GREEN -> MaterialTheme.colorScheme.tertiaryContainer
-        MaterialFamily.NEUTRAL -> MaterialTheme.colorScheme.surfaceContainerHighest
-        else -> materialFamily().headerFill(isCurioDarkTheme())
+fun CurioCategory.materialHeaderAccent(): Color {
+    if (isCurioDarkTheme()) {
+        return when (materialFamily()) {
+            MaterialFamily.ROSE -> MaterialTheme.colorScheme.secondaryContainer
+            MaterialFamily.GREEN -> MaterialTheme.colorScheme.tertiaryContainer
+            MaterialFamily.NEUTRAL -> MaterialTheme.colorScheme.surfaceContainerHighest
+            else -> materialFamily().headerFill(true)
+        }
     }
+    val fill = materialFamily().fill(false)
+    val a = toHsl(fill)
+    return fromHsl(a.h, a.s.coerceAtMost(0.55f), 0.70f)
+}
+
+/**
+ * v190 — dark ink that reads on the LIGHT-mode [materialHeaderAccent]
+ * banner: a deep same-hue twin of the family color (the app's light-mode
+ * deep-ink language, [readableLightInk]). Pairs with the rich family
+ * banner — the old near-white container ink vanished on the pale T90
+ * containers (user verdict).
+ */
+@Composable
+fun CurioCategory.materialHeroInk(): Color =
+    readableLightInk(materialFamily().fill(false))
 
 // Convenience gate — is the proper M3 Material theme toggle on?
 internal val materialThemeOn: Boolean

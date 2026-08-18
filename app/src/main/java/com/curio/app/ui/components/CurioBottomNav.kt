@@ -55,6 +55,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.materialThemeOn
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
 
@@ -573,6 +574,10 @@ fun CurioNavigationRail(
  */
 @Composable
 private fun curioNavContainerColor(routePrefix: String?): Color {
+    // v190 — Material theme: the M3 nav container role (neutral surface) —
+    // the page wash collapses (M3: navigation lives on surfaceContainer,
+    // not per-page tints).
+    if (materialThemeOn) return MaterialTheme.colorScheme.surfaceContainer
     val target = when (routePrefix) {
         // Fall back to the theme BACKGROUND (not surface): when a page
         // publishes no wash its own background IS `colorScheme.background`
@@ -619,6 +624,9 @@ internal fun curioFloatingNavContainer(routePrefix: String?): Color =
  */
 @Composable
 internal fun curioFloatingNavContainerFor(wash: Color): Color {
+    // v190 — Material theme: the M3 nav container role instead of the
+    // page-tinted lift.
+    if (materialThemeOn) return MaterialTheme.colorScheme.surfaceContainer
     if (isCurioDarkTheme()) return MaterialTheme.colorScheme.surfaceContainerHigh
     return lerp(wash, MaterialTheme.colorScheme.surfaceContainerHigh, 0.30f)
 }
@@ -661,6 +669,10 @@ private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePref
  */
 @Composable
 private fun curioActivePillFill(accent: Color?): Color {
+    // v190 — Material theme: the M3 navigation indicator — the scheme's
+    // muted secondaryContainer (no per-lane colors in the bar; user:
+    // "fix the nav bar material color as they are bad").
+    if (materialThemeOn) return MaterialTheme.colorScheme.secondaryContainer
     if (accent != null) {
         if (!isCurioDarkTheme() && !AppPreferences.pastelColorsState) {
             val a = toHsl(accent)
@@ -676,6 +688,8 @@ private fun curioActivePillFill(accent: Color?): Color {
  *  the plain-page fallback (proper M3 pair, guaranteed contrast). */
 @Composable
 private fun curioActivePillInk(accent: Color?): Color {
+    // v190 — Material theme: onSecondaryContainer on the M3 indicator.
+    if (materialThemeOn) return MaterialTheme.colorScheme.onSecondaryContainer
     if (accent != null) return pastelFillInk(accent)
     return MaterialTheme.colorScheme.onSecondaryContainer
 }
