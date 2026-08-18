@@ -362,6 +362,11 @@ object AppPreferences {
     // paper under-sheet (the extra layered lip below the seam) is an opt-in
     // experiment in Settings → Experiments → Paper & headers.
     var heroTearSheetState by mutableStateOf(false)
+    // v208 — experiment: the Spin Categories/Filter buttons (and their
+    // vertical variants) wear the floating NAV-PILL look (capsule, calmed
+    // accent active fill, elevated container) instead of the category
+    // rounded-24 buttons. Default OFF.
+    var navPillButtonsState by mutableStateOf(false)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
     var homeTintState by mutableStateOf(false)
@@ -620,6 +625,7 @@ object AppPreferences {
         paperStatTearState = isPaperStatTearEnabled(context)
         pillGlowSubtleState = isPillGlowSubtleEnabled(context)
         heroTearSheetState = isHeroTearSheetEnabled(context)
+        navPillButtonsState = isNavPillButtonsEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
         homeTintFollowLaneState = isHomeTintFollowLaneEnabled(context)
@@ -910,6 +916,7 @@ object AppPreferences {
     private const val KEY_HOME_TINT_CATEGORY = "home_tint_category"
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
     private const val KEY_HEADER_DEEP = "header_deep"
+    private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -955,6 +962,15 @@ object AppPreferences {
     fun setHomeTintEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_HOME_TINT, enabled).apply()
         homeTintState = enabled
+    }
+
+    /** Whether the Spin Categories/Filter buttons wear the nav-pill look (experimental, default off). */
+    fun isNavPillButtonsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_NAV_PILL_BUTTONS, false)
+
+    fun setNavPillButtonsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_NAV_PILL_BUTTONS, enabled).apply()
+        navPillButtonsState = enabled
     }
 
     /** Whether the Home quest hero ALSO wears the tint (experimental, default off). */

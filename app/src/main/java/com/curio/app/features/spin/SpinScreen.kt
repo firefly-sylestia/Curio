@@ -145,10 +145,13 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
+import com.curio.app.ui.components.curioActivePillFill
+import com.curio.app.ui.components.curioActivePillInk
 import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -4127,19 +4130,40 @@ private fun VerticalDeckButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
+    // v208 — opt-in experiment (Settings → Experiments → Nav-style buttons):
+    // the vertical pill wears the floating NAV-PILL look — full capsule,
+    // the nav bar's CALMED accent fill when selected, the elevated floating
+    // container when idle, Changa One label — instead of the category
+    // rounded-24 button.
+    val navPill = AppPreferences.navPillButtonsState
+    val shape = if (navPill) RoundedCornerShape(50) else RoundedCornerShape(24.dp)
+    val fill = if (navPill) {
+        if (selected) curioActivePillFill(cat.themedAccent())
+        else curioFloatingNavContainerFor(cat.categoryBackgroundWash())
+    } else {
         // Selected controls wear the bright accent fill; unselected get the
         // tinted surface.
-        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
+        if (selected) cat.themedButtonFill() else deckControlSurface(cat)
+    }
+    val ink = if (navPill) {
+        if (selected) curioActivePillInk(cat.themedAccent()) else cat.categoryInk()
+    } else {
+        deckControlInk(cat, selected)
+    }
+    Surface(
+        onClick = onClick,
+        shape = shape,
+        color = fill,
         // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = 2.dp,
+        shadowElevation = if (navPill) 4.dp else 2.dp,
         modifier = modifier
             .size(width = 54.dp, height = 112.dp)
-            // v9.x — Material buttons keep their category identity as the
-            // accent rim shine on the device primary.
-            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
+            .then(
+                if (navPill) Modifier.curioGlassEdge(shape)
+                // v9.x — Material buttons keep their category identity as the
+                // accent rim shine on the device primary.
+                else Modifier.categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
+            )
     ) {
         Column(
             modifier = Modifier
@@ -4150,15 +4174,26 @@ private fun VerticalDeckButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = deckControlInk(cat, selected),
+                tint = ink,
                 size = 22.dp
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                // v208 — nav-pill mode uses the nav bar's Changa One label
+                // (13sp fits the narrow vertical pill); otherwise the stock
+                // bold label.
+                style = if (navPill) {
+                    MaterialTheme.typography.labelMedium.copy(
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 13.sp
+                    )
+                } else {
+                    MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold)
+                },
                 // v32 — pastel dark flips to the bright cream ([deckControlInk]).
-                color = deckControlInk(cat, selected),
+                color = ink,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -4177,23 +4212,40 @@ private fun DeckControlButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Solid fills — no translucent tint, no border. Selected buttons get the
-    // full accent color with white content; unselected buttons get a solid
-    // surface fill with theme-aware accent ink (stays readable on the
-    // midnight dark surfaces).
+    // v208 — opt-in experiment (Settings → Experiments → Nav-style buttons):
+    // the button wears the floating NAV-PILL look — full capsule, the nav
+    // bar's CALMED accent fill when selected, the elevated floating
+    // container when idle, Changa One label — instead of the category
+    // rounded-24 button.
+    val navPill = AppPreferences.navPillButtonsState
+    val shape = if (navPill) RoundedCornerShape(50) else RoundedCornerShape(24.dp)
+    val fill = if (navPill) {
+        if (selected) curioActivePillFill(cat.themedAccent())
+        else curioFloatingNavContainerFor(cat.categoryBackgroundWash())
+    } else {
+        // Solid fills — no translucent tint, no border. Selected buttons get
+        // the full accent color; unselected get a solid surface fill.
+        if (selected) cat.themedButtonFill() else deckControlSurface(cat)
+    }
+    val ink = if (navPill) {
+        if (selected) curioActivePillInk(cat.themedAccent()) else cat.categoryInk()
+    } else {
+        deckControlInk(cat, selected)
+    }
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
-        // Selected controls wear the bright accent fill; unselected get the
-        // tinted surface.
-        color = if (selected) cat.themedButtonFill() else deckControlSurface(cat),
+        shape = shape,
+        color = fill,
         // v27q — flat 2dp: selection reads through the solid accent fill.
-        shadowElevation = 2.dp,
+        shadowElevation = if (navPill) 4.dp else 2.dp,
         modifier = modifier
             .height(62.dp)
-            // v9.x — Material buttons keep their category identity as the
-            // accent rim shine on the device primary.
-            .categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
+            .then(
+                if (navPill) Modifier.curioGlassEdge(shape)
+                // v9.x — Material buttons keep their category identity as the
+                // accent rim shine on the device primary.
+                else Modifier.categoryEdgeShine(RoundedCornerShape(24.dp), accent = if (selected) cat.themedAccent() else null)
+            )
     ) {
         Row(
             // The icon + label group sits CENTERED in the pill box (not
@@ -4206,24 +4258,32 @@ private fun DeckControlButton(
         ) {
             CurioIcon(
                 icon, null,
-                tint = deckControlInk(cat, selected),
+                tint = ink,
                 size = 24.dp
             )
             Text(
                 text = label,
-                // Text-only bump: 14sp → 16sp (icon stays 24dp) so the
-                // button labels read a little larger per user request.
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold
-                ),
+                // v208 — nav-pill mode uses the nav bar's Changa One label
+                // (15sp, exactly like the bar); otherwise the stock label.
+                style = if (navPill) {
+                    MaterialTheme.typography.labelMedium.copy(
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 15.sp
+                    )
+                } else {
+                    MaterialTheme.typography.labelLarge.copy(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                },
                 // v11 — the label pairs with the icon's [themedButtonInk]
                 // (the device onPrimary in Material) instead of the old
                 // onAccent, whose Material value (onPrimaryContainer) left
                 // the text dark-on-primary in light and light-on-primary in
                 // dark — mismatched siblings on the same fill.
                 // v32 — pastel dark flips to the bright cream ([deckControlInk]).
-                color = deckControlInk(cat, selected),
+                color = ink,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

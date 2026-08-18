@@ -701,7 +701,9 @@ private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePref
  * Home-only now.
  */
 @Composable
-private fun curioActivePillFill(accent: Color?): Color {
+// v208 — internal (not private): the Spin experiment reuses the nav pill's
+// CALMED accent fill + ink for the nav-style Categories/Filter buttons.
+internal fun curioActivePillFill(accent: Color?): Color {
     // v190 — Material theme: the M3 navigation indicator — the scheme's
     // muted secondaryContainer (no per-lane colors in the bar; user:
     // "fix the nav bar material color as they are bad").
@@ -720,7 +722,8 @@ private fun curioActivePillFill(accent: Color?): Color {
  *  deep/light twin on a category fill, the theme's onSecondaryContainer on
  *  the plain-page fallback (proper M3 pair, guaranteed contrast). */
 @Composable
-private fun curioActivePillInk(accent: Color?): Color {
+// v208 — internal (see [curioActivePillFill]).
+internal fun curioActivePillInk(accent: Color?): Color {
     // v190 — Material theme: onSecondaryContainer on the M3 indicator.
     if (materialThemeOn) return MaterialTheme.colorScheme.onSecondaryContainer
     if (accent != null) return pastelFillInk(accent)
