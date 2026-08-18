@@ -50,6 +50,7 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Navigation: leaving a tab (opening Profile, a settings page, the Topic Reveal…) now glides the selected pill closed with the same spring it expands with — the pill no longer vanishes the instant the page opens.
 - Spin: the shuffle card no longer shows the topic's year pill — the year reads only on the Topic Reveal page (the byline pill stays on the card).
 - Drawer: the curiosity constellation is now a brain neural web — explored lanes sit as neurons in two hemisphere lobes, linked by curved synaptic connections with inter-hemispheric bridges, instead of the old flat scatter.
 - Drawer: tapping a neuron shows a small floating card with the lane and its saved count (the big panel below is gone), and the drawer is a touch wider so the brain has room to breathe.

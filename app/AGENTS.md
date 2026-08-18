@@ -1648,6 +1648,22 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v193 — nav pill COLLAPSES when leaving a tab (was vanishing).** User:
+  "the home nav pill should collapse just the way it expands when i back
+  from home… it still just vanishes instead of collapse vanishing". ROOT
+  CAUSE: the floating bar was composed only while
+  `routePrefix in CurioRoutes.bottomNavRoutePrefixes` (the `showBottomBar`
+  gate in CurioNavHost), so navigating to a non-tab page (Profile,
+  settings sub-pages, the Topic Reveal…) unmounted the WHOLE bar the
+  instant the route changed — the expanded pill never got a chance to run
+  its collapse spring and simply disappeared. FIX: the bar's composition
+  now gates on a `barVisible` state that stays true for 500ms after the
+  route leaves the tab set (`LaunchedEffect(showBottomBar)` + `delay(500)`
+  — the pill's collapse spring + label retract settle in ~450ms), so the
+  deselected pill glides closed with the SAME springs it expands with,
+  then the bar unmounts. Returning to a tab cancels the pending delay and
+  remounts instantly (no flicker, pill expands as before). The wide-window
+  rail keeps the instant `showBottomBar` gate (rail items never expand).
 - **v192 — shuffle main card drops the year pill (reveal keeps it).**
   User: "in shuffle main card dont show the year pill just inside the
   topic reveal". The Spin ticket's top-left pill row (v141) was byline +

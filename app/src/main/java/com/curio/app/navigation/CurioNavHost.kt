@@ -276,6 +276,26 @@ fun CurioNavHost(
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
     val showBottomBar =
         routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+    // v193 — the floating pill bar stays composed briefly after the route
+    // leaves the tab set so the previously-selected pill COLLAPSES with the
+    // same spring it expands with. The old `showBottomBar` gate unmounted
+    // the bar the instant the route changed (e.g. Home → Profile), so the
+    // expanded pill just vanished instead of gliding closed — user report:
+    // "the home nav pill should collapse just the way it expands when i
+    // back from home… it still just vanishes instead of collapse vanishing".
+    // When the route is a tab again the bar remounts immediately (the pill
+    // expands as before); the rail keeps the instant `showBottomBar` gate
+    // (rail items never expand/collapse).
+    var barVisible by remember { mutableStateOf(showBottomBar) }
+    LaunchedEffect(showBottomBar) {
+        if (showBottomBar) {
+            barVisible = true
+        } else {
+            // Let the collapse spring + label retract finish before unmount.
+            delay(500)
+            barVisible = false
+        }
+    }
     // v142 — full-bleed-bottom routes: like the tab pages and the Topic
     // Reveal, these pages paint their own backgrounds to the very bottom
     // edge and clear the gesture bar themselves — no reserved nav-bar slot
@@ -831,7 +851,7 @@ fun CurioNavHost(
         // floating pill dock floats at the same bottom-center spot, and the
         // old opaque dock covered the bar anyway, so the bar must not show
         // behind/around the tour pill on tab stops.
-        if (!wide && showBottomBar && TourController.currentStep == null) {
+        if (!wide && barVisible && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
                 modifier = Modifier.align(Alignment.BottomCenter)
