@@ -21385,5 +21385,593 @@
    "2020s"
   ],
   "tier": 1
+ },
+ {
+  "id": "song-suzanne-1966",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Suzanne (1966)",
+  "teaser": "Leonard Cohen's song about a real woman who took him to her waterfront loft and served him tea — half spoken-word, half hymn. Judy Collins' 1966 cover made it famous before Cohen's own version appeared. The lyric about Jesus is pure Cohen: a wandering saint who only 'knows that you were drowning' but keeps walking on water anyway.",
+  "imageUrl": "",
+  "byline": "Leonard Cohen",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Suzanne (1966) by Leonard Cohen",
+   "durationMinutes": 4,
+   "instruction": "Listen to the way Cohen's vocal never quite lands on a melody — it's a poem that happens to be sung — then notice how the imagery stays concrete: tea, oranges, the river."
+  },
+  "tags": [
+   "Folk",
+   "1960s",
+   "Singer-Songwriter"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-chelsea-hotel-2-1974",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Chelsea Hotel No. 2 (1974)",
+  "teaser": "Cohen's brutally honest ballad about a night with Janis Joplin at the Chelsea Hotel, written years later with the details rearranged. He later said he regretted naming her — but the song stands as one of pop's most unflinching portraits of a one-night stand. The guitar part is a simple three-chord figure he keeps circling like memory.",
+  "imageUrl": "",
+  "byline": "Leonard Cohen",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Chelsea Hotel No. 2 (1974) by Leonard Cohen",
+   "durationMinutes": 3,
+   "instruction": "Listen to the flat, almost bored delivery — the point is the distance between the memory and the telling. Notice how the final line about 'giving up on you' lands without any musical resolution."
+  },
+  "tags": [
+   "Folk",
+   "1970s",
+   "Singer-Songwriter"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-radio-free-europe-1981",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Radio Free Europe (1981)",
+  "teaser": "R.E.M.'s debut single, so murky that fans argued for years about what the title meant — it's a fictional broadcast, not the actual station. Recorded twice, the second version with a jangling guitar intro became the blueprint for college rock. The lyrics are mostly impressionistic fragments, which is exactly why they worked.",
+  "imageUrl": "",
+  "byline": "R.E.M.",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Radio Free Europe (1981) by R.E.M.",
+   "durationMinutes": 4,
+   "instruction": "Listen for how Michael Stipe's mumbled vocal makes the words a texture rather than a message — then pick out the bassline that actually carries the song."
+  },
+  "tags": [
+   "Alternative",
+   "1980s",
+   "College Rock"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-west-end-girls-1985",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "West End Girls (1985)",
+  "teaser": "Pet Shop Boys' global hit pairs a clipped, spoken delivery with a synth line that sounds like a city at night. It was inspired by T.S. Eliot's 'The Waste Land' — the title and the chorus's 'west end' are a literal London geography. Neil Tennant wrote it while working as a magazine editor; it took two years and a remix to become a number one.",
+  "imageUrl": "",
+  "byline": "Pet Shop Boys",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "West End Girls (1985) by Pet Shop Boys",
+   "durationMinutes": 5,
+   "instruction": "Listen to the verse as rhythm rather than melody — Tennant's deadpan recitation over a ticking hi-hat — then notice the key change that lifts the chorus."
+  },
+  "tags": [
+   "Synthpop",
+   "1980s",
+   "New Wave"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-debaser-1989",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Debaser (1989)",
+  "teaser": "Pixies' howling tribute to Luis Buñuel's surrealist film Un Chien Andalou, whose famous eye-slitting scene gives the song its chorus — 'slicing up eyeballs'. Black Francis wrote it as a two-minute blast of stop-start noise that invented the quiet-loud template grunge would steal. The film's dream logic became the song's: it makes no sense and means everything.",
+  "imageUrl": "",
+  "byline": "Pixies",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Debaser (1989) by Pixies",
+   "durationMinutes": 3,
+   "instruction": "Listen to the way the band slams between whisper and scream within one verse — then notice the bass lead that carries the melody while the guitar just rips."
+  },
+  "tags": [
+   "Alternative",
+   "1980s",
+   "College Rock"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-where-is-my-mind-1988",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Where Is My Mind? (1988)",
+  "teaser": "Pixies' most-covered song, a delicate verse that erupts into a roaring chorus about a mind wandering off on its own. Black Francis has said he wrote it after a diving trip, watching small fish while imagining a giant one. Decades later it soundtracked the finale of Fight Club, cementing its place as the sound of a psyche unravelling.",
+  "imageUrl": "",
+  "byline": "Pixies",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Where Is My Mind? (1988) by Pixies",
+   "durationMinutes": 4,
+   "instruction": "Listen to the guitar arpeggio that opens it — soft, almost naive — then notice how the drums and scream arrive not as anger but as release."
+  },
+  "tags": [
+   "Alternative",
+   "1980s",
+   "College Rock"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-cherry-coloured-funk-1990",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Cherry-coloured Funk (1990)",
+  "teaser": "Cocteau Twins' gauzy masterpiece — Elizabeth Fraser's wordless, elastic vocals floating over Robin Guthrie's shimmering guitar. The 'lyrics' are mostly invented syllables; Fraser sings melody first and language second. The result is a song that feels like a memory of a song, and it became the band's signature track.",
+  "imageUrl": "",
+  "byline": "Cocteau Twins",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Cherry-coloured Funk (1990) by Cocteau Twins",
+   "durationMinutes": 4,
+   "instruction": "Listen without trying to parse a single word — Fraser's voice is an instrument here — then notice how the guitar swells in and out like a tide."
+  },
+  "tags": [
+   "Dream Pop",
+   "1990s",
+   "Shoegaze"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-fade-into-you-1993",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Fade Into You (1993)",
+  "teaser": "Mazzy Star's one huge hit is a study in stillness: a pedal-steel guitar, a two-note piano figure, and Hope Sandoval's voice barely rising above a murmur. Written by David Roback, it's about that strange closeness of being with someone you can't quite reach — 'I want to hold the hand inside you'. It took years to chart, then never left.",
+  "imageUrl": "",
+  "byline": "Mazzy Star",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Fade Into You (1993) by Mazzy Star",
+   "durationMinutes": 4,
+   "instruction": "Listen to the pedal steel — country's loneliest instrument — and notice how the song never builds to a chorus; it just leans."
+  },
+  "tags": [
+   "Dream Pop",
+   "1990s",
+   "Alternative"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-glory-box-1994",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Glory Box (1994)",
+  "teaser": "Portishead's trip-hop landmark, a slow-burning threat of a song built on Isaac Hayes' 'Ike's Rap III' sample. Beth Gibbons sings about 'giving you a lifetime of devotion' with the warmth of a handshake at a duel. The orchestral sting that opens it gives way to a beat that never fully wakes up.",
+  "imageUrl": "",
+  "byline": "Portishead",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Glory Box (1994) by Portishead",
+   "durationMinutes": 5,
+   "instruction": "Listen to the sample's warped strings under Gibbons' vocal, then notice how the song stays at the same low temperature from first bar to last."
+  },
+  "tags": [
+   "Trip-Hop",
+   "1990s",
+   "Downtempo"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-roads-1994",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Roads (1994)",
+  "teaser": "Portishead's bleakest ballad: a single chord progression, a muted drum loop, and Beth Gibbons' voice stretched to its breaking point over 'can't you see'. The production is almost nothing — a few strings, a wobbly sample — which makes the ache feel unprocessed. It's the song that made trip-hop weep.",
+  "imageUrl": "",
+  "byline": "Portishead",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Roads (1994) by Portishead",
+   "durationMinutes": 5,
+   "instruction": "Listen to the emptiness — the drums are barely there, and Gibbons' vocal cracks at the top. Notice how the strings arrive only when she stops singing."
+  },
+  "tags": [
+   "Trip-Hop",
+   "1990s",
+   "Downtempo"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-teardrop-1998",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Teardrop (1998)",
+  "teaser": "Massive Attack's gentle juggernaut, instantly recognized as the theme to House — the show's creators chose it for its heartbeat-like intro, which was recorded from a real foetal ultrasound. Elizabeth Fraser of Cocteau Twins sings a maternal lullaby over the band's slow-drifting beat. The 'teardrop' in the title is a single piano note that falls like one.",
+  "imageUrl": "",
+  "byline": "Massive Attack",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Teardrop (1998) by Massive Attack",
+   "durationMinutes": 5,
+   "instruction": "Listen to the intro as a heartbeat, then notice how Fraser's vocal floats above the beat rather than locking to it."
+  },
+  "tags": [
+   "Trip-Hop",
+   "1990s",
+   "Downtempo"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-unfinished-sympathy-1991",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Unfinished Sympathy (1991)",
+  "teaser": "Massive Attack's breakthrough — a gospel-soul vocal by Shara Nelson over a swelling string arrangement and a beat that shuffles like a hangover. The famous video was shot in one continuous take down a Los Angeles street. It's often named the song that turned trip-hop from a Bristol scene into a worldwide sound.",
+  "imageUrl": "",
+  "byline": "Massive Attack",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Unfinished Sympathy (1991) by Massive Attack",
+   "durationMinutes": 5,
+   "instruction": "Listen to the strings rise underneath the beat — recorded live, not sampled — and notice how Nelson's vocal stays utterly calm on top."
+  },
+  "tags": [
+   "Trip-Hop",
+   "1990s",
+   "Downtempo"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-risingson-1994",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Risingson (1994)",
+  "teaser": "Massive Attack at their most paranoid: a slow, narcotic groove built on a sample of The Winstons, with 3D and Daddy G trading low, menacing verses about drifters and dead ends. The title is a spoonerism of 'son rising' twisted into something gloomier. It's the sound of a night out that stopped being fun an hour ago.",
+  "imageUrl": "",
+  "byline": "Massive Attack",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Risingson (1994) by Massive Attack",
+   "durationMinutes": 4,
+   "instruction": "Listen to the sub-bass and the way the vocal sits deep in the mix — this is a song engineered for headphones in the dark."
+  },
+  "tags": [
+   "Trip-Hop",
+   "1990s",
+   "Downtempo"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-big-time-sensuality-1993",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Big Time Sensuality (1993)",
+  "teaser": "Björk's first solo hit outside Iceland: a four-on-the-floor house track with a hook so simple — 'I can sense it' — it reads as pure joy. The video, shot by Stéphane Sednaoui on a flatbed truck driving through New York, captures her unguarded happiness. It's the closest she ever came to a pure pop single.",
+  "imageUrl": "",
+  "byline": "Björk",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Big Time Sensuality (1993) by Björk",
+   "durationMinutes": 4,
+   "instruction": "Listen to the kick drum hit on every beat — house music's heartbeat — and notice how Björk's vocal slurs and gasps around it like a dancer."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "House"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-hyperballad-1995",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Hyperballad (1995)",
+  "teaser": "Björk's most beautiful collision: an electronic beat that sounds like falling objects, under a lyric about throwing things off a cliff each morning before returning to her lover. She wrote it about the small rituals we use to protect a happy relationship. The bassline descends with every 'throw', and the chorus lands like a landing.",
+  "imageUrl": "",
+  "byline": "Björk",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Hyperballad (1995) by Björk",
+   "durationMinutes": 4,
+   "instruction": "Listen to the falling-instruments metaphor — every synth hit is an object thrown — then notice how the chorus 'catching' her feels like a landing."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Art Pop"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-joga-1997",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Jóga (1997)",
+  "teaser": "Björk's love letter to Iceland: a song about the person who grounds her, written with a choir arrangement that swells like the island's landscape. The title is the Icelandic word for yoga, and the chords hold static while her voice builds. The video, shot entirely in Icelandic geography, was a postcard to the world.",
+  "imageUrl": "",
+  "byline": "Björk",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Jóga (1997) by Björk",
+   "durationMinutes": 4,
+   "instruction": "Listen to the strings and choir build behind the simple piano figure, then notice how the beat enters only when the chorus erupts."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Art Pop"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-staralfur-1995",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Starálfur (1995)",
+  "teaser": "Sigur Rós' wordless ache of a track — a music box melody, a bowed guitar, and Jónsi's falsetto singing syllables that aren't a language at all. The title means 'staring elf'. It was used over the closing scene of The Life Aquatic, where a ship disappears into the sky, which is exactly what the song does.",
+  "imageUrl": "",
+  "byline": "Sigur Rós",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Starálfur (1995) by Sigur Rós",
+   "durationMinutes": 7,
+   "instruction": "Listen to the toy-piano riff that never resolves — then notice how the strings enter and swallow the whole piece like weather."
+  },
+  "tags": [
+   "Post-Rock",
+   "1990s",
+   "Ambient"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-glosoli-2005",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Glósóli (2005)",
+  "teaser": "Sigur Rós' anthem of release: six minutes that start as a whisper and end as a field of noise. Jónsi sings 'glósóli' — 'glowing sun' — in his invented language, and the song's long, slow build is famous for its emotional kick at the two-thirds mark. The video shows children running across a landscape at dawn, chasing the glow.",
+  "imageUrl": "",
+  "byline": "Sigur Rós",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Glósóli (2005) by Sigur Rós",
+   "durationMinutes": 6,
+   "instruction": "Listen to the patience of the build — the drums don't arrive until minutes in — then notice how the release feels earned rather than sudden."
+  },
+  "tags": [
+   "Post-Rock",
+   "2000s",
+   "Ambient"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-bachelorette-1997",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Bachelorette (1997)",
+  "teaser": "Björk's most dramatic single: a waltz in 3/4 about a woman who keeps leaving and returning, sung with an orchestra that swings between tender and menacing. The video, a film-within-a-film directed by Michel Gondry, tells a story of a book that writes itself. It's opera in pop clothing.",
+  "imageUrl": "",
+  "byline": "Björk",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Bachelorette (1997) by Björk",
+   "durationMinutes": 4,
+   "instruction": "Listen to the waltz time signature — rare in pop — and notice how the string section turns from romantic to threatening across the verses."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Art Pop"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-army-of-me-1995",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Army of Me (1995)",
+  "teaser": "Björk's angriest song, built on a single pounding industrial riff she wrote after being woken at dawn by a nightmare — and her response to a fan asking for a song to help him 'get up in the morning'. It's a blunt command: stand up, you wimp. The video cast her as a giant driving a monster truck through a flooded city.",
+  "imageUrl": "",
+  "byline": "Björk",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Army of Me (1995) by Björk",
+   "durationMinutes": 4,
+   "instruction": "Listen to the riff that repeats the entire song — relentless, mechanical — and notice how her vocal melody fights against it rather than joining it."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Industrial"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-firestarter-1996",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Firestarter (1996)",
+  "teaser": "The Prodigy's punk-electronic crossover: a furious, distorted vocal from Keith Flint — the first time he sang lead — over Liam Howlett's breakbeat assault. Its video, Flint snarling in a white tunnel, made him one of the most recognizable figures in dance music. It topped the UK charts and dragged rave into the mainstream.",
+  "imageUrl": "",
+  "byline": "The Prodigy",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Firestarter (1996) by The Prodigy",
+   "durationMinutes": 4,
+   "instruction": "Listen to the vocal distortion — Flint's voice is processed into a growl — and notice the breakbeat that never lets the energy settle."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Big Beat"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-breathe-1996",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Breathe (1996)",
+  "teaser": "The Prodigy's biggest hit, a slowed-down, sinister groove that swaps Firestarter's fury for menace. Flint's whispered, hypnotic verses — 'breathe with me' — over a cowbell-and-siren loop became an instant rave anthem. The video's desert ritual imagery made it a fixture of the late-90s MTV era.",
+  "imageUrl": "",
+  "byline": "The Prodigy",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Breathe (1996) by The Prodigy",
+   "durationMinutes": 4,
+   "instruction": "Listen to the off-kilter cowbell and the siren that cuts across the beat, then notice how Flint's vocal barely rises above a whisper the whole time."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Big Beat"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-born-slippy-nuxx-1996",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Born Slippy (NUXX) (1996)",
+  "teaser": "Underworld's accidental anthem — a nine-minute techno epic that became the sound of Trainspotting's famous 'choose life' scene. The title comes from a dog's name, and the repeated chant 'lager, lager, lager' was improvised in the studio. It turned a club track into the emotional climax of a generation's film.",
+  "imageUrl": "",
+  "byline": "Underworld",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Born Slippy (NUXX) (1996) by Underworld",
+   "durationMinutes": 9,
+   "instruction": "Listen to the long, patient build — the beat stays the same while layers pile on — and notice how the 'lager' chant lands as the emotional peak."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Techno"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-insomnia-1995",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Insomnia (1995)",
+  "teaser": "Faithless' defining track: Sister Bliss's rolling piano hook over Maxi Jazz's spoken verses about a sleepless night in a city that never shuts up. The vocal is less sung than recited — a diary entry over a dance beat. It became a crossover hit and one of the most-played tracks in 90s club culture.",
+  "imageUrl": "",
+  "byline": "Faithless",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Insomnia (1995) by Faithless",
+   "durationMinutes": 9,
+   "instruction": "Listen to the piano riff that opens it — already the peak — and notice how Maxi Jazz's spoken delivery makes the verses feel like confession."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Progressive House"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-children-1995",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Children (1995)",
+  "teaser": "Robert Miles' dreamy piano-house hit, famously born from a demo he made to calm friends after a rave ended. The track's meditative chord loop and soft breakbeat turned a tragedy-adjacent genre into a relaxation tool. It topped charts across Europe and practically invented the 'dream house' subgenre.",
+  "imageUrl": "",
+  "byline": "Robert Miles",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Children (1995) by Robert Miles",
+   "durationMinutes": 4,
+   "instruction": "Listen to the piano melody as a loop, not a progression — nothing changes, which is the point — and notice how the kick drum stays gentle throughout."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "Dream House"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-scatman-1995",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Scatman (Ski Ba Bop Ba Dop Bop) (1995)",
+  "teaser": "Scatman John — a stuttering jazz pianist — turned his speech impediment into a global hit by scat-singing over a house beat. The song's chorus is pure joy: a man turning his disability into his instrument. It sold millions worldwide and made 'ski ba bop ba dop bop' one of the most recognizable hooks of the decade.",
+  "imageUrl": "",
+  "byline": "Scatman John",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Scatman (Ski Ba Bop Ba Dop Bop) (1995) by Scatman John",
+   "durationMinutes": 4,
+   "instruction": "Listen to the transformation: the verse stutters, then the scat chorus flows perfectly — the hook IS the overcoming."
+  },
+  "tags": [
+   "Electronic",
+   "1990s",
+   "House"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-tunnels-2004",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Neighborhood #1 (Tunnels) (2004)",
+  "teaser": "Arcade Fire's opening statement: a six-minute song that starts as a marching-band hymn and ends as a riot, about a couple who meet in tunnels during a snowstorm and decide the apocalypse can wait. Win Butler's shout of 'we used to wait' became the band's declaration of intent. It introduced the world to funeral-punk: strings, guitars and grief as celebration.",
+  "imageUrl": "",
+  "byline": "Arcade Fire",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Neighborhood #1 (Tunnels) (2004) by Arcade Fire",
+   "durationMinutes": 5,
+   "instruction": "Listen to the slow build from quiet verse to full-band chorus, then notice the strings arriving underneath — the band's signature trick of making joy sound like mourning."
+  },
+  "tags": [
+   "Indie Rock",
+   "2000s",
+   "Baroque Pop"
+  ],
+  "tier": 1
+ },
+ {
+  "id": "song-harder-better-faster-stronger-2001",
+  "categoryId": "SONGS",
+  "subtype": "Song",
+  "name": "Harder, Better, Faster, Stronger (2001)",
+  "teaser": "Daft Punk's vocoder anthem — four robotic words repeated into a four-on-the-floor epic. It was famously sampled by Kanye West in 'Stronger', a decade later. The song's genius is its restraint: the vocals are filtered to pure robot, and the beat never changes. It remains the definitive sound of robots wanting to dance.",
+  "imageUrl": "",
+  "byline": "Daft Punk",
+  "exploreAction": {
+   "verb": "Listen",
+   "targetName": "Harder, Better, Faster, Stronger (2001) by Daft Punk",
+   "durationMinutes": 4,
+   "instruction": "Listen to the vocoder as an instrument — the words are a hook, not a message — and notice how the bassline locks into the kick drum for the entire song."
+  },
+  "tags": [
+   "Electronic",
+   "2000s",
+   "House"
+  ],
+  "tier": 1
  }
 ]

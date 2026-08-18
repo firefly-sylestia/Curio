@@ -101,6 +101,15 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Main card shadow", "Ambient depth below the hero card", AppPreferences.heroShadowState) {
                         AppPreferences.setHeroShadowEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    // v208 — opt-in experiment: the Spin Categories/Filter
+                    // buttons (and their vertical variants) wear the floating
+                    // NAV-PILL look — capsule shape, calmed accent active
+                    // fill, elevated container — instead of the category
+                    // rounded-24 buttons. Default OFF.
+                    ExperimentSwitchRow("Nav-style buttons", "Categories, Filter and their vertical twins wear the floating nav-pill look", AppPreferences.navPillButtonsState) {
+                        AppPreferences.setNavPillButtonsEnabled(context, it)
+                    }
                 }
                 }
             }

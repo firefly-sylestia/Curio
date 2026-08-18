@@ -36,16 +36,21 @@ import com.curio.app.ui.theme.toHsl
  * (the page behind shows through the holes) and each hole wears either the
  * pressed two-tone diary-spiral rim ([ringsOn] = false) or a 3D steel ring
  * through the hole ([ringsOn] = true) — each style draws the wire as a
- * real THREADED ring: a dark shaded hole interior, a dark back arc
- * receding inside the hole (behind the paper), a bright front arc riding
- * the hole rim over the paper, and darkened dives where the wire sinks
- * back in. The [ringStyle] selects the look: "coil" — a spiral-notebook
- * binding wire (front arc over the rim, back arc recessed in the hole);
- * "split" — a closed keyring / split-ring loop (top half over paper,
- * bottom half inside the hole, split gap near the top); "oblique" — the
- * coil foreshortened at an angle, bulging out of the hole toward the
- * viewer. With holes off it is simply the opaque paper fill in the card's
- * shape — no translucent fills anywhere (v27n shadow rule).
+ * real THREADED ring: a dark shaded hole interior with the wire drawn
+ * OVER the opening. The [ringStyle] selects the look: "coil" — the
+ * spiral-notebook binding wire from the user's reference SVG (v27w +
+ * v197 + v208 + v208f: a clean open hook MIRRORED to the author's art
+ * (start bottom-right, rising up the right side, over the top and down
+ * the left, with the left leg DIVING below the box past the card's
+ * left edge and ending open — no curl-back, no blunt mid-air stop —
+ * that PEEKS OUT of the card's left edge like a real spiral binding
+ * instead of sitting entirely inside, with a dark depth pass, a metal
+ * tube gradient and a white specular — see [drawCoilRing]); "split" — a
+ * closed keyring / split-ring loop (top half over paper, bottom half
+ * inside the hole, split gap near the top); "oblique" — the coil
+ * foreshortened at an angle, bulging out of the hole toward the viewer.
+ * With holes off it is simply the opaque paper fill in the card's shape —
+ * no translucent fills anywhere (v27n shadow rule).
  */
 fun Modifier.paperStatCardFill(
     shape: Shape,
@@ -83,14 +88,19 @@ fun Modifier.paperStatCardFill(
         }
         onDrawBehind {
             drawPath(path, fill)
+            // v27u+ — the rings sit ~3dp LEFT of the hole center so they
+            // visually align with the punched opening (the coil's arch +
+            // left peek read as centered when the wire center is offset).
+            val ringOffX = 3.dp.toPy()
             repeat(3) { i ->
                 val cy = size.height * (i + 1) / 4f
                 val center = Offset(holeX, cy)
+                val ringCenter = Offset(holeX - ringOffX, cy)
                 if (ringsOn) {
                     when (ringStyle) {
-                        "split" -> drawSplitRing(center, holeR, ink, dark)
-                        "oblique" -> drawObliqueCoil(center, holeR, ink, dark, index = i)
-                        else -> drawCoilRing(center, holeR, ink, dark)
+                        "split" -> drawSplitRing(ringCenter, holeR, ink, dark)
+                        "oblique" -> drawObliqueCoil(ringCenter, holeR, ink, dark, index = i)
+                        else -> drawCoilRing(ringCenter, holeR, ink, dark)
                     }
                 } else {
                     drawPressedRim(center, holeR, ink)
@@ -203,88 +213,158 @@ private fun DrawScope.drawHoleInterior(center: Offset, holeR: Float, ink: Color)
 }
 
 /**
- * "coil" — a spiral-notebook binding wire threaded THROUGH the hole. The
- * hole interior is shaded dark (a real opening); the wire's BACK arc loops
- * behind the paper, seen recessed inside the hole's bottom, while its
- * FRONT arc rides over the hole rim in bright steel — half its tube over
- * the opening, half on the paper — with darkened dives where it re-enters
- * the hole and a specular on top. Reads as a wire passing through, not a
- * ring drawn around the hole.
+ * "coil" — the spiral-notebook binding wire THREADED THROUGH the hole, per
+ * the user's reference SVG (v27w + v197): the wire is a FORESHORTENED ARCH
+ * rising up the left side, over the top and down the right (the revised
+ * SVG dropped the bottom curl — 73:38 aspect), and it PEEKS OUT of the
+ * card's LEFT edge like a real spiral binding instead of sitting entirely
+ * inside the card (user: "the ring should be come out from the left of it
+ * like peek out from the left not entirely inside the stat card"). Drawn
+ * OVER the shaded hole interior ([drawHoleInterior]) so the wire reads as
+ * wrapping around the opening: a dark depth stroke behind the wire (its
+ * shadowed underside — the SVG's 18px dark pass), the metal coil on top
+ * (horizontal tube gradient — the SVG's 13px pass), and a white specular
+ * along the upper-left curve (the SVG's 3px highlight). The metal stops
+ * are tuned from the SVG's palette.
  */
 private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color, dark: Boolean) {
-    val frontR = holeR * 1.02f  // front wire rides the hole rim
-    val backR = holeR * 0.72f   // back wire — visibly INSIDE the hole
-    val metalW = 3.0.dp.toPx()
-    val frontTopLeft = Offset(center.x - frontR, center.y - frontR)
-    val frontSize = Size(frontR * 2f, frontR * 2f)
-    val backTopLeft = Offset(center.x - backR, center.y - backR)
-    val backSize = Size(backR * 2f, backR * 2f)
-
     drawHoleInterior(center, holeR, ink)
 
-    // ── Back arc — the wire BEHIND the paper, seen through the hole. ───
-    drawArc(
-        brush = Brush.linearGradient(
-            colors = if (dark) CoilBackDark else listOf(Color(0xFF5A554C), Color(0xFF332F29)),
-            start = Offset(center.x, center.y - backR),
-            end = Offset(center.x, center.y + backR)
-        ),
-        startAngle = 35f,
-        sweepAngle = 110f,
-        useCenter = false,
-        topLeft = backTopLeft,
-        size = backSize,
-        style = Stroke(width = metalW * 0.9f, cap = StrokeCap.Round)
+    val wireW = 3.2.dp.toPx()
+    // The arch is wider than the hole (still ~2.1× the hole diameter) so
+    // the hole reads inside its opening, and it's pushed LEFT past the
+    // card edge — its left arc + leg visibly protrude ~6.5dp like a real
+    // spiral binding sticking out of the paper, instead of sitting
+    // entirely inside the card (user: "the ring should be come out from
+    // the left of it like peek out from the left not entirely inside the
+    // stat card"). v208f — the path is MIRRORED to the SVG's own
+    // `matrix(-1,0,0,1,0,0)` (the app was rendering it inverted vs the
+    // author's art): the wire STARTS inside the hole at the right
+    // (bottom-right corner of the box), arches up over the top, and the
+    // LEFT leg dives down past the card's left edge to an open round-capped
+    // end. Foreshortened to the revised reference's 73:38 aspect.
+    val coilW = holeR * 4.2f
+    val coilH = coilW * (38f / 73f)
+    val leftPeek = 9.dp.toPx()
+    val topLeft = Offset(
+        center.x - coilW / 2f - leftPeek,
+        center.y - coilH / 2f
     )
 
-    // ── Front arc — bright steel OVER the paper, riding the hole rim. ──
-    drawArc(
-        brush = Brush.linearGradient(
-            colors = steelGradient,
-            start = Offset(center.x, center.y - frontR),
-            end = Offset(center.x, center.y + frontR)
-        ),
-        startAngle = 145f,
-        sweepAngle = 250f,
-        useCenter = false,
-        topLeft = frontTopLeft,
-        size = frontSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    val metal = Brush.linearGradient(
+        colors = if (dark) CoilMetalDark else CoilMetal,
+        start = topLeft,
+        end = Offset(topLeft.x + coilW, topLeft.y)
     )
+    val outline = buildCoilPath(topLeft, coilW, coilH)
 
-    // Darkened dives where the front wire sinks back INTO the hole.
-    val dive = if (dark) DiveMetalDark else Color(0xFF3A362F)
-    drawArc(
-        color = dive.copy(alpha = 0.55f),
-        startAngle = 145f,
-        sweepAngle = 26f,
-        useCenter = false,
-        topLeft = frontTopLeft,
-        size = frontSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    // Dark depth — the coil's shadowed underside (a wider stroke behind).
+    drawPath(
+        path = outline,
+        color = if (dark) Color(0xFF22282F) else Color(0xFF101B27),
+        style = Stroke(width = wireW * 1.5f, cap = StrokeCap.Round)
     )
-    drawArc(
-        color = dive.copy(alpha = 0.55f),
-        startAngle = 9f,
-        sweepAngle = 26f,
-        useCenter = false,
-        topLeft = frontTopLeft,
-        size = frontSize,
-        style = Stroke(width = metalW, cap = StrokeCap.Round)
+    // The metal wire.
+    drawPath(
+        path = outline,
+        brush = metal,
+        style = Stroke(width = wireW, cap = StrokeCap.Round)
     )
+    // Specular along the upper-left curve.
+    drawPath(
+        path = buildCoilHighlightPath(topLeft, coilW, coilH),
+        color = Color.White.copy(alpha = if (dark) 0.60f else 0.75f),
+        style = Stroke(width = wireW * 0.22f, cap = StrokeCap.Round)
+    )
+}
 
-    // Specular highlight riding the front arc's top.
-    drawArc(
-        color = Color.White.copy(alpha = 0.92f),
-        startAngle = 252f,
-        sweepAngle = 40f,
-        useCenter = false,
-        topLeft = frontTopLeft,
-        size = frontSize,
-        style = Stroke(width = metalW * 0.28f, cap = StrokeCap.Round)
-    )
+/**
+ * The coil's tube gradient — tuned from the user's reference SVG stops: a
+ * cool polished steel, dark edges wrapping to a bright specular band.
+ * Light mode uses the full metal; dark mode flips to light steel so the
+ * wire reads on the near-black paper (the v81 dark reversal).
+ */
+private val CoilMetal = listOf(
+    Color(0xFF26333F),
+    Color(0xFF4E6276),
+    Color(0xFFD9E5F1),
+    Color(0xFF8396A9),
+    Color(0xFFFFFFFF),
+    Color(0xFF9AABBC),
+    Color(0xFF42566A),
+    Color(0xFF182430)
+)
 
-    drawRingContactShadow(center, holeR, ink)
+private val CoilMetalDark = listOf(
+    Color(0xFF8E9AA8),
+    Color(0xFFC4D0DD),
+    Color(0xFFF4F8FC),
+    Color(0xFFA9B6C4),
+    Color(0xFFFFFFFF),
+    Color(0xFFBCC8D5),
+    Color(0xFFA0ADBB),
+    Color(0xFF7C8896)
+)
+
+/**
+ * The coil OUTLINE from the user's LATEST reference SVG (svgviewer-output
+ * (15).svg), normalized to the 73×38 bounding box and MIRRORED to match
+ * the SVG's own `matrix(-1,0,0,1,0,0)` transform (v208f — the app was
+ * rendering the ring inverted vs the author's art: "see the svg its
+ * inverted of what its in the app youre plaing it wrngly"). So the wire
+ * starts at the bottom-RIGHT corner (inside the paper, near the hole),
+ * rises up the right side, arches over the top and down the LEFT side,
+ * then the LEFT leg DIVES below the box past the card's left edge and
+ * ends OPEN with a round cap — the old curl-back is gone AND the leg no
+ * longer stops blunt mid-air at y=0.737. Each cubic is c1/c2/end triples
+ * of normalized coordinates.
+ */
+private val CoilOutlineNorm = floatArrayOf(
+    1.000f, 1.000f,
+    1.000f, 0.395f, 0.781f, 0.000f, 0.479f, 0.000f,
+    0.178f, 0.000f, 0.000f, 0.342f, 0.000f, 0.737f,
+    0.000f, 1.105f, 0.123f, 1.342f, 0.288f, 1.342f
+)
+
+/** The coil's specular line — the SVG's `M43 57 C45 39 58 29 76 29 C92
+ *  29 103 37 106 48` mirrored horizontally (x → 1−x) to ride the flipped
+ *  outline's upper-LEFT curve. */
+private val CoilSpecularNorm = floatArrayOf(
+    0.932f, 0.868f,
+    0.904f, 0.395f, 0.726f, 0.132f, 0.479f, 0.132f,
+    0.260f, 0.132f, 0.110f, 0.342f, 0.068f, 0.632f
+)
+
+/** Scales one of the normalized coil paths into [topLeft] + [w]×[h]. */
+private fun buildCoilPath(topLeft: Offset, w: Float, h: Float): Path {
+    val p = Path()
+    p.moveTo(topLeft.x + CoilOutlineNorm[0] * w, topLeft.y + CoilOutlineNorm[1] * h)
+    var i = 2
+    while (i < CoilOutlineNorm.size) {
+        p.cubicTo(
+            topLeft.x + CoilOutlineNorm[i] * w, topLeft.y + CoilOutlineNorm[i + 1] * h,
+            topLeft.x + CoilOutlineNorm[i + 2] * w, topLeft.y + CoilOutlineNorm[i + 3] * h,
+            topLeft.x + CoilOutlineNorm[i + 4] * w, topLeft.y + CoilOutlineNorm[i + 5] * h
+        )
+        i += 6
+    }
+    return p
+}
+
+/** Scales the specular line into the same box. */
+private fun buildCoilHighlightPath(topLeft: Offset, w: Float, h: Float): Path {
+    val p = Path()
+    p.moveTo(topLeft.x + CoilSpecularNorm[0] * w, topLeft.y + CoilSpecularNorm[1] * h)
+    var i = 2
+    while (i < CoilSpecularNorm.size) {
+        p.cubicTo(
+            topLeft.x + CoilSpecularNorm[i] * w, topLeft.y + CoilSpecularNorm[i + 1] * h,
+            topLeft.x + CoilSpecularNorm[i + 2] * w, topLeft.y + CoilSpecularNorm[i + 3] * h,
+            topLeft.x + CoilSpecularNorm[i + 4] * w, topLeft.y + CoilSpecularNorm[i + 5] * h
+        )
+        i += 6
+    }
+    return p
 }
 
 /**
@@ -457,8 +537,8 @@ private fun DrawScope.drawObliqueCoil(center: Offset, holeR: Float, ink: Color, 
 // v81 — dark-mode METAL tones for the ring shading: on the near-black
 // paper the dark wire tones would vanish, so they flip to light greys
 // (the wire catches light on the dark sheet). Light mode keeps the
-// original dark metals unchanged.
-private val CoilBackDark = listOf(Color(0xFF9A948A), Color(0xFF6E6A61))
+// original dark metals unchanged. (The coil's own dark light/dark metals
+// live above next to the SVG coil paths.)
 private val SplitBackDark = listOf(Color(0xFF958F85), Color(0xFF69655C))
 private val DiveMetalDark = Color(0xFF76726A)
 

@@ -77,7 +77,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -86,6 +88,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -134,6 +137,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -1393,6 +1397,8 @@ private fun PetStudioBottomNav(
     page: PetDesignerPage,
     onSelect: (PetDesignerPage) -> Unit
 ) {
+    // v188 — light tick when switching studio pages.
+    val haptics = LocalHapticFeedback.current
     // v142 — restyled to the app's FLOATING PILL BAR language (the main
     // app replaced its stock M3 bar with this in v124/v129): a rounded,
     // elevated container with capsule tabs. The NavHost content is already
@@ -1425,12 +1431,15 @@ private fun PetStudioBottomNav(
             horizontalArrangement = Arrangement.Center
         ) {
             PetStudioTab(CurioIcons.Pets, "Pets", page == PetDesignerPage.PETS) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSelect(PetDesignerPage.PETS)
             }
             PetStudioTab(CurioIcons.Brush, "Editor", page == PetDesignerPage.EDITOR) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSelect(PetDesignerPage.EDITOR)
             }
             PetStudioTab(CurioIcons.Settings, "Settings", page == PetDesignerPage.SETTINGS) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onSelect(PetDesignerPage.SETTINGS)
             }
         }
@@ -1439,8 +1448,10 @@ private fun PetStudioBottomNav(
 }
 
 // Same pill geometry as the main bar (v131: 52dp tall, 112dp expanded).
-private val StudioPillIconWidth = 52.dp
-private val StudioPillExpandedWidth = 112.dp
+// v201 — bumped to the main bar's CURRENT sizes (64/136dp + 26dp icon, the
+// v184 sizing) so the studio bar matches the nav bar again.
+private val StudioPillIconWidth = 64.dp
+private val StudioPillExpandedWidth = 136.dp
 private val StudioPillHeight = 52.dp
 
 // v162 — same ONE-spring-family fix as the nav bar: the studio tab's width
@@ -1452,9 +1463,11 @@ private val StudioPillHeight = 52.dp
 // v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
 // critically damped (1.0) so the studio tabs glide with zero overshoot.
 // v173 — slowed to 400 with the nav pill family ("still too rapid").
-private val StudioWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
-private val StudioMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
-private val StudioExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
+// v201 — slowed to 150 with the nav pill family ("smoother").
+// v206 — 120 with the nav family ("even smoother").
+private val StudioWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 120f)
+private val StudioMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 120f)
+private val StudioExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 120f)
 
 /**
  * One capsule tab in the studio pill bar — mirrors [CurioFloatingNavBar]'s
@@ -1501,7 +1514,8 @@ private fun RowScope.PetStudioTab(
                 name = icon,
                 contentDescription = label,
                 tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 22.dp
+                // v201 — matches the main bar's 26dp icon.
+                size = 26.dp
             )
             // v162 — the label expands/shrinks + fades on the SAME spring
             // as the pill width (its own 160ms tweens finished ~4x early,
@@ -1513,9 +1527,13 @@ private fun RowScope.PetStudioTab(
             ) {
                 Text(
                     text = label,
-                    // v164 — bolder label to match the main nav bar (was
-                    // SemiBold).
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    // v201 — EXACTLY the main nav bar's label: Changa One
+                    // display face, 15sp, Normal (was labelMedium Bold).
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 15.sp
+                    ),
                     color = activeInk,
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)

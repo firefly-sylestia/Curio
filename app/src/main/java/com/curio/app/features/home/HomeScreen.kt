@@ -93,6 +93,8 @@ import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioPassport
+import com.curio.app.data.LaneKnowledge
+import com.curio.app.data.laneKnowledge
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -129,6 +131,7 @@ import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
@@ -163,8 +166,8 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.onAccent
-import kotlin.random.Random
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -592,27 +595,25 @@ fun HomeScreen(navController: NavController) {
                             val ringsOn = holesOn && AppPreferences.paperHoleRingsState
                             // v27v — which 3D ring look the holes wear.
                             val ringStyle = AppPreferences.paperHoleRingStyleState
-                            Surface(
-                                shape = statShape,
-                                color = Color.Transparent,
-                                // v74 — the pane always carries the elevation +
-                                // dark glow, exactly like Profile's stat pane
-                                // (the old 0dp default made the fill read flat
-                                // against the banner).
-                                shadowElevation = 3.dp,
+                            // v200 — the Surface wrapper is GONE: M3 Surface
+                            // (1.2+) clips its children to the shape, which CUT
+                            // the coil's left peek at the card edge. A plain
+                            // Box + shadow(clip = false) keeps the elevation
+                            // without the clip — the paper fill self-clips to
+                            // the shape outline, so the protruding wire can
+                            // render outside the card.
+                            // v27u — the paper surface (fill + 3-hole column
+                            // + pressed rims or tilted book rings) lives in the
+                            // shared paperStatCardFill component, so Profile's
+                            // stat pane wears the same card.
+                            // v74 — the pane always carries the elevation + dark
+                            // glow, exactly like Profile's stat pane.
+                            Box(
                                 modifier = Modifier
                                     .curioDarkGlow(3.dp, statShape)
-                            ) {
-                                // The fill must wear the card's own shape —
-                                // Surface does not clip its content, so a plain
-                                // background() would bleed square corners past
-                                // the torn/rounded border.
-                                // v27u — the paper surface (fill + 3-hole column
-                                // + pressed rims or tilted book rings) lives in
-                                // the shared paperStatCardFill component, so
-                                // Profile's stat pane wears the same card.
-                                Box(
-                                    modifier = when {
+                                    .shadow(3.dp, statShape, clip = false)
+                                    .then(
+                                        when {
                                         paperStatsOn -> Modifier.paperStatCardFill(
                                             shape = statShape,
                                             fill = paperStatBg,
@@ -642,7 +643,8 @@ fun HomeScreen(navController: NavController) {
                                             RoundedCornerShape(20.dp)
                                         )
                                     }
-                                ) {
+                                )
+                            ) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -692,7 +694,6 @@ fun HomeScreen(navController: NavController) {
                                         )
                                     }
                                 }
-                            }
                         }
                     }
                 }
@@ -1899,7 +1900,10 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     var aboutExpanded by rememberSaveable { mutableStateOf(false) }
 
     ModalDrawerSheet(
-        modifier = Modifier.width(320.dp),
+        // v190 — a little wider so the brain neural web has room to breathe
+        // (user: "if the brain neuron look feels squished extend the drawer
+        // a little more to the right").
+        modifier = Modifier.width(336.dp),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
         // The hero banner tears from the very top edge — run the sheet
@@ -1909,15 +1913,23 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // -- Menu rows - drawn first so they scroll UNDER the tear ------
+            // v206 — a Column: the scrolling rows sit in a weight(1f) area
+            // ABOVE the footer, so the footer is pinned to the bottom in
+            // normal flow — it can never float, and expanded sections
+            // (About, Your Curiosity) scroll above it instead of hiding
+            // behind it (v203 overlaid the footer, which let rows slide
+            // under its fade).
+            Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.weight(1f)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
                     top = HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
-                    // v176 — the footer is the last item and now anchors to
-                    // the very bottom edge of the drawer (no gap below it).
-                    bottom = 0.dp
+                    // v206 — just a small breathing spacer now: the footer
+                    // is BELOW the list, not reserved space at its tail.
+                    bottom = 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -2044,11 +2056,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         }
                     }
                 }
-                // v174 — the illustrated planetary footer: the drawer's SVG
-                // landscape fades in behind the version + credits.
-                item("footer") {
-                    DrawerFooter()
-                }
+            }
+            }
+            // v206 — the footer in NORMAL FLOW below the list: pinned to the
+            // sheet's bottom edge, rows never slide under it.
+            DrawerFooter()
             }
 
             // -- Torn rose hero - drawn on top, rows vanish at the seam -----
@@ -2342,11 +2354,25 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     // All-time per-lane counters from the passport (spins/reveals/explores/
     // saves/lastAt) — the "more available data" behind the map.
     val progress = remember(context) { CurioPassport.allProgress(context) }
+    // v208 — the constellation is fed by KNOWLEDGE (the same science-based
+    // stats as the Your Curiosity page): star size = the lane's knowledge
+    // score (explores + saves + words written there), glow = recency. Words
+    // come from the user's saved captures (the generation effect).
+    val allEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
+    }
+    val knowledge = remember(progress, allEntries) { laneKnowledge(progress, allEntries) }
     val lanes = remember(progress) { progress.keys.sortedBy { it.ordinal } }
     // Explored = real activity (started an explore or saved a capture).
     val explored = remember(progress) {
         progress.filterValues { it.explores > 0 || it.saves > 0 }.keys.toSet()
     }
+    // v186 — the drawer now draws THE SAME constellation as the "Your
+    // Curiosity" page (the shared [CurioConstellation]): explored lanes in
+    // the brain layout, star size = knowledge score, all-time window
+    // (recentCutoff 0 → every explored lane glows recent), nearest-neighbour
+    // web. The grid-web "map" is gone.
+    val exploredList = remember(progress) { lanes.filter { it in explored } }
     var selected by remember { mutableStateOf<CategoryId?>(null) }
 
     Column(
@@ -2354,250 +2380,43 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        // ── The constellation: every lane is a star ─────────────────────
-        DrawerLaneConstellation(
-            lanes = lanes,
-            explored = explored,
-            progress = progress,
+        // ── The constellation: the Stats page's brain web ───────────────
+        CurioConstellation(
+            explored = exploredList,
+            laneCounts = knowledge.mapValues { it.value.score },
+            laneRecent = knowledge.mapValues { it.value.lastAt },
+            recentCutoff = 0L,
             selected = selected,
             onSelect = { selected = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(196.dp)
-        )
-        // Selected lane's data — richer passport panel.
-        AnimatedVisibility(
-            visible = selected != null,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            selected?.let { id ->
+                .height(230.dp),
+            // v190 — the tap detail is now a small FLOATING card anchored to
+            // the neuron (name + saved count — user: "a floating small thing
+            // and also less data") instead of the richer panel below. Tap the
+            // card (or empty sky) to dismiss.
+            popoverContent = { id ->
                 val cat = CurioCategories.byId(id)
-                val accent = cat.themedAccent()
-                val p = progress[id] ?: CurioPassport.CategoryProgress()
-                val ink = MaterialTheme.colorScheme.onSurface
-                val muted = MaterialTheme.colorScheme.onSurfaceVariant
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, 0.14f),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
+                val k = knowledge[id] ?: LaneKnowledge(0, 0, 0, 0, 0L)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            CurioIcon(cat.iconGlyph, null, tint = accent, size = 20.dp)
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(1.dp)
-                            ) {
-                                Text(
-                                    cat.displayName,
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = ink
-                                )
-                                Text(
-                                    if (p.lastAt > 0) "Last explored ${formatElapsed(System.currentTimeMillis() - p.lastAt)} ago"
-                                    else "Explored, nothing saved yet",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = muted
-                                )
-                            }
-                            Surface(
-                                onClick = { selected = null },
-                                shape = CircleShape,
-                                color = muted.copy(alpha = 0.10f),
-                                modifier = Modifier.size(26.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                    CurioIcon(CurioIcons.Close, null, tint = muted, size = 16.dp)
-                                }
-                            }
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            DrawerMapStat("${p.spins}", "spins", Color(0xFF9B7BB8))
-                            DrawerMapStat("${p.reveals}", "peeked", Color(0xFF7FA0C8))
-                            DrawerMapStat("${p.explores}", "explores", Color(0xFF5F9EA0))
-                            DrawerMapStat("${p.saves}", "saved", Color(0xFFB98A5E))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/** v176 — one solid star per lane (ALL lanes shown): explored lanes are
- *  SOLID accent chips with their icon + a glow, inactive lanes are solid
- *  but smaller and muted (differentiated by size + color, not transparency),
- *  and a few extra tiny stars fill the sky. Only explored stars respond to
- *  taps. Deterministic grid scatter + per-lane jitter so every lane is
- *  visible and the constellation reads as a whole. */
-@Composable
-private fun DrawerLaneConstellation(
-    lanes: List<CategoryId>,
-    explored: Set<CategoryId>,
-    progress: Map<CategoryId, CurioPassport.CategoryProgress>,
-    selected: CategoryId?,
-    onSelect: (CategoryId?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Deterministic scatter: an even grid (so all lanes fit) + a small
-    // per-lane jitter so stars don't line up in a rigid lattice.
-    val nodes = remember(lanes) {
-        val n = lanes.size
-        val cols = kotlin.math.ceil(kotlin.math.sqrt(n.toFloat())).toInt().coerceAtLeast(1)
-        val rows = (n + cols - 1) / cols
-        lanes.mapIndexed { index, id ->
-            val col = index % cols
-            val row = index / cols
-            val rnd = Random(id.name.hashCode())
-            val jx = (rnd.nextFloat() - 0.5f) * 0.07f
-            val jy = (rnd.nextFloat() - 0.5f) * 0.07f
-            val x = ((col + 0.5f) / cols + jx).coerceIn(0.07f, 0.93f)
-            val y = ((row + 0.5f) / rows + jy).coerceIn(0.10f, 0.90f)
-            id to Offset(x, y)
-        }
-    }
-    // Extra tiny stars (decorative + future data slots), seeded so the sky
-    // feels full even when few lanes are explored.
-    val extras = remember {
-        val rnd = Random(0xD2A7E + 101)
-        List(16) {
-            Offset(0.05f + rnd.nextFloat() * 0.9f, 0.08f + rnd.nextFloat() * 0.8f)
-        }
-    }
-    // Accents must resolve in COMPOSITION (themedAccent is @Composable and
-    // can't run inside the Canvas draw lambda; recomputing the small map per
-    // recomposition is cheap).
-    val accents = lanes.associateWith { CurioCategories.byId(it).themedAccent() }
-    // v178 — theme-aware constellation inks (audit fix: the old steel-blue
-    // at 0.20 alpha vanished on the white drawer surface in light mode).
-    // Dark: light blue on near-black. Light: a deeper slate so the lines
-    // and tiny stars actually read on white.
-    val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.30f)
-                    else Color(0xFF5F7E9A).copy(alpha = 0.55f)
-    val tinyStarColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.35f)
-                        else Color(0xFF5F7E9A).copy(alpha = 0.50f)
-    val idleDotColor = if (isCurioDarkTheme()) Color(0xFF4A5F6E) else Color(0xFF7E9CB0)
-
-    BoxWithConstraints(modifier = modifier) {
-        val w = maxWidth
-        val h = maxHeight
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val pw = size.width
-            val ph = size.height
-            // Extra tiny stars first (under everything).
-            extras.forEach { s ->
-                drawCircle(
-                    color = tinyStarColor,
-                    radius = 1.2.dp.toPx(),
-                    center = Offset(s.x * pw, s.y * ph)
-                )
-            }
-            // Grid web (v178): connect each node to its RIGHT + DOWN grid
-            // neighbours so EVERY star is visibly linked (the old single
-            // zigzag chain hid links under the explored chips and read as
-            // unconnected in light mode). Interior stars get 4 links, edge
-            // stars 2–3 — the constellation reads as a connected mesh.
-            val n = nodes.size
-            val c = kotlin.math.ceil(kotlin.math.sqrt(n.toFloat())).toInt().coerceAtLeast(1)
-            val r = (n + c - 1) / c
-            val pts = nodes.map { (_, nd) -> Offset(nd.x * pw, nd.y * ph) }
-            nodes.indices.forEach { i ->
-                val col = i % c
-                val row = i / c
-                // v181 — length guards: with a NON-rectangular grid (e.g. 29
-                // lanes → 6×5 with the last row holding 5), the last node of a
-                // short row has no right/down neighbour — pts[i+1]/pts[i+c]
-                // indexed past the end and crashed the drawer open
-                // (IndexOutOfBounds 29/29 on draw).
-                if (col < c - 1 && i + 1 < n) {
-                    drawLine(
-                        color = linkColor,
-                        start = pts[i],
-                        end = pts[i + 1],
-                        strokeWidth = 1.dp.toPx()
+                    CurioIcon(cat.iconGlyph, null, tint = cat.themedAccent(), size = 18.dp)
+                    Text(
+                        cat.displayName,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                }
-                if (row < r - 1 && i + c < n) {
-                    drawLine(
-                        color = linkColor,
-                        start = pts[i],
-                        end = pts[i + c],
-                        strokeWidth = 1.dp.toPx()
+                    Text(
+                        "${k.score} knowledge",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-        }
-        nodes.forEach { (id, n) ->
-            val cat = CurioCategories.byId(id)
-            val accent = accents[id] ?: Color(0xFF7FAFD8)
-            val isExplored = id in explored
-            val isSel = selected == id
-            if (isExplored) {
-                // Active: SOLID accent chip + icon + glow; tap selects.
-                val chip = 34.dp
-                Surface(
-                    onClick = { onSelect(if (isSel) null else id) },
-                    shape = CircleShape,
-                    color = accent,
-                    border = BorderStroke(1.dp, accent.copy(alpha = 0.9f)),
-                    shadowElevation = if (isSel) 4.dp else 1.dp,
-                    modifier = Modifier
-                        .offset(x = w * n.x - chip / 2, y = h * n.y - chip / 2)
-                        .size(chip)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        CurioIcon(cat.iconGlyph, null, tint = cat.onAccent(), size = 16.dp)
-                    }
-                }
-            } else {
-                // Inactive: SOLID but smaller + muted (size + color, not
-                // transparency). Decorative only — no tap.
-                val dot = 14.dp
-                Box(
-                    modifier = Modifier
-                        .offset(x = w * n.x - dot / 2, y = h * n.y - dot / 2)
-                        .size(dot)
-                        .clip(CircleShape)
-                        .background(idleDotColor)
-                )
-            }
-        }
-    }
-}
-
-/** v176 — one compact stat pane inside the map's tap panel. */
-@Composable
-private fun DrawerMapStat(value: String, label: String, tint: Color) {
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = tint.copy(alpha = 0.14f)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
-        ) {
-            Text(
-                value,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        )
     }
 }
 
@@ -2607,6 +2426,10 @@ private fun DrawerMapStat(value: String, label: String, tint: Color) {
  *  doesn't look like it's floating. The version + "Made with curiosity"
  *  line sits inside that fade, at the end of the footer. The SVG loads
  *  through Coil's SvgDecoder. */
+// v203 — the footer's height is shared with the list's bottom padding so
+// the pinned footer never covers the last row.
+private val DrawerFooterHeight = 150.dp
+
 @Composable
 private fun DrawerFooter() {
     val context = LocalContext.current
@@ -2618,11 +2441,25 @@ private fun DrawerFooter() {
             .build()
     }
     val surfaceColor = MaterialTheme.colorScheme.surface
-    val footerInk = Color(0xFF7E6E50)
+    // v203 — theme-aware credits ink: the fixed khaki (#7E6E50) vanished on
+    // the near-black surface in dark mode (user: "the v1.10 made with
+    // curiocity text sint visible"). Dark mode now uses a warm parchment
+    // light so the credits read over the fade in both themes.
+    val footerInk = if (isCurioDarkTheme()) Color(0xFFC9BC9D) else Color(0xFF7E6E50)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(210.dp)
+            // v186 — the user said the footer "looks big": 210 → 150dp tall
+            // (the planet art reads as a smaller bottom band, the credits
+            // still sit in the fade).
+            .height(DrawerFooterHeight)
+            // v208f — the drawer sheet runs edge-to-edge (windowInsets
+            // zeroed), so the footer's bottom band was hiding BEHIND the
+            // system gesture bar and the planet read as FLOATING above the
+            // drawer bottom. The nav-bar inset now pads the footer content
+            // up above the gesture bar: the art sits flush, nothing is cut
+            // (user: "why my drawer footer is floating?? please fix it…").
+            .navigationBarsPadding()
     ) {
         // The art, bottom-anchored and filling the drawer's full width —
         // cropped from the top so the planet reads at the bottom end.
@@ -2638,7 +2475,7 @@ private fun DrawerFooter() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(110.dp)
+                .height(80.dp)
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
@@ -2648,12 +2485,13 @@ private fun DrawerFooter() {
                 )
         )
         // Version + credits, sitting in the fade at the end of the footer.
+        // (v208f — the footer Box now carries the navigationBarsPadding, so
+        // the credits no longer need their own inset.)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
                 .padding(bottom = 14.dp)
         ) {
             Text(
@@ -2795,11 +2633,23 @@ private fun ExploreTopicRow(
                     if (tag != null) {
                         // Small accent pill — signals a topic the user left
                         // unexplored earlier and came back to (resumed).
+                        // v198 — the pill wears a SHADED category chip: the
+                        // accent pulled toward the card surface — ~30% in
+                        // light (a solid shaded chip on the tinted card,
+                        // replacing the old 14% blend that vanished) and
+                        // ~38% in dark (visibly tinted on the dark card,
+                        // never the old near-invisible blend). Pastel light
+                        // uses the deep same-hue ink as the shade so the
+                        // airy pastel twin doesn't wash the pill away.
+                        val tagShade = if (AppPreferences.pastelColorsState && !isCurioDarkTheme())
+                            category.categoryInk() else accent
                         Surface(
                             shape = RoundedCornerShape(50),
-                            // v27n — opaque tinted pill (was 14% alpha, which
-                            // let the elevation shadow bleed through).
-                            color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
+                            color = lerp(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                tagShade,
+                                if (isCurioDarkTheme()) 0.38f else 0.30f
+                            ),
                             // Same hairline rim as the detail page's #tag
                             // chips — the deep ink text + pastel fill alone
                             // read muddy on the tinted card (v7.32).

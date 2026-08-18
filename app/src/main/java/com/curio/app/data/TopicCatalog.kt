@@ -87,6 +87,17 @@ object TopicCatalog {
     fun findByName(name: String): CurioTopic? {
         val wanted = name.trim()
         if (wanted.isEmpty()) return null
+        // v199 — TWO passes: strict matches (exact name / base-name) win
+        // across ALL categories before any containment match. The old
+        // single scan returned the first lane's first tolerant match, so
+        // "Flow" (the 2024 film in films.json) resolved to "Flower Boy"
+        // (an album) — ALBUMS scans before FILMS and "Flower Boy"
+        // contains "flow". A strict hit in any lane now always beats a
+        // loose containment hit in an earlier lane.
+        CategoryId.values().forEach { id ->
+            TopicJsonLoader.cached(id)?.firstOrNull { it.matchesSavedNameStrict(wanted) }
+                ?.let { return it }
+        }
         CategoryId.values().forEach { id ->
             TopicJsonLoader.cached(id)?.firstOrNull { it.matchesSavedName(wanted) }
                 ?.let { return it }
@@ -200,26 +211,50 @@ object TopicCatalog {
 }
 
 /**
+ * v199 — strips a trailing " (…)" or " — …" qualifier from a topic name
+ * ("Flow (2024)" → "Flow", "Moby-Dick; or, The Whale" stays). Shared by
+ * the strict and tolerant saved-name matchers.
+ */
+private fun savedNameBase(s: String): String {
+    val cut = s.substringBefore(" (").substringBefore(" — ")
+    return cut.trim().removeSuffix(";")
+}
+
+/**
+ * v199 — STRICT saved-name match: exact (case-insensitive) or base-name
+ * equality (trailing " (…)" / "— …" qualifier stripped from either side).
+ * NO containment — used by [TopicCatalog.findByName]'s first pass so an
+ * exact/base hit in any lane beats a loose containment hit elsewhere
+ * ("Flow" must resolve to the film, never to "Flower Boy" whose name
+ * merely contains "flow").
+ */
+internal fun CurioTopic.matchesSavedNameStrict(requested: String): Boolean {
+    val wanted = requested.trim()
+    if (wanted.isEmpty()) return false
+    if (name.equals(wanted, ignoreCase = true)) return true
+    val nameBase = savedNameBase(name)
+    val wantedBase = savedNameBase(wanted)
+    return nameBase.isNotBlank() && nameBase.equals(wantedBase, ignoreCase = true)
+}
+
+/**
  * v135 — tolerant saved-name matching for topics whose canonical name
  * changed under a saved entry (the books dedupe collapsed "The Odyssey"
  * into "The Odyssey (c. 8th century BCE)", "Moby-Dick; or, The Whale"
  * into "Moby-Dick (1851)", etc.). Tiered: exact (case-insensitive) →
  * base-name (strip a trailing "(…)" / "— …" qualifier from either side)
  * → containment (min 4 chars, so a bare "The" can never match
- * everything). Used by [TopicCatalog.findByName] and the reveal's
- * per-pool fallback.
+ * everything). v199 — the containment tier is intentionally the LAST
+ * resort: [TopicCatalog.findByName] runs strict matches across every
+ * category before this tolerant pass, and callers resolve within the
+ * route's own category first.
  */
 internal fun CurioTopic.matchesSavedName(requested: String): Boolean {
     val wanted = requested.trim()
     if (wanted.isEmpty()) return false
     if (name.equals(wanted, ignoreCase = true)) return true
-
-    fun base(s: String): String {
-        val cut = s.substringBefore(" (").substringBefore(" — ")
-        return cut.trim().removeSuffix(";")
-    }
-    val nameBase = base(name)
-    val wantedBase = base(wanted)
+    val nameBase = savedNameBase(name)
+    val wantedBase = savedNameBase(wanted)
     if (nameBase.isNotBlank() && nameBase.equals(wantedBase, ignoreCase = true)) return true
 
     // Containment needs a real word to anchor on — never match on a

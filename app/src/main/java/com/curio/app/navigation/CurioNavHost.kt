@@ -121,6 +121,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioFloatingNavBar
+import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.CurioInAppToastHost
 import com.curio.app.ui.components.CurioNavigationRail
@@ -276,6 +277,41 @@ fun CurioNavHost(
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
     val showBottomBar =
         routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+    // v193 — the floating pill bar stays composed briefly after the route
+    // leaves the tab set so the previously-selected pill COLLAPSES with the
+    // same spring it expands with. The old `showBottomBar` gate unmounted
+    // the bar the instant the route changed (e.g. Home → Profile), so the
+    // expanded pill just vanished instead of gliding closed — user report:
+    // "the home nav pill should collapse just the way it expands when i
+    // back from home… it still just vanishes instead of collapse vanishing".
+    // When the route is a tab again the bar remounts immediately (the pill
+    // expands as before); the rail keeps the instant `showBottomBar` gate
+    // (rail items never expand/collapse).
+    // v194 — the hold is the collapse spring's settle time (~380ms, the
+    // 240-stiffness critically-damped family), not a fixed half-second: the
+    // pill glides fully closed and then the bar unmounts — no dead pause
+    // with the bar sitting there (user: "it stays for too long").
+    // v201 — the pill family slowed to 150 stiffness (smooth, deeper
+    // collapse), so the hold extends to ~420ms — still exactly the spring's
+    // settle time, so the cinch finishes and the bar unmounts with no dead
+    // pause.
+    // v206 — family slowed to 120 (even smoother), hold → ~460ms.
+    var barVisible by remember { mutableStateOf(showBottomBar) }
+    LaunchedEffect(showBottomBar) {
+        if (showBottomBar) {
+            barVisible = true
+        } else {
+            // Let the collapse spring + label retract finish before unmount.
+            // v208e — the hold is [FloatingNavCollapseHoldMillis], tuned to
+            // the reveal's Like/Dislike entrance (220ms slide + a hair), so
+            // the bar VANISHES right as the pill lands — the pill keeps its
+            // natural start time; the nav pill syncs TO it (user: "the like
+            // and dislike starting time was fine i just asked you to tune the
+            // navpil home one to sync properly").
+            delay(FloatingNavCollapseHoldMillis)
+            barVisible = false
+        }
+    }
     // v142 — full-bleed-bottom routes: like the tab pages and the Topic
     // Reveal, these pages paint their own backgrounds to the very bottom
     // edge and clear the gesture bar themselves — no reserved nav-bar slot
@@ -831,11 +867,33 @@ fun CurioNavHost(
         // floating pill dock floats at the same bottom-center spot, and the
         // old opaque dock covered the bar anyway, so the bar must not show
         // behind/around the tour pill on tab stops.
-        if (!wide && showBottomBar && TourController.currentStep == null) {
+        if (!wide && barVisible && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
+                // While the bar lingers after leaving the tab set, force the
+                // collapse: NO pill stays selected (they all glide closed),
+                // so the reveal route can't keep the Spin pill popped open.
+                collapsing = !showBottomBar,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
+        }
+        // v208e — the reveal's Like/Dislike pill renders in THIS overlay,
+        // composed AFTER the bar, so it draws ON TOP of the collapsing nav
+        // pill during the handoff (z-index above the nav pill — user
+        // request). The reveal registers its pill via [SentimentPillHost];
+        // the wrapper Box has no pointer input, so touches pass through
+        // everywhere except the pill itself.
+        // v208f — gated on the reveal route so the pill VANISHES the moment
+        // you tap back (the route flips before the screen finishes its exit
+        // transition — the old gate waited for the screen to fully dispose,
+        // so the pill lingered: "why the like and dislike pill now staying
+        // longer… make it vanish like before just when i tap back").
+        if (isRevealRoutePrefix) {
+            SentimentPillHost.content?.let { pill ->
+                Box(Modifier.fillMaxSize()) {
+                    Box(Modifier.align(Alignment.BottomCenter)) { pill() }
+                }
+            }
         }
 
     // Keep the tour controls inside the existing root Box. The Row is a

@@ -37,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -53,6 +55,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.materialThemeOn
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
 
@@ -223,6 +226,11 @@ object CurioBottomNavItems {
 // higher": icon pills 60 → 64dp, expanded 128 → 136dp, height 48 → 52dp.
 private val FloatingPillIconWidth = 64.dp
 private val FloatingPillExpandedWidth = 136.dp
+// v201 — the leave-hold collapse pulls the pill TIGHTER than its resting
+// icon width (64 → 44dp): just the icon + a sliver of breathing room, so
+// the pill visibly cinches in before the bar unmounts instead of stopping
+// at its idle size ("collapse even more").
+private val FloatingPillCollapsedWidth = 44.dp
 private val FloatingPillHeight = 52.dp
 
 // v162 — ONE spring family drives EVERY animated property of the pill
@@ -247,10 +255,31 @@ private val FloatingPillHeight = 52.dp
 // settle). Still critically damped (damping 1.0 = zero overshoot, zero
 // bounce) — the calmest glide a spring can give; identical physics across
 // all four specs keeps the lockstep.
-private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 240f)
-private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 240f)
-private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 240f)
-private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 240f)
+// v201 — "make the home nav pill collapse even smoother… collape even
+// more": stiffness 240 → 150 (~40% slower settle again, the longest calm
+// glide a critically-damped spring can give), and the leave-hold collapse
+// now targets a width TIGHTER than the resting icon pill (see
+// [FloatingNavPill]) so the pill visibly pulls in before the bar
+// unmounts. The NavHost hold is sized to this family's settle time.
+// v206 — "the collapse of home nav pil can be more smoother": 150 → 120
+// (~20% slower still), the calmest glide yet; the NavHost hold extends to
+// ~460ms to match (see CurioNavHost).
+private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 120f)
+private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 120f)
+private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 120f)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 120f)
+
+// v208e — how long the collapsed pill bar stays composed after the route
+// leaves the tab set, then unmounts. Tuned to the Topic Reveal's
+// Like/Dislike entrance: the pill slides in over 220ms at its NATURAL
+// time, and the bar vanishes right as it lands (240 = 220 + a hair), so
+// the nav pill syncs TO the pill — the collapse motion is still visible
+// beneath it (overlap), then the bar is gone the moment the pill arrives.
+// The reveal's pill renders ABOVE the bar via the [SentimentPillHost]
+// overlay, so the overlap reads clean.
+// (Long — it feeds kotlinx.coroutines.delay(), which takes Long millis; a
+// literal 460 compiled because literals widen, a typed Int const does not.)
+const val FloatingNavCollapseHoldMillis = 240L
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -275,18 +304,30 @@ private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 24
 @Composable
 fun CurioFloatingNavBar(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v194 — while the bar is in its leave-hold phase (the route left the
+    // tab set but the bar stays composed so the selected pill can COLLAPSE
+    // with its spring), NO pill stays selected — they all glide closed. The
+    // old code forced SPIN selected on the reveal route, so leaving Home for
+    // a topic reveal made the SPIN pill POP OPEN during the hold and the bar
+    // then vanished with a pill stuck expanded ("neither it collapse").
+    collapsing: Boolean = false
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val routePrefix = currentRoute?.substringBefore("/")
     // Reveal is entered from the Shuffle deck, so keep Shuffle selected while
-    // the reveal page is open instead of leaving every tab unselected.
-    val selectedRoute = if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
+    // the reveal page is open instead of leaving every tab unselected — but
+    // only while the bar is actually ON a page (see [collapsing]).
+    val selectedRoute = if (collapsing) {
+        null
+    } else if (routePrefix == CurioRoutes.REVEAL.substringBefore("/")) {
         CurioRoutes.SPIN
     } else {
         routePrefix
     }
+    // v188 — a light tick when switching tabs.
+    val haptics = LocalHapticFeedback.current
 
     // v149 — the ACTIVE pill wears the current page's category color
     // (published via [CurioNavTint]); null on plain pages → secondary.
@@ -325,6 +366,9 @@ fun CurioFloatingNavBar(
                     FloatingNavPill(
                         destination = destination,
                         selected = selected,
+                        // v201 — during the leave-hold the pill cinches below
+                        // its idle icon width (see [FloatingPillCollapsedWidth]).
+                        collapsing = collapsing,
                         activeAccent = pageAccent,
                         onClick = {
                             // Compare the route PREFIX: the Shuffle tab is also
@@ -333,6 +377,8 @@ fun CurioFloatingNavBar(
                             // already-selected tab must be a no-op instead of
                             // re-opening it.
                             if (selectedRoute != destination.route) {
+                                // v188 — light tick on tab switch.
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 // Anchor to HOME (the persistent root), not the
                                 // graph start destination: SPLASH is popped on
                                 // launch, so popUpTo(startDestination) would be
@@ -364,6 +410,10 @@ fun CurioFloatingNavBar(
 private fun FloatingNavPill(
     destination: CurioBottomDestination,
     selected: Boolean,
+    // v201 — true only during the bar's leave-hold: the pill cinches to
+    // [FloatingPillCollapsedWidth] (tighter than the idle icon pill) so
+    // the collapse visibly finishes before the bar unmounts.
+    collapsing: Boolean,
     // v149 — the current page's category accent (see [curioNavActiveAccent]);
     // null → the theme's PRIMARY (coral) with onPrimary ink (v161: the old
     // secondary/butter fallback read as a stray yellow on Cabinet "All").
@@ -371,7 +421,9 @@ private fun FloatingNavPill(
     onClick: () -> Unit
 ) {
     val pillWidth by animateDpAsState(
-        targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+        targetValue = if (selected) FloatingPillExpandedWidth
+        else if (collapsing) FloatingPillCollapsedWidth
+        else FloatingPillIconWidth,
         // v162 — the shared [PillWidthSpring] (near-critical 0.9 + Medium),
         // identical to the fill/icon/label springs so they stay in lockstep.
         animationSpec = PillWidthSpring,
@@ -448,10 +500,13 @@ private fun FloatingNavPill(
                     // already display-heavy). Size nudged 12 → 13sp so the
                     // wide face reads at the same visual weight as the old
                     // geom Bold.
+                    // v186 — the user asked for the labels EVEN LARGER in
+                    // the default look: 13 → 15sp (still fits the 136dp
+                    // expanded pill: icon 26 + label ~70sp + padding).
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontFamily = ChangaOneFontFamily,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 13.sp
+                        fontSize = 15.sp
                     ),
                     color = activeInk,
                     maxLines = 1,
@@ -483,6 +538,8 @@ fun CurioNavigationRail(
     } else {
         routePrefix
     }
+    // v188 — light tick on tab switch (wide-window rail).
+    val haptics = LocalHapticFeedback.current
     // v161/v166 — the rail's active indicator mirrors the phone pill bar:
     // the current page's accent CALMED (v166 muted the bright accents), else
     // the theme's muted secondaryContainer (the old hard-coded secondary /
@@ -512,6 +569,8 @@ fun CurioNavigationRail(
                     // category-launched deck ("spin/artists") is still the
                     // Shuffle tab, so re-tapping must not re-navigate.
                     if (selectedRoute != destination.route) {
+                        // v188 — light tick on tab switch.
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         navController.navigateToTab(destination.route)
                     }
                 },
@@ -560,6 +619,10 @@ fun CurioNavigationRail(
  */
 @Composable
 private fun curioNavContainerColor(routePrefix: String?): Color {
+    // v190 — Material theme: the M3 nav container role (neutral surface) —
+    // the page wash collapses (M3: navigation lives on surfaceContainer,
+    // not per-page tints).
+    if (materialThemeOn) return MaterialTheme.colorScheme.surfaceContainer
     val target = when (routePrefix) {
         // Fall back to the theme BACKGROUND (not surface): when a page
         // publishes no wash its own background IS `colorScheme.background`
@@ -606,6 +669,9 @@ internal fun curioFloatingNavContainer(routePrefix: String?): Color =
  */
 @Composable
 internal fun curioFloatingNavContainerFor(wash: Color): Color {
+    // v190 — Material theme: the M3 nav container role instead of the
+    // page-tinted lift.
+    if (materialThemeOn) return MaterialTheme.colorScheme.surfaceContainer
     if (isCurioDarkTheme()) return MaterialTheme.colorScheme.surfaceContainerHigh
     return lerp(wash, MaterialTheme.colorScheme.surfaceContainerHigh, 0.30f)
 }
@@ -647,7 +713,13 @@ private fun curioNavActiveAccent(routePrefix: String?): Color? = when (routePref
  * Home-only now.
  */
 @Composable
-private fun curioActivePillFill(accent: Color?): Color {
+// v208 — internal (not private): the Spin experiment reuses the nav pill's
+// CALMED accent fill + ink for the nav-style Categories/Filter buttons.
+internal fun curioActivePillFill(accent: Color?): Color {
+    // v190 — Material theme: the M3 navigation indicator — the scheme's
+    // muted secondaryContainer (no per-lane colors in the bar; user:
+    // "fix the nav bar material color as they are bad").
+    if (materialThemeOn) return MaterialTheme.colorScheme.secondaryContainer
     if (accent != null) {
         if (!isCurioDarkTheme() && !AppPreferences.pastelColorsState) {
             val a = toHsl(accent)
@@ -662,7 +734,10 @@ private fun curioActivePillFill(accent: Color?): Color {
  *  deep/light twin on a category fill, the theme's onSecondaryContainer on
  *  the plain-page fallback (proper M3 pair, guaranteed contrast). */
 @Composable
-private fun curioActivePillInk(accent: Color?): Color {
+// v208 — internal (see [curioActivePillFill]).
+internal fun curioActivePillInk(accent: Color?): Color {
+    // v190 — Material theme: onSecondaryContainer on the M3 indicator.
+    if (materialThemeOn) return MaterialTheme.colorScheme.onSecondaryContainer
     if (accent != null) return pastelFillInk(accent)
     return MaterialTheme.colorScheme.onSecondaryContainer
 }

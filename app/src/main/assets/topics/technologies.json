@@ -18947,5 +18947,65 @@
       "durationMinutes": 7,
       "instruction": "Learn to notice the technology around you, then explain why we stop seeing it."
     }
+  },
+  {
+    "id": "tech-ferranti-mark-1",
+    "categoryId": "TECHNOLOGIES",
+    "subtype": "Computing History",
+    "name": "The Ferranti Mark 1 (1951)",
+    "teaser": "The world's first commercially sold general-purpose computer — and the first machine to run a computer music program, playing 'God Save the King' through a loudspeaker in 1951. Ferranti shipped it out of Manchester's wartime radar workshops, straight to the University of Manchester. It could store 256 words of memory, yet its operators programmed it by plugging cables.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the Ferranti Mark 1 (1951)",
+      "durationMinutes": 12,
+      "instruction": "Read how the first commercial computer was built and programmed, then notice that its 'music' was just the CPU wiggling a speaker — computing and audio were never far apart."
+    },
+    "tags": [
+      "Computing History",
+      "Hardware",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "tech-signal-fires",
+    "categoryId": "TECHNOLOGIES",
+    "subtype": "Communications",
+    "name": "Signal Fires & Beacon Chains",
+    "teaser": "Before electricity, news traveled at the speed of fire: relay chains of hilltop beacons could pass a message across a kingdom in hours. The Greeks used fire signals to report the fall of Troy, and the Romans built the first documented long-distance relay. A single flare meant 'danger' — but the system could only send a handful of pre-arranged messages.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Explore the history of beacon communication",
+      "durationMinutes": 15,
+      "instruction": "Read how beacon chains encoded a handful of pre-arranged messages, then think about what a fire-and-drum network could NOT say — that limit shaped how empires communicated."
+    },
+    "tags": [
+      "Communications",
+      "Tech History",
+      "Ancient"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "tech-pantelegraph",
+    "categoryId": "TECHNOLOGIES",
+    "subtype": "Communications",
+    "name": "The Pantelegraph (1861)",
+    "teaser": "Thirty years before the telephone, Giovanni Caselli's pantelegraph sent handwriting and drawings over telegraph wires — Paris to Lyon, and later between Moscow and St. Petersburg. The sender traced a line with a stylus while a pendulum swept the page; the receiver re-drew it in sync. Napoleon III was a fan. It worked, then the telegraph's economics killed it.",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Learn",
+      "targetName": "Meet the pantelegraph (1861)",
+      "durationMinutes": 10,
+      "instruction": "Read how Caselli's fax machine used synchronized pendulums to redraw documents, and notice that the core idea — scan a page line by line and rebuild it remotely — outlived every Victorian version of it."
+    },
+    "tags": [
+      "Communications",
+      "Tech History",
+      "1800s"
+    ],
+    "tier": 1
   }
 ]
