@@ -290,13 +290,17 @@ fun CurioNavHost(
     // 240-stiffness critically-damped family), not a fixed half-second: the
     // pill glides fully closed and then the bar unmounts — no dead pause
     // with the bar sitting there (user: "it stays for too long").
+    // v201 — the pill family slowed to 150 stiffness (smooth, deeper
+    // collapse), so the hold extends to ~420ms — still exactly the spring's
+    // settle time, so the cinch finishes and the bar unmounts with no dead
+    // pause.
     var barVisible by remember { mutableStateOf(showBottomBar) }
     LaunchedEffect(showBottomBar) {
         if (showBottomBar) {
             barVisible = true
         } else {
             // Let the collapse spring + label retract finish before unmount.
-            delay(380)
+            delay(420)
             barVisible = false
         }
     }

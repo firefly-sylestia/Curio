@@ -558,20 +558,24 @@ fun EntryDetailScreen(
                     val metaHolesOn = metaPaperOn && AppPreferences.paperHeaderHolesState
                     val metaRingsOn = metaHolesOn && AppPreferences.paperHoleRingsState
                     val metaRingStyle = AppPreferences.paperHoleRingStyleState
-                    Surface(
-                        shape = metaShape,
-                        // v27n — frosted glass pane over the hero: the
-                        // translucent frost can't hold an elevation shadow
-                        // (it bleeds through), so the frosted pane stays
-                        // flat; the opaque paper card can lift like Home's.
-                        // v75 — the default pane is OPAQUE now (the same
-                        // language as Profile's stat pane + Home's Streak
-                        // card), so it always carries the elevation + dark
-                        // glow like those panes.
-                        color = Color.Transparent,
-                        shadowElevation = 3.dp,
+                    // v200 — the Surface wrapper is GONE: M3 Surface (1.2+)
+                    // clips its children to the shape, which CUT the coil's
+                    // left peek at the card edge. A plain Box +
+                    // shadow(clip = false) keeps the elevation without the
+                    // clip — the paper fill self-clips to the shape outline,
+                    // so the protruding wire can render outside the card.
+                    // v27n — frosted glass pane over the hero: the
+                    // translucent frost can't hold an elevation shadow
+                    // (it bleeds through), so the frosted pane stays
+                    // flat; the opaque paper card can lift like Home's.
+                    // v75 — the default pane is OPAQUE now (the same
+                    // language as Profile's stat pane + Home's Streak
+                    // card), so it always carries the elevation + dark
+                    // glow like those panes.
+                    Box(
                         modifier = Modifier
                             .curioDarkGlow(3.dp, metaShape)
+                            .shadow(3.dp, metaShape, clip = false)
                     ) {
                         // The card's content Box: the Row below defines the
                         // height, and the paper fill / frosted pane + glass

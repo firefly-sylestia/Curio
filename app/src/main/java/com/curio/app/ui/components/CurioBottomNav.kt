@@ -226,6 +226,11 @@ object CurioBottomNavItems {
 // higher": icon pills 60 → 64dp, expanded 128 → 136dp, height 48 → 52dp.
 private val FloatingPillIconWidth = 64.dp
 private val FloatingPillExpandedWidth = 136.dp
+// v201 — the leave-hold collapse pulls the pill TIGHTER than its resting
+// icon width (64 → 44dp): just the icon + a sliver of breathing room, so
+// the pill visibly cinches in before the bar unmounts instead of stopping
+// at its idle size ("collapse even more").
+private val FloatingPillCollapsedWidth = 44.dp
 private val FloatingPillHeight = 52.dp
 
 // v162 — ONE spring family drives EVERY animated property of the pill
@@ -250,10 +255,16 @@ private val FloatingPillHeight = 52.dp
 // settle). Still critically damped (damping 1.0 = zero overshoot, zero
 // bounce) — the calmest glide a spring can give; identical physics across
 // all four specs keeps the lockstep.
-private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 240f)
-private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 240f)
-private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 240f)
-private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 240f)
+// v201 — "make the home nav pill collapse even smoother… collape even
+// more": stiffness 240 → 150 (~40% slower settle again, the longest calm
+// glide a critically-damped spring can give), and the leave-hold collapse
+// now targets a width TIGHTER than the resting icon pill (see
+// [FloatingNavPill]) so the pill visibly pulls in before the bar
+// unmounts. The NavHost hold is sized to this family's settle time.
+private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 150f)
+private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 150f)
+private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 150f)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 150f)
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
@@ -340,6 +351,9 @@ fun CurioFloatingNavBar(
                     FloatingNavPill(
                         destination = destination,
                         selected = selected,
+                        // v201 — during the leave-hold the pill cinches below
+                        // its idle icon width (see [FloatingPillCollapsedWidth]).
+                        collapsing = collapsing,
                         activeAccent = pageAccent,
                         onClick = {
                             // Compare the route PREFIX: the Shuffle tab is also
@@ -381,6 +395,10 @@ fun CurioFloatingNavBar(
 private fun FloatingNavPill(
     destination: CurioBottomDestination,
     selected: Boolean,
+    // v201 — true only during the bar's leave-hold: the pill cinches to
+    // [FloatingPillCollapsedWidth] (tighter than the idle icon pill) so
+    // the collapse visibly finishes before the bar unmounts.
+    collapsing: Boolean,
     // v149 — the current page's category accent (see [curioNavActiveAccent]);
     // null → the theme's PRIMARY (coral) with onPrimary ink (v161: the old
     // secondary/butter fallback read as a stray yellow on Cabinet "All").
@@ -388,7 +406,9 @@ private fun FloatingNavPill(
     onClick: () -> Unit
 ) {
     val pillWidth by animateDpAsState(
-        targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+        targetValue = if (selected) FloatingPillExpandedWidth
+        else if (collapsing) FloatingPillCollapsedWidth
+        else FloatingPillIconWidth,
         // v162 — the shared [PillWidthSpring] (near-critical 0.9 + Medium),
         // identical to the fill/icon/label springs so they stay in lockstep.
         animationSpec = PillWidthSpring,

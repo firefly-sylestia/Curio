@@ -141,6 +141,7 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioInnerGlow
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
@@ -2265,9 +2266,11 @@ private fun RevealSentimentPill(
 // v154 — bumped to EXACTLY the nav bar's sizes (60dp/128dp/60dp + 26dp
 // icon) so the reveal Like/Dislike pill matches the bigger bottom pill.
 // v159 — height slimmed 60 → 48dp WITH the nav bar (lengths unchanged).
-private val RevealSentimentIconWidth = 60.dp
-private val RevealSentimentExpandedWidth = 128.dp
-private val RevealSentimentHeight = 48.dp
+// v201 — bumped to the nav bar's CURRENT sizes (64/136dp + 52dp height,
+// the v184 sizing) so the Like/Dislike pill matches the bar again.
+private val RevealSentimentIconWidth = 64.dp
+private val RevealSentimentExpandedWidth = 136.dp
+private val RevealSentimentHeight = 52.dp
 
 // v162 — same ONE-spring-family fix as the nav bar: width, fill, icon tint
 // and the label expand/shrink all run identical spring params so the
@@ -2278,11 +2281,12 @@ private val RevealSentimentHeight = 48.dp
 // v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
 // critically damped (1.0) so the Like/Dislike segments glide with zero
 // overshoot — same feel as the bottom bar's collapse. v173 — slowed to
-// 400 with the nav pill family ("still too rapid").
-private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
-private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
-private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 400f)
-private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
+// 400 with the nav pill family ("still too rapid"). v201 — slowed to 150
+// with the nav pill family ("smoother"), the calmest glide yet.
+private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 150f)
+private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 150f)
+private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 150f)
+private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 150f)
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
@@ -2354,8 +2358,14 @@ private fun SentimentSegment(
             ) {
                 Text(
                     text = label,
-                    // v164 — bolder label to match the nav bar (was SemiBold).
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    // v201 — EXACTLY the nav bar's label: Changa One display
+                    // face, 15sp, Normal (was labelMedium Bold, which read
+                    // thinner and smaller than the bar's tab labels).
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 15.sp
+                    ),
                     color = ink,
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)

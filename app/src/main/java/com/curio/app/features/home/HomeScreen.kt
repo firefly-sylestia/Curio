@@ -593,27 +593,25 @@ fun HomeScreen(navController: NavController) {
                             val ringsOn = holesOn && AppPreferences.paperHoleRingsState
                             // v27v — which 3D ring look the holes wear.
                             val ringStyle = AppPreferences.paperHoleRingStyleState
-                            Surface(
-                                shape = statShape,
-                                color = Color.Transparent,
-                                // v74 — the pane always carries the elevation +
-                                // dark glow, exactly like Profile's stat pane
-                                // (the old 0dp default made the fill read flat
-                                // against the banner).
-                                shadowElevation = 3.dp,
+                            // v200 — the Surface wrapper is GONE: M3 Surface
+                            // (1.2+) clips its children to the shape, which CUT
+                            // the coil's left peek at the card edge. A plain
+                            // Box + shadow(clip = false) keeps the elevation
+                            // without the clip — the paper fill self-clips to
+                            // the shape outline, so the protruding wire can
+                            // render outside the card.
+                            // v27u — the paper surface (fill + 3-hole column
+                            // + pressed rims or tilted book rings) lives in the
+                            // shared paperStatCardFill component, so Profile's
+                            // stat pane wears the same card.
+                            // v74 — the pane always carries the elevation + dark
+                            // glow, exactly like Profile's stat pane.
+                            Box(
                                 modifier = Modifier
                                     .curioDarkGlow(3.dp, statShape)
-                            ) {
-                                // The fill must wear the card's own shape —
-                                // Surface does not clip its content, so a plain
-                                // background() would bleed square corners past
-                                // the torn/rounded border.
-                                // v27u — the paper surface (fill + 3-hole column
-                                // + pressed rims or tilted book rings) lives in
-                                // the shared paperStatCardFill component, so
-                                // Profile's stat pane wears the same card.
-                                Box(
-                                    modifier = when {
+                                    .shadow(3.dp, statShape, clip = false)
+                                    .then(
+                                        when {
                                         paperStatsOn -> Modifier.paperStatCardFill(
                                             shape = statShape,
                                             fill = paperStatBg,
@@ -643,7 +641,8 @@ fun HomeScreen(navController: NavController) {
                                             RoundedCornerShape(20.dp)
                                         )
                                     }
-                                ) {
+                                )
+                            ) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -693,7 +692,6 @@ fun HomeScreen(navController: NavController) {
                                         )
                                     }
                                 }
-                            }
                         }
                     }
                 }

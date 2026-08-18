@@ -1,34 +1,36 @@
-# Current Request — Animated Movies category (v200) + housekeeping
+# Current Request — v201: ring cut fix + nav pill collapse + pill-size parity
 
-## Status: DONE (committed + pushed to Alpha)
+## Status: DONE (committed, push follows)
 
 ## Request (user, verbatim)
-"continue the expansion of topics and add animated movies section as a ne category and separate animated movies from films and make them 1000+ and anduse real quick facts and push after its fully done" (+ "anime and animation movies are differnt btw")
+- "the 3d ring should be shouwn fully without getting cut thats what i meant"
+- "make the home nav pill collapse even smoother like make it collape even more and make the like dislike button match the text and size of the nav bar pill and same in pet designer" (plus "okay thats fine for now, you can push it and remove the useless dump files" — the v200 content push happened first)
 
-## What changed (v200)
+## What changed (v201)
 
-### 1. New category: Animated Movies (ANIMATED_MOVIES)
-- **Anime ≠ animated movies** (user note): the 6 anime films in films.json stay put (Akira, Grave of the Fireflies, Totoro, Princess Mononoke, Spirited Away, The Boy and the Heron). The new lane is non-anime animation only.
-- **Registration:** `Category.kt` (enum + newLanes + order + slug `animated-movies` + Entertainment family), `CurioColors.kt` (palette constants), the three exhaustive `when`s (CaptureEntity.kt, ExploreSession.kt, TopicRevealScreen.kt), and the Entertainment quick-mix preset (DeckPresets.kt). Gradle `validateTopics` derives expected categoryId from the filename — no validator list change needed.
-- **Separation:** `scripts/extract_animated_from_films.py` moved 52 non-anime animated films out of films.json (948 remaining) into the new animated-movies.json. First tag-based attempt false-positived (live-action "Pixar"-tagged films) and was reverted — switched to an explicit title list.
-- **Content:** ~540 more real entries authored across scripts/batch_animated_1..11.py — Disney theatrical + DTV, Pixar, DreamWorks, Illumination, Blue Sky, Sony, Aardman, Laika, stop-motion indie, Don Bluth + 80s/90s classics, classic 30s–60s + Rankin/Bass, international (French, Irish, Chinese, Latin American, Indian, Australian, Russian), and franchise DTV (Barbie, Scooby-Doo, Tom & Jerry, DC/Marvel animated, DisneyToon sequels). **591 entries total this push** — the 1000+ top-up continues in a later pass (user approved pushing at 591).
-- **Validation:** check_assets.py clean, all 18,071 ids unique across the catalog (no cross-file collisions).
+### 1. Hole-ring coil cut at card edge — ROOT CAUSE FOUND
+Material3 1.5's `Surface` ALWAYS clips children to the shape (`.clip(shape)` at the end of its implementation) — the v74 "Surface does not clip" note was true only for M3 1.0/1.1. The coil's left peek (drawn at −6.5dp) was being cut at the card edge. Fix: the three stat-pane call sites (Home, Profile, EntryDetail) swap the clipping `Surface` for a plain `Box` carrying `Modifier.shadow(elevation, shape, clip = false)` + the paper fill — the fill self-clips to the outline path, so the coil escapes past the left edge. All three sites have ≥28dp container padding, so the peek clears the screen edge.
 
-### 2. Housekeeping
-- Removed root-level reference dump SVGs: `svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`, `footer.svg` (real drawer art lives in res/raw/).
+### 2. Nav pill collapse — smoother + deeper
+- Pill spring family 240 → 150 stiffness (longest calm critically-damped glide).
+- The leave-hold collapse now targets `FloatingPillCollapsedWidth` (44dp — tighter than the idle 64dp icon pill), so the pill visibly cinches in before the bar unmounts. `FloatingNavPill` gained a `collapsing` param; the NavHost leave-hold extended 380 → 420ms to match the slower settle (still exactly the spring's settle time — no dead pause).
+
+### 3. Like/Dislike + Pet Studio bars match the nav pill exactly
+- `RevealSentimentPill` (Topic Reveal): 64/136dp + 52dp height + 26dp icon, springs 400 → 150, label → Changa One 15sp Normal (was labelMedium Bold).
+- `PetStudioTab` (Pet Designer): same 64/136dp + 26dp icon, springs 400 → 150, label → Changa One 15sp Normal.
 
 ## Files
-- `data/Category.kt`, `ui/theme/CurioColors.kt`, `data/CaptureEntity.kt`, `data/ExploreSession.kt`, `features/reveal/TopicRevealScreen.kt`, `features/picker/DeckPresets.kt` — category registration.
-- `app/src/main/assets/topics/animated-movies.json` — 591 entries.
-- `app/src/main/assets/topics/films.json` — 948 (52 animated removed, anime intact).
-- `scripts/extract_animated_from_films.py`, `scripts/batch_animated_1..11.py` — authoring scripts.
+- `ui/components/CurioBottomNav.kt` — collapsing param + collapsed width + 150 springs.
+- `navigation/CurioNavHost.kt` — hold 380 → 420ms.
+- `features/reveal/TopicRevealScreen.kt` — sentiment pill parity.
+- `features/petdesigner/PetDesignerScreen.kt` — studio tab parity.
+- `features/home/HomeScreen.kt`, `features/profile/ProfileScreen.kt`, `features/detail/EntryDetailScreen.kt` — Surface → Box + shadow(clip=false) at the three stat-pane sites.
 
 ## Docs
-- `app/AGENTS.md` — v200 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — ADD bullet.
+- `app/AGENTS.md` — v201 entry.
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — FIX bullets.
 - This Prompt.md.
 
-## Next steps (user's follow-up asks, queued)
-1. 3D ring on PaperStatCard: still cut at the card's left edge — make it actually peek out (needs the peek to escape the clip, not just draw at negative x).
-2. Home nav pill collapse: even smoother / collapses more.
-3. Like/Dislike button: match the text and size of the nav bar pill — same in Pet Designer.
+## Verification
+- All touched files brace-balanced (tokenizer check) — Home/Profile/Detail 300/220/518, nav/reveal/pet clean.
+- CI validates the compile on push.

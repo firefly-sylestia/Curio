@@ -1716,6 +1716,33 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v201 — nav pill collapse cinches tighter + slower; Like/Dislike and
+  Pet Studio bars match the nav pill exactly; hole-ring coil no longer
+  cut at the card edge. (branch Alpha)** User: "the 3d ring should be
+  shouwn fully without getting cut" + "make the home nav pill collapse
+  even smoother like make it collape even more and make the like dislike
+  button match the text and size of the nav bar pill and same in pet
+  designer".
+  - RING CUT — ROOT CAUSE: Material3 1.5's `Surface` ALWAYS clips its
+    children to the shape (`.clip(shape)` at the end of the
+    implementation) — the v74 "Surface does not clip" note was true
+    only for M3 1.0/1.1. The coil's left peek (drawn at −6.5dp) was cut
+    at the card edge. Fix: the three stat-pane call sites (Home,
+    Profile, EntryDetail) swap the clipping `Surface` for a plain `Box`
+    carrying `Modifier.shadow(elevation, shape, clip = false)` + the
+    paper fill — the fill self-clips to the outline path, so the coil
+    escapes past the left edge. All three sites have ≥28dp container
+    padding so the peek clears the screen edge.
+  - NAV PILL COLLAPSE: pill spring family 240 → 150 stiffness (longest
+    calm critically-damped glide), and the leave-hold collapse now
+    targets `FloatingPillCollapsedWidth` (44dp — tighter than the idle
+    64dp icon pill) so the pill visibly cinches before the bar unmounts
+    ([FloatingNavPill] gains a `collapsing` param; NavHost hold 380 →
+    420ms to match the slower settle — still no dead pause).
+  - LIKE/DISLIKE + PET STUDIO PILLS: `RevealSentimentPill` and
+    `PetStudioTab` bumped to the nav bar's exact sizes (64/136dp +
+    52dp height + 26dp icon), springs 400 → 150, and the labels now use
+    the nav bar's Changa One 15sp Normal face (was labelMedium Bold).
 - **v198 — Home/Recents "Unexplored" tag pills wear a SHADED category
   chip; Material theme: category buttons, filter chips and ink now use
   the family tonal tones — the scheme-role amber/mint/translucent paints
