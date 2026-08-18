@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -194,56 +192,10 @@ fun StatsScreen(navController: NavController) {
             skyInk = skyInk
         )
 
-        // v206 — a standalone sun (light) / crescent moon (dark) floating just
-        // below the status bar — only the celestial body, not the whole sky
-        // drawing, and only on this page (user: "place the drawing of sun and
-        // moon a little below the start bar just the moon and the sun not the
-        // whole drawing. and only in your curiocity page as a separate
-        // maybe"). Decorative only — the drawer's body stays the theme toggle.
-        StatsCelestialBody(
-            skyTop = skyTop,
-            skyBottom = skyBottom,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(top = 14.dp, end = 28.dp)
-        )
     }
 }
 
-/** v206 — the sun (light theme) / crescent moon (dark theme) from the drawer
- *  sky art, drawn ALONE as a small decorative accent on the Your Curiosity
- *  page: a warm gold sun with a soft glow in light mode, a cream crescent
- *  carved by the local sky tone in dark mode (mirrors the SVG's moon
- *  construction). Not interactive. */
-@Composable
-private fun StatsCelestialBody(
-    skyTop: Color,
-    skyBottom: Color,
-    modifier: Modifier = Modifier
-) {
-    val dark = isCurioDarkTheme()
-    // The crescent's carve uses the banner's local sky mid-tone (the SVG
-    // carves the moon with its own sky color).
-    val skyMid = lerp(skyTop, skyBottom, 0.5f)
-    Box(modifier = modifier.size(44.dp)) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val c = Offset(size.width * 0.56f, size.height * 0.50f)
-            if (dark) {
-                val r = size.minDimension * 0.30f
-                // cream crescent, carved by a sky-colored disc (like the SVG)
-                drawCircle(Color(0xFFFFFDF4).copy(alpha = 0.85f), radius = r, center = c)
-                drawCircle(skyMid, radius = r, center = Offset(c.x + r * 0.55f, c.y - r * 0.40f))
-            } else {
-                val r = size.minDimension * 0.26f
-                // warm sun: soft glow disc + gold core + highlight (the SVG's sun)
-                drawCircle(Color(0xFFFFD66B).copy(alpha = 0.16f), radius = r * 2.6f, center = c)
-                drawCircle(Color(0xFFFFD66B), radius = r, center = c)
-                drawCircle(Color(0xFFFFE9A2).copy(alpha = 0.72f), radius = r * 0.36f, center = Offset(c.x - r * 0.30f, c.y - r * 0.30f))
-            }
-        }
-    }
-}
+
 
 /** v174c — the stats page's celestial palette (mirrors the drawer's sky). */
 @Composable
