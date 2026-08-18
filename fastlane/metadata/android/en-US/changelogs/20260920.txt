@@ -50,6 +50,8 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Paper: the "Title cut lines" under headers are shorter and sit to the right of the title text — a partial right-side underline.
+- Paper: the "Hole rings" are redrawn as the real spiral-coil binding wire from the reference SVG — a foreshortened metal coil drawn over the punched holes with a tuned steel gradient and specular (the old rounded ring look is gone).
 - Navigation: leaving a tab (opening Profile, a settings page, the Topic Reveal…) now glides the selected pill closed with the same spring it expands with — the pill no longer vanishes the instant the page opens.
 - Spin: the shuffle card no longer shows the topic's year pill — the year reads only on the Topic Reveal page (the byline pill stays on the card).
 - Drawer: the curiosity constellation is now a brain neural web — explored lanes sit as neurons in two hemisphere lobes, linked by curved synaptic connections with inter-hemispheric bridges, instead of the old flat scatter.

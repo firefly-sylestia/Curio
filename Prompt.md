@@ -1,43 +1,44 @@
-# Current Request — Nav pill should collapse (not vanish) when leaving a tab
+# Current Request — Cut lines shorter + right-shifted; hole rings redrawn as the spiral-coil SVG
 
 ## Status: DONE (committed + pushed to Alpha)
 
 ## Request (user, paraphrased)
-"when i open a page away from home screen like suppose profile screen from
-home screen the home nav pill should collapse just the way it expands when
-i back from home and we worked on it but its not working it still just
-vanishes instead of collapse vanishing."
+"now we have two cut lines lets improve it even more. make it little more
+shorter and more to the right of the header text. and the hole rings. so i
+think the problem is stamped pin holes so as it creates holes which is see
+through the 3d ring doesnt show over it. lemme share the rings which you
+can adjust and put above the holes to give it a good look and tune the
+ring colors on your own. the ring itself isnt perfect its too much rounded
+and the view is also wrong so youve to fix the svg rings" + pasted SVG
+reference (3 spiral coils, 150×420).
 
-## Root cause
-- `CurioNavHost` composed the floating pill bar only while
-  `showBottomBar` was true (`routePrefix in CurioRoutes.bottomNavRoutePrefixes
-  && !isRevealRoutePrefix`). Navigating to ANY non-tab route (Profile,
-  settings sub-pages, Topic Reveal, …) flipped that gate false → the whole
-  bar unmounted the instant the route changed → the expanded Home pill
-  never ran its collapse spring, it just disappeared.
-- Tab→tab switches worked (the bar stays composed, pills animate); the
-  broken case was tab→non-tab.
-
-## Fix (v193)
-- New `barVisible` state in CurioNavHost: `LaunchedEffect(showBottomBar)`
-  sets it true immediately when on a tab, and after a `delay(500)` when
-  leaving (the pill's collapse spring + label retract settle in ~450ms —
-  `PillWidthSpring`/`PillExpandSpring` = critical damping, stiffness 240).
-  The bar composition gate changed from `showBottomBar` to `barVisible`.
-- During the 500ms the bar stays composed with the new (non-tab) route:
-  the previously-selected pill's `selected` flips false and it glides
-  closed with the SAME springs it expands with, then the bar unmounts.
-- Returning to a tab cancels the pending delay and remounts instantly
-  (no flicker; the pill expands as before).
-- The wide-window rail keeps the instant `showBottomBar` gate (rail items
-  never expand/collapse).
+## What changed (v194)
+- **Cut lines** (`ui/components/PaperTitleLines.kt`): the two hand-drawn
+  underlines now start ~a quarter in from the title's left edge and span
+  only the right ~70% of the line — top stroke 0.22→0.90w, bottom
+  0.26→0.94w (was 0.02/0.06 → 0.90/0.96). Shorter + more to the right of
+  the header text, same pen-sag shapes and -2° tilt.
+- **Hole rings** (`ui/components/PaperStatCard.kt`, the default "coil"
+  style): redrawn as the user's reference SVG — a FORESHORTENED
+  spiral-notebook wire (73:51 aspect) looping up the left, over the top,
+  down the right, curling in at the bottom. Drawn OVER the shaded hole
+  interior so the punched hole shows through the coil's inner opening
+  ("put above the holes"). Three SVG passes:
+  1. dark depth stroke behind (18px pass) — #101B27 light / #22282F dark;
+  2. metal tube gradient on top (8 stops tuned from the SVG palette, cool
+     polished steel; dark mode flips to light steel);
+  3. white specular along the upper-left (3px pass, 0.75 light / 0.60
+     dark).
+  Coil outer loop = holeR × 4.2 (~2.1× the hole diameter). Old arc-based
+  coil + CoilBackDark deleted; "split" / "oblique" styles untouched.
 
 ## Docs
-- `app/AGENTS.md` — v193 entry.
-- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 1 FIX bullet.
+- `app/AGENTS.md` — v194 entry.
+- `fastlane/metadata/android/en-US/changelogs/20260920.txt` — 2 FIX bullets.
 - This Prompt.md.
 
 ## Verification
-- Static only (no Gradle here — CI validates on push). `delay`,
-  `remember`, `mutableStateOf`, `getValue`/`setValue`, `LaunchedEffect`
-  all already imported in CurioNavHost.kt.
+- Static only (no Gradle here — CI validates on push). The coil paths are
+  transcribed 1:1 from the SVG (normalized to the 73×51 box, verified
+  point-by-point); the specular line likewise. No leftover references to
+  CoilBackDark; all imports (Path/Brush/Stroke/StrokeCap) already present.

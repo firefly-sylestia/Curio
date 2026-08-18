@@ -1648,6 +1648,32 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v194 — cut lines shorter + right-shifted; hole rings redrawn as the
+  spiral-coil SVG.** User: "now we have two cut lines lets improve it even
+  more. make it little more shorter and more to the right of the header
+  text. and the hole rings… the stamped pin holes create holes which is
+  see through, the 3d ring doesnt show over it. lemme share the rings
+  which you can adjust and put above the holes… the ring itself isnt
+  perfect its too much rounded and the view is also wrong so youve to fix
+  the svg rings" + a reference SVG (3 spiral coils).
+  - CUT LINES (`ui/components/PaperTitleLines.kt`): the two hand-drawn
+    underlines now start ~a quarter in from the title's left edge and
+    span only the right ~70% of the line (top 0.22→0.90, bottom
+    0.26→0.94 of the canvas) — a partial right-side underline instead of
+    a full-width one (was 0.02/0.06 → 0.90/0.96). Same pen-sag shapes.
+  - HOLE RINGS (`ui/components/PaperStatCard.kt`): the default "coil"
+    ring is redrawn as the user's reference SVG — a FORESHORTENED
+    spiral-notebook wire (73:51 aspect, correcting the old round-ring
+    "view") looping up the left, over the top, down the right, curling
+    in at the bottom; drawn OVER the shaded hole interior ([drawHoleInterior])
+    so the punched hole shows through the coil's inner opening. Three
+    passes mirror the SVG: a dark depth stroke behind (18px pass, #101B27
+    light / #22282F dark), the metal tube gradient on top (8 tuned stops
+    from the SVG's palette — cool polished steel, dark-mode light steel
+    reversal), and a white specular along the upper-left (3px pass,
+    0.75 light / 0.60 dark). The coil's outer loop is ~2.1× the hole
+    diameter (holeR × 4.2 wide). Old arc-based coil drawing + CoilBackDark
+    deleted; "split" and "oblique" styles untouched.
 - **v193 — nav pill COLLAPSES when leaving a tab (was vanishing).** User:
   "the home nav pill should collapse just the way it expands when i back
   from home… it still just vanishes instead of collapse vanishing". ROOT
