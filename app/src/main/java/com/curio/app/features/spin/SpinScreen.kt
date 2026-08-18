@@ -3099,11 +3099,13 @@ private fun HeroTicketCard(
                         else -> null
                     }
                     // v141 — the top-left corner is a pill ROW: the byline
-                    // plus the topic's year qualifier ("Moby-Dick (1851)"
-                    // shows "Moby-Dick" in the title and "1851" here), so
-                    // the reveal hero's matching top row morphs 1:1.
-                    val (_, yearQual) = topic?.titleAndYearQualifier() ?: (null to null)
-                    if ((byline != null && bylineLabel != null) || !yearQual.isNullOrBlank()) {
+                    // ("Director · Nolan"). v192 — the YEAR qualifier pill
+                    // is gone from the shuffle card (user: "in shuffle main
+                    // card dont show the year pill just inside the topic
+                    // reveal") — the Topic Reveal hero keeps its year pill;
+                    // the title still drops the trailing year ("Moby-Dick
+                    // (1851)" → "Moby-Dick") so the morph stays clean.
+                    if (byline != null && bylineLabel != null) {
                         Row(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
@@ -3111,46 +3113,19 @@ private fun HeroTicketCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            if (byline != null && bylineLabel != null) {
-                                Surface(
-                                    shape = RoundedCornerShape(50),
-                                    color = ink.copy(alpha = 0.18f),
-                                    shadowElevation = 0.dp
-                                ) {
-                                    Text(
-                                        text = "$bylineLabel · $byline",
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = ink,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                            if (!yearQual.isNullOrBlank()) {
-                                Surface(
-                                    shape = RoundedCornerShape(50),
-                                    color = ink.copy(alpha = 0.18f),
-                                    shadowElevation = 0.dp
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        CurioIcon(
-                                            name = CurioIcons.Schedule,
-                                            contentDescription = null,
-                                            tint = ink,
-                                            size = 14.dp
-                                        )
-                                        Text(
-                                            text = yearQual.orEmpty(),
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                            color = ink
-                                        )
-                                    }
-                                }
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = ink.copy(alpha = 0.18f),
+                                shadowElevation = 0.dp
+                            ) {
+                                Text(
+                                    text = "$bylineLabel · $byline",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ink,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
                             }
                         }
                     }

@@ -1648,6 +1648,14 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v192 — shuffle main card drops the year pill (reveal keeps it).**
+  User: "in shuffle main card dont show the year pill just inside the
+  topic reveal". The Spin ticket's top-left pill row (v141) was byline +
+  year qualifier; the year pill (`yearQual` from
+  `titleAndYearQualifier`, the Schedule glyph chip) is REMOVED from the
+  shuffle card — the byline pill stays. The Topic Reveal hero keeps its
+  year pill (top bar, next to the category chip), and the card title
+  still drops the trailing year, so the shared-element morph stays clean.
 - **v191 — drawer constellation as a BRAIN NEURAL WEB + floating tap
   popover. (branch Alpha)** User: "in drawer we have your constellation
   right but its random? isnt it. and it doesnt show real data yet. but i
