@@ -277,7 +277,9 @@ private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 12
 // beneath it (overlap), then the bar is gone the moment the pill arrives.
 // The reveal's pill renders ABOVE the bar via the [SentimentPillHost]
 // overlay, so the overlap reads clean.
-const val FloatingNavCollapseHoldMillis = 240
+// (Long — it feeds kotlinx.coroutines.delay(), which takes Long millis; a
+// literal 460 compiled because literals widen, a typed Int const does not.)
+const val FloatingNavCollapseHoldMillis = 240L
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).
