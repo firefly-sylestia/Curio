@@ -261,10 +261,13 @@ private val FloatingPillHeight = 52.dp
 // now targets a width TIGHTER than the resting icon pill (see
 // [FloatingNavPill]) so the pill visibly pulls in before the bar
 // unmounts. The NavHost hold is sized to this family's settle time.
-private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 150f)
-private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 150f)
-private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 150f)
-private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 150f)
+// v206 — "the collapse of home nav pil can be more smoother": 150 → 120
+// (~20% slower still), the calmest glide yet; the NavHost hold extends to
+// ~460ms to match (see CurioNavHost).
+private val PillWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 120f)
+private val PillMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 120f)
+private val PillColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 120f)
+private val PillExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 120f)
 
 /**
  * Curio's persistent bottom navigation — a floating pill bar (v124).

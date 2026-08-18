@@ -294,13 +294,14 @@ fun CurioNavHost(
     // collapse), so the hold extends to ~420ms — still exactly the spring's
     // settle time, so the cinch finishes and the bar unmounts with no dead
     // pause.
+    // v206 — family slowed to 120 (even smoother), hold → ~460ms.
     var barVisible by remember { mutableStateOf(showBottomBar) }
     LaunchedEffect(showBottomBar) {
         if (showBottomBar) {
             barVisible = true
         } else {
             // Let the collapse spring + label retract finish before unmount.
-            delay(420)
+            delay(460)
             barVisible = false
         }
     }

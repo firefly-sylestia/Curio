@@ -1724,6 +1724,41 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v207 — drawer footer in normal flow (no float / no rows behind it),
+  coil left-end hook, standalone sun/moon on the stats page, even
+  smoother nav collapse, Like/Dislike exact capsule height. (branch
+  Alpha, NOT pushed — the v206 splash commit is queued unpushed per
+  user: "dont push it")** User: "why the footer is floating now and when
+  the about gets expanded its behind the footer. also the 3d hole is
+  good. now mak the left end the side its out curve a little so it looks
+  seemless connected also in your curiocity page place the drawing of
+  sun and moon a little below the start bar just the moon and the sun
+  not the whole drawing. and only in your curiocity page as a separate
+  maybe. and the collapse of home nav pil can be more smoother, and the
+  like and dislike size still doesnt match with home nav pill, like its
+  height".
+  - FOOTER: v203 pinned the footer as an OVERLAY over the list tail, so
+    expanded sections (About) slid UNDER its fade ("behind the footer")
+    and it read as floating over the empty reserve. HomeDrawerContent
+    now wraps the rows in a Column — the list sits in a weight(1f) Box
+    ABOVE the footer, which is in normal flow pinned to the sheet's
+    bottom: it can never float and rows never hide behind it.
+  - COIL: the protruding LEFT end of the hole-ring coil now curves
+    (a small hook dipping down-outward before rising into the arch —
+    new moveTo/cubic prepended to CoilOutlineNorm) so the wire reads as
+    wrapping around the card edge instead of ending blunt.
+  - STATS SUN/MOON: a standalone decorative `StatsCelestialBody` on the
+    Your Curiosity page only — just the celestial body (gold sun with
+    soft glow in light; cream crescent carved by the local sky mid-tone
+    in dark, mirroring the SVG construction), floating just below the
+    status bar (TopEnd + statusBarsPadding + 14dp). Not interactive
+    (the drawer's body stays the theme toggle).
+  - NAV COLLAPSE: pill family 150 → 120 stiffness (calmest glide yet);
+    the NavHost leave-hold extends 420 → 460ms to match. Reveal
+    sentiment + Pet Studio springs follow to 120 to stay in lockstep.
+  - LIKE/DISLIKE HEIGHT: the sentiment capsule's Row padding 7 → 8dp and
+    gap 6 → 10dp (mirroring the nav bar), so the whole capsule (52dp
+    segments + 16dp = 68dp) matches the nav bar's capsule exactly.
 - **v206 — splash redesign: bigger gradient wordmark, warm tagline, warm
   ground band at the bottom. (branch Alpha, NOT pushed — user: "dont
   push it")** User: "make the Curio tet bigger and with gradient basced

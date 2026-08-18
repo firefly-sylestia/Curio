@@ -2231,9 +2231,14 @@ private fun RevealSentimentPill(
             shadowElevation = 6.dp
         ) {
             Row(
-                modifier = Modifier.padding(7.dp),
+                // v206 — EXACT capsule parity with the nav bar: 8dp padding
+                // + 10dp gap (was 7/6), so the whole pill's height (52dp
+                // segments + 16dp padding = 68dp) matches the nav bar's
+                // capsule exactly (user: "the like and dislike size still
+                // doesnt match with home nav pill, like its height").
+                modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 SentimentSegment(
                     icon = CurioIcons.ThumbDown,
@@ -2282,11 +2287,12 @@ private val RevealSentimentHeight = 52.dp
 // critically damped (1.0) so the Like/Dislike segments glide with zero
 // overshoot — same feel as the bottom bar's collapse. v173 — slowed to
 // 400 with the nav pill family ("still too rapid"). v201 — slowed to 150
-// with the nav pill family ("smoother"), the calmest glide yet.
-private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 150f)
-private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 150f)
-private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 150f)
-private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 150f)
+// with the nav pill family ("smoother"), the calmest glide yet. v206 —
+// 120 with the nav family ("even smoother").
+private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 120f)
+private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 120f)
+private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 120f)
+private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 120f)
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE

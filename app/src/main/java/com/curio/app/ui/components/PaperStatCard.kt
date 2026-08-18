@@ -304,7 +304,13 @@ private val CoilMetalDark = listOf(
  * of normalized coordinates.
  */
 private val CoilOutlineNorm = floatArrayOf(
-    0.000f, 1.000f,
+    // v206 — the protruding LEFT end now curves a little (a small hook
+    // dipping down-outward before rising into the arch) so the wire reads
+    // as wrapping around the card edge instead of ending blunt — user:
+    // "make the left end the side its out curve a little so it looks
+    // seemless connected". The rest of the arch is unchanged.
+    0.16f, 1.34f,
+    0.00f, 1.26f, 0.00f, 1.10f, 0.00f, 1.00f,
     0.000f, 0.395f, 0.219f, 0.000f, 0.521f, 0.000f,
     0.822f, 0.000f, 1.000f, 0.342f, 1.000f, 0.737f
 )

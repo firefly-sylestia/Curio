@@ -1911,18 +1911,23 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // -- Menu rows - drawn first so they scroll UNDER the tear ------
+            // v206 — a Column: the scrolling rows sit in a weight(1f) area
+            // ABOVE the footer, so the footer is pinned to the bottom in
+            // normal flow — it can never float, and expanded sections
+            // (About, Your Curiosity) scroll above it instead of hiding
+            // behind it (v203 overlaid the footer, which let rows slide
+            // under its fade).
+            Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.weight(1f)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
                     top = HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
-                    // v203 — the footer is PINNED to the drawer's bottom edge
-                    // (see the aligned Box below), so the list reserves its
-                    // height here instead of carrying the footer as its own
-                    // item (that let it float above the bottom whenever the
-                    // drawer content was shorter than the sheet).
-                    bottom = DrawerFooterHeight
+                    // v206 — just a small breathing spacer now: the footer
+                    // is BELOW the list, not reserved space at its tail.
+                    bottom = 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -2050,18 +2055,10 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     }
                 }
             }
-
-            // -- v203 — the illustrated planetary footer, PINNED to the very
-            // bottom of the drawer sheet (it used to be the last scrolling
-            // item, so it floated above the bottom when the drawer content
-            // was shorter than the sheet). Drawn after the list so the last
-            // rows scroll under its fade.
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-            ) {
-                DrawerFooter()
+            }
+            // v206 — the footer in NORMAL FLOW below the list: pinned to the
+            // sheet's bottom edge, rows never slide under it.
+            DrawerFooter()
             }
 
             // -- Torn rose hero - drawn on top, rows vanish at the seam -----

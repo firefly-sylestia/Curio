@@ -1,4 +1,30 @@
-# Current Request — v206: splash redesign (bigger gradient wordmark, warm tagline, bottom ground)
+# Current Request — v207: drawer footer float + About-behind-footer, coil left-end hook, stats sun/moon, smoother nav collapse, Like/Dislike height
+
+## Status: DONE (committed, NOT pushed)
+
+## Request (user, verbatim)
+"why the footer is floating now and when the about gets expanded its behind the footer. also the 3d hole is good. now mak the left end the side its out curve a little so it looks seemless connected also in your curiocity page place the drawing of sun and moon a little below the start bar just the moon and the sun not the whole drawing. and only in your curiocity page as a separate maybe. and the collapse of home nav pil can be more smoother, and the like and dislike size still doesnt match with home nav pill, like its height"
+
+## What changed
+1. **Drawer footer** — v203 pinned the footer as an OVERLAY over the list tail; expanded sections slid under its fade and it read as floating. Now `HomeDrawerContent` wraps the rows in a Column: the list sits in a weight(1f) Box ABOVE the footer, which is in normal flow pinned to the sheet bottom — never floats, rows never hide behind it.
+2. **Coil left end** — prepended a small hook (moveTo 0.16,1.34 → cubic into 0,1.0) to `CoilOutlineNorm` in PaperStatCard.kt, so the protruding left end curves like a wire wrapping around the card edge.
+3. **Stats sun/moon** — new private `StatsCelestialBody` on the Your Curiosity page only: gold sun + glow in light, cream crescent carved by the sky mid-tone in dark (mirrors the SVG construction), floating just below the status bar (TopEnd). Not interactive.
+4. **Nav collapse smoother** — pill family 150 → 120 stiffness; NavHost hold 420 → 460ms; Reveal + Pet Studio springs follow to 120 (lockstep).
+5. **Like/Dislike height** — sentiment capsule Row padding 7 → 8dp, gap 6 → 10dp → capsule 68dp tall, exactly the nav bar's capsule.
+
+## Files
+- `features/home/HomeScreen.kt` (drawer Column restructure)
+- `ui/components/PaperStatCard.kt` (coil hook)
+- `features/stats/StatsScreen.kt` (StatsCelestialBody)
+- `ui/components/CurioBottomNav.kt`, `navigation/CurioNavHost.kt`, `features/reveal/TopicRevealScreen.kt`, `features/petdesigner/PetDesignerScreen.kt` (springs + capsule padding)
+- Docs: `app/AGENTS.md` (v207), changelog FIX bullets, this Prompt.md.
+
+## NOTE
+Committed locally only — NOT pushed. The v206 splash commit is also queued unpushed (user: "dont push it" for the splash).
+
+---
+
+# Previous — v206: splash redesign (bigger gradient wordmark, warm tagline, bottom ground)
 
 ## Status: DONE (committed, NOT pushed — user: "dont push it")
 
