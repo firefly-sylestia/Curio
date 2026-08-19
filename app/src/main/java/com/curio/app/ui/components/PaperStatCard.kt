@@ -88,14 +88,14 @@ fun Modifier.paperStatCardFill(
         }
         onDrawBehind {
             drawPath(path, fill)
-            // v27u+ — the rings sit ~3dp LEFT of the hole center so they
-            // visually align with the punched opening (the coil's arch +
-            // left peek read as centered when the wire center is offset).
-            val ringOffX = 3.dp.toPx()
+            // v27u+ — the rings sit ~1dp LEFT and ~3dp UP of the hole
+            // center so the arch visually centers over the punched opening.
+            val ringOffX = 1.dp.toPx()
+            val ringOffY = 3.dp.toPx()
             repeat(3) { i ->
                 val cy = size.height * (i + 1) / 4f
                 val center = Offset(holeX, cy)
-                val ringCenter = Offset(holeX - ringOffX, cy)
+                val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
                 if (ringsOn) {
                     when (ringStyle) {
                         "split" -> drawSplitRing(ringCenter, holeR, ink, dark)
@@ -242,9 +242,9 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color, dar
     // author's art): the wire STARTS inside the hole at the right
     // (bottom-right corner of the box), arches up over the top, and the
     // LEFT leg dives down past the card's left edge to an open round-capped
-    // end. Foreshortened to the revised reference's 73:38 aspect.
+    // end. Foreshortened to the reference SVG's 73:51 aspect.
     val coilW = holeR * 4.2f
-    val coilH = coilW * (38f / 73f)
+    val coilH = coilW * (51f / 73f)
     val leftPeek = 9.dp.toPx()
     val topLeft = Offset(
         center.x - coilW / 2f - leftPeek,
@@ -285,14 +285,14 @@ private fun DrawScope.drawCoilRing(center: Offset, holeR: Float, ink: Color, dar
  * wire reads on the near-black paper (the v81 dark reversal).
  */
 private val CoilMetal = listOf(
-    Color(0xFF26333F),
-    Color(0xFF4E6276),
-    Color(0xFFD9E5F1),
-    Color(0xFF8396A9),
+    Color(0xFF1c2937),
+    Color(0xFF52687d),
+    Color(0xFFdce9f6),
+    Color(0xFF8196aa),
     Color(0xFFFFFFFF),
-    Color(0xFF9AABBC),
-    Color(0xFF42566A),
-    Color(0xFF182430)
+    Color(0xFF9caec0),
+    Color(0xFF43586c),
+    Color(0xFF172432)
 )
 
 private val CoilMetalDark = listOf(

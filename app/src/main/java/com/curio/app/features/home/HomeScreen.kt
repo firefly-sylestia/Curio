@@ -2380,7 +2380,8 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        // ── The constellation: the Stats page's brain web ───────────────            CurioConstellation(
+        // ── The constellation: the Stats page's brain web ───────────────
+            CurioConstellation(
                 explored = exploredList,
                 laneCounts = knowledge.mapValues { it.value.score },
                 laneRecent = knowledge.mapValues { it.value.lastAt },
@@ -2448,16 +2449,8 @@ private fun DrawerFooter() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            // v186 — the user said the footer "looks big": 210 → 150dp tall
-            // (the planet art reads as a smaller bottom band, the credits
-            // still sit in the fade).
             .height(DrawerFooterHeight)
-            // v208f — the drawer sheet runs edge-to-edge (windowInsets
-            // zeroed), so the footer's bottom band was hiding BEHIND the
-            // system gesture bar and the planet read as FLOATING above the
-            // drawer bottom. The nav-bar inset now pads the footer content
-            // up above the gesture bar: the art sits flush, nothing is cut
-            // (user: "why my drawer footer is floating?? please fix it…").
+            .background(surfaceColor)
             .navigationBarsPadding()
     ) {
         // The art, bottom-anchored and filling the drawer's full width —
