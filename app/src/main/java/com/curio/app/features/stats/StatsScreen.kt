@@ -394,7 +394,7 @@ private fun StatsConstellationCard(
                 recentCutoff = recentCutoff,
                 selected = selected,
                 onSelect = onSelect,
-                modifier = Modifier.fillMaxWidth().height(230.dp)
+                modifier = Modifier.fillMaxWidth().height(260.dp)
             )
             AnimatedVisibility(
                 visible = selectedCat != null,

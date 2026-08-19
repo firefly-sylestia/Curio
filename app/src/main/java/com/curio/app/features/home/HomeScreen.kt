@@ -2380,17 +2380,16 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        // ── The constellation: the Stats page's brain web ───────────────
-        CurioConstellation(
-            explored = exploredList,
-            laneCounts = knowledge.mapValues { it.value.score },
-            laneRecent = knowledge.mapValues { it.value.lastAt },
-            recentCutoff = 0L,
-            selected = selected,
-            onSelect = { selected = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(230.dp),
+        // ── The constellation: the Stats page's brain web ───────────────            CurioConstellation(
+                explored = exploredList,
+                laneCounts = knowledge.mapValues { it.value.score },
+                laneRecent = knowledge.mapValues { it.value.lastAt },
+                recentCutoff = 0L,
+                selected = selected,
+                onSelect = { selected = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp),
             // v190 — the tap detail is now a small FLOATING card anchored to
             // the neuron (name + saved count — user: "a floating small thing
             // and also less data") instead of the richer panel below. Tap the

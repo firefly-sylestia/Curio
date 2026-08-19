@@ -168,7 +168,7 @@ fun CurioConstellation(
             fillers.forEach { f ->
                 drawCircle(
                     color = fillerColor,
-                    radius = 2.2.dp.toPx(),
+                    radius = 1.6.dp.toPx(),
                     center = Offset(f.x * w, f.y * h)
                 )
             }
@@ -192,8 +192,8 @@ fun CurioConstellation(
                     .coerceAtMost(12f).dp.toPx()
                 val isSel = selected == id
                 drawCircle(
-                    color = accent.copy(alpha = if (recent) 0.20f else 0.10f),
-                    radius = r * (if (recent || isSel) 2.6f else 2.2f),
+                    color = accent.copy(alpha = if (recent) 0.14f else 0.07f),
+                    radius = r * (if (recent || isSel) 1.7f else 1.5f),
                     center = p
                 )
                 drawCircle(color = accent, radius = r, center = p)
@@ -249,22 +249,23 @@ fun CurioConstellation(
  * dot.
  */
 private val BRAIN_SILHOUETTE = listOf(
-    Offset(0.16f, 0.42f),   // frontal pole
-    Offset(0.19f, 0.22f),   // front-top rise
-    Offset(0.30f, 0.09f),
+    Offset(0.08f, 0.52f),   // frontal pole
+    Offset(0.09f, 0.34f),   // frontal rise
+    Offset(0.16f, 0.20f),   // frontal-parietal
+    Offset(0.30f, 0.09f),   // parietal dome approach
     Offset(0.46f, 0.04f),   // highest dome
-    Offset(0.63f, 0.05f),
-    Offset(0.79f, 0.10f),
-    Offset(0.90f, 0.19f),
-    Offset(0.96f, 0.33f),   // occipital pole
-    Offset(0.99f, 0.50f),   // cerebellum bulge
-    Offset(0.90f, 0.61f),
-    Offset(0.80f, 0.65f),
-    Offset(0.68f, 0.71f),
-    Offset(0.54f, 0.75f),   // bottom
-    Offset(0.40f, 0.74f),
-    Offset(0.28f, 0.68f),
-    Offset(0.20f, 0.56f)
+    Offset(0.62f, 0.06f),   // post-parietal
+    Offset(0.78f, 0.14f),   // occipital rise
+    Offset(0.88f, 0.28f),   // occipital pole
+    Offset(0.90f, 0.40f),   // back of cerebrum
+    Offset(0.86f, 0.52f),   // above cerebellum
+    Offset(0.90f, 0.60f),   // cerebellum peak
+    Offset(0.82f, 0.70f),   // cerebellum base
+    Offset(0.70f, 0.74f),   // brain stem
+    Offset(0.56f, 0.76f),   // temporal lobe
+    Offset(0.40f, 0.74f),   // temporal mid
+    Offset(0.26f, 0.70f),   // temporal-frontal
+    Offset(0.14f, 0.62f)    // below frontal
 )
 
 /** Ray-casting point-in-polygon test against [BRAIN_SILHOUETTE]. */
@@ -310,7 +311,7 @@ private fun randomInBrain(rnd: Random): Offset {
  */
 private fun brainFillerDots(): List<Offset> {
     val rnd = Random(0x5EEDC0DE) // fixed — decoration never re-rolls
-    return List(16) { randomInBrain(rnd) }
+    return List(24) { randomInBrain(rnd) }
 }
 
 /** Draws the smooth closed brain outline (quadratic curves through the
