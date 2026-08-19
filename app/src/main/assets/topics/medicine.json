@@ -1,1 +1,1162 @@
-[]
+[
+ {
+  "id": "medicine-germ-theory",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "The Germ Theory of Disease",
+  "teaser": "Before Pasteur and Koch, doctors thought disease came from 'bad air.' Germ theory proved that microorganisms cause infection — and transformed medicine from superstition into science.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "microbiology",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How germ theory changed medicine",
+   "durationMinutes": 8,
+   "instruction": "Learn how Pasteur's swan-neck flask experiment disproved spontaneous generation, then explain why handwashing took decades to become standard practice."
+  }
+ },
+ {
+  "id": "medicine-antibiotics",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Antibiotics",
+  "teaser": "Alexander Fleming's accidental discovery of penicillin in 1928 saved more lives than any other drug in history. But overuse is creating superbugs that no antibiotic can kill.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "antibiotics",
+   "resistance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The story of penicillin and antibiotic resistance",
+   "durationMinutes": 8,
+   "instruction": "Learn how Fleming discovered penicillin and how mass production saved soldiers in WWII, then explain why antibiotic resistance is called a 'silent pandemic.'"
+  }
+ },
+ {
+  "id": "medicine-vaccination",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Vaccination",
+  "teaser": "Edward Jenner's 1796 experiment — cowpox protecting against smallpox — launched immunology. Vaccines have eradicated smallpox, nearly eliminated polio, and saved an estimated 154 million lives in the past 50 years.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "immunology",
+   "prevention"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How vaccines work",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between live attenuated, inactivated, subunit, and mRNA vaccines, then explain how herd immunity protects unvaccinated people."
+  }
+ },
+ {
+  "id": "medicine-dna",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "DNA and the Double Helix",
+  "teaser": "Watson and Crick's 1953 discovery of DNA's structure revealed the code of life. But Rosalind Franklin's X-ray crystallography made it possible — and she was denied credit for decades.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genetics",
+   "DNA"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of DNA's structure",
+   "durationMinutes": 10,
+   "instruction": "Learn about Rosalind Franklin's Photo 51 and how it revealed the helical structure, then explain why the story of DNA's discovery is also a story about scientific credit."
+  }
+ },
+ {
+  "id": "medicine-anaesthesia",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Anaesthesia",
+  "teaser": "Before 1846, surgery meant screaming. Ether's demonstration at Massachusetts General Hospital — 'Gentlemen, no humbug' — made painless surgery possible and transformed what doctors could do.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "surgery",
+    "anesthesia"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The ether demonstration of 1846",
+   "durationMinutes": 8,
+   "instruction": "Learn about the 'Ether Dome' demonstration, then explain how general, regional, and local anaesthesia work differently in the body."
+  }
+ },
+ {
+  "id": "medicine-x-ray",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "X-Rays",
+  "teaser": "Wilhelm Röntgen discovered X-rays in 1895 and immediately took a picture of his wife's hand — the first medical image in history. Within weeks, doctors could see inside living bodies without cutting them open.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "imaging",
+   "radiology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How X-rays changed medicine",
+   "durationMinutes": 7,
+   "instruction": "Learn about Röntgen's discovery and the first X-ray image, then explain how modern CT scans build on the same principle."
+  }
+ },
+ {
+  "id": "medicine-blood-types",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Blood Types",
+  "teaser": "Karl Landsteiner discovered that blood transfusions kill people because of incompatible blood types. The ABO system saved millions — and explained why 'universal donor' O-negative matters.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "blood",
+   "transfusion"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The ABO blood group system",
+   "durationMinutes": 7,
+   "instruction": "Learn why blood types matter for transfusions and organ donation, then explain why type O-negative is called the 'universal donor.'"
+  }
+ },
+ {
+  "id": "medicine-stethoscope",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "The Stethoscope",
+  "teaser": "In 1816, René Laennec rolled a paper tube to listen to a patient's heart — embarrassed to press his ear against her chest. The stethoscope became the symbol of medicine itself.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "diagnosis",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the stethoscope transformed diagnosis",
+   "durationMinutes": 6,
+   "instruction": "Learn about Laennec's invention and how auscultation (listening to body sounds) works, then explain why the stethoscope remains essential despite modern imaging."
+  }
+ },
+ {
+  "id": "medicine-insulin",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Insulin",
+  "teaser": "Before 1921, diabetes was a death sentence. Banting and Best's discovery of insulin turned a fatal disease into a manageable condition — and they sold the patent for $1 each.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "diabetes",
+   "endocrinology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The discovery of insulin",
+   "durationMinutes": 8,
+   "instruction": "Learn how Banting and Best isolated insulin, then explain why insulin's price controversy matters for millions of diabetics worldwide."
+  }
+ },
+ {
+  "id": "medicine-pen-cycle",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Germ Theory and Antisepsis",
+  "teaser": "Joseph Lister proved that carbolic acid spray during surgery dramatically reduced infection. The 'father of antiseptic surgery' turned operating rooms from death chambers into healing spaces.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "surgery",
+   "infection"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Lister pioneered antiseptic surgery",
+   "durationMinutes": 7,
+   "instruction": "Learn about Lister's carbolic acid spray technique, then explain why surgical mortality dropped from 45% to 15% after antisepsis was adopted."
+  }
+ },
+ {
+  "id": "medicine-immune-system",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Immune System",
+  "teaser": "Your body's defense network: white blood cells, antibodies, complement, and memory cells fight off billions of invaders daily. When it malfunctions, the results range from allergies to autoimmune disease.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "immunology",
+   "defense"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Innate vs adaptive immunity",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between innate immunity (fast, nonspecific) and adaptive immunity (slow, specific, with memory), then explain why you get chickenpox only once."
+  }
+ },
+ {
+  "id": "medicine-cardiovascular",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Cardiovascular System",
+  "teaser": "Your heart beats 100,000 times a day, pumping 7,500 liters of blood through 100,000 km of vessels. It's the most reliable pump ever built — and when it fails, everything else follows.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "heart",
+   "circulation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the heart and blood vessels work",
+   "durationMinutes": 8,
+   "instruction": "Learn about the cardiac cycle (systole and diastole), then explain how blood pressure is measured and what the numbers mean."
+  }
+ },
+ {
+  "id": "medicine-nervous-system",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Nervous System",
+  "teaser": "86 billion neurons, each connected to thousands of others: the brain and spinal cord process every sensation, thought, and movement. It's the most complex structure in the known universe.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "neurology",
+   "brain"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How neurons communicate",
+   "durationMinutes": 8,
+   "instruction": "Learn about action potentials, neurotransmitters, and synapses, then explain how a thought becomes a movement."
+  }
+ },
+ {
+  "id": "medicine-gut-microbiome",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Gut Microbiome",
+  "teaser": "Your gut hosts 38 trillion bacteria — more than your own cells. They digest food, produce vitamins, train your immune system, and may even influence your mood. The microbiome is medicine's newest frontier.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "microbiome",
+   "digestion"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How gut bacteria affect health",
+   "durationMinutes": 8,
+   "instruction": "Learn about the gut-brain axis and how microbiome diversity affects immunity, then find one dietary change that improves microbiome health."
+  }
+ },
+ {
+  "id": "medicine-bone-structure",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "Bone Biology",
+  "teaser": "Bones aren't dead scaffolding: they're living tissue that constantly remodels. Osteoclasts break down old bone; osteoblasts build new. The skeleton repairs itself daily — until it doesn't.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "skeleton",
+   "orthopedics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How bones heal and remodel",
+   "durationMinutes": 7,
+   "instruction": "Learn about the bone remodeling cycle, then explain why osteoporosis is called a 'silent disease' and who's most at risk."
+  }
+ },
+ {
+  "id": "medicine-kidney-function",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Kidneys",
+  "teaser": "Two fist-sized organs that filter 180 liters of blood daily, producing 1-2 liters of urine. Kidneys regulate blood pressure, balance electrolytes, and produce hormones — yet most people can't name what they do.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "kidneys",
+   "filtration"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How kidneys filter blood",
+   "durationMinutes": 7,
+   "instruction": "Learn about nephrons (the kidney's filtering units), then explain why kidney disease is often called a 'silent killer.'"
+  }
+ },
+ {
+  "id": "medicine-cancer-basics",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "What Is Cancer?",
+  "teaser": "Cancer is uncontrolled cell growth: cells multiply without stopping, invade nearby tissue, and spread to distant organs. It's not one disease — it's hundreds, each with its own biology and treatment.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "oncology",
+   "cell-biology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How cancer develops",
+   "durationMinutes": 8,
+   "instruction": "Learn about oncogenes, tumor suppressors, and metastasis, then explain why cancer becomes more common with age."
+  }
+ },
+ {
+  "id": "medicine-diabetes",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Diabetes",
+  "teaser": "Type 1: the immune system destroys insulin-producing cells. Type 2: the body stops responding to insulin. Both cause blood sugar to rise — and untreated diabetes damages every organ over time.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "diabetes",
+   "endocrinology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Type 1 vs Type 2 diabetes",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between Type 1 (autoimmune) and Type 2 (metabolic), then find one lifestyle factor that reduces Type 2 risk."
+  }
+ },
+ {
+  "id": "medicine-heart-disease",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Cardiovascular Disease",
+  "teaser": "The world's #1 killer: heart disease and stroke account for 17 million deaths annually. Plaque builds in arteries, blood clots form, and the heart or brain loses blood supply.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "heart",
+   "prevention"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How cardiovascular disease develops",
+   "durationMinutes": 8,
+   "instruction": "Learn about atherosclerosis (plaque buildup), then find three modifiable risk factors and one that's genetic."
+  }
+ },
+ {
+  "id": "medicine-alzheimers",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Alzheimer's Disease",
+  "teaser": "The most common cause of dementia: amyloid plaques and tau tangles destroy brain cells, erasing memory, language, and identity. There's no cure — and the aging global population is making it an epidemic.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "neurology",
+   "dementia"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Alzheimer's destroys the brain",
+   "durationMinutes": 8,
+   "instruction": "Learn about amyloid-beta plaques and tau protein, then explain why early diagnosis is so important and why drug development has been so difficult."
+  }
+ },
+ {
+  "id": "medicine-malaria",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Malaria",
+  "teaser": "A mosquito-borne parasite that kills 600,000 people annually — mostly children in sub-Saharan Africa. Malaria has shaped human evolution, economics, and geography for millennia.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "parasitology",
+   "global-health"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How malaria parasites evade the immune system",
+   "durationMinutes": 8,
+   "instruction": "Learn about Plasmodium falciparum's life cycle, then explain why sickle cell trait provides malaria resistance."
+  }
+ },
+ {
+  "id": "medicine-antibiotic-resistance",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Antimicrobial Resistance",
+  "teaser": "Bacteria evolve faster than we can invent new antibiotics. By 2050, drug-resistant infections could kill 10 million people a year — more than cancer. It's the slowest-moving pandemic in history.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "antibiotics",
+   "resistance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How antibiotic resistance develops",
+   "durationMinutes": 7,
+   "instruction": "Learn about natural selection in bacteria, then find one action individuals can take to slow resistance."
+  }
+ },
+ {
+  "id": "medicine-autoimmune",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Autoimmune Diseases",
+  "teaser": "When the immune system attacks its own body: lupus, rheumatoid arthritis, multiple sclerosis, type 1 diabetes. There are 80+ autoimmune conditions — and they're increasingly common.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "immunology",
+   "chronic"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why the immune system turns on itself",
+   "durationMinutes": 8,
+   "instruction": "Learn about molecular mimicry and loss of self-tolerance, then find one autoimmune condition and its most common symptoms."
+  }
+ },
+ {
+  "id": "medicine-mental-health",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Depression",
+  "teaser": "More than sadness: depression is a neurochemical condition affecting 280 million people. It's the leading cause of disability worldwide — and the gap between need and treatment is enormous.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "psychiatry",
+   "mental-health"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What depression actually is",
+   "durationMinutes": 7,
+   "instruction": "Learn about the serotonin hypothesis and its limitations, then explain why depression treatment often combines medication with therapy."
+  }
+ },
+ {
+  "id": "medicine-antivirals",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Antiviral Drugs",
+  "teaser": "Viruses hijack your cells to replicate — antivirals stop them at specific steps. HIV antiretrovirals turned a death sentence into a chronic condition. Acyclovir treats herpes. Tamiflu shortens flu.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "pharmacology",
+   "viruses"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How antiviral drugs work",
+   "durationMinutes": 7,
+   "instruction": "Learn how antivirals target viral replication (entry inhibitors, polymerase inhibitors, protease inhibitors), then find one antiviral that changed public health."
+  }
+ },
+ {
+  "id": "medicine-chemotherapy",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Chemotherapy",
+  "teaser": "Killing cancer cells by poisoning fast-dividing cells — which also kills hair, gut, and bone marrow. Chemotherapy is brutal medicine, but it's saved millions of lives since the 1940s.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "oncology",
+   "treatment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How chemotherapy works and its side effects",
+   "durationMinutes": 8,
+   "instruction": "Learn why chemotherapy targets fast-dividing cells, then explain why newer targeted therapies cause fewer side effects."
+  }
+ },
+ {
+  "id": "medicine-organ-transplant",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Organ Transplantation",
+  "teaser": "Replacing a failed organ with one from a donor: kidney, liver, heart, lung. The surgery is miraculous; the waiting list is heartbreaking. Immunosuppression keeps the body from rejecting the gift.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "surgery",
+   "transplant"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How organ transplants work",
+   "durationMinutes": 8,
+   "instruction": "Learn about tissue matching, immunosuppression, and organ donation systems, then explain why xenotransplantation (animal-to-human) is being pursued."
+  }
+ },
+ {
+  "id": "medicine-mri",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "MRI Imaging",
+  "teaser": "Magnetic resonance imaging uses powerful magnets and radio waves to see inside the body without radiation. It can distinguish gray matter from white, tumor from healthy tissue — the most detailed medical images available.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "imaging",
+   "technology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How MRI works",
+   "durationMinutes": 8,
+   "instruction": "Learn about hydrogen atoms in magnetic fields and radiofrequency pulses, then explain why MRI is better than CT for soft tissue imaging."
+  }
+ },
+ {
+  "id": "medicine-ct-scan",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "CT Scanning",
+  "teaser": "Computed tomography: X-rays from hundreds of angles, reconstructed by computer into 3D slices of the body. CT scans diagnose strokes, cancers, and trauma in minutes — but expose patients to radiation.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "imaging",
+   "radiology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How CT scans create 3D images",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Radon transform and how CT reconstruction works, then explain why CT is preferred for trauma and MRI for neurological conditions."
+  }
+ },
+ {
+  "id": "medicine-physical-therapy",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Physical Therapy",
+  "teaser": "Restoring movement after injury, surgery, or stroke: physical therapists use exercise, manual therapy, and education to help bodies heal themselves. It's medicine without drugs.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "rehabilitation",
+   "movement"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How physical therapy works",
+   "durationMinutes": 6,
+   "instruction": "Learn about therapeutic exercise principles (progressive overload, specificity), then find one condition where physical therapy is first-line treatment."
+  }
+ },
+ {
+  "id": "medicine-clinical-trials",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Clinical Trials",
+  "teaser": "Phase I (safety), Phase II (efficacy), Phase III (comparison), Phase IV (post-market): clinical trials are the gold standard for proving a treatment works. They're slow, expensive, and essential.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "research",
+   "methodology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How clinical trials work",
+   "durationMinutes": 8,
+   "instruction": "Learn the four phases of clinical trials and why randomized controlled trials are the gold standard, then find one drug that failed Phase III trials."
+  }
+ },
+ {
+  "id": "medicine-who",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "The World Health Organization",
+  "teaser": "The UN's health agency: WHO coordinates global disease surveillance, sets health standards, and responds to pandemics. Its successes (smallpox eradication) and failures (COVID response) reshape global health.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "global-health",
+   "policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What WHO does and how it's funded",
+   "durationMinutes": 7,
+   "instruction": "Learn about WHO's core functions and funding structure, then evaluate its COVID-19 response."
+  }
+ },
+ {
+  "id": "medicine-hippocratic-oath",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "The Hippocratic Oath",
+  "teaser": "'First, do no harm': the ancient Greek oath that defines medical ethics. Modern versions focus on patient autonomy, confidentiality, and justice — but the core principle remains: the patient comes first.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "ethics",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Hippocratic Oath and medical ethics",
+   "durationMinutes": 8,
+   "instruction": "Read both the original Hippocratic Oath and a modern version (Declaration of Geneva), then compare their priorities."
+  }
+ },
+ {
+  "id": "medicine-public-health",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Public Health",
+  "teaser": "Not treating individual patients — but preventing disease in populations. Sanitation, vaccination, clean water, tobacco regulation: public health has saved more lives than all hospitals combined.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "prevention",
+   "epidemiology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The greatest public health achievements",
+   "durationMinutes": 8,
+   "instruction": "Learn about the CDC's 'Ten Great Public Health Achievements,' then find one public health intervention that's underfunded today."
+  }
+ },
+ {
+  "id": "medicine-evidence-based",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Evidence-Based Medicine",
+  "teaser": "Decisions based on the best available research, not tradition or intuition. EBM transformed medicine in the 1990s — but critics argue it can ignore individual patient needs.",
+  "imageUrl": "",
+   "tier": 1,
+  "tags": [
+   "medicine",
+   "methodology",
+   "practice"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How evidence-based medicine works",
+   "durationMinutes": 7,
+   "instruction": "Learn about systematic reviews and meta-analyses, then explain why EBM sometimes conflicts with clinical experience."
+  }
+ },
+ {
+  "id": "medicine-precision-medicine",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Precision Medicine",
+  "teaser": "Treating patients based on their genes, not just their symptoms: pharmacogenomics, targeted therapies, and personalized risk profiles. The future of medicine is tailored to you.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genomics",
+    "personalized"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How precision medicine personalizes treatment",
+   "durationMinutes": 8,
+   "instruction": "Learn about pharmacogenomics (how genes affect drug response), then find one example where genetic testing changes treatment decisions."
+  }
+ },
+ {
+  "id": "medicine-telemedicine",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Telemedicine",
+  "teaser": "Doctor visits via video call: telemedicine exploded during COVID-19 and isn't going back. It improves access for rural patients but raises questions about physical examination and digital divides.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "technology",
+   "access"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The rise of telemedicine",
+   "durationMinutes": 6,
+   "instruction": "Learn about the advantages and limitations of telemedicine, then find one telehealth service that's improving access in underserved areas."
+  }
+ },
+ {
+  "id": "medicine-surgeon-general",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "The Surgeon General's Warning",
+  "teaser": "In 1964, Surgeon General Luther Terry released the first report linking smoking to cancer. The tobacco industry fought it for decades — but the report saved millions of lives through regulation and awareness.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "tobacco",
+   "prevention"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the tobacco report changed public health",
+   "durationMinutes": 8,
+   "instruction": "Learn about the 1964 Surgeon General's report and the tobacco industry's response, then explain why it's a model for evidence-based policy."
+  }
+ },
+ {
+  "id": "medicine-florence-nightingale",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Florence Nightingale",
+  "teaser": "The 'Lady with the Lamp' who revolutionized nursing: Nightingale used statistics to prove that sanitation saved lives. Her polar area diagrams were among the first infographics — and they changed hospital design forever.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "nursing",
+   "statistics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Nightingale used statistics to save lives",
+   "durationMinutes": 8,
+   "instruction": "Learn about Nightingale's Coxcomb diagrams and her Crimean War statistics, then explain why she's considered the founder of modern nursing."
+  }
+ },
+ {
+  "id": "medicine-jonas-salk",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Jonas Salk",
+  "teaser": "The man who cured polio: Salk's inactivated polio vaccine (1955) was one of medicine's greatest triumphs. He famously refused to patent it — 'Could you patent the sun?'",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "vaccines",
+   "polio"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Salk vs Sabin: the polio vaccine debate",
+   "durationMinutes": 8,
+   "instruction": "Learn about Salk's killed vaccine vs Sabin's oral vaccine, then explain why most countries now use Salk's approach."
+  }
+ },
+ {
+  "id": "medicine-pasteur",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Louis Pasteur",
+  "teaser": "The chemist who proved germs cause disease, invented pasteurization, and developed vaccines for rabies and anthrax. Pasteur bridged chemistry and medicine — and his name is everywhere (pasteurized milk).",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "microbiology",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Pasteur's contributions to medicine",
+   "durationMinutes": 8,
+   "instruction": "Learn about the swan-neck flask experiment, pasteurization, and the rabies vaccine, then explain why Pasteur is considered the father of microbiology."
+  }
+ },
+ {
+  "id": "medicine-william-osler",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "William Osler",
+  "teaser": "The 'Father of Modern Medicine': Osler brought medical students to the bedside, insisted on observation over theory, and wrote The Principles and Practice of Medicine. His teaching methods are still used today.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "education",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Osler modernized medical education",
+   "durationMinutes": 7,
+   "instruction": "Learn about Osler's clinical teaching methods, then explain why he insisted that 'the best teaching is that taught by the patient.'"
+  }
+ },
+ {
+  "id": "medicine-covid-19",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "COVID-19",
+  "teaser": "The pandemic that changed everything: SARS-CoV-2 killed millions, overwhelmed health systems, and accelerated vaccine technology by a decade. mRNA vaccines were developed in record time.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "pandemic",
+    "virology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How mRNA vaccines were developed so fast",
+   "durationMinutes": 8,
+   "instruction": "Learn about the mRNA technology platform that enabled rapid vaccine development, then explain why mRNA vaccines represent a paradigm shift in immunology."
+  }
+ },
+ {
+  "id": "medicine-radiation-therapy",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Radiation Therapy",
+  "teaser": "Using radiation to kill cancer cells: targeted beams destroy DNA in tumors. Modern techniques (IMRT, proton therapy) can hit tumors with millimeter precision while sparing healthy tissue.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "oncology",
+   "radiology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How radiation therapy targets cancer",
+   "durationMinutes": 7,
+   "instruction": "Learn the difference between external beam radiation and brachytherapy, then explain why fractionated dosing (small doses over weeks) is more effective than one big dose."
+  }
+ },
+ {
+  "id": "medicine-prosthetics",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Prosthetics",
+  "teaser": "From wooden legs to mind-controlled bionic limbs: prosthetics engineering has gone from replacement to enhancement. Osseointegration and neural interfaces are blurring the line between human and machine.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "rehabilitation",
+   "technology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The future of prosthetics",
+   "durationMinutes": 7,
+   "instruction": "Learn about myoelectric prosthetics and osseointegration, then find one breakthrough in bionic limbs that's changing lives."
+  }
+ },
+ {
+  "id": "medicine-palliative-care",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Palliative Care",
+  "teaser": "Not giving up — giving comfort: palliative care manages pain, symptoms, and quality of life for seriously ill patients. It's not just for the dying; it improves outcomes for the living too.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "ethics",
+   "end-of-life"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What palliative care actually does",
+   "durationMinutes": 6,
+   "instruction": "Learn the difference between palliative care and hospice, then explain why palliative care is increasingly offered alongside curative treatment."
+  }
+ },
+ {
+  "id": "medicine-genetic-testing",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Genetic Testing",
+  "teaser": "From 23andMe to BRCA testing: genetic tests can predict disease risk, guide treatment, and reveal ancestry. But the results raise questions about privacy, insurance, and psychological burden.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genetics",
+   "ethics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The promises and pitfalls of genetic testing",
+   "durationMinutes": 8,
+   "instruction": "Learn about BRCA testing for breast cancer risk, then debate whether genetic information should be shared with insurance companies."
+  }
+ },
+ {
+  "id": "medicine-scrub-in",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Surgical Sterile Technique",
+  "teaser": "Scrubbing, gowning, gloving, draping: surgical sterile technique is a ritual of infection prevention. Every step exists because someone, somewhere, died when it was skipped.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "surgery",
+   "infection"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why surgical sterility matters",
+   "durationMinutes": 6,
+   "instruction": "Learn the principles of surgical asepsis, then explain how a single breach in technique can cause a surgical site infection."
+  }
+ },
+ {
+  "id": "medicine-microbiome-medicine",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Fecal Microbiota Transplant",
+  "teaser": "Transplanting gut bacteria from a healthy donor to treat infection: FMT has a 90% success rate for C. difficile. It's proof that your microbiome isn't just along for the ride — it's essential medicine.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "microbiome",
+   "innovation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How FMT works",
+   "durationMinutes": 7,
+   "instruction": "Learn about C. difficile infection and how FMT restores healthy gut bacteria, then explain why the FDA treats FMT as a drug."
+  }
+ },
+ {
+  "id": "medicine-immunotherapy",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Cancer Immunotherapy",
+  "teaser": "Teaching the immune system to fight cancer: checkpoint inhibitors, CAR-T cells, and cancer vaccines are producing remissions where chemotherapy failed. It's the biggest oncology breakthrough in decades.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "oncology",
+   "immunology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How immunotherapy works against cancer",
+   "durationMinutes": 8,
+   "instruction": "Learn about PD-1/PD-L1 checkpoint inhibitors and CAR-T cell therapy, then explain why immunotherapy can cause autoimmune side effects."
+  }
+ },
+ {
+  "id": "medicine-bmj",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Medical Journals",
+  "teaser": "The Lancet, NEJM, BMJ: medical journals are where discoveries are announced, debated, and scrutinized. Peer review isn't perfect — but it's the best system we have for separating good science from bad.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "research",
+   "publishing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How medical knowledge is published",
+   "durationMinutes": 7,
+   "instruction": "Learn about peer review, preprints, and the replication crisis in medical research, then find one landmark paper that changed medical practice."
+  }
+ },
+ {
+  "id": "medicine-reproductive-health",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "Reproductive Biology",
+  "teaser": "From ovulation to implantation: the human reproductive system is a precision-timed cascade of hormones, cells, and signals. Understanding it has transformed fertility, contraception, and women's health.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "reproduction",
+   "endocrinology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The hormonal cycle of reproduction",
+   "durationMinutes": 8,
+   "instruction": "Learn about the hypothalamic-pituitary-ovarian axis, then explain how hormonal contraceptives work by disrupting this cycle."
+  }
+ },
+ {
+  "id": "medicine-stem-cells",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Stem Cell Research",
+  "teaser": "Cells that can become any tissue: stem cells hold the promise of regenerating damaged organs, curing spinal injuries, and growing replacement tissue. The science is powerful; the ethics are complicated.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "regenerative",
+   "ethics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Types of stem cells and their potential",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between embryonic and adult stem cells, then find one clinical trial using stem cells and its current status."
+  }
+ },
+ {
+  "id": "medicine-epidemiology",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Epidemiology",
+  "teaser": "The detective work of public health: tracking disease patterns, identifying risk factors, and determining causes. Epidemiology found the link between smoking and cancer — and between COVID and lungs.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "research",
+   "statistics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How epidemiology works",
+   "durationMinutes": 7,
+   "instruction": "Learn about cohort studies, case-control studies, and relative risk, then find one epidemiological study that changed public health policy."
+  }
+ },
+ {
+  "id": "medicine-tropical-medicine",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Tropical Medicine",
+  "teaser": "Diseases of poverty and heat: malaria, dengue, schistosomiasis, leishmaniasis. Tropical medicine was born in colonial empires and now serves the 3 billion people in equatorial regions.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "global-health",
+   "tropical"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The neglected tropical diseases",
+   "durationMinutes": 8,
+   "instruction": "Learn about the WHO's list of neglected tropical diseases, then explain why they persist despite being treatable."
+  }
+ },
+ {
+  "id": "medicine-brain-plasticity",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "Neuroplasticity",
+  "teaser": "The brain rewires itself after injury, practice, and experience. Stroke patients relearn walking; London taxi drivers grow hippocampi. Neuroplasticity is why rehabilitation works — and why habits are so hard to break.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "neuroscience",
+   "recovery"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the brain changes itself",
+   "durationMinutes": 8,
+   "instruction": "Learn about London taxi driver studies and stroke rehabilitation, then explain why neuroplasticity declines with age."
+  }
+ },
+ {
+  "id": "medicine-chrono-pharmacology",
+  "categoryId": "MEDICINE",
+  "subtype": "Concept",
+  "name": "Chronopharmacology",
+  "teaser": "When you take a drug matters as much as which drug you take: blood pressure medication works better at night; statins are more effective in the evening. Your body clock affects drug metabolism.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "pharmacology",
+   "circadian"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How timing affects drug effectiveness",
+   "durationMinutes": 7,
+   "instruction": "Learn about circadian rhythms and drug metabolism, then find one medication where timing significantly affects its efficacy."
+  }
+ },
+ {
+  "id": "medicine-pandemic-preparedness",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Pandemic Preparedness",
+  "teaser": "COVID-19 proved that pandemics aren't black swans — they're predictable. Stockpiles, surveillance systems, vaccine platforms, and international coordination are the tools that will save us next time.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "public-health",
+   "planning"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How countries prepare for pandemics",
+   "durationMinutes": 8,
+   "instruction": "Learn about strategic national stockpiles and disease surveillance networks, then find one lesson from COVID that's being applied to future preparedness."
+  }
+ }
+]
