@@ -28,9 +28,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.CategoryId
-import com.curio.app.data.CurioCategories
 import com.curio.app.ui.theme.isCurioDarkTheme
-import com.curio.app.ui.theme.themedAccent
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -89,10 +87,8 @@ fun CurioConstellation(
     // Dim background stars for depth — scattered across the whole canvas.
     val bgStars = remember { backgroundStars() }
 
-    // Accent colors resolved in composition (can't call themedAccent in draw).
-    val accents = nodes.associate { (id, _) -> id to CurioCategories.byId(id).themedAccent() }
-
-    // Theme-aware colors.
+    // Theme-aware colors — lane stars use the same neutral palette as the
+    // constellation anchors, not category accent colors.
     val isDark = isCurioDarkTheme()
     val linkColor = if (isDark) Color(0xFF6B8CAA).copy(alpha = 0.18f)
                     else Color(0xFF5A7898).copy(alpha = 0.25f)
@@ -256,6 +252,8 @@ fun CurioConstellation(
             }
 
             // ── Background stars: tiny star glyphs for depth ────────
+            // Two layers: main starfield + a second pass of even tinier
+            // faint dots for a real cosmic feel.
             bgStars.forEach { s ->
                 drawStar(
                     center = Offset(s.first.x * w, s.first.y * h),
@@ -263,6 +261,23 @@ fun CurioConstellation(
                     color = bgStarColor,
                     alpha = bgStarColor.alpha
                 )
+            }
+            // Extra tinies — a second scatter at half-size for depth.
+            bgStars.forEachIndexed { i, s ->
+                if (i % 3 == 0) {
+                    // Offset each tiny from its parent to avoid stacking.
+                    val ox = ((i * 0.17f) % 1f)
+                    val oy = ((i * 0.23f) % 1f)
+                    drawStar(
+                        center = Offset(
+                            ((s.first.x + ox * 0.05f) % 1f) * w,
+                            ((s.second.y + oy * 0.05f) % 1f) * h
+                        ),
+                        outerRadius = (s.second * 0.4f).dp.toPx(),
+                        color = bgStarColor,
+                        alpha = bgStarColor.alpha * 0.5f
+                    )
+                }
             }
 
             // ── Ursa Minor constellation lines: gossamer thin ──────
@@ -347,10 +362,14 @@ fun CurioConstellation(
                 )
             }
 
-            // ── Lane stars: category-accent colored, star shapes ────
+            // ── Lane stars: neutral star colors, star shapes ────────
+            // These represent explored categories as real stars in the
+            // constellation — white/blue-white like the anchor stars,
+            // not colorful category accents.
+            val laneStarColor = if (isDark) Color(0xFFD0E0F8)
+                               else Color(0xFF6080A0)
             nodes.forEachIndexed { i, (id, n) ->
                 val p = pts[i]
-                val accent = accents[id] ?: Color(0xFF7FAFD8)
                 val count = laneCounts[id] ?: 0
                 val recent = (laneRecent[id] ?: 0L) >= recentCutoff
                 val isSel = selected == id
@@ -359,22 +378,22 @@ fun CurioConstellation(
                 val r = (2.5f + sqrt(count.coerceAtLeast(0).toFloat()) * 1.6f)
                     .coerceAtMost(7f).dp.toPx()
 
-                // Soft accent halo — larger when recently active or selected.
+                // Soft halo — larger when recently active or selected.
                 val haloAlpha = if (recent || isSel) 0.18f else 0.08f
                 val haloScale = if (recent || isSel) 2.2f else 1.8f
                 // Star halo.
                 drawStar(
                     center = p,
                     outerRadius = r * haloScale,
-                    color = accent.copy(alpha = haloAlpha),
+                    color = laneStarColor.copy(alpha = haloAlpha),
                     alpha = haloAlpha
                 )
                 // Star core.
                 drawStar(
                     center = p,
                     outerRadius = r,
-                    color = accent,
-                    alpha = accent.alpha
+                    color = laneStarColor,
+                    alpha = laneStarColor.alpha
                 )
                 // Bright center point.
                 drawCircle(
@@ -442,13 +461,15 @@ private fun randomAroundUrsaMinor(rnd: Random): Offset {
 }
 
 /**
- * Sparse background stars scattered across the whole canvas for depth.
- * Each is (position, radius in dp). Fixed seed — never re-rolls.
+ * Dense background stars scattered across the whole canvas for a real
+ * night-sky starfield. Each is (position, radius in dp). Fixed seed —
+ * never re-rolls. A mix of tiny dim dots and a few slightly brighter
+ * ones for depth.
  */
 private fun backgroundStars(): List<Pair<Offset, Float>> {
     val rnd = Random(0x5EED)
-    return List(40) {
-        Offset(rnd.nextFloat(), rnd.nextFloat()) to (0.4f + rnd.nextFloat() * 0.8f)
+    return List(120) {
+        Offset(rnd.nextFloat(), rnd.nextFloat()) to (0.3f + rnd.nextFloat() * 0.9f)
     }
 }
 
