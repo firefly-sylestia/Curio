@@ -1,39 +1,24 @@
 # Prompt — Current Request
 
 ## Request
-"whatever i dont like the brain constellation. lets use a real constellation map that symbolize curiosity. research and tell me. and we will be giving it the space style look properly blended and beautiful and not those messes and bright glows. fully redesign"
+"revert the hole changes we did. also why theres stamped holes along with the hole rings"
 
-## Status: DONE ✅
+## Status: IN PROGRESS
 
-## What changed (v210)
+## What's being reverted
+The 3 hole-ring commits from today:
+- `e9c15dc` — fix: restore PAPER_HOLE constants (reverted ✓)
+- `421d890` — fix: hole rings as opt-in toggle (reverted ✓)
+- `4ddc3c1` — refactor: 3D coil ring always-on (reverting, resolving conflicts)
 
-Replaced the entire brain neural web constellation with the real **Corvus (The Crow)** star pattern — Apollo placed the crow in the sky because its curiosity led it to seek forbidden knowledge.
-
-### Corvus star positions (real astronomical coordinates, normalized)
-- **Gienah** (ε Corvi) — mag 2.65, brightest — upper-left anchor
-- **Kraz** (β Corvi) — mag 2.65 — upper-right anchor
-- **Algorab** (δ Corvi) — mag 2.95 — lower-left anchor
-- **Minkar** (ν Corvi) — mag 3.00 — lower-right anchor
-
-These form the constellation's characteristic **quadrilateral** (the "sail" shape).
-
-### Space aesthetic
-- **Background**: deep void with faint radial nebula gradient (purple wash in dark mode, lavender in light)
-- **Constellation lines**: thin gossamer links between the four anchor stars (not a dense mesh)
-- **Stars**: small bright points with soft halos, sized by knowledge (sqrt ramp, capped at 7dp)
-- **Background stars**: 40 dim scattered points for depth
-- **No brain silhouette, no filler dots, no neural web, no garish glows**
-
-### Removed
-- `BRAIN_SILHOUETTE` polygon and `pointInBrain()` ray-casting
-- `randomInBrain()` rejection sampling
-- `brainFillerDots()` decorative fillers
-- `drawBrainOutline()` smooth curve renderer
-- `drawCurvedLink()` quadratic bezier links (replaced with straight gossamer lines)
-- `Path` and `Stroke` imports (no longer needed)
-
-### Files touched
-- `CurioConstellation.kt` — complete rewrite (same API, no caller changes needed)
+## What stays
+- v210 Corvus constellation redesign
+- v208 Brain Stats
+- v208e nav pill sync
+- v207 drawer footer, coil, nav collapse
+- v206 splash redesign
 
 ## Remaining work
-None — this request is complete.
+- Resolve AGENTS.md + changelog conflicts
+- Fix category picker showing "coming soon" for new categories
+- Commit + push
