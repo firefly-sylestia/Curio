@@ -80,6 +80,7 @@ object CurioColors {
     val CategoryTeal600     = Color(0xFF0D9488)  // Language
     val CategoryZinc        = Color(0xFF3F3F46)  // Engineering
     val CategoryDeepCyan    = Color(0xFF0C4A6E)  // Oceans
+    val CategoryPlum        = Color(0xFF7C3AED)  // Quotes (violet-purple)
 
     /** Light 300-level twins for accent-colored ink on dark surfaces. */
     val CategoryIndigoInk = Color(0xFFA5B4FC)
@@ -116,6 +117,7 @@ object CurioColors {
     val CategoryTeal600Ink   = Color(0xFF5EEAD4)  // Language
     val CategoryZincInk      = Color(0xFFD4D4D8)  // Engineering
     val CategoryDeepCyanInk  = Color(0xFF7DD3FC)  // Oceans
+    val CategoryPlumInk      = Color(0xFFC4B5FD)  // Quotes (violet-300)
 
     /** Tinted (20% alpha) washes of the researched category accents. */
     val CategoryIndigoTint = CategoryIndigo.copy(alpha = 0.20f)
@@ -152,6 +154,7 @@ object CurioColors {
     val CategoryTeal600Tint   = CategoryTeal600.copy(alpha = 0.20f)
     val CategoryZincTint      = CategoryZinc.copy(alpha = 0.20f)
     val CategoryDeepCyanTint  = CategoryDeepCyan.copy(alpha = 0.20f)
+    val CategoryPlumTint      = CategoryPlum.copy(alpha = 0.20f)  // Quotes
 
     /**
      * Legacy warm pastels — retained ONLY for brand/decorative use

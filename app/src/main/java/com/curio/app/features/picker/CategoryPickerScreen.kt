@@ -105,6 +105,7 @@ private fun newLaneRank(id: CategoryId): Int = when (id) {
     CategoryId.LANGUAGE -> 12
     CategoryId.HISTORY -> 13
     CategoryId.ECONOMICS -> 14
+    CategoryId.QUOTES -> 15
     else -> 100
 }
 

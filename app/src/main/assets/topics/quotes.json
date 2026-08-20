@@ -1,0 +1,3249 @@
+[
+  {
+    "id": "quote-socrates-unexamined-life",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The unexamined life is not worth living.",
+    "teaser": "Socrates said this at his trial in 399 BCE, choosing death over exile from Athens. The line became Western philosophy's founding challenge — think about why you live, or don't bother.",
+    "imageUrl": "",
+    "byline": "Socrates",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Apology (399 BCE)",
+      "durationMinutes": 10,
+      "instruction": "Read the Apology — Socrates' defense speech at his trial. Notice how he never begs for his life. He argues that questioning everything is the highest duty, and that a life without self-reflection isn't really human."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-socrates-only-thing-i-know",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I know that I know nothing.",
+    "teaser": "The paradox that launched a thousand philosophy seminars. Socrates claimed wisdom began with recognizing your own ignorance — a humility that still unnerves experts.",
+    "imageUrl": "",
+    "byline": "Socrates",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Apology (399 BCE)",
+      "durationMinutes": 10,
+      "instruction": "Read the section where Socrates explains why the Oracle at Delphi called him the wisest man in Athens. His answer: he's the only one who knows he doesn't know anything."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Epistemology"],
+    "tier": 1
+  },
+  {
+    "id": "quote-heraclitus-you-cannot-step",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "No man ever steps in the same river twice, for it is not the same river and he is not the same man.",
+    "teaser": "Heraclitus saw change as the only constant. The river metaphor became philosophy's most famous image for impermanence — everything flows, nothing stays.",
+    "imageUrl": "",
+    "byline": "Heraclitus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heraclitus' fragments on flux",
+      "durationMinutes": 8,
+      "instruction": "Read the surviving fragments of Heraclitus. Notice how he sees fire, not water, as the fundamental element — everything is always burning, always changing. The river is just his most famous image for it."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Metaphysics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-democritus-fullness-need",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Nothing is more useful than plenty, and nothing more cheeks than too much.",
+    "teaser": "The laughing philosopher Democritus invented atomic theory and also knew when to stop eating. His wisdom on moderation still cuts through a world of excess.",
+    "imageUrl": "",
+    "byline": "Democritus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Democritus' ethical fragments",
+      "durationMinutes": 8,
+      "instruction": "Read the ethical fragments of Democritus. Notice how he balances atomist physics with practical wisdom — the man who imagined atoms also knew the value of a simple meal."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 2
+  },
+  {
+    "id": "quote-plato-cave-allegory",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Allegory of the Cave: We are like prisoners who have only ever seen shadows on a wall.",
+    "teaser": "Plato's most famous thought experiment: what if everything you see is just a shadow of something real? The allegory still defines how we think about perception, reality, and education.",
+    "imageUrl": "",
+    "byline": "Plato",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Republic, Book VII (c. 375 BCE)",
+      "durationMinutes": 12,
+      "instruction": "Read the Allegory of the Cave in Republic Book VII. Picture the prisoners chained in darkness, mistaking shadows for reality. Then imagine one freed — the sun blinds him at first, but he never wants to go back."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Epistemology", "Metaphysics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-plato-be-kind-everyone",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Be kind, for everyone you meet is fighting a hard battle.",
+    "teaser": "Though often misattributed to Plato, this sentiment captures something essential about ancient Greek philosophy — the recognition that suffering is universal and compassion is rational.",
+    "imageUrl": "",
+    "byline": "Plato (attributed)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Phaedrus",
+      "durationMinutes": 10,
+      "instruction": "Read the Phaedrus, where Socrates walks with Phaedrus through the countryside and discusses love, madness, and the soul. Notice how Plato treats every human struggle as worthy of philosophical attention."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 2
+  },
+  {
+    "id": "quote-plato-wings-soul",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Every soul is winged, and when it is in its whole state, it flies up into the higher region.",
+    "teaser": "Plato's theory of recollection — learning is remembering what the soul already knows. The wings metaphor makes philosophy feel like flight, not study.",
+    "imageUrl": "",
+    "byline": "Plato",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Phaedrus (c. 370 BCE)",
+      "durationMinutes": 10,
+      "instruction": "Read the myth of the chariot in the Phaedrus. The soul is a charioteer driving two horses — one noble, one wild. The wings represent the soul's memory of beauty and truth before birth."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Metaphysics"],
+    "tier": 2
+  },
+  {
+    "id": "quote-aristotle-mean-virtue",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Virtue is a mean between two extremes — excess and deficiency.",
+    "teaser": "Aristotle's golden mean: courage isn't fearlessness, it's the space between cowardice and recklessness. Every virtue sits on a spectrum, and wisdom is finding the middle.",
+    "imageUrl": "",
+    "byline": "Aristotle",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aristotle's Nicomachean Ethics, Book II",
+      "durationMinutes": 10,
+      "instruction": "Read Book II of the Nicomachean Ethics. Aristotle lists virtues as means: courage is between cowardice and rashness, generosity between stinginess and wastefulness. The mean isn't average — it's relative to each person."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-aristotle-pursuit-happiness",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Happiness depends upon ourselves.",
+    "teaser": "Aristotle argued that eudaimonia — human flourishing — isn't a gift from the gods but something you build through virtuous action. You are the architect of your own good life.",
+    "imageUrl": "",
+    "byline": "Aristotle",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aristotle's Nicomachean Ethics, Book I",
+      "durationMinutes": 10,
+      "instruction": "Read Book I of the Nicomachean Ethics. Aristotle asks what the highest good is — wealth? pleasure? honor? He concludes it's eudaimonia, flourishing through virtuous activity. It's not a feeling; it's a way of living."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-aristotle-educated-mind",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Educated mind is able to entertain a thought without accepting it.",
+    "teaser": "The mark of intelligence isn't knowing all the answers — it's holding ideas loosely, examining them before committing. A lesson our age of hot takes desperately needs.",
+    "imageUrl": "",
+    "byline": "Aristotle",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aristotle's Posterior Analytics",
+      "durationMinutes": 8,
+      "instruction": "Read the Posterior Analytics, where Aristotle defines scientific knowledge. Notice how he distinguishes between knowing facts and understanding why they're true — the educated mind doesn't just collect information."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Epistemology"],
+    "tier": 2
+  },
+  {
+    "id": "quote-epictetus-disturbance",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "People are not disturbed by things, but by the views they take of them.",
+    "teaser": "Epictetus, a former slave who became one of Rome's greatest teachers, said your suffering comes from your interpretation, not from events themselves. Stoic therapy in one sentence.",
+    "imageUrl": "",
+    "byline": "Epictetus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Epictetus' Enchiridion",
+      "durationMinutes": 8,
+      "instruction": "Read the Enchiridion — Epictetus' handbook of Stoic practice. The opening line: 'Some things are within our control, and some things are not.' Everything follows from that distinction."
+    },
+    "tags": ["Philosophy", "Stoicism", "Ancient Greek"],
+    "tier": 1
+  },
+  {
+    "id": "quote-epictetus-circumstances",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It's not what happens to you, but how you react to it that matters.",
+    "teaser": "Epictetus taught that between stimulus and response lies a choice — and that choice is your freedom. No tyrant can take it from you, not even one who enslaves your body.",
+    "imageUrl": "",
+    "byline": "Epictetus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Epictetus' Discourses",
+      "durationMinutes": 10,
+      "instruction": "Read the Discourses, where Epictetus teaches his students that external events are 'indifferent' — neither good nor bad. Only your response has moral weight. He should know: he was a slave."
+    },
+    "tags": ["Philosophy", "Stoicism", "Ancient Greek"],
+    "tier": 1
+  },
+  {
+    "id": "quote-epictetus-suffering-imagination",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We suffer more in imagination than in reality.",
+    "teaser": "The mind's worst monsters are the ones it invents. Epictetus spotted anxiety's trick two millennia before cognitive behavioral therapy named it.",
+    "imageUrl": "",
+    "byline": "Epictetus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Epictetus' Moral Discourses",
+      "durationMinutes": 8,
+      "instruction": "Read the Discourses where Epictetus addresses fear of death. He argues that death itself is painless — it's the fear of death that causes all the suffering. The imagined future is always worse than the present moment."
+    },
+    "tags": ["Philosophy", "Stoicism", "Psychology"],
+    "tier": 1
+  },
+  {
+    "id": "quote-seneca-shortness-life",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It is not that we have a short time to live, but that we waste a great deal of it.",
+    "teaser": "Seneca's essay On the Shortness of Life is a 2,000-year-old time-management book that's still better than most modern ones. We don't lack time; we squander it on things that don't matter.",
+    "imageUrl": "",
+    "byline": "Seneca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seneca's On the Shortness of Life (c. 49 CE)",
+      "durationMinutes": 12,
+      "instruction": "Read Seneca's essay On the Shortness of Life. He argues that life isn't short — we just waste most of it on busywork, other people's demands, and pleasures that leave us emptier. The generous person has the most time."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 1
+  },
+  {
+    "id": "quote-seneca-luck-preparation",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Luck is what happens when preparation meets opportunity.",
+    "teaser": "Seneca knew that what looks like luck is really readiness colliding with a moment. The people who seem 'lucky' have been preparing for years.",
+    "imageUrl": "",
+    "byline": "Seneca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seneca's Moral Letters to Lucilius",
+      "durationMinutes": 10,
+      "instruction": "Read Letter 76 of Seneca's Moral Letters. He writes about fortune and preparation, arguing that wisdom is the only wealth that can't be stolen. Luck is just the name we give to someone else's preparation."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-seneca-hell-is-now",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "There is nothing so wretched or foolish as to anticipate misfortunes.",
+    "teaser": "Seneca's prescription for anxiety: stop rehearsing disasters that haven't happened. Most of what you fear will never come to pass — and if it does, worrying twice won't help.",
+    "imageUrl": "",
+    "byline": "Seneca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seneca's Moral Letters to Lucilius, Letter 98",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 98, where Seneca writes about the foolishness of worrying about the future. He says we suffer twice: once in anticipation, once in reality. The Stoic meets events as they come, not as feared."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-marcus-amber-perspective",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "How much more grievous are the consequences of anger than the causes of it.",
+    "teaser": "Marcus Aurelius wrote this in his private journal during military campaigns. The Roman emperor reminded himself daily that rage solves nothing — a lesson for anyone who's ever sent an angry email.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book XI",
+      "durationMinutes": 10,
+      "instruction": "Read Book XI of the Meditations. Marcus writes to himself about anger, patience, and the smallness of human grudges against the backdrop of eternity. He was the most powerful man in the world and still had to talk himself down."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 1
+  },
+  {
+    "id": "quote-marcus-waste-time",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Waste no more time arguing about what a good man should be. Be one.",
+    "teaser": "Marcus Aurelius didn't write the Meditations for publication — they were reminders to himself. This line is pure Stoic practice: stop debating virtue and start practicing it.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book X",
+      "durationMinutes": 10,
+      "instruction": "Read Book X of the Meditations. Marcus reminds himself that philosophy isn't about winning arguments — it's about changing how you live. Every day is a chance to be better, not just to talk about being better."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 1
+  },
+  {
+    "id": "quote-marcus-universe-change",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The universe is change; our life is what our thoughts make it.",
+    "teaser": "Marcus Aurelius saw reality as a river of becoming. You can't stop the current, but you can choose what you think about as you float. Your mind is the one thing that's truly yours.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book IV",
+      "durationMinutes": 10,
+      "instruction": "Read Book IV of the Meditations. Marcus reflects on the transience of all things — fame, empires, even the stars. He concludes that the only solid ground is your own mind and its choices."
+    },
+    "tags": ["Philosophy", "Stoicism", "Metaphysics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-marcus-obstacle-way",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The impediment to action advances action. What stands in the way becomes the way.",
+    "teaser": "The most quoted Marcus Aurelius line — and possibly the most useful philosophy ever written. Every obstacle is raw material for progress if you look at it right.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book V",
+      "durationMinutes": 10,
+      "instruction": "Read Book V of the Meditations. Marcus writes about starting the day, dealing with difficult people, and finding opportunity in obstacles. The line about obstacles becoming the way is part of his morning meditation practice."
+    },
+    "tags": ["Philosophy", "Stoicism", "Resilience"],
+    "tier": 1
+  },
+  {
+    "id": "quote-marcus-kindness-strength",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The best revenge is not to be like your enemy.",
+    "teaser": "Marcus Aurelius faced betrayal, plague, and war. His answer: don't become the thing that hurt you. Kindness in the face of cruelty is the ultimate victory.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book VI",
+      "durationMinutes": 8,
+      "instruction": "Read Book VI of the Meditations. Marcus reminds himself that the people who wrong him are acting out of ignorance, not malice. Responding with cruelty would make him no better than them."
+    },
+    "tags": ["Philosophy", "Stoicism", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-buddha-attachment-suffering",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Attachment is the source of all suffering.",
+    "teaser": "The Buddha's First Noble Truth explained in five words. Clinging to people, things, or ideas — even to life itself — is the root of pain. Letting go isn't resignation; it's liberation.",
+    "imageUrl": "",
+    "byline": "Siddhartha Gautama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Four Noble Truths",
+      "durationMinutes": 10,
+      "instruction": "Read about the Four Noble Truths — the core of Buddhist teaching. Life involves suffering (dukkha); suffering comes from attachment; attachment can cease; the Eightfold Path shows how. The insight is that the pain isn't in the event — it's in the clinging."
+    },
+    "tags": ["Philosophy", "Buddhism", "Eastern"],
+    "tier": 1
+  },
+  {
+    "id": "quote-buddha-mind-everything",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The mind is everything. What you think, you become.",
+    "teaser": "Buddha's core insight: your thoughts shape your reality. Not in a mystical law-of-attraction way, but in the practical sense that habitual thinking becomes habitual being.",
+    "imageUrl": "",
+    "byline": "Siddhartha Gautama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Dhammapada",
+      "durationMinutes": 8,
+      "instruction": "Read the opening verses of the Dhammapada: 'All that we are is the result of what we have thought.' Buddha argues that the mind creates our experience of reality — change the mind, change the world."
+    },
+    "tags": ["Philosophy", "Buddhism", "Mindfulness"],
+    "tier": 1
+  },
+  {
+    "id": "quote-confucius-do-not-others",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Do not do to others what you do not want done to yourself.",
+    "teaser": "Confucius said this 500 years before Jesus. The Golden Rule appears independently in almost every culture — proof that basic empathy is a human universal, not a religious invention.",
+    "imageUrl": "",
+    "byline": "Confucius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Analects, Book XV",
+      "durationMinutes": 8,
+      "instruction": "Read Analects 15.24, where a student asks Confucius for a single word to live by. Confucius says 'shu' — reciprocity. Do not do to others what you would not want done to you. The entire ethical system in one sentence."
+    },
+    "tags": ["Philosophy", "Confucianism", "Eastern", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-confucius-real-knowledge",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Real knowledge is to know the extent of one's ignorance.",
+    "teaser": "Confucius and Socrates agreed on the most important thing: knowing what you don't know. Wisdom starts at the edge of your understanding.",
+    "imageUrl": "",
+    "byline": "Confucius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Analects, Book II",
+      "durationMinutes": 8,
+      "instruction": "Read Analects 2.17, where Confucius discusses what it means to know. He argues that knowing isn't just memorizing — it's understanding the limits of your knowledge and acting with appropriate humility."
+    },
+    "tags": ["Philosophy", "Confucianism", "Epistemology"],
+    "tier": 2
+  },
+  {
+    "id": "quote-laozi-nature-way",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Nature does not hurry, yet everything is accomplished.",
+    "teaser": "Laozi's Tao Te Ching is the world's most compact philosophy book — 81 chapters, each a few lines. This one reminds you that forcing things rarely works; patience is not passive.",
+    "imageUrl": "",
+    "byline": "Laozi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tao Te Ching, Chapter 37",
+      "durationMinutes": 10,
+      "instruction": "Read the Tao Te Ching — it's only 81 short chapters. Chapter 37 says the Tao does nothing, yet nothing is left undone. The sage leads by not forcing, achieves by not striving."
+    },
+    "tags": ["Philosophy", "Taoism", "Eastern"],
+    "tier": 1
+  },
+  {
+    "id": "quote-laozi-stream-ten-thousand",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "A journey of a thousand miles begins with a single step.",
+    "teaser": "Laozi's most famous line, and still the best answer to overwhelm. You don't need to see the whole path — just take the first step.",
+    "imageUrl": "",
+    "byline": "Laozi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tao Te Ching, Chapter 64",
+      "durationMinutes": 8,
+      "instruction": "Read Chapter 64 of the Tao Te Ching. Laozi writes that the sage acts before things get difficult and orders them before disorder sets in. The great journey begins with small, early steps — not grand plans."
+    },
+    "tags": ["Philosophy", "Taoism", "Eastern"],
+    "tier": 1
+  },
+  {
+    "id": "quote-laozi-water-softest",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Water is fluid, soft, and yielding. But water will wear away rock, which is rigid and cannot yield.",
+    "teaser": "Laozi's paradox of strength: the softest thing in nature carves the hardest. Flexibility beats force — a lesson every tree in a storm knows instinctively.",
+    "imageUrl": "",
+    "byline": "Laozi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tao Te Ching, Chapter 78",
+      "durationMinutes": 8,
+      "instruction": "Read Chapter 78 of the Tao Te Ching. Nothing in the world is softer than water, yet nothing is better at overcoming the hard and strong. The soft overcomes the hard — this is a universal truth."
+    },
+    "tags": ["Philosophy", "Taoism", "Eastern"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-god-dead",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "God is dead. God remains dead. And we have killed him.",
+    "teaser": "Nietzsche didn't celebrate this — he mourned it. Without God, where do we find meaning? The madman's cry in the marketplace is a warning, not a victory speech.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gay Science, Section 125 (1882)",
+      "durationMinutes": 10,
+      "instruction": "Read Section 125 of The Gay Science — the madman who runs into the marketplace crying 'God is dead.' He's not triumphant; he's terrified. Without a shared framework of meaning, what holds civilization together?"
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-gaze-abyss",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "When you gaze long into an abyss, the abyss also gazes into you.",
+    "teaser": "Nietzsche knew that confronting darkness changes you. You can't study evil, suffering, or meaninglessness without it leaving a mark on your psyche.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beyond Good and Evil, Aphorism 146 (1886)",
+      "durationMinutes": 8,
+      "instruction": "Read Aphorism 146 of Beyond Good and Evil. Nietzsche warns that fighting monsters — or studying them — transforms the fighter. The abyss isn't just a metaphor; it's a description of what happens when you stare at the darkest truths too long."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-what-doesnt-kill",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "What does not kill me makes me stronger.",
+    "teaser": "Nietzsche's most popular line — and his most misunderstood. He's not celebrating suffering; he's saying that surviving hardship creates the kind of person who can handle anything.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Twilight of the Idols, Aphorism 8 (1889)",
+      "durationMinutes": 8,
+      "instruction": "Read Aphorism 8 of Twilight of the Idols. Nietzsche writes that what doesn't kill an organism often strengthens it — a biological observation he applies to human psychology. He also says the same about what 'makes me happier,' complicating the quote."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-eternal-recurrence",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "What if some day or night a demon were to steal after you into your loneliest loneliness and say: this life as you now live it and have lived it, you will have to live once more and innumerable times more.",
+    "teaser": "Nietzsche's thought experiment: would you live your exact life again, forever? If yes, you've affirmed life. If no, you have work to do. The ultimate test of whether you're living well.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gay Science, Section 341 (1882)",
+      "durationMinutes": 10,
+      "instruction": "Read Section 341 of The Gay Science. A demon asks you: would you live your life, exactly as it is, an infinite number of times? Nietzsche calls this the heaviest weight — and asks whether it would crush you or make you say yes to everything."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kierkegaard-leap-faith",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Faith sees best in the dark.",
+    "teaser": "Kierkegaard argued that rational certainty is the enemy of genuine faith. Real belief requires a leap into uncertainty — and that leap is what gives life its depth and meaning.",
+    "imageUrl": "",
+    "byline": "Søren Kierkegaard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kierkegaard's Fear and Trembling (1843)",
+      "durationMinutes": 12,
+      "instruction": "Read Fear and Trembling, where Kierkegaard examines Abraham's willingness to sacrifice Isaac. He argues that faith is a paradox — it transcends reason, and that's precisely what makes it meaningful. The leap of faith is not irrational; it's suprarational."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kierkegaard-life backwards",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Life can only be understood backwards; but it must be lived forwards.",
+    "teaser": "Kierkegaard's most elegant paradox: you only make sense of your life after it's happened, but you have to keep living while the story unfolds. The gap between understanding and action is where anxiety lives.",
+    "imageUrl": "",
+    "byline": "Søren Kierkegaard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Journals of Søren Kierkegaard (1844)",
+      "durationMinutes": 8,
+      "instruction": "Read Kierkegaard's journals, where this line appears. He reflects on how memory arranges the past into a narrative, but living is always uncertain. The clarity comes only in retrospect — but you can't wait for it."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-sartre-condemned-free",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Man is condemned to be free; because once thrown into the world, he is responsible for everything he does.",
+    "teaser": "Sartre's existentialism in a nutshell: there's no script, no divine plan, no excuse. You chose — even not choosing is a choice — and you own the consequences.",
+    "imageUrl": "",
+    "byline": "Jean-Paul Sartre",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Existentialism Is a Humanism (1946)",
+      "durationMinutes": 10,
+      "instruction": "Read Existentialism Is a Humanism, Sartre's most accessible lecture. He argues that existence precedes essence — you're not born with a purpose, you create one. This freedom is terrifying, but also the source of all human dignity."
+    },
+    "tags": ["Philosophy", "Existentialism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-sartre-hell-other-people",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Hell is other people.",
+    "teaser": "From Sartre's play No Exit — three people trapped in a room discover that the real torture isn't fire or brimstone. It's being permanently seen, judged, and defined by others.",
+    "imageUrl": "",
+    "byline": "Jean-Paul Sartre",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sartre's No Exit (1944)",
+      "durationMinutes": 15,
+      "instruction": "Read No Exit — a one-act play where three dead souls discover their afterlife is a drawing room. They can leave at any time, but they don't. The 'hell' is not punishment — it's the permanent presence of other people's gaze."
+    },
+    "tags": ["Philosophy", "Existentialism", "20th Century", "Theatre"],
+    "tier": 1
+  },
+  {
+    "id": "quote-camus-absurd-hero",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "One must imagine Sisyphus happy.",
+    "teaser": "Camus' final line in The Myth of Sisyphus — the most optimistic sentence ever written about futility. Sisyphus pushes a boulder up a hill forever. Camus says: in the struggle itself, there is fulfillment.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Myth of Sisyphus (1942)",
+      "durationMinutes": 12,
+      "instruction": "Read The Myth of Sisyphus. Camus argues that life is absurd — we search for meaning in a meaningless universe — but this isn't cause for despair. The revolt against absurdity is itself meaningful. Sisyphus is happy because he owns his struggle."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-camus-in-the-midst-winter",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "In the midst of winter, I found there was, within me, an invincible summer.",
+    "teaser": "Camus wrote this during World War II. The darkest seasons don't destroy your inner warmth — they reveal it. A promise that the human spirit can't be permanently frozen.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Return to Tipasa (1954)",
+      "durationMinutes": 8,
+      "instruction": "Read Return to Tipasa, an essay where Camus returns to Algeria after the war. He writes about finding beauty and resilience in the ruins — both literal and personal. The invincible summer is not optimism; it's defiance."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-camus-myth-of-sisyphus",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The struggle itself toward the heights is enough to fill a man's heart.",
+    "teaser": "Camus completes his Sisyphus argument: you don't need to reach the top. The climbing — the effort, the sweat, the refusal to quit — is where meaning lives.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Myth of Sisyphus (1942)",
+      "durationMinutes": 10,
+      "instruction": "Read the final pages of The Myth of Sisyphus. Camus argues that the moment of walking back down the hill — when Sisyphus is conscious of his fate — is the moment of freedom. The struggle itself fills a heart."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-heidegger-being-death",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Authentic existence means living in awareness of one's own death.",
+    "teaser": "Heidegger argued that most of us sleepwalk through life, avoiding the one certainty that could wake us up. Facing death honestly is what makes you truly alive.",
+    "imageUrl": "",
+    "byline": "Martin Heidegger",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Being and Time (1927), Division II",
+      "durationMinutes": 15,
+      "instruction": "Read the section on Being-toward-death in Being and Time. Heidegger argues that awareness of mortality doesn't depress you — it makes every moment urgent and authentic. Death is not an event at the end of life; it's a possibility that shapes every moment."
+    },
+    "tags": ["Philosophy", "Existentialism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-wittgenstein-whereof-silence",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Whereof one cannot speak, thereof one must be silent.",
+    "teaser": "The final line of Wittgenstein's Tractatus — the most famous sentence in 20th-century philosophy. Some things (ethics, beauty, the meaning of life) can't be said. They can only be shown.",
+    "imageUrl": "",
+    "byline": "Ludwig Wittgenstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tractatus Logico-Philosophicus (1921)",
+      "durationMinutes": 12,
+      "instruction": "Read the final propositions of the Tractatus. Wittgenstein argues that language can only picture facts about the world — things like ethics, aesthetics, and the mystical lie beyond language. The silence isn't ignorance; it's respect for what can't be spoken."
+    },
+    "tags": ["Philosophy", "Analytic", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-camus-absurd-revolt",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I rebel; therefore we exist.",
+    "teaser": "Camus' most political line — from The Rebel. The individual act of saying 'no' to injustice creates solidarity. You don't rebel alone; you rebel for everyone.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Rebel (1951)",
+      "durationMinutes": 12,
+      "instruction": "Read The Rebel, where Camus traces the history of revolt from the French Revolution to Soviet communism. He argues that true rebellion says 'no' to oppression but 'yes' to human dignity — it draws a line."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century", "Politics"],
+    "tier": 2
+  },
+  {
+    "id": "quote-hannah-arendt-banality-evil",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The sad truth is that most evil is done by people who never made up their minds to be either good or evil.",
+    "teaser": "Hannah Arendt watched Adolf Eichmann's trial and realized something terrifying: evil isn't always monstrous. Sometimes it's just not thinking — following orders, going along, never deciding.",
+    "imageUrl": "",
+    "byline": "Hannah Arendt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Eichmann in Jerusalem (1963)",
+      "durationMinutes": 12,
+      "instruction": "Read Eichmann in Jerusalem, Arendt's report on the trial of Adolf Eichmann. She coins 'the banality of evil' — Eichmann wasn't a monster, he was a bureaucrat who never thought about what he was doing. Thinking, for Arendt, is the best defense against evil."
+    },
+    "tags": ["Philosophy", "Political Philosophy", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-viktor-frankl-meaning-suffering",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "He who has a why to live can bear almost any how.",
+    "teaser": "Viktor Frankl survived Auschwitz and built a psychology around what he learned there: the people who survived weren't the strongest — they were the ones who found meaning in their suffering.",
+    "imageUrl": "",
+    "byline": "Viktor Frankl",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Man's Search for Meaning (1946)",
+      "durationMinutes": 12,
+      "instruction": "Read Man's Search for Meaning, part memoir of Auschwitz, part introduction to logotherapy. Frankl argues that the primary human drive is not pleasure but meaning. Even in the worst circumstances, you can choose your attitude."
+    },
+    "tags": ["Philosophy", "Psychology", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-viktor-frankl-last-freedom",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Everything can be taken from a man but one thing: the last of the human freedoms — to choose one's attitude in any given set of circumstances.",
+    "teaser": "Frankl's most powerful line — written from inside a concentration camp. Even when you lose everything else, you keep the freedom to decide how you respond. That's the one thing no one can take.",
+    "imageUrl": "",
+    "byline": "Viktor Frankl",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Man's Search for Meaning (1946)",
+      "durationMinutes": 10,
+      "instruction": "Read the opening chapters of Man's Search for Meaning. Frankl describes the daily horror of the camps — and then explains how some prisoners found meaning anyway. The choice of attitude became their last act of dignity."
+    },
+    "tags": ["Philosophy", "Psychology", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-empson-seven-types",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The paradox is the truest truth, and the best we can do is to live with it.",
+    "teaser": "William Empson, the literary critic, argued that ambiguity isn't a flaw in language — it's its deepest power. The best poems, like the best lives, hold contradictions without resolving them.",
+    "imageUrl": "",
+    "byline": "William Empson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seven Types of Ambiguity (1930)",
+      "durationMinutes": 10,
+      "instruction": "Read the introduction to Seven Types of Ambiguity. Empson shows how a single line of poetry can carry multiple, even contradictory meanings — and argues that this richness is not confusion but depth."
+    },
+    "tags": ["Literary Criticism", "Poetry", "20th Century"],
+    "tier": 3
+  },
+  {
+    "id": "quote-rilke-patience-unsolved",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Be patient toward all that is unsolved in your heart and try to love the questions themselves.",
+    "teaser": "Rilke's advice to a young poet: don't rush to answers. Sit with the questions. The questions themselves will guide you to the right life — if you let them.",
+    "imageUrl": "",
+    "byline": "Rainer Maria Rilke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letters to a Young Poet (1929)",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 4 of Letters to a Young Poet. Rilke tells the 19-year-old Franz Xaver Kappus not to seek answers from others. Live the questions now — eventually you'll grow into the answer without even realizing it."
+    },
+    "tags": ["Literature", "Letters", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-rilke-live-questions",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Live the questions now. Perhaps you will then gradually, without noticing it, live along some distant day into the answer.",
+    "teaser": "Rilke's companion line to 'love the questions' — the promise that patience isn't passive. You don't force the answer; you become the kind of person who naturally finds it.",
+    "imageUrl": "",
+    "byline": "Rainer Maria Rilke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letters to a Young Poet (1929)",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 4 again with this companion line in mind. Rilke's advice is radical: don't try to solve your life. Instead, become someone who can live with uncertainty. The answer will come when you're ready."
+    },
+    "tags": ["Literature", "Letters", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-camus-summer-in-algeria",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The absurd does not liberate; it binds. It does not authorize all actions. Everything is permitted does not mean that nothing is forbidden.",
+    "teaser": "Camus pushes back against the nihilistic reading of his own philosophy. The absence of cosmic meaning doesn't mean anything goes — you still have to answer to other humans.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Myth of Sisyphus (1942)",
+      "durationMinutes": 10,
+      "instruction": "Read the final chapter of The Myth of Sisyphus. Camus explicitly rejects the idea that absurdism leads to nihilism. The absence of ultimate meaning makes human meaning more precious, not less."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-malcolm-x-education-freedom",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Education is the passport to the future, for tomorrow belongs to those who prepare for it today.",
+    "teaser": "Malcolm X taught himself to read in prison. He knew that education wasn't just knowledge — it was the tool that could break any chain, physical or mental.",
+    "imageUrl": "",
+    "byline": "Malcolm X",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Autobiography of Malcolm X (1965)",
+      "durationMinutes": 12,
+      "instruction": "Read the chapters on Malcolm X's prison education. He describes how reading transformed him — from a street hustler into a man who could argue with anyone. Education wasn't escape; it was weapon and shield."
+    },
+    "tags": ["Philosophy", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-martin-luther-king-darkness",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Darkness cannot drive out darkness; only light can do that. Hate cannot drive out hate; only love can do that.",
+    "teaser": "Martin Luther King Jr.'s most direct statement about nonviolence: meeting hate with hate only doubles the darkness. Love is not weakness — it's the only force that actually changes things.",
+    "imageUrl": "",
+    "byline": "Martin Luther King Jr.",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Strength to Love (1963)",
+      "durationMinutes": 10,
+      "instruction": "Read Strength to Love, King's collection of sermons. He argues that nonviolence isn't passivity — it's active love in the face of hatred. Darkness can't push out darkness; only light can."
+    },
+    "tags": ["Philosophy", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-mlk-injustice-anywhere",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Injustice anywhere is a threat to justice everywhere.",
+    "teaser": "King wrote this from a Birmingham jail cell. You can't stay neutral about injustice — silence in the face of oppression is siding with the oppressor.",
+    "imageUrl": "",
+    "byline": "Martin Luther King Jr.",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letter from Birmingham Jail (1963)",
+      "durationMinutes": 12,
+      "instruction": "Read Letter from Birmingham Jail, written on scraps of paper and margins of a newspaper. King responds to white clergymen who called his protest 'unwise and untimely.' He argues that justice is indivisible — you can't pick and choose where to care."
+    },
+    "tags": ["Philosophy", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nelson-mandela-impossible",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It always seems impossible until it's done.",
+    "teaser": "Mandela spent 27 years in prison and emerged without bitterness. This line is his testimony: every revolution looked impossible the day before it succeeded.",
+    "imageUrl": "",
+    "byline": "Nelson Mandela",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nelson Mandela's Long Walk to Freedom (1994)",
+      "durationMinutes": 12,
+      "instruction": "Read the closing chapters of Long Walk to Freedom. Mandela describes the moment he walked out of Victor Verster Prison — the moment 'impossible' became real. He refused to hate his captors, and that refusal changed a nation."
+    },
+    "tags": ["Philosophy", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-maya-angelou-rise",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "You may encounter many defeats, but you must not be defeated.",
+    "teaser": "Maya Angelou was a single mother, a dancer, a journalist, and a poet before she became Maya Angelou. Defeat was always temporary; giving up was never an option.",
+    "imageUrl": "",
+    "byline": "Maya Angelou",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "I Know Why the Caged Bird Sings (1969)",
+      "durationMinutes": 12,
+      "instruction": "Read I Know Why the Caged Bird Sings, Angelou's memoir of growing up Black in the segregated South. She was mute for years after a trauma — and found her voice through literature. Defeat was never the end."
+    },
+    "tags": ["Literature", "Memoir", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-maya-angelou-people-forget",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "People will forget what you said, people will forget what you did, but people will never forget how you made them feel.",
+    "teaser": "Maya Angelou's most quoted line — and the simplest measure of a life. What you do matters, but how you make people feel is what they carry forever.",
+    "imageUrl": "",
+    "byline": "Maya Angelou",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letter to My Daughter (2009)",
+      "durationMinutes": 8,
+      "instruction": "Read Letter to My Daughter, where Angelou shares life lessons with women she considers her 'daughter.' She writes about kindness, resilience, and the power of making people feel seen."
+    },
+    "tags": ["Literature", "Memoir", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-james Baldwin-not-everything",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Not everything that is faced can be changed, but nothing can be changed until it is faced.",
+    "teaser": "James Baldwin wrote about race in America with the precision of a surgeon and the fury of a prophet. This line is his prescription: you can't fix what you refuse to see.",
+    "imageUrl": "",
+    "byline": "James Baldwin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "James Baldwin's The Fire Next Time (1963)",
+      "durationMinutes": 12,
+      "instruction": "Read The Fire Next Time, two essays on race in America. Baldwin writes with devastating clarity about what happens when a nation refuses to face its own history. The fire is a warning, not a threat."
+    },
+    "tags": ["Literature", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-james-baldwin-not-father",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I imagine one of the reasons people cling to their hates so stubbornly is because they sense, once hate is gone, they will be forced to deal with pain.",
+    "teaser": "Baldwin understood that hatred is often a shield against grief. To let go of hate means facing the wound underneath — and that takes more courage than holding onto anger.",
+    "imageUrl": "",
+    "byline": "James Baldwin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Fire Next Time (1963)",
+      "durationMinutes": 10,
+      "instruction": "Read the second essay of The Fire Next Time, 'Letters from a Region in My Mind.' Baldwin describes meeting the Nation of Islam's Elijah Muhammad and grappling with the seduction of Black nationalism — the appeal of hatred as a shield."
+    },
+    "tags": ["Literature", "Civil Rights", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-elie-wiesel-forget-dead",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "To forget the dead would be akin to killing them a second time.",
+    "teaser": "Elie Wiesel survived Auschwitz and spent his life making sure the world didn't forget. Memory isn't optional — it's the last act of respect we owe to those who suffered.",
+    "imageUrl": "",
+    "byline": "Elie Wiesel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Night (1960)",
+      "durationMinutes": 10,
+      "instruction": "Read Night, Wiesel's memoir of the Holocaust. He was 15 when he entered Auschwitz. The book is short, brutal, and necessary — it makes forgetting impossible."
+    },
+    "tags": ["Literature", "Memoir", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-elie-wisel-silence-evil",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We must take sides. Neutrality helps the oppressor, never the victim.",
+    "teaser": "Wiesel won the Nobel Peace Prize and used his acceptance speech to say this: silence in the face of suffering is complicity. There is no neutral ground when people are being hurt.",
+    "imageUrl": "",
+    "byline": "Elie Wiesel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nobel Peace Prize Acceptance Speech (1986)",
+      "durationMinutes": 8,
+      "instruction": "Read Wiesel's Nobel acceptance speech. He warns against indifference — calling it 'the beginning of a cold and strange stillness.' For Wiesel, taking a side is not political; it's moral."
+    },
+    "tags": ["Philosophy", "Ethics", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-simone-beauvoir-one-born",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "One is not born, but rather becomes, a woman.",
+    "teaser": "Simone de Beauvoir's most famous line — the foundation of modern gender theory. Identity isn't destiny; it's performance, construction, and choice. Biology doesn't dictate who you become.",
+    "imageUrl": "",
+    "byline": "Simone de Beauvoir",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Second Sex (1949), Introduction",
+      "durationMinutes": 12,
+      "instruction": "Read the Introduction to The Second Sex. De Beauvoir argues that 'woman' is not a biological fact but a social construct — something women are made into by society. The line 'One is not born, but rather becomes, a woman' changed everything."
+    },
+    "tags": ["Philosophy", "Feminism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-emily-dickinson-i-dwell-possibility",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I dwell in Possibility — A fairer House than Prose.",
+    "teaser": "Emily Dickinson chose poetry over prose, possibility over certainty. She wrote nearly 1,800 poems and published almost none — dwelling in possibility was enough.",
+    "imageUrl": "",
+    "byline": "Emily Dickinson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Emily Dickinson's poems (1860s)",
+      "durationMinutes": 10,
+      "instruction": "Read the poem 'I dwell in Possibility' (Fr466). Dickinson compares poetry to prose, arguing that poetry is wider, more open, more alive. She chose to live in possibility — and wrote from that house."
+    },
+    "tags": ["Poetry", "American", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-dickinson-if-i-read-book",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "If I feel physically as if the top of my head were taken off, I know that is poetry.",
+    "teaser": "Dickinson's test for poetry: not beauty, not rhyme, not intellect — physical sensation. Real poetry changes your body before it changes your mind.",
+    "imageUrl": "",
+    "byline": "Emily Dickinson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Emily Dickinson's letters (1870)",
+      "durationMinutes": 8,
+      "instruction": "Read Dickinson's letters, where she describes her physical response to poetry. She doesn't analyze poems — she lets them hit her body. The top of her head coming off is the ultimate description of being moved."
+    },
+    "tags": ["Poetry", "American", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-oscar-wilde-be-yourself",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Be yourself; everyone else is already taken.",
+    "teaser": "Oscar Wilde knew that originality was the most radical act. In a world of imitation, being authentically yourself is both the hardest and most rewarding thing you can do.",
+    "imageUrl": "",
+    "byline": "Oscar Wilde",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Oscar Wilde's Letters and Essays",
+      "durationMinutes": 8,
+      "instruction": "Read Wilde's essay 'The Soul of Man Under Socialism' (1891). He argues that individuality is the highest value — society crushes it, and art expresses it. 'Be yourself' isn't vanity; it's resistance."
+    },
+    "tags": ["Literature", "Victorian", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-oscar-wilde-lives-wrecked",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We are all in the gutter, but some of us are looking at the stars.",
+    "teaser": "Wilde wrote this from prison — or just before it. Even in the worst circumstances, looking up is an act of defiance. The gutter is real; so are the stars.",
+    "imageUrl": "",
+    "byline": "Oscar Wilde",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lady Windermere's Fan (1892)",
+      "durationMinutes": 10,
+      "instruction": "Read Lady Windermere's Fan, where Lord Darlington says this line. The play is a comedy of manners, but this line cuts through the surface: everyone is flawed, but hope is a choice."
+    },
+    "tags": ["Literature", "Victorian", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-mark-twain-two-best-days",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The two most important days in your life are the day you are born and the day you find out why.",
+    "teaser": "Mark Twain's answer to the meaning of life: find your purpose. The first day is given; the second is earned. Most people spend their whole lives waiting for the second day.",
+    "imageUrl": "",
+    "byline": "Mark Twain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mark Twain's Autobiography (1924)",
+      "durationMinutes": 8,
+      "instruction": "Read Mark Twain's Autobiography, where he reflects on purpose and legacy. He wrote it in a way he wanted — to be published 100 years after his death. Finding your 'why' took him a lifetime."
+    },
+    "tags": ["Literature", "American", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-lewis-carroll-curiouser",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Curiouser and curiouser!",
+    "teaser": "Alice's exclamation in Wonderland became the English language's most famous expression of wonder. Lewis Carroll knew that the best response to the impossible is curiosity, not fear.",
+    "imageUrl": "",
+    "byline": "Lewis Carroll",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Alice's Adventures in Wonderland (1865)",
+      "durationMinutes": 10,
+      "instruction": "Read Alice's Adventures in Wonderland. Notice how Alice responds to every impossible thing with curiosity rather than panic. She falls down a rabbit hole and her first thought is wonder, not terror."
+    },
+    "tags": ["Literature", "Victorian", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-frost-road-not-taken",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Two roads diverged in a wood, and I — I took the one less traveled by, and that has made all the difference.",
+    "teaser": "Robert Frost's most famous poem is also his most misread. He wrote it as a joke about a friend's indecision — but the 'less traveled' path became America's favorite metaphor for individuality.",
+    "imageUrl": "",
+    "byline": "Robert Frost",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Road Not Taken (1916)",
+      "durationMinutes": 5,
+      "instruction": "Read 'The Road Not Taken' carefully. Frost says the roads were 'really about the same' and 'equally lay' — the speaker only decides it was 'less traveled' years later, looking back. The difference isn't in the road; it's in the telling."
+    },
+    "tags": ["Poetry", "American", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-shakespeare-all-world-stage",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "All the world's a stage, and all the men and women merely players.",
+    "teaser": "Shakespeare's most famous metaphor for human life: we're all performing roles, entering and exiting scenes, playing parts we didn't choose. The speech traces life from infancy to old age.",
+    "imageUrl": "",
+    "byline": "William Shakespeare",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "As You Like It, Act II, Scene VII (1599)",
+      "durationMinutes": 8,
+      "instruction": "Read the 'All the world's a stage' speech from As You Like It. Jaques describes the seven ages of man — from the infant to the 'second childless mouth' of old age. It's both a comedy speech and a meditation on mortality."
+    },
+    "tags": ["Literature", "Theatre", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "quote-shakespeare-to-be-not-be",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "To be, or not to be, that is the question.",
+    "teaser": "The most famous line in English literature. Hamlet weighs the pain of existence against the uncertainty of death — and decides that thinking about it is both the problem and the solution.",
+    "imageUrl": "",
+    "byline": "William Shakespeare",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hamlet, Act III, Scene I (c. 1600)",
+      "durationMinutes": 10,
+      "instruction": "Read Hamlet's 'To be, or not to be' soliloquy. He's not just contemplating suicide — he's weighing the cost of action versus inaction, the fear of the unknown, and whether it's nobler to suffer or to fight."
+    },
+    "tags": ["Literature", "Theatre", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "quote-shakespeare-mercy-not-strained",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The quality of mercy is not strained; it droppeth as the gentle rain from heaven.",
+    "teaser": "Portia's speech in The Merchant of Venice is Shakespeare's greatest argument for compassion. Mercy isn't forced or measured — it falls freely, and it blesses both the giver and the receiver.",
+    "imageUrl": "",
+    "byline": "William Shakespeare",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Merchant of Venice, Act IV, Scene I (1596)",
+      "durationMinutes": 10,
+      "instruction": "Read Portia's 'Quality of Mercy' speech. Disguised as a lawyer, she argues that mercy is more powerful than justice — it's free, it falls like rain, and it makes the person who gives it greater too."
+    },
+    "tags": ["Literature", "Theatre", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "quote-dostoyevsky-everything-granted",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The soul is healed by being with children.",
+    "teaser": "Dostoevsky wrote from the depths of human darkness — prison, poverty, epilepsy — but he found salvation in the simplest place: the presence of children. Innocence is therapy.",
+    "imageUrl": "",
+    "byline": "Fyodor Dostoevsky",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dostoevsky's The Brothers Karamazov (1880)",
+      "durationMinutes": 15,
+      "instruction": "Read the chapters about children in The Brothers Karamazov. Dostoevsky devotes extraordinary attention to the suffering and innocence of children — and argues that a society is judged by how it treats them."
+    },
+    "tags": ["Literature", "Russian", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-dostoyevsky-suffering-soul",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Pain and suffering are always inevitable for a large intelligence and a deep heart.",
+    "teaser": "Dostoevsky believed that sensitivity was both a gift and a curse — the more deeply you feel, the more deeply you suffer. But this suffering is also what makes great art and great compassion possible.",
+    "imageUrl": "",
+    "byline": "Fyodor Dostoevsky",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Crime and Punishment (1866)",
+      "durationMinutes": 15,
+      "instruction": "Read Crime and Punishment, where Raskolnikov's intellectual pride leads him to murder. Dostoevsky shows that intelligence without compassion creates monsters — and that suffering can be the beginning of redemption."
+    },
+    "tags": ["Literature", "Russian", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-tolstoy-happy-families",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Happy families are all alike; every unhappy family is unhappy in its own way.",
+    "teaser": "Tolstoy's opening line for Anna Karenina is the most perfect first sentence in literature. It's also a deep observation about human nature: dysfunction is creative, but happiness follows a pattern.",
+    "imageUrl": "",
+    "byline": "Leo Tolstoy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Anna Karenina (1877), opening chapter",
+      "durationMinutes": 10,
+      "instruction": "Read the opening chapters of Anna Karenina. Tolstoy introduces two parallel stories — the happy Levin and the doomed Anna — and the opening line becomes a thesis for the entire novel."
+    },
+    "tags": ["Literature", "Russian", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kafka-light-broken-thorough",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "A book must be the axe for the frozen sea within us.",
+    "teaser": "Kafka knew that literature shouldn't entertain — it should break you open. The frozen sea inside is the numbness of daily life; the right book shatters it.",
+    "imageUrl": "",
+    "byline": "Franz Kafka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kafka's Letters to Oskar Pollak (1904)",
+      "durationMinutes": 8,
+      "instruction": "Read Kafka's letters, where he describes what literature should do. He writes that a book must be an axe — not a pillow. The frozen sea within us is the everyday numbness that good art breaks through."
+    },
+    "tags": ["Literature", "Modernist", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kafka-bird-cage",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "A bird sitting on a tree is never afraid of the branch breaking, because its trust is not in the branch but in its own wings.",
+    "teaser": "Kafka's most uplifting line — rare from a writer known for dread. Self-reliance isn't about trusting the world; it's about trusting yourself. The branch may break, but you can fly.",
+    "imageUrl": "",
+    "byline": "Franz Kafka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Franz Kafka's parables",
+      "durationMinutes": 8,
+      "instruction": "Read Kafka's short parables and aphorisms. They're brief, strange, and devastating — but this one offers something rare in Kafka: hope. Trust your wings, not the branch."
+    },
+    "tags": ["Literature", "Modernist", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-hemingway-world-break-everyone",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The world breaks every one and afterward many are strong at the broken places.",
+    "teaser": "Hemingway wrote this in A Farewell to Arms — one soldier's observation about war, survival, and the strange strength that comes from being shattered and rebuilt.",
+    "imageUrl": "",
+    "byline": "Ernest Hemingway",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Farewell to Arms (1929)",
+      "durationMinutes": 12,
+      "instruction": "Read the final pages of A Farewell to Arms. Hemingway writes about how the world breaks people — but also how brokenness creates a kind of strength. The line is both devastating and hopeful."
+    },
+    "tags": ["Literature", "American", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-hemingway-write-drunk-edit",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Write drunk, edit sober.",
+    "teaser": "This quote is almost certainly misattributed to Hemingway — but it captures something real about his creative process. The raw material comes from somewhere wild; the craft comes from discipline.",
+    "imageUrl": "",
+    "byline": "Hemingway (attributed)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Moveable Feast (1964)",
+      "durationMinutes": 10,
+      "instruction": "Read A Moveable Feast, Hemingway's memoir of 1920s Paris. He describes writing in cafés, standing up, stopping when he knew what came next. The 'drunk' was the raw feeling; the 'sober' was the daily discipline."
+    },
+    "tags": ["Literature", "American", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-orwell-truth-revolution",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "In a time of deceit, telling the truth is a revolutionary act.",
+    "teaser": "Orwell wrote 1984 as a warning, not a prophecy. This line — whether he said it exactly this way or not — captures the core of his life's work: truth is the first casualty of power.",
+    "imageUrl": "",
+    "byline": "George Orwell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "George Orwell's essays (1940s)",
+      "durationMinutes": 10,
+      "instruction": "Read Orwell's essay 'Politics and the English Language' (1946). He argues that clear language is a moral act — that political corruption starts with corrupting words. Telling the truth begins with honest speech."
+    },
+    "tags": ["Literature", "Political", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-orwell-big-brother",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Who controls the past controls the future. Who controls the present controls the past.",
+    "teaser": "From 1984 — Orwell's most chilling observation about power. History isn't just written by the victors; it's actively rewritten to maintain control. Memory is a battlefield.",
+    "imageUrl": "",
+    "byline": "George Orwell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "1984, Part One, Chapter 3",
+      "durationMinutes": 10,
+      "instruction": "Read 1984, Part One, where Winston Smith works at the Ministry of Truth altering historical records. Orwell shows how controlling the past isn't just about lies — it's about making reality itself flexible."
+    },
+    "tags": ["Literature", "Dystopia", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-orwell-sleep-walk",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Until they became conscious they will never rebel, and until after they have rebelled they cannot become conscious.",
+    "teaser": "Orwell's catch-22 of oppression: you can't fight what you can't see, and you can't see it until you fight. The cycle of ignorance and power is the hardest one to break.",
+    "imageUrl": "",
+    "byline": "George Orwell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "1984, Part One, Chapter 7",
+      "durationMinutes": 10,
+      "instruction": "Read the Goldstein book passages in 1984, where the mechanics of oppression are explained. Orwell shows how the system perpetuates itself: the proles can't rebel because they don't know they're oppressed."
+    },
+    "tags": ["Literature", "Dystopia", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-austen-truth-universally",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    "teaser": "Austen's opening line is the most famous sentence in English comedy. The irony is delicious: it's not the man who wants a wife — it's the neighborhood that wants his fortune.",
+    "imageUrl": "",
+    "byline": "Jane Austen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pride and Prejudice (1813), opening chapter",
+      "durationMinutes": 10,
+      "instruction": "Read the opening chapter of Pride and Prejudice. Austen introduces the Bennet family through Mrs. Bennet's obsession with marrying off her daughters. The opening line sets the tone: this is a comedy of manners, and nothing is what it seems."
+    },
+    "tags": ["Literature", "Romance", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-bronte-i-am-no-bird",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I am no bird; and no net ensnares me: I am a free human being with an independent will.",
+    "teaser": "Jane Eyre's declaration of independence in 1847 — a woman refusing to be kept, caged, or defined by anyone else. Charlotte Brontë wrote the feminist novel before feminism had a name.",
+    "imageUrl": "",
+    "byline": "Charlotte Brontë",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jane Eyre (1847), Chapter 23",
+      "durationMinutes": 10,
+      "instruction": "Read Jane Eyre's confrontation with Rochester. She refuses to be his mistress, declaring herself a 'free human being with an independent will.' In 1847, this was revolutionary."
+    },
+    "tags": ["Literature", "Romance", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-tolstoy-least-resistance",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The two most powerful warriors are patience and time.",
+    "teaser": "Tolstoy knew that wars aren't won by armies alone — they're won by the side that outlasts the other. Patience isn't passivity; it's the most aggressive form of strategy.",
+    "imageUrl": "",
+    "byline": "Leo Tolstoy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "War and Peace (1869)",
+      "durationMinutes": 15,
+      "instruction": "Read the Borodino battle chapters in War and Peace. Tolstoy argues that battles are won not by generals but by the accumulated patience of thousands of ordinary soldiers. Time and patience are the real warriors."
+    },
+    "tags": ["Literature", "Russian", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-freud-love-work",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Love and work are the cornerstones of our humanness.",
+    "teaser": "Freud's simplest and most human insight — not about sex or the unconscious, but about what makes life worth living. Without love and meaningful work, we wither.",
+    "imageUrl": "",
+    "byline": "Sigmund Freud",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Freud's Civilization and Its Discontents (1930)",
+      "durationMinutes": 10,
+      "instruction": "Read Civilization and Its Discontents, where Freud argues that civilization requires us to sacrifice instinct for society. But love and work are the ways we find meaning within those sacrifices."
+    },
+    "tags": ["Philosophy", "Psychology", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-jung-privilege-awaken",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Who looks outside, dreams; who looks inside, awakes.",
+    "teaser": "Carl Jung believed that self-knowledge was the most important kind. External success means nothing if you don't understand your own shadow — the parts of yourself you hide.",
+    "imageUrl": "",
+    "byline": "Carl Jung",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carl Jung's The Undiscovered Self (1957)",
+      "durationMinutes": 10,
+      "instruction": "Read The Undiscovered Self, where Jung argues that the greatest threat to modern society isn't political — it's the lack of individual self-knowledge. Looking inside is the only path to awakening."
+    },
+    "tags": ["Philosophy", "Psychology", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-jung-shadow-self",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Until you make the unconscious conscious, it will direct your life and you will call it fate.",
+    "teaser": "Jung's most practical insight: the parts of yourself you don't examine will control you from the shadows. What you call 'destiny' is often just unexamined habit.",
+    "imageUrl": "",
+    "byline": "Carl Jung",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carl Jung's Aion (1951)",
+      "durationMinutes": 10,
+      "instruction": "Read Aion, where Jung develops the concept of the Shadow — the dark side of the personality that we deny and project onto others. Making the Shadow conscious is the work of a lifetime."
+    },
+    "tags": ["Philosophy", "Psychology", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-tesla-think-single-thought",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The present is theirs; the future, for which I really worked, is mine.",
+    "teaser": "Nikola Tesla died broke and alone, but his inventions power the modern world. He knew he was ahead of his time — and that the future would prove him right.",
+    "imageUrl": "",
+    "byline": "Nikola Tesla",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tesla's autobiography 'My Inventions' (1919)",
+      "durationMinutes": 10,
+      "instruction": "Read 'My Inventions,' Tesla's serialized autobiography. He describes visualizing complete machines in his mind before building them — and the loneliness of seeing a future no one else could see."
+    },
+    "tags": ["Science", "Invention", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-einstein-imagination-creativity",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Imagination is more important than knowledge. Knowledge is limited. Imagination encircles the world.",
+    "teaser": "Einstein didn't discover relativity through math alone — he imagined himself riding a beam of light. The thought experiment came first; the equations followed.",
+    "imageUrl": "",
+    "byline": "Albert Einstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Einstein's interview in The Saturday Evening Post (1929)",
+      "durationMinutes": 8,
+      "instruction": "Read Einstein's 1929 interview with George Sylvester Viereck. He describes how imagination — not calculation — led to his greatest insights. 'I very rarely think in words at all. A thought comes, and I may try to express it in words afterward.'"
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-einstein-compound-interest",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn't, pays it.",
+    "teaser": "Whether Einstein actually said this is debated, but the truth of it is undeniable. Compound interest — in money, in knowledge, in relationships — is the most powerful force in the universe.",
+    "imageUrl": "",
+    "byline": "Albert Einstein (attributed)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Magic of Compound Interest",
+      "durationMinutes": 8,
+      "instruction": "Read about the Rule of 72 — a simple way to calculate how long it takes money to double. At 7% annual return, money doubles every ~10 years. Start early, and the math becomes almost unfair."
+    },
+    "tags": ["Science", "Mathematics", "Economics"],
+    "tier": 2
+  },
+  {
+    "id": "quote-turing-asking-machine-think",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "A time will come when we will be able to make machines that can do almost anything that a human being can do — except perhaps think.",
+    "teaser": "Alan Turing asked the right question before anyone else: can machines think? He proposed the Turing Test in 1950 — and the debate he started is still unresolved.",
+    "imageUrl": "",
+    "byline": "Alan Turing",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Turing's 'Computing Machinery and Intelligence' (1950)",
+      "durationMinutes": 12,
+      "instruction": "Read 'Computing Machinery and Intelligence,' where Turing proposes his famous test. He systematically dismantles every objection to machine thinking — including the theological, the mathematical, and the emotional."
+    },
+    "tags": ["Science", "Computing", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-darwin-fittest-survive",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It is not the strongest of the species that survives, nor the most intelligent, but the one most adaptable to change.",
+    "teaser": "Darwin's actual insight was about adaptability, not brute strength. The dinosaurs were strong; the mammals were adaptable. Adaptability beats power every time.",
+    "imageUrl": "",
+    "byline": "Charles Darwin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Darwin's On the Origin of Species (1859)",
+      "durationMinutes": 12,
+      "instruction": "Read the concluding chapter of On the Origin of Species. Darwin explains natural selection — survival of the fittest means survival of the most adaptable, not the strongest. It's the ability to change that matters."
+    },
+    "tags": ["Science", "Biology", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-tesla-think-single-thought2",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The scientists of today think deeply instead of clearly. One must be sane to think clearly, but one can think deeply and be quite insane.",
+    "teaser": "Tesla warned about the danger of intelligence without wisdom — the brilliant mind that loses touch with reality. Clear thinking requires sanity, not just cleverness.",
+    "imageUrl": "",
+    "byline": "Nikola Tesla",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tesla's 'The Problem of Increasing Human Energy' (1900)",
+      "durationMinutes": 10,
+      "instruction": "Read Tesla's essay 'The Problem of Increasing Human Energy' in The Century Magazine. He envisions wireless power, solar energy, and global communication — all ideas that were insane in 1900 and obvious today."
+    },
+    "tags": ["Science", "Invention", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-davinci-learning-never-exhausts",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Learning never exhausts the mind.",
+    "teaser": "Leonardo da Vinci filled 13,000 pages of notebooks and never stopped learning. He studied anatomy, engineering, painting, music, and botany — not because he had to, but because curiosity has no ceiling.",
+    "imageUrl": "",
+    "byline": "Leonardo da Vinci",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Leonardo da Vinci's notebooks",
+      "durationMinutes": 10,
+      "instruction": "Browse Leonardo's notebooks — they're available online. Notice how he jumps from dissecting corpses to designing flying machines to painting the Mona Lisa. Learning wasn't a task; it was how he breathed."
+    },
+    "tags": ["Art", "Renaissance", "Science"],
+    "tier": 2
+  },
+  {
+    "id": "quote-michelangelo-saw-angel",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I saw the angel in the marble and carved until I set him free.",
+    "teaser": "Michelangelo believed the statue was already inside the stone — he just had to remove everything that wasn't it. Creation isn't addition; it's subtraction.",
+    "imageUrl": "",
+    "byline": "Michelangelo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vasari's Lives of the Artists (1550)",
+      "durationMinutes": 10,
+      "instruction": "Read Vasari's biography of Michelangelo. He describes how Michelangelo saw figures already present in rough marble — the artist's job was to free them. This philosophy applies to writing, coding, and any creative work."
+    },
+    "tags": ["Art", "Sculpture", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "quote-van-gogh-dreams-untitled",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I dream my painting and I paint my dream.",
+    "teaser": "Van Gogh sold only one painting in his lifetime. He painted not for markets or critics but from the images in his head. The dream was the real work; the canvas was just the proof.",
+    "imageUrl": "",
+    "byline": "Vincent van Gogh",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Van Gogh's Letters to Theo",
+      "durationMinutes": 10,
+      "instruction": "Read Van Gogh's letters to his brother Theo. They're the most intimate artist's journal ever written — he describes his dreams, his fears, and his absolute conviction that painting was his purpose, even when no one agreed."
+    },
+    "tags": ["Art", "Painting", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-picasso-every-child-artist",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Every child is an artist. The problem is how to remain an artist once you grow up.",
+    "teaser": "Picasso saw what children know instinctively: art is play, not performance. Growing up teaches us to be afraid of getting it wrong — and that fear kills creativity.",
+    "imageUrl": "",
+    "byline": "Pablo Picasso",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Picasso's conversations with Christian Zervos (1935)",
+      "durationMinutes": 8,
+      "instruction": "Read Picasso's conversations with Zervos. He argues that art is about unlearning — shedding the rules and fears that education installs. Children draw freely because they haven't learned to be afraid."
+    },
+    "tags": ["Art", "Painting", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-picasso-art-lie-truth",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Art is a lie that makes us realize the truth.",
+    "teaser": "Picasso's paradox: a painting of a bowl of fruit isn't the fruit — it's a lie. But that lie can reveal something about beauty, mortality, and seeing that the real fruit never could.",
+    "imageUrl": "",
+    "byline": "Pablo Picasso",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Picasso's conversations with Christian Zervos (1935)",
+      "durationMinutes": 8,
+      "instruction": "Read Picasso's reflections on what art does. He argues that art doesn't copy reality — it reinterprets it. The 'lie' of a Cubist portrait reveals more truth about how we see than a photograph ever could."
+    },
+    "tags": ["Art", "Painting", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-warhol-famous-fifteen-minutes",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "In the future, everyone will be world-famous for 15 minutes.",
+    "teaser": "Andy Warhol predicted social media fame decades before Instagram. His observation wasn't cynical — it was a description of how mass media democratizes attention.",
+    "imageUrl": "",
+    "byline": "Andy Warhol",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Andy Warhol's Popism (1980)",
+      "durationMinutes": 8,
+      "instruction": "Read Popism, Warhol's memoir of the 1960s art scene. He describes how fame became a medium — not something earned through talent, but something manufactured through exposure. The 15-minute prophecy came true."
+    },
+    "tags": ["Art", "Pop Art", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-superman-ideal",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Man is something that shall be overcome. What have you done to overcome him?",
+    "teaser": "Nietzsche's Übermensch isn't a comic book hero — it's the human who creates their own values instead of inheriting them. Overcoming means becoming more than what tradition made you.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thus Spoke Zarathustra, Prologue (1883)",
+      "durationMinutes": 10,
+      "instruction": "Read the opening of Thus Spoke Zarathustra. Nietzsche's prophet descends from his mountain to teach humanity that the Übermensch — the overhuman — is the goal. Not a master race, but a human who has transcended conventional morality."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-nietzsche-dance-lightly",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "And those who were seen dancing were thought to be insane by those who could not hear the music.",
+    "teaser": "Nietzsche's most joyful image: the dancer who hears music others can't. Creativity, vision, and genius always look like madness to the tone-deaf.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thus Spoke Zarathustra (1883)",
+      "durationMinutes": 10,
+      "instruction": "Read the 'Dance Song' section of Thus Spoke Zarathustra. Nietzsche celebrates the body, the dance, and lightness of being. The superhuman doesn't trudge — they dance. The music is real even if others can't hear it."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-epictetus-great-design",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "First say to yourself what you would be; and then do what you have to do.",
+    "teaser": "Epictetus' practical Stoicism in one line: decide who you want to become, then reverse-engineer the daily actions that person would take. Identity drives behavior.",
+    "imageUrl": "",
+    "byline": "Epictetus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Epictetus' Discourses, Book III",
+      "durationMinutes": 8,
+      "instruction": "Read Book III of the Discourses. Epictetus teaches that virtue starts with intention — decide what kind of person you want to be, then act accordingly. The actions follow from the identity, not the other way around."
+    },
+    "tags": ["Philosophy", "Stoicism", "Ancient Greek"],
+    "tier": 2
+  },
+  {
+    "id": "quote-seneca-begin-immediately",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We suffer more often in imagination than in reality.",
+    "teaser": "Seneca's insight about anxiety: the mind's worst scenarios are almost always worse than reality. The cure isn't planning — it's acting.",
+    "imageUrl": "",
+    "byline": "Seneca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seneca's Moral Letters to Lucilius, Letter 13",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 13, where Seneca advises: 'Begin at once to live, and count each separate day as a separate life.' He argues that delay is the enemy — start now, not tomorrow."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-marcus-not-happen-to-you",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "You have power over your mind — not outside events. Realize this, and you will find strength.",
+    "teaser": "Marcus Aurelius' core teaching: you can't control what happens, but you can control what you think about it. That distinction is the difference between suffering and strength.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book VI",
+      "durationMinutes": 8,
+      "instruction": "Read Book VI of the Meditations. Marcus returns again and again to the distinction between what's in your control and what isn't. The mind is yours; everything else is borrowed."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 1
+  },
+  {
+    "id": "quote-leonardo-simple-sophisticated",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Simplicity is the ultimate sophistication.",
+    "teaser": "Leonardo da Vinci — the most complex mind of the Renaissance — understood that true genius lies in making the complicated simple. The hardest thing to do is to cut away everything that isn't essential.",
+    "imageUrl": "",
+    "byline": "Leonardo da Vinci",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Leonardo da Vinci's notebooks",
+      "durationMinutes": 8,
+      "instruction": "Study Leonardo's notebooks alongside his finished paintings. Notice how the Mona Lisa's smile is achieved with almost invisible brushstrokes — maximum effect, minimum gesture. Simplicity is the hardest thing to achieve."
+    },
+    "tags": ["Art", "Renaissance", "Design"],
+    "tier": 2
+  },
+  {
+    "id": "quote-shakespeare-brevity-wit",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Brevity is the soul of wit.",
+    "teaser": "Shakespeare wrote this in Hamlet — and the irony is that Polonius, who says it, is the most long-winded character in the play. The best advice is often given by the people who least follow it.",
+    "imageUrl": "",
+    "byline": "William Shakespeare",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hamlet, Act II, Scene II (c. 1600)",
+      "durationMinutes": 8,
+      "instruction": "Read the scene where Polonius says 'Brevity is the soul of wit' — and then proceeds to talk for three pages. Shakespeare's irony is deliberate: the man who preaches brevity is the play's biggest windbag."
+    },
+    "tags": ["Literature", "Theatre", "Renaissance"],
+    "tier": 2
+  },
+  {
+    "id": "quote-dostoyevsky-god-exists",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "If God does not exist, everything is permitted.",
+    "teaser": "Ivan Karamazov's argument in The Brothers Karamazov — the idea that without divine judgment, there are no absolute moral boundaries. Whether you agree or not, it's the question that haunts modern ethics.",
+    "imageUrl": "",
+    "byline": "Fyodor Dostoevsky",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Brothers Karamazov, 'The Grand Inquisitor' (1880)",
+      "durationMinutes": 15,
+      "instruction": "Read 'The Grand Inquisitor' chapter — Ivan's poem about Christ returning to Seville during the Inquisition. The Grand Inquisitor argues that humans can't handle freedom — they need bread, miracles, and authority. It's the most powerful argument against faith ever written by a believer."
+    },
+    "tags": ["Literature", "Russian", "Philosophy"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-gods-are-dead",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "And we killed them — you and I. All of us are murderers.",
+    "teaser": "The madman's accusation in The Gay Science — God didn't die of natural causes. Humanity killed God through science, rationality, and the refusal to believe. Now what?",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gay Science, Section 125 (1882)",
+      "durationMinutes": 8,
+      "instruction": "Read the madman's speech in Section 125. He doesn't celebrate God's death — he's horrified. Without a shared moral framework, how do we find meaning? The madman's question is still unanswered."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-kierkegaard-leap-or-fall",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "To dare is to lose one's footing momentarily. Not to dare is to lose oneself.",
+    "teaser": "Kierkegaard's paradox of courage: taking a risk feels like falling, but refusing to risk is the real loss. You lose yourself when you refuse to act.",
+    "imageUrl": "",
+    "byline": "Søren Kierkegaard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kierkegaard's Either/Or (1843)",
+      "durationMinutes": 12,
+      "instruction": "Read Either/Or, Kierkegaard's first major work. He presents two ways of living: the aesthetic (pleasure-seeking) and the ethical (committed). The leap from one to the other requires courage — and a willingness to lose your footing."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-camus-one-must-imagine",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "In the depth of winter, I finally learned that within me there lay an invincible summer.",
+    "teaser": "Camus' companion to the Sisyphus line: the human spirit has a core that winter can't reach. Despair doesn't destroy — it reveals the strength that was always there.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Return to Tipasa (1954)",
+      "durationMinutes": 8,
+      "instruction": "Read Return to Tipasa, written after the war. Camus returns to Algeria and finds beauty in the ruins — both of the landscape and of his own faith. The invincible summer is defiance, not optimism."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-kafka-everything-far-away",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "So near to each other, yet so far apart — for how can we truly know one another?",
+    "teaser": "Kafka saw the fundamental isolation of human existence: we live side by side with the people we love and never truly bridge the gap. Intimacy is the closest we get to connection.",
+    "imageUrl": "",
+    "byline": "Franz Kafka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kafka's Diaries (1914-1923)",
+      "durationMinutes": 8,
+      "instruction": "Read Kafka's diaries. They're the most honest account of loneliness ever written — a man who could describe the distance between people with surgical precision, even while desperate to close it."
+    },
+    "tags": ["Literature", "Modernist", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-marcus-outer-self-inner",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.",
+    "teaser": "Marcus Aurelius owned the Roman Empire and still said this: happiness isn't about what you have, it's about how you think about what you have. The richest man in the world knew that wealth isn't the point.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book VII",
+      "durationMinutes": 8,
+      "instruction": "Read Book VII of the Meditations. Marcus reminds himself that happiness is internal — not dependent on fame, power, or possessions. He writes as the most powerful man in the world, telling himself that power doesn't matter."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 1
+  },
+  {
+    "id": "quote-plato-love-is-desire",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "At the touch of love everyone becomes a poet.",
+    "teaser": "Plato's Symposium is the greatest love story in philosophy — a dinner party where drunken Athenians compete to define love. Eryximachus's observation is the simplest: love makes you creative.",
+    "imageUrl": "",
+    "byline": "Plato",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Symposium (c. 385 BCE)",
+      "durationMinutes": 12,
+      "instruction": "Read the Symposium — the most entertaining philosophy text ever written. Socrates, Aristophanes, and Agathon each give speeches about love. Aristophanes tells the myth of the split humans; Socrates recounts Diotima's ladder of love."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Love"],
+    "tier": 1
+  },
+  {
+    "id": "quote-plato-love-anticipation",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Attention to health is life's greatest hindrance.",
+    "teaser": "Plato's Socrates, in one of his more mischievous moments, suggests that obsession with health prevents you from truly living. Sometimes the examined life requires a little recklessness.",
+    "imageUrl": "",
+    "byline": "Plato",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Protagoras (387 BCE)",
+      "durationMinutes": 8,
+      "instruction": "Read the Protagoras, where Socrates debates whether virtue can be taught. The remark about health is a provocation — Socrates is pushing his listeners to think about what really matters versus what feels safe."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 3
+  },
+  {
+    "id": "quote-aristotle-habit-second-nature",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+    "teaser": "Often attributed to Aristotle (it's actually Will Durant summarizing Aristotle), this line captures the essence of virtue ethics: character is built through repetition, not inspiration.",
+    "imageUrl": "",
+    "byline": "Will Durant (on Aristotle)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Will Durant's The Story of Philosophy (1926)",
+      "durationMinutes": 8,
+      "instruction": "Read Durant's chapter on Aristotle in The Story of Philosophy. He distills Aristotle's ethics into this single line: we become virtuous by practicing virtue, just as we become musicians by playing music."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-heraclitus-war-father",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "War is the father of all things.",
+    "teaser": "Heraclitus saw conflict as creative, not just destructive. Without opposition — fire against water, summer against winter — nothing would change. Struggle is how the universe creates.",
+    "imageUrl": "",
+    "byline": "Heraclitus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heraclitus' fragments",
+      "durationMinutes": 8,
+      "instruction": "Read Heraclitus' fragments on the unity of opposites. He argues that harmony comes from tension — like a bow string. War isn't just violence; it's the creative tension that holds the world together."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Metaphysics"],
+    "tier": 2
+  },
+  {
+    "id": "quote-seneca-wind-favorable",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It is not because things are difficult that we do not dare; it is because we do not dare that things are difficult.",
+    "teaser": "Seneca reverses the usual excuse: you don't lack courage because the task is hard — the task is hard because you lack courage. Dare first; difficulty follows from inaction.",
+    "imageUrl": "",
+    "byline": "Seneca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seneca's Moral Letters to Lucilius, Letter 104",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 104, where Seneca discusses the relationship between daring and difficulty. He argues that fear makes obstacles seem larger than they are — and that action shrinks them."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-emerson-build-staircase",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Do not go where the path may lead, go instead where there is no path and leave a trail.",
+    "teaser": "Emerson was America's first great thinker — before him, America imported its philosophy from Europe. This line is his prescription: originality isn't found, it's made.",
+    "imageUrl": "",
+    "byline": "Ralph Waldo Emerson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Emerson's 'Self-Reliance' (1841)",
+      "durationMinutes": 10,
+      "instruction": "Read 'Self-Reliance,' Emerson's most famous essay. He argues that society conspires to conformity — 'whoso would be a man must be a nonconformist.' Leaving a trail means trusting your own instincts over everyone else's advice."
+    },
+    "tags": ["Philosophy", "American", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-thoreau-live-deliberately",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I went to the woods because I wished to live deliberately.",
+    "teaser": "Thoreau built a cabin in the woods for $28.12 and stayed two years. His experiment wasn't escapism — it was a deliberate test of how little you actually need to live fully.",
+    "imageUrl": "",
+    "byline": "Henry David Thoreau",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Walden (1854)",
+      "durationMinutes": 12,
+      "instruction": "Read the opening chapter of Walden, 'Economy.' Thoreau explains why he went to the woods: to suck the marrow out of life, to see if he could learn what it had to teach, and not discover when he died that he hadn't lived."
+    },
+    "tags": ["Philosophy", "American", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-darwin-monkey-mind",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "There is grandeur in this view of life, with its several powers, having been originally breathed into a few forms or into one.",
+    "teaser": "The final line of On the Origin of Species — Darwin's poetic conclusion to the most controversial book in science. Evolution isn't bleak; it's grand.",
+    "imageUrl": "",
+    "byline": "Charles Darwin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "On the Origin of Species, final paragraph (1859)",
+      "durationMinutes": 10,
+      "instruction": "Read the final paragraph of On the Origin of Species. Darwin writes with genuine awe about the 'grandeur' of life evolving through natural selection. It's one of the most beautiful conclusions in all of science."
+    },
+    "tags": ["Science", "Biology", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-copernicus-dare-to-know",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Of all things, I loved most the pursuit of knowledge.",
+    "teaser": "Copernicus moved the Earth from the center of the universe. His love of knowledge was stronger than his fear of the Church — and that love changed astronomy forever.",
+    "imageUrl": "",
+    "byline": "Nicolaus Copernicus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Copernicus' De Revolutionibus (1543)",
+      "durationMinutes": 10,
+      "instruction": "Read the preface to De Revolutionibus. Copernicus dedicates his work to Pope Paul III, knowing it contradicts Church doctrine. He chose knowledge over safety — and changed how humanity sees its place in the cosmos."
+    },
+    "tags": ["Science", "Astronomy", "Renaissance"],
+    "tier": 2
+  },
+  {
+    "id": "quote-galileo-surely-it-moves",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "And yet it moves.",
+    "teaser": "Galileo allegedly muttered this after being forced to recant his belief that the Earth orbits the Sun. Whether he actually said it or not, it captures the stubborn beauty of truth.",
+    "imageUrl": "",
+    "byline": "Galileo Galilei",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Galileo's trial transcript (1633)",
+      "durationMinutes": 10,
+      "instruction": "Read the account of Galileo's trial by the Roman Inquisition. He was forced to say 'I abjure, curse, and detest' his heliocentric views. The Earth kept moving anyway."
+    },
+    "tags": ["Science", "Astronomy", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "quote-tesla-brilliant-idiots",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Let the future tell the truth, and evaluate each one according to his work and accomplishments.",
+    "teaser": "Tesla let his work speak. He died in a hotel room, but his inventions power the modern world. Time is the only honest judge.",
+    "imageUrl": "",
+    "byline": "Nikola Tesla",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tesla's writings and patents",
+      "durationMinutes": 8,
+      "instruction": "Read Tesla's patents for AC electricity and the induction motor. He cared more about the future than about recognition. The future did tell the truth — his work powers the world."
+    },
+    "tags": ["Science", "Invention", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-einstein-god-does-not-play",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "God does not play dice with the universe.",
+    "teaser": "Einstein's famous objection to quantum mechanics — he believed the universe was deterministic, not random. He was wrong about quantum mechanics, but his intuition about deep order still drives physics.",
+    "imageUrl": "",
+    "byline": "Albert Einstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Einstein's letters to Max Born (1926)",
+      "durationMinutes": 10,
+      "instruction": "Read Einstein's letters to Max Born, where he develops his objection to quantum uncertainty. Einstein believed that randomness was a sign of incomplete theory, not a feature of reality. Bohr's reply: 'Stop telling God what to do.'"
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-bohr-opposite-correct",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The opposite of a correct statement is a false statement. But the opposite of a profound truth may well be another profound truth.",
+    "teaser": "Niels Bohr's insight about quantum physics — and about life. The deepest truths don't have simple opposites; they coexist in paradox. Wave and particle. Free will and determinism.",
+    "imageUrl": "",
+    "byline": "Niels Bohr",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bohr's writings on complementarity",
+      "durationMinutes": 8,
+      "instruction": "Read Bohr's principle of complementarity — the idea that light is both a wave and a particle, and that both descriptions are correct. This wasn't just physics; it was a new way of thinking about paradox."
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-tesla-inventor-utopian",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The present is theirs; the future, for which I really worked, is mine.",
+    "teaser": "Tesla's pride in his foresight. He worked on wireless communication, renewable energy, and AI in the 1900s — ideas that seemed like science fiction then and run the world now.",
+    "imageUrl": "",
+    "byline": "Nikola Tesla",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tesla's 'The Problem of Increasing Human Energy' (1900)",
+      "durationMinutes": 8,
+      "instruction": "Read Tesla's 1900 essay in The Century Magazine. He envisions wireless power, global communication, and harnessing solar energy — all ideas that seemed insane and are now reality. The future was his."
+    },
+    "tags": ["Science", "Invention", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-hawking-infinite-universe",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Remember to look up at the stars and not down at your feet. Try to make sense of what you see and wonder about what makes the universe exist.",
+    "teaser": "Stephen Hawking wrote this from a wheelchair, unable to speak, using a computer to communicate. His body was confined; his mind explored the origin of the universe.",
+    "imageUrl": "",
+    "byline": "Stephen Hawking",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hawking's Brief Answers to the Big Questions (2018)",
+      "durationMinutes": 10,
+      "instruction": "Read Brief Answers to the Big Questions, Hawking's final book. He addresses God, time travel, black holes, and the future of humanity — always with wonder, never with despair."
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-sagan-pale-blue-dot",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Look again at that dot. That's here. That's home. That's us.",
+    "teaser": "Carl Sagan looked at a photo of Earth taken from 6 billion kilometers away and saw a tiny speck of light. From that distance, every war, every love, every human achievement is invisible.",
+    "imageUrl": "",
+    "byline": "Carl Sagan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pale Blue Dot (1994)",
+      "durationMinutes": 8,
+      "instruction": "Read Sagan's 'Pale Blue Dot' essay, inspired by Voyager 1's photo of Earth from 6 billion km away. He describes our planet as a 'mote of dust suspended in a sunbeam' — and argues for kindness and humility."
+    },
+    "tags": ["Science", "Astronomy", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-sagan-atom-connection",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We are all made of star-stuff. We are a way for the cosmos to know itself.",
+    "teaser": "Sagan made you feel cosmic. Every atom in your body was forged in a star — you are literally the universe becoming conscious of itself. That's not a metaphor; it's chemistry.",
+    "imageUrl": "",
+    "byline": "Carl Sagan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cosmos (1980), Episode 1",
+      "durationMinutes": 10,
+      "instruction": "Watch the opening episode of Cosmos. Sagan stands in a field and says 'we are made of star-stuff' — describing how every element heavier than hydrogen was created inside a dying star. You are the universe, looking back at itself."
+    },
+    "tags": ["Science", "Astronomy", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-feynman-nobody-understands",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "If you think you understand quantum mechanics, you don't understand quantum mechanics.",
+    "teaser": "Feynman was the most honest physicist of the 20th century. He admitted what no one else would: quantum mechanics is genuinely weird, and pretending otherwise is dishonest.",
+    "imageUrl": "",
+    "byline": "Richard Feynman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feynman's The Character of Physical Law (1965)",
+      "durationMinutes": 8,
+      "instruction": "Read The Character of Physical Law. Feynman explains quantum mechanics with extraordinary clarity — and then admits that no one really understands it. Honesty about ignorance is the beginning of wisdom."
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-feynman-pleasure-finding-out",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I would rather have questions that can't be answered than answers that can't be questioned.",
+    "teaser": "Feynman's scientific philosophy: curiosity beats certainty. The best scientists are the ones who know how much they don't know — and find that thrilling rather than threatening.",
+    "imageUrl": "",
+    "byline": "Richard Feynman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feynman's 'The Value of Science' (1955)",
+      "durationMinutes": 8,
+      "instruction": "Read 'The Value of Science,' Feynman's address to the National Academy of Sciences. He argues that science is valuable not because it provides answers, but because it provides questions — and the joy of finding out."
+    },
+    "tags": ["Science", "Philosophy", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-tesla-ire-thought-absolute",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.",
+    "teaser": "Tesla's framework for understanding reality. Everything vibrates — from atoms to galaxies, from thoughts to music. The universe is a symphony, and energy is the conductor.",
+    "imageUrl": "",
+    "byline": "Nikola Tesla",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tesla's writings on resonance and vibration",
+      "durationMinutes": 8,
+      "instruction": "Read Tesla's writings on resonance and wireless energy. He understood that everything vibrates at specific frequencies — from radio waves to the resonance of bridges. His insight was that the universe runs on vibration."
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-tesla-think-single-thought3",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "My brain is only a receiver, in the Cosmos there is a core from which we obtain knowledge, strength and inspiration.",
+    "teaser": "Tesla believed the brain was an antenna, not a generator. Whether mystical or metaphorical, his insight that ideas seem to come 'from somewhere' resonates with every creator who's had a sudden breakthrough.",
+    "imageUrl": "",
+    "byline": "Nikola Tesla",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tesla's interviews and letters",
+      "durationMinutes": 8,
+      "instruction": "Read Tesla's interviews about his creative process. He describes visualizing inventions completely in his mind before building them — and feeling that the ideas came from 'a cosmic source.' The brain as receiver is a powerful metaphor for creativity."
+    },
+    "tags": ["Science", "Invention", "20th Century"],
+    "tier": 3
+  },
+  {
+    "id": "quote-einstein-no-problem-solved",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We cannot solve our problems with the same thinking we used when we created them.",
+    "teaser": "Einstein's prescription for progress: if your current approach got you into trouble, a different approach will get you out. Same thinking = same problems. New thinking = new solutions.",
+    "imageUrl": "",
+    "byline": "Albert Einstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Einstein's writings on problem-solving",
+      "durationMinutes": 8,
+      "instruction": "Read Einstein's reflections on how he developed relativity. He didn't solve Newtonian problems with Newtonian thinking — he changed the framework entirely. New thinking requires questioning assumptions you didn't know you had."
+    },
+    "tags": ["Science", "Physics", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-feynman-scientific-imagination",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Scientific knowledge is a body of statements of varying degrees of certainty — some most unsure, some nearly sure, but none absolutely certain.",
+    "teaser": "Feynman's humility about science: it doesn't deal in absolutes, only in degrees of confidence. The scientist who claims certainty has stopped being a scientist.",
+    "imageUrl": "",
+    "byline": "Richard Feynman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feynman's 'What is Science?' (1966)",
+      "durationMinutes": 8,
+      "instruction": "Read 'What is Science?' Feynman's speech to the National Science Teachers Association. He defines science as 'belief in the ignorance of experts' — the willingness to question authority through observation."
+    },
+    "tags": ["Science", "Philosophy", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-einstein-thought-experiment",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
+    "teaser": "Einstein's childlike curiosity drove every discovery. He never stopped asking 'what if?' — and the answers reshaped our understanding of space, time, and gravity.",
+    "imageUrl": "",
+    "byline": "Albert Einstein",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Einstein's 'What I Believe' (1930)",
+      "durationMinutes": 8,
+      "instruction": "Read Einstein's 'What I Believe' essay. He describes his philosophy of life: a reverence for beauty, a belief in the comprehensibility of the universe, and an unquenchable curiosity. Questioning isn't a method; it's a way of being."
+    },
+    "tags": ["Science", "Philosophy", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-rumi-out-beyond-ideas",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Out beyond ideas of wrongdoing and rightdoing, there is a field. I'll meet you there.",
+    "teaser": "Rumi, the 13th-century Sufi mystic, pointed toward a place beyond moral categories. The field he describes isn't amoral — it's trans-moral. Love operates on a different plane than judgment.",
+    "imageUrl": "",
+    "byline": "Rumi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rumi's Masnavi and collected poems",
+      "durationMinutes": 10,
+      "instruction": "Read Rumi's poetry — especially the Masnavi and the Divan-i-Shams. He writes about love as the fundamental force of the universe, transcending all boundaries of religion, morality, and reason."
+    },
+    "tags": ["Poetry", "Sufism", "Medieval"],
+    "tier": 1
+  },
+  {
+    "id": "quote-rumi-wound-place-light",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The wound is the place where the Light enters you.",
+    "teaser": "Rumi's most healing line: your pain isn't a flaw — it's an opening. The places where you've been broken are where understanding and compassion flow in.",
+    "imageUrl": "",
+    "byline": "Rumi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rumi's The Essential Rumi (trans. Coleman Barks)",
+      "durationMinutes": 8,
+      "instruction": "Read The Essential Rumi, translated by Coleman Barks. Rumi treats wounds as sacred — places where the ego breaks open and something greater enters. The broken places are the brightest."
+    },
+    "tags": ["Poetry", "Sufism", "Medieval"],
+    "tier": 1
+  },
+  {
+    "id": "quote-rumi-silence-language-god",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Silence is the language of God, all else is poor translation.",
+    "teaser": "Rumi points to the limits of words. The deepest truths — love, beauty, the divine — can't be spoken. They can only be experienced in the spaces between words.",
+    "imageUrl": "",
+    "byline": "Rumi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rumi's collected poems",
+      "durationMinutes": 8,
+      "instruction": "Read Rumi's poems about silence and the unspeakable. He argues that words are tools for ordinary communication — but the deepest experiences require a different language: music, dance, silence."
+    },
+    "tags": ["Poetry", "Sufism", "Spirituality"],
+    "tier": 2
+  },
+  {
+    "id": "quote-hafiz-dream-dreams",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I wish I could show you, when you are lonely or in darkness, the astonishing light of your own being.",
+    "teaser": "Hafiz, the 14th-century Persian poet, wrote love poems that work on two levels — romantic and divine. This line is both: a reminder that your own light is always there, even when you can't see it.",
+    "imageUrl": "",
+    "byline": "Hafiz",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gift (trans. Daniel Ladinsky)",
+      "durationMinutes": 8,
+      "instruction": "Read The Gift, Daniel Ladinsky's translation of Hafiz. The poems celebrate love, wine, and the divine with extraordinary tenderness. Hafiz writes about inner light as something always present, even in darkness."
+    },
+    "tags": ["Poetry", "Sufism", "Medieval"],
+    "tier": 1
+  },
+  {
+    "id": "quote-hafiz-divine-intelligence",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Even after all this time, the Sun never says to the Earth, 'You owe me.' Look what happens with a love like that — it lights the whole sky.",
+    "teaser": "Hafiz's metaphor for unconditional love: the sun gives without expecting return. That's the kind of love that changes the world — not transactional, but radiating.",
+    "imageUrl": "",
+    "byline": "Hafiz",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gift (trans. Daniel Ladinsky)",
+      "durationMinutes": 8,
+      "instruction": "Read The Gift. Hafiz compares divine love to sunlight — freely given, expecting nothing in return. The metaphor is simple, but the insight is deep: unconditional love isn't self-sacrifice; it's the nature of the universe."
+    },
+    "tags": ["Poetry", "Sufism", "Spirituality"],
+    "tier": 1
+  },
+  {
+    "id": "quote-avicenna-flying-man",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The soul is a simple substance, not subject to dissolution.",
+    "teaser": "Ibn Sina (Avicenna) imagined a 'Flying Man' suspended in empty space, unable to see or feel — and argued he would still know 'I exist.' Consciousness proves the soul is separate from the body.",
+    "imageUrl": "",
+    "byline": "Ibn Sina (Avicenna)",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Avicenna's 'On the Soul' (De Anima)",
+      "durationMinutes": 10,
+      "instruction": "Read Avicenna's thought experiment of the Flying Man: imagine a person created in mid-air, unable to see or feel anything. Would they know they exist? Avicenna says yes — self-awareness is the proof that consciousness is separate from the body."
+    },
+    "tags": ["Philosophy", "Islamic Golden Age", "Medieval"],
+    "tier": 2
+  },
+  {
+    "id": "quote-alghazali-certainty-doubt",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Doubt is the key to knowledge.",
+    "teaser": "Al-Ghazali, the Islamic philosopher, argued that you can't truly know something until you've doubted it. Certainty without doubt is just habit — not understanding.",
+    "imageUrl": "",
+    "byline": "Al-Ghazali",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Al-Ghazali's Deliverance from Error",
+      "durationMinutes": 10,
+      "instruction": "Read Deliverance from Error, Al-Ghazali's intellectual autobiography. He describes his crisis of doubt — questioning everything he'd been taught — and finding truth through the fire of skepticism."
+    },
+    "tags": ["Philosophy", "Islamic Golden Age", "Medieval"],
+    "tier": 2
+  },
+  {
+    "id": "quote-aquinas-five-ways",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The five ways: motion, causation, contingency, degree, and design — each pointing toward a necessary being.",
+    "teaser": "Thomas Aquinas' Five Ways — his arguments for God's existence — are among the most debated arguments in philosophy. Whether you agree or not, they show how rigorous medieval theology could be.",
+    "imageUrl": "",
+    "byline": "Thomas Aquinas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aquinas' Summa Theologica, Question 2, Article 3",
+      "durationMinutes": 10,
+      "instruction": "Read Aquinas' Five Ways. Each argument starts from an observation about the physical world (motion, causation, degrees of goodness) and reasons toward a First Cause. Whether you find them convincing or not, they're beautifully structured arguments."
+    },
+    "tags": ["Philosophy", "Medieval", "Theology"],
+    "tier": 2
+  },
+  {
+    "id": "quote-constantin-greatest-misery",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The greatest misfortune that can befall a man is to have never known adversity.",
+    "teaser": "Seneca argued that suffering teaches what comfort cannot. Without hardship, you never develop resilience, compassion, or the depth that comes from surviving difficulty.",
+    "imageUrl": "",
+    "byline": "Seneca",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Seneca's Moral Letters to Lucilius, Letter 78",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 78, where Seneca discusses the value of adversity. He argues that the person who has never suffered is the poorest — not financially, but in wisdom and depth of character."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-epictetus-control-two-things",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The chief task in life is simply this: to identify and separate matters so that I can say clearly to myself which are externals not under my control, and which have to do with the choices I actually control.",
+    "teaser": "Epictetus boils all of Stoicism down to one practice: knowing what's yours to control and what isn't. Everything else is noise.",
+    "imageUrl": "",
+    "byline": "Epictetus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Epictetus' Discourses, Book II",
+      "durationMinutes": 8,
+      "instruction": "Read Book II of the Discourses. Epictetus teaches the 'dichotomy of control' — dividing everything into what you control (your thoughts, actions, responses) and what you don't (everything else). Peace comes from focusing only on the first."
+    },
+    "tags": ["Philosophy", "Stoicism", "Ancient Greek"],
+    "tier": 1
+  },
+  {
+    "id": "quote-marcus-cocoons-rebirth",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Loss is nothing else but change, and change is Nature's delight.",
+    "teaser": "Marcus Aurelius saw loss as transformation, not destruction. Everything that dies feeds something new — the fallen leaf feeds the soil that grows the next tree. Change isn't death; it's life in disguise.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book IX",
+      "durationMinutes": 8,
+      "instruction": "Read Book IX of the Meditations. Marcus reflects on the impermanence of all things — including himself. He concludes that change is not destruction but transformation, and Nature delights in this constant renewal."
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-socrates-love-wisdom",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The word 'philosophy' means 'love of wisdom.' The philosopher is not one who has found the truth, but one who seeks it.",
+    "teaser": "Socrates defined philosophy as a practice, not a destination. The philosopher doesn't possess wisdom — they pursue it. The seeking is the point.",
+    "imageUrl": "",
+    "byline": "Socrates",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Plato's Symposium (c. 385 BCE)",
+      "durationMinutes": 10,
+      "instruction": "Read Diotima's speech in the Symposium. She tells Socrates that Love (Eros) is not a god but a spirit — between mortal and divine, between ignorance and wisdom. The philosopher loves wisdom precisely because they don't have it."
+    },
+    "tags": ["Philosophy", "Ancient Greek", "Epistemology"],
+    "tier": 2
+  },
+  {
+    "id": "quote-bacon-knowledge-power",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Knowledge is power.",
+    "teaser": "Francis Bacon's most famous line — and possibly the most consequential idea in Western history. The Baconian revolution made science a tool for controlling nature, for better and worse.",
+    "imageUrl": "",
+    "byline": "Francis Bacon",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bacon's Meditationes Sacrae (1597)",
+      "durationMinutes": 8,
+      "instruction": "Read Bacon's Meditations, where 'knowledge is power' first appears. Bacon argues that knowledge isn't just contemplation — it's the means to improve human life. This idea launched the Scientific Revolution."
+    },
+    "tags": ["Philosophy", "Science", "Renaissance"],
+    "tier": 1
+  },
+  {
+    "id": "quote-descartes-i-think-therefore",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I think, therefore I am.",
+    "teaser": "Descartes doubted everything — his senses, his body, even the existence of God. The one thing he couldn't doubt was that he was doubting. Thinking proved existence.",
+    "imageUrl": "",
+    "byline": "René Descartes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Descartes' Discourse on Method (1637)",
+      "durationMinutes": 10,
+      "instruction": "Read the Discourse on Method, where Descartes applies radical doubt. He questions everything — his senses, the physical world, even mathematics — and arrives at the one indubitable truth: 'I think, therefore I am.'"
+    },
+    "tags": ["Philosophy", "Rationalism", "17th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-spinoza-gods-nature",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "God or Nature — the two are the same thing.",
+    "teaser": "Spinoza's pantheism: God isn't a person sitting in heaven. God is the universe itself — every atom, every law, every star. Spinoza was excommunicated for this; Einstein agreed with him.",
+    "imageUrl": "",
+    "byline": "Baruch Spinoza",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Spinoza's Ethics (1677)",
+      "durationMinutes": 12,
+      "instruction": "Read the Definitions and Axioms of Spinoza's Ethics. He defines God as 'that infinite, self-caused substance of which all things are properties.' God isn't separate from nature; God IS nature."
+    },
+    "tags": ["Philosophy", "Rationalism", "17th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-hume-reason-slave",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Reason is, and ought only to be the slave of the passions.",
+    "teaser": "Hume overturned the idea that reason rules human behavior. He argued that emotions come first — reason is just the tool that helps you get what you want. We're not rational beings who feel; we're feeling beings who rationalize.",
+    "imageUrl": "",
+    "byline": "David Hume",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hume's Treatise of Human Nature (1739)",
+      "durationMinutes": 10,
+      "instruction": "Read the Treatise of Human Nature, Book II. Hume argues that reason alone can't motivate action — only passions can. Reason tells you how to get what you want; it can't tell you what to want."
+    },
+    "tags": ["Philosophy", "Empiricism", "18th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-kant-starry-heavens",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Two things fill the mind with ever new and increasing admiration and awe — the starry heavens above me and the moral law within me.",
+    "teaser": "Kant found wonder in two places: the cosmos outside and the conscience inside. The universe is vast and ordered; the moral sense is small and absolute. Both deserve reverence.",
+    "imageUrl": "",
+    "byline": "Immanuel Kant",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kant's Critique of Practical Reason (1788), final paragraph",
+      "durationMinutes": 10,
+      "instruction": "Read the final paragraph of the Critique of Practical Reason. Kant describes his two sources of awe: the infinite universe and the moral law. He argues that the moral law is more important — it's within you, not above you."
+    },
+    "tags": ["Philosophy", "Enlightenment", "18th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kant-act-universal-law",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Act only according to that maxim whereby you can at the same time will that it should become a universal law.",
+    "teaser": "Kant's Categorical Imperative: before you do something, ask 'what if everyone did this?' If the answer is chaos, don't do it. It's the golden rule, formalized.",
+    "imageUrl": "",
+    "byline": "Immanuel Kant",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kant's Groundwork of the Metaphysics of Morals (1785)",
+      "durationMinutes": 10,
+      "instruction": "Read the Groundwork, where Kant develops the Categorical Imperative. He argues that morality is based on reason, not feelings or consequences. The universalizability test is his way of separating genuine moral rules from selfish excuses."
+    },
+    "tags": ["Philosophy", "Enlightenment", "Ethics"],
+    "tier": 1
+  },
+  {
+    "id": "quote-voltaire-gardens",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We must cultivate our own garden.",
+    "teaser": "Voltaire's conclusion in Candide — after traveling the world and finding disaster everywhere, the answer is simple: tend your own garden. Small, local, practical action beats grand philosophy.",
+    "imageUrl": "",
+    "byline": "Voltaire",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Candide (1759), final chapter",
+      "durationMinutes": 10,
+      "instruction": "Read the final chapter of Candide. After traveling through war, earthquake, and slavery, Candide concludes: 'we must cultivate our garden.' It's not escapism — it's the recognition that changing the world starts with changing your own small corner."
+    },
+    "tags": ["Literature", "Enlightenment", "18th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-rousseau-man-born-free",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Man is born free, and everywhere he is in chains.",
+    "teaser": "Rousseau's opening to The Social Contract is a declaration of revolution. Born free, enslaved by society — the chains are custom, law, and inequality. Breaking them was the work of the Enlightenment.",
+    "imageUrl": "",
+    "byline": "Jean-Jacques Rousseau",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Social Contract (1762), Book I",
+      "durationMinutes": 10,
+      "instruction": "Read Book I of The Social Contract. Rousseau argues that society corrupts natural freedom — and that legitimate government requires the consent of the governed. 'Man is born free' is both observation and accusation."
+    },
+    "tags": ["Philosophy", "Enlightenment", "Political"],
+    "tier": 1
+  },
+  {
+    "id": "quote-mill-greatest-happiness",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The greatest happiness of the greatest number is the foundation of morals and legislation.",
+    "teaser": "John Stuart Mill's utilitarianism: the best action is the one that produces the most happiness for the most people. Simple principle, complicated in practice.",
+    "imageUrl": "",
+    "byline": "John Stuart Mill",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mill's Utilitarianism (1863), Chapter 2",
+      "durationMinutes": 10,
+      "instruction": "Read Chapter 2 of Utilitarianism. Mill distinguishes between higher and lower pleasures — the mind matters more than the body. 'It is better to be Socrates dissatisfied than a fool satisfied.'"
+    },
+    "tags": ["Philosophy", "Utilitarianism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-mill-ape-socrates",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It is better to be a human being dissatisfied than a pig satisfied; better to be Socrates dissatisfied than a fool satisfied.",
+    "teaser": "Mill's most quoted line: not all pleasures are equal. Intellectual pleasure is worth more than physical pleasure — and the dissatisfied thinker lives a richer life than the contented fool.",
+    "imageUrl": "",
+    "byline": "John Stuart Mill",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mill's Utilitarianism (1863), Chapter 2",
+      "durationMinutes": 8,
+      "instruction": "Read the section where Mill argues for higher and lower pleasures. He claims that anyone who has experienced both intellectual and physical pleasure will always prefer the intellectual — and that this preference is evidence of its superiority."
+    },
+    "tags": ["Philosophy", "Utilitarianism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-thoreau-small-stone",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "If one advances confidently in the direction of his dreams, and endeavors to live the life which he has imagined, he will meet with a success unexpected in common hours.",
+    "teaser": "Thoreau's prescription for a meaningful life: pursue your dreams with confidence and persistence. The 'success unexpected in common hours' is the reward for refusing to settle for ordinary.",
+    "imageUrl": "",
+    "byline": "Henry David Thoreau",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Walden (1854), 'Conclusion'",
+      "durationMinutes": 10,
+      "instruction": "Read the Conclusion of Walden. Thoreau summarizes his two years in the woods: 'I learned this, at least, by my experiment: that if one advances confidently in the direction of his dreams, he will meet with a success unexpected in common hours.'"
+    },
+    "tags": ["Philosophy", "American", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-jefferson-pursuit-happiness",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We hold these truths to be self-evident, that all men are created equal, that they are endowed by their Creator with certain unalienable Rights, that among these are Life, Liberty and the pursuit of Happiness.",
+    "teaser": "The American Declaration of Independence — the most influential sentence in political history. Jefferson wrote that happiness is a right, not a privilege. The pursuit, not the guarantee, is what's protected.",
+    "imageUrl": "",
+    "byline": "Thomas Jefferson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Declaration of Independence (1776)",
+      "durationMinutes": 8,
+      "instruction": "Read the Declaration of Independence. Notice the word 'pursuit' — Jefferson didn't promise happiness, only the right to chase it. The gap between the promise and reality has driven American history ever since."
+    },
+    "tags": ["Political Philosophy", "American", "18th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-lincoln-nobler-test",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Government of the people, by the people, for the people, shall not perish from the earth.",
+    "teaser": "Lincoln's Gettysburg Address compressed the entire philosophy of democracy into one sentence. The three 'of/by/for' phrases define what government should be — and what it must never stop being.",
+    "imageUrl": "",
+    "byline": "Abraham Lincoln",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lincoln's Gettysburg Address (1863)",
+      "durationMinutes": 8,
+      "instruction": "Read the Gettysburg Address — it's only 272 words. Lincoln redefines the Civil War not as a fight for union but as a test of whether democracy can survive. The 'unfinished work' he describes is still unfinished."
+    },
+    "tags": ["Political Philosophy", "American", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-gandhi-be-change",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Be the change you wish to see in the world.",
+    "teaser": "Gandhi's most quoted line — and possibly the most misused. He didn't say 'be the change'; he said 'be the change you wish to see.' The difference is intentionality: choose your transformation deliberately.",
+    "imageUrl": "",
+    "byline": "Mahatma Gandhi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gandhi's writings and speeches",
+      "durationMinutes": 10,
+      "instruction": "Read Gandhi's 'Constructive Programme' (1941), where he lays out what 'being the change' actually means: spinning your own cloth, lifting the 'untouchables,' practicing Hindu-Muslim unity. It's not a bumper sticker; it's a life's work."
+    },
+    "tags": ["Philosophy", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-gandhi-eye-for-eye",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "An eye for an eye only ends up making the whole world blind.",
+    "teaser": "Gandhi's most elegant argument against revenge: retaliation doesn't restore balance — it escalates destruction. The cycle of violence ends only when someone refuses to continue it.",
+    "imageUrl": "",
+    "byline": "Mahatma Gandhi",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gandhi's Non-Violence in Theory and Practice",
+      "durationMinutes": 8,
+      "instruction": "Read Gandhi's writings on ahimsa (non-violence). He argues that non-violence isn't weakness — it's the strongest form of resistance. Retaliation perpetuates violence; non-violence breaks the cycle."
+    },
+    "tags": ["Philosophy", "Civil Rights", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-dalai-lama-kindness",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Be kind whenever it is possible. It is always possible.",
+    "teaser": "The Dalai Lama's simplest teaching: kindness is always available. You don't need money, power, or permission. The option to be kind exists in every moment, for every person.",
+    "imageUrl": "",
+    "byline": "Dalai Lama",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Art of Happiness (1998)",
+      "durationMinutes": 8,
+      "instruction": "Read The Art of Happiness, conversations between the Dalai Lama and psychiatrist Howard Cutler. They explore how compassion and kindness are not just moral ideals but practical paths to genuine happiness."
+    },
+    "tags": ["Philosophy", "Buddhism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-rilke-letters-change",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I want to unfold. I don't want to stay folded anywhere, because where I am folded, there I am a lie.",
+    "teaser": "Rilke wrote this to a young woman in 1904. To fold yourself is to hide — to pretend to be smaller or different than you are. Unfolding means being honest, even when it's terrifying.",
+    "imageUrl": "",
+    "byline": "Rainer Maria Rilke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letters to a Young Poet (1929)",
+      "durationMinutes": 8,
+      "instruction": "Read the Letters to a Young Poet as a whole. Rilke advises the young Franz Xaver Kappus to live deeply within himself, to be patient with unanswered questions, and to unfold honestly."
+    },
+    "tags": ["Literature", "Letters", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-rilke-solitude-greatness",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "What is necessary, after all, is only this: solitude, great inner solitude. To walk inside yourself and meet no one for hours.",
+    "teaser": "Rilke believed that solitude wasn't loneliness — it was the prerequisite for creation. You can't make art, or know yourself, without periods of deep, uninterrupted aloneness.",
+    "imageUrl": "",
+    "byline": "Rainer Maria Rilke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letters to a Young Poet, Letter 6",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 6, where Rilke defends solitude. He argues that being alone is not loneliness — it's the necessary condition for deep work. The creative person must learn to be alone without despair."
+    },
+    "tags": ["Literature", "Letters", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-borges-infinite-library",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I have always imagined that Paradise will be a kind of library.",
+    "teaser": "Jorge Luis Borges, who went blind and became a librarian, saw books as the closest thing to infinity. A library contains every thought anyone has ever had — including the ones not yet written.",
+    "imageUrl": "",
+    "byline": "Jorge Luis Borges",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Borges' 'The Library of Babel' (1941)",
+      "durationMinutes": 10,
+      "instruction": "Read 'The Library of Babel,' Borges' story of a library containing every possible book. Most are gibberish, but somewhere in it is the book that explains everything. The paradise of infinite knowledge is also its prison."
+    },
+    "tags": ["Literature", "Magical Realism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-garcia-marquez-love-forever",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "It is not true that people stop pursuing dreams because they grow old, they grow old because they stop pursuing dreams.",
+    "teaser": "García Márquez knew that aging isn't about years — it's about curiosity. The moment you stop dreaming, you start dying. Keep chasing, and the years don't matter.",
+    "imageUrl": "",
+    "byline": "Gabriel García Márquez",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "García Márquez's 'Autumn of the Patriarch' (1975)",
+      "durationMinutes": 12,
+      "instruction": "Read Autumn of the Patriarch, where García Márquez describes a dictator who has lived so long he's forgotten what power was for. Dreams keep you young; forgetting them makes you ancient."
+    },
+    "tags": ["Literature", "Magical Realism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-calvino-classic-books",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "A classic is a book that has never finished saying what it has to say.",
+    "teaser": "Calvino's definition of a classic: not old, but inexhaustible. You can reread it a hundred times and find new meaning. The book doesn't change; you do — and it meets you where you are.",
+    "imageUrl": "",
+    "byline": "Italo Calvino",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Calvino's 'Why Read the Classics?' (1991)",
+      "durationMinutes": 8,
+      "instruction": "Read 'Why Read the Classics?' — Calvino's list of 14 definitions. The final one: a classic is a book that says more than you remembered. It rewards rereading because you're never the same reader twice."
+    },
+    "tags": ["Literature", "Literary Criticism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-woolf-one-cannot-find",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "One cannot think well, love well, sleep well, if one has not dined well.",
+    "teaser": "Virginia Woolf, arguing for women's right to an income and a room of their own. The practical conditions of life determine the quality of thought — and women had neither.",
+    "imageUrl": "",
+    "byline": "Virginia Woolf",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Room of One's Own (1929)",
+      "durationMinutes": 12,
+      "instruction": "Read A Room of One's Own, Woolf's extended essay on women and fiction. She argues that women need money and privacy to create — 'a room of one's own and £500 a year.' Without material independence, genius is impossible."
+    },
+    "tags": ["Literature", "Feminism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-woolf-locked-out",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Lock up your libraries if you like; but there is no gate, no lock, no bolt that you can set upon the freedom of my mind.",
+    "teaser": "Woolf's declaration of intellectual freedom. You can ban books, censor ideas, and control access — but the mind finds a way. The gatekeeper never wins against genuine thought.",
+    "imageUrl": "",
+    "byline": "Virginia Woolf",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Room of One's Own (1929), Chapter 5",
+      "durationMinutes": 8,
+      "instruction": "Read Chapter 5 of A Room of One's Own. Woolf imagines what Shakespeare's sister would have faced — and argues that no amount of censorship can truly lock up a free mind."
+    },
+    "tags": ["Literature", "Feminism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-plath-roots-spring",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "I am, I am, I am.",
+    "teaser": "Sylvia Plath's most defiant line from The Bell Jar — a cry of existence against the void. Not 'I think' or 'I want' — just 'I am.' Being alive is enough.",
+    "imageUrl": "",
+    "byline": "Sylvia Plath",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Bell Jar (1963), final chapter",
+      "durationMinutes": 10,
+      "instruction": "Read the final chapter of The Bell Jar. Esther watches her future self in a mirror — a fig tree where every branch represents a different life. She can't choose, and they all wither. But 'I am' is the beginning of choosing."
+    },
+    "tags": ["Literature", "Feminism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-angelou-phoenix-rising",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We delight in the beauty of the butterfly, but rarely admit the changes it has gone through to achieve that beauty.",
+    "teaser": "Maya Angelou reminds us that beauty requires transformation — and transformation requires pain. The butterfly doesn't skip the chrysalis; neither can you.",
+    "imageUrl": "",
+    "byline": "Maya Angelou",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letter to My Daughter (2009)",
+      "durationMinutes": 8,
+      "instruction": "Read Letter to My Daughter. Angelou writes about transformation through suffering — how the chrysalis isn't optional. The beauty of the butterfly is inseparable from the struggle of becoming."
+    },
+    "tags": ["Literature", "Memoir", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-nietzsche-man-bridge",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Man is a rope, tied between beast and Superman — a rope over an abyss.",
+    "teaser": "Nietzsche's vision of humanity: we're not the destination, we're the transition. Between the animal we were and the being we could become, we dangle over nothingness. The rope is dangerous; that's what makes it meaningful.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thus Spoke Zarathustra, Prologue (1883)",
+      "durationMinutes": 10,
+      "instruction": "Read the Prologue of Thus Spoke Zarathustra. Nietzsche describes humanity as a rope over an abyss — dangerous, transitional, but full of purpose. We're not the end of evolution; we're the bridge."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-kierkegaard-anxiety-possibility",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Anxiety is the dizziness of freedom.",
+    "teaser": "Kierkegaard saw anxiety not as a disorder but as proof of freedom. If you felt no anxiety about your choices, it would mean you had no choices to make. Dizziness comes from looking down at your own freedom.",
+    "imageUrl": "",
+    "byline": "Søren Kierkegaard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kierkegaard's The Concept of Anxiety (1844)",
+      "durationMinutes": 10,
+      "instruction": "Read The Concept of Anxiety, where Kierkegaard links anxiety to freedom. He argues that anxiety isn't fear of something specific — it's the awareness of possibility. To be anxious is to be free."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kierkegaard-leap-of-faith",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "The most common form of despair is not being who you are.",
+    "teaser": "Kierkegaard's diagnosis of modern life: most people live as imitations of others rather than as themselves. The deepest despair isn't sadness — it's the absence of authentic selfhood.",
+    "imageUrl": "",
+    "byline": "Søren Kierkegaard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kierkegaard's The Sickness Unto Death (1849)",
+      "durationMinutes": 10,
+      "instruction": "Read The Sickness Unto Death. Kierkegaard defines despair as the failure to be yourself. Most people don't know they're despairing because they've never tried to be authentic — they've always been copies."
+    },
+    "tags": ["Philosophy", "Existentialism", "19th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-sartre-imagining-man",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Existence precedes essence. There is no human nature, because there is no God to conceive it.",
+    "teaser": "Sartre's existentialism in two sentences: you exist first, then you define yourself. There's no pre-written script, no divine blueprint — just the terrifying freedom to become whoever you choose.",
+    "imageUrl": "",
+    "byline": "Jean-Paul Sartre",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Existentialism Is a Humanism (1946)",
+      "durationMinutes": 10,
+      "instruction": "Read Existentialism Is a Humanism. Sartre argues that without God, there's no fixed human nature — and that this is good news, not bad. You're free to create yourself, and that freedom is the source of all value."
+    },
+    "tags": ["Philosophy", "Existentialism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-beauvoir-aging-body",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "One is not born a genius, one becomes a genius.",
+    "teaser": "De Beauvoir's gender theory extended: genius isn't innate talent — it's cultivated through work, opportunity, and the refusal to accept limits. Who you become depends on what you're allowed to do.",
+    "imageUrl": "",
+    "byline": "Simone de Beauvoir",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Second Sex (1949), Introduction",
+      "durationMinutes": 10,
+      "instruction": "Read the Introduction to The Second Sex. De Beauvoir argues that gender is constructed, not innate — 'One is not born, but rather becomes, a woman.' The same principle applies to genius: it's made, not given."
+    },
+    "tags": ["Philosophy", "Feminism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-camus-meaning-absurd",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Should I kill myself, or have a cup of coffee? But in the end one needs more courage to live than to kill himself.",
+    "teaser": "Camus finds the most absurd humor in the most serious question. The decision to keep living — when you know life has no inherent meaning — takes more bravery than ending it.",
+    "imageUrl": "",
+    "byline": "Albert Camus",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Happy Death (1971)",
+      "durationMinutes": 8,
+      "instruction": "Read A Happy Death, Camus' early novel. The protagonist murders a man and spends the rest of the book trying to die happy. The coffee versus suicide line captures Camus' dark humor perfectly."
+    },
+    "tags": ["Philosophy", "Absurdism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-heidegger-dasein-there",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We are not merely in the world; we are of the world.",
+    "teaser": "Heidegger rejected the idea that humans are separate observers of reality. We're not minds trapped in bodies looking at an external world — we're part of it, woven into it, inseparable from it.",
+    "imageUrl": "",
+    "byline": "Martin Heidegger",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Being and Time (1927), Division I",
+      "durationMinutes": 12,
+      "instruction": "Read Being and Time, Division I. Heidegger's concept of Dasein (being-there) rejects the subject/object split. We're not observers of the world; we're beings whose existence is always already 'in' the world."
+    },
+    "tags": ["Philosophy", "Existentialism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-gramsci-pessimism-intellect",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Pessimism of the intellect, optimism of the will.",
+    "teaser": "Gramsci wrote this from a fascist prison. The mind sees the worst; the will refuses to accept it. Intellectual honesty demands pessimism; human dignity demands hope.",
+    "imageUrl": "",
+    "byline": "Antonio Gramsci",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gramsci's Prison Notebooks (1929-1935)",
+      "durationMinutes": 10,
+      "instruction": "Read selections from Gramsci's Prison Notebooks. Written in a fascist prison, they combine sharp political analysis with stubborn hope. 'Pessimism of the intellect, optimism of the will' is his formula for resistance."
+    },
+    "tags": ["Philosophy", "Political Philosophy", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-marcus-common-obsession",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "How much time he gains who does not look to see what his neighbor says or does or thinks, but only at what he does himself.",
+    "teaser": "Marcus Aurelius knew that comparison is the thief of time — and peace. Stop watching what others do and focus on your own actions. That's where your power lives.",
+    "imageUrl": "",
+    "byline": "Marcus Aurelius",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marcus Aurelius' Meditations, Book IV",
+      "durationMinutes": 8,
+      "instruction": "Read Book IV of the Meditations. Marcus reminds himself to stop worrying about what others think and focus on his own conduct. 'It is the responsibility of the philosopher to wash away every stain of false opinion.'"
+    },
+    "tags": ["Philosophy", "Stoicism", "Roman"],
+    "tier": 2
+  },
+  {
+    "id": "quote-woolf-professions-women",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "For most of history, Anonymous was a woman.",
+    "teaser": "Woolf's one-line history of gender inequality. Women wrote, created, and invented — but their names were lost because history didn't think they mattered.",
+    "imageUrl": "",
+    "byline": "Virginia Woolf",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Room of One's Own (1929), Chapter 3",
+      "durationMinutes": 8,
+      "instruction": "Read Chapter 3 of A Room of One's Own. Woolf imagines Shakespeare's equally talented sister — and shows how patriarchal society would have crushed her. 'Anonymous' was often a woman because women weren't allowed names."
+    },
+    "tags": ["Literature", "Feminism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-sontag-interpretation-desk",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "To interpret is to impoverish, to deplete the world — in order to set up a shadow world of 'meanings.'",
+    "teaser": "Susan Sontag argued that over-analyzing art kills it. Sometimes a painting is just a painting; sometimes a song is just a song. Let the work exist before you explain it.",
+    "imageUrl": "",
+    "byline": "Susan Sontag",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Against Interpretation (1966)",
+      "durationMinutes": 8,
+      "instruction": "Read 'Against Interpretation,' Sontag's most famous essay. She argues that interpretation drains art of its sensuous power. 'In place of a hermeneutics we need an erotics of art.'"
+    },
+    "tags": ["Literary Criticism", "Art Theory", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-eluard-earth-blue",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "There is another world, but it is in this one.",
+    "teaser": "Paul Éluard, the surrealist poet, saw the extraordinary hiding inside the ordinary. You don't need to escape to find magic — it's right here, in the world you've stopped noticing.",
+    "imageUrl": "",
+    "byline": "Paul Éluard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Éluard's poetry collections",
+      "durationMinutes": 8,
+      "instruction": "Read Éluard's poems — especially 'Capitale de la Douleur' and 'L'Amour la Poésie'. He finds surreal beauty in everyday objects: 'The earth is blue like an orange.' The other world is this one, seen differently."
+    },
+    "tags": ["Poetry", "Surrealism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-cavafy-ithaka-journey",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Keep Ithaka always in your mind. Arriving there is what you are destined for.",
+    "teaser": "Cavafy's poem Ithaka is the best travel poem ever written. The destination matters less than the journey — the wisdom you gain, the monsters you face, the beauty you discover along the way.",
+    "imageUrl": "",
+    "byline": "C.P. Cavafy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cavafy's 'Ithaka' (1911)",
+      "durationMinutes": 8,
+      "instruction": "Read 'Ithaka' by C.P. Cavafy. The poem advises the traveler not to rush to Ithaka — enjoy the journey, collect experiences. 'Ithaka gave you the marvelous journey. Without her you would not have set out.'"
+    },
+    "tags": ["Poetry", "Greek", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-borges-we-are-our-memory",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "We are our memory. We are that chrysalis of moments. That's why I train it, why I treat it like a delicate organ.",
+    "teaser": "Borges went blind and became obsessed with memory. Without sight, memory became his entire world — and he treated it with the care of a man who knows it's the only thing keeping him alive.",
+    "imageUrl": "",
+    "byline": "Jorge Luis Borges",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Borges' 'Borges and I' (1960)",
+      "durationMinutes": 8,
+      "instruction": "Read 'Borges and I,' a short prose piece where Borges distinguishes between himself and his public persona. Memory is the bridge between the two — the thing that makes you 'you' across time."
+    },
+    "tags": ["Literature", "Magical Realism", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-rilke-love-two-lonelinesses",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "For one human being to love another: that is perhaps the most difficult of all our tasks, the ultimate, the last test and proof.",
+    "teaser": "Rilke saw love not as finding your other half but as two complete people choosing to honor each other's solitude. The hardest thing isn't finding someone — it's truly seeing them.",
+    "imageUrl": "",
+    "byline": "Rainer Maria Rilke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Letters to a Young Poet, Letter 7",
+      "durationMinutes": 8,
+      "instruction": "Read Letter 7, where Rilke writes about love. He argues that love is not merging — it's the ability to be two solitudes that protect and greet each other. The hardest task is to love without possessing."
+    },
+    "tags": ["Literature", "Letters", "Love"],
+    "tier": 1
+  },
+  {
+    "id": "quote-kafka-before-the-law",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Before the Law stands a doorkeeper. To this doorkeeper there comes a man from the country who begs for admittance to the Law.",
+    "teaser": "Kafka's parable about the man who waits his whole life at a door that was only meant for him. The Law never opens — but was the wait the punishment, or the point?",
+    "imageUrl": "",
+    "byline": "Franz Kafka",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Trial (1925), Chapter 9",
+      "durationMinutes": 10,
+      "instruction": "Read 'Before the Law,' the parable embedded in The Trial. A man waits at a door his entire life, never entering. The doorkeeper tells him the door was made only for him. The parable is about the access we deny ourselves."
+    },
+    "tags": ["Literature", "Modernist", "20th Century"],
+    "tier": 2
+  },
+  {
+    "id": "quote-hemingway-sun-also-rises",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "You can't get away from yourself by moving from one place to another.",
+    "teaser": "Hemingway's characters travel to escape themselves and discover the same problems at every destination. The sun also rises — whether you're in Paris, Pamplona, or your own living room.",
+    "imageUrl": "",
+    "byline": "Ernest Hemingway",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Sun Also Rises (1926)",
+      "durationMinutes": 12,
+      "instruction": "Read The Sun Also Rises. Jake Barnes travels from Paris to Pamplona, drinking and watching bullfights. The scenery changes; the emptiness doesn't. Travel doesn't cure self-knowledge — it demands it."
+    },
+    "tags": ["Literature", "American", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-woolf-death-room",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "A woman must have money and a room of her own if she is to write fiction.",
+    "teaser": "Woolf's most practical piece of literary advice: you need material independence to create. The genius exists; the conditions for expressing it don't — unless you fight for them.",
+    "imageUrl": "",
+    "byline": "Virginia Woolf",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Room of One's Own (1929), Chapter 1",
+      "durationMinutes": 10,
+      "instruction": "Read Chapter 1, where Woolf visits a men's college and is denied entry. She connects material deprivation to creative silence: without money and space, women's genius stays locked inside."
+    },
+    "tags": ["Literature", "Feminism", "20th Century"],
+    "tier": 1
+  },
+  {
+    "id": "quote-nietzsche-who-fights-monsters",
+    "categoryId": "QUOTES",
+    "subtype": "Quote",
+    "name": "Whoever fights monsters should see to it that in the process he does not become a monster.",
+    "teaser": "Nietzsche's warning about crusades: the longer you fight evil, the more you risk becoming it. Good intentions aren't armor against corruption — vigilance is.",
+    "imageUrl": "",
+    "byline": "Friedrich Nietzsche",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beyond Good and Evil, Aphorism 146 (1886)",
+      "durationMinutes": 8,
+      "instruction": "Read Aphorism 146 of Beyond Good and Evil. Nietzsche warns that fighting monsters changes the fighter. The full aphorism adds: 'And if you gaze long into an abyss, the abyss also gazes into you.' The monster and the abyss are warnings about moral corruption."
+    },
+    "tags": ["Philosophy", "Ethics", "19th Century"],
+    "tier": 1
+  }
+]

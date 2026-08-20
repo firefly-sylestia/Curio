@@ -68,6 +68,7 @@ enum class CategoryId {
     LANGUAGE,
     ENGINEERING,
     OCEANS,
+    QUOTES,
     WILDCARD;
 
     companion object {
@@ -85,7 +86,8 @@ enum class CategoryId {
             ANIMATED_MOVIES,
             BIOLOGY, CHEMISTRY, ANIMALS, PLANTS, TECHNOLOGIES,
             ASTRONOMY, HISTORY, GEOLOGY, MEDICINE, PSYCHOLOGY,
-            MATHEMATICS, ECONOMICS, LANGUAGE, ENGINEERING, OCEANS
+            MATHEMATICS, ECONOMICS, LANGUAGE, ENGINEERING, OCEANS,
+            QUOTES
         )
 
         /** Default chip order on Home + Category Picker. Wildcard stays last. */
@@ -104,6 +106,7 @@ enum class CategoryId {
             BIOLOGY, CHEMISTRY, ANIMALS, PLANTS, TECHNOLOGIES,
             ASTRONOMY, HISTORY, GEOLOGY, MEDICINE, PSYCHOLOGY,
             MATHEMATICS, ECONOMICS, LANGUAGE, ENGINEERING, OCEANS,
+            QUOTES,
             WILDCARD
         )
     }
@@ -146,6 +149,7 @@ enum class CategoryId {
         LANGUAGE    -> "language"
         ENGINEERING -> "engineering"
         OCEANS      -> "oceans"
+        QUOTES      -> "quotes"
         WILDCARD    -> "wildcard"
     }
 }
@@ -195,6 +199,7 @@ enum class CategoryFamily {
             CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
             CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING -> SCIENCE
             CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS -> BOOKS
+            CategoryId.QUOTES -> BOOKS
             CategoryId.WILDCARD -> WILDCARD
         }
     }
@@ -664,6 +669,18 @@ object CurioCategories {
             iconGlyph     = "bubble_chart",
             family        = CategoryFamily.SCIENCE,
             defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true
+        ),
+        // ── Quotes family (Plum) ────────────────────────────────────────
+        CurioCategory(
+            id            = CategoryId.QUOTES,
+            displayName   = "Quotes",
+            accent        = CurioColors.CategoryPlum,
+            lightAccent   = CurioColors.CategoryPlumInk,
+            tint          = CurioColors.CategoryPlumTint,
+            iconGlyph     = "format_quote",
+            family        = CategoryFamily.BOOKS,
+            defaultFormat = CaptureFormat.Marginalia,
             isReady       = true
         ),
         // ── Wildcard (brand coral; cards use the themed coral gradient) ──

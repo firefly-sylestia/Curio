@@ -1763,6 +1763,7 @@ private fun HeroCard(
                     CategoryId.ANIMATED_MOVIES -> "Director"
                     CategoryId.ARTWORKS -> "Painter"
                     CategoryId.DISCOVERIES -> "Discovered by"
+                    CategoryId.QUOTES -> "Author"
                     else -> null
                 }
                 if (byline != null && bylineLabel != null) {

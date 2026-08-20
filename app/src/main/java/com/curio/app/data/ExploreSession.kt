@@ -83,7 +83,8 @@ fun ExploreSession.reflectionQuestion(): String = when (categoryId) {
     CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
     CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING ->
         "Finished exploring? What fact surprised you most?"
-    CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS ->
+    CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS,
+    CategoryId.QUOTES ->
         "Finished reading? What idea do you want to keep?"
     CategoryId.GAMES ->
         "Finished watching? What moment or decision stuck with you?"
