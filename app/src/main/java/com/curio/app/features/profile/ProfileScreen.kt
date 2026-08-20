@@ -1100,6 +1100,7 @@ private fun ProfileHero(
                         if (statTearOn) TornStatPaperShape(0x6B4E3E) else RoundedCornerShape(20.dp)
                     }
                     val statHolesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
+                    val statRingsOn = AppPreferences.paperHoleRingsState
                     // v200 — the Surface wrapper is GONE: M3 Surface (1.2+)
                     // clips its children to the shape, which CUT the coil's
                     // left peek at the card edge. A plain Box +
@@ -1117,6 +1118,7 @@ private fun ProfileHero(
                                     shape = statShape,
                                     fill = paperStatBg,
                                     holesOn = statHolesOn,
+                                    ringsOn = statRingsOn,
                                     ink = ink,
                                     // v81 — dark: light metal ring tones.
                                     dark = isCurioDarkTheme()

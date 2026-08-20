@@ -346,6 +346,7 @@ object AppPreferences {
     /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
     var paperHeaderCutsState by mutableStateOf(false)
     var paperHeaderHolesState by mutableStateOf(false)
+    var paperHoleRingsState by mutableStateOf(false)
     // v97 — the Paper stat card experiment PASSED: on by default app-wide
     // (the Experiments toggles stay for comparison).
     var paperStatCardsState by mutableStateOf(true)
@@ -616,6 +617,7 @@ object AppPreferences {
         heroShadowState = isHeroShadowEnabled(context)
         paperHeaderCutsState = isPaperHeaderCutsEnabled(context)
         paperHeaderHolesState = isPaperHeaderHolesEnabled(context)
+        paperHoleRingsState = isPaperHoleRingsEnabled(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
         pillGlowSubtleState = isPillGlowSubtleEnabled(context)
@@ -900,6 +902,7 @@ object AppPreferences {
     // ── Paper & header experiments (v27) ─────────────────────────────
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
+    private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
     private const val KEY_PILL_GLOW_SUBTLE = "pill_glow_subtle"
     private const val KEY_HERO_TEAR_SHEET = "hero_tear_sheet"
@@ -927,6 +930,15 @@ object AppPreferences {
     fun setPaperHeaderHolesEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_HEADER_HOLES, enabled).apply()
         paperHeaderHolesState = enabled
+    }
+
+    /** Whether the pin holes wear 3D metal rings (experimental, default off). */
+    fun isPaperHoleRingsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PAPER_HOLE_RINGS, false)
+
+    fun setPaperHoleRingsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PAPER_HOLE_RINGS, enabled).apply()
+        paperHoleRingsState = enabled
     }
 
     /** Whether Home's background + bottom nav wear the category tint (experimental, default off). */

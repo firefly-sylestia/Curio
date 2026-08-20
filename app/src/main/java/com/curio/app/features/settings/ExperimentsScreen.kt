@@ -101,6 +101,10 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPaperHeaderHolesEnabled(context, it)
                     }
                     CurioSettingsDivider()
+                    ExperimentSwitchRow("Hole rings", "3D steel coil rings on the paper stat card", AppPreferences.paperHoleRingsState) {
+                        AppPreferences.setPaperHoleRingsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
                     ExperimentSwitchRow("Paper stat card", "Soft rose paper card on the stat panes and the Profile quests block (on by default)", AppPreferences.paperStatCardsState) {
                         AppPreferences.setPaperStatCardsEnabled(context, it)
                     }

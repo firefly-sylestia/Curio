@@ -592,6 +592,7 @@ fun HomeScreen(navController: NavController) {
                             // path so the holes stay transparent and the hero
                             // banner shows through.
                             val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
+                            val ringsOn = AppPreferences.paperHoleRingsState
                             // v200 — the Surface wrapper is GONE: M3 Surface
                             // (1.2+) clips its children to the shape, which CUT
                             // the coil's left peek at the card edge. A plain
@@ -615,6 +616,7 @@ fun HomeScreen(navController: NavController) {
                                             shape = statShape,
                                             fill = paperStatBg,
                                             holesOn = holesOn,
+                                            ringsOn = ringsOn,
                                             ink = questInk,
                                             // v81 — dark: light metal ring tones.
                                             dark = isCurioDarkTheme()

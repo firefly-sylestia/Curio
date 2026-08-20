@@ -556,6 +556,7 @@ fun EntryDetailScreen(
                         if (metaTearOn) TornStatPaperShape(tearSeed xor 0x6B4E3E) else RoundedCornerShape(20.dp)
                     }
                     val metaHolesOn = metaPaperOn && AppPreferences.paperHeaderHolesState
+                    val metaRingsOn = AppPreferences.paperHoleRingsState
                     // v200 — the Surface wrapper is GONE: M3 Surface (1.2+)
                     // clips its children to the shape, which CUT the coil's
                     // left peek at the card edge. A plain Box +
@@ -592,6 +593,7 @@ fun EntryDetailScreen(
                                             shape = metaShape,
                                             fill = metaPaperBg,
                                             holesOn = metaHolesOn,
+                                            ringsOn = metaRingsOn,
                                             ink = heroCardInk,
                                             // v81 — dark: light metal ring tones.
                                             dark = isCurioDarkTheme()
