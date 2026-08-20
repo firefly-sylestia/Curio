@@ -271,7 +271,7 @@ fun CurioConstellation(
                     drawStar(
                         center = Offset(
                             ((s.first.x + ox * 0.05f) % 1f) * w,
-                            ((s.second.y + oy * 0.05f) % 1f) * h
+                            ((s.first.y + oy * 0.05f) % 1f) * h
                         ),
                         outerRadius = (s.second * 0.4f).dp.toPx(),
                         color = bgStarColor,
