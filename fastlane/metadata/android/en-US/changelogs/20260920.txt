@@ -1,4 +1,5 @@
 ADD
+- Paper: the 3D coil ring now always appears on stat cards, independent of pin holes. Removed the "Hole rings" toggle and ring-style picker from Experiments.
 - Drawer: the planet footer now sits flush above the gesture bar — the art is no longer cut off behind the system nav area, and the footer SVG is trimmed 44 units from the bottom so it reads as one clean band.
 - Paper: the hole-ring coil is mirrored to match the reference art — the wire now starts inside the hole on the right, arches over, and the left leg dives past the card's left edge to an open end.
 - Reveal: the Like/Dislike pill now vanishes the instant you tap back (it no longer lingers through the exit transition), while still floating ABOVE the collapsing nav pill when you arrive.

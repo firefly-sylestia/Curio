@@ -1724,6 +1724,16 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v209 — 3D COIL RING always-on: the spiral-notebook binding wire now
+  draws on every paper stat card, independent of the pin holes toggle.
+  Removed: "Hole rings" experiment toggle, ring-style picker (coil/
+split/oblique), `paperHoleRingsState`, `paperHoleRingStyleState`,
+  `drawSplitRing`, `drawObliqueCoil`, `drawPressedRim`,
+  `drawRingContactShadow`. The coil is always the 3D spring (from the
+  user's SVG). With holes on it threads through the punched holes;
+  without holes it sits on the card edge as a standalone decoration.
+  Affected: `PaperStatCard.kt`, `AppPreferences.kt`, `ExperimentsScreen.kt`,
+  `HomeScreen.kt`, `EntryDetailScreen.kt`, `ProfileScreen.kt`.
 - **v208 — CURIO BRAIN STATS: a real science-based cognitive model
   replaces the constellation's save-count stars (user: "a fresh system of
   my on, i want a real science based stats system that will help user
