@@ -363,7 +363,7 @@ object AppPreferences {
     // vertical variants) wear the floating NAV-PILL look (capsule, calmed
     // accent active fill, elevated container) instead of the category
     // rounded-24 buttons. Default OFF.
-    var navPillButtonsState by mutableStateOf(false)
+    var navPillButtonsState by mutableStateOf(true)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
     var homeTintState by mutableStateOf(false)
@@ -940,7 +940,7 @@ object AppPreferences {
 
     /** Whether the Spin Categories/Filter buttons wear the nav-pill look (experimental, default off). */
     fun isNavPillButtonsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_NAV_PILL_BUTTONS, false)
+        prefs(context).getBoolean(KEY_NAV_PILL_BUTTONS, true)
 
     fun setNavPillButtonsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_NAV_PILL_BUTTONS, enabled).apply()
