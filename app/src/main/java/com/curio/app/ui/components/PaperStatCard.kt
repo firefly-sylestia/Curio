@@ -96,9 +96,7 @@ fun Modifier.paperStatCardFill(
                 }
             }
         } else {
-            onDrawBehind {
-                drawRect(fill)
-            }
+            background(fill, shape)
         }
     }
 }
@@ -299,6 +297,13 @@ private fun buildCoilHighlightPath(topLeft: Offset, w: Float, h: Float): Path {
     }
     return p
 }
+
+/**
+ * "split" — a closed steel keyring / split-ring binder loop threaded
+ * through the hole. The ring's TOP half is a bright tube riding over the
+ * paper; its BOTTOM half recedes behind the sheet, seen dark inside the
+ * shaded hole, with the classic split gap near the top and a glint on the
+
 
 private val PAPER_HOLE_RADIUS = 5.5f
 private val PAPER_HOLE_X = 14f
