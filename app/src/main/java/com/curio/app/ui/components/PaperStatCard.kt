@@ -33,17 +33,18 @@ import com.curio.app.ui.theme.toHsl
  * classic 3-hole column is punched through the LEFT edge as an EvenOdd path
  * (the page behind shows through the holes).
  *
- * The 3D steel coil ring (spiral-notebook binding wire) draws when
- * [ringsOn] is true: it decorates the card's LEFT edge. With [holesOn]
- * the coil THREADS THROUGH the holes; without holes it sits on the card
- * edge alone. With [ringsOn] off the card is the opaque paper fill
- * only — no translucent fills anywhere (v27n shadow rule).
+ * The 3D steel coil ring (spiral-notebook binding wire) always draws on
+ * the card's LEFT edge, independent of the pin holes — it decorates the
+ * card regardless. When [holesOn] is true the coil THREADS THROUGH the
+ * holes; when false it sits on the card edge alone.
+ *
+ * With holes off the card is simply the opaque paper fill + the coil —
+ * no translucent fills anywhere (v27n shadow rule).
  */
 fun Modifier.paperStatCardFill(
     shape: Shape,
     fill: Color,
     holesOn: Boolean,
-    ringsOn: Boolean,
     ink: Color,
     // v81 — dark mode: the wire's DARK metal tones would vanish on the
     // near-black paper, so they flip to light metal (the reversal).
@@ -74,29 +75,25 @@ fun Modifier.paperStatCardFill(
         }
         onDrawBehind {
             drawPath(path, fill)
-            if (ringsOn) {
-                // The coil rings thread through the punched holes.
-                repeat(3) { i ->
-                    val cy = size.height * (i + 1) / 4f
-                    val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
-                    drawCoilRing(ringCenter, holeR, ink, dark)
-                }
+            // The coil rings thread through the punched holes.
+            repeat(3) { i ->
+                val cy = size.height * (i + 1) / 4f
+                val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
+                drawCoilRing(ringCenter, holeR, ink, dark)
             }
         }
     } else {
-        if (ringsOn) {
-            // No holes but coil on — opaque fill + the coil as a
-            // standalone decoration on the card's left edge.
-            onDrawBehind {
-                drawRect(fill)
-                repeat(3) { i ->
-                    val cy = size.height * (i + 1) / 4f
-                    val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
-                    drawCoilRing(ringCenter, holeR, ink, dark)
-                }
+        // No holes — opaque fill + the coil as a standalone decoration
+        // on the card's left edge.
+        onDrawBehind {
+            drawRect(fill)
+            // Three coil rings at the same hole positions, drawn over the
+            // fill so they read as the binding wire wrapping the left edge.
+            repeat(3) { i ->
+                val cy = size.height * (i + 1) / 4f
+                val ringCenter = Offset(holeX - ringOffX, cy - ringOffY)
+                drawCoilRing(ringCenter, holeR, ink, dark)
             }
-        } else {
-            background(fill, shape)
         }
     }
 }
