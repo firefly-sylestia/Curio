@@ -288,7 +288,7 @@ private fun randomAroundCorvus(rnd: Random): Offset {
  * Each is (position, radius in dp). Fixed seed — never re-rolls.
  */
 private fun backgroundStars(): List<Pair<Offset, Float>> {
-    val rnd = Random(0x5TAR5)
+    val rnd = Random(0x5EED)
     return List(40) {
         Offset(rnd.nextFloat(), rnd.nextFloat()) to (0.4f + rnd.nextFloat() * 0.8f)
     }
