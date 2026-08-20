@@ -597,7 +597,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryCrimsonTint,
             iconGlyph     = "self_improvement",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.PSYCHOLOGY,
@@ -607,7 +608,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryPeriwinkleTint,
             iconGlyph     = "psychology",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.MATHEMATICS,
@@ -617,7 +619,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryIndigoBlueTint,
             iconGlyph     = "equalizer",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.ECONOMICS,
@@ -627,7 +630,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryGoldTint,
             iconGlyph     = "public",
             family        = CategoryFamily.BOOKS,
-            defaultFormat = CaptureFormat.Marginalia
+            defaultFormat = CaptureFormat.Marginalia,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.LANGUAGE,
@@ -637,7 +641,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryTeal600Tint,
             iconGlyph     = "format_quote",
             family        = CategoryFamily.BOOKS,
-            defaultFormat = CaptureFormat.Marginalia
+            defaultFormat = CaptureFormat.Marginalia,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.ENGINEERING,
@@ -647,7 +652,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryZincTint,
             iconGlyph     = "settings",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.OCEANS,
@@ -657,7 +663,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryDeepCyanTint,
             iconGlyph     = "bubble_chart",
             family        = CategoryFamily.SCIENCE,
-            defaultFormat = CaptureFormat.FieldNotes
+            defaultFormat = CaptureFormat.FieldNotes,
+            isReady       = true
         ),
         // ── Wildcard (brand coral; cards use the themed coral gradient) ──
         CurioCategory(
