@@ -102,6 +102,8 @@ fun CurioConstellation(
                        else Color(0xFFD0A848).copy(alpha = 0.80f)
     val bgStarColor = if (isDark) Color(0xFF8899BB).copy(alpha = 0.22f)
                       else Color(0xFF8899BB).copy(alpha = 0.15f)
+    // Page background for light-mode edge blending (hoisted from Canvas).
+    val pageBg = MaterialTheme.colorScheme.background
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -203,7 +205,7 @@ fun CurioConstellation(
                 drawRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.70f),
+                            pageBg.copy(alpha = 0.70f),
                             Color.Transparent
                         ),
                         startY = 0f,
@@ -217,7 +219,7 @@ fun CurioConstellation(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.70f)
+                            pageBg.copy(alpha = 0.70f)
                         ),
                         startY = h * 0.82f,
                         endY = h
@@ -229,7 +231,7 @@ fun CurioConstellation(
                 drawRect(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.55f),
+                            pageBg.copy(alpha = 0.55f),
                             Color.Transparent
                         ),
                         startX = 0f,
@@ -243,7 +245,7 @@ fun CurioConstellation(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.55f)
+                            pageBg.copy(alpha = 0.55f)
                         ),
                         startX = w * 0.88f,
                         endX = w
