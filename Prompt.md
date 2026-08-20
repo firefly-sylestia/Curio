@@ -1,34 +1,39 @@
 # Prompt — Current Request
 
 ## Request
-"the 3d svg ring we added above can you make it a differentotion and remove those hole rings and ring style and just make that 3d spirng to apply even withouth the stamped pin holes option"
+"whatever i dont like the brain constellation. lets use a real constellation map that symbolize curiosity. research and tell me. and we will be giving it the space style look properly blended and beautiful and not those messes and bright glows. fully redesign"
 
 ## Status: DONE ✅
 
-## What changed (v209)
+## What changed (v210)
 
-The 3D spiral-notebook coil ring is now always drawn on paper stat cards, regardless of whether pin holes are enabled. Previously it was tied to the "Hole rings" experiment toggle and the ring-style picker (coil/split/oblique).
+Replaced the entire brain neural web constellation with the real **Corvus (The Crow)** star pattern — Apollo placed the crow in the sky because its curiosity led it to seek forbidden knowledge.
+
+### Corvus star positions (real astronomical coordinates, normalized)
+- **Gienah** (ε Corvi) — mag 2.65, brightest — upper-left anchor
+- **Kraz** (β Corvi) — mag 2.65 — upper-right anchor
+- **Algorab** (δ Corvi) — mag 2.95 — lower-left anchor
+- **Minkar** (ν Corvi) — mag 3.00 — lower-right anchor
+
+These form the constellation's characteristic **quadrilateral** (the "sail" shape).
+
+### Space aesthetic
+- **Background**: deep void with faint radial nebula gradient (purple wash in dark mode, lavender in light)
+- **Constellation lines**: thin gossamer links between the four anchor stars (not a dense mesh)
+- **Stars**: small bright points with soft halos, sized by knowledge (sqrt ramp, capped at 7dp)
+- **Background stars**: 40 dim scattered points for depth
+- **No brain silhouette, no filler dots, no neural web, no garish glows**
 
 ### Removed
-- `paperHoleRingsState` and `paperHoleRingStyleState` from AppPreferences
-- `KEY_PAPER_HOLE_RINGS` and `KEY_PAPER_HOLE_RING_STYLE` prefs
-- "Hole rings" experiment toggle from ExperimentsScreen
-- Ring style picker dialog (coil/split/oblique) from ExperimentsScreen
-- `drawSplitRing()`, `drawObliqueCoil()`, `drawPressedRim()`, `drawRingContactShadow()` from PaperStatCard
-- `steelGradient`, `SplitBackDark`, `DiveMetalDark` dead color constants
-- Unused imports: `AlertDialog`, `Surface`, `TextButton`, `FontWeight`, `Arrangement`, `Size`, `rotate`
-
-### Changed
-- `paperStatCardFill()` signature: removed `ringsOn` and `ringStyle` params
-- With holes on: holes punched + coil threads through them
-- Without holes: coil sits on the card edge as a standalone decoration
-- Call sites (HomeScreen, EntryDetailScreen, ProfileScreen) simplified
+- `BRAIN_SILHOUETTE` polygon and `pointInBrain()` ray-casting
+- `randomInBrain()` rejection sampling
+- `brainFillerDots()` decorative fillers
+- `drawBrainOutline()` smooth curve renderer
+- `drawCurvedLink()` quadratic bezier links (replaced with straight gossamer lines)
+- `Path` and `Stroke` imports (no longer needed)
 
 ### Files touched
-- `PaperStatCard.kt` — core change
-- `AppPreferences.kt` — removed ring prefs
-- `ExperimentsScreen.kt` — removed toggle + picker
-- `HomeScreen.kt`, `EntryDetailScreen.kt`, `ProfileScreen.kt` — call site updates
+- `CurioConstellation.kt` — complete rewrite (same API, no caller changes needed)
 
 ## Remaining work
 None — this request is complete.

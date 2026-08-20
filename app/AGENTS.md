@@ -1724,6 +1724,17 @@ app/src/main/java/com/curio/app/
   - HOUSEKEEPING: removed the root-level reference dump SVGs
     (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
     `footer.svg`) — the real drawer art lives in res/raw/.
+- **v210 — CONSTELLATION REDESIGN: replaced the brain neural mesh with
+  the real Corvus (The Crow) constellation — Apollo placed the crow in
+  the sky because its curiosity led it to seek forbidden knowledge, the
+  perfect emblem for Curio. Four anchor stars (Gienah, Kraz, Algorab,
+  Minkar) form the characteristic quadrilateral; explored lane stars are
+  scattered around the pattern. SPACE AESTHETIC: deep void background
+  with faint nebula wash, gossamer constellation lines (thin, dim),
+  small bright stars with soft halos — no brain silhouette, no dense
+  mesh, no garish glows. Background stars add depth. Removed: brain
+  silhouette outline, filler dots, nearest-neighbour neural web,
+  corpus-callosum bridges, gold fissure.
 - **v209 — 3D COIL RING always-on: the spiral-notebook binding wire now
   draws on every paper stat card, independent of the pin holes toggle.
   Removed: "Hole rings" experiment toggle, ring-style picker (coil/
