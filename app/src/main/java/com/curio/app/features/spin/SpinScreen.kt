@@ -4284,6 +4284,7 @@ private fun DeckControlButton(
                 // dark — mismatched siblings on the same fill.
                 // v32 — pastel dark flips to the bright cream ([deckControlInk]).
                 color = ink,
+                textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

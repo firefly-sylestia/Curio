@@ -1,19 +1,22 @@
 # Prompt — Current Request
 
 ## Request
-"instead of glow colorful dots use the star as the dots itself. and dont increase the size, and use the north star constellation with the question and the pole star. make the backgroud colorfully beautiful galaxy looking, and in light mode it should keep its color and just in the edges it should blend a little"
+"remove the dislike and make the like as Favorite and put the category in the bottom like that category and the favorite icon, and the category gets expanded automatically just like when i tap like it gets expanded. and remove that category from the top corner. and again dont push this, and the animation of expanding and collapse just like the home nav pill buttons. and also in shuffle page the category and the Filters the texts size it feels a little offset so if it is make it centered"
 
 ## Status: IN PROGRESS
 
-## What's changed
-- **v211** — CurioConstellation.kt: full rewrite from Corvus to **Ursa Minor** (North Star / Little Dipper) constellation with **Polaris** as the guiding pole star.
-- Stars are now drawn as **4-pointed star shapes** (diamond-star glyphs) instead of circles.
-- Background: **colorful galaxy aesthetic** — layered nebula washes (purple, teal-blue, magenta, gold dust near Polaris).
-- **Light mode**: galaxy palette stays vibrant but **edges fade** to meet the page background (top/bottom/left/right gradient blends).
-- **Dark mode**: full-bleed deep space galaxy.
-- Anchor stars: Polaris is larger and warmer (golden), the other 6 Ursa Minor stars are cooler (blue-white).
-- Lane stars remain category-accent colored, sized by knowledge (sqrt ramp, capped at 7dp).
-- Background scatter stars are now tiny star glyphs, not circles.
+## Changes made
+
+### TopicRevealScreen.kt
+- **Removed dislike button** from RevealSentimentPill — only Favorite remains
+- **Renamed "Like" to "Favorite"** with Star/StarOutline icon (filled when active)
+- **Removed category chip from top bar** — category no longer shown in top-left corner
+- **New bottom bar** (`RevealCategoryFavoriteBar`): category icon + name on left (expands when favorited), favorite star on right
+- Category pill expands from 56dp (icon-only) to 160dp (icon + name) using the same nav-pill spring (stiffness=120, dampingRatio=1)
+- Favorite star toggles between Star (filled) and StarOutline (outline)
+
+### SpinScreen.kt
+- Added `textAlign = TextAlign.Center` to DeckControlButton's Text for proper centering
 
 ## Remaining work
-- Commit + push the constellation redesign
+- Commit + push (user said don't push yet)
