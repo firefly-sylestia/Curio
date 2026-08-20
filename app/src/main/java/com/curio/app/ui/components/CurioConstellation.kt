@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -32,22 +33,22 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
 
 /**
- * v210 — REAL CONSTELLATION: the Corvus (The Crow) star pattern, the
- * mythological symbol of curiosity. Apollo placed the crow in the sky
- * because its curiosity led it to seek forbidden knowledge — the
- * perfect emblem for Curio.
+ * v211 — NORTH STAR CONSTELLATION: Ursa Minor (the Little Dipper), with
+ * Polaris — the Pole Star — as the guiding light. Seven stars form the
+ * iconic ladle shape, anchored by the brightest star in the handle.
  *
- * The four anchor stars (Gienah, Kraz, Algorab, Minkar) form the
- * constellation's characteristic quadrilateral. Explored lane stars are
- * scattered around the pattern. Decorative background stars add depth.
+ * GALAXY AESTHETIC: vibrant deep-space nebula background with overlapping
+ * purple, blue, and teal washes. Explored-lane stars are drawn as 4-pointed
+ * star shapes, not circles. Background scatter stars are tiny star glyphs
+ * for a consistent starfield feel.
  *
- * SPACE AESTHETIC: deep void background with a faint nebula wash, thin
- * gossamer constellation lines, small bright stars with soft halos — no
- * brain mesh, no bright glows, no clutter.
+ * Light mode: the galaxy palette stays but the edges fade to meet the page
+ * background. Dark mode: full-bleed deep space.
  *
  * Tap a star to select it; tap empty sky to clear. When [popoverContent]
  * is provided, the selection shows as a floating card anchored to the star.
@@ -63,22 +64,25 @@ fun CurioConstellation(
     modifier: Modifier = Modifier,
     popoverContent: (@Composable (CategoryId) -> Unit)? = null
 ) {
-    // Corvus anchor positions (real star coordinates, normalized).
-    // The quadrilateral sits in the upper-center of the canvas.
-    val corvusAnchors = remember {
+    // Ursa Minor anchor positions (real star coordinates, normalized).
+    // Polaris sits top-left; the handle curves down-right into the bowl.
+    val ursaMinorAnchors = remember {
         listOf(
-            Offset(0.38f, 0.28f), // Gienah ( brightest)
-            Offset(0.52f, 0.42f), // Kraz
-            Offset(0.34f, 0.48f), // Algorab
-            Offset(0.44f, 0.58f)  // Minkar
+            Offset(0.28f, 0.20f), // Polaris — the Pole Star (α UMi)
+            Offset(0.36f, 0.32f), // η UMi — first handle star
+            Offset(0.42f, 0.40f), // ζ UMi — second handle star
+            Offset(0.50f, 0.48f), // δ UMi — third handle star (bowl junction)
+            Offset(0.58f, 0.38f), // ε UMi — bowl top-right
+            Offset(0.66f, 0.50f), // β UMi — Kochab (bright bowl star)
+            Offset(0.54f, 0.58f)  // γ UMi — Pherkad (bowl bottom)
         )
     }
 
     // Lane star positions: explored lanes get deterministic spots scattered
-    // around the Corvus pattern. Unexplored lanes are not shown.
+    // around the Ursa Minor pattern. Unexplored lanes are not shown.
     val nodes = remember(explored) {
         explored.map { id ->
-            id to randomAroundCorvus(Random(id.name.hashCode()))
+            id to randomAroundUrsaMinor(Random(id.name.hashCode()))
         }
     }
 
@@ -90,15 +94,14 @@ fun CurioConstellation(
 
     // Theme-aware colors.
     val isDark = isCurioDarkTheme()
-    val linkColor = if (isDark) Color(0xFF5A7A9A).copy(alpha = 0.22f)
-                    else Color(0xFF4A6A88).copy(alpha = 0.30f)
-    val anchorColor = if (isDark) Color(0xFFD8E4F0).copy(alpha = 0.70f)
-                      else Color(0xFF607888).copy(alpha = 0.55f)
-    val bgStarColor = if (isDark) Color(0xFF8899AA).copy(alpha = 0.25f)
-                      else Color(0xFF8899AA).copy(alpha = 0.18f)
-    val nebulaCenter = if (isDark) Color(0xFF1A1040).copy(alpha = 0.35f)
-                       else Color(0xFFD8CCE8).copy(alpha = 0.12f)
-    val nebulaEdge = Color.Transparent
+    val linkColor = if (isDark) Color(0xFF6B8CAA).copy(alpha = 0.18f)
+                    else Color(0xFF5A7898).copy(alpha = 0.25f)
+    val anchorColor = if (isDark) Color(0xFFD8E8F8).copy(alpha = 0.80f)
+                      else Color(0xFF7090B0).copy(alpha = 0.65f)
+    val polarisColor = if (isDark) Color(0xFFFFF8E8).copy(alpha = 0.95f)
+                       else Color(0xFFD0A848).copy(alpha = 0.80f)
+    val bgStarColor = if (isDark) Color(0xFF8899BB).copy(alpha = 0.22f)
+                      else Color(0xFF8899BB).copy(alpha = 0.15f)
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -123,35 +126,156 @@ fun CurioConstellation(
             val w = size.width
             val h = size.height
 
-            // ── Space background: faint radial nebula ──────────────────
+            // ── Galaxy background: layered nebula washes ───────────
+            // Deep space base: dark radial gradient from center.
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(nebulaCenter, nebulaEdge),
-                    center = Offset(w * 0.45f, h * 0.42f),
-                    radius = w * 0.7f
+                    colors = listOf(
+                        Color(0xFF1A0E3A).copy(alpha = if (isDark) 0.65f else 0.35f),
+                        Color.Transparent
+                    ),
+                    center = Offset(w * 0.40f, h * 0.38f),
+                    radius = w * 0.8f
                 ),
-                radius = w * 0.7f,
-                center = Offset(w * 0.45f, h * 0.42f)
+                radius = w * 0.8f,
+                center = Offset(w * 0.40f, h * 0.38f)
             )
 
-            // ── Background stars: tiny dim points for depth ────────────
-            bgStars.forEach { s ->
-                drawCircle(
-                    color = bgStarColor,
-                    radius = s.second.dp.toPx(),
-                    center = Offset(s.first.x * w, s.first.y * h)
+            // Purple nebula cloud.
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF6B2FA0).copy(alpha = if (isDark) 0.22f else 0.12f),
+                        Color.Transparent
+                    ),
+                    center = Offset(w * 0.55f, h * 0.50f),
+                    radius = w * 0.55f
+                ),
+                radius = w * 0.55f,
+                center = Offset(w * 0.55f, h * 0.50f)
+            )
+
+            // Teal-blue nebula cloud.
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF1A6090).copy(alpha = if (isDark) 0.20f else 0.10f),
+                        Color.Transparent
+                    ),
+                    center = Offset(w * 0.30f, h * 0.65f),
+                    radius = w * 0.50f
+                ),
+                radius = w * 0.50f,
+                center = Offset(w * 0.30f, h * 0.65f)
+            )
+
+            // Warm magenta accent cloud.
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFA03070).copy(alpha = if (isDark) 0.16f else 0.08f),
+                        Color.Transparent
+                    ),
+                    center = Offset(w * 0.70f, h * 0.30f),
+                    radius = w * 0.40f
+                ),
+                radius = w * 0.40f,
+                center = Offset(w * 0.70f, h * 0.30f)
+            )
+
+            // Faint gold dust near Polaris.
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFB89040).copy(alpha = if (isDark) 0.10f else 0.05f),
+                        Color.Transparent
+                    ),
+                    center = Offset(w * 0.28f, h * 0.20f),
+                    radius = w * 0.25f
+                ),
+                radius = w * 0.25f,
+                center = Offset(w * 0.28f, h * 0.20f)
+            )
+
+            // ── Light-mode edge blend: soften galaxy into page bg ──
+            if (!isDark) {
+                // Top edge fade.
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.70f),
+                            Color.Transparent
+                        ),
+                        startY = 0f,
+                        endY = h * 0.18f
+                    ),
+                    topLeft = Offset(0f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w, h * 0.18f)
+                )
+                // Bottom edge fade.
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.70f)
+                        ),
+                        startY = h * 0.82f,
+                        endY = h
+                    ),
+                    topLeft = Offset(0f, h * 0.82f),
+                    size = androidx.compose.ui.geometry.Size(w, h * 0.18f)
+                )
+                // Left edge fade.
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.55f),
+                            Color.Transparent
+                        ),
+                        startX = 0f,
+                        endX = w * 0.12f
+                    ),
+                    topLeft = Offset(0f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w * 0.12f, h)
+                )
+                // Right edge fade.
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.55f)
+                        ),
+                        startX = w * 0.88f,
+                        endX = w
+                    ),
+                    topLeft = Offset(w * 0.88f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w * 0.12f, h)
                 )
             }
 
-            // ── Corvus constellation lines: gossamer thin ──────────────
-            // The four edges of the quadrilateral.
-            val anchorPx = corvusAnchors.map { Offset(it.x * w, it.y * h) }
-            val corvusEdges = listOf(0 to 1, 1 to 2, 2 to 3, 3 to 0)
-            corvusEdges.forEach { (a, b) ->
+            // ── Background stars: tiny star glyphs for depth ────────
+            bgStars.forEach { s ->
+                drawStar(
+                    center = Offset(s.first.x * w, s.first.y * h),
+                    outerRadius = s.second.dp.toPx(),
+                    color = bgStarColor,
+                    alpha = bgStarColor.alpha
+                )
+            }
+
+            // ── Ursa Minor constellation lines: gossamer thin ──────
+            // Handle: Polaris → η → ζ → δ (bowl junction)
+            // Bowl: δ → ε → β → γ → δ (closing the quadrilateral)
+            val anchorPx = ursaMinorAnchors.map { Offset(it.x * w, it.y * h) }
+            val ursaEdges = listOf(
+                0 to 1, 1 to 2, 2 to 3,  // handle
+                3 to 4, 4 to 5, 5 to 6, 6 to 3  // bowl
+            )
+            ursaEdges.forEach { (a, b) ->
                 drawGossamerLink(anchorPx[a], anchorPx[b], linkColor, 0.8.dp.toPx())
             }
 
-            // ── Lane-to-nearest-anchor links: faint connection ──────────
+            // ── Lane-to-nearest-anchor links: faint connection ──────
             val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
             pts.forEach { p ->
                 val nearestAnchor = anchorPx.minByOrNull { sqDist(p, it) }
@@ -160,7 +284,7 @@ fun CurioConstellation(
                 }
             }
 
-            // ── Lane-to-nearest-lane links: sparse web ─────────────────
+            // ── Lane-to-nearest-lane links: sparse web ─────────────
             val drawn = mutableSetOf<Pair<Int, Int>>()
             pts.forEachIndexed { i, pi ->
                 val nearest = pts.indices
@@ -174,29 +298,54 @@ fun CurioConstellation(
                 }
             }
 
-            // ── Corvus anchor stars: slightly larger, neutral bright ───
-            anchorPx.forEach { p ->
+            // ── Polaris: the Pole Star — prominent, warm glow ───────
+            val polaris = anchorPx[0]
+            // Warm golden halo.
+            drawStar(
+                center = polaris,
+                outerRadius = 10.dp.toPx(),
+                color = polarisColor.copy(alpha = 0.20f),
+                alpha = 0.20f
+            )
+            // Core star.
+            drawStar(
+                center = polaris,
+                outerRadius = 4.5.dp.toPx(),
+                color = polarisColor,
+                alpha = polarisColor.alpha
+            )
+            // Bright center point.
+            drawCircle(
+                color = Color.White.copy(alpha = 0.95f),
+                radius = 1.5.dp.toPx(),
+                center = polaris
+            )
+
+            // ── Ursa Minor anchor stars: slightly smaller, cool ─────
+            anchorPx.drop(1).forEach { p ->
                 // Soft outer halo.
-                drawCircle(
-                    color = anchorColor.copy(alpha = 0.12f),
-                    radius = 8.dp.toPx(),
-                    center = p
+                drawStar(
+                    center = p,
+                    outerRadius = 7.dp.toPx(),
+                    color = anchorColor.copy(alpha = 0.14f),
+                    alpha = 0.14f
                 )
                 // Core star.
-                drawCircle(
+                drawStar(
+                    center = p,
+                    outerRadius = 3.dp.toPx(),
                     color = anchorColor,
-                    radius = 3.dp.toPx(),
-                    center = p
+                    alpha = anchorColor.alpha
                 )
                 // Tiny bright center.
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.90f),
-                    radius = 1.2.dp.toPx(),
+                    color = Color.White.copy(alpha = 0.88f),
+                    radius = 1.0.dp.toPx(),
                     center = p
                 )
             }
 
-            // ── Lane stars: category-accent colored, sized by knowledge ─
+            // ── Lane stars: category-accent colored, star shapes ────
             nodes.forEachIndexed { i, (id, n) ->
                 val p = pts[i]
                 val accent = accents[id] ?: Color(0xFF7FAFD8)
@@ -211,13 +360,20 @@ fun CurioConstellation(
                 // Soft accent halo — larger when recently active or selected.
                 val haloAlpha = if (recent || isSel) 0.18f else 0.08f
                 val haloScale = if (recent || isSel) 2.2f else 1.8f
-                drawCircle(
+                // Star halo.
+                drawStar(
+                    center = p,
+                    outerRadius = r * haloScale,
                     color = accent.copy(alpha = haloAlpha),
-                    radius = r * haloScale,
-                    center = p
+                    alpha = haloAlpha
                 )
                 // Star core.
-                drawCircle(color = accent, radius = r, center = p)
+                drawStar(
+                    center = p,
+                    outerRadius = r,
+                    color = accent,
+                    alpha = accent.alpha
+                )
                 // Bright center point.
                 drawCircle(
                     color = Color.White.copy(alpha = 0.85f),
@@ -227,7 +383,7 @@ fun CurioConstellation(
             }
         }
 
-        // ── Floating popover for selected star ─────────────────────────
+        // ── Floating popover for selected star ─────────────────────
         val selId = selected
         val selNode = selId?.let { id -> nodes.firstOrNull { (nid, _) -> nid == id } }
         if (popoverContent != null && selNode != null) {
@@ -264,22 +420,22 @@ fun CurioConstellation(
     }
 }
 
-// ── Corvus geometry ───────────────────────────────────────────────────
+// ── Ursa Minor geometry ──────────────────────────────────────────────
 
 /**
- * Deterministic position for a lane star, scattered around the Corvus
+ * Deterministic position for a lane star, scattered around the Ursa Minor
  * constellation. The star lands in a ring around the constellation center
  * with some angular variance — close enough to feel part of the pattern,
  * far enough to not overlap the anchor stars.
  */
-private fun randomAroundCorvus(rnd: Random): Offset {
-    // Corvus center: average of the four anchor positions.
-    val cx = 0.42f
-    val cy = 0.44f
+private fun randomAroundUrsaMinor(rnd: Random): Offset {
+    // Ursa Minor center: average of the seven anchor positions.
+    val cx = 0.45f
+    val cy = 0.40f
     val angle = rnd.nextFloat() * PI.toFloat() * 2f
     val dist = 0.12f + rnd.nextFloat() * 0.22f // 12–34% from center
     val x = cx + cos(angle) * dist
-    val y = cy + kotlin.math.sin(angle) * dist * 0.8f // slightly squished vertically
+    val y = cy + sin(angle) * dist * 0.8f // slightly squished vertically
     return Offset(x.coerceIn(0.06f, 0.94f), y.coerceIn(0.06f, 0.94f))
 }
 
@@ -307,9 +463,33 @@ private fun sqDist(a: Offset, b: Offset): Float {
 private fun norm(i: Int, j: Int): Pair<Int, Int> = if (i < j) i to j else j to i
 
 /**
+ * A 4-pointed star shape — the classic twinkling-star glyph.
+ * Four points extend outward at 0°, 90°, 180°, 270° with an
+ * inner radius at 45° offsets for the characteristic diamond-star look.
+ */
+private fun DrawScope.drawStar(
+    center: Offset,
+    outerRadius: Float,
+    color: Color,
+    alpha: Float = 1f
+) {
+    val innerRadius = outerRadius * 0.38f
+    val path = Path()
+    for (i in 0 until 8) {
+        val angle = (i * PI / 4.0).toFloat() - (PI / 2.0).toFloat()
+        val r = if (i % 2 == 0) outerRadius else innerRadius
+        val px = center.x + cos(angle) * r
+        val py = center.y + sin(angle) * r
+        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+    }
+    path.close()
+    drawPath(path, color, alpha = alpha)
+}
+
+/**
  * A gossamer constellation link — a thin, faint line between two stars.
- * Much thinner and more transparent than the old neural-web links, so
- * the constellation reads as a star chart, not a circuit board.
+ * Much thinner and more transparent than old neural-web links, so the
+ * constellation reads as a star chart, not a circuit board.
  */
 private fun DrawScope.drawGossamerLink(
     from: Offset,
