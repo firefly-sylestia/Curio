@@ -242,10 +242,18 @@ class ExploreSessionService : Service() {
         // where canDrawOverlays() returns true but the overlay is silently
         // never shown. Treating that as not granted keeps the notification
         // path honest and lets the permission prompts re-ask.
-        val bubbleWanted = AppPreferences.isOverlayBubbleEnabled(this) &&
-            AppPreferences.overlayActuallyUsable(this) &&
-            !session.pillHidden
-        if (!liveNotif && !bubbleWanted) return stopQuietly()
+        // The bubble is visually hidden when the user taps Hide (pillHidden)
+        // or when the overlay permission is missing/disabled. But hiding the
+        // bubble must NOT kill the notification — the two are independent.
+        // The bubble is *usable* when the overlay permission is available;
+        // whether it's actually shown depends on pillHidden.
+        val bubbleUsable = AppPreferences.isOverlayBubbleEnabled(this) &&
+            AppPreferences.overlayActuallyUsable(this)
+        val bubbleWanted = bubbleUsable && !session.pillHidden
+        // Only stop the service when BOTH the live notification AND the
+        // bubble's overlay are genuinely unavailable — hiding the bubble
+        // (pillHidden) should leave the notification running.
+        if (!liveNotif && !bubbleUsable) return stopQuietly()
 
         promote(if (liveNotif) liveNotification(session) else bubbleOnlyNotification(session))
         if (bubbleWanted) showBubble() else removeBubble()
