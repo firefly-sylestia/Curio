@@ -93,11 +93,11 @@ fun CurioConstellation(
     val linkColor = if (isDark) Color(0xFF6B8CAA).copy(alpha = 0.18f)
                     else Color(0xFF5A7898).copy(alpha = 0.25f)
     val anchorColor = if (isDark) Color(0xFFD8E8F8).copy(alpha = 0.80f)
-                      else Color(0xFF7090B0).copy(alpha = 0.65f)
+                      else Color(0xFF506878).copy(alpha = 0.90f)
     val polarisColor = if (isDark) Color(0xFFFFF8E8).copy(alpha = 0.95f)
-                       else Color(0xFFD0A848).copy(alpha = 0.80f)
+                       else Color(0xFFB08830).copy(alpha = 0.90f)
     val bgStarColor = if (isDark) Color(0xFF8899BB).copy(alpha = 0.22f)
-                      else Color(0xFF8899BB).copy(alpha = 0.15f)
+                      else Color(0xFF607080).copy(alpha = 0.35f)
     // Page background for light-mode edge blending (hoisted from Canvas).
     val pageBg = MaterialTheme.colorScheme.background
 
@@ -129,7 +129,7 @@ fun CurioConstellation(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF1A0E3A).copy(alpha = if (isDark) 0.65f else 0.35f),
+                        Color(0xFF1A0E3A).copy(alpha = if (isDark) 0.65f else 0.55f),
                         Color.Transparent
                     ),
                     center = Offset(w * 0.40f, h * 0.38f),
@@ -143,7 +143,7 @@ fun CurioConstellation(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF6B2FA0).copy(alpha = if (isDark) 0.22f else 0.12f),
+                        Color(0xFF6B2FA0).copy(alpha = if (isDark) 0.22f else 0.20f),
                         Color.Transparent
                     ),
                     center = Offset(w * 0.55f, h * 0.50f),
@@ -157,7 +157,7 @@ fun CurioConstellation(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF1A6090).copy(alpha = if (isDark) 0.20f else 0.10f),
+                        Color(0xFF1A6090).copy(alpha = if (isDark) 0.20f else 0.18f),
                         Color.Transparent
                     ),
                     center = Offset(w * 0.30f, h * 0.65f),
@@ -171,7 +171,7 @@ fun CurioConstellation(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFFA03070).copy(alpha = if (isDark) 0.16f else 0.08f),
+                        Color(0xFFA03070).copy(alpha = if (isDark) 0.16f else 0.14f),
                         Color.Transparent
                     ),
                     center = Offset(w * 0.70f, h * 0.30f),
@@ -185,7 +185,7 @@ fun CurioConstellation(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFFB89040).copy(alpha = if (isDark) 0.10f else 0.05f),
+                        Color(0xFFB89040).copy(alpha = if (isDark) 0.10f else 0.08f),
                         Color.Transparent
                     ),
                     center = Offset(w * 0.28f, h * 0.20f),
@@ -197,57 +197,57 @@ fun CurioConstellation(
 
             // ── Light-mode edge blend: soften galaxy into page bg ──
             if (!isDark) {
-                // Top edge fade.
+                // Top edge fade — gentle, just enough to blend into the page.
                 drawRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            pageBg.copy(alpha = 0.70f),
+                            pageBg.copy(alpha = 0.45f),
                             Color.Transparent
                         ),
                         startY = 0f,
-                        endY = h * 0.18f
+                        endY = h * 0.14f
                     ),
                     topLeft = Offset(0f, 0f),
-                    size = androidx.compose.ui.geometry.Size(w, h * 0.18f)
+                    size = androidx.compose.ui.geometry.Size(w, h * 0.14f)
                 )
                 // Bottom edge fade.
                 drawRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            pageBg.copy(alpha = 0.70f)
+                            pageBg.copy(alpha = 0.45f)
                         ),
-                        startY = h * 0.82f,
+                        startY = h * 0.86f,
                         endY = h
                     ),
-                    topLeft = Offset(0f, h * 0.82f),
-                    size = androidx.compose.ui.geometry.Size(w, h * 0.18f)
+                    topLeft = Offset(0f, h * 0.86f),
+                    size = androidx.compose.ui.geometry.Size(w, h * 0.14f)
                 )
                 // Left edge fade.
                 drawRect(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            pageBg.copy(alpha = 0.55f),
+                            pageBg.copy(alpha = 0.35f),
                             Color.Transparent
                         ),
                         startX = 0f,
-                        endX = w * 0.12f
+                        endX = w * 0.10f
                     ),
                     topLeft = Offset(0f, 0f),
-                    size = androidx.compose.ui.geometry.Size(w * 0.12f, h)
+                    size = androidx.compose.ui.geometry.Size(w * 0.10f, h)
                 )
                 // Right edge fade.
                 drawRect(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            pageBg.copy(alpha = 0.55f)
+                            pageBg.copy(alpha = 0.35f)
                         ),
-                        startX = w * 0.88f,
+                        startX = w * 0.90f,
                         endX = w
                     ),
-                    topLeft = Offset(w * 0.88f, 0f),
-                    size = androidx.compose.ui.geometry.Size(w * 0.12f, h)
+                    topLeft = Offset(w * 0.90f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w * 0.10f, h)
                 )
             }
 
@@ -367,7 +367,7 @@ fun CurioConstellation(
             // constellation — white/blue-white like the anchor stars,
             // not colorful category accents.
             val laneStarColor = if (isDark) Color(0xFFD0E0F8)
-                               else Color(0xFF6080A0)
+                               else Color(0xFF405870)
             nodes.forEachIndexed { i, (id, n) ->
                 val p = pts[i]
                 val count = laneCounts[id] ?: 0
