@@ -450,7 +450,6 @@ private fun StatsConstellationCard(
             }
         }
     }
-}
 
 /** v208 — the BRAIN PROFILE card: six real cognitive dimensions scored
  *  from actual activity (knowledge, memory, expression, focus, consistency,
