@@ -266,6 +266,12 @@ export const SettingsScreen: React.FC = () => {
             </div>
           </div>
           <div className="mb-6">
+            <CurioSectionHeader title="Categories" />
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+              <SettingsItem icon="category" title="Manage Categories" description="Show, hide and reorder" onClick={() => navigate('/manage-categories')} />
+            </div>
+          </div>
+          <div className="mb-6">
             <CurioSectionHeader title="Experiments" />
             <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
               <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-nav-pill') === 'true'} onChange={(v) => localStorage.setItem('curio-nav-pill', v ? 'true' : 'false')} label="Nav-style buttons" description="Categories wear the floating pill look" /></div>
