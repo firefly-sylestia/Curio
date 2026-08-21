@@ -1,5 +1,6 @@
 // Curio Web App - Profile Screen
 // Matches Android: torn rose hero (same seed as Home), watermark collage, stats + achievements
+// v2 — edge-to-edge constellation section, lifetime totals with Favorites
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +16,7 @@ import {
   MaterialIcon,
 } from '../components/SharedComponents';
 import { TornHero, PROFILE_HERO_SYMBOLS } from '../components/TornHero';
+import { Constellation } from '../components/Constellation';
 import { ScreenEntrance } from '../animations';
 
 const PROFILE_HERO_HEIGHT = 220;
@@ -78,6 +80,18 @@ const PetDisplay: React.FC<{ pet: any }> = ({ pet }) => {
   );
 };
 
+/** Count favorites from localStorage keys: curio-fav-{cat}-{topicId} = 'true' */
+const countFavorites = (): number => {
+  let count = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('curio-fav-') && localStorage.getItem(key) === 'true') {
+      count++;
+    }
+  }
+  return count;
+};
+
 export const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const { isDark, isAmoled } = useTheme();
@@ -88,6 +102,7 @@ export const ProfileScreen: React.FC = () => {
   const [pet, setPet] = useState<any>(null);
   const [achievements, setAchievements] = useState<any[]>([]);
   const [xpToNext, setXpToNext] = useState(100);
+  const [favoriteCount, setFavoriteCount] = useState(0);
 
   useEffect(() => {
     const qs = questSystem.getState();
@@ -100,6 +115,7 @@ export const ProfileScreen: React.FC = () => {
     });
     setXpToNext((questSystem.getLevel() || 1) * 100);
     setPet(petSystem.getState());
+    setFavoriteCount(countFavorites());
     setAchievements([
       { id: 'first_entry', title: 'First Entry', description: 'Save your first entry', icon: 'edit_note', unlocked: (qs.lifetime?.saves || 0) >= 1 },
       { id: 'streak_3', title: 'On Fire', description: 'Maintain a 3-day streak', icon: 'local_fire_department', unlocked: (qs.bestStreak || 0) >= 3 },
@@ -112,6 +128,8 @@ export const ProfileScreen: React.FC = () => {
   }, [questSystem, petSystem]);
 
   const levelProgress = (stats.xp % xpToNext) / xpToNext * 100;
+
+  const lifetime = questSystem.getState().lifetime;
 
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
@@ -154,9 +172,9 @@ export const ProfileScreen: React.FC = () => {
       </TornHero>
 
       <ScreenEntrance>
-        <div className="relative z-10 px-4">
+        <div className="relative z-10">
           {/* Stats grid */}
-          <div className="mb-6">
+          <div className="px-4 mb-6">
             <CurioSectionHeader title="Your Stats" />
             <div className="grid grid-cols-2 gap-3">
               <CurioStatCard label="Total Entries" value={stats.totalEntries} icon="edit_note" color="#4338CA" />
@@ -166,14 +184,40 @@ export const ProfileScreen: React.FC = () => {
             </div>
           </div>
 
+          {/* ── Edge-to-edge constellation — full-width deep-space sky ── */}
+          <div className="mb-6 overflow-hidden" style={{ margin: '0 -0px', marginBottom: '24px' }}>
+            <div className="px-4 mb-2">
+              <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Your Constellation</h3>
+              <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>Every star is a lane you've explored</p>
+            </div>
+            <Constellation isDark={isDark} />
+          </div>
+
+          {/* ── Lifetime totals — matches Android's LifetimeTotalsCard ── */}
+          <div className="px-4 mb-6">
+            <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+              <h3 className="text-base font-extrabold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Lifetime totals</h3>
+              <p className="text-xs mb-3" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>Everything your curiosity has collected</p>
+              <div className="grid grid-cols-2 gap-2">
+                <LifetimeStatItem icon="auto_awesome" label="Spins" value={lifetime.spins} color="#9B7BB8" />
+                <LifetimeStatItem icon="travel_explore" label="Explores" value={lifetime.explores} color="#7FA0C8" />
+                <LifetimeStatItem icon="bookmark" label="Saved" value={lifetime.saves} color="#B98A5E" />
+                <LifetimeStatItem icon="format_quote" label="Quotes" value={lifetime.quotes} color="#7FA0C8" />
+                <LifetimeStatItem icon="push_pin" label="Pins" value={lifetime.pins} color="#C96F4A" />
+                <LifetimeStatItem icon="star" label="Favorites" value={favoriteCount} color="#D9A85C" />
+                <LifetimeStatItem icon="task_alt" label="Daily quests" value={lifetime.dailyCompleted} color="#7F9B6E" />
+              </div>
+            </div>
+          </div>
+
           {/* Pet */}
-          <div className="mb-6">
+          <div className="px-4 mb-6">
             <CurioSectionHeader title="Your Companion" action="Customize" onAction={() => navigate('/pet-designer')} />
             <PetDisplay pet={pet} />
           </div>
 
           {/* Achievements */}
-          <div className="mb-6">
+          <div className="px-4 mb-6">
             <CurioSectionHeader title="Achievements"
               action={`${achievements.filter(a => a.unlocked).length}/${achievements.length}`} />
             <div className="space-y-3">
@@ -184,7 +228,7 @@ export const ProfileScreen: React.FC = () => {
           </div>
 
           {/* Level progress */}
-          <div className="mb-6">
+          <div className="px-4 mb-6">
             <CurioSectionHeader title="Level Progress" />
             <div className="p-4 rounded-2xl" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
               <div className="flex items-center justify-between mb-2">
@@ -198,6 +242,26 @@ export const ProfileScreen: React.FC = () => {
           </div>
         </div>
       </ScreenEntrance>
+    </div>
+  );
+};
+
+/** Single lifetime stat tile — icon + label + count, matching Android's rounded row */
+const LifetimeStatItem: React.FC<{
+  icon: string; label: string; value: number; color: string;
+}> = ({ icon, label, value, color }) => {
+  const { isDark } = useTheme();
+  return (
+    <div className="flex items-center gap-2.5 p-2.5 rounded-xl"
+      style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.025)' }}>
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: `${color}20` }}>
+        <MaterialIcon name={icon} size={17} style={{ color }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(59,10,23,0.5)' }}>{label}</p>
+        <p className="text-sm font-extrabold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>{value}</p>
+      </div>
     </div>
   );
 };

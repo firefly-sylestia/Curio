@@ -1,0 +1,1222 @@
+[
+ {
+  "id": "psychology-cognitive-dissonance",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Cognitive Dissonance",
+  "teaser": "The discomfort of holding two contradictory beliefs: 'I'm smart' + 'I made a stupid choice' = mental tension. We reduce it by changing beliefs, justifying behavior, or ignoring evidence.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "cognition",
+   "motivation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How cognitive dissonance works",
+   "durationMinutes": 7,
+   "instruction": "Learn about Festinger's classic experiment (paid $1 vs $20 to lie), then find one example of cognitive dissonance in your own life."
+  }
+ },
+ {
+  "id": "psychology-maslow-hierarchy",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Maslow's Hierarchy of Needs",
+  "teaser": "Physiological, safety, love, esteem, self-actualization: Maslow's pyramid says you can't pursue higher needs until lower ones are met. Simple, intuitive — and probably wrong in its strict ordering.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "humanistic"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Maslow's hierarchy and its criticisms",
+   "durationMinutes": 7,
+   "instruction": "Learn Maslow's five levels, then find one counterexample (artists creating while hungry) and explain the criticism."
+  }
+ },
+ {
+  "id": "psychology-classical-conditioning",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Classical Conditioning",
+  "teaser": "Pavlov's dogs learned to salivate at a bell: pairing a neutral stimulus with food creates automatic associations. Classical conditioning explains phobias, brand loyalty, and why certain songs make you cry.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "learning",
+   "Pavlov"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Pavlov's experiment and its applications",
+   "durationMinutes": 7,
+   "instruction": "Learn the components of classical conditioning (UCS, UCR, CS, CR), then find one everyday example of classical conditioning."
+  }
+ },
+ {
+  "id": "psychology-operant-conditioning",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Operant Conditioning",
+  "teaser": "Skinner's boxes taught us that behavior is shaped by consequences: rewards increase behavior; punishments decrease it. From slot machines to school grades, operant conditioning runs the world.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "learning",
+   "Skinner"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How rewards and punishments shape behavior",
+   "durationMinutes": 8,
+   "instruction": "Learn about positive/negative reinforcement and punishment, then find one example of variable ratio reinforcement (the most addictive schedule)."
+  }
+ },
+ {
+  "id": "psychology-attachment-theory",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Attachment Theory",
+  "teaser": "John Bowlby's idea that early bonds with caregivers shape lifelong relationship patterns. Secure, anxious, avoidant — your attachment style influences who you love and how you love them.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "development",
+   "relationships"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The four attachment styles",
+   "durationMinutes": 8,
+   "instruction": "Learn about secure, anxious-preoccupied, dismissive-avoidant, and fearful-avoidant attachment, then consider which style resonates with your own patterns."
+  }
+ },
+ {
+  "id": "psychology-stanford-prison",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "The Stanford Prison Experiment",
+  "teaser": "In 1971, college students became guards and prisoners in a simulated prison — and the guards became sadistic within days. The experiment was stopped after 6 days, revealing how quickly roles corrupt.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "ethics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What the Stanford Prison Experiment revealed",
+   "durationMinutes": 8,
+   "instruction": "Learn about Zimbardo's experiment and its ethical criticisms, then explain what it reveals about situational power."
+  }
+ },
+ {
+  "id": "psychology-milgram-obedience",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Milgram's Obedience Experiment",
+  "teaser": "65% of participants administered what they believed were lethal electric shocks when told to by an authority figure. Milgram showed that ordinary people can commit atrocities — just by following orders.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "obedience"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why people obey authority",
+   "durationMinutes": 8,
+   "instruction": "Learn about Milgram's experimental setup and results, then explain the 'agentic state' theory for why people obey even against their conscience."
+  }
+ },
+ {
+  "id": "psychology-anchoring-bias",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Anchoring Bias",
+  "teaser": "The first number you see influences every estimate after it: a high starting price makes a discount feel like a deal. Anchoring affects negotiations, medical diagnoses, and sentencing decisions.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "decision-making"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How anchoring distorts judgment",
+   "durationMinutes": 6,
+   "instruction": "Learn about Tversky and Kahneman's wheel-of-fortune experiment, then find one example of anchoring in everyday pricing."
+  }
+ },
+ {
+  "id": "psychology-confirmation-bias",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Confirmation Bias",
+  "teaser": "We see what we want to see: confirmation bias makes us seek information that supports our beliefs and ignore evidence that contradicts them. It's the engine of polarization and the enemy of science.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "thinking"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How confirmation bias works",
+   "durationMinutes": 6,
+   "instruction": "Learn about the Wason selection task and how it demonstrates confirmation bias, then find one area of your life where you might be biased."
+  }
+ },
+ {
+  "id": "psychology-availability-heuristic",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Availability Heuristic",
+  "teaser": "We judge frequency by ease of recall: plane crashes feel more common than car accidents because they're more memorable. The availability heuristic makes us fear dramatic risks and ignore mundane ones.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "judgment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we overweight vivid events",
+   "durationMinutes": 6,
+   "instruction": "Learn about Tversky and Kahneman's availability heuristic, then find three risks that feel more dangerous than statistics suggest."
+  }
+ },
+ {
+  "id": "psychology-dunning-kruger",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Dunning-Kruger Effect",
+  "teaser": "Incompetent people overestimate their ability; experts underestimate theirs. The less you know, the less you know what you don't know — creating a confidence curve that peaks at incompetence.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "metacognition",
+   "bias"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Dunning-Kruger effect and its limits",
+   "durationMinutes": 7,
+   "instruction": "Learn about the original study and the statistical criticisms, then find one domain where you might be overconfident."
+  }
+ },
+ {
+  "id": "psychology-learned-helplessness",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Learned Helplessness",
+  "teaser": "Seligman's dogs stopped trying to escape shocks they couldn't control. Humans do the same: repeated failure teaches us to stop trying — even when the situation changes and escape is possible.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "depression"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How learned helplessness develops",
+   "durationMinutes": 7,
+   "instruction": "Learn about Seligman's original experiment and its human applications, then explain how learned helplessness relates to depression."
+  }
+ },
+ {
+  "id": "psychology-bystander-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Bystander Effect",
+  "teaser": "Kitty Genovese was murdered while 38 neighbors watched and did nothing. The bystander effect: the more people present, the less likely any individual helps. Diffusion of responsibility kills.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "helping"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why people don't help in groups",
+   "durationMinutes": 7,
+   "instruction": "Learn about diffusion of responsibility and social influence, then find one way to overcome the bystander effect in an emergency."
+  }
+ },
+ {
+  "id": "psychology-halo-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Halo Effect",
+  "teaser": "Attractive people are rated as smarter, kinder, and more competent. The halo effect spreads one positive impression to unrelated judgments — which is why first appearances deceive.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "impression"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the halo effect distorts judgment",
+   "durationMinutes": 6,
+   "instruction": "Learn about Thorndike's original study, then find three contexts where the halo effect influences decisions (hiring, elections, courtroom)."
+  }
+ },
+ {
+  "id": "psychology-ego-depletion",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Ego Depletion",
+  "teaser": "Willpower is a limited resource: resisting cookies makes you worse at solving puzzles. Baumeister's ego depletion theory suggests self-control is like a muscle — it fatigues with use.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "self-control",
+   "motivation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The ego depletion debate",
+   "durationMinutes": 7,
+   "instruction": "Learn about the cookie-and-puzzle experiment, then explain why the replication crisis has challenged ego depletion."
+  }
+ },
+ {
+  "id": "psychology-placebo-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Placebo Effect",
+  "teaser": "Sugar pills relieve pain; saline injections reduce swelling. The placebo effect proves that belief can change biology — your brain manufactures real chemicals in response to expectation.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "belief",
+   "medicine"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the placebo effect works",
+   "durationMinutes": 7,
+   "instruction": "Learn about endorphin release during placebo analgesia, then explain why placebos work even when people know they're placebos (open-label placebos)."
+  }
+ },
+ {
+  "id": "psychology-self-fulfilling-prophecy",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Self-Fulfilling Prophecy",
+  "teaser": "Teachers told students were 'intellectually blooming' — and those students actually improved more. Expectations create reality: what you believe about someone changes how you treat them, which changes how they perform.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "expectation",
+   "social"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Rosenthal effect in classrooms",
+   "durationMinutes": 7,
+   "instruction": "Learn about Rosenthal and Jacobson's Pygmalion study, then find one example of self-fulfilling prophecy in your own experience."
+  }
+ },
+ {
+  "id": "psychology-sunk-cost",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "The Sunk Cost Fallacy",
+  "teaser": "You keep watching a bad movie because you paid for the ticket. Rational thinking says ignore sunk costs — but psychology says we're wired to throw good resources after bad.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "economics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we can't let go of past investments",
+   "durationMinutes": 6,
+   "instruction": "Learn about the Concorde fallacy and the military version (cost overrun justification), then find one sunk cost decision you made recently."
+  }
+ },
+ {
+  "id": "psychology-fundamental-attribution-error",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Fundamental Attribution Error",
+  "teaser": "When someone else fails, it's their character. When you fail, it's the situation. We overattribute others' behavior to personality and our own to circumstances — a bias that poisons relationships.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "attribution",
+   "social"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we judge others more harshly than ourselves",
+   "durationMinutes": 6,
+   "instruction": "Learn about the actor-observer asymmetry, then find one recent situation where you fell into this error."
+  }
+ },
+ {
+  "id": "psychology-stockdale-paradox",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "The Stockdale Paradox",
+  "teaser": "Admiral Stockdale survived 7 years as a POW by combining brutal realism with unwavering faith: confront the worst reality while maintaining conviction that you'll prevail. Optimism without realism is dangerous.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "resilience",
+   "leadership"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Stockdale survived captivity",
+   "durationMinutes": 7,
+   "instruction": "Learn about Stockdale's philosophy (confront the most brutal facts + retain faith), then explain why the optimists in his camp died first."
+  }
+ },
+ {
+  "id": "psychology-ikigai",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Ikigai",
+  "teaser": "The Japanese concept of 'reason for being': the intersection of what you love, what you're good at, what the world needs, and what you can be paid for. It's why some people wake up excited.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "purpose",
+   "well-being"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Finding your ikigai",
+   "durationMinutes": 6,
+   "instruction": "Map the four circles (love, skill, need, pay) for your own life, then find one area where two circles overlap and one where all four do."
+  }
+ },
+ {
+  "id": "psychology-flow-state",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Flow State",
+  "teaser": "Csikszentmihalyi's concept of complete absorption: when challenge matches skill, time vanishes and performance peaks. Athletes, musicians, and programmers all chase this optimal experience.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "optimal-experience",
+   "performance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How to enter flow state",
+   "durationMinutes": 7,
+   "instruction": "Learn Csikszentmihalyi's conditions for flow (clear goals, immediate feedback, challenge-skill balance), then identify one activity that regularly puts you in flow."
+  }
+ },
+ {
+  "id": "psychology-growth-mindset",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Growth Mindset",
+  "teaser": "Carol Dweck's finding that people who believe abilities can be developed (growth mindset) outperform those who believe abilities are fixed (fixed mindset). Praise effort, not talent.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "education"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Growth vs fixed mindset",
+   "durationMinutes": 7,
+   "instruction": "Learn about Dweck's praise experiment (children praised for intelligence vs effort), then consider which mindset you tend toward."
+  }
+ },
+ {
+  "id": "psychology-self-determination-theory",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Self-Determination Theory",
+  "teaser": "Three innate needs drive motivation: autonomy (choice), competence (mastery), and relatedness (connection). When all three are met, people thrive. When any is frustrated, motivation collapses.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "well-being"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The three pillars of intrinsic motivation",
+   "durationMinutes": 7,
+   "instruction": "Learn about autonomy, competence, and relatedness, then find one workplace or school that violates all three and one that supports them."
+  }
+ },
+ {
+  "id": "psychology-positive-psychology",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Positive Psychology",
+  "teaser": "Seligman's shift from studying depression to studying flourishing: what makes life worth living? Gratitude, character strengths, meaning, and engagement — the science of happiness.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "happiness",
+   "well-being"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The PERMA model of well-being",
+   "durationMinutes": 7,
+   "instruction": "Learn about Seligman's PERMA (Positive Emotion, Engagement, Relationships, Meaning, Accomplishment), then rate yourself on each dimension."
+  }
+ },
+ {
+  "id": "psychology-serial-position-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Serial Position Effect",
+  "teaser": "You remember the first and last items in a list best (primacy and recency effects) and forget the middle. This is why opening and closing statements matter in court — and why supermarket shelves are arranged the way they are.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "learning"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Primacy and recency effects",
+   "durationMinutes": 6,
+   "instruction": "Learn about the serial position curve, then find one practical application (speech structure, product placement, study techniques)."
+  }
+ },
+ {
+  "id": "psychology-cognitive-load",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Cognitive Load Theory",
+  "teaser": "Working memory can handle about 4 chunks of information at once. Overload it, and learning fails. Good teachers, designers, and communicators manage cognitive load like engineers manage stress.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "learning",
+   "design"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How to manage cognitive load",
+   "durationMinutes": 6,
+   "instruction": "Learn about intrinsic, extraneous, and germane cognitive load, then find one example of good vs poor cognitive load management in design."
+  }
+ },
+ {
+  "id": "psychology-schizophrenia",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Schizophrenia",
+  "teaser": "Affects 1 in 100 people: hallucinations, delusions, disorganized thinking. Schizophrenia isn't split personality — it's a brain disorder where reality and perception come apart.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "psychosis",
+   "mental-health"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What schizophrenia actually is",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between positive symptoms (hallucinations, delusions) and negative symptoms (flat affect, withdrawal), then explain why early intervention improves outcomes."
+  }
+ },
+ {
+  "id": "psychology-trauma-ptsd",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Post-Traumatic Stress Disorder",
+  "teaser": "After trauma, the brain can get stuck in survival mode: flashbacks, hypervigilance, avoidance. PTSD isn't weakness — it's the nervous system's alarm system misfiring months or years later.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "trauma",
+   "mental-health"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How PTSD changes the brain",
+   "durationMinutes": 8,
+   "instruction": "Learn about amygdala hyperactivation and hippocampal shrinkage in PTSD, then explain why EMDR and prolonged exposure therapy work."
+  }
+ },
+ {
+  "id": "psychology-memory-reconstruction",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Memory Reconstruction",
+  "teaser": "Memory isn't a video recording: each time you recall an event, you rebuild it — and the reconstruction changes slightly. Elizabeth Loftus proved that memories can be implanted, and eyewitness testimony is unreliable.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "reliability"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How memories are reconstructed",
+   "durationMinutes": 7,
+   "instruction": "Learn about Loftus's misinformation effect and the lost in the mall experiment, then explain why this matters for the justice system."
+  }
+ },
+ {
+  "id": "psychology-stroop-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Stroop Effect",
+  "teaser": "Say the COLOR of the word, not the word itself: when the word 'RED' is printed in blue ink, your brain stutters. The Stroop effect reveals the conflict between automatic reading and controlled color naming.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "attention",
+   "cognition"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Try the Stroop test yourself",
+   "durationMinutes": 5,
+   "instruction": "Find an online Stroop test, try it, and time yourself on congruent vs incongruent trials. Then explain why the interference happens."
+  }
+ },
+ {
+  "id": "psychology-sleep-memory",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Sleep and Memory Consolidation",
+  "teaser": "Your brain replays the day's experiences during sleep: deep sleep consolidates facts; REM sleep integrates them. Pulling an all-nighter before an exam is the worst possible strategy.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "sleep",
+   "memory"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How sleep strengthens memories",
+   "durationMinutes": 7,
+   "instruction": "Learn about sleep spindles and slow-wave sleep's role in memory, then find one study technique that leverages sleep for learning."
+  }
+ },
+ {
+  "id": "psychology-embodied-cognition",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Embodied Cognition",
+  "teaser": "Thinking isn't just in the brain: holding a warm cup makes you judge people as warmer; nodding your head makes ideas seem more true. The body shapes the mind more than we realize.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "cognition",
+   "body"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the body influences thought",
+   "durationMinutes": 7,
+   "instruction": "Learn about Williams and Bargh's warm-cup experiment, then find one example of embodied cognition in daily life."
+  }
+ },
+ {
+  "id": "psychology-conformity",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Asch's Conformity Experiments",
+  "teaser": "75% of participants gave wrong answers to obvious questions when confederates all agreed. Asch proved that social pressure can override even your own eyes — conformity is that powerful.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "conformity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why people conform to groups",
+   "durationMinutes": 7,
+   "instruction": "Learn about Asch's line judgment experiment, then explain the difference between normative and informational social influence."
+  }
+ },
+ {
+  "id": "psychology-emotional-intelligence",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Emotional Intelligence",
+  "teaser": "Knowing your emotions, managing them, reading others, and navigating relationships: Goleman's EI concept argues that emotional skills matter as much as IQ for success in life.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "emotions",
+   "success"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The four components of EI",
+   "durationMinutes": 7,
+   "instruction": "Learn about self-awareness, self-regulation, social awareness, and relationship management, then rate yourself honestly on each."
+  }
+ },
+ {
+  "id": "psychology-paradox-of-choice",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Paradox of Choice",
+  "teaser": "More options don't make us happier — they make us more anxious. Barry Schwartz showed that excessive choice leads to decision paralysis, regret, and lower satisfaction with the choice we make.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "decision-making",
+   "well-being"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why more choice means less happiness",
+   "durationMinutes": 6,
+   "instruction": "Learn about the jam experiment (more jams = fewer purchases), then find one area of your life where too many options cause paralysis."
+  }
+ },
+ {
+  "id": "psychology-optimism-bias",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Optimism Bias",
+  "teaser": "80% of people think they're above average drivers. The optimism bias makes us overestimate good outcomes and underestimate bad ones — which is why insurance exists and why startups fail.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "risk"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we're unrealistically optimistic",
+   "durationMinutes": 6,
+   "instruction": "Learn about Sharot's research on the optimism bias, then find one domain where your optimism might be leading you astray."
+  }
+ },
+ {
+  "id": "psychology-planning-fallacy",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "The Planning Fallacy",
+  "teaser": "We underestimate how long tasks will take — even when we've done them before. The Sydney Opera House took 10 years longer than planned. Boston's Big Dig went 190% over budget. Planning is optimism in disguise.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "planning",
+   "bias"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why projects always take longer than expected",
+   "durationMinutes": 6,
+   "instruction": "Learn about Kahneman's inside/outside view distinction, then find one personal project where you fell victim to the planning fallacy."
+  }
+ },
+ {
+  "id": "psychology-reactance",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Psychological Reactance",
+  "teaser": "Tell someone they can't do something, and they want to do it more: reactance is the boomerang effect of freedom restriction. It explains why prohibition increases desire and why teenagers rebel.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "persuasion"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How reactance drives behavior",
+   "durationMinutes": 6,
+   "instruction": "Learn about Brehm's reactance theory, then find one example where restricting access made something more desirable."
+  }
+ },
+ {
+  "id": "psychology-schemas",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Cognitive Schemas",
+  "teaser": "Mental frameworks that organize knowledge: you have schemas for restaurants, dogs, and social situations. Schemas help you process information quickly — but they also create blind spots and stereotypes.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "cognition",
+   "schemas"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How schemas shape perception",
+   "durationMinutes": 7,
+   "instruction": "Learn about Piaget's schemas (assimilation and accommodation), then find one schema that might be causing you to misinterpret something."
+  }
+ },
+ {
+  "id": "psychology-dark-triad",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "The Dark Triad",
+  "teaser": "Narcissism, Machiavellianism, and psychopathy: three personality traits that overlap in manipulative, self-serving behavior. They're rare but disproportionately concentrated in leadership positions.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "personality",
+   "social"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The three dark personality traits",
+   "durationMinutes": 8,
+   "instruction": "Learn the distinguishing features of each Dark Triad trait, then debate whether these traits are always harmful or sometimes adaptive."
+  }
+ },
+ {
+  "id": "psychology-cognitive-bias-tarjetas",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Survivorship Bias",
+  "teaser": "We study winners and ignore losers: 'College dropouts become billionaires!' ignores the millions who dropped out and didn't. Survivorship bias makes success look easier and failure rarer than they are.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "statistics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How survivorship bias distorts decisions",
+   "durationMinutes": 6,
+   "instruction": "Learn about the WWII bomber armor story (Abraham Wald), then find one example of survivorship bias in business or self-help advice."
+  }
+ },
+ {
+  "id": "psychology-sunk-cost-psychology",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Loss Aversion",
+  "teaser": "Losing $100 hurts twice as much as gaining $100 feels good. Kahneman and Tversky's prospect theory: losses loom larger than gains, which is why we hold losing stocks too long and avoid risky bets.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "economics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How loss aversion shapes decisions",
+   "durationMinutes": 7,
+   "instruction": "Learn about Kahneman and Tversky's prospect theory, then find one example of loss aversion in your own financial decisions."
+  }
+ },
+ {
+  "id": "psychology-sleep-deprivation",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Sleep Deprivation and Cognition",
+  "teaser": "After 17 hours awake, your cognitive performance equals being legally drunk. Sleep deprivation impairs memory, judgment, and emotional regulation — yet 1 in 3 adults don't get enough sleep.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "sleep",
+   "performance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How sleep deprivation affects the brain",
+   "durationMinutes": 7,
+   "instruction": "Learn about the cognitive effects of sleep deprivation (attention, working memory, emotional regulation), then find one strategy for improving sleep quality."
+  }
+ },
+ {
+  "id": "psychology-emotional-contagion",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Emotional Contagion",
+  "teaser": "Emotions spread like viruses: you catch anxiety from anxious friends, happiness from happy ones. Mirror neurons and unconscious mimicry make us emotional chameleons — for better or worse.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "emotions",
+   "social"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How emotions spread between people",
+   "durationMinutes": 6,
+   "instruction": "Learn about Facebook's emotional contagion study, then find one relationship where you notice emotional contagion happening."
+  }
+ },
+ {
+  "id": "psychology-implicit-association",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Implicit Bias",
+  "teaser": "The IAT reveals unconscious associations: most people associate 'male' with 'career' and 'female' with 'family' — even when they consciously reject stereotypes. Your brain has biases your mind doesn't know about.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "bias",
+   "discrimination"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Take the Implicit Association Test",
+   "durationMinutes": 10,
+   "instruction": "Take Harvard's IAT (implicit.harvard.edu), then discuss what the results reveal about unconscious bias and whether the test is reliable."
+  }
+ },
+ {
+  "id": "psychology-self-compassion",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Self-Compassion",
+  "teaser": "Kristin Neff's finding that treating yourself with kindness after failure — instead of self-criticism — actually improves performance and resilience. Self-compassion isn't weakness; it's a skill.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "well-being",
+   "resilience"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The three components of self-compassion",
+   "durationMinutes": 6,
+   "instruction": "Learn about self-kindness, common humanity, and mindfulness, then try a self-compassion exercise after your next mistake."
+  }
+ },
+ {
+  "id": "psychology-misinformation-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Misinformation Effect",
+  "teaser": "Post-event information distorts memory: leading questions, suggestive media, and conversations with others can implant false memories. Elizabeth Loftus proved that what you think you saw may never have happened.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "reliability"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How misinformation distorts memory",
+   "durationMinutes": 7,
+   "instruction": "Learn about Loftus's car accident experiments (how 'smashed' vs 'hit' changes speed estimates), then explain why this matters for eyewitness testimony."
+  }
+ },
+ {
+  "id": "psychology-procrastination",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Why We Procrastinate",
+  "teaser": "Procrastination isn't laziness — it's emotional regulation failure: we avoid unpleasant tasks to feel better now, even though it makes us feel worse later. The present bias defeats future planning.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "self-control"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The psychology of procrastination",
+   "durationMinutes": 7,
+   "instruction": "Learn about temporal discounting and the amygdala-prefrontal cortex conflict, then find one strategy that works for your procrastination pattern."
+  }
+ },
+ {
+  "id": "psychology-decision-fatigue",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Decision Fatigue",
+  "teaser": "After making many decisions, your judgment deteriorates: parole judges grant favorable rulings 65% of the time after breakfast but 0% before lunch. Every decision depletes a finite mental resource.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "decision-making",
+   "willpower"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How decision fatigue affects performance",
+   "durationMinutes": 6,
+   "instruction": "Learn about the parole study and Steve Jobs's uniform strategy, then find one way to reduce decision fatigue in your daily life."
+  }
+ },
+ {
+  "id": "psychology-oxytocin",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Oxytocin: The Bonding Hormone",
+  "teaser": "Oxytocin strengthens social bonds, trust, and empathy — but it also strengthens in-group favoritism and out-group hostility. The 'love hormone' is really the 'trust your tribe' hormone.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "neuroscience",
+   "social"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The complex role of oxytocin",
+   "durationMinutes": 7,
+   "instruction": "Learn about oxytocin's role in pair bonding and trust, then explain why de Dreu's research shows it also increases ethnocentrism."
+  }
+ },
+ {
+  "id": "psychology-mental-models",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Mental Models",
+  "teaser": "Simplified representations of how the world works: first principles thinking, inversion, opportunity cost, circle of competence. Charlie Munger argues that mental models are the most powerful thinking tools.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "thinking",
+   "decision-making"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Key mental models for better thinking",
+   "durationMinutes": 8,
+   "instruction": "Learn three mental models (first principles, inversion, second-order thinking), then apply one to a current decision you're facing."
+  }
+ },
+ {
+  "id": "psychology-gestalt-psychology",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Gestalt Psychology",
+  "teaser": "The whole is greater than the sum of its parts: Gestalt psychologists showed that perception is organized, not mechanical. Proximity, similarity, and closure — your brain creates patterns from chaos.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "perception",
+   "gestalt"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Gestalt principles of visual perception",
+   "durationMinutes": 7,
+   "instruction": "Learn the Gestalt principles (proximity, similarity, closure, continuity), then find three examples of Gestalt design in apps or websites you use."
+  }
+ },
+ {
+  "id": "psychology-habit-loop",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "The Habit Loop",
+  "teaser": "Cue → routine → reward: every habit follows this three-step pattern. Charles Duhigg showed that changing habits means keeping the cue and reward while swapping the routine.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "habits",
+   "behavior"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How to change habits using the loop",
+   "durationMinutes": 7,
+   "instruction": "Identify the cue, routine, and reward of one of your habits, then design a replacement routine that satisfies the same reward."
+  }
+ },
+ {
+  "id": "psychology-fear-conditioning",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Fear Conditioning",
+  "teaser": "Your amygdala learns fear faster than your cortex can think: a single traumatic event can create a lifelong phobia. Fear conditioning is adaptive (avoid predators) but maladaptive (avoid airplanes after turbulence).",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "fear",
+   "learning"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How fears are learned and unlearned",
+   "durationMinutes": 7,
+   "instruction": "Learn about fear conditioning and extinction, then explain why exposure therapy works for phobias."
+  }
+ },
+ {
+  "id": "psychology-social-comparison",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Social Comparison Theory",
+  "teaser": "Festinger's idea that we evaluate ourselves by comparing with others. Upward comparison inspires or demoralizes; downward comparison boosts self-esteem. Social media amplified this ancient tendency into an epidemic.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "self-esteem"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How social comparison affects well-being",
+   "durationMinutes": 6,
+   "instruction": "Learn about upward vs downward social comparison, then find one way social media triggers comparison in your life."
+  }
+ },
+ {
+  "id": "psychology-money-happiness",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Money and Happiness",
+  "teaser": "Kahneman found that happiness plateaus at $75,000/year — but new research shows income continues to help beyond that. Money buys happiness when it buys time, experiences, and freedom from worry.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "happiness",
+   "economics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What research says about money and happiness",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Kahneman plateau finding and Killingsworth's counter-research, then find one way to spend money that increases well-being."
+  }
+ },
+ {
+  "id": "psychology-priming",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Priming Effects",
+  "teaser": "Exposure to one stimulus influences your response to the next: reading 'old' makes you walk slower; seeing money makes you more self-reliant. Priming reveals how unconscious cues shape behavior.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "cognition",
+   "unconscious"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How priming shapes behavior",
+   "durationMinutes": 7,
+   "instruction": "Learn about Bargh's elderly walking study and the replication controversies, then find one example of priming in advertising."
+  }
+ },
+ {
+  "id": "psychology-crowd-psychology",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Crowd Psychology",
+  "teaser": "In a crowd, individuals lose self-awareness and become susceptible to collective emotion: Le Bon argued that crowds are irrational. Modern research shows the truth is more nuanced — crowds can be wise or dangerous.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "crowds"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The wisdom and madness of crowds",
+   "durationMinutes": 7,
+   "instruction": "Compare Le Bon's crowd theory with Surowiecki's 'Wisdom of Crowds,' then find one example of collective intelligence and one of collective irrationality."
+  }
+ },
+ {
+  "id": "psychology-occams-razor-psychology",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Occam's Razor in Psychology",
+  "teaser": "The simplest explanation is usually correct: when someone acts strangely, it's more likely stress than a secret conspiracy. Psychologists use Occam's razor to avoid overcomplicating diagnoses.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "thinking",
+   "diagnosis"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How parsimony guides psychological explanation",
+   "durationMinutes": 6,
+   "instruction": "Learn about parsimony in clinical diagnosis, then find one situation where the simplest explanation is probably wrong."
+  }
+ },
+ {
+  "id": "psychology-neuroplasticity-psychology",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Neuroplasticity and Psychology",
+  "teaser": "The brain changes in response to experience: meditation thickens the prefrontal cortex; London taxi drivers grow hippocampi. Neuroplasticity means your brain isn't fixed — and neither are your psychological traits.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "neuroscience",
+   "change"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How experience reshapes the brain",
+   "durationMinutes": 7,
+   "instruction": "Learn about meditation and brain structure changes, then find one habit that could reshape your brain for the better."
+  }
+ }
+]

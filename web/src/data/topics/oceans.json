@@ -1,0 +1,962 @@
+[
+ {
+  "id": "oceans-five-oceans",
+  "categoryId": "OCEANS",
+  "subtype": "Ocean",
+  "name": "The Five Oceans",
+  "teaser": "Pacific, Atlantic, Indian, Southern, Arctic: the Pacific alone covers more area than all land combined. Earth is an ocean planet — 71% of its surface is water, and we've explored less than 5%.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "geography",
+   "basics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The world's five oceans and their sizes",
+   "durationMinutes": 7,
+   "instruction": "Compare the sizes of all five oceans, then explain why the Southern Ocean was only officially recognized in 2021."
+  }
+ },
+ {
+  "id": "ocean-pacific",
+  "categoryId": "OCEANS",
+  "subtype": "Ocean",
+  "name": "The Pacific Ocean",
+  "teaser": "The largest and deepest ocean: the Pacific covers 63 million square miles, contains more than half the world's open water, and holds the Mariana Trench — the deepest point on Earth.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "Pacific",
+   "depth"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Pacific's extreme features",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Mariana Trench (11,034m deep), the Ring of Fire, and the Great Pacific Garbage Patch, then explain why the Pacific is shrinking."
+  }
+ },
+ {
+  "id": "ocean-atlantic",
+  "categoryId": "OCEANS",
+  "subtype": "Ocean",
+  "name": "The Atlantic Ocean",
+  "teaser": "The second-largest ocean, dividing the Old and New Worlds: the Atlantic is growing as the Mid-Atlantic Ridge pushes tectonic plates apart. Its currents regulate climate across three continents.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "Atlantic",
+   "currents"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the Atlantic shapes global climate",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Gulf Stream and Atlantic Meridional Overturning Circulation (AMOC), then explain why AMOC slowdown could trigger European cooling."
+  }
+ },
+ {
+  "id": "ocean-mariana-trench",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "The Mariana Trench",
+  "teaser": "At 11,034 meters deep, the Challenger Deep is the deepest known point on Earth. Pressure at the bottom is 1,000 times surface atmospheric — yet life thrives in total darkness.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "depth",
+   "extremophiles"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Life at the bottom of the ocean",
+   "durationMinutes": 8,
+   "instruction": "Learn about hadal zone creatures (snailfish, amphipods, xenophyophores), then explain how organisms survive crushing pressure, freezing temperatures, and total darkness."
+  }
+ },
+ {
+  "id": "ocean-mid-ocean-ridges",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Mid-Ocean Ridges",
+  "teaser": "A 65,000 km underwater mountain range where tectonic plates diverge: new ocean floor is born at mid-ocean ridges. It's the longest mountain chain on Earth — and almost nobody's seen it.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "geology",
+   "tectonics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How new ocean floor is created",
+   "durationMinutes": 7,
+   "instruction": "Learn about seafloor spreading and hydrothermal vents at mid-ocean ridges, then explain how this process drives plate tectonics."
+  }
+ },
+ {
+  "id": "ocean-hydrothermal-vents",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Hydrothermal Vents",
+  "teaser": "Black smokers spewing 400°C mineral-rich water: hydrothermal vents support entire ecosystems without sunlight. Bacteria here use chemosynthesis instead of photosynthesis — a completely different basis for life.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "biology",
+   "extremophiles"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Life around hydrothermal vents",
+   "durationMinutes": 8,
+   "instruction": "Learn about chemosynthetic bacteria, giant tube worms, and vent crabs, then explain how vent ecosystems challenged the assumption that all life needs sunlight."
+  }
+ },
+ {
+  "id": "ocean-great-barrier-reef",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "The Great Barrier Reef",
+  "teaser": "The largest living structure on Earth: 2,300 km of coral stretching along Australia's coast, visible from space. It hosts 1,500 fish species and 400 coral types — but bleaching is killing it.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "coral",
+   "Australia"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why coral bleaching is killing the reef",
+   "durationMinutes": 8,
+   "instruction": "Learn about the coral-zooxanthellae symbiosis, then explain how rising ocean temperatures trigger mass bleaching events."
+  }
+ },
+ {
+  "id": "ocean-coral-reefs",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "Coral Reef Ecosystems",
+  "teaser": "Coral reefs cover less than 1% of the ocean floor but support 25% of all marine species. They're called 'rainforests of the sea' — and they're disappearing three times faster than rainforests.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "coral",
+   "biodiversity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why coral reefs matter",
+   "durationMinutes": 7,
+   "instruction": "Learn about the economic value of coral reefs (fisheries, tourism, coastal protection), then find one reef system outside Australia that's critically endangered."
+  }
+ },
+ {
+  "id": "ocean-kelp-forests",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "Kelp Forests",
+  "teaser": "Underwater jungles of giant kelp can grow 60 cm per day, creating three-dimensional habitats for sea otters, fish, and invertebrates. Kelp absorbs carbon 20 times faster than land forests.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "kelp",
+   "carbon"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How kelp forests support marine life",
+   "durationMinutes": 7,
+   "instruction": "Learn about the kelp-urchin-otter trophic cascade, then explain why kelp forests are considered a nature-based climate solution."
+  }
+ },
+ {
+  "id": "ocean-open-ocean",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "The Open Ocean (Pelagic Zone)",
+  "teaser": "The vast blue emptiness — or so it seems: the pelagic zone is the largest habitat on Earth, and it's full of life adapted to life without walls. Phytoplankton here produce half the world's oxygen.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "pelagic",
+   "plankton"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Life in the open ocean",
+   "durationMinutes": 7,
+   "instruction": "Learn about the different pelagic zones (epipelagic, mesopelagic, bathypelagic), then explain why the open ocean is the least productive habitat per square meter."
+  }
+ },
+ {
+  "id": "ocean-deep-sea",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "The Abyssal Zone",
+  "teaser": "Below 4,000 meters: eternal darkness, near-freezing temperatures, and crushing pressure. Yet life persists — transparent fish, bioluminescent jellyfish, and xenophyophores the size of grapefruits.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "deep-sea",
+   "extremophiles"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Life in the abyss",
+   "durationMinutes": 8,
+   "instruction": "Learn about adaptations to the abyss (bioluminescence, antifreeze proteins, pressure-resistant membranes), then find one deep-sea creature that looks like science fiction."
+  }
+ },
+ {
+  "id": "ocean-ocean-currents",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Currents",
+  "teaser": "The ocean's conveyor belt: surface currents driven by wind and deep currents driven by temperature and salinity. They transport heat from the equator to the poles — regulating Earth's climate.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "currents",
+   "climate"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The thermohaline circulation",
+   "durationMinutes": 8,
+   "instruction": "Learn how temperature and salinity drive the global ocean conveyor belt, then explain why melting Arctic ice could shut down the Gulf Stream."
+  }
+ },
+ {
+  "id": "ocean-el-nino",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "El Niño and La Niña",
+  "teaser": "Every 2-7 years, Pacific Ocean temperatures swing between warm (El Niño) and cool (La Niña), disrupting weather worldwide. Droughts in Australia, floods in Peru, weaker hurricanes in the Atlantic.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "Pacific",
+   "climate"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How El Niño affects global weather",
+   "durationMinutes": 8,
+   "instruction": "Learn about the El Niño-Southern Oscillation (ENSO), then find three countries affected differently by the same El Niño event."
+  }
+ },
+ {
+  "id": "ocean-tides",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Tides",
+  "teaser": "The ocean breathes: tides rise and fall as the Moon's gravity pulls on Earth's water. The Bay of Fundy sees a 16-meter tidal range — the water level changes by the height of a five-story building.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "gravity",
+   "Moon"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How tides work",
+   "durationMinutes": 7,
+   "instruction": "Learn why there are two high tides per day and how spring/neap tides relate to the Sun and Moon, then explain why the Bay of Fundy has such extreme tides."
+  }
+ },
+ {
+  "id": "ocean-waves",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Waves",
+  "teaser": "Wind, gravity, and distant storms create waves that travel thousands of miles. A wave that hits California may have been born in a Antarctic storm. Surfers ride energy, not water.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "physics",
+   "surfing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How ocean waves form and travel",
+   "durationMinutes": 7,
+   "instruction": "Learn about wave generation (wind speed, duration, fetch), then explain why deep-water waves don't actually move water forward."
+  }
+ },
+ {
+  "id": "ocean-tsunami",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Tsunamis",
+  "teaser": "Underwater earthquakes, landslides, or volcanic eruptions generate waves that cross entire ocean basins at jet speed. The 2004 Indian Ocean tsunami killed 230,000 people in hours.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "disaster",
+   "geology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How tsunamis form and how warning systems work",
+   "durationMinutes": 8,
+   "instruction": "Learn about the earthquake-tsunami mechanism and the DART buoy warning system, then explain why tsunamis are invisible in deep water."
+  }
+ },
+ {
+  "id": "ocean-whale-migration",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Whale Migration",
+  "teaser": "Gray whales travel 10,000 km each way between Alaska and Mexico. Humpbacks cross entire ocean basins. The longest animal migration on Earth happens underwater.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "whales",
+   "migration"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The longest migration on Earth",
+   "durationMinutes": 7,
+   "instruction": "Learn about gray whale and humpback whale migration routes, then explain why whales migrate and how they navigate."
+  }
+ },
+ {
+  "id": "ocean-giant-squid",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Giant Squid",
+  "teaser": "For centuries, sailors told stories of sea monsters. The giant squid (Architeuthis) is real: 13 meters long, with the largest eyes in the animal kingdom. It wasn't photographed alive until 2004.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "cephalopods",
+   "deep-sea"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The biology of giant squid",
+   "durationMinutes": 7,
+   "instruction": "Learn about giant squid anatomy (giant eyes for deep-sea vision, two-third-length tentacles), then explain why they were so hard to photograph alive."
+  }
+ },
+ {
+  "id": "ocean-blue-whale",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Blue Whale",
+  "teaser": "The largest animal that has ever lived: 30 meters long, 150 tons, with a heart the size of a small car. Blue whales eat 4 tons of krill daily and communicate across hundreds of kilometers.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "whales",
+   "scale"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The scale of the blue whale",
+   "durationMinutes": 7,
+   "instruction": "Compare blue whale dimensions to everyday objects (heart = small car, tongue = elephant), then explain how whaling almost drove them extinct and their current recovery status."
+  }
+ },
+ {
+  "id": "ocean-bioluminescence",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Bioluminescence",
+  "teaser": "Living light: 76% of deep-sea creatures produce their own glow. Anglerfish lure prey with it, dinoflagellates create blue waves on beaches, and some squid use it for camouflage.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "bioluminescence",
+   "deep-sea"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why deep-sea creatures glow",
+   "durationMinutes": 7,
+   "instruction": "Learn about the functions of bioluminescence (predation, defense, communication), then find one bioluminescent event you could witness in person."
+  }
+ },
+ {
+  "id": "ocean-oil-spills",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Oil Spills",
+  "teaser": "Deepwater Horizon (2010) spilled 780 million liters of oil into the Gulf of Mexico. The cleanup took years; the ecological damage will last decades. Oil and water don't mix — and neither do oil and ecosystems.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "pollution",
+   "disaster"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The impact of oil spills on marine life",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Deepwater Horizon spill's effects on marine ecosystems, then explain why dispersants are controversial."
+  }
+ },
+ {
+  "id": "ocean-plastic-pollution",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Plastic Pollution",
+  "teaser": "8 million tons of plastic enter the ocean every year. It's in the Mariana Trench, in Arctic ice, and in the stomachs of 90% of seabirds. Microplastics are now in the food chain — including yours.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "pollution",
+   "plastic"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Where ocean plastic comes from and where it goes",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Great Pacific Garbage Patch and microplastics, then find one action that reduces plastic entering the ocean."
+  }
+ },
+ {
+  "id": "ocean-overfishing",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Overfishing",
+  "teaser": "90% of large predatory fish are gone. Industrial fishing fleets with sonar and GPS have stripped the ocean faster than it can recover. Some fish stocks have collapsed by 99%.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "fishing",
+   "sustainability"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The scale of overfishing",
+   "durationMinutes": 8,
+   "instruction": "Learn about maximum sustainable yield and bycatch, then find one fish species that's currently overfished and one that's recovering."
+  }
+ },
+ {
+  "id": "ocean-ocean-acidification",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Acidification",
+  "teaser": "The ocean absorbs 30% of human CO₂ emissions — but this makes seawater more acidic.珊瑚 dissolves, shellfish struggle, and the entire marine food web is at risk. It's called 'climate change's equally evil twin.'",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "climate",
+   "chemistry"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How CO₂ is changing ocean chemistry",
+   "durationMinutes": 8,
+   "instruction": "Learn about the carbonate chemistry of acidification, then explain why coral reefs and shellfish are especially vulnerable."
+  }
+ },
+ {
+  "id": "ocean-james-cook",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "Captain Cook's Voyages",
+  "teaser": "Between 1768 and 1779, Cook circumnavigated the globe, mapped Australia, discovered Hawaii, and transformed European knowledge of the Pacific. He was also a pioneer of navigation science.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "exploration",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Cook's three Pacific voyages",
+   "durationMinutes": 10,
+   "instruction": "Learn about Cook's use of the transit of Venus for navigation and his encounters with Pacific Island cultures, then evaluate his legacy."
+  }
+ },
+ {
+  "id": "ocean-trieste",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "The Trieste Dive to the Challenger Deep",
+  "teaser": "In 1960, Jacques Piccard and Don Walsh descended to the bottom of the Mariana Trench in the bathyscaphe Trieste: 10,916 meters. They spent 20 minutes on the floor and saw a flatfish.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "exploration",
+   "deep-sea"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The first dive to the deepest point",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Trieste's design and the extreme engineering challenges, then compare with James Cameron's 2012 solo dive."
+  }
+ },
+ {
+  "id": "ocean-constellation",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "HMS Beagle and Darwin",
+  "teaser": "The five-year voyage of the Beagle (1831–1836) carried young Charles Darwin around the world. His observations of finches, tortoises, and fossils in the Galápagos laid the groundwork for evolution.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "exploration",
+   "evolution"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What Darwin saw on the Beagle",
+   "durationMinutes": 10,
+   "instruction": "Learn about Darwin's observations in the Galápagos, then explain how oceanography and biology intersected on a single voyage."
+  }
+ },
+ {
+  "id": "ocean-nautilus",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "The USS Nautilus and Submarine Exploration",
+  "teaser": "The first nuclear-powered submarine: Nautilus crossed the North Pole underwater in 1958, proving that submarines could operate for months without surfacing. It changed warfare and oceanography forever.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "submarines",
+   "technology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How nuclear submarines work",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Nautilus's nuclear propulsion and its Arctic crossing, then explain how submarines use sonar for navigation."
+  }
+ },
+ {
+  "id": "ocean-darwin-seamount",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Seamounts",
+  "teaser": "Underwater mountains: there are more than 100,000 seamounts taller than 1,000 meters. They create ocean currents, concentrate marine life, and may influence weather patterns.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "geology",
+   "biodiversity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How seamounts create biodiversity hotspots",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Taylor column effect (how seamounts trap water and nutrients), then find one seamount that's a marine protected area."
+  }
+ },
+ {
+  "id": "ocean-ocean-zones",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Ocean Depth Zones",
+  "teaser": "Sunlight (0-200m), twilight (200-1000m), midnight (1000-4000m), abyssal (4000-6000m), hadal (6000m+): each zone has its own rules for light, pressure, and life.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "zones",
+   "depth"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Life in each ocean depth zone",
+   "durationMinutes": 8,
+   "instruction": "Learn the characteristics of each zone (photic, dysphotic, aphotic), then find one creature adapted to each zone."
+  }
+ },
+ {
+  "id": "ocean-sea-level-rise",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Sea Level Rise",
+  "teaser": "The ocean is rising 3.6 mm per year and accelerating. By 2100, it could rise 1 meter — flooding coastal cities, displacing 200 million people, and redefining where humans can live.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "climate",
+   "coastal"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How fast the ocean is rising",
+   "durationMinutes": 7,
+   "instruction": "Learn about thermal expansion and ice sheet melting as drivers of sea level rise, then find three major cities at risk."
+  }
+ },
+ {
+  "id": "ocean-coral-spawning",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Coral Spawning",
+  "teaser": "Once a year, after a full moon, coral colonies release millions of eggs and sperm simultaneously: an underwater blizzard of pink and orange. It's one of nature's most synchronized events.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "coral",
+   "reproduction"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How coral spawning works",
+   "durationMinutes": 6,
+   "instruction": "Learn about the environmental cues (temperature, moonlight, tidal cycles) that trigger mass spawning, then find one location where you can witness it."
+  }
+ },
+ {
+  "id": "ocean-whale-song",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Whale Songs",
+  "teaser": "Humpback whale songs last up to 20 minutes and travel thousands of kilometers. Each population shares a song that evolves over years. Scientists still don't know exactly why they sing.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "whales",
+   "communication"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The science of whale communication",
+   "durationMinutes": 7,
+   "instruction": "Learn about humpback song structure and how songs spread between populations, then debate the leading theories for why whales sing."
+  }
+ },
+ {
+  "id": "ocean-deep-sea-mining",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Deep-Sea Mining",
+  "teaser": "The ocean floor holds polymetallic nodules rich in cobalt, manganese, and rare earths. Companies want to mine them — but scientists warn that we could destroy ecosystems we haven't even discovered yet.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "mining",
+   "conservation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The deep-sea mining debate",
+   "durationMinutes": 8,
+   "instruction": "Learn about polymetallic nodules and the International Seabed Authority, then debate whether deep-sea mining is necessary for the green energy transition."
+  }
+ },
+ {
+  "id": "ocean-ocean-thermal-energy",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Thermal Energy Conversion",
+  "teaser": "Using the temperature difference between warm surface water and cold deep water to generate electricity: OTEC works in the tropics and could provide baseload renewable power to island nations.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "energy",
+   "renewable"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How OTEC generates electricity",
+   "durationMinutes": 7,
+   "instruction": "Learn the Rankine cycle原理 behind OTEC, then explain why it only works in tropical waters and why it hasn't scaled yet."
+  }
+ },
+ {
+  "id": "ocean-mangroves",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "Mangrove Forests",
+  "teaser": "Trees that grow in saltwater: mangroves protect coastlines from storms, store 4x more carbon than rainforests, and nursery grounds for 75% of commercial fish species. They're the ocean's unsung heroes.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "mangroves",
+   "coastal"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why mangroves matter",
+   "durationMinutes": 7,
+   "instruction": "Learn about mangrove root systems and their role in coastal protection, then find one country that's successfully restoring mangroves."
+  }
+ },
+ {
+  "id": "ocean-seagrass",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "Seagrass Meadows",
+  "teaser": "Underwater grasslands that feed dugongs, shelter juvenile fish, and sequester carbon 35 times faster than rainforests. Seagrass covers 0.1% of the ocean floor but supports 20% of marine biodiversity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "seagrass",
+   "carbon"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The ecological role of seagrass",
+   "durationMinutes": 7,
+   "instruction": "Learn about blue carbon sequestration by seagrass, then explain why seagrass meadows are declining globally."
+  }
+ },
+ {
+  "id": "ocean-hadopelagic",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Ocean Trenches",
+  "teaser": "Subduction zones where one tectonic plate dives beneath another: ocean trenches are the deepest parts of the ocean. The Pacific Ring of Fire contains most of them — and some are volcanically active.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "geology",
+   "trenches"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The world's deepest ocean trenches",
+   "durationMinutes": 7,
+   "instruction": "Learn about the ten deepest trenches and their locations, then explain why trenches form at subduction zones."
+  }
+ },
+ {
+  "id": "ocean-shipping-lanes",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Global Shipping Lanes",
+  "teaser": "90% of world trade moves by sea: container ships, tankers, and bulk carriers follow invisible highways across the ocean. A single ship can carry 20,000 containers — enough to fill a small town.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "trade",
+   "logistics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How ocean shipping works",
+   "durationMinutes": 8,
+   "instruction": "Learn about containerization and global shipping routes, then explain why the Suez Canal blockage in 2021 disrupted global supply chains."
+  }
+ },
+ {
+  "id": "ocean-shipwrecks",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Shipwrecks",
+  "teaser": "There are an estimated 3 million shipwrecks on the ocean floor — an underwater museum of human ambition and tragedy. From ancient Greek vessels to the Titanic, they preserve history in cold, dark water.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "archaeology",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The underwater archaeological record",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Uluburun shipwreck (3,300 years old) and the Titanic wreck, then explain why deep-sea shipwrecks are so well preserved."
+  }
+ },
+ {
+  "id": "ocean-marine-snow",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Marine Snow",
+  "teaser": "A constant rain of organic debris falling from surface waters to the deep: dead plankton, fecal pellets, and mucus. Marine snow is the deep ocean's only food supply — and it sustains life thousands of meters down.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "biology",
+   "deep-sea"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the deep ocean gets its food",
+   "durationMinutes": 6,
+   "instruction": "Learn about the biological pump and marine snow, then explain why deep-sea life depends entirely on what happens at the surface."
+  }
+ },
+ {
+  "id": "ocean-tentacles",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Cephalopod Intelligence",
+  "teaser": "Octopuses solve puzzles, use tools, and escape from jars. Cuttlefish change color in milliseconds. Cephalopods are the ocean's most intelligent invertebrates — with three hearts and blue blood.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "cephalopods",
+   "intelligence"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How smart are octopuses?",
+   "durationMinutes": 7,
+   "instruction": "Learn about octopus problem-solving (jar opening, maze navigation, coconut shell tool use), then explain why cephalopod intelligence evolved separately from vertebrate intelligence."
+  }
+ },
+ {
+  "id": "ocean-sea-slugs",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Nudibranchs",
+  "teaser": "Sea slugs that steal: nudibranchs eat cnidarians and repurpose their stinging cells for their own defense. They're also some of the most photogenic creatures in the ocean — living jewels of the reef.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "invertebrates",
+   "reef"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How nudibranchs weaponize their prey",
+   "durationMinutes": 6,
+   "instruction": "Learn about kleptocnidae (stolen stinging cells), then find three visually stunning nudibranch species."
+  }
+ },
+ {
+  "id": "ocean-sea-turtles",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Sea Turtles",
+  "teaser": "Navigation masters: sea turtles cross entire oceans to nest on the same beach where they were born. They've existed for 110 million years — surviving the asteroid that killed the dinosaurs.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "reptiles",
+   "migration"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How sea turtles navigate across oceans",
+   "durationMinutes": 7,
+   "instruction": "Learn about magnetic navigation and natal homing, then find one threat to sea turtles and one conservation success."
+  }
+ },
+ {
+  "id": "ocean-ocean-exploration-statistics",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "How Little We've Explored",
+  "teaser": "We've mapped the surface of Mars in more detail than the ocean floor. Only 20% of the seabed has been surveyed at high resolution. The deep ocean remains Earth's last true frontier.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "exploration",
+   "frontier"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The gap in ocean exploration",
+   "durationMinutes": 6,
+   "instruction": "Compare the percentage of ocean floor mapped vs. the surface of Mars and Moon, then explain why ocean exploration lags behind space exploration."
+  }
+ },
+ {
+  "id": "ocean-challenger-expedition",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "The Challenger Expedition",
+  "teaser": "The first global oceanographic expedition (1872–1876): HMS Challenger traveled 130,000 km, discovered 4,700 new species, and measured the deepest ocean trenches. Modern ocean science began here.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "exploration",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What the Challenger expedition discovered",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Challenger's instruments and discoveries, then explain why it's considered the birth of oceanography."
+  }
+ },
+ {
+  "id": "ocean-alvin",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "DSV Alvin",
+  "teaser": "The submersible that discovered hydrothermal vents in 1977: Alvin has dove over 5,000 times, exploring the deep ocean from the Titanic wreck to mid-ocean ridges. It changed our understanding of life.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "submersibles",
+   "discovery"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Alvin's greatest discoveries",
+   "durationMinutes": 8,
+   "instruction": "Learn about Alvin's discovery of hydrothermal vent ecosystems, then find one other deep-sea discovery made with Alvin."
+  }
+ },
+ {
+  "id": "ocean-sonar-mapping",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Sonar and Seafloor Mapping",
+  "teaser": "Sound waves reveal the hidden landscape: multibeam sonar maps the ocean floor in detail, revealing mountains, trenches, and ridges we never knew existed. The ocean floor is more rugged than the land.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "oceans",
+   "technology",
+   "mapping"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How we map the ocean floor",
+   "durationMinutes": 7,
+   "instruction": "Learn about multibeam sonar and the Seabed 2030 project, then explain why mapping the ocean floor matters for climate science and navigation."
+  }
+ }
+]
