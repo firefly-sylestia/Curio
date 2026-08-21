@@ -39,17 +39,16 @@ import kotlin.random.Random
  * v211 — NORTH STAR CONSTELLATION: Ursa Minor (the Little Dipper), with
  * Polaris — the Pole Star — as the guiding light. Seven stars form the
  * iconic ladle shape, anchored by the brightest star in the handle.
+ * *  GALAXY AESTHETIC: vibrant deep-space nebula background with overlapping
+ *  purple, blue, and teal washes. The seven Ursa Minor stars form the
+ *  constellation. Background scatter stars are tiny star glyphs
+ *  for a dense, beautiful starfield.
+ * *  Light mode: the galaxy palette stays but the edges fade to meet the page
+ *  background. Dark mode: full-bleed deep space.
  *
- * GALAXY AESTHETIC: vibrant deep-space nebula background with overlapping
- * purple, blue, and teal washes. Explored-lane stars are drawn as 4-pointed
- * star shapes, not circles. Background scatter stars are tiny star glyphs
- * for a consistent starfield feel.
- *
- * Light mode: the galaxy palette stays but the edges fade to meet the page
- * background. Dark mode: full-bleed deep space.
- *
- * Tap a star to select it; tap empty sky to clear. When [popoverContent]
- * is provided, the selection shows as a floating card anchored to the star.
+ *  Tap a constellation star to select it; tap empty sky to clear. When
+ *  [popoverContent] is provided, the selection shows as a floating card
+ *  anchored to the star.
  */
 @Composable
 fun CurioConstellation(
@@ -74,14 +73,6 @@ fun CurioConstellation(
             Offset(0.66f, 0.50f), // β UMi — Kochab (bright bowl star)
             Offset(0.54f, 0.58f)  // γ UMi — Pherkad (bowl bottom)
         )
-    }
-
-    // Lane star positions: explored lanes get deterministic spots scattered
-    // around the Ursa Minor pattern. Unexplored lanes are not shown.
-    val nodes = remember(explored) {
-        explored.map { id ->
-            id to randomAroundUrsaMinor(Random(id.name.hashCode()))
-        }
     }
 
     // Dim background stars for depth — scattered across the whole canvas.
@@ -111,13 +102,17 @@ fun CurioConstellation(
                 .fillMaxSize()
                 .pointerInput(explored, laneCounts, laneRecent) {
                     detectTapGestures { tap ->
-                        val hit = nodes.mapNotNull { (id, n) ->
-                            val dx = tap.x - n.x * size.width
-                            val dy = tap.y - n.y * size.height
+                        // Tap detection: hit-test against the 7 anchor stars.
+                        val hit = ursaMinorAnchors.mapIndexedNotNull { idx, anchor ->
+                            val ax = anchor.x * size.width
+                            val ay = anchor.y * size.height
+                            val dx = tap.x - ax
+                            val dy = tap.y - ay
                             val d = sqrt(dx * dx + dy * dy)
-                            if (d <= 34.dp.toPx()) id to d else null
-                        }.minByOrNull { it.second }?.first
-                        onSelect(hit)
+                            if (d <= 40.dp.toPx()) idx to d else null
+                        }.minByOrNull { it.second }
+                        // Map anchor index back to an explored CategoryId if possible.
+                        onSelect(hit?.let { explored.getOrNull(it.first) })
                     }
                 }
         ) {
@@ -292,29 +287,6 @@ fun CurioConstellation(
                 drawGossamerLink(anchorPx[a], anchorPx[b], linkColor, 0.8.dp.toPx())
             }
 
-            // ── Lane-to-nearest-anchor links: faint connection ──────
-            val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
-            pts.forEach { p ->
-                val nearestAnchor = anchorPx.minByOrNull { sqDist(p, it) }
-                if (nearestAnchor != null && sqDist(p, nearestAnchor) < 0.08f) {
-                    drawGossamerLink(p, nearestAnchor, linkColor.copy(alpha = linkColor.alpha * 0.5f), 0.5.dp.toPx())
-                }
-            }
-
-            // ── Lane-to-nearest-lane links: sparse web ─────────────
-            val drawn = mutableSetOf<Pair<Int, Int>>()
-            pts.forEachIndexed { i, pi ->
-                val nearest = pts.indices
-                    .filter { it != i }
-                    .minByOrNull { sqDist(pi, pts[it]) }
-                if (nearest != null) {
-                    val key = norm(i, nearest)
-                    if (drawn.add(key)) {
-                        drawGossamerLink(pi, pts[nearest], linkColor.copy(alpha = linkColor.alpha * 0.4f), 0.5.dp.toPx())
-                    }
-                }
-            }
-
             // ── Polaris: the Pole Star — prominent, warm glow ───────
             val polaris = anchorPx[0]
             // Warm golden halo.
@@ -362,54 +334,15 @@ fun CurioConstellation(
                 )
             }
 
-            // ── Lane stars: neutral star colors, star shapes ────────
-            // These represent explored categories as real stars in the
-            // constellation — white/blue-white like the anchor stars,
-            // not colorful category accents.
-            val laneStarColor = if (isDark) Color(0xFFD0E0F8)
-                               else Color(0xFF405870)
-            nodes.forEachIndexed { i, (id, n) ->
-                val p = pts[i]
-                val count = laneCounts[id] ?: 0
-                val recent = (laneRecent[id] ?: 0L) >= recentCutoff
-                val isSel = selected == id
-
-                // Knowledge-sized radius: gentle sqrt ramp, capped at 7dp.
-                val r = (2.5f + sqrt(count.coerceAtLeast(0).toFloat()) * 1.6f)
-                    .coerceAtMost(7f).dp.toPx()
-
-                // Soft halo — larger when recently active or selected.
-                val haloAlpha = if (recent || isSel) 0.18f else 0.08f
-                val haloScale = if (recent || isSel) 2.2f else 1.8f
-                // Star halo.
-                drawStar(
-                    center = p,
-                    outerRadius = r * haloScale,
-                    color = laneStarColor.copy(alpha = haloAlpha),
-                    alpha = haloAlpha
-                )
-                // Star core.
-                drawStar(
-                    center = p,
-                    outerRadius = r,
-                    color = laneStarColor,
-                    alpha = laneStarColor.alpha
-                )
-                // Bright center point.
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.85f),
-                    radius = r * 0.35f,
-                    center = p
-                )
-            }
         }
 
         // ── Floating popover for selected star ─────────────────────
         val selId = selected
-        val selNode = selId?.let { id -> nodes.firstOrNull { (nid, _) -> nid == id } }
-        if (popoverContent != null && selNode != null) {
+        val selAnchorIdx = selId?.let { sid -> explored.indexOf(sid).takeIf { it in ursaMinorAnchors.indices } }
+        if (popoverContent != null && selAnchorIdx != null) {
             var cardSize by remember { mutableStateOf(IntSize.Zero) }
-            val nodePx = Offset(selNode.second.x * wPx, selNode.second.y * hPx)
+            val anchor = ursaMinorAnchors[selAnchorIdx]
+            val nodePx = Offset(anchor.x * wPx, anchor.y * hPx)
             val gap = with(density) { 8.dp.toPx() }
             val pad = with(density) { 4.dp.toPx() }
             Box(
@@ -441,25 +374,6 @@ fun CurioConstellation(
     }
 }
 
-// ── Ursa Minor geometry ──────────────────────────────────────────────
-
-/**
- * Deterministic position for a lane star, scattered around the Ursa Minor
- * constellation. The star lands in a ring around the constellation center
- * with some angular variance — close enough to feel part of the pattern,
- * far enough to not overlap the anchor stars.
- */
-private fun randomAroundUrsaMinor(rnd: Random): Offset {
-    // Ursa Minor center: average of the seven anchor positions.
-    val cx = 0.45f
-    val cy = 0.40f
-    val angle = rnd.nextFloat() * PI.toFloat() * 2f
-    val dist = 0.12f + rnd.nextFloat() * 0.22f // 12–34% from center
-    val x = cx + cos(angle) * dist
-    val y = cy + sin(angle) * dist * 0.8f // slightly squished vertically
-    return Offset(x.coerceIn(0.06f, 0.94f), y.coerceIn(0.06f, 0.94f))
-}
-
 /**
  * Dense background stars scattered across the whole canvas for a real
  * night-sky starfield. Each is (position, radius in dp). Fixed seed —
@@ -468,22 +382,12 @@ private fun randomAroundUrsaMinor(rnd: Random): Offset {
  */
 private fun backgroundStars(): List<Pair<Offset, Float>> {
     val rnd = Random(0x5EED)
-    return List(120) {
-        Offset(rnd.nextFloat(), rnd.nextFloat()) to (0.3f + rnd.nextFloat() * 0.9f)
+    return List(220) {
+        Offset(rnd.nextFloat(), rnd.nextFloat()) to (0.2f + rnd.nextFloat() * 1.0f)
     }
 }
 
 // ── Drawing helpers ───────────────────────────────────────────────────
-
-/** Squared distance — the link-pairing comparator. */
-private fun sqDist(a: Offset, b: Offset): Float {
-    val dx = a.x - b.x
-    val dy = a.y - b.y
-    return dx * dx + dy * dy
-}
-
-/** Order-independent pair key so each link is drawn once. */
-private fun norm(i: Int, j: Int): Pair<Int, Int> = if (i < j) i to j else j to i
 
 /**
  * A 4-pointed star shape — the classic twinkling-star glyph.
