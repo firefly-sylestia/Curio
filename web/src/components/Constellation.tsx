@@ -2,8 +2,9 @@
 // Big Dipper + Polaris — exact reproduction of the Android SVG designs.
 // Dark mode: deep-space palette (svgviewer-output 16)
 // Light mode: muted cosmic palette (svgviewer-output 17)
+// v2 — star-focused zoom, pinch-to-zoom, 3D perspective tilt
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 // ── Star data ──────────────────────────────────────────────────────
 
@@ -133,6 +134,12 @@ const LIGHT_FIELD = [
   { cx: 300, cy: 1080, r: 0.65, opacity: 0.35 },
 ];
 
+// ── Zoom constants ─────────────────────────────────────────────────
+
+const FULL_SIZE = 1400;
+const ZOOM_SIZE = 700;   // 2× zoom level
+const LERP = 0.1;        // animation smoothing (0–1, lower = smoother)
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Constellation Component
 // ═══════════════════════════════════════════════════════════════════════════
@@ -144,10 +151,113 @@ export const Constellation: React.FC<{
   selectedStar?: string | null;
 }> = ({ isDark, height = 280, onStarTap, selectedStar }) => {
   const [hoveredStar, setHoveredStar] = useState<string | null>(null);
+  const [perspective, setPerspective] = useState({ rotateX: 0, rotateY: 0 });
 
+  // Refs for animation (no re-renders)
+  const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewBoxRef = useRef({ x: 0, y: 0, w: FULL_SIZE, h: FULL_SIZE });
+  const targetRef = useRef({ x: 0, y: 0, w: FULL_SIZE, h: FULL_SIZE });
+  const lastTapRef = useRef(0);
+  const lastPinchDistRef = useRef(0);
+
+  const is3D = useMemo(() => {
+    try { return localStorage.getItem('curio-star-zoom-3d') === 'true'; }
+    catch { return false; }
+  }, []);
+
+  // ── Smooth viewBox animation loop (runs once, lerps toward targetRef) ──
+  useEffect(() => {
+    let raf: number;
+    const animate = () => {
+      const cur = viewBoxRef.current;
+      const tgt = targetRef.current;
+      cur.x += (tgt.x - cur.x) * LERP;
+      cur.y += (tgt.y - cur.y) * LERP;
+      cur.w += (tgt.w - cur.w) * LERP;
+      cur.h += (tgt.h - cur.h) * LERP;
+      if (svgRef.current) {
+        svgRef.current.setAttribute('viewBox',
+          `${cur.x.toFixed(1)} ${cur.y.toFixed(1)} ${cur.w.toFixed(1)} ${cur.h.toFixed(1)}`);
+      }
+      raf = requestAnimationFrame(animate);
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // ── Pinch-to-zoom: native listener for { passive: false } ─────────
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && lastPinchDistRef.current > 0) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const scale = dist / lastPinchDistRef.current;
+        lastPinchDistRef.current = dist;
+
+        const cur = targetRef.current;
+        const cx = cur.x + cur.w / 2;
+        const cy = cur.y + cur.h / 2;
+        const newW = Math.max(200, Math.min(FULL_SIZE, cur.w / scale));
+        const newH = Math.max(200, Math.min(FULL_SIZE, cur.h / scale));
+        const nx = Math.max(0, Math.min(FULL_SIZE - newW, cx - newW / 2));
+        const ny = Math.max(0, Math.min(FULL_SIZE - newH, cy - newH / 2));
+        const snap = { x: nx, y: ny, w: newW, h: newH };
+        targetRef.current = snap;
+        // Skip lerp for immediate pinch response
+        Object.assign(viewBoxRef.current, snap);
+      }
+    };
+
+    el.addEventListener('touchmove', onMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onMove);
+  }, []);
+
+  // ── Star tap → zoom to that star's position ──────────────────────
   const handleStarClick = useCallback((name: string) => {
     onStarTap?.(name);
-  }, [onStarTap]);
+    const star = STARS.find(s => s.name === name);
+    if (!star) return;
+
+    const nx = Math.max(0, Math.min(FULL_SIZE - ZOOM_SIZE, star.x - ZOOM_SIZE / 2));
+    const ny = Math.max(0, Math.min(FULL_SIZE - ZOOM_SIZE, star.y - ZOOM_SIZE / 2));
+    targetRef.current = { x: nx, y: ny, w: ZOOM_SIZE, h: ZOOM_SIZE };
+
+    // 3D perspective tilt based on star position relative to center
+    if (is3D) {
+      const dx = (star.x - FULL_SIZE / 2) / (FULL_SIZE / 2);
+      const dy = (star.y - FULL_SIZE / 2) / (FULL_SIZE / 2);
+      setPerspective({ rotateX: -dy * 8, rotateY: dx * 8 });
+    }
+  }, [onStarTap, is3D]);
+
+  // ── Double-tap background → reset zoom ───────────────────────────
+  const handleBgTap = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 350) {
+      targetRef.current = { x: 0, y: 0, w: FULL_SIZE, h: FULL_SIZE };
+      setPerspective({ rotateX: 0, rotateY: 0 });
+    }
+    lastTapRef.current = now;
+  }, []);
+
+  // ── Touch start / end for pinch tracking ──────────────────────────
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastPinchDistRef.current = Math.hypot(dx, dy);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    lastPinchDistRef.current = 0;
+  }, []);
 
   const bgStars = isDark ? DARK_BG_STARS : LIGHT_BG_STARS;
   const distant = isDark ? DARK_DISTANT : LIGHT_DISTANT;
@@ -157,9 +267,27 @@ export const Constellation: React.FC<{
   // Gradient IDs must be unique per instance
   const uid = 'cst';
 
+  // 3D tilt is active when the 3D experiment is on and a star is selected or hovered
+  const active3D = is3D && (hoveredStar || selectedStar);
+
   return (
-    <div className="relative w-full overflow-hidden rounded-none" style={{ height }}>
+    <div
+      ref={containerRef}
+      className="relative w-full overflow-hidden rounded-none"
+      style={{
+        height,
+        transform: active3D
+          ? `perspective(800px) rotateX(${perspective.rotateX}deg) rotateY(${perspective.rotateY}deg)`
+          : undefined,
+        transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        touchAction: 'pan-y',
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onClick={handleBgTap}
+    >
       <svg
+        ref={svgRef}
         viewBox="0 0 1400 1400"
         preserveAspectRatio="xMidYMid slice"
         className="w-full h-full"
@@ -278,7 +406,7 @@ export const Constellation: React.FC<{
 
           return (
             <g key={star.name}
-              onClick={() => handleStarClick(star.name)}
+              onClick={(e) => { e.stopPropagation(); handleStarClick(star.name); }}
               onMouseEnter={() => setHoveredStar(star.name)}
               onMouseLeave={() => setHoveredStar(null)}
               style={{ cursor: 'pointer' }}

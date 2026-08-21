@@ -144,37 +144,14 @@ export const MenuDrawer: React.FC<{
         <div className="flex-1 overflow-y-auto">
           {/* Constellation background fills the area below the hero */}
           <div className="relative">
-            <Constellation isDark={isDark} height={260} />
-
-            {/* Menu items floating over the constellation */}
-            <div className="relative z-10 px-3 pt-3 pb-2 space-y-1.5">
-              {/* Curiosity map tap target */}
-              <button
-                onClick={() => handleNavigate('/stats')}
-                className="w-full text-left px-4 py-3 rounded-2xl transition-all duration-150"
-                style={{
-                  background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ background: '#7FA0C820' }}>
-                    <MaterialIcon name="auto_awesome" size={22} style={{ color: '#7FA0C8' }} />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm font-bold block" style={{ color: getTextColor(isDark) }}>
-                      Your Curiosity
-                    </span>
-                    <span className="text-[11px] block mt-0.5"
-                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
-                      Stats, streaks & insights
-                    </span>
-                  </div>
-                  <MaterialIcon name="chevron_right" size={18}
-                    style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }} />
-                </div>
-              </button>
-            </div>
+            <Constellation isDark={isDark} height={280} />
+            {/* Gradient overlay to blend constellation into drawer background */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none"
+              style={{
+                background: `linear-gradient(transparent, ${isDark ? '#1a1a2e' : '#FFFBF5'})`,
+              }}
+            />
           </div>
 
           {/* Menu rows below the constellation */}
