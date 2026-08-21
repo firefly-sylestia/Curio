@@ -1913,22 +1913,16 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // -- Menu rows - drawn first so they scroll UNDER the tear ------
-            // v206 — a Column: the scrolling rows sit in a weight(1f) area
-            // ABOVE the footer, so the footer is pinned to the bottom in
-            // normal flow — it can never float, and expanded sections
-            // (About, Your Curiosity) scroll above it instead of hiding
-            // behind it (v203 overlaid the footer, which let rows slide
-            // under its fade).
-            Column(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.weight(1f)) {
+            // v206 — the scrolling rows sit above the footer. The footer
+            // is inside the LazyColumn as the last item so it scrolls with
+            // content — expanded sections (About, Your Curiosity) never
+            // hide behind a pinned footer.
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
                     top = HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
-                    // v206 — just a small breathing spacer now: the footer
-                    // is BELOW the list, not reserved space at its tail.
                     bottom = 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -2056,11 +2050,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                         }
                     }
                 }
+            // v206 — footer scrolls with the list as the last item, so
+            // expanded sections never hide behind it.
+            item("footer") {
+                DrawerFooter()
             }
-            }
-            // v206 — the footer in NORMAL FLOW below the list: pinned to the
-            // sheet's bottom edge, rows never slide under it.
-            DrawerFooter()
             }
 
             // -- Torn rose hero - drawn on top, rows vanish at the seam -----
@@ -2233,9 +2227,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 val restOfName = nameParts.drop(1).joinToString(" ")
-                                if (restOfName.isNotBlank()) {
+                                val bio = AppPreferences.getCustomStreakTagline(context)
+                                val subtitle = restOfName.ifBlank { bio }
+                                if (subtitle.isNotBlank()) {
                                     Text(
-                                        restOfName,
+                                        subtitle,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = drawerInk.copy(alpha = 0.78f),
                                         maxLines = 1,
