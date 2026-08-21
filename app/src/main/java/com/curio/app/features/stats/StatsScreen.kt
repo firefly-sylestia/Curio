@@ -341,7 +341,9 @@ private fun StreakLevelCard(
 
 /** v174c — the interactive constellation: every star is one of your lanes,
  *  sized by how much you've saved there (with a glow on recently active
- *  ones). Tap a star to see its stats. */
+ *  ones). Tap a star to see its stats. v220 — constellation is now
+ *  edge-to-edge (no rounded card), the deep-space background fills
+ *  the full width. Header + chips stay in a StatsCard above. */
 @Composable
 private fun StatsConstellationCard(
     explored: List<CategoryId>,
@@ -358,45 +360,50 @@ private fun StatsConstellationCard(
     val selectedCount = selected?.let { laneCounts[it] ?: 0 } ?: 0
     val selectedRecent = selected?.let { laneRecent[it] ?: 0L } ?: 0L
 
-    StatsCard {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.Top) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        "Your Constellation",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = ink
-                    )
-                    Text(
-                        "Every star is a lane you've explored — bigger means more knowledge built there.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = muted
-                    )
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        // Header + summary chips in a StatsCard.
+        StatsCard {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.Top) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            "Your Constellation",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = ink
+                        )
+                        Text(
+                            "Every star is a lane you've explored — bigger means more knowledge built there.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = muted
+                        )
+                    }
+                    StatsRangeSelectorPill()
                 }
-                // v174d — the live window selector (shared with the drawer map).
-                StatsRangeSelectorPill()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    StatsSummaryChip("$totalSaves", "knowledge", Color(0xFFB98A5E))
+                    StatsSummaryChip("${explored.size}", "lanes", Color(0xFF7FA0C8))
+                    StatsSummaryChip(CurioQuests.lifetimeState.spins.toString(), "spins", Color(0xFF9B7BB8))
+                }
             }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StatsSummaryChip("$totalSaves", "knowledge", Color(0xFFB98A5E))
-                StatsSummaryChip("${explored.size}", "lanes", Color(0xFF7FA0C8))
-                StatsSummaryChip(CurioQuests.lifetimeState.spins.toString(), "spins", Color(0xFF9B7BB8))
-            }
-            CurioConstellation(
-                explored = explored,
-                laneCounts = laneCounts,
-                laneRecent = laneRecent,
-                recentCutoff = recentCutoff,
-                selected = selected,
-                onSelect = onSelect,
-                modifier = Modifier.fillMaxWidth().height(260.dp)
-            )
-            AnimatedVisibility(
+        }
+        // Edge-to-edge constellation — deep-space background fills full width.
+        CurioConstellation(
+            explored = explored,
+            laneCounts = laneCounts,
+            laneRecent = laneRecent,
+            recentCutoff = recentCutoff,
+            selected = selected,
+            onSelect = onSelect,
+            modifier = Modifier.fillMaxWidth().height(260.dp)
+        )
+        // Selected lane info card — below the constellation.
+        AnimatedVisibility(
                 visible = selectedCat != null,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
