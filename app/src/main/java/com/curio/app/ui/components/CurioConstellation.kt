@@ -1,7 +1,11 @@
 package com.curio.app.ui.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -82,6 +86,38 @@ fun CurioConstellation(
     val offsetY = remember { Animatable(0f) }
     var tiltX by remember { mutableFloatStateOf(0f) }
     var tiltY by remember { mutableFloatStateOf(0f) }
+
+    // v222 — twinkling stars: 10 medium stars with slow sine-wave alpha pulse
+    val infiniteTransition = rememberInfiniteTransition(label = "constellation")
+    val twinkleData = remember {
+        // Indices into mediumStars (0-based from the drawSmallFieldStars
+        // medium list) with staggered phases so they don't pulse together.
+        listOf(
+            0 to 0f, 4 to 0.8f, 8 to 1.6f, 12 to 2.4f, 16 to 3.2f,
+            20 to 4.0f, 24 to 4.8f, 28 to 1.2f, 31 to 2.0f, 34 to 3.6f
+        )
+    }
+    val twinkleAlphas = twinkleData.map { (idx, phase) ->
+        infiniteTransition.animateFloat(
+            initialValue = 0.35f,
+            targetValue = 0.75f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 3000 + (idx % 5) * 400, delayMillis = (phase * 500).toInt()),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "twinkle$idx"
+        )
+    }
+    // v222 — nebula glow pulse: subtle breathing alpha on the nebulae
+    val nebulaAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(5000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "nebulaPulse"
+    )
 
     // Auto-zoom to star on tap (when 3D zoom enabled)
     LaunchedEffect(selected, zoom3d) {
@@ -216,8 +252,10 @@ fun CurioConstellation(
             // ── Opaque background fill ──────────────────────────
             drawRect(color = pageBg)
 
-            if (isDark) drawDarkBackground(w, h, ::px, ::py, ::pr, s)
-            else drawLightBackground(w, h, ::px, ::py, ::pr, s)
+            // v222 — pass animated nebula alpha + twinkle data
+            val twinkleValues = twinkleAlphas.map { it.value }
+            if (isDark) drawDarkBackground(w, h, ::px, ::py, ::pr, s, nebulaAlpha, twinkleValues)
+            else drawLightBackground(w, h, ::px, ::py, ::pr, s, nebulaAlpha, twinkleValues)
 
             // ── Constellation lines ─────────────────────────────
             if (isDark) {
@@ -312,7 +350,9 @@ fun CurioConstellation(
 private fun DrawScope.drawDarkBackground(
     w: Float, h: Float,
     px: (Float) -> Float, py: (Float) -> Float, pr: (Float) -> Float,
-    s: Float
+    s: Float,
+    nebulaAlpha: Float = 1f,
+    twinkleValues: List<Float> = emptyList()
 ) {
     // v221 — flat linear gradient (no radial = no circular look)
     drawRect(
@@ -325,13 +365,16 @@ private fun DrawScope.drawDarkBackground(
         )
     )
 
+    // v222 — nebula helper: scales alpha channel by nebulaAlpha
+    fun nebColor(hex: Long) = Color(hex).copy(alpha = Color(hex).alpha * nebulaAlpha)
+
     // Purple nebula — ellipse at (220, 400) rotated -25°
     drawOval(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to Color(0x268d45bd),
-                0.45f to Color(0x0f55277f),
-                1f to Color(0x0018072d)
+                0f to nebColor(0x268d45bd),
+                0.45f to nebColor(0x0f55277f),
+                1f to nebColor(0x0018072d)
             ),
             center = Offset(px(220f), py(400f)),
             radius = pr(500f)
@@ -344,9 +387,9 @@ private fun DrawScope.drawDarkBackground(
     drawOval(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to Color(0x213979c9),
-                0.45f to Color(0x0e24518c),
-                1f to Color(0x00061128)
+                0f to nebColor(0x213979c9),
+                0.45f to nebColor(0x0e24518c),
+                1f to nebColor(0x00061128)
             ),
             center = Offset(px(1160f), py(850f)),
             radius = pr(520f)
@@ -359,9 +402,9 @@ private fun DrawScope.drawDarkBackground(
     drawOval(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to Color(0x268d45bd),
-                0.45f to Color(0x0f55277f),
-                1f to Color(0x0018072d)
+                0f to nebColor(0x268d45bd),
+                0.45f to nebColor(0x0f55277f),
+                1f to nebColor(0x0018072d)
             ),
             center = Offset(px(700f), py(1170f)),
             radius = pr(470f)
@@ -381,7 +424,7 @@ private fun DrawScope.drawDarkBackground(
     drawCircle(Color(0xFFe8f4ff).copy(alpha = 0.60f), pr(1.2f), Offset(px(1080f), py(1160f)))
 
     // Small random field stars
-    drawSmallFieldStars(w, h, s, dark = true)
+    drawSmallFieldStars(w, h, s, dark = true, twinkleValues = twinkleValues)
 }
 
 // ── Light mode background ────────────────────────────────────────
@@ -389,7 +432,9 @@ private fun DrawScope.drawDarkBackground(
 private fun DrawScope.drawLightBackground(
     w: Float, h: Float,
     px: (Float) -> Float, py: (Float) -> Float, pr: (Float) -> Float,
-    s: Float
+    s: Float,
+    nebulaAlpha: Float = 1f,
+    twinkleValues: List<Float> = emptyList()
 ) {
     // v221 — flat linear gradient (no radial = no circular look)
     drawRect(
@@ -402,13 +447,16 @@ private fun DrawScope.drawLightBackground(
         )
     )
 
+    // v222 — nebula helper: scales alpha channel by nebulaAlpha
+    fun nebColor(hex: Long) = Color(hex).copy(alpha = Color(hex).alpha * nebulaAlpha)
+
     // Blue nebula — muted atmospheric
     drawOval(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to Color(0x2e7197bd),
-                0.45f to Color(0x14607f9f),
-                1f to Color(0x0026394f)
+                0f to nebColor(0x2e7197bd),
+                0.45f to nebColor(0x14607f9f),
+                1f to nebColor(0x0026394f)
             ),
             center = Offset(px(1160f), py(850f)),
             radius = pr(520f)
@@ -421,9 +469,9 @@ private fun DrawScope.drawLightBackground(
     drawOval(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to Color(0x24987da9),
-                0.45f to Color(0x12806b92),
-                1f to Color(0x0026394f)
+                0f to nebColor(0x24987da9),
+                0.45f to nebColor(0x12806b92),
+                1f to nebColor(0x0026394f)
             ),
             center = Offset(px(220f), py(400f)),
             radius = pr(500f)
@@ -436,9 +484,9 @@ private fun DrawScope.drawLightBackground(
     drawOval(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to Color(0x24987da9),
-                0.45f to Color(0x12806b92),
-                1f to Color(0x0026394f)
+                0f to nebColor(0x24987da9),
+                0.45f to nebColor(0x12806b92),
+                1f to nebColor(0x0026394f)
             ),
             center = Offset(px(700f), py(1170f)),
             radius = pr(470f)
@@ -458,7 +506,7 @@ private fun DrawScope.drawLightBackground(
     drawCircle(Color(0xFFd5e1eb).copy(alpha = 0.52f), pr(1.1f), Offset(px(1080f), py(1160f)))
 
     // Small random field stars
-    drawSmallFieldStars(w, h, s, dark = false)
+    drawSmallFieldStars(w, h, s, dark = false, twinkleValues = twinkleValues)
 }
 
 // ── Background star pattern (180×180 tile) ───────────────────────
@@ -510,7 +558,10 @@ private fun DrawScope.drawBgStarPattern(w: Float, h: Float, s: Float, dark: Bool
 
 // ── Small random field stars ─────────────────────────────────────
 
-private fun DrawScope.drawSmallFieldStars(w: Float, h: Float, s: Float, dark: Boolean) {
+private fun DrawScope.drawSmallFieldStars(
+    w: Float, h: Float, s: Float, dark: Boolean,
+    twinkleValues: List<Float> = emptyList()
+) {
     data class FieldStar(val cx: Float, val cy: Float, val r: Float, val alpha: Float)
     // v222 — existing field stars (small, dim)
     val fieldStars = if (dark) listOf(
@@ -624,15 +675,23 @@ private fun DrawScope.drawSmallFieldStars(w: Float, h: Float, s: Float, dark: Bo
         FieldStar(530f, 550f, 1.8f, 0.46f),
         FieldStar(750f, 1300f, 1.9f, 0.47f),
     )
-    mediumStars.forEach { star ->
+    // v222 — twinkle indices: these medium stars pulse via animated alpha
+    val twinkleIndices = setOf(0, 4, 8, 12, 16, 20, 24, 28, 31, 34)
+    mediumStars.forEachIndexed { idx, star ->
         val starColor = if (dark) {
-            // Blue-tinted stars use a cool white; others warm white
             if (star.alpha < 0.50f) Color(0xFFd0e8ff) else Color(0xFFf0f0ff)
         } else {
             if (star.alpha < 0.38f) Color(0xFFb8c8d8) else Color(0xFFdde4ec)
         }
+        // Twinkling stars use the animated alpha; others keep their static alpha
+        val finalAlpha = if (idx in twinkleIndices && twinkleValues.isNotEmpty()) {
+            val twinkleIdx = twinkleIndices.indexOf(idx)
+            if (twinkleIdx < twinkleValues.size) twinkleValues[twinkleIdx] else star.alpha
+        } else {
+            star.alpha
+        }
         drawCircle(
-            color = starColor.copy(alpha = star.alpha),
+            color = starColor.copy(alpha = finalAlpha),
             radius = star.r * s,
             center = Offset(star.cx * s, star.cy * s)
         )
