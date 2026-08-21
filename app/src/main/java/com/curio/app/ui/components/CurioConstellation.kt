@@ -130,9 +130,11 @@ fun CurioConstellation(
                         val touchSlop = viewConfiguration.touchSlop
                         var totalPan = Offset.Zero
                         var isTap = true
+                        var lastEvent = awaitPointerEvent()
                         do {
-                            val event = awaitPointerEvent()
-                            val drag = event.changes.firstOrNull()
+                            val ev = awaitPointerEvent()
+                            lastEvent = ev
+                            val drag = ev.changes.firstOrNull()
                             if (drag != null && drag.pressed) {
                                 val currentPan = drag.position - drag.previousPosition
                                 totalPan += currentPan
@@ -141,10 +143,10 @@ fun CurioConstellation(
                                     isTap = false
                                 }
                             }
-                        } while (event.changes.any { it.pressed })
+                        } while (lastEvent.changes.any { it.pressed })
 
                         if (isTap) {
-                            val tap = event.changes.firstOrNull()?.position
+                            val tap = lastEvent.changes.firstOrNull()?.position
                             if (tap != null) {
                                 val hit = stars.mapNotNull { star ->
                                     val sx = star.nx * size.width
@@ -161,8 +163,8 @@ fun CurioConstellation(
                             }
                         } else if (pastTouchSlop) {
                             // Pinch + drag gesture
-                            val zoomChange = event.calculateZoom()
-                            val panChange = event.calculatePan()
+                            val zoomChange = lastEvent.calculateZoom()
+                            val panChange = lastEvent.calculatePan()
                             if (zoom3d) {
                                 val newZoom = (zoom.value * zoomChange).coerceIn(1f, 3f)
                                 scope.launch { zoom.snapTo(newZoom) }
