@@ -3211,7 +3211,12 @@ private fun HeroTicketCard(
                                 // "Moby-Dick"); the year reads as its own
                                 // pill in the top corner instead — matching
                                 // the reveal hero, so the morph is seamless.
-                                text = currentTopic?.titleAndYearQualifier()?.first ?: "Ready when you are",
+                                // v221 — for QUOTES, show the author name instead of the quote text.
+                                text = if (currentTopic?.categoryId == CategoryId.QUOTES && currentTopic.byline.isNotBlank()) {
+                                    currentTopic.byline
+                                } else {
+                                    currentTopic?.titleAndYearQualifier()?.first ?: "Ready when you are"
+                                },
                                 // v7.16 — enhanced typography is now the
                                 // shipped default: a true display treatment —
                                 // ExtraBold geom at 34sp with negative
