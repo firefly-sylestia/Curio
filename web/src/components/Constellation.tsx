@@ -84,15 +84,15 @@ const DARK_BG_STARS: BgStar[] = [
 ];
 
 const LIGHT_BG_STARS: BgStar[] = [
-  { cx: 18, cy: 22, r: 0.75, fill: '#d7e1ec', opacity: 0.48 },
-  { cx: 61, cy: 70, r: 0.5, fill: '#c3d1df', opacity: 0.42 },
-  { cx: 128, cy: 29, r: 0.7, fill: '#e0e8f0', opacity: 0.45 },
-  { cx: 157, cy: 91, r: 0.5, fill: '#c5d4e2', opacity: 0.42 },
-  { cx: 39, cy: 130, r: 0.5, fill: '#d4e0eb', opacity: 0.40 },
-  { cx: 101, cy: 151, r: 0.65, fill: '#e0e8f0', opacity: 0.42 },
-  { cx: 151, cy: 164, r: 0.4, fill: '#c4d2df', opacity: 0.45 },
-  { cx: 87, cy: 103, r: 0.4, fill: '#e0e8f0', opacity: 0.40 },
-  { cx: 12, cy: 166, r: 0.4, fill: '#c7d5e2', opacity: 0.42 },
+  { cx: 18, cy: 22, r: 0.75, fill: '#b8c8d8', opacity: 0.50 },
+  { cx: 61, cy: 70, r: 0.5, fill: '#a8bcd0', opacity: 0.45 },
+  { cx: 128, cy: 29, r: 0.7, fill: '#c0d0de', opacity: 0.48 },
+  { cx: 157, cy: 91, r: 0.5, fill: '#aec0d2', opacity: 0.45 },
+  { cx: 39, cy: 130, r: 0.5, fill: '#b4c6d6', opacity: 0.42 },
+  { cx: 101, cy: 151, r: 0.65, fill: '#c0d0de', opacity: 0.45 },
+  { cx: 151, cy: 164, r: 0.4, fill: '#afc0d0', opacity: 0.48 },
+  { cx: 87, cy: 103, r: 0.4, fill: '#c0d0de', opacity: 0.42 },
+  { cx: 12, cy: 166, r: 0.4, fill: '#b2c4d4', opacity: 0.45 },
 ];
 
 // Distant + small field stars
@@ -116,22 +116,22 @@ const DARK_FIELD = [
 ];
 
 const LIGHT_DISTANT = [
-  { cx: 150, cy: 260, r: 1.2, opacity: 0.55 },
-  { cx: 1160, cy: 260, r: 1.1, opacity: 0.52 },
-  { cx: 1240, cy: 780, r: 1.2, opacity: 0.52 },
-  { cx: 190, cy: 820, r: 1.0, opacity: 0.50 },
-  { cx: 1080, cy: 1160, r: 1.1, opacity: 0.52 },
+  { cx: 150, cy: 260, r: 1.2, opacity: 0.60 },
+  { cx: 1160, cy: 260, r: 1.1, opacity: 0.58 },
+  { cx: 1240, cy: 780, r: 1.2, opacity: 0.58 },
+  { cx: 190, cy: 820, r: 1.0, opacity: 0.56 },
+  { cx: 1080, cy: 1160, r: 1.1, opacity: 0.58 },
 ];
 const LIGHT_FIELD = [
-  { cx: 90, cy: 600, r: 0.75, opacity: 0.35 },
-  { cx: 230, cy: 470, r: 0.65, opacity: 0.35 },
-  { cx: 320, cy: 300, r: 0.75, opacity: 0.35 },
-  { cx: 1050, cy: 420, r: 0.75, opacity: 0.35 },
-  { cx: 1190, cy: 520, r: 0.65, opacity: 0.35 },
-  { cx: 1130, cy: 980, r: 0.75, opacity: 0.35 },
-  { cx: 920, cy: 1190, r: 0.65, opacity: 0.35 },
-  { cx: 760, cy: 1260, r: 0.75, opacity: 0.35 },
-  { cx: 300, cy: 1080, r: 0.65, opacity: 0.35 },
+  { cx: 90, cy: 600, r: 0.75, opacity: 0.42 },
+  { cx: 230, cy: 470, r: 0.65, opacity: 0.42 },
+  { cx: 320, cy: 300, r: 0.75, opacity: 0.42 },
+  { cx: 1050, cy: 420, r: 0.75, opacity: 0.42 },
+  { cx: 1190, cy: 520, r: 0.65, opacity: 0.42 },
+  { cx: 1130, cy: 980, r: 0.75, opacity: 0.42 },
+  { cx: 920, cy: 1190, r: 0.65, opacity: 0.42 },
+  { cx: 760, cy: 1260, r: 0.75, opacity: 0.42 },
+  { cx: 300, cy: 1080, r: 0.65, opacity: 0.42 },
 ];
 
 // ── Zoom constants ─────────────────────────────────────────────────
@@ -224,6 +224,9 @@ export const Constellation: React.FC<{
     const star = STARS.find(s => s.name === name);
     if (!star) return;
 
+    // Haptic feedback (Web Vibration API — Android Chrome, some mobile browsers)
+    try { navigator.vibrate?.(10); } catch {}
+
     const nx = Math.max(0, Math.min(FULL_SIZE - ZOOM_SIZE, star.x - ZOOM_SIZE / 2));
     const ny = Math.max(0, Math.min(FULL_SIZE - ZOOM_SIZE, star.y - ZOOM_SIZE / 2));
     targetRef.current = { x: nx, y: ny, w: ZOOM_SIZE, h: ZOOM_SIZE };
@@ -305,10 +308,10 @@ export const Constellation: React.FC<{
               </>
             ) : (
               <>
-                <stop offset="0%" stopColor="#344b67" />
-                <stop offset="35%" stopColor="#2d425c" />
-                <stop offset="68%" stopColor="#26394f" />
-                <stop offset="100%" stopColor="#202f42" />
+                <stop offset="0%" stopColor="#7a9ab5" />
+                <stop offset="35%" stopColor="#6a8ca8" />
+                <stop offset="68%" stopColor="#5d7f9c" />
+                <stop offset="100%" stopColor="#527490" />
               </>
             )}
           </radialGradient>
@@ -323,9 +326,9 @@ export const Constellation: React.FC<{
               </>
             ) : (
               <>
-                <stop offset="0%" stopColor="#987da9" stopOpacity="0.14" />
-                <stop offset="45%" stopColor="#806b92" stopOpacity="0.07" />
-                <stop offset="100%" stopColor="#26394f" stopOpacity="0" />
+                <stop offset="0%" stopColor="#9a88b0" stopOpacity="0.18" />
+                <stop offset="45%" stopColor="#8878a0" stopOpacity="0.09" />
+                <stop offset="100%" stopColor="#527490" stopOpacity="0" />
               </>
             )}
           </radialGradient>
@@ -340,9 +343,9 @@ export const Constellation: React.FC<{
               </>
             ) : (
               <>
-                <stop offset="0%" stopColor="#7197bd" stopOpacity="0.18" />
-                <stop offset="45%" stopColor="#607f9f" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#26394f" stopOpacity="0" />
+                <stop offset="0%" stopColor="#8aacca" stopOpacity="0.22" />
+                <stop offset="45%" stopColor="#7a9cb8" stopOpacity="0.10" />
+                <stop offset="100%" stopColor="#527490" stopOpacity="0" />
               </>
             )}
           </radialGradient>
@@ -393,7 +396,7 @@ export const Constellation: React.FC<{
         ))}
         {field.map((s, i) => (
           <circle key={`f${i}`} cx={s.cx} cy={s.cy} r={s.r}
-            fill={isDark ? '#ffffff' : '#d0deea'} opacity={s.opacity} />
+            fill={isDark ? '#ffffff' : '#c8d8e6'} opacity={s.opacity} />
         ))}
 
         {/* ── Main stars (tappable) ──────────────────────────── */}

@@ -34,9 +34,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -74,6 +76,7 @@ fun CurioConstellation(
 ) {
     val isDark = isCurioDarkTheme()
     val pageBg = MaterialTheme.colorScheme.background
+    val haptics = LocalHapticFeedback.current
 
     // Named star positions in the 1400×1400 viewBox, normalized to 0–1.
     val stars = remember { constellationStars() }
@@ -119,12 +122,15 @@ fun CurioConstellation(
         label = "nebulaPulse"
     )
 
-    // Auto-zoom to star on tap (when 3D zoom enabled)
+    // Auto-zoom to star on tap (when 3D zoom enabled) + star-based tilt
     LaunchedEffect(selected, zoom3d) {
         if (selected != null && zoom3d) {
             val star = stars.getOrNull(explored.indexOf(selected)) ?: return@LaunchedEffect
             val cx = (star.nx - 0.5f) * 80f
             val cy = (star.ny - 0.5f) * 80f
+            // Tilt toward the star's position relative to center
+            tiltY = (star.nx - 0.5f) * 16f
+            tiltX = -(star.ny - 0.5f) * 10f
             coroutineScope {
                 launch { zoom.animateTo(2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
                 launch { offsetX.animateTo(-cx, spring(dampingRatio = 0.7f, stiffness = 200f)) }
@@ -192,6 +198,7 @@ fun CurioConstellation(
                                     val d = sqrt(dx * dx + dy * dy)
                                     if (d <= star.hitRadius.toPx()) star to d else null
                                 }.minByOrNull { it.second }?.first
+                                if (hit != null) haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                                 onSelect(hit?.let { s ->
                                     val idx = stars.indexOf(s)
                                     explored.getOrNull(idx)
