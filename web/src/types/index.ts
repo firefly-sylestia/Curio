@@ -1,19 +1,21 @@
 // Curio Web App - Type Definitions
 // Mirrors Android app's data models
 
-// Category System
-export type CategoryId = 
+// Category Systemexport type CategoryId = 
   | 'ARTISTS' | 'ALBUMS' | 'SONGS'
-  | 'DIRECTORS' | 'FILMS' | 'SERIES'
+  | 'DIRECTORS' | 'FILMS' | 'ANIMATED_MOVIES' | 'SERIES'
   | 'AUTHORS' | 'BOOKS'
   | 'PAINTERS' | 'ARTWORKS'
   | 'SCIENTISTS' | 'DISCOVERIES'
   | 'ANIME' | 'MANGA' | 'MANHWA'
   | 'GAMES'
-  | 'MYTHOLOGY'
-  | 'SPORTS'
-  | 'FOOD'
+  | 'MYTHOLOGY' | 'SPORTS' | 'FOOD'
   | 'INTERNET'
+  | 'BIOLOGY' | 'CHEMISTRY' | 'ANIMALS' | 'PLANTS'
+  | 'TECHNOLOGIES' | 'ASTRONOMY' | 'HISTORY' | 'GEOLOGY'
+  | 'MEDICINE' | 'PSYCHOLOGY' | 'MATHEMATICS' | 'ECONOMICS'
+  | 'LANGUAGE' | 'ENGINEERING' | 'OCEANS'
+  | 'QUOTES'
   | 'WILDCARD';
 
 export type CategoryFamily = 

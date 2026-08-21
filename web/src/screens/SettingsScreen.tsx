@@ -266,6 +266,16 @@ export const SettingsScreen: React.FC = () => {
             </div>
           </div>
           <div className="mb-6">
+            <CurioSectionHeader title="Experiments" />
+            <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
+              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-nav-pill') === 'true'} onChange={(v) => localStorage.setItem('curio-nav-pill', v ? 'true' : 'false')} label="Nav-style buttons" description="Categories wear the floating pill look" /></div>
+              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-star-zoom-3d') === 'true'} onChange={(v) => localStorage.setItem('curio-star-zoom-3d', v ? 'true' : 'false')} label="3D star zoom" description="Tap a constellation star for a perspective tilt + glow" /></div>
+              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-hero-shadow') === 'true'} onChange={(v) => localStorage.setItem('curio-hero-shadow', v ? 'true' : 'false')} label="Main card shadow" description="Ambient depth below the hero card" /></div>
+              <div className="px-4 py-2"><CurioToggle checked={localStorage.getItem('curio-paper-header') !== 'false'} onChange={(v) => localStorage.setItem('curio-paper-header', v ? 'true' : 'false')} label="Paper stat card" description="Soft rose paper card on stat panes" /></div>
+              <div className="px-4 pb-2"><CurioToggle checked={localStorage.getItem('curio-torn-hero-sheet') === 'true'} onChange={(v) => localStorage.setItem('curio-torn-hero-sheet', v ? 'true' : 'false')} label="Torn hero under-sheet" description="White paper lip below torn heroes" /></div>
+            </div>
+          </div>
+          <div className="mb-6">
             <CurioSectionHeader title="About" />
             <div className="rounded-2xl overflow-hidden" style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(59,10,23,0.03)' }}>
               <SettingsItem icon="info" title="About Curio" description="Version 1.0.0" onClick={() => {}} />

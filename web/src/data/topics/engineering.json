@@ -1,0 +1,1501 @@
+[
+ {
+  "id": "engineering-what-is-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "What Is Engineering?",
+  "teaser": "Engineering is applied science: using physics, math, and creativity to design structures, machines, and systems that solve real problems. It's the bridge between discovery and invention.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "basics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The branches of engineering",
+   "durationMinutes": 7,
+   "instruction": "Learn the major engineering disciplines (mechanical, civil, electrical, chemical, software) and what each one does, then pick which one interests you most and why."
+  }
+ },
+ {
+  "id": "engineering-structural-analysis",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Structural Engineering",
+  "teaser": "The discipline that makes buildings stand up: analyzing loads, stresses, and material behavior so bridges don't collapse and skyscrapers don't sway. Every structure is a conversation with gravity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "civil",
+   "structures"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How structural engineers design buildings",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between compression, tension, and shear forces in structures, then find one building that pushes structural engineering to its limits."
+  }
+ },
+ {
+  "id": "engineering-fluid-dynamics",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Fluid Dynamics",
+  "teaser": "The physics of liquids and gases in motion: how air flows over wings, how water moves through pipes, how blood travels through arteries. Every fluid problem is a turbulence problem in disguise.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "physics",
+   "fluids"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Bernoulli's principle and its applications",
+   "durationMinutes": 8,
+   "instruction": "Learn how Bernoulli's principle explains lift on airplane wings, then find one everyday example where fluid dynamics shapes the design of a product."
+  }
+ },
+ {
+  "id": "engineering-thermodynamics",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Thermodynamics",
+  "teaser": "The science of heat and energy: why engines can't be 100% efficient, why perpetual motion is impossible, and why every energy conversion produces waste heat. The laws of thermodynamics are non-negotiable.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "physics",
+   "energy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The four laws of thermodynamics",
+   "durationMinutes": 10,
+   "instruction": "Learn the four laws (zeroth through third), focusing on the second law's entropy principle, then explain why no engine can ever be perfectly efficient."
+  }
+ },
+ {
+  "id": "engineering-materials-science",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Materials Science",
+  "teaser": "Why steel is strong, rubber is flexible, and glass is transparent: materials science studies how atomic structure determines properties. Every engineering breakthrough starts with a new material.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "science"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How material properties are determined",
+   "durationMinutes": 7,
+   "instruction": "Learn how crystal structure, bonding, and microstructure determine properties like strength, conductivity, and transparency, then find one material that changed engineering history."
+  }
+ },
+ {
+  "id": "engineering-concrete",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Reinforced Concrete",
+  "teaser": "Concrete is strong in compression but weak in tension. Steel bars fix that. Together, they created the modern world: bridges, dams, skyscrapers, and highways — all possible because steel and concrete complement each other.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "construction"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why concrete and steel work together",
+   "durationMinutes": 6,
+   "instruction": "Learn how steel's tensile strength compensates for concrete's weakness, then explain why you can see rebar sticking out of earthquake-damaged buildings."
+  }
+ },
+ {
+  "id": "engineering-steel",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Steel",
+  "teaser": "Iron + carbon = steel: the alloy that built the modern world. From the Bessemer process to high-strength low-alloy steel, each innovation made structures lighter, stronger, and cheaper.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "metallurgy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How steel is made and why it matters",
+   "durationMinutes": 8,
+   "instruction": "Learn the Bessemer process and modern steelmaking, then find one structure that would be impossible without steel."
+  }
+ },
+ {
+  "id": "engineering-composites",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Composite Materials",
+  "teaser": "Carbon fiber, fiberglass, Kevlar: materials made by combining two or more substances to get properties neither has alone. Lighter than steel, stronger than aluminum — and expensive.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "aerospace"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How composites are engineered",
+   "durationMinutes": 8,
+   "instruction": "Learn how fiber orientation and matrix material determine composite properties, then find one application where composites replaced metal and why."
+  }
+ },
+ {
+  "id": "engineering-bridge-design",
+  "categoryId": "ENGINEERING",
+  "subtype": "Structure",
+  "name": "Bridge Engineering",
+  "teaser": "Bridges are engineering's most visible art: spanning gaps while carrying loads, resisting wind and earthquakes, and looking elegant doing it. Each type — beam, arch, suspension, cable-stayed — solves the same problem differently.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "civil",
+   "bridges"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Types of bridges and how they work",
+   "durationMinutes": 8,
+   "instruction": "Learn how beam, arch, suspension, and cable-stayed bridges distribute forces, then find one bridge that exemplifies each type."
+  }
+ },
+ {
+  "id": "engineering-suspension-bridge",
+  "categoryId": "ENGINEERING",
+  "subtype": "Structure",
+  "name": "The Suspension Bridge",
+  "teaser": "Cables hang from towers, the deck hangs from cables — elegant, efficient, and terrifying in high winds. The Golden Gate, Akashi Kaikyo, and Brooklyn Bridge are engineering's most dramatic structures.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "bridges",
+   "structures"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How suspension bridges resist wind",
+   "durationMinutes": 8,
+   "instruction": "Learn how the Tacoma Narrows collapse (1940) changed bridge aerodynamics, then explain how modern suspension bridges prevent similar failures."
+  }
+ },
+ {
+  "id": "engineering-skyscraper",
+  "categoryId": "ENGINEERING",
+  "subtype": "Structure",
+  "name": "Skyscraper Engineering",
+  "teaser": "Building 100+ stories means fighting gravity, wind, and your own weight. The Burj Khalifa, Shanghai Tower, and One World Trade Center each solved the problem of going tall differently.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "tall-buildings",
+   "structures"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How skyscrapers stay standing",
+   "durationMinutes": 8,
+   "instruction": "Learn about tube structures, outrigger trusses, and tuned mass dampers, then explain why the Burj Khalifa's 'buttressed core' was revolutionary."
+  }
+ },
+ {
+  "id": "engineering-tunnel",
+  "categoryId": "ENGINEERING",
+  "subtype": "Structure",
+  "name": "Tunnel Engineering",
+  "teaser": "Digging through mountains and under rivers: tunnel boring machines, pressurized shafts, and geological surveys make the impossible routine. The Channel Tunnel took 6 years and 13,000 workers.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "civil",
+   "underground"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How tunnels are built",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between bored tunnels and cut-and-cover tunnels, then find one tunnel project that pushed engineering to its limits."
+  }
+ },
+ {
+  "id": "engineering-dam",
+  "categoryId": "ENGINEERING",
+  "subtype": "Structure",
+  "name": "Dam Engineering",
+  "teaser": "Holding back billions of tons of water: dams are among the largest structures humans build. The Three Gorges Dam is the world's largest power station — and displaced 1.3 million people.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "civil",
+   "water"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How dams work and fail",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between gravity, arch, and buttress dams, then find one dam failure and what engineers learned from it."
+  }
+ },
+ {
+  "id": "engineering-hydraulic-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Hydraulic Engineering",
+  "teaser": "Controlling water: from ancient irrigation canals to modern flood barriers, hydraulic engineers shape rivers, manage coastlines, and deliver clean water to millions.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "water",
+   "infrastructure"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How hydraulic engineering shapes civilization",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Netherlands' delta works and their flood defense system, then explain how water engineering enabled agriculture and urbanization."
+  }
+ },
+ {
+  "id": "engineering-quantum-computing-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Quantum Computing Engineering",
+  "teaser": "Building computers that exploit quantum mechanics: superposition and entanglement let quantum bits solve problems classical computers can't touch. Engineering them requires temperatures colder than outer space.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "quantum",
+   "computing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How quantum computers are engineered",
+   "durationMinutes": 10,
+   "instruction": "Learn about superconducting qubits and why quantum computers need millikelvin temperatures, then find one problem quantum computers are expected to solve better than classical ones."
+  }
+ },
+ {
+  "id": "engineering-iceberg-principle",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "The Iceberg Principle",
+  "teaser": "In engineering, what you see is the tip: beneath every product, bridge, or software system lie thousands of invisible decisions, calculations, and trade-offs. The visible is 10% of the work.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "design",
+   "process"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What makes engineering hard",
+   "durationMinutes": 5,
+   "instruction": "Consider the hidden complexity behind a simple object like a paperclip or a door handle, then explain why engineering is more than just applying formulas."
+  }
+ },
+ {
+  "id": "engineering-buckminster-fuller",
+  "categoryId": "ENGINEERING",
+  "subtype": "Inventor",
+  "name": "Buckminster Fuller",
+  "teaser": "Architect, inventor, systems thinker: Fuller designed the geodesic dome, coined 'Spaceship Earth,' and spent his life asking how technology could make 'more with less.' His ideas were decades ahead.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "design",
+   "futurism"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Fuller's geodesic dome and tensegrity",
+   "durationMinutes": 8,
+   "instruction": "Learn how geodesic domes distribute stress through triangular networks, then find one real-world application of geodesic design."
+  }
+ },
+ {
+  "id": "engineering-tesla-nikola",
+  "categoryId": "ENGINEERING",
+  "subtype": "Inventor",
+  "name": "Nikola Tesla",
+  "teaser": "The inventor of AC power, the induction motor, and the Tesla coil. Tesla's alternating current won the 'War of Currents' and powers the modern world — but he died poor and forgotten.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "electricity",
+   "inventors"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Tesla vs Edison: the War of Currents",
+   "durationMinutes": 10,
+   "instruction": "Learn why AC power (Tesla) beat DC power (Edison) for long-distance transmission, then find one of Tesla's inventions that's still essential today."
+  }
+ },
+ {
+  "id": "engineering-isaac-newton-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Newton's Laws in Engineering",
+  "teaser": "F=ma isn't just physics — it's the foundation of every structural calculation, vehicle design, and rocket trajectory. Engineering is Newton's laws applied with a budget and a deadline.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "physics",
+   "mechanics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Newton's three laws apply to engineering",
+   "durationMinutes": 7,
+   "instruction": "Find one engineering application for each of Newton's three laws (inertia, F=ma, action-reaction), then explain why structural engineers care about equilibrium."
+  }
+ },
+ {
+  "id": "engineering-finite-element-analysis",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Finite Element Analysis",
+  "teaser": "Breaking a complex structure into millions of tiny pieces and solving equations for each one. FEA lets engineers simulate stress, heat, and vibration before building anything — saving billions in prototypes.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "simulation",
+   "computing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How FEA works in practice",
+   "durationMinutes": 8,
+   "instruction": "Learn the basic concept of discretization (breaking continuous objects into finite elements), then find one product that was designed using FEA simulation."
+  }
+ },
+ {
+  "id": "engineering-fatigue-failure",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Fatigue Failure",
+  "teaser": "Materials break under repeated stress even when the load is below their ultimate strength. The de Havilland Comet disintegrated in mid-air because of fatigue cracks around square windows.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "failure"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why materials fail under repeated loading",
+   "durationMinutes": 7,
+   "instruction": "Learn the S-N curve (stress vs cycles to failure), then explain why airplane windows are round and not square."
+  }
+ },
+ {
+  "id": "engineering-corrosion",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Corrosion Engineering",
+  "teaser": "Metal wants to return to ore: rust is nature's default. Corrosion costs the global economy $2.5 trillion annually — more than all natural disasters combined. Fighting it is an endless battle.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "maintenance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How engineers fight corrosion",
+   "durationMinutes": 7,
+   "instruction": "Learn about galvanic corrosion, sacrificial anodes, and protective coatings, then find one structure where corrosion control is a major engineering challenge."
+  }
+ },
+ {
+  "id": "engineering-cad",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Computer-Aided Design",
+  "teaser": "From T-square and drafting table to SolidWorks and AutoCAD: CAD transformed engineering from hand drawing to digital simulation. Today, engineers can test thousands of designs before cutting metal.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "design",
+   "software"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How CAD changed engineering",
+   "durationMinutes": 6,
+   "instruction": "Compare the old drafting process with modern parametric CAD, then find one product that could only be designed with computer simulation."
+  }
+ },
+ {
+  "id": "engineering-patent-system",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Patents and Innovation",
+  "teaser": "A patent grants a 20-year monopoly in exchange for disclosing an invention. It's a bargain: temporary exclusivity for permanent knowledge. But does it help or hinder innovation?",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "innovation",
+   "law"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How patents incentivize (or block) innovation",
+   "durationMinutes": 7,
+   "instruction": "Learn how the patent system works, then debate whether patents help small inventors or mainly protect large corporations."
+  }
+ },
+ {
+  "id": "engineering-systems-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Systems Engineering",
+  "teaser": "When the problem is too complex for one discipline — a spacecraft, a power grid, an airport — systems engineers manage the interfaces between components so the whole thing works.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "management",
+   "complexity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What systems engineers actually do",
+   "durationMinutes": 7,
+   "instruction": "Learn the V-model of systems engineering (requirements → design → implementation → verification → validation), then find one project that needed systems engineering to succeed."
+  }
+ },
+ {
+  "id": "engineering-reliability-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Reliability Engineering",
+  "teaser": "Making things that don't break: reliability engineers calculate failure probabilities, design redundancies, and predict maintenance schedules. The goal is the number that matters most: uptime.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "quality",
+   "safety"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How reliability is engineered",
+   "durationMinutes": 7,
+   "instruction": "Learn about mean time between failures (MTBF) and redundant design, then find one system where reliability engineering prevents catastrophic failure."
+  }
+ },
+ {
+  "id": "engineering-quality-control",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Quality Control",
+  "teaser": "Statistical process control, Six Sigma, zero defects: quality engineering ensures that products meet specifications every time, not just sometimes. The cost of poor quality is measured in recalls, lawsuits, and lost trust.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "manufacturing",
+   "quality"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How quality control works in manufacturing",
+   "durationMinutes": 7,
+   "instruction": "Learn about control charts and statistical process control, then find one famous quality failure (Ford Pinto, Boeing 737 MAX) and what went wrong."
+  }
+ },
+ {
+  "id": "engineering-safety-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Safety Engineering",
+  "teaser": "Every airplane crash, bridge collapse, and industrial accident teaches engineers how to prevent the next one. Safety engineering is the discipline of learning from disasters — ideally before they happen.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "safety",
+   "risk"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How engineers prevent disasters",
+   "durationMinutes": 8,
+   "instruction": "Learn about failure mode and effects analysis (FMEA), then find one engineering disaster that changed safety regulations."
+  }
+ },
+ {
+  "id": "engineering-control-systems",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Control Systems",
+  "teaser": "From thermostat to autopilot: control systems use feedback to maintain desired states. The PID controller — invented in 1922 — still runs most of the world's automated processes.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "automation",
+   "feedback"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How feedback loops control systems",
+   "durationMinutes": 8,
+   "instruction": "Learn the concept of negative feedback in control systems, then find three everyday devices that use PID control."
+  }
+ },
+ {
+  "id": "engineering-power-grid",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "The Power Grid",
+  "teaser": "The largest machine ever built: power grids balance supply and demand in real time across continents. When you flip a light switch, the grid responds in milliseconds to keep frequency stable at 50 or 60 Hz.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "electrical",
+   "infrastructure"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the electrical grid works",
+   "durationMinutes": 10,
+   "instruction": "Learn how grid operators balance supply and demand in real time, then explain why renewable energy makes grid balancing harder."
+  }
+ },
+ {
+  "id": "engineering-water-treatment",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Water Treatment Systems",
+  "teaser": "Turning river water into drinking water: coagulation, filtration, disinfection. Water treatment plants are invisible engineering marvels that prevent millions of deaths every year.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "water",
+   "public-health"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How water gets from river to tap",
+   "durationMinutes": 7,
+   "instruction": "Learn the steps of municipal water treatment, then explain why water chlorination is considered one of the greatest public health achievements in history."
+  }
+ },
+ {
+  "id": "engineering-wastewater",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Wastewater Engineering",
+  "teaser": "After you flush: the invisible journey through sewers, treatment plants, and back to rivers. Wastewater engineering protects public health and the environment — and it's underfunded everywhere.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "water",
+   "environment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What happens to wastewater",
+   "durationMinutes": 7,
+   "instruction": "Learn the three stages of wastewater treatment (primary, secondary, tertiary), then explain why combined sewer overflows are a growing problem in old cities."
+  }
+ },
+ {
+  "id": "engineering-traffic-engineering",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Traffic Engineering",
+  "teaser": "Why do traffic jams happen when there's no accident? Traffic engineers study flow theory, signal timing, and human behavior to keep cities moving — and they've discovered that adding lanes often makes things worse.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "transportation",
+   "cities"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why traffic jams happen",
+   "durationMinutes": 7,
+   "instruction": "Learn about induced demand (why building more lanes increases traffic), then explain how traffic signals are timed to create 'green waves.'"
+  }
+ },
+ {
+  "id": "engineering-hvac",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "HVAC Engineering",
+  "teaser": "Heating, ventilation, and air conditioning: the engineering that makes indoor life possible. HVAC systems consume 40% of building energy — making them both essential and a climate challenge.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "buildings",
+   "energy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How HVAC systems work",
+   "durationMinutes": 7,
+   "instruction": "Learn the refrigeration cycle that makes air conditioning possible, then explain why buildings in hot climates need so much energy for cooling."
+  }
+ },
+ {
+  "id": "engineering-gps",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "GPS Engineering",
+  "teaser": "24 satellites, atomic clocks, and relativistic corrections: GPS triangulates your position to within 3 meters. Einstein's theory of relativity is built into every navigation app on your phone.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "navigation",
+   "satellites"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How GPS works",
+   "durationMinutes": 8,
+   "instruction": "Learn how GPS uses time-of-flight from satellites, then explain why GPS satellites need relativistic corrections to stay accurate."
+  }
+ },
+ {
+  "id": "engineering-semiconductor",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Semiconductor Engineering",
+  "teaser": "The foundation of all modern electronics: silicon wafers doped with precise impurities, patterned with features smaller than viruses. Every chip is a city of billions of transistors.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "electronics",
+   "chips"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How microchips are manufactured",
+   "durationMinutes": 10,
+   "instruction": "Learn the photolithography process that etches circuits onto silicon, then explain why the latest chips cost $20 billion to build a factory for."
+  }
+ },
+ {
+  "id": "engineering-3d-printing",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Additive Manufacturing",
+  "teaser": "Building objects layer by layer from digital designs: 3D printing has gone from prototyping curiosity to production method. Aerospace, medical, and construction are all being transformed.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "manufacturing",
+   "3d-printing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How 3D printing is changing manufacturing",
+   "durationMinutes": 7,
+   "instruction": "Learn the main 3D printing technologies (FDM, SLA, SLS, DMLS), then find one application where 3D printing enables something impossible with traditional manufacturing."
+  }
+ },
+ {
+  "id": "engineering-robotics",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Robotics Engineering",
+  "teaser": "Building machines that sense, think, and act: robotics combines mechanical engineering, electrical engineering, and computer science. From factory arms to Mars rovers, robots extend human capability.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "robotics",
+   "automation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The components of a robot",
+   "durationMinutes": 8,
+   "instruction": "Learn the three pillars of robotics (sensing, processing, actuation), then find one robot that pushed the boundaries of what machines can do."
+  }
+ },
+ {
+  "id": "engineering-aerospace",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Aerospace Engineering",
+  "teaser": "Designing aircraft and spacecraft: from the Wright Flyer to the James Webb Space Telescope, aerospace engineering pushes the boundaries of what flies, what orbits, and what returns safely.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "aerospace",
+   "flight"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The challenges of aerospace engineering",
+   "durationMinutes": 8,
+   "instruction": "Learn why aerospace engineers obsess over weight, then explain how the Space Shuttle's thermal protection system survived reentry."
+  }
+ },
+ {
+  "id": "engineering-nuclear",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Nuclear Engineering",
+  "teaser": "Harnessing the atom: nuclear power, medical isotopes, and weapons. Nuclear engineering demands extraordinary safety standards because the consequences of failure are measured in centuries.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "nuclear",
+   "energy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How nuclear power plants work",
+   "durationMinutes": 10,
+   "instruction": "Learn the difference between fission and fusion reactors, then explain why nuclear power is both a climate solution and a political nightmare."
+  }
+ },
+ {
+  "id": "engineering-biomedical",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Biomedical Engineering",
+  "teaser": "Engineering meets medicine: prosthetics, imaging machines, artificial organs, and wearable sensors. Biomedical engineers bridge the gap between technology and the human body.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "medicine",
+   "biotech"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Breakthroughs in biomedical engineering",
+   "durationMinutes": 8,
+   "instruction": "Learn about MRI technology, cochlear implants, or prosthetic limbs, then find one biomedical innovation that's changing patient care today."
+  }
+ },
+ {
+  "id": "engineering-environmental",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Environmental Engineering",
+  "teaser": "Cleaning up the mess: water purification, air pollution control, waste management, and remediation. Environmental engineers are the ones who figure out how to undo damage while preventing more.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "environment",
+   "sustainability"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How environmental engineering protects public health",
+   "durationMinutes": 7,
+   "instruction": "Learn about air quality standards and how engineers design scrubbers and filters, then find one environmental engineering success story."
+  }
+ },
+ {
+  "id": "engineering-petroleum",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Petroleum Engineering",
+  "teaser": "Finding oil, extracting it, and getting it to refineries: petroleum engineers design the infrastructure that powers modern civilization — and face the challenge of doing it sustainably.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "oil",
+   "energy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How oil is extracted",
+   "durationMinutes": 8,
+   "instruction": "Learn about drilling, hydraulic fracturing, and enhanced oil recovery, then explain why petroleum engineers are now being recruited for geothermal energy."
+  }
+ },
+ {
+  "id": "engineering-mining",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Mining Engineering",
+  "teaser": "Extracting minerals from the earth: open pits, underground tunnels, and mineral processing. Mining engineering feeds every other industry — and faces growing environmental scrutiny.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "mining",
+   "resources"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How modern mining works",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between surface and underground mining, then find one mineral that's critical for renewable energy technology."
+  }
+ },
+ {
+  "id": "engineering-ocean",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Ocean Engineering",
+  "teaser": "Building for the sea: offshore platforms, subsea cables, coastal defenses, and autonomous underwater vehicles. The ocean is the harshest engineering environment on Earth.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "ocean",
+   "marine"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Challenges of engineering in the ocean",
+   "durationMinutes": 8,
+   "instruction": "Learn about corrosion, wave loading, and deep-sea pressure, then find one ocean engineering project that pushed technology forward."
+  }
+ },
+ {
+  "id": "engineering-agricultural",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Agricultural Engineering",
+  "teaser": "Feeding 8 billion people requires engineering: irrigation systems, precision farming, food processing, and machinery design. Agricultural engineers work where engineering meets biology.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "agriculture",
+   "food"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How engineering feeds the world",
+   "durationMinutes": 7,
+   "instruction": "Learn about precision agriculture (GPS-guided tractors, drone monitoring), then explain how engineering has multiplied crop yields since 1900."
+  }
+ },
+ {
+  "id": "engineering-archimedes",
+  "categoryId": "ENGINEERING",
+  "subtype": "Inventor",
+  "name": "Archimedes",
+  "teaser": "The ancient Greek who invented the screw, the lever, and the principle of buoyancy. Archimedes solved engineering problems 2,000 years ago that still guide modern design.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "ancient",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Archimedes' engineering inventions",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Archimedes screw (used for irrigation), the compound pulley, and the legendary heat ray, then explain why he's considered the first engineer."
+  }
+ },
+ {
+  "id": "engineering-da-vinci",
+  "categoryId": "ENGINEERING",
+  "subtype": "Inventor",
+  "name": "Leonardo da Vinci",
+  "teaser": "Painter, sculptor, and — secretly — one of history's greatest engineers. Da Vinci designed flying machines, tanks, solar power concentrators, and bridges, centuries before the technology existed.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "Renaissance",
+   "inventors"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Da Vinci's engineering designs",
+   "durationMinutes": 8,
+   "instruction": "Examine da Vinci's notebooks for designs like the helicopter precursor or the armored vehicle, then explain why many of his ideas couldn't be built in his lifetime."
+  }
+ },
+ {
+  "id": "engineering-james-watt",
+  "categoryId": "ENGINEERING",
+  "subtype": "Inventor",
+  "name": "James Watt",
+  "teaser": "The engineer who improved the steam engine and launched the Industrial Revolution. Watt's separate condenser turned a curiosity into the power source that changed the world.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "Industrial-Revolution",
+   "steam"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Watt's steam engine worked",
+   "durationMinutes": 8,
+   "instruction": "Learn what Newcomen's engine did wrong and how Watt's separate condenser fixed it, then explain why the steam engine is considered the most important invention of the Industrial Revolution."
+  }
+ },
+ {
+  "id": "engineering-isaambard-brunel",
+  "categoryId": "ENGINEERING",
+  "subtype": "Inventor",
+  "name": "Isambard Kingdom Brunel",
+  "teaser": "The Victorian engineer who built the Great Western Railway, the SS Great Britain, and the Clifton Suspension Bridge. Brunel thought big — almost absurdly big — and most of his projects worked.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "Victorian",
+   "railways"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Brunel's greatest engineering feats",
+   "durationMinutes": 10,
+   "instruction": "Learn about the SS Great Britain (the first iron-hulled, screw-propelled ocean liner), then explain how Brunel's tunnel under the Thames was built."
+  }
+ },
+ {
+  "id": "engineering-structural-redundancy",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Structural Redundancy",
+  "teaser": "If one beam fails, can the structure survive? Redundancy means having multiple load paths so that no single failure causes collapse. It's why buildings have more steel than the math requires.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "safety",
+   "structures"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why engineers overbuild",
+   "durationMinutes": 6,
+   "instruction": "Learn the difference between determinate and indeterminate structures, then explain why factors of safety exist and how engineers decide how much extra capacity to build in."
+  }
+ },
+ {
+  "id": "engineering-fatigue-testing",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Fatigue Testing",
+  "teaser": "Repeated stress kills materials: fatigue testing cycles loads thousands of times to predict when a part will fail. Every airplane wing, car suspension, and bridge cable is fatigue-tested before service.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "testing",
+   "safety"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How fatigue testing works",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Wöhler S-N curve and how fatigue limits are determined, then explain why airplane maintenance schedules are based on flight cycles."
+  }
+ },
+ {
+  "id": "engineering-tolerancing",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Engineering Tolerancing",
+  "teaser": "No part is made perfectly: tolerancing defines how much variation is acceptable. A shaft that's 0.01mm too thick won't fit; 0.01mm too thin will wobble. Getting tolerances right is the difference between machines that work and machines that don't.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "manufacturing",
+   "precision"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How tolerances are specified and why they matter",
+   "durationMinutes": 6,
+   "instruction": "Learn about GD&T (Geometric Dimensioning and Tolerancing), then explain why Swiss watches cost more than mass-produced ones."
+  }
+ },
+ {
+  "id": "engineering-vibration-analysis",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Vibration Analysis",
+  "teaser": "Everything vibrates: buildings in wind, bridges under traffic, engines at speed. Vibration engineers analyze natural frequencies to prevent resonance — the phenomenon that can shake a structure apart.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "dynamics",
+   "safety"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Resonance and why it matters",
+   "durationMinutes": 7,
+   "instruction": "Learn how resonance amplifies vibrations at natural frequencies, then explain why the Tacoma Narrows Bridge collapsed and how the Millennium Bridge wobble was fixed."
+  }
+ },
+ {
+  "id": "engineering-fire-protection",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Fire Protection Engineering",
+  "teaser": "Designing buildings that don't burn down: sprinkler systems, fire-resistant materials, evacuation routes, and smoke control. Fire engineers make the difference between a contained incident and a tragedy.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "safety",
+   "buildings"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How fire protection engineering works",
+   "durationMinutes": 7,
+   "instruction": "Learn the fire triangle (fuel, heat, oxygen) and how sprinkler systems work, then explain why the Grenfell Tower fire changed building regulations."
+  }
+ },
+ {
+  "id": "engineering-aviation-safety",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Aviation Safety Engineering",
+  "teaser": "Making air travel the safest form of transportation: every crash investigation, every design revision, every maintenance protocol is engineered to prevent the next accident.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "aviation",
+   "safety"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How aviation achieves its safety record",
+   "durationMinutes": 8,
+   "instruction": "Learn about redundant systems, fail-safe design, and accident investigation, then explain why modern air travel has a fatality rate of 0.07 per billion passenger-miles."
+  }
+ },
+ {
+  "id": "engineering-nuclear-safety",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Nuclear Safety Systems",
+  "teaser": "Three layers of containment, passive cooling, and defense in depth: nuclear safety engineering is the most rigorous in any industry because failure means contamination measured in millennia.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "nuclear",
+   "safety"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Defense in depth for nuclear plants",
+   "durationMinutes": 8,
+   "instruction": "Learn the five levels of defense in depth for nuclear reactors, then compare the safety philosophies of Chernobyl (Soviet) and Westinghouse (passive safety) designs."
+  }
+ },
+ {
+  "id": "engineering-civil-code",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Building Codes",
+  "teaser": "The minimum standards that keep buildings safe: load requirements, fire resistance, seismic design, and accessibility. Building codes are written in blood — every major disaster leads to a new clause.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "construction",
+   "regulation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How building codes evolve",
+   "durationMinutes": 7,
+   "instruction": "Learn how disasters lead to code changes (San Francisco 1906, Mexico City 1985, Chile 2010), then explain why some countries have weaker codes than others."
+  }
+ },
+ {
+  "id": "engineering-lean-manufacturing",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Lean Manufacturing",
+  "teaser": "Toyota's production system: eliminate waste, improve flow, empower workers. Lean manufacturing transformed global industry and proved that efficiency and quality aren't trade-offs — they're partners.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "manufacturing",
+   "efficiency"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The principles of lean manufacturing",
+   "durationMinutes": 8,
+   "instruction": "Learn the seven wastes of lean (overproduction, waiting, transport, etc.), then explain how just-in-time production reduces inventory costs."
+  }
+ },
+ {
+  "id": "engineering-electrical-power",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Electrical Engineering",
+  "teaser": "From Maxwell's equations to your smartphone: electrical engineering harnesses electromagnetism to generate, transmit, and use power. It's the invisible infrastructure behind modern life.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "electrical",
+   "electronics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The branches of electrical engineering",
+   "durationMinutes": 7,
+   "instruction": "Learn the difference between power engineering, electronics, signal processing, and telecommunications, then find one electrical engineering breakthrough that changed daily life."
+  }
+ },
+ {
+  "id": "engineering-chemical-process",
+  "categoryId": "ENGINEERING",
+  "subtype": "Discipline",
+  "name": "Chemical Engineering",
+  "teaser": "Turning raw materials into useful products at industrial scale: refineries, pharmaceutical plants, food processing, and semiconductor fabs. Chemical engineers make chemistry profitable.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "chemistry",
+   "industry"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What chemical engineers do",
+   "durationMinutes": 7,
+   "instruction": "Learn the difference between chemistry (lab scale) and chemical engineering (industrial scale), then find one product that requires chemical engineering to produce."
+  }
+ },
+ {
+  "id": "engineering-sustainable-design",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Sustainable Engineering",
+  "teaser": "Designing systems that meet today's needs without destroying tomorrow's: renewable energy, circular economy, green buildings. Sustainable engineering is no longer optional — it's the future of the profession.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "sustainability",
+   "climate"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Principles of sustainable engineering",
+   "durationMinutes": 8,
+   "instruction": "Learn about life-cycle assessment and cradle-to-cradle design, then find one engineering project that embodies sustainable design principles."
+  }
+ },
+ {
+  "id": "engineering-life-cycle-assessment",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Life-Cycle Assessment",
+  "teaser": "From raw material extraction to disposal: LCA tracks the environmental impact of a product across its entire life. It reveals that the 'greenest' choice isn't always obvious.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "sustainability",
+   "assessment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How LCA works",
+   "durationMinutes": 7,
+   "instruction": "Learn the four stages of LCA (extraction, manufacturing, use, disposal), then find one surprising LCA result — like when paper bags aren't always better than plastic."
+  }
+ },
+ {
+  "id": "engineering-simulation",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Engineering Simulation",
+  "teaser": "Testing in silicon before steel: computational fluid dynamics, finite element analysis, and digital twins let engineers predict how designs will perform without building physical prototypes.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "simulation",
+   "computing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How simulation replaces physical testing",
+   "durationMinutes": 7,
+   "instruction": "Learn about CFD (computational fluid dynamics) and how it simulates airflow, then find one product that was designed entirely through simulation."
+  }
+ },
+ {
+  "id": "engineering-bridge-failure",
+  "categoryId": "ENGINEERING",
+  "subtype": "History",
+  "name": "Notable Bridge Failures",
+  "teaser": "Tacoma Narrows, I-35W Minneapolis, Genoa Morandi: bridge failures teach engineers more than successes. Each collapse reveals a lesson about resonance, fatigue, corrosion, or human error.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "failures",
+   "bridges"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What bridge failures teach engineers",
+   "durationMinutes": 10,
+   "instruction": "Study the Tacoma Narrows collapse (aerodynamic instability) and the I-35W collapse (fatigue and corrosion), then explain what design changes followed."
+  }
+ },
+ {
+  "id": "engineering-challenger-disaster",
+  "categoryId": "ENGINEERING",
+  "subtype": "History",
+  "name": "The Challenger Disaster",
+  "teaser": "January 28, 1986: the Space Shuttle Challenger broke apart 73 seconds after launch, killing seven crew. The cause was an O-ring failure — engineers had warned management, but schedule pressure won.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "space",
+   "ethics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The engineering failures behind Challenger",
+   "durationMinutes": 10,
+   "instruction": "Learn about the O-ring problem and the engineers' warnings, then explain why the disaster is a case study in engineering ethics and organizational communication."
+  }
+ },
+ {
+  "id": "engineering-titanic",
+  "categoryId": "ENGINEERING",
+  "subtype": "History",
+  "name": "The Titanic's Engineering Failures",
+  "teaser": "The 'unsinkable' ship sank on its maiden voyage. The steel was brittle in cold water, the rivets were substandard, and the watertight compartments didn't reach the top deck. Hubris meets physics.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "maritime",
+   "failures"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What went wrong with the Titanic",
+   "durationMinutes": 10,
+   "instruction": "Learn about the metallurgy of the hull plates, the rivet quality, and the compartment design, then explain why modern shipbuilding standards changed after 1912."
+  }
+ },
+ {
+  "id": "engineering-quake-resistant",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Seismic Engineering",
+  "teaser": "Making buildings survive earthquakes: base isolation, tuned mass dampers, and ductile steel frames. Japan leads the world because it has to — the country sits on four tectonic plates.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "seismic",
+   "buildings"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How buildings survive earthquakes",
+   "durationMinutes": 8,
+   "instruction": "Learn about base isolation and seismic dampers, then compare Japan's approach to earthquake engineering with California's."
+  }
+ },
+ {
+  "id": "engineering-project-management",
+  "categoryId": "ENGINEERING",
+  "subtype": "System",
+  "name": "Engineering Project Management",
+  "teaser": "The art of delivering complex projects on time and on budget: Gantt charts, critical path analysis, earned value management. The best engineering in the world fails if the project is mismanaged.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "management",
+   "planning"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How engineering projects are managed",
+   "durationMinutes": 7,
+   "instruction": "Learn about the critical path method and earned value management, then find one famous engineering project that was completed on time (or explain why most aren't)."
+  }
+ },
+ {
+  "id": "engineering-civil-rights-bridges",
+  "categoryId": "ENGINEERING",
+  "subtype": "History",
+  "name": "Engineering and Social Justice",
+  "teaser": "Engineering is never neutral: the same profession that built highways also demolished Black neighborhoods. Understanding engineering's social impact is essential to building a just future.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "ethics",
+   "society"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Engineering's role in social inequality",
+   "durationMinutes": 8,
+   "instruction": "Learn about Robert Moses and urban highway construction through minority neighborhoods, then discuss how engineers can design more equitably."
+  }
+ },
+ {
+  "id": "engineering-superstructure",
+  "categoryId": "ENGINEERING",
+  "subtype": "Structure",
+  "name": "Space Structures",
+  "teaser": "Building in vacuum and microgravity: the ISS, satellite buses, and telescope mirrors require engineering solutions that work without air, without gravity, and with extreme temperature swings.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "space",
+   "structures"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the ISS was engineered",
+   "durationMinutes": 10,
+   "instruction": "Learn about the modular construction of the International Space Station, then explain why thermal management is one of the hardest problems in space engineering."
+  }
+ },
+ {
+  "id": "engineering-self-healing-materials",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Self-Healing Materials",
+  "teaser": "Materials that repair themselves: concrete embedded with bacteria that seal cracks, polymers that re-bond when cut. Self-healing materials could revolutionize infrastructure maintenance.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "innovation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How self-healing materials work",
+   "durationMinutes": 7,
+   "instruction": "Learn about bacterial self-healing concrete and vascular self-healing polymers, then explain why self-healing materials could save billions in infrastructure repair."
+  }
+ },
+ {
+  "id": "engineering-metamaterials",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Metamaterials",
+  "teaser": "Materials with properties not found in nature: negative refractive index, acoustic cloaking, programmable stiffness. Metamaterials are engineered at the micro-scale to do things that sound like science fiction.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "physics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What metamaterials can do",
+   "durationMinutes": 8,
+   "instruction": "Learn about negative-index materials and acoustic metamaterials, then find one potential application that could change everyday life."
+  }
+ },
+ {
+  "id": "engineering-biomimicry",
+  "categoryId": "ENGINEERING",
+  "subtype": "Concept",
+  "name": "Biomimicry",
+  "teaser": "Nature has been engineering for 3.8 billion years: shark skin reduces drag, spider silk is stronger than steel, termite mounds regulate temperature. Biomimicry copies nature's solutions to human problems.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "biology",
+   "design"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Engineering inspired by nature",
+   "durationMinutes": 7,
+   "instruction": "Find three products inspired by biological structures (Velcro from burrs, bullet trains from kingfisher beaks, building ventilation from termite mounds), then explain why nature is such a good engineer."
+  }
+ },
+ {
+  "id": "engineering-smart-materials",
+  "categoryId": "ENGINEERING",
+  "subtype": "Material",
+  "name": "Smart Materials",
+  "teaser": "Materials that respond to their environment: shape-memory alloys return to their original form when heated, piezoelectric materials generate electricity from pressure, electrochromic glass changes opacity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "engineering",
+   "materials",
+   "responsive"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How smart materials work",
+   "durationMinutes": 7,
+   "instruction": "Learn about shape-memory alloys (Nitinol) and piezoelectric materials, then find one application where smart materials enable something impossible with traditional materials."
+  }
+ }
+]
