@@ -200,13 +200,12 @@ private fun DrawScope.drawDarkBackground(
     // Space radial gradient
     drawCircle(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0xFF101d45),
-                Color(0xFF08132f),
-                Color(0xFF03091d),
-                Color(0xFF01030b)
+            colorStops = arrayOf(
+                0f to Color(0xFF101d45),
+                0.38f to Color(0xFF08132f),
+                0.72f to Color(0xFF03091d),
+                1f to Color(0xFF01030b)
             ),
-            stops = floatArrayOf(0f, 0.38f, 0.72f, 1f),
             center = Offset(w * 0.5f, h * 0.5f),
             radius = w * 0.78f
         ),
@@ -217,12 +216,11 @@ private fun DrawScope.drawDarkBackground(
     // Purple nebula — ellipse at (220, 400) rotated -25°
     drawOval(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0x268d45bd),
-                Color(0x0f55277f),
-                Color(0x0018072d)
+            colorStops = arrayOf(
+                0f to Color(0x268d45bd),
+                0.45f to Color(0x0f55277f),
+                1f to Color(0x0018072d)
             ),
-            stops = floatArrayOf(0f, 0.45f, 1f),
             center = Offset(px(220f), py(400f)),
             radius = pr(500f)
         ),
@@ -233,12 +231,11 @@ private fun DrawScope.drawDarkBackground(
     // Blue nebula — ellipse at (1160, 850) rotated 20°
     drawOval(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0x213979c9),
-                Color(0x0e24518c),
-                Color(0x00061128)
+            colorStops = arrayOf(
+                0f to Color(0x213979c9),
+                0.45f to Color(0x0e24518c),
+                1f to Color(0x00061128)
             ),
-            stops = floatArrayOf(0f, 0.45f, 1f),
             center = Offset(px(1160f), py(850f)),
             radius = pr(520f)
         ),
@@ -249,12 +246,11 @@ private fun DrawScope.drawDarkBackground(
     // Purple nebula 2 — ellipse at (700, 1170)
     drawOval(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0x268d45bd),
-                Color(0x0f55277f),
-                Color(0x0018072d)
+            colorStops = arrayOf(
+                0f to Color(0x268d45bd),
+                0.45f to Color(0x0f55277f),
+                1f to Color(0x0018072d)
             ),
-            stops = floatArrayOf(0f, 0.45f, 1f),
             center = Offset(px(700f), py(1170f)),
             radius = pr(470f)
         ),
@@ -286,13 +282,12 @@ private fun DrawScope.drawLightBackground(
     // Space radial gradient
     drawCircle(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0xFF344b67),
-                Color(0xFF2d425c),
-                Color(0xFF26394f),
-                Color(0xFF202f42)
+            colorStops = arrayOf(
+                0f to Color(0xFF344b67),
+                0.35f to Color(0xFF2d425c),
+                0.68f to Color(0xFF26394f),
+                1f to Color(0xFF202f42)
             ),
-            stops = floatArrayOf(0f, 0.35f, 0.68f, 1f),
             center = Offset(w * 0.5f, h * 0.48f),
             radius = w * 0.78f
         ),
@@ -303,12 +298,11 @@ private fun DrawScope.drawLightBackground(
     // Blue nebula — muted atmospheric
     drawOval(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0x2e7197bd),
-                Color(0x14607f9f),
-                Color(0x0026394f)
+            colorStops = arrayOf(
+                0f to Color(0x2e7197bd),
+                0.45f to Color(0x14607f9f),
+                1f to Color(0x0026394f)
             ),
-            stops = floatArrayOf(0f, 0.45f, 1f),
             center = Offset(px(1160f), py(850f)),
             radius = pr(520f)
         ),
@@ -319,12 +313,11 @@ private fun DrawScope.drawLightBackground(
     // Purple nebula — muted lavender
     drawOval(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0x24987da9),
-                Color(0x12806b92),
-                Color(0x0026394f)
+            colorStops = arrayOf(
+                0f to Color(0x24987da9),
+                0.45f to Color(0x12806b92),
+                1f to Color(0x0026394f)
             ),
-            stops = floatArrayOf(0f, 0.45f, 1f),
             center = Offset(px(220f), py(400f)),
             radius = pr(500f)
         ),
@@ -335,12 +328,11 @@ private fun DrawScope.drawLightBackground(
     // Purple nebula 2
     drawOval(
         brush = Brush.radialGradient(
-            colors = listOf(
-                Color(0x24987da9),
-                Color(0x12806b92),
-                Color(0x0026394f)
+            colorStops = arrayOf(
+                0f to Color(0x24987da9),
+                0.45f to Color(0x12806b92),
+                1f to Color(0x0026394f)
             ),
-            stops = floatArrayOf(0f, 0.45f, 1f),
             center = Offset(px(700f), py(1170f)),
             radius = pr(470f)
         ),
