@@ -2308,8 +2308,9 @@ private fun SentimentSegment(
         }
     }
 }/** The reveal's floating Category + Favorite bar (v212) — category icon
- *  + name on the left (always expanded showing name), favorite star on
- *  the right (expands to show "Favorite" label on tap). Wears the page's
+ *  + name on the left (expands when favorited, collapses to icon-only
+ *  when not), favorite star on the right (expands on tap to show
+ *  "Favorite" label, collapses when unfavorited). Wears the page's
  *  dynamic tint. */
 @Composable
 private fun RevealCategoryFavoriteBar(
@@ -2321,26 +2322,25 @@ private fun RevealCategoryFavoriteBar(
     onFavorite: () -> Unit
 ) {
     val haptics = LocalHapticFeedback.current
-    var favTapped by remember { mutableStateOf(false) }
-    // Category pill: always expanded showing name.
+    // Category pill: icon-only at rest, expands to show name when favorited.
     val categoryWidth by animateDpAsState(
-        targetValue = 160.dp,
+        targetValue = if (isFavorited) 160.dp else 56.dp,
         animationSpec = RevealWidthSpring,
         label = "categoryBarWidth"
     )
     val categoryFill by animateColorAsState(
-        targetValue = accent,
+        targetValue = if (isFavorited) accent else container,
         animationSpec = RevealColorSpring,
         label = "categoryBarFill"
     )
     val categoryInk by animateColorAsState(
-        targetValue = ink,
+        targetValue = if (isFavorited) ink else MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = RevealColorSpring,
         label = "categoryBarInk"
     )
-    // Favorite star: filled when active, outline when not. Expands on tap.
+    // Favorite star: icon-only at rest, expands to show label when favorited.
     val favWidth by animateDpAsState(
-        targetValue = if (favTapped || isFavorited) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
+        targetValue = if (isFavorited) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
         animationSpec = RevealWidthSpring,
         label = "favBarWidth"
     )
@@ -2374,7 +2374,7 @@ private fun RevealCategoryFavoriteBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Category pill — always expanded showing icon + name.
+                // Category pill — expands to show name when favorited.
                 Surface(
                     shape = RoundedCornerShape(50),
                     color = categoryFill,
@@ -2393,25 +2393,29 @@ private fun RevealCategoryFavoriteBar(
                             tint = categoryInk,
                             size = 24.dp
                         )
-                        Text(
-                            text = cat.displayName,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontFamily = ChangaOneFontFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 15.sp
-                            ),
-                            color = categoryInk,
-                            maxLines = 1,
-                            modifier = Modifier.padding(start = 6.dp, end = 2.dp)
-                        )
+                        AnimatedVisibility(
+                            visible = isFavorited,
+                            enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
+                            exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
+                        ) {
+                            Text(
+                                text = cat.displayName,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = ChangaOneFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 15.sp
+                                ),
+                                color = categoryInk,
+                                maxLines = 1,
+                                modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                            )
+                        }
                     }
-
                 }
-                // Favorite pill — expands on tap to show label.
+                // Favorite pill — expands on tap to show label, collapses when unfavorited.
                 Surface(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        favTapped = true
                         onFavorite()
                     },
                     shape = RoundedCornerShape(50),
@@ -2432,7 +2436,7 @@ private fun RevealCategoryFavoriteBar(
                             size = 26.dp
                         )
                         AnimatedVisibility(
-                            visible = favTapped || isFavorited,
+                            visible = isFavorited,
                             enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
                             exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
                         ) {
