@@ -1,5 +1,6 @@
 // Curio Web App - Topic History Screen
 // Mirrors Android Topic History: torn hero, day-grouped rows, session time, category/format glyphs
+// v2 — Favorites section at top (star icon), hero subtitle updated
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +15,34 @@ import type { CaptureEntity } from '../types';
 const HISTORY_HERO_HEIGHT = 180;
 const HISTORY_TEAR_SEED = 0xAB1E5;
 const ROSE_WOOD = '#C46B7C';
+
+/** Scan localStorage for curio-fav-{cat}-{topicId} = 'true' entries. */
+const loadFavoritedTopics = (): Array<{ categoryId: string; topicId: string; name: string; displayName: string; iconGlyph: string; accent: string }> => {
+  const favs: Array<{ categoryId: string; topicId: string; name: string; displayName: string; iconGlyph: string; accent: string }> = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('curio-fav-') && localStorage.getItem(key) === 'true') {
+      // key format: curio-fav-{categoryId}-{topicId}
+      const parts = key.split('-');
+      if (parts.length >= 4) {
+        const catId = parts[2];
+        const topicId = parts.slice(3).join('-'); // handle topicIds with hyphens
+        const cat = ALL_CATEGORIES.find(c => c.id.toUpperCase() === catId.toUpperCase());
+        if (cat) {
+          favs.push({
+            categoryId: catId,
+            topicId,
+            name: topicId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            displayName: cat.displayName,
+            iconGlyph: cat.iconGlyph,
+            accent: cat.accent,
+          });
+        }
+      }
+    }
+  }
+  return favs;
+};
 
 const formatDay = (millis: number) => {
   const date = new Date(millis);
@@ -45,6 +74,35 @@ const formatGlyph = (format: string) => {
     case 'FieldNotes': return 'description';
     default: return 'note_stack';
   }
+};
+
+// ── Favorite row — star accent + category dot ─────────────────────────
+const FavoriteRow: React.FC<{
+  fav: { categoryId: string; topicId: string; name: string; displayName: string; iconGlyph: string; accent: string };
+  onClick: () => void;
+}> = ({ fav, onClick }) => {
+  const { isDark } = useTheme();
+  const { handlers, pressStyle } = usePressable(0.98);
+  const muted = isDark ? 'rgba(255,255,255,0.46)' : 'rgba(59,10,23,0.46)';
+  const starColor = '#F5C518';
+
+  return (
+    <button onClick={onClick} {...handlers} className="w-full flex items-center gap-3 p-3 rounded-2xl text-left"
+      style={{
+        background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(59,10,23,0.025)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(59,10,23,0.045)'}`,
+        ...pressStyle,
+      }}>
+      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${fav.accent}1C` }}>
+        <MaterialIcon name="star" size={22} style={{ color: starColor }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-extrabold truncate" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>{fav.name}</p>
+        <p className="text-xs truncate mt-0.5" style={{ color: muted }}>{fav.displayName}</p>
+      </div>
+      <MaterialIcon name="star" size={16} style={{ color: starColor, opacity: 0.4 }} />
+    </button>
+  );
 };
 
 const HistoryRow: React.FC<{ entry: CaptureEntity; onClick: () => void }> = ({ entry, onClick }) => {
@@ -84,11 +142,20 @@ export const TopicHistoryScreen: React.FC = () => {
   const { isDark, isAmoled } = useTheme();
   const [entries, setEntries] = useState<CaptureEntity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState(loadFavoritedTopics());
 
   useEffect(() => {
     captureRepository.getAll()
       .then(all => setEntries([...all].sort((a, b) => b.capturedAtMillis - a.capturedAtMillis)))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Re-check favorites when screen gains focus (back from reveal)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFavorites(loadFavoritedTopics());
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const grouped = useMemo(() => entries.reduce((acc, entry) => {
@@ -97,6 +164,8 @@ export const TopicHistoryScreen: React.FC = () => {
     acc[day].push(entry);
     return acc;
   }, {} as Record<string, CaptureEntity[]>), [entries]);
+
+  const totalCount = entries.length + favorites.length;
 
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
@@ -108,7 +177,7 @@ export const TopicHistoryScreen: React.FC = () => {
             <MaterialIcon name="arrow_back" size={20} style={{ color: '#fff' }} />
           </button>
           <h1 className="text-xl font-extrabold text-white text-center" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>Topic History</h1>
-          <p className="text-xs text-white/70 text-center mt-0.5">{entries.length} explored topics</p>
+          <p className="text-xs text-white/70 text-center mt-0.5">Favorites & every spin you've explored</p>
         </div>
       </TornHero>
 
@@ -116,14 +185,38 @@ export const TopicHistoryScreen: React.FC = () => {
         <div className="px-4 pt-5 space-y-6 relative z-10">
           {loading ? (
             <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: ROSE_WOOD, borderTopColor: 'transparent' }} /></div>
-          ) : entries.length === 0 ? (
+          ) : entries.length === 0 && favorites.length === 0 ? (
             <CurioEmptyState icon="history" title="No history yet" description="Spin, explore, and save a topic to start your trail." action="Start exploring" onAction={() => navigate('/spin')} />
-          ) : Object.entries(grouped).map(([day, dayEntries]) => (
-            <section key={day}>
-              <CurioSectionHeader title={day} action={`${dayEntries.length} ${dayEntries.length === 1 ? 'entry' : 'entries'}`} />
-              <div className="space-y-2">{dayEntries.map(entry => <HistoryRow key={entry.id} entry={entry} onClick={() => navigate(`/detail/${entry.id}`)} />)}</div>
-            </section>
-          ))}
+          ) : (
+            <>
+              {/* ── Favorited topics — star icon, like Android's Favorite section ── */}
+              {favorites.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-1.5 mb-4">
+                    <MaterialIcon name="star" size={16} style={{ color: '#F5C518' }} />
+                    <h3 className="text-lg font-bold" style={{ color: getTextColor(isDark), fontFamily: 'Geom, Inter, sans-serif' }}>Favorite · {favorites.length}</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {favorites.map(fav => (
+                      <FavoriteRow
+                        key={`fav-${fav.categoryId}-${fav.topicId}`}
+                        fav={fav}
+                        onClick={() => navigate(`/reveal/${fav.categoryId.toLowerCase()}/${fav.topicId}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ── Day-grouped capture history ── */}
+              {Object.entries(grouped).map(([day, dayEntries]) => (
+                <section key={day}>
+                  <CurioSectionHeader title={day} action={`${dayEntries.length} ${dayEntries.length === 1 ? 'entry' : 'entries'}`} />
+                  <div className="space-y-2">{dayEntries.map(entry => <HistoryRow key={entry.id} entry={entry} onClick={() => navigate(`/detail/${entry.id}`)} />)}</div>
+                </section>
+              ))}
+            </>
+          )}
         </div>
       </ScreenEntrance>
     </div>
