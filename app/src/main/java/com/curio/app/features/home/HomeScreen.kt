@@ -2374,11 +2374,11 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     // v220 — edge-to-edge constellation: negative offset bleeds outside
     // the LazyColumn's 16dp horizontal content padding so the deep-space
     // background fills the full drawer width.
-    Column(
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .offset(x = (-16).dp)
-            .clickable(onClick = onClick)
     ) {
         CurioConstellation(
             explored = exploredList,
@@ -2390,10 +2390,6 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp),
-            // v190 — the tap detail is now a small FLOATING card anchored to
-            // the neuron (name + saved count — user: "a floating small thing
-            // and also less data") instead of the richer panel below. Tap the
-            // card (or empty sky) to dismiss.
             popoverContent = { id ->
                 val cat = CurioCategories.byId(id)
                 val k = knowledge[id] ?: LaneKnowledge(0, 0, 0, 0, 0L)
@@ -2415,6 +2411,32 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
                     )
                 }
             }
+        )
+        // Edge gradients — blend constellation into drawer surface on sides + bottom
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colorStops = arrayOf(
+                            0f to surfaceColor,
+                            0.10f to Color.Transparent,
+                            0.90f to Color.Transparent,
+                            1f to surfaceColor
+                        )
+                    )
+                )
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(40.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, surfaceColor)
+                    )
+                )
         )
     }
 }
