@@ -55,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -74,6 +75,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -120,10 +123,12 @@ import com.curio.app.data.derivedDecadeTag
 import com.curio.app.data.isMusicTopic
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
+import com.curio.app.data.matchesSavedNameStrict
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.SentimentPillHost
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
@@ -138,6 +143,7 @@ import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioInnerGlow
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
@@ -220,19 +226,22 @@ fun TopicRevealScreen(
     }
 
     val topic by produceState<CurioTopic?>(initialValue = null, topicName, cat.id) {
-        val cached = TopicCatalog.findByName(topicName)
-        if (cached != null) {
-            value = cached
-            return@produceState
-        }
+        // v199 — resolve WITHIN the route's own category FIRST. The old
+        // code asked the global TopicCatalog.findByName first, which scans
+        // every lane and returns the first tolerant match — "Flow" (the
+        // 2024 film) opened "Flower Boy" (an album) because ALBUMS scans
+        // before FILMS and "flower" contains "flow" (and even the full
+        // name "Flow (2024)" base-collided the same way). The category
+        // pool owns the match, TIERED exactly like findByName: strict
+        // (exact / base-name) hits before tolerant (containment) hits, so
+        // a loose match earlier in the file can't beat a precise one later
+        // in the same lane either. The global lookup stays only as the
+        // legacy saved-entry fallback (v135: an old entry whose lane
+        // changed must still resolve instead of hanging on "Loading…").
         val pool = TopicJsonLoader.load(cat.id)
-        // v135 — tolerant match: a saved entry's topic name can differ from
-        // the current canonical name (the books dedupe collapsed "The
-        // Odyssey" into "The Odyssey (c. 8th century BCE)"), so an old
-        // entry must still resolve instead of hanging on "Loading…". A
-        // genuinely unknown topic stays null and the screen falls back to
-        // showing the requested name (see HeroCard).
-        value = pool.firstOrNull { it.matchesSavedName(topicName) }
+        value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
+            ?: pool.firstOrNull { it.matchesSavedName(topicName) }
+            ?: TopicCatalog.findByName(topicName)
     }
 
     val resolved = topic
@@ -812,42 +821,37 @@ fun TopicRevealScreen(
         // left (expands on favorite), favorite star on the right. Slides
         // away on scroll-down, back on scroll-up. Hidden in Browse-Topics.
         if (!browseMode && resolved != null) {
-            AnimatedVisibility(
-                visible = !sentimentPillHidden,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                enter = slideInVertically(
-                    animationSpec = tween(220, easing = FastOutSlowInEasing)
-                ) { it } + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(
-                    animationSpec = tween(180, easing = FastOutSlowInEasing)
-                ) { it } + fadeOut(animationSpec = tween(180))
-            ) {
-                RevealSentimentPill(
-                    sentiment = sentiment,
-                    accent = cat.themedAccent(),
-                    ink = cat.onAccent(),
-                    // v167 — the pill's capsule wears the reveal page's own
-                    // dynamic tint (same lift rule as the nav bar capsule),
-                    // instead of a static surface color that ignored the
-                    // page tint in light mode.
-                    container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
-                    onDislike = {
-                        AppPreferences.setTopicSentiment(
-                            context, cat.id, resolved.id,
-                            if (sentiment == AppPreferences.SENTIMENT_DISLIKE)
-                                AppPreferences.SENTIMENT_NONE
-                            else AppPreferences.SENTIMENT_DISLIKE
-                        )
-                    },
-                    onLike = {
-                        AppPreferences.setTopicSentiment(
-                            context, cat.id, resolved.id,
-                            if (sentiment == AppPreferences.SENTIMENT_LIKE)
-                                AppPreferences.SENTIMENT_NONE
-                            else AppPreferences.SENTIMENT_LIKE
+            SideEffect {
+                SentimentPillHost.content = {
+                    AnimatedVisibility(
+                        visible = !sentimentPillHidden,
+                        enter = slideInVertically(
+                            animationSpec = tween(220, easing = FastOutSlowInEasing)
+                        ) { it } + fadeIn(animationSpec = tween(220)),
+                        exit = slideOutVertically(
+                            animationSpec = tween(180, easing = FastOutSlowInEasing)
+                        ) { it } + fadeOut(animationSpec = tween(180))
+                    ) {
+                        RevealCategoryFavoriteBar(
+                            cat = cat,
+                            isFavorited = sentiment == AppPreferences.SENTIMENT_LIKE,
+                            accent = cat.themedAccent(),
+                            ink = cat.onAccent(),
+                            container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
+                            onFavorite = {
+                                AppPreferences.setTopicSentiment(
+                                    context, cat.id, resolved.id,
+                                    if (sentiment == AppPreferences.SENTIMENT_LIKE)
+                                        AppPreferences.SENTIMENT_NONE
+                                    else AppPreferences.SENTIMENT_LIKE
+                                )
+                            }
                         )
                     }
-                )
+                }
+            }
+            DisposableEffect(Unit) {
+                onDispose { SentimentPillHost.content = null }
             }
         }
     }
@@ -1756,6 +1760,7 @@ private fun HeroCard(
                     CategoryId.ALBUMS -> "Artist"
                     CategoryId.BOOKS -> "Author"
                     CategoryId.FILMS -> "Director"
+                    CategoryId.ANIMATED_MOVIES -> "Director"
                     CategoryId.ARTWORKS -> "Painter"
                     CategoryId.DISCOVERIES -> "Discovered by"
                     CategoryId.QUOTES -> "Author"
@@ -2161,6 +2166,8 @@ private fun RevealSentimentPill(
     container: Color,
     onFavorite: () -> Unit
 ) {
+    val haptics = LocalHapticFeedback.current
+    val isFav = sentiment == AppPreferences.SENTIMENT_LIKE
     Box(
         modifier = Modifier
             .navigationBarsPadding()
@@ -2171,28 +2178,18 @@ private fun RevealSentimentPill(
             color = container,
             shadowElevation = 6.dp
         ) {
-            Row(
-                modifier = Modifier.padding(7.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                SentimentSegment(
-                    icon = CurioIcons.ThumbDown,
-                    label = "Dislike",
-                    active = sentiment == AppPreferences.SENTIMENT_DISLIKE,
-                    accent = accent,
-                    ink = ink,
-                    onClick = onDislike
-                )
-                SentimentSegment(
-                    icon = CurioIcons.ThumbUp,
-                    label = "Like",
-                    active = sentiment == AppPreferences.SENTIMENT_LIKE,
-                    accent = accent,
-                    ink = ink,
-                    onClick = onLike
-                )
-            }
+            SentimentSegment(
+                icon = if (isFav) CurioIcons.Star else CurioIcons.StarOutline,
+                label = "Favorite",
+                active = isFav,
+                accent = accent,
+                ink = ink,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onFavorite()
+                },
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }
@@ -2201,9 +2198,11 @@ private fun RevealSentimentPill(
 // v154 — bumped to EXACTLY the nav bar's sizes (60dp/128dp/60dp + 26dp
 // icon) so the reveal Like/Dislike pill matches the bigger bottom pill.
 // v159 — height slimmed 60 → 48dp WITH the nav bar (lengths unchanged).
-private val RevealSentimentIconWidth = 60.dp
-private val RevealSentimentExpandedWidth = 128.dp
-private val RevealSentimentHeight = 48.dp
+// v201 — bumped to the nav bar's CURRENT sizes (64/136dp + 52dp height,
+// the v184 sizing) so the Like/Dislike pill matches the bar again.
+private val RevealSentimentIconWidth = 64.dp
+private val RevealSentimentExpandedWidth = 136.dp
+private val RevealSentimentHeight = 52.dp
 
 // v162 — same ONE-spring-family fix as the nav bar: width, fill, icon tint
 // and the label expand/shrink all run identical spring params so the
@@ -2214,11 +2213,13 @@ private val RevealSentimentHeight = 48.dp
 // v166 — mirrors the nav-pill family: slower (750 vs Medium 1500) and
 // critically damped (1.0) so the Like/Dislike segments glide with zero
 // overshoot — same feel as the bottom bar's collapse. v173 — slowed to
-// 400 with the nav pill family ("still too rapid").
-private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 400f)
-private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 400f)
-private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 400f)
-private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 400f)
+// 400 with the nav pill family ("still too rapid"). v201 — slowed to 150
+// with the nav pill family ("smoother"), the calmest glide yet. v206 —
+// 120 with the nav family ("even smoother").
+private val RevealWidthSpring = spring<Dp>(dampingRatio = 1f, stiffness = 120f)
+private val RevealMotionSpring = spring<Float>(dampingRatio = 1f, stiffness = 120f)
+private val RevealColorSpring = spring<Color>(dampingRatio = 1f, stiffness = 120f)
+private val RevealExpandSpring = spring<IntSize>(dampingRatio = 1f, stiffness = 120f)
 
 /** One segment inside [RevealSentimentPill] — v149: mirrors the floating
  *  nav bar's expand-on-active pill: icons at rest (60dp), the ACTIVE
@@ -2291,8 +2292,14 @@ private fun SentimentSegment(
             ) {
                 Text(
                     text = label,
-                    // v164 — bolder label to match the nav bar (was SemiBold).
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    // v201 — EXACTLY the nav bar's label: Changa One display
+                    // face, 15sp, Normal (was labelMedium Bold, which read
+                    // thinner and smaller than the bar's tab labels).
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 15.sp
+                    ),
                     color = ink,
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)

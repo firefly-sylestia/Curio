@@ -81,7 +81,7 @@ app/src/main/java/com/curio/app/
 
 ### UI
 - **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
-- **Theme styles (Settings → Appearance):** three mutually exclusive styles — **Curio** (default: warm cream palette + category tints), **AMOLED** (forced dark, pure-black surfaces, tints off), **Material** (the device's Material You dynamic palette for surfaces/backgrounds/controls; category accents stay the true researched colors so cards/heroes/gradients stay vivid, tints off). Persisted as `AppPreferences.themeStyleState`; the wash helpers gate on `AppPreferences.tintWashEffective()`. All category-accent fills/ink read `themedAccent()` so the Material style shades them app-wide.
+- **M3 theme system (v185, Settings → Appearance):** ONE opt-in toggle, default OFF (the current Curio look is the default — nothing changes until it's on). **"Material theme"** (`AppPreferences.materialThemeState`) redoes the COLOR system per M3 guidelines: the whole `ColorScheme` becomes `materialColorScheme()` (dynamic Material You on Android 12+, seeded brand-coral baseline fallback — `ui/theme/MaterialColorSchemes.kt`), and the 36 lane accents collapse to **6 muted hue families** (`MaterialFamilies.kt`: every family resolves to tonal tones of its own hue — T40/T80 fills, on-fill ink, T45/T80 text ink; v198 removed the earlier rose→scheme.secondary / green→scheme.tertiary role branches that painted buttons/chips off-hue, see v198) — M3's multi-color guideline is restraint: neutral surfaces, ONE primary, muted accents, never a rainbow per lane. The category choke points (`themedAccent()`, `categoryInk()`, `onAccent()`, `headerAccent()`, `categoryBackgroundWash()` → neutral background, `categorySurface()/categoryChipSurface()` → neutral containers, `CurioGradients.cardGradient/heroBlendGradient`, `CurioMixedDeck.*`) all gate on `materialThemeOn` so every screen repaints. The v185 **"Material guidelines" + "Material chrome"** options (M3 typography/shapes/spacing, the M3 `NavigationBar` swap, the Changa One drop from nav labels) were REMOVED (user verdict: not good) — `MaterialGuidelines.kt`, the `materialGuidelinesState` / `materialChromeFullState` prefs and their Appearance rows are deleted; `CurioTheme` always uses `CurioTypography`/`CurioShapes` and `CurioBottomNav` always renders the floating pill bar with Changa One labels. v190 refinements: material card fills are pastel-aware; mixed decks collapse to the scheme primary; light-mode heroes wear the rich family banner with dark ink (`materialHeaderAccent` light + `materialHeroInk`); the nav chrome uses pure M3 roles under Material (surfaceContainer + secondaryContainer indicator). The v78-era AMOLED/Material STYLES are long gone — do not resurrect them; the v185 toggle is the only Material system.
 - **Always-on companions & onboarding setup (v23):** the floating pet, the pet brain, and auto-open landed topic have NO Settings toggles — they are always on (their Appearance toggles were removed; the `AppPreferences` APIs remain, defaults ON). Custom reaction lines are permanently off (no toggle; the reactions editor is unreachable). The explore-bubble opt-in row in the Explore dialog is hidden by default — a Notifications toggle (`AppPreferences.showBubbleOptInDialogState`) re-shows it as a single text line (no subtext). Onboarding includes a dedicated Search step that picks the explore search engine (`AppPreferences.searchEngineState`; changeable anytime in Settings) and the bubble opt-in row inside the "Display over other apps" permission card.
 - **3D shuffle button (v24):** always on by default — its toggle was removed from Settings → Experiments → Deck & controls (the `threeDButtonState` pref API stays, default true; SpinScreen reads it unchanged).
 - **Closed experiments (v24) — hardcoded OFF:** dual-accent hero gradient (ugly golden blend), deck card shadows (weird look while cards animate), tail-fade peek motion, and Smart Spin layout (always natural deck sizing) had their toggles removed from Experiments and their reads in SpinScreen/TopicRevealScreen hardcoded to false. The Layout & input section was removed from Experiments (Voice-to-text still lives in Settings → Recording; Smart density keeps its stored pref but has no UI).
@@ -1648,6 +1648,718 @@ app/src/main/java/com/curio/app/
     composition: `linkColor` #7FAFD8@0.32 dark / #5F7E9A@0.50 light,
     `fissureColor` #D9A85C@0.30 dark / #A97F3C@0.45 light (the gold
     fissure still bridges the two hemispheres).
+- **v199 — topic name resolution: exact/base matches beat containment
+  across lanes, and the reveal/capture resolve within the route's own
+  category first ("Flow" no longer opens "Flower Boy"); the Browse-Topics
+  category + chip-bar state persists until app restart. (branch Alpha)**
+  User: "when i tap flow in topic browser movie 2024 in fimls why its
+  opening flower boy, fix more similiar issues like this and also make the
+  category selected and expaddned setting persistent untill restart".
+  - FLOW → FLOWER BOY (root cause): `TopicCatalog.findByName` scanned
+    `CategoryId.values()` in order and returned the FIRST lane's first
+    tolerant match; ALBUMS scans before FILMS and "Flower Boy" contains
+    "flow" (and even the full "Flow (2024)" base-collided the same way),
+    so the Films reveal opened the album. Fixes:
+    - `TopicCatalog.findByName` is now TWO passes — strict matches
+      (exact name / base-name equality, new `matchesSavedNameStrict` +
+      shared `savedNameBase` helper) across ALL categories, THEN the
+      tolerant pass (containment still last). An exact/base hit in any
+      lane always beats a loose containment hit in an earlier lane.
+    - `TopicRevealScreen` + `SaveCaptureScreen` now resolve within the
+      route's own category pool FIRST, TIERED like `findByName` — strict
+      (`pool.firstOrNull { it.matchesSavedNameStrict(name) }`) before
+      tolerant (`matchesSavedName`), so a loose containment match earlier
+      in the same file can't beat a precise one later in the lane either —
+      falling back to the global `findByName` only for legacy saved
+      entries whose lane changed (v135).
+  - BROWSE-TOPICS PERSISTENCE: the browser is a plain `composable`, so
+    every reopen from the drawer creates a fresh backstack entry and
+    rememberSaveable reset the category selection + chip bar. New
+    `TopicBrowserSession` (process-scoped static, same pattern as
+    `SpinPickerRequest`) seeds `selectedCat` / `categoryFilterOpen` and
+    syncs back on change — the state now survives close-and-reopen until
+    the app restarts (statics die with the process).
+- **v200 — NEW CATEGORY: Animated Movies (ANIMATED_MOVIES) — a 1000+
+  lane: non-anime animation split out of Films; real films, real quick
+  facts. (branch Alpha)** User: "continue the expansion of topics and add
+  animated movies section as a ne category and separate animated movies
+  from films and make them 1000+ and anduse real quick facts and push
+  after its fully done" (+ "anime and animation movies are differnt btw").
+  - ANIME ≠ ANIMATED MOVIES (user note): the 6 anime films in films.json
+    (Akira, Grave of the Fireflies, Totoro, Princess Mononoke, Spirited
+    Away, The Boy and the Heron) STAY in Films — the new lane is
+    non-anime animation only (Disney, Pixar, DreamWorks, Illumination,
+    Blue Sky, Sony, Aardman, Laika, Don Bluth, classic US, Rankin/Bass,
+    European, Chinese, Latin American, Indian, Australian, stop-motion,
+    DTV/franchise: Barbie, Scooby-Doo, Tom & Jerry, DC/Marvel animated,
+    DisneyToon sequels).
+  - CATEGORY REGISTRATION: `Category.kt` (enum + newLanes + order +
+    slug `animated-movies` + family Entertainment), `CurioColors.kt`
+    (ANIMATED_MOVIES palette constants), the three exhaustive `when`s
+    (CaptureEntity.kt, ExploreSession.kt, TopicRevealScreen.kt) and the
+    Entertainment quick-mix preset (DeckPresets.kt). The topic_index
+    builder globs all files.
+  - VALIDATOR FIX (v200.1): the Gradle `validateTopics` derived the
+    expected categoryId as the bare uppercased FILENAME, so the first
+    hyphenated slug tripped CI — `animated-movies.json` expected
+    `ANIMATED-MOVIES` but entries carry the enum name `ANIMATED_MOVIES`.
+    The derivation now maps hyphens → underscores
+    (`uppercase().replace("-", "_")`) — single-word filenames
+    (films.json → FILMS) are unaffected. The dev-time
+    `scripts/validate_topics.js` got the same hyphen→underscore mapping
+    and `animated-movies` added to its EXPECTED_CATEGORIES list. (All
+    prior files were single-word, so this never surfaced before.)
+  - CONTENT: 52 non-anime animated films moved out of films.json (948
+    remaining, anime intact) into the new animated-movies.json via
+    `scripts/extract_animated_from_films.py` (explicit-title list — the
+    first tag-based attempt false-positived on live-action "Pixar"-
+    tagged films like Braveheart and was reverted), then ~540 more real
+    entries authored across scripts/batch_animated_1..11.py (Disney
+    theatrical + DTV, Pixar, DreamWorks, Illumination, Blue Sky, Sony,
+    Aardman, Laika, stop-motion indie, Don Bluth + 80s/90s classics,
+    international, Chinese, franchise DTV). 591 entries total in this
+    push (1000+ top-up continues in a later pass). All ids unique across
+    the catalog (18,071 total) — validated with check_assets.py + a
+    cross-file id scan.
+  - HOUSEKEEPING: removed the root-level reference dump SVGs
+    (`svgviewer-output (12).svg`, `curio_planet_cropped_bottom_264.svg`,
+    `footer.svg`) — the real drawer art lives in res/raw/.
+- **v210 — CONSTELLATION REDESIGN: replaced the brain neural mesh with
+  the real Corvus (The Crow) constellation — Apollo placed the crow in
+  the sky because its curiosity led it to seek forbidden knowledge, the
+  perfect emblem for Curio. Four anchor stars (Gienah, Kraz, Algorab,
+  Minkar) form the characteristic quadrilateral; explored lane stars are
+  scattered around the pattern. SPACE AESTHETIC: deep void background
+  with faint nebula wash, gossamer constellation lines (thin, dim),
+  small bright stars with soft halos — no brain silhouette, no dense
+  mesh, no garish glows. Background stars add depth. Removed: brain
+  silhouette outline, filler dots, nearest-neighbour neural web,
+  corpus-callosum bridges, gold fissure.
+- **v208 — CURIO BRAIN STATS: a real science-based cognitive model
+  replaces the constellation's save-count stars (user: "a fresh system of
+  my on, i want a real science based stats system that will help user
+  improve their brain in a certain ways and it shows the knowledge based
+  on the category user explored and the amout of wrting user does etc
+  etc, and this will be rplaced the category stars glow from
+  costelation").** New `data/BrainStats.kt`:
+  - PER-LANE KNOWLEDGE (`LaneKnowledge` + `laneKnowledge`): how much
+    knowledge you BUILT in each lane — explores + saves + words written
+    in that lane (`score = explores*30 + saves*40 + words/20 + spins*2`),
+    with `lastAt` driving the recent glow. Both the drawer and the Your
+    Curiosity page feed the SHARED `CurioConstellation` from this
+    (`laneCounts = knowledge scores`, `laneRecent = lastAt`) so they can
+    never drift; the drawer's floating popover now shows "N knowledge"
+    instead of "N saved".
+  - THE BRAIN PROFILE (`BrainProfile` + `BrainDimension`): six cognitive
+    dimensions, each mapped to a real learning-science mechanism —
+    Knowledge (breadth×depth of explored domains), Memory (saves+pins+
+    quotes, retrieval-practice effect), Expression (words written,
+    generation effect), Focus (explores + daily quests), Consistency
+    (best streak, spacing effect), Curiosity (spins + lanes sampled).
+    Each scored 0–100 from REAL data (passport counters, saved captures,
+    lifetime counters, streak) with a level label (Awakening → Mastered)
+    and a science-based improvement tip.
+  - WORD COUNT: `CaptureData.wordCount()` — real words across every text
+    field (journal, review, notes, field notes, captions, quotes),
+    recursive through portfolios and the wildcard notebook; voice
+    transcripts NOT counted (machine-transcribed, not user writing).
+  - UI: a new `BrainProfileCard` on the Your Curiosity page (six
+    color-coded dimension bars + levels + tips + a words-written line);
+    constellation star SIZE is now sqrt-scaled knowledge (the old linear
+    `min(count,60)` pinned everything at max once scores ran past 60).
+  - CI FIX (v208b): `CaptureData`'s subclasses are NESTED — the
+    `wordCount()` `when` branches needed `CaptureData.` qualification
+    (`is CaptureData.SoundBite` etc.); the splash wordmark's gradient
+    `brush` moved from the `Text(...)` param (doesn't exist) into
+    `style.copy(brush = …)`.
+  - v208f — four follow-ups (user: "see the svg its inverted of what its
+    in the app youre plaing it wrngly fix it. and why th elike and dislike
+    pill now staying longer make it vanish like before just when i tap
+    back from the reveal screen… make the costeellation dots smaller they
+    are too big give it a size limit… why my drawer footer is floating??
+    please fix it and the collapsed options is sghowing behind the
+    drawer, fix it, and also cut the footer from button 44 units the
+    footer svg cut it from buttom and place it properly"):
+    - RING MIRROR: `CoilOutlineNorm`/`CoilSpecularNorm` in PaperStatCard
+      now MATCH the SVG's own `matrix(-1,0,0,1,0,0)` (the app rendered
+      the coil inverted vs the author's art): wire starts bottom-RIGHT
+      inside the hole, arches over the top, and the LEFT leg dives below
+      the box past the card's left edge to an open round-capped end.
+    - SENTIMENT PILL VANISH: the NavHost's SentimentPillHost overlay is
+      now gated on `isRevealRoutePrefix` — the pill disappears the
+      moment you tap back (route flips before the screen's exit
+      transition ends; the old gate waited for full dispose and the pill
+      lingered).
+    - CONSTELLATION DOTS: radius ramp retuned `5.5+sqrt×7` capped 60 →
+      `4.5+sqrt×2.4` capped 12dp (24dp across max) — the dots were
+      ballooning to ~120dp; now score 0→4.5dp … 10+→12dp.
+    - DRAWER FOOTER: (a) the footer Box now wears `navigationBarsPadding`
+      (the sheet is edge-to-edge with zeroed insets, so the footer's
+      bottom band hid behind the gesture bar and the planet read as
+      floating — now the art sits flush above the gesture bar; the
+      credits' own navBarPadding removed); (b) `drawer_footer.svg`
+      viewBox cut 44 units off the bottom (760 → 716) per the user's
+      explicit "cut the footer svg from the bottom 44 units". The v207
+      Column/weight structure (footer in normal flow below the list) is
+      confirmed intact — expanded sections scroll above the footer, never
+      behind it.
+  - NAV→SENTIMENT HANDOFF (v208e): user (v208d attempt rejected): "no
+    bro the like and dislike starting time was fine i just asked you to
+    tune the navpil home one to sync properly… place the like and dislike
+    pill z index above the home nav pill… keep it overlap". So the pill
+    KEEPS its natural entrance; the NAV pill syncs TO it:
+    - `FloatingNavCollapseHoldMillis` retuned 460 → 240ms (the pill's
+      220ms slide + a hair) — the bar vanishes right as the pill lands.
+    - Z-INDEX: the pill is portaled into the NavHost's own overlay via
+      the new `SentimentPillHost` (CurioRoutes.kt, out-of-band like
+      LightboxTarget): the reveal registers its pill composable in a
+      `SideEffect` (+ `DisposableEffect` clears it on route leave) and
+      the NavHost composes the slot AFTER the floating bar — so the
+      Like/Dislike draws ON TOP of the collapsing nav pill during the
+      overlap. The slot's wrapper Box has no pointer input (touches pass
+      through); the pill's scroll hide/show is captured by the lambda.
+  - RING SVG v3 (v208c): user supplied `svgviewer-output (15).svg` —
+    `CoilOutlineNorm` now matches it exactly: the wire starts at the
+    box's bottom-LEFT corner (the v207 left hook is GONE), rises up,
+    arches over, and the RIGHT leg DIVES below the box through the hole
+    to an open round-capped end at (0.712, 1.342) — replacing the old
+    blunt stop at (1.0, 0.737). Verified numerically: start protrudes
+    6.6dp past the card's left edge, the dive threads the hole, and the
+    open end stays inside the card. Colors untouched (user will tweak
+    later). The dump SVG was removed from the repo.
+- **v207 — drawer footer in normal flow (no float / no rows behind it),
+  coil left-end hook, standalone sun/moon on the stats page, even
+  smoother nav collapse, Like/Dislike exact capsule height. (branch
+  Alpha, NOT pushed — the v206 splash commit is queued unpushed per
+  user: "dont push it")** User: "why the footer is floating now and when
+  the about gets expanded its behind the footer. also the 3d hole is
+  good. now mak the left end the side its out curve a little so it looks
+  seemless connected also in your curiocity page place the drawing of
+  sun and moon a little below the start bar just the moon and the sun
+  not the whole drawing. and only in your curiocity page as a separate
+  maybe. and the collapse of home nav pil can be more smoother, and the
+  like and dislike size still doesnt match with home nav pill, like its
+  height".
+  - FOOTER: v203 pinned the footer as an OVERLAY over the list tail, so
+    expanded sections (About) slid UNDER its fade ("behind the footer")
+    and it read as floating over the empty reserve. HomeDrawerContent
+    now wraps the rows in a Column — the list sits in a weight(1f) Box
+    ABOVE the footer, which is in normal flow pinned to the sheet's
+    bottom: it can never float and rows never hide behind it.
+  - COIL: the protruding LEFT end of the hole-ring coil now curves
+    (a small hook dipping down-outward before rising into the arch —
+    new moveTo/cubic prepended to CoilOutlineNorm) so the wire reads as
+    wrapping around the card edge instead of ending blunt.
+  - STATS SUN/MOON: a standalone decorative `StatsCelestialBody` on the
+    Your Curiosity page only — just the celestial body (gold sun with
+    soft glow in light; cream crescent carved by the local sky mid-tone
+    in dark, mirroring the SVG construction), floating just below the
+    status bar (TopEnd + statusBarsPadding + 14dp). Not interactive
+    (the drawer's body stays the theme toggle).
+  - NAV COLLAPSE: pill family 150 → 120 stiffness (calmest glide yet);
+    the NavHost leave-hold extends 420 → 460ms to match. Reveal
+    sentiment + Pet Studio springs follow to 120 to stay in lockstep.
+  - LIKE/DISLIKE HEIGHT: the sentiment capsule's Row padding 7 → 8dp and
+    gap 6 → 10dp (mirroring the nav bar), so the whole capsule (52dp
+    segments + 16dp = 68dp) matches the nav bar's capsule exactly.
+- **v206 — splash redesign: bigger gradient wordmark, warm tagline, warm
+  ground band at the bottom. (branch Alpha, NOT pushed — user: "dont
+  push it")** User: "make the Curio tet bigger and with gradient basced
+  on the dark or light mode. and at the buttom it have a similiar
+  gradient backgroud of the app backgroud. not full just at the buttom
+  and also discover something that text gets a little bigger too and
+  warmer in dark mode light mode you figure it out."
+  - WORDMARK: "Curio" 36 → 72sp (same Geom Bold displaySmall family),
+    now painted with a theme-aware horizontal GRADIENT echoing the
+    cosmic mark — dark: bright SkyMint → ButterYellow on the dark sky;
+    light: deep CoralInk → GoldInk on the cream (readable deep tones).
+  - BOTTOM GROUND: a bottom-anchored band (bottom 34% of the screen)
+    fading transparent → a warmed app-background tone (dark: background
+    lerped 5% toward CoralBlush; light: 14% toward ButterYellow), so the
+    splash reads grounded instead of a flat void. Not full-bleed.
+  - TAGLINE: 14 → 18sp and WARMER in both themes — parchment
+    #D8CDB4 on dark, warm khaki #7E6E50 on light (replaces the cool
+    onBackground @ 0.62).
+  - Everything else (logomark + shimmer, animated halo, 3-dot loader)
+    unchanged. Brace/paren-balanced.
+- **v205 — app-size diet: the 40MB was Vosk, not the topics. (branch
+  Alpha)** User: "the app size is still 40mb and why. dont tell me its
+  the topic ik its alot but still not alot to make it 40mb" (+ "its not
+  the release the pr builds im talking about" — the PR/push CI artifact).
+  - DIAGNOSIS: Vosk (offline ASR, `com.alphacephei:vosk-android:0.3.47`,
+    11.7MB AAR) ships a ~10MB `libvosk.so` PER ABI, and Android stores
+    `.so` UNCOMPRESSED (mmap). The universal release APK (the PR/push
+    CI artifact and the release universal) bundled ALL FOUR ABIs
+    (armeabi-v7a, arm64-v8a, x86, x86_64) ≈ 38MB of native libs — that
+    is the 40MB. The 17MB of topics compress to ~6MB in the APK; code
+    ~8-10MB; fonts/icon ~1MB.
+  - FIX: the `release` buildType now sets `ndk.abiFilters =
+    [armeabi-v7a, arm64-v8a]` — x86/x86_64 are emulator-only legacy,
+    every real device since ~2017 is arm64. Universal release APK drops
+    ~20MB (→ ~22-25MB total). DEBUG builds keep all four ABIs so x86_64
+    emulator testing still works. The `splits.abi` include list is
+    unchanged; the release.yml hard guard now expects only
+    `universal armeabi-v7a arm64-v8a`.
+  - NOT DONE (deferred): the in-app updater still downloads the first
+    `.apk` asset (the universal) — a follow-up could match
+    `Build.SUPPORTED_ABIS` to the per-ABI asset (~10-12MB updates).
+- **v204 — compile fix (PetStudio `sp` import) + Save CTA tick removed.
+  (branch Alpha)** User: CI failure "PetDesignerScreen.kt:1533:39
+  Unresolved reference 'sp'" + "fix this too then push everything. and
+  also remove the tick from the save your entry button".
+  - The v201 PetStudio label change (`fontSize = 15.sp`) was missing the
+    `androidx.compose.ui.unit.sp` import — added. (CI caught it because
+    the v201..v203 commits were sitting UNPUSHED; this push carries
+    v201–v204.)
+  - Save CTA (SaveCaptureScreen): the leading check tick
+    (`CurioIcons.Check` + Spacer) is gone — the button is text-only
+    ("Save entry" / "Save changes"), matching the Manage / Apply pills.
+    `CurioIcon` still used elsewhere (12 sites) so its import stays.
+  - Brace/paren-balanced; PUSHED with v201–v203 in one go.
+- **v203 — Your Curiosity page: back pill REMOVED (system back already
+  works); drawer footer PINNED to the bottom + theme-aware credits ink.
+  (branch Alpha)** User: "fix the back button in your cusriocity page.
+  maybe jut remove the back button" (+ confirmed via ask_user: remove
+  entirely), then "the footer is still sitting like floating above the
+  buttom part of the draer page. and also the v1.10 made with curiocity
+  text sint visible".
+  - BACK PILL: the stats page is a plain NavHost destination
+    (`composable(CurioRoutes.STATS)`), so the system back gesture/button
+    pops it — the custom cream circle pill in [StatsSkyHeader] was a
+    redundant second path calling `popBackStack()`. Removed the pill
+    (Surface + ArrowBack icon + the `onBack` param + call-site arg); the
+    header Row keeps just the title/subtitle column. `CircleShape` stays
+    (used by the range pill).
+  - FOOTER FLOATING: the footer was the LAST LAZYCOLUMN ITEM, so it
+    floated above the drawer's bottom whenever the list content was
+    shorter than the sheet. It's now PINNED: removed the `item("footer")`
+    from the list and added a `Box(Modifier.align(Alignment.BottomCenter))`
+    at the drawer-sheet level (drawn after the list so rows scroll under
+    its fade); the list's bottom contentPadding = `DrawerFooterHeight`
+    (150dp, the shared constant) so the last row never hides behind it.
+  - CREDITS INVISIBLE: the fixed khaki `#7E6E50` vanished on the
+    near-black surface in dark mode. `DrawerFooter` ink is now
+    theme-aware — warm parchment `#C9BC9D` in dark, khaki in light.
+  - COMMITTED BUT NOT PUSHED (user: "dont push this").
+- **v202 — curiosity constellation REDRAWN as a human-brain side profile:
+  random dot scatter (no left/right partition), light nearest-neighbour
+  web. (branch Alpha)** User: "also the mesh is too much and why it doesnt
+  look like a brain like the human brain design it should follow that and
+  the dots should be random not some in left and some in right".
+  - The old design was two side-by-side ellipses (generic blobs) with
+    filler dots in rigid per-lobe rings, ~114 links (2-nearest + a
+    cross-bridge per dot), and a gold midline fissure.
+  - NEW: `BRAIN_SILHOUETTE` — the classic anatomy side profile (frontal
+    pole, smooth cerebrum dome, occipital pole, cerebellum bump), drawn
+    as a faint outline (`drawBrainOutline`, quadratic curves through the
+    midpoints) so the shape reads as a brain instantly.
+  - EVERY dot (16 decorative fillers + the real lane neurons) is now
+    scattered RANDOMLY inside the silhouette via seeded rejection
+    sampling (`randomInBrain` / `pointInBrain`, ~77% acceptance) — the
+    per-lobe rings and left/right flag are gone. Real neurons stay
+    per-id deterministic (stable as lanes are added), tappable, with
+    saved-count sizing + recent glow. Fillers are NOT tappable.
+  - The web is now a NEAREST-NEIGHBOUR graph (one synapse per dot):
+    13–32 links depending on explored count vs the old ~114 — a ~70%
+    cut ("the mesh is too much"). The gold midline fissure is gone with
+    the two-lobe layout.
+  - Verified: silhouette is x-monotone (no self-intersection), fill
+    ratio 77%, link counts simulated (3/8/16/30 explored → 13/16/23/32
+    links). Brace-balanced.
+- **v201 — nav pill collapse cinches tighter + slower; Like/Dislike and
+  Pet Studio bars match the nav pill exactly; hole-ring coil no longer
+  cut at the card edge. (branch Alpha)** User: "the 3d ring should be
+  shouwn fully without getting cut" + "make the home nav pill collapse
+  even smoother like make it collape even more and make the like dislike
+  button match the text and size of the nav bar pill and same in pet
+  designer".
+  - RING CUT — ROOT CAUSE: Material3 1.5's `Surface` ALWAYS clips its
+    children to the shape (`.clip(shape)` at the end of the
+    implementation) — the v74 "Surface does not clip" note was true
+    only for M3 1.0/1.1. The coil's left peek (drawn at −6.5dp) was cut
+    at the card edge. Fix: the three stat-pane call sites (Home,
+    Profile, EntryDetail) swap the clipping `Surface` for a plain `Box`
+    carrying `Modifier.shadow(elevation, shape, clip = false)` + the
+    paper fill — the fill self-clips to the outline path, so the coil
+    escapes past the left edge. All three sites have ≥28dp container
+    padding so the peek clears the screen edge.
+  - NAV PILL COLLAPSE: pill spring family 240 → 150 stiffness (longest
+    calm critically-damped glide), and the leave-hold collapse now
+    targets `FloatingPillCollapsedWidth` (44dp — tighter than the idle
+    64dp icon pill) so the pill visibly cinches before the bar unmounts
+    ([FloatingNavPill] gains a `collapsing` param; NavHost hold 380 →
+    420ms to match the slower settle — still no dead pause).
+  - LIKE/DISLIKE + PET STUDIO PILLS: `RevealSentimentPill` and
+    `PetStudioTab` bumped to the nav bar's exact sizes (64/136dp +
+    52dp height + 26dp icon), springs 400 → 150, and the labels now use
+    the nav bar's Changa One 15sp Normal face (was labelMedium Bold).
+- **v198 — Home/Recents "Unexplored" tag pills wear a SHADED category
+  chip; Material theme: category buttons, filter chips and ink now use
+  the family tonal tones — the scheme-role amber/mint/translucent paints
+  are gone. (branch Alpha)** User: "in light mode home screen the recents
+  unplored pills make it get the color of the category it sits on with a
+  shade and in dark mode why it looks transparent fix that, and in
+  material theme in light mode and dark mode the category button in spin
+  screen and filters looks bad and even worse when mixed is selected the
+  category button".
+  - TAG PILL (`ExploreTopicRow` in HomeScreen.kt + `RecentTopicRow` in
+    RecentScreen.kt): the old `lerp(surfaceContainerLow, accent, 0.14f)`
+    fill vanished on the tinted card in light and read transparent in
+    dark. The pill now pulls the accent toward the card surface — ~30%
+    in light (a solid SHADED category chip on the tinted card) and ~38%
+    in dark (visibly tinted on the dark card); pastel light shades with
+    the deep same-hue ink (`categoryInk()`) so the airy pastel twin can't
+    wash the pill away. Text stays `categoryInk()`.
+  - MATERIAL FAMILY TONES EVERYWHERE (`MaterialFamilies.kt`): the v185
+    scheme-role branches are GONE. `materialAccent()` wore the scheme
+    secondary/tertiary for rose/green lanes (an AMBER button for a rose
+    Movies deck — the baseline secondary is an amber companion) and a
+    translucent onSurfaceVariant for neutrals, so the Spin deck buttons
+    (Categories/Filter), the Spin filter-sheet chips and the
+    Cabinet/Topic-History filter chips painted DIFFERENT hues than the
+    family-toned cards; a MIXED deck (which collapses to the scheme
+    primary) re-mapped through the rose-family branch and the button wore
+    secondary while the deck wore primary — the "even worse when mixed"
+    case. `materialAccent()` / `materialOnAccent()` / `materialInk()` now
+    resolve the lane's OWN family tonal tone (T40/T80 fills, on-fill ink,
+    T45/T80 text ink) — the exact fills the cards already use — so
+    buttons, chips, filters and text match the deck; pastel mode softens
+    the fills to their pastel twins like the cards. `materialAccentFor`
+    drops its neutral special-case tones so watermarks/blends align.
+  - CI REGRESSION FIX (v198): the v196 tap-to-open rewrite accidentally
+    dropped the sheet's `val wide = windowWidthSizeClass().isWide` (it rode
+    in the replaced `persistedVisible` block) — the grid's `columns = if
+    (wide) …` then failed to compile (CI: "Unresolved reference 'wide'" at
+    the two grid sites). Restored in `CategoryPickerSheet` right after
+    `val context`.
+- **v197 — hole-ring coil redrawn from the user's REVISED SVG (a truncated
+  arch, no bottom curl) and it now PEEKS OUT of the card's left edge.
+  (branch Alpha)** User: "now i added a better ring this time can u use
+  that instead of the previous one, and also the ring should be come out
+  from the left of it like peek out from the left not entirely inside the
+  stat card" + a revised SVG (same 150×420, three coils — but each coil's
+  path is now `M38 62 C38 39 54 24 76 24 C98 24 111 37 111 52`: the
+  bottom curl `C111 66 102 75 90 75 …` is GONE, the box is 73×38 instead
+  of 73×51, and the dark depth pass uses the SAME truncated path).
+  - `ui/components/PaperStatCard.kt` [drawCoilRing]: `CoilOutlineNorm` and
+    `CoilSpecularNorm` re-normalized to the revised 73×38 box (outline:
+    0,1.0 → 0,0.395 / 0.219,0 / 0.521,0 / 0.822,0 / 1,0.342 / 1,0.737;
+    specular unchanged in SVG space but re-normalized: 0.068,0.868 …).
+    The wire now rises up the left, over the top and down the right as a
+    clean arch (no curl-in at the bottom); `coilH` aspect 51/73 → 38/73.
+  - PEEK-OUT: the coil is pushed LEFT past the card edge (`leftPeek`
+    ≈ 9dp → its left arc + leg protrude ~6.5dp past the card's left
+    edge, like a spiral binding sticking out of the paper) instead of
+    sitting entirely inside. The hole stays centered vertically under the
+    arch; the wire's right leg dives through it. Works because the
+    fill's `drawWithCache` isn't clipped to the card shape (the Surface
+    doesn't clip its content here — see the Home v74 note).
+- **v196 — category picker: tap-to-open always (hold to mix), cancel +
+  back applies the cleared mix, and a cancelled mix no longer resurrects
+  after a topic visit. (branch Alpha)** User: "even when i cancel the
+  selected in category picker and i tap back make it apply too. and also
+  when its mixed and after that i open the category picker to slecet dont
+  let me tap to select for mix let it be open the category when i tap and
+  only tap and hold should select for next mic or override mix, also theres
+  a bug suppos i have a mixed selected and its from the home shuffle button
+  and then i cancel it and chnage it to other category and i opened the
+  topic and then when i tap back it goes back to the mixed one even though
+  i have chnaged it".
+  - TAP-TO-OPEN ALWAYS (`CategoryPickerSheet` in SpinScreen.kt): the v26
+    auto-tick reopened the sheet in multi-select with every mix lane
+    pre-ticked whenever the persisted deck was a mix — the user wanted tap
+    to OPEN a category (replacing the deck) and only tap-and-hold to enter
+    multi-select. `multiSelectMode` now starts false and `selectedSlugs`
+    empty on every open; long-press (both pages) is the ONLY way into
+    multi-select, starting a fresh selection for the next / overriding mix.
+  - CANCEL + BACK APPLIES: the Cancel button now sets a `mixCancelled`
+    flag, and `onDismissRequest` applies a cleared state when cancelled OR
+    when every lane was deselected in multi-select — the deck reverts to
+    the last single category (`onCategoriesSelected(emptyList())` →
+    SpinScreen persists the single) instead of closing with the old mix
+    intact. Fresh selections (presets, long-press) reset the flag.
+  - NO MIX RESURRECTION (root cause of the back-to-mixed bug): the v5.14
+    slug-authority `LaunchedEffect(categorySlug)` and the v5.5 persist
+    effect re-ran on every pop-back from a pushed route (the topic reveal)
+    and re-forced the launch slug over the user's in-session category
+    change. A new `slugApplied` rememberSaveable flag gates both: the slug
+    (and its prefs persist) apply ONCE per navigation; returning from the
+    reveal restores the flag true, so the deck keeps the user's change.
+- **v195 — constellation gets decorative filler neurons (the mesh reads
+  whole); nav pill fully collapses on the Topic Reveal and the hold is
+  shorter. (branch Alpha)** User: "the neruons dot doesnt create the
+  brain mesh. and i told you to add extra dots for decoration and
+  completion of the neuron mesh, and the home nav doesnt collapse fully
+  in topic reveal screen it stays for too long, neither it collapse".
+  - BRAIN MESH FILLERS (`ui/components/CurioConstellation.kt`): with few
+    explored lanes the neural web read as scattered dots, not a brain —
+    the user explicitly asked for decorative extras. A fixed
+    deterministic ring layout per hemisphere lobe (radial 0.35 → 0.89,
+    5/7/9 dots per ring, tiny fixed-seed jitter) now fills both lobes;
+    the fillers join the SAME link web as the real neurons (nearest-2
+    synapses + inter-hemispheric bridges over all dots, with real nodes
+    still splitting left/right by index), so the mesh outlines the whole
+    brain even at zero explored lanes. Fillers draw as small neutral
+    dots UNDER the real neurons (dim steel, no accent / glow / white
+    core) and are NOT tappable — the real explored neurons stay the only
+    interactive data (popover untouched).
+  - NAV COLLAPSE ON REVEAL (`ui/components/CurioBottomNav.kt` +
+    `navigation/CurioNavHost.kt`): v193 kept the bar composed for 500ms
+    after leaving the tab set so the selected pill could collapse, but
+    `CurioFloatingNavBar`'s internal `selectedRoute` mapping forces SPIN
+    selected on the reveal route — so leaving Home for a topic reveal
+    made the SPIN pill POP OPEN during the hold and the bar then
+    vanished with a pill stuck expanded ("neither it collapse"). FIX: a
+    new `collapsing` parameter — while the route is off the tab set the
+    bar forces NO selection (`selectedRoute = null`), so every pill
+    glides closed and the bar unmounts with nothing expanded. The hold
+    also dropped 500 → 380ms (the 240-stiffness critically-damped
+    collapse spring's settle time) so the bar doesn't linger ("stays
+    for too long").
+- **v194 — cut lines shorter + right-shifted; hole rings redrawn as the
+  spiral-coil SVG.** User: "now we have two cut lines lets improve it even
+  more. make it little more shorter and more to the right of the header
+  text. and the hole rings… the stamped pin holes create holes which is
+  see through, the 3d ring doesnt show over it. lemme share the rings
+  which you can adjust and put above the holes… the ring itself isnt
+  perfect its too much rounded and the view is also wrong so youve to fix
+  the svg rings" + a reference SVG (3 spiral coils).
+  - CUT LINES (`ui/components/PaperTitleLines.kt`): the two hand-drawn
+    underlines now start ~a quarter in from the title's left edge and
+    span only the right ~70% of the line (top 0.22→0.90, bottom
+    0.26→0.94 of the canvas) — a partial right-side underline instead of
+    a full-width one (was 0.02/0.06 → 0.90/0.96). Same pen-sag shapes.
+  - HOLE RINGS (`ui/components/PaperStatCard.kt`): the default "coil"
+    ring is redrawn as the user's reference SVG — a FORESHORTENED
+    spiral-notebook wire (73:51 aspect, correcting the old round-ring
+    "view") looping up the left, over the top, down the right, curling
+    in at the bottom; drawn OVER the shaded hole interior ([drawHoleInterior])
+    so the punched hole shows through the coil's inner opening. Three
+    passes mirror the SVG: a dark depth stroke behind (18px pass, #101B27
+    light / #22282F dark), the metal tube gradient on top (8 tuned stops
+    from the SVG's palette — cool polished steel, dark-mode light steel
+    reversal), and a white specular along the upper-left (3px pass,
+    0.75 light / 0.60 dark). The coil's outer loop is ~2.1× the hole
+    diameter (holeR × 4.2 wide). Old arc-based coil drawing + CoilBackDark
+    deleted; "split" and "oblique" styles untouched.
+- **v193 — nav pill COLLAPSES when leaving a tab (was vanishing).** User:
+  "the home nav pill should collapse just the way it expands when i back
+  from home… it still just vanishes instead of collapse vanishing". ROOT
+  CAUSE: the floating bar was composed only while
+  `routePrefix in CurioRoutes.bottomNavRoutePrefixes` (the `showBottomBar`
+  gate in CurioNavHost), so navigating to a non-tab page (Profile,
+  settings sub-pages, the Topic Reveal…) unmounted the WHOLE bar the
+  instant the route changed — the expanded pill never got a chance to run
+  its collapse spring and simply disappeared. FIX: the bar's composition
+  now gates on a `barVisible` state that stays true for 500ms after the
+  route leaves the tab set (`LaunchedEffect(showBottomBar)` + `delay(500)`
+  — the pill's collapse spring + label retract settle in ~450ms), so the
+  deselected pill glides closed with the SAME springs it expands with,
+  then the bar unmounts. Returning to a tab cancels the pending delay and
+  remounts instantly (no flicker, pill expands as before). The wide-window
+  rail keeps the instant `showBottomBar` gate (rail items never expand).
+- **v192 — shuffle main card drops the year pill (reveal keeps it).**
+  User: "in shuffle main card dont show the year pill just inside the
+  topic reveal". The Spin ticket's top-left pill row (v141) was byline +
+  year qualifier; the year pill (`yearQual` from
+  `titleAndYearQualifier`, the Schedule glyph chip) is REMOVED from the
+  shuffle card — the byline pill stays. The Topic Reveal hero keeps its
+  year pill (top bar, next to the category chip), and the card title
+  still drops the trailing year, so the shared-element morph stays clean.
+- **v192 — detail hero tear rim matches every other hero. (branch
+  Alpha)** User: "the tear logic of detail screen seems totally differnt
+  from rest of the screens, can u fix it". The detail hero's shape
+  construction was ALREADY aligned with Home (v104: `SoftTornBottomShape`
+  + `SoftTornSheetShape` with `bold = true`, same seed, same 10dp lip /
+  14dp baseline, same v108 sheet gate) — the ONE remaining divergence was
+  the torn-edge shadow rim under the seam: every other hero (Home,
+  Profile, Cabinet, Settings, Onboarding, TopicHistory, Spin) draws
+  `Color.Black.copy(alpha = 0.20f)`, but the detail hero drew a warm
+  paper-colored `heroSheetColor.copy(alpha = 0.72f)` band (near-black in
+  dark mode) that read as a totally different tear. Now it draws the same
+  20% black hairline.
+- **v191 — drawer constellation as a BRAIN NEURAL WEB + floating tap
+  popover. (branch Alpha)** User: "in drawer we have your constellation
+  right but its random? isnt it. and it doesnt show real data yet. but i
+  want to draw the costellation pattern as a brain neural connection. and
+  when i tap the dot it shows me the info belo but i want that to sho as
+  a floating small thing and also less data. and also in future i will be
+  replacing the category with real knowledge based things just like brain
+  knowlegde you get it right?" Clarified via ask_user: explored-only
+  neurons (keep), popover = name + saved count (both later replaceable by
+  knowledge nodes), and the drawer widens a little if the brain feels
+  squished.
+  - BRAIN NEURAL WEB (`ui/components/CurioConstellation.kt`): the old arc
+    scatter sat every star in a flat bottom band of the canvas (looked
+    random/squished). Neurons now fill two hemisphere ELLIPSE lobes
+    (phi sweeps -π/2..π/2, radial 0.3..1.0 fills the lobe interior; lobes
+    bulge outward at mid-height and taper to the midline top/bottom — the
+    brain silhouette with the fissure gap). Links are CURVED quadratic
+    beziers (perpendicular sag 0.12) instead of straight lines: every
+    neuron → its 2 nearest neighbours (synapses) + its nearest neuron on
+    the OTHER hemisphere (corpus-callosum bridges, deduped). The gold
+    fissure is now a soft curve down the centre line. Data unchanged —
+    stars = explored lanes, size = saves, glow = active (real passport
+    data, deterministic positions).
+  - FLOATING POPOVER: `CurioConstellation` gained a
+    `popoverContent: (@Composable (CategoryId) -> Unit)? = null` slot —
+    when provided, the selected neuron shows a small floating card
+    anchored just above the dot (below when near the top), clamped inside
+    the canvas, tap-to-dismiss (BoxWithConstraints + onSizeChanged for the
+    clamp). The DRAWER passes a compact name + "N saved" chip and its
+    richer below-panel (the 4 stat chips + last-explored line +
+    `DrawerMapStat`) is DELETED — "a floating small thing and also less
+    data". The Stats page passes null and keeps its own below-panel.
+  - DRAWER WIDTH: `ModalDrawerSheet` 320 → 336dp so the neural web has
+    room to breathe (user's "extend the drawer a little more to the
+    right" contingency).
+  - FUTURE NOTE: the neurons are fed by [CategoryId] + count maps today;
+    the user plans to replace category lanes with real knowledge-based
+    nodes — the component only reads the id list + maps, so swapping the
+    data model later is caller-side only.
+- **v190 — Material theme polish: pastel-softened material cards, mixes
+  collapse to the scheme primary, readable adaptive-hero contrast, M3 nav
+  roles. (branch Alpha)** User: "the material main card colors are good
+  but in pastel mode they are not. and also in material theme dont let
+  the mix color come, make it the material color when they get mixed.
+  also in light mode adaptive hero the hero card looks washed out along
+  with the glyphs and the texts and the box. fix that keep the material
+  color for it but fix it. and fix the nav bar material color as they
+  are bad". Clarified via ask_user: mixes → scheme PRIMARY (one brand
+  color); hero → DEEP material banner with DARK ink; nav → pure M3 roles.
+  - PASTEL CARDS: the Material branches of `CurioGradients.cardGradient` /
+    `heroBlendGradient` and `CurioMixedDeck` ignored Pastel mode, so the
+    material main card kept its full-strength muted family fill while
+    everything around it softened. All material card fills now resolve
+    through `pastelAccent(fill, dark)` when Pastel is on (the composable
+    gradients read the pref directly; `mixedDeckAccent` honors its
+    `pastel` param).
+  - MIXES → PRIMARY: `mixedDeckAccent` / `mixedDeckGradient` gained a
+    `materialPrimary: Color? = null` param; SpinScreen passes
+    `MaterialTheme.colorScheme.primary` when Material is on and >1 lane is
+    selected, so a mixed deck wears THE one material color — peeks, spin
+    button, confetti and the nav tint all follow — and the multi-hue
+    family sweep is gone (`mixedDeckGradient`'s Material branch renders
+    the standard quiet `cardGradient` from the single resolved color).
+    Same-family mixes keep the family fill; pastel mode pastel-softens
+    the primary too.
+  - ADAPTIVE HERO CONTRAST: the light-mode Material hero banner was the
+    pale T90 scheme containers (secondaryContainer / tertiaryContainer /
+    surfaceContainerHighest) with near-white ink — washed out. The new
+    `materialHeaderAccent()` LIGHT branch wears the RICH family color
+    (family fill lifted to L=0.70, sat capped 0.55) and new
+    `materialHeroInk()` (a deep same-hue twin via `readableLightInk`)
+    pairs with it through `heroHeaderInk()`'s Material-light branch —
+    title text, watermark glyphs and the banner box read crisp while the
+    material family hue stays. Dark keeps the deep T30 containers + light
+    ink (unchanged).
+  - NAV M3 ROLES: under Material, `curioNavContainerColor` /
+    `curioFloatingNavContainerFor` return `surfaceContainer` (the M3 nav
+    container role) and `curioActivePillFill` / `curioActivePillInk`
+    return `secondaryContainer` / `onSecondaryContainer` (the M3
+    navigation indicator) — no per-lane colors in the bar. Applies to the
+    floating pill bar, the wide-window rail and the reveal Like/Dislike
+    capsule (`curioFloatingNavContainerFor`).
+- **v189 — page-switch haptics; Mix/Cancel as ONE nav-bar capsule;
+  picker + filter apply on pop-back. (branch Alpha)** User: "add haptics
+  when switching pages with nav pill or like or pet designer too" + "also
+  make the mix and cancel as a navbar style pill and also let user apply
+  the mix even when it pops back same for filters".
+  - HAPTICS: a light tick (`HapticFeedbackType.TextHandleMove` via
+    `LocalHapticFeedback.current`, resolved in composition — never inside
+    the clickable) fires on: tab switches in all three nav surfaces
+    (`CurioFloatingNavBar` floating pill + M3 `NavigationBar` branch +
+    `CurioNavigationRail`), the Topic Reveal Like/Dislike segments, and
+    the Pet Designer studio bar tabs. `TextHandleMove` is the lightest
+    standard tick (no strong press flash on Android 12+).
+  - MIX/CANCEL CAPSULE: the picker's floating Mix + Cancel now live in
+    ONE capsule styled like the bottom nav bar — `Surface` with
+    `RoundedCornerShape(50)`, `curioFloatingNavContainerFor(wash)`
+    (internal, CurioBottomNav.kt — the page wash lifted toward the
+    elevated surface, dark = surfaceContainerHigh), `shadowElevation =
+    6.dp`, inner Row `padding(8.dp)`; Mix stays the accent-filled
+    active-pill (`themedButtonFill`/`themedButtonInk`), Cancel is plain
+    text with `heightIn(min = 44.dp)` to match the pill's height.
+  - APPLY-ON-POP: both sheets' `onDismissRequest` now APPLY instead of
+    dropping the draft when there's something to apply. Picker:
+    `multiSelectMode && selectedSlugs.isNotEmpty()` →
+    `onCategoriesSelected(selected)` (swipe/scrim/back applies the mix;
+    single-select or empty selection just closes). FilterSheet: draft
+    differs from initial → `onApply(draftFilters, draftSubtypes)`; a
+    no-change pop keeps the old set.
+- **v186 — drawer shows the Stats page's constellation; nav labels larger;
+  footer slimmer. (branch Alpha)** User: "make the home shuffle cabinet
+  tet xt even larger in default look and in drawer show the your
+  constellaetion from the your curiocity page not another thing bruh" +
+  "also the footer looks big its good now but looks big so make it more
+  small".
+  - SHARED CONSTELLATION: extracted the Stats page's `CategoryConstellation`
+    into `ui/components/CurioConstellation.kt` (internal, public in the
+    components package) — the exact same brain two-lobe rendering, web
+    links, gold fissure, size-by-saves, recent glow, tap-select. The Stats
+    page calls the shared component (private duplicate deleted, 5 unused
+    imports removed). The DRAWER's `DrawerCuriosityMap` now calls the same
+    `CurioConstellation` with passport data (explored lanes sorted by
+    ordinal, `laneCounts = saves`, `laneRecent = lastAt`, `recentCutoff =
+    0L` = all-time → every explored lane glows), and the whole
+    `DrawerLaneConstellation` grid-web function (v176-era) was deleted
+    (~140 lines). The drawer's richer passport tap panel stays.
+  - NAV LABELS: default-look Changa One label 13 → 15sp (still fits the
+    136dp expanded pill; guidelines branch untouched).
+  - FOOTER: 210 → 150dp tall, fade 110 → 80dp — the planet reads as a
+    small bottom band.
+- **v185 — proper M3 Material theme (1 opt-in toggle), on branch Alpha.**
+  User: "go to alpha branch and sync it with main (alpha was so much
+  behind)… read everything [m3.material.io color system overview +
+  get-started + full guideline]… we will be adding 2 new toggle. with one
+  beaigh a proper material theme with category colors either getting
+  nothing or maybe a one color from the material color… and another test
+  full material guideline text spacing boxes layout evrything… it will be
+  a new extra sytem as a toggle without chnaging anything thats in our
+  current app and look… make the proper plan and follow it untill its
+  done." Synced Alpha (was 251 behind) → fast-forwarded to main a127f10 +
+  pushed. Clarified via ask_user: (1) "clear the current material style
+  and fully redo it" — the old partial Material style was ALREADY removed
+  in v78, so this is a from-scratch rebuild; (2) category colors = "one
+  color per family, muted" (6 families); (3) the guidelines toggle is
+  INDEPENDENT of the Material theme (works on Curio colors); (4) brand
+  chrome = "give both as an option, all opt-in, no default on" (full M3
+  chrome vs keep Curio chrome sub-option).
+  - M3 research: color system = 5 key colors × 13-tone palettes; the
+    multi-color guideline is RESTRAINT (neutral surfaces, ONE primary,
+    secondary/tertiary for muted accents — never a rainbow per section);
+    dynamic color (Material You) on Android 12+; typography = 15-style
+    scale; shapes 4/8/12/16/24; elevation = tonal overlays.
+  - PHASE A — pref + UI: `materialThemeState` (default OFF) + 1 Appearance
+    row in SettingsSectionScreen.kt. NOTE — the "Material guidelines" +
+    "Material chrome" system (PHASE C below) was later REMOVED wholesale
+    (user verdict: "its not good"): `MaterialGuidelines.kt`, the
+    `materialGuidelinesState` / `materialChromeFullState` prefs and both
+    Appearance rows are deleted; `CurioTheme` always uses
+    `CurioTypography`/`CurioShapes`; `CurioBottomNav` always renders the
+    floating pill bar with Changa One labels. Only the Material theme
+    toggle remains.
+  - PHASE B — Material color: `MaterialColorSchemes.kt` (dynamic light/
+    dark on API 31+, `MaterialBaselineLight/DarkScheme` seeded from the
+    brand coral via a `materialTone(hue, sat, tone)` M3 tone→lightness
+    ladder for older devices); `MaterialFamilies.kt` (6 families by hue,
+    near-achromatic → NEUTRAL; family fill T40 light/T80 dark, ink
+    T100/T20; rose→secondary + green→tertiary map to the scheme's own
+    roles; non-composable `*For(dark)` twins for remember-block paths);
+    choke-point wiring in CategoryInk.kt (themedAccent/categoryInk/
+    onAccent/headerAccent/backgroundWash→neutral/surfaces→neutral/
+    InkFor+AccentFor twins) + CurioColors.kt (cardGradient/heroBlendGradient/
+    mixedDeckAccent/mixedDeckGradient/mixedDeckWash→neutral) + CurioTheme
+    (curioColorScheme → materialColorScheme).
+  - PHASE C — guidelines + chrome: BUILT (`MaterialGuidelines.kt` =
+    MaterialTypography / MaterialShapes / CurioSpacing tokens, gates
+    materialGuidelinesOn / materialChromeFullOn; CurioTheme typography+
+    shapes swap; M3 NavigationBar under full chrome; Changa One drop from
+    pill/rail labels), then REMOVED — see the NOTE in PHASE A. The
+    per-screen spacing/layout sweep never shipped with it.
+  - LESSON: extension functions on an enum type (`MaterialFamily.forAccent`)
+    need a receiver INSTANCE — a factory-style helper must be a plain
+    top-level function (`materialFamilyFor`).
 - **v184 — nav pill: calmer morph/collapse, wider+higher pill, more
   inactive spacing, Changa One labels.** User: "make the nav pill morph
   and collape animation even smoother and calmer. and give the inactive

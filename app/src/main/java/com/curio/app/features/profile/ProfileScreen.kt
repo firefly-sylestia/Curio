@@ -1103,16 +1103,19 @@ private fun ProfileHero(
                     val statRingsOn = statHolesOn && AppPreferences.paperHoleRingsState
                     // v27v — which 3D ring look the holes wear.
                     val statRingStyle = AppPreferences.paperHoleRingStyleState
-                    Surface(
-                        shape = statShape,
-                        color = Color.Transparent,
-                        shadowElevation = 3.dp,
-                        // v28 — dark mode elevation visibility (glow).
+                    // v200 — the Surface wrapper is GONE: M3 Surface (1.2+)
+                    // clips its children to the shape, which CUT the coil's
+                    // left peek at the card edge. A plain Box +
+                    // shadow(clip = false) keeps the elevation without the
+                    // clip — the paper fill self-clips to the shape outline,
+                    // so the protruding wire can render outside the card.
+                    // v28 — dark mode elevation visibility (glow).
+                    Box(
                         modifier = Modifier
                             .curioDarkGlow(3.dp, statShape)
-                    ) {
-                        Box(
-                            modifier = when {
+                            .shadow(3.dp, statShape, clip = false)
+                            .then(
+                                when {
                                 paperStatsOn -> Modifier.paperStatCardFill(
                                     shape = statShape,
                                     fill = paperStatBg,
@@ -1139,7 +1142,8 @@ private fun ProfileHero(
                                     RoundedCornerShape(20.dp)
                                 )
                             }
-                        ) {
+                        )
+                    ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1177,7 +1181,6 @@ private fun ProfileHero(
                                 )
                             }
                         }
-                    }
                 }
             }
         }

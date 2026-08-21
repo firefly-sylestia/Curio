@@ -5,9 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,11 +36,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -56,19 +52,24 @@ import com.curio.app.R
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
+import com.curio.app.data.BrainDimension
+import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.StreakTracker
+import com.curio.app.data.brainProfile
+import com.curio.app.data.laneKnowledge
+import com.curio.app.data.wordCount
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBadgeMedal
+import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
-import kotlin.random.Random
 
 /** v174c — the Curiosity Stats page: the drawer's observatory world, full
  *  page. A celestial sky header, an INTERACTIVE constellation brain where
@@ -92,26 +93,34 @@ fun StatsScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         allEntries = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull().orEmpty()
     }
-    // Saved entries per lane INSIDE the window (+ recency for the glow).
+    // Saved entries per lane INSIDE the window (drives the lanes breakdown).
     val filteredEntries = remember(allEntries, range) { allEntries.filterForRange(range) }
     val laneCounts = remember(filteredEntries) {
         filteredEntries.groupingBy { it.topic.categoryId }.eachCount()
     }
-    val laneRecent = remember(filteredEntries) {
-        filteredEntries.groupBy { it.topic.categoryId }
-            .mapValues { (_, es) -> es.maxOf { it.capturedAtMillis } }
-    }
 
-    // Explored lanes = saved-entry lanes in the window ∪ (All Time only)
-    // lanes the user has spun/quested — quest history has no timestamps.
+    // v208 — the constellation is fed by KNOWLEDGE (real science-based
+    // stats): star size = the lane's knowledge score (explores + saves +
+    // words written there), glow = recent activity. The passport supplies
+    // the all-time per-lane counters; words come from the window's entries.
+    val progress = remember(context) { CurioPassport.allProgress(context) }
+    val knowledge = remember(progress, filteredEntries) {
+        laneKnowledge(progress, filteredEntries)
+    }
+    val knowledgeScores = remember(knowledge) { knowledge.mapValues { it.value.score } }
+    val knowledgeRecent = remember(knowledge) { knowledge.mapValues { it.value.lastAt } }
+
+    // Explored lanes = saved-entry lanes in the window ∪ knowledge lanes
+    // (all-time passport) ∪ (All Time only) quest lanes.
     val knownNames = remember { CurioCategories.all.map { it.id.name }.toSet() }
-    val explored = remember(laneCounts, range, CurioQuests.categoriesState) {
+    val explored = remember(laneCounts, knowledge, range, CurioQuests.categoriesState) {
         val fromQuests = if (range == StatsRange.ALL) {
             CurioQuests.categoriesState
                 .filter { it in knownNames }
                 .mapNotNull { runCatching { CategoryId.valueOf(it) }.getOrNull() }
         } else emptyList()
-        (laneCounts.keys + fromQuests).distinct().sortedBy { it.ordinal }
+        (laneCounts.keys + knowledge.filterValues { it.explored }.keys + fromQuests)
+            .distinct().sortedBy { it.ordinal }
     }
 
     var selected by remember { mutableStateOf<CategoryId?>(null) }
@@ -137,10 +146,26 @@ fun StatsScreen(navController: NavController) {
             item("constellation") {
                 StatsConstellationCard(
                     explored = explored,
-                    laneCounts = laneCounts,
-                    laneRecent = laneRecent,
+                    laneCounts = knowledgeScores,
+                    laneRecent = knowledgeRecent,
                     selected = selected,
                     onSelect = { selected = it }
+                )
+            }
+            // v208 — the BRAIN PROFILE: six real cognitive dimensions
+            // (knowledge, memory, expression, focus, consistency, curiosity)
+            // computed from actual activity, each with a science-based
+            // improvement tip.
+            item("brain") {
+                BrainProfileCard(
+                    dimensions = brainProfile(
+                        progress = progress,
+                        entries = filteredEntries,
+                        lifetime = lifetime,
+                        bestStreak = bestStreak,
+                        totalLanes = CurioCategories.visible.size
+                    ),
+                    totalWords = filteredEntries.sumOf { it.wordCount() }
                 )
             }
             item("lifetime") { LifetimeTotalsCard(lifetime) }
@@ -164,11 +189,13 @@ fun StatsScreen(navController: NavController) {
         StatsSkyHeader(
             skyTop = skyTop,
             skyBottom = skyBottom,
-            skyInk = skyInk,
-            onBack = { navController.popBackStack() }
+            skyInk = skyInk
         )
+
     }
 }
+
+
 
 /** v174c — the stats page's celestial palette (mirrors the drawer's sky). */
 @Composable
@@ -184,14 +211,16 @@ private val StatsHeaderHeight = 148.dp
 
 /** v178 — the fixed sky band: the SAME theme-picked sky artwork as the
  *  drawer hero (night sky in dark mode, day sky in light) behind the page
- *  title + back pill. The design (rounded tear, pill, ink) is unchanged —
- *  only the banner's art style changed. */
+ *  title. The design (rounded tear, ink) is unchanged — only the banner's
+ *  art style changed. v202 — the back pill is GONE: the page is a plain
+ *  NavHost destination, so the system back gesture/button already pops it
+ *  (user: "fix the back button in your curiosity page… just remove the
+ *  back button"). */
 @Composable
 private fun StatsSkyHeader(
     skyTop: Color,
     skyBottom: Color,
-    skyInk: Color,
-    onBack: () -> Unit
+    skyInk: Color
 ) {
     val context = LocalContext.current
     // v178 — theme-picked drawer-hero sky SVG (dark → night, light → day).
@@ -224,22 +253,11 @@ private fun StatsSkyHeader(
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .statusBarsPadding()
                 .padding(start = 16.dp, end = 16.dp, bottom = 22.dp)
         ) {
-            Surface(
-                onClick = onBack,
-                shape = CircleShape,
-                color = Color(0xFFFFFDF4).copy(alpha = 0.85f),
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(CurioIcons.ArrowBack, null, tint = skyInk, size = 22.dp)
-                }
-            }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     "Your Curiosity",
@@ -353,7 +371,7 @@ private fun StatsConstellationCard(
                         color = ink
                     )
                     Text(
-                        "Every star is a lane you've explored — bigger means more saved ${StatsRangeState.selected.label.lowercase()}.",
+                        "Every star is a lane you've explored — bigger means more knowledge built there.",
                         style = MaterialTheme.typography.bodySmall,
                         color = muted
                     )
@@ -365,11 +383,11 @@ private fun StatsConstellationCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatsSummaryChip("$totalSaves", "saved", Color(0xFFB98A5E))
+                StatsSummaryChip("$totalSaves", "knowledge", Color(0xFFB98A5E))
                 StatsSummaryChip("${explored.size}", "lanes", Color(0xFF7FA0C8))
                 StatsSummaryChip(CurioQuests.lifetimeState.spins.toString(), "spins", Color(0xFF9B7BB8))
             }
-            CategoryConstellation(
+            CurioConstellation(
                 explored = explored,
                 laneCounts = laneCounts,
                 laneRecent = laneRecent,
@@ -402,7 +420,7 @@ private fun StatsConstellationCard(
                                     color = ink
                                 )
                                 Text(
-                                    if (selectedCount > 0) "$selectedCount saved${if (selectedRecent >= recentCutoff) " · active this week" else ""}"
+                                    if (selectedCount > 0) "Knowledge score $selectedCount${if (selectedRecent >= recentCutoff) " · active this week" else ""}"
                                     else "Explored, nothing saved yet",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = muted
@@ -421,6 +439,81 @@ private fun StatsConstellationCard(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+/** v208 — the BRAIN PROFILE card: six real cognitive dimensions scored
+ *  from actual activity (knowledge, memory, expression, focus, consistency,
+ *  curiosity), each with a science-based improvement tip. */
+@Composable
+private fun BrainProfileCard(
+    dimensions: List<BrainDimension>,
+    totalWords: Int
+) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val dimensionColors = listOf(
+        Color(0xFF7FA0C8), // knowledge — sky
+        Color(0xFFB98A5E), // memory — keepsake
+        Color(0xFFD9A85C), // expression — gold
+        Color(0xFF9B7BB8), // focus — violet
+        Color(0xFFC96F4A), // consistency — ember
+        Color(0xFF7F9B6E)  // curiosity — moss
+    )
+    StatsCard {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        "Your Brain Profile",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink
+                    )
+                    Text(
+                        "Six cognitive muscles, scored from your real activity — each has a science-backed way to grow.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted
+                    )
+                }
+            }
+            Text(
+                if (totalWords > 0) "$totalWords words written — the generation effect at work."
+                else "No words written yet — journal after an explore to build expression.",
+                style = MaterialTheme.typography.labelSmall,
+                color = muted
+            )
+            dimensions.forEachIndexed { i, d ->
+                val tint = dimensionColors[i % dimensionColors.size]
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CurioIcon(d.icon, null, tint = tint, size = 16.dp)
+                        Spacer(Modifier.size(6.dp))
+                        Text(
+                            d.name,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = ink
+                        )
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            d.level,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = tint
+                        )
+                    }
+                    LinearProgressIndicator(
+                        progress = { d.score / 100f },
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                        color = tint,
+                        trackColor = tint.copy(alpha = 0.14f)
+                    )
+                    Text(
+                        d.tip,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = muted
+                    )
                 }
             }
         }
@@ -457,122 +550,6 @@ private fun StatsSummaryChip(value: String, label: String, tint: Color) {
  *  arc-positioned into two hemisphere lobes (deterministic jitter per lane),
  *  sized by saved count, glowing when active this week. Tap a star to select
  *  it (tap empty space to clear). */
-@Composable
-private fun CategoryConstellation(
-    explored: List<CategoryId>,
-    laneCounts: Map<CategoryId, Int>,
-    laneRecent: Map<CategoryId, Long>,
-    recentCutoff: Long,
-    selected: CategoryId?,
-    onSelect: (CategoryId?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Deterministic node positions: two lobes (left / right hemisphere).
-    val nodes = remember(explored) {
-        explored.mapIndexed { index, id ->
-            val total = explored.size
-            val side = if (index < (total + 1) / 2) -1 else 1
-            val idxInSide = if (side < 0) index else index - (total + 1) / 2
-            val nInSide = if (side < 0) (total + 1) / 2 else total / 2
-            val t = if (nInSide <= 1) 0.5f else idxInSide.toFloat() / (nInSide - 1)
-            val angle = (0.28f + t * 0.44f) * kotlin.math.PI.toFloat()
-            val rnd = Random(id.name.hashCode())
-            val jx = (rnd.nextFloat() - 0.5f) * 0.05f
-            val jy = (rnd.nextFloat() - 0.5f) * 0.05f
-            val cx = 0.5f + side * 0.12f
-            val cy = 0.52f
-            val pos = Offset(
-                cx + side * kotlin.math.cos(angle.toDouble()).toFloat() * 0.21f + jx,
-                cy + kotlin.math.sin(angle.toDouble()).toFloat() * 0.33f + jy
-            )
-            id to pos
-        }
-    }
-    // Accents must resolve in COMPOSITION (themedAccent is @Composable and
-    // can't run inside the Canvas draw lambda below; recomputing the small
-    // map per recomposition is cheap).
-    val accents = nodes.associate { (id, _) -> id to CurioCategories.byId(id).themedAccent() }
-    // v181 — theme-aware link inks (audit fix, same as the drawer map: the
-    // old steel-blue at 0.22 alpha vanished on the light card surface).
-    // Resolved in COMPOSITION — isCurioDarkTheme can't run in the Canvas
-    // draw lambda below.
-    val linkColor = if (isCurioDarkTheme()) Color(0xFF7FAFD8).copy(alpha = 0.32f)
-                    else Color(0xFF5F7E9A).copy(alpha = 0.50f)
-    val fissureColor = if (isCurioDarkTheme()) Color(0xFFD9A85C).copy(alpha = 0.30f)
-                       else Color(0xFFA97F3C).copy(alpha = 0.45f)
-
-    Canvas(
-        modifier = modifier.pointerInput(explored, laneCounts, laneRecent) {
-            detectTapGestures { tap ->
-                // Only stars within the touch radius register; tapping empty
-                // sky clears the selection.
-                val hit = nodes.mapNotNull { (id, n) ->
-                    val dx = tap.x - n.x * size.width
-                    val dy = tap.y - n.y * size.height
-                    val d = kotlin.math.sqrt(dx * dx + dy * dy)
-                    if (d <= 34.dp.toPx()) id to d else null
-                }.minByOrNull { it.second }?.first
-                onSelect(hit)
-            }
-        }
-    ) {
-        val w = size.width
-        val h = size.height
-        val pts = nodes.map { (_, n) -> Offset(n.x * w, n.y * h) }
-        // v181 — nearest-neighbour WEB: every star links to its 2 closest
-        // stars, so the constellation reads as one connected map (the old
-        // lane-order chain + single fissure were nearly invisible in light
-        // mode). Each pair is deduped; the gold fissure below bridges the
-        // two hemispheres.
-        val links = LinkedHashSet<Pair<Int, Int>>()
-        nodes.indices.forEach { i ->
-            val nearest = nodes.indices
-                .filter { it != i }
-                .sortedBy { j ->
-                    val dx = pts[i].x - pts[j].x
-                    val dy = pts[i].y - pts[j].y
-                    dx * dx + dy * dy
-                }
-                .take(2)
-            nearest.forEach { j ->
-                links.add(if (i < j) i to j else j to i)
-            }
-        }
-        links.forEach { (a, b) ->
-            drawLine(
-                color = linkColor,
-                start = pts[a],
-                end = pts[b],
-                strokeWidth = 1.dp.toPx()
-            )
-        }
-        if (nodes.size >= 3) {
-            val mid = nodes.size / 2
-            drawLine(
-                color = fissureColor,
-                start = pts[mid - 1],
-                end = pts[mid],
-                strokeWidth = 1.dp.toPx()
-            )
-        }
-        nodes.forEachIndexed { i, (id, n) ->
-            val p = pts[i]
-            val accent = accents[id] ?: Color(0xFF7FAFD8)
-            val count = laneCounts[id] ?: 0
-            val recent = (laneRecent[id] ?: 0L) >= recentCutoff
-            val r = (5.5f + kotlin.math.min(count, 60).toFloat() * 0.30f).dp.toPx()
-            val isSel = selected == id
-            drawCircle(
-                color = accent.copy(alpha = if (recent) 0.20f else 0.10f),
-                radius = r * (if (recent || isSel) 2.6f else 2.2f),
-                center = p
-            )
-            drawCircle(color = accent, radius = r, center = p)
-            drawCircle(color = Color.White.copy(alpha = 0.85f), radius = r * 0.42f, center = p)
-        }
-    }
-}
-
 /** v174c — the lifetime totals grid: spins, explores, saves, quotes, pins,
  *  likes, dislikes and daily quests, in compact paper panes. */
 @Composable

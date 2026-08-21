@@ -224,6 +224,19 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v185 — the proper M3 Material theme system (opt-in, default OFF —
+        // the current app look is untouched). The v185 "Material guidelines"
+        // + "Material chrome" options were removed (user verdict: not good).
+        SettingsRowPulse(highlightKey == "appearance-material-theme") {
+            CompactSwitchRow(
+                "Material theme",
+                "Proper Material 3 colors: one primary, neutral surfaces, muted category families",
+                AppPreferences.materialThemeState
+            ) {
+                AppPreferences.setMaterialThemeEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
         // v101 — the dark-mode pill glow is the subtle top-only version by
         // default; the toggle restores the fuller glow for comparison.
         SettingsRowPulse(highlightKey == "appearance-pill-glow") {

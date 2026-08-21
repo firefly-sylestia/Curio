@@ -192,8 +192,9 @@ fun CaptureEntity.toEntry(): CurioEntry {
         imageUrl = "",
         exploreAction = ExploreAction(
             verb = when (categoryId) {
-                CategoryId.FILMS, CategoryId.DIRECTORS, CategoryId.SERIES,
-                CategoryId.ANIME, CategoryId.SPORTS, CategoryId.INTERNET -> "Watch"
+                CategoryId.FILMS, CategoryId.DIRECTORS, CategoryId.ANIMATED_MOVIES,
+                CategoryId.SERIES, CategoryId.ANIME, CategoryId.SPORTS,
+                CategoryId.INTERNET -> "Watch"
                 CategoryId.ALBUMS, CategoryId.ARTISTS, CategoryId.SONGS -> "Listen"
                 CategoryId.BOOKS, CategoryId.AUTHORS, CategoryId.MANGA,
                 CategoryId.MANHWA, CategoryId.MYTHOLOGY -> "Read"
