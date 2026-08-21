@@ -2325,7 +2325,7 @@ private fun RevealCategoryFavoriteBar(
     var categoryExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { categoryExpanded = true }
     val categoryWidth by animateDpAsState(
-        targetValue = if (categoryExpanded) 160.dp else 56.dp,
+        targetValue = if (categoryExpanded) 200.dp else 56.dp,
         animationSpec = RevealWidthSpring,
         label = "categoryBarWidth"
     )

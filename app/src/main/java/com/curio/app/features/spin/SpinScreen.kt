@@ -4158,7 +4158,7 @@ private fun VerticalDeckButton(
         // v27q — flat 2dp: selection reads through the solid accent fill.
         shadowElevation = if (navPill) 4.dp else 2.dp,
         modifier = modifier
-            .size(width = 54.dp, height = 112.dp)
+            .size(width = 68.dp, height = 112.dp)
             .then(
                 if (navPill) Modifier.curioGlassEdge(shape)
                 // v9.x — Material buttons keep their category identity as the
@@ -4286,7 +4286,7 @@ private fun DeckControlButton(
                 // v32 — pastel dark flips to the bright cream ([deckControlInk]).
                 color = ink,
                 textAlign = TextAlign.Center,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
         }

@@ -398,9 +398,9 @@ object AppPreferences {
     var reminderEnabledState by mutableStateOf(false)
         private set
 
-    // v220 — constellation 3D star zoom: tapping a star shows a subtle
-    // perspective tilt + white glow halo. Default OFF (experimental).
-    var starZoom3dState by mutableStateOf(false)
+    // v221 — constellation 3D star zoom: tapping a star shows a subtle
+    // perspective tilt + white glow halo. Default ON.
+    var starZoom3dState by mutableStateOf(true)
         private set
 
     /**
