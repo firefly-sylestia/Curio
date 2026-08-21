@@ -295,16 +295,33 @@ const SpinButton: React.FC<{ isSpinning: boolean; hasLanded: boolean; onClick: (
   );
 };
 
-// ─── Bottom Control Pill ──────────────────────────────────────────────
+// ─── Bottom Control Pill (nav-pill style) ──────────────────────────
+// Matches Android's floating nav-bar look: capsule shape, calmed accent
+// active fill, elevated container. Expands to show label when active.
 const BottomPill: React.FC<{ icon: string; label: string; isActive: boolean; accent: string; onClick: () => void }> = ({ icon, label, isActive, accent, onClick }) => {
   const { isDark } = useTheme();
   const { handlers, pressStyle } = usePressable(0.96);
+  const containerBg = isDark ? 'rgba(30,30,50,0.92)' : 'rgba(255,253,249,0.92)';
   return (
     <button onClick={onClick} {...handlers}
-      className="flex-1 flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl font-semibold text-sm touch-action-manipulation"
-      style={{ background: isActive ? accent : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-        color: isActive ? 'white' : isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)', ...pressStyle }}>
-      <MaterialIcon name={icon} size={22} />{label}
+      className="flex items-center justify-center gap-2 rounded-full font-semibold text-sm touch-action-manipulation transition-all duration-300"
+      style={{
+        height: 52,
+        width: isActive ? 160 : 64,
+        background: isActive ? accent : containerBg,
+        color: isActive ? 'white' : isDark ? 'rgba(255,255,255,0.7)' : 'rgba(59,10,23,0.7)',
+        boxShadow: isActive ? `0 4px 16px ${accent}44` : '0 2px 8px rgba(0,0,0,0.08)',
+        transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        ...pressStyle,
+      }}>
+      <MaterialIcon name={icon} size={22} />
+      {isActive && (
+        <span className="whitespace-nowrap" style={{
+          fontFamily: 'Changa One, Inter, sans-serif',
+          opacity: isActive ? 1 : 0,
+          transition: 'opacity 0.3s ease 0.1s',
+        }}>{label}</span>
+      )}
     </button>
   );
 };
@@ -447,12 +464,11 @@ export const SpinScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 3. Bottom Bar: Categories · Filter ───────────────────────── */}
-      <div className="w-full px-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)' }}>
-        <div className="flex gap-2.5">
-          <BottomPill icon={activeCategory.iconGlyph} label={activeCategory.displayName} isActive={true} accent={activeCategory.accent} onClick={() => setShowPicker(true)} />
-          <BottomPill icon="tune" label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'} isActive={!!selectedSubtype} accent={activeCategory.accent} onClick={() => setShowFilter(true)} />
-        </div>
+      {/* ── 3. Floating Bottom Bar: Categories · Filter ─────────────── */}
+      <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center gap-3 px-4"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <BottomPill icon={activeCategory.iconGlyph} label={activeCategory.displayName} isActive={true} accent={activeCategory.accent} onClick={() => setShowPicker(true)} />
+        <BottomPill icon="tune" label={selectedSubtype ? `Filter · ${selectedSubtype}` : 'Filter'} isActive={!!selectedSubtype} accent={activeCategory.accent} onClick={() => setShowFilter(true)} />
       </div>
 
       <FilterSheet isOpen={showFilter} onClose={() => setShowFilter(false)} category={activeCategory} subtypes={subtypes} sel={selectedSubtype} setSel={setSelectedSubtype} />
