@@ -802,7 +802,9 @@ fun TopicRevealScreen(
                             cat = cat,
                             action = resolved.exploreAction,
                             subtype = resolved.subtype,
-                            modifier = Modifier.padding(top = 14.dp)
+                            modifier = Modifier.padding(top = 14.dp),
+                            // v221 — for QUOTES, show the full quote text.
+                            instructionOverride = if (resolved.categoryId == CategoryId.QUOTES) resolved.name else null
                         )
                     }
                 }
@@ -1799,7 +1801,12 @@ private fun HeroCard(
                     // identical during the morph. v146 — the year pill rides
                     // in the top bar next to the category chip (see above),
                     // out of the hero where the progress pill sits.
-                    text = resolved?.titleAndYearQualifier()?.first ?: fallbackName.ifBlank { cat.displayName },
+                    // v221 — for QUOTES, show the author name instead of the quote text.
+                    text = if (resolved?.categoryId == CategoryId.QUOTES && resolved.byline.isNotBlank()) {
+                        resolved.byline
+                    } else {
+                        resolved?.titleAndYearQualifier()?.first ?: fallbackName.ifBlank { cat.displayName }
+                    },
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontSize = 34.sp,
                         lineHeight = 38.sp,
@@ -2056,7 +2063,9 @@ private fun ActionPromptCard(
     cat: com.curio.app.data.CurioCategory,
     action: com.curio.app.data.ExploreAction,
     subtype: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v221 — for QUOTES, the full quote replaces the instruction text.
+    instructionOverride: String? = null
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -2105,7 +2114,7 @@ private fun ActionPromptCard(
             }
             Spacer(Modifier.height(10.dp))
             Text(
-                text = action.instruction,
+                text = instructionOverride ?: action.instruction,
                 // v35/v49 — the instruction reads in the Lora editorial
                 // serif; since v49 it IS the shared [RevealEditorialBody] —
                 // the exact same 15sp/23sp style as the quick fact above.

@@ -729,7 +729,8 @@ fun EntryDetailScreen(
                     if (isQuotesCategory) {
                         QuickFactCard(
                             cat = cat,
-                            teaser = resolvedEntry.topic.name
+                            teaser = resolvedEntry.topic.name,
+                            label = "Quote"
                         )
                     } else {
                         QuickFactCard(
@@ -1509,7 +1510,9 @@ private fun FormatBody(
 private fun QuickFactCard(
     cat: CurioCategory,
     teaser: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v221 — QUOTES category labels this "Quote" instead of "Quick fact".
+    label: String = "Quick fact"
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     var hasOverflow by remember { mutableStateOf(false) }
@@ -1538,7 +1541,7 @@ private fun QuickFactCard(
                 size = 14.dp
             )
             Text(
-                text = "Quick fact",
+                text = label,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = ink
             )
