@@ -260,6 +260,8 @@ fun EntryDetailScreen(
 
     val resolvedEntry = entry ?: return
     val cat = CurioCategories.byId(resolvedEntry.topic.categoryId)
+    val isQuotesCategory = resolvedEntry.topic.categoryId ==
+        com.curio.app.data.CategoryId.QUOTES
     // The page's category tint wash — the saved-entry page wears the entry's
     // wash over the theme background (same as Spin / Save / Cabinet), so a
     // capture from the Cabinet reads in its category's color story instead of
@@ -501,8 +503,6 @@ fun EntryDetailScreen(
                     // color remains the backdrop, the title stays crisp.
                     // QUOTES category: show the writer/byline instead of
                     // the quote text (the quote is shown in the body).
-                    val isQuotesCategory = resolvedEntry.topic.categoryId ==
-                        com.curio.app.data.CategoryId.QUOTES
                     val heroTitle = if (isQuotesCategory && resolvedEntry.topic.byline.isNotBlank()) {
                         resolvedEntry.topic.byline
                     } else {
