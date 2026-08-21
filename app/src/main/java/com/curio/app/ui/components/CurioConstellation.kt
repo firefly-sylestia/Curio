@@ -1,5 +1,7 @@
 package com.curio.app.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -21,12 +23,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.ui.theme.isCurioDarkTheme
 import kotlin.math.PI
@@ -67,9 +71,36 @@ fun CurioConstellation(
         val wPx = with(density) { maxWidth.toPx() }
         val hPx = with(density) { maxHeight.toPx() }
 
+        // v220 — 3D star zoom: when enabled, a tapped star gets a
+        // subtle perspective tilt + white glow halo.
+        val zoom3d = AppPreferences.starZoom3dState
+        val zoomScale by animateFloatAsState(
+            targetValue = if (selected != null && zoom3d) 1.06f else 1f,
+            animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
+            label = "zoomScale"
+        )
+        val zoomRotationX by animateFloatAsState(
+            targetValue = if (selected != null && zoom3d) -3f else 0f,
+            animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
+            label = "zoomRotX"
+        )
+        val zoomRotationY by animateFloatAsState(
+            targetValue = if (selected != null && zoom3d) 2f else 0f,
+            animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
+            label = "zoomRotY"
+        )
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
+                .graphicsLayer {
+                    if (zoom3d) {
+                        scaleX = zoomScale
+                        scaleY = zoomScale
+                        rotationX = zoomRotationX
+                        rotationY = zoomRotationY
+                        cameraDistance = 12f * density
+                    }
+                }
                 .pointerInput(explored) {
                     detectTapGestures { tap ->
                         val hit = stars.mapNotNull { star ->
@@ -148,6 +179,22 @@ fun CurioConstellation(
                 val cy = py(star.y)
                 val r = pr(star.r)
                 val color = if (isDark) star.darkColor else star.lightColor
+                // v220 — white glow halo when this star is selected.
+                val isSelected = selected?.let { s ->
+                    explored.indexOf(s) == stars.indexOf(star)
+                } == true
+                if (isSelected && zoom3d) {
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.35f),
+                        radius = r * 3f,
+                        center = Offset(cx, cy)
+                    )
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.18f),
+                        radius = r * 5f,
+                        center = Offset(cx, cy)
+                    )
+                }
                 drawCircle(color = color, radius = r, center = Offset(cx, cy))
             }
         }

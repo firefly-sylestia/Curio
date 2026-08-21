@@ -2371,22 +2371,25 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
     val exploredList = remember(progress) { lanes.filter { it in explored } }
     var selected by remember { mutableStateOf<CategoryId?>(null) }
 
+    // v220 — edge-to-edge constellation: negative offset bleeds outside
+    // the LazyColumn's 16dp horizontal content padding so the deep-space
+    // background fills the full drawer width.
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .offset(x = (-16).dp)
             .clickable(onClick = onClick)
     ) {
-        // ── The constellation: the Stats page's brain web ───────────────
-            CurioConstellation(
-                explored = exploredList,
-                laneCounts = knowledge.mapValues { it.value.score },
-                laneRecent = knowledge.mapValues { it.value.lastAt },
-                recentCutoff = 0L,
-                selected = selected,
-                onSelect = { selected = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(260.dp),
+        CurioConstellation(
+            explored = exploredList,
+            laneCounts = knowledge.mapValues { it.value.score },
+            laneRecent = knowledge.mapValues { it.value.lastAt },
+            recentCutoff = 0L,
+            selected = selected,
+            onSelect = { selected = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp),
             // v190 — the tap detail is now a small FLOATING card anchored to
             // the neuron (name + saved count — user: "a floating small thing
             // and also less data") instead of the richer panel below. Tap the

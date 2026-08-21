@@ -398,6 +398,11 @@ object AppPreferences {
     var reminderEnabledState by mutableStateOf(false)
         private set
 
+    // v220 — constellation 3D star zoom: tapping a star shows a subtle
+    // perspective tilt + white glow halo. Default OFF (experimental).
+    var starZoom3dState by mutableStateOf(false)
+        private set
+
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
@@ -917,6 +922,7 @@ object AppPreferences {
     private const val KEY_PAPER_STAT_TEAR = "paper_stat_tear"
     private const val KEY_HEADER_DEEP = "header_deep"
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
+    private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1069,6 +1075,15 @@ object AppPreferences {
     fun set3DButtonGradientEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_3D_BUTTON_GRADIENT, enabled).apply()
         threeDButtonState = enabled
+    }
+
+    // ── Constellation 3D star zoom (v220 experimental) ─────────────
+    fun isStarZoom3dEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_STAR_ZOOM_3D, false)
+
+    fun setStarZoom3dEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_STAR_ZOOM_3D, enabled).apply()
+        starZoom3dState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────
