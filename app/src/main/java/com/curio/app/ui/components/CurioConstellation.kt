@@ -512,6 +512,7 @@ private fun DrawScope.drawBgStarPattern(w: Float, h: Float, s: Float, dark: Bool
 
 private fun DrawScope.drawSmallFieldStars(w: Float, h: Float, s: Float, dark: Boolean) {
     data class FieldStar(val cx: Float, val cy: Float, val r: Float, val alpha: Float)
+    // v222 — existing field stars (small, dim)
     val fieldStars = if (dark) listOf(
         FieldStar(90f, 600f, 0.8f, 0.5f),
         FieldStar(230f, 470f, 0.7f, 0.5f),
@@ -537,6 +538,101 @@ private fun DrawScope.drawSmallFieldStars(w: Float, h: Float, s: Float, dark: Bo
     fieldStars.forEach { star ->
         drawCircle(
             color = color.copy(alpha = star.alpha),
+            radius = star.r * s,
+            center = Offset(star.cx * s, star.cy * s)
+        )
+    }
+
+    // v222 — medium-brightness scattered stars (between field and
+    // constellation stars): bigger, slightly brighter, with varied
+    // color temperature for depth.
+    val mediumStars = if (dark) listOf(
+        // Warm white — scattered across the sky
+        FieldStar(120f, 150f, 1.6f, 0.58f),
+        FieldStar(450f, 200f, 1.4f, 0.52f),
+        FieldStar(780f, 130f, 1.5f, 0.55f),
+        FieldStar(1100f, 180f, 1.3f, 0.50f),
+        FieldStar(1300f, 350f, 1.5f, 0.54f),
+        FieldStar(200f, 500f, 1.4f, 0.52f),
+        FieldStar(550f, 380f, 1.6f, 0.56f),
+        FieldStar(950f, 300f, 1.3f, 0.50f),
+        FieldStar(1250f, 600f, 1.5f, 0.53f),
+        FieldStar(100f, 900f, 1.4f, 0.51f),
+        FieldStar(400f, 750f, 1.5f, 0.55f),
+        FieldStar(700f, 650f, 1.6f, 0.57f),
+        FieldStar(1000f, 800f, 1.3f, 0.50f),
+        FieldStar(1200f, 1050f, 1.5f, 0.54f),
+        FieldStar(180f, 1200f, 1.4f, 0.52f),
+        FieldStar(500f, 1100f, 1.6f, 0.56f),
+        FieldStar(850f, 1050f, 1.3f, 0.50f),
+        FieldStar(1150f, 1250f, 1.5f, 0.53f),
+        FieldStar(350f, 1300f, 1.4f, 0.51f),
+        FieldStar(650f, 1350f, 1.5f, 0.54f),
+        // Blue-tinted — cooler stars for variety
+        FieldStar(300f, 180f, 1.3f, 0.48f),
+        FieldStar(600f, 250f, 1.4f, 0.50f),
+        FieldStar(1000f, 500f, 1.3f, 0.47f),
+        FieldStar(150f, 700f, 1.4f, 0.49f),
+        FieldStar(800f, 900f, 1.3f, 0.48f),
+        FieldStar(450f, 1200f, 1.4f, 0.50f),
+        FieldStar(1100f, 1350f, 1.3f, 0.47f),
+        FieldStar(250f, 1350f, 1.4f, 0.49f),
+        // Slightly brighter accent stars (not as bright as constellation)
+        FieldStar(170f, 320f, 2.0f, 0.62f),
+        FieldStar(680f, 170f, 2.1f, 0.65f),
+        FieldStar(1180f, 430f, 1.9f, 0.60f),
+        FieldStar(350f, 850f, 2.0f, 0.63f),
+        FieldStar(900f, 1150f, 2.1f, 0.65f),
+        FieldStar(1280f, 200f, 1.9f, 0.60f),
+        FieldStar(530f, 550f, 2.0f, 0.62f),
+        FieldStar(750f, 1300f, 2.1f, 0.64f),
+    ) else listOf(
+        FieldStar(120f, 150f, 1.5f, 0.42f),
+        FieldStar(450f, 200f, 1.3f, 0.38f),
+        FieldStar(780f, 130f, 1.4f, 0.40f),
+        FieldStar(1100f, 180f, 1.2f, 0.37f),
+        FieldStar(1300f, 350f, 1.4f, 0.39f),
+        FieldStar(200f, 500f, 1.3f, 0.38f),
+        FieldStar(550f, 380f, 1.5f, 0.41f),
+        FieldStar(950f, 300f, 1.2f, 0.37f),
+        FieldStar(1250f, 600f, 1.4f, 0.39f),
+        FieldStar(100f, 900f, 1.3f, 0.38f),
+        FieldStar(400f, 750f, 1.4f, 0.40f),
+        FieldStar(700f, 650f, 1.5f, 0.42f),
+        FieldStar(1000f, 800f, 1.2f, 0.37f),
+        FieldStar(1200f, 1050f, 1.4f, 0.39f),
+        FieldStar(180f, 1200f, 1.3f, 0.38f),
+        FieldStar(500f, 1100f, 1.5f, 0.41f),
+        FieldStar(850f, 1050f, 1.2f, 0.37f),
+        FieldStar(1150f, 1250f, 1.4f, 0.39f),
+        FieldStar(350f, 1300f, 1.3f, 0.38f),
+        FieldStar(650f, 1350f, 1.4f, 0.40f),
+        FieldStar(300f, 180f, 1.2f, 0.36f),
+        FieldStar(600f, 250f, 1.3f, 0.37f),
+        FieldStar(1000f, 500f, 1.2f, 0.35f),
+        FieldStar(150f, 700f, 1.3f, 0.36f),
+        FieldStar(800f, 900f, 1.2f, 0.35f),
+        FieldStar(450f, 1200f, 1.3f, 0.37f),
+        FieldStar(1100f, 1350f, 1.2f, 0.35f),
+        FieldStar(250f, 1350f, 1.3f, 0.36f),
+        FieldStar(170f, 320f, 1.8f, 0.46f),
+        FieldStar(680f, 170f, 1.9f, 0.48f),
+        FieldStar(1180f, 430f, 1.7f, 0.44f),
+        FieldStar(350f, 850f, 1.8f, 0.46f),
+        FieldStar(900f, 1150f, 1.9f, 0.48f),
+        FieldStar(1280f, 200f, 1.7f, 0.44f),
+        FieldStar(530f, 550f, 1.8f, 0.46f),
+        FieldStar(750f, 1300f, 1.9f, 0.47f),
+    )
+    mediumStars.forEach { star ->
+        val starColor = if (dark) {
+            // Blue-tinted stars use a cool white; others warm white
+            if (star.alpha < 0.50f) Color(0xFFd0e8ff) else Color(0xFFf0f0ff)
+        } else {
+            if (star.alpha < 0.38f) Color(0xFFb8c8d8) else Color(0xFFdde4ec)
+        }
+        drawCircle(
+            color = starColor.copy(alpha = star.alpha),
             radius = star.r * s,
             center = Offset(star.cx * s, star.cy * s)
         )
