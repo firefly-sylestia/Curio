@@ -392,16 +392,23 @@ private fun StatsConstellationCard(
                 }
             }
         }
-        // Edge-to-edge constellation — deep-space background fills full width.
-        CurioConstellation(
-            explored = explored,
-            laneCounts = laneCounts,
-            laneRecent = laneRecent,
-            recentCutoff = recentCutoff,
-            selected = selected,
-            onSelect = onSelect,
-            modifier = Modifier.fillMaxWidth().height(260.dp)
-        )
+        // v221 — constellation in a card box (no overflow)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+        ) {
+            CurioConstellation(
+                explored = explored,
+                laneCounts = laneCounts,
+                laneRecent = laneRecent,
+                recentCutoff = recentCutoff,
+                selected = selected,
+                onSelect = onSelect,
+                modifier = Modifier.fillMaxWidth().height(260.dp)
+            )
+        }
         // Selected lane info card — below the constellation.
         AnimatedVisibility(
                 visible = selectedCat != null,
