@@ -1,0 +1,301 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1400 1400"
+     width="1400"
+     height="1400">
+
+<defs>
+
+  <radialGradient id="space" cx="50%" cy="50%" r="78%">
+    <stop offset="0%" stop-color="#101d45"/>
+    <stop offset="38%" stop-color="#08132f"/>
+    <stop offset="72%" stop-color="#03091d"/>
+    <stop offset="100%" stop-color="#01030b"/>
+  </radialGradient>
+
+  <radialGradient id="purpleNebula">
+    <stop offset="0%" stop-color="#8d45bd" stop-opacity=".15"/>
+    <stop offset="45%" stop-color="#55277f" stop-opacity=".06"/>
+    <stop offset="100%" stop-color="#18072d" stop-opacity="0"/>
+  </radialGradient>
+
+  <radialGradient id="blueNebula">
+    <stop offset="0%" stop-color="#3979c9" stop-opacity=".13"/>
+    <stop offset="45%" stop-color="#24518c" stop-opacity=".055"/>
+    <stop offset="100%" stop-color="#061128" stop-opacity="0"/>
+  </radialGradient>
+
+  <pattern id="backgroundStars"
+           width="180"
+           height="180"
+           patternUnits="userSpaceOnUse">
+
+    <circle cx="18" cy="22" r=".8"
+            fill="#fff" opacity=".60"/>
+    <circle cx="61" cy="70" r=".55"
+            fill="#c9e2ff" opacity=".65"/>
+    <circle cx="128" cy="29" r=".75"
+            fill="#fff" opacity=".55"/>
+    <circle cx="157" cy="91" r=".55"
+            fill="#fff" opacity=".60"/>
+    <circle cx="39" cy="130" r=".55"
+            fill="#9fc8ed" opacity=".55"/>
+    <circle cx="101" cy="151" r=".7"
+            fill="#fff" opacity=".55"/>
+    <circle cx="151" cy="164" r=".45"
+            fill="#fff" opacity=".65"/>
+    <circle cx="87" cy="103" r=".45"
+            fill="#fff" opacity=".55"/>
+    <circle cx="12" cy="166" r=".45"
+            fill="#8db9e5" opacity=".55"/>
+
+  </pattern>
+
+</defs>
+
+
+<!-- =========================================================
+     BACKGROUND
+     ========================================================= -->
+
+<rect width="1400"
+      height="1400"
+      fill="url(#space)"/>
+
+<ellipse cx="220"
+         cy="400"
+         rx="390"
+         ry="500"
+         fill="url(#purpleNebula)"
+         transform="rotate(-25 220 400)"/>
+
+<ellipse cx="1160"
+         cy="850"
+         rx="430"
+         ry="520"
+         fill="url(#blueNebula)"
+         transform="rotate(20 1160 850)"/>
+
+<ellipse cx="700"
+         cy="1170"
+         rx="470"
+         ry="280"
+         fill="url(#purpleNebula)"/>
+
+<rect width="1400"
+      height="1400"
+      fill="url(#backgroundStars)"/>
+
+
+<!-- =========================================================
+     MAIN CONSTELLATION
+     
+     Zoomed approximately 1.55x around center.
+     
+     Original centered positions:
+       Polaris 533,959
+       Dubhe  811,733
+       Merak  868,693
+       Phecda 825,596
+       Megrez 765,607
+       Alioth 710,560
+       Mizar  662,527
+       Alkaid 633,441
+
+     Zoomed around center (700,700).
+     ========================================================= -->
+
+
+<!-- Big Dipper bowl -->
+
+<path d="
+M 872 751
+L 961 689
+L 894 539
+L 801 556
+Z"
+fill="none"
+stroke="#c9e5ff"
+stroke-width="2.4"
+stroke-linecap="round"
+stroke-linejoin="round"
+opacity=".72"/>
+
+
+<!-- Big Dipper handle -->
+
+<path d="
+M 801 556
+L 716 483
+L 642 432
+L 597 298
+"
+fill="none"
+stroke="#c9e5ff"
+stroke-width="2.4"
+stroke-linecap="round"
+stroke-linejoin="round"
+opacity=".78"/>
+
+
+<!-- Pointer direction -->
+
+<line x1="872"
+      y1="751"
+      x2="441"
+      y2="1101"
+      stroke="#9fc8ed"
+      stroke-width="1.3"
+      stroke-dasharray="6 13"
+      opacity=".22"/>
+
+
+<!-- =========================================================
+     BIG DIPPER STARS
+     ========================================================= -->
+
+<!-- Dubhe -->
+
+<circle cx="872"
+        cy="751"
+        r="5.8"
+        fill="#ffffff"/>
+
+
+<!-- Merak -->
+
+<circle cx="961"
+        cy="689"
+        r="5.2"
+        fill="#ffffff"/>
+
+
+<!-- Phecda -->
+
+<circle cx="894"
+        cy="539"
+        r="5.1"
+        fill="#ffffff"/>
+
+
+<!-- Megrez -->
+
+<circle cx="801"
+        cy="556"
+        r="4.3"
+        fill="#ffffff"/>
+
+
+<!-- Alioth -->
+
+<circle cx="716"
+        cy="483"
+        r="6"
+        fill="#ffffff"/>
+
+
+<!-- Mizar -->
+
+<circle cx="642"
+        cy="432"
+        r="5.2"
+        fill="#ffffff"/>
+
+
+<!-- Alkaid -->
+
+<circle cx="597"
+        cy="298"
+        r="5.7"
+        fill="#ffffff"/>
+
+
+<!-- =========================================================
+     POLARIS
+     ========================================================= -->
+
+<circle cx="441"
+        cy="1101"
+        r="7.5"
+        fill="#f8fcff"/>
+
+
+<!-- =========================================================
+     ALCOR
+     ========================================================= -->
+
+<circle cx="633"
+        cy="418"
+        r="3.8"
+        fill="#eaf5ff"/>
+
+
+<!-- =========================================================
+     KOCHAB
+     ========================================================= -->
+
+<circle cx="320"
+        cy="1211"
+        r="5.2"
+        fill="#fffdf2"/>
+
+
+<!-- =========================================================
+     PHERKAD
+     ========================================================= -->
+
+<circle cx="561"
+        cy="1265"
+        r="4.5"
+        fill="#f7f8ff"/>
+
+
+<!-- subtle Ursa Minor relation -->
+
+<path d="
+M 441 1101
+L 320 1211
+
+M 441 1101
+L 561 1265
+"
+fill="none"
+stroke="#9bbbd9"
+stroke-width="1"
+stroke-dasharray="3 11"
+opacity=".12"/>
+
+
+<!-- =========================================================
+     FEW REALISTIC BACKGROUND STARS
+     ========================================================= -->
+
+<g fill="#e8f4ff">
+
+  <circle cx="150" cy="260" r="1.3" opacity=".65"/>
+  <circle cx="1160" cy="260" r="1.2" opacity=".60"/>
+  <circle cx="1240" cy="780" r="1.3" opacity=".60"/>
+  <circle cx="190" cy="820" r="1.1" opacity=".60"/>
+  <circle cx="1080" cy="1160" r="1.2" opacity=".60"/>
+
+</g>
+
+
+<!-- =========================================================
+     SMALL RANDOM FIELD
+     ========================================================= -->
+
+<g fill="#ffffff">
+
+  <circle cx="90" cy="600" r=".8" opacity=".5"/>
+  <circle cx="230" cy="470" r=".7" opacity=".5"/>
+  <circle cx="320" cy="300" r=".8" opacity=".5"/>
+  <circle cx="1050" cy="420" r=".8" opacity=".5"/>
+  <circle cx="1190" cy="520" r=".7" opacity=".5"/>
+  <circle cx="1130" cy="980" r=".8" opacity=".5"/>
+  <circle cx="920" cy="1190" r=".7" opacity=".5"/>
+  <circle cx="760" cy="1260" r=".8" opacity=".5"/>
+  <circle cx="300" cy="1080" r=".7" opacity=".5"/>
+
+</g>
+
+</svg>

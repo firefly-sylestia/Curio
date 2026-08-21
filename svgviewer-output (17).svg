@@ -1,0 +1,353 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1400 1400"
+     width="1400"
+     height="1400">
+
+<defs>
+
+  <!-- =====================================================
+       LIGHT-MODE FRIENDLY COSMIC BACKGROUND
+       ===================================================== -->
+
+  <radialGradient id="space"
+                  cx="50%"
+                  cy="48%"
+                  r="78%">
+
+    <stop offset="0%"
+          stop-color="#344b67"/>
+
+    <stop offset="35%"
+          stop-color="#2d425c"/>
+
+    <stop offset="68%"
+          stop-color="#26394f"/>
+
+    <stop offset="100%"
+          stop-color="#202f42"/>
+
+  </radialGradient>
+
+
+  <!-- Muted atmospheric blue -->
+
+  <radialGradient id="blueNebula">
+
+    <stop offset="0%"
+          stop-color="#7197bd"
+          stop-opacity=".18"/>
+
+    <stop offset="45%"
+          stop-color="#607f9f"
+          stop-opacity=".08"/>
+
+    <stop offset="100%"
+          stop-color="#26394f"
+          stop-opacity="0"/>
+
+  </radialGradient>
+
+
+  <!-- Muted lavender -->
+
+  <radialGradient id="purpleNebula">
+
+    <stop offset="0%"
+          stop-color="#987da9"
+          stop-opacity=".14"/>
+
+    <stop offset="45%"
+          stop-color="#806b92"
+          stop-opacity=".07"/>
+
+    <stop offset="100%"
+          stop-color="#26394f"
+          stop-opacity="0"/>
+
+  </radialGradient>
+
+
+  <!-- =====================================================
+       SUBTLE BACKGROUND STARS
+       ===================================================== -->
+
+  <pattern id="backgroundStars"
+           width="180"
+           height="180"
+           patternUnits="userSpaceOnUse">
+
+    <circle cx="18" cy="22"
+            r=".75"
+            fill="#d7e1ec"
+            opacity=".48"/>
+
+    <circle cx="61" cy="70"
+            r=".5"
+            fill="#c3d1df"
+            opacity=".42"/>
+
+    <circle cx="128" cy="29"
+            r=".7"
+            fill="#e0e8f0"
+            opacity=".45"/>
+
+    <circle cx="157" cy="91"
+            r=".5"
+            fill="#c5d4e2"
+            opacity=".42"/>
+
+    <circle cx="39" cy="130"
+            r=".5"
+            fill="#d4e0eb"
+            opacity=".40"/>
+
+    <circle cx="101" cy="151"
+            r=".65"
+            fill="#e0e8f0"
+            opacity=".42"/>
+
+    <circle cx="151" cy="164"
+            r=".4"
+            fill="#c4d2df"
+            opacity=".45"/>
+
+    <circle cx="87" cy="103"
+            r=".4"
+            fill="#e0e8f0"
+            opacity=".40"/>
+
+    <circle cx="12" cy="166"
+            r=".4"
+            fill="#c7d5e2"
+            opacity=".42"/>
+
+  </pattern>
+
+</defs>
+
+
+<!-- =====================================================
+     BACKGROUND
+     ===================================================== -->
+
+<rect width="1400"
+      height="1400"
+      fill="url(#space)"/>
+
+
+<!-- Soft cosmic clouds -->
+
+<ellipse cx="220"
+         cy="400"
+         rx="390"
+         ry="500"
+         fill="url(#purpleNebula)"
+         transform="rotate(-25 220 400)"/>
+
+<ellipse cx="1160"
+         cy="850"
+         rx="430"
+         ry="520"
+         fill="url(#blueNebula)"
+         transform="rotate(20 1160 850)"/>
+
+<ellipse cx="700"
+         cy="1170"
+         rx="470"
+         ry="280"
+         fill="url(#purpleNebula)"/>
+
+
+<!-- Small stars -->
+
+<rect width="1400"
+      height="1400"
+      fill="url(#backgroundStars)"/>
+
+
+<!-- =====================================================
+     MAIN CONSTELLATION
+     ===================================================== -->
+
+<!-- Big Dipper bowl -->
+
+<path d="
+M 872 751
+L 961 689
+L 894 539
+L 801 556
+Z"
+fill="none"
+stroke="#c7d9e8"
+stroke-width="2.3"
+stroke-linecap="round"
+stroke-linejoin="round"
+opacity=".78"/>
+
+
+<!-- Big Dipper handle -->
+
+<path d="
+M 801 556
+L 716 483
+L 642 432
+L 597 298
+"
+fill="none"
+stroke="#c7d9e8"
+stroke-width="2.3"
+stroke-linecap="round"
+stroke-linejoin="round"
+opacity=".82"/>
+
+
+<!-- Pointer direction toward Polaris -->
+
+<line x1="872"
+      y1="751"
+      x2="441"
+      y2="1101"
+      stroke="#b4c9db"
+      stroke-width="1.2"
+      stroke-dasharray="6 13"
+      opacity=".28"/>
+
+
+<!-- =====================================================
+     MAIN STARS
+     ===================================================== -->
+
+<circle cx="872" cy="751"
+        r="5.7"
+        fill="#eef5fa"/>
+
+<circle cx="961" cy="689"
+        r="5.1"
+        fill="#eef5fa"/>
+
+<circle cx="894" cy="539"
+        r="5"
+        fill="#eef5fa"/>
+
+<circle cx="801" cy="556"
+        r="4.2"
+        fill="#e8f1f7"/>
+
+<circle cx="716" cy="483"
+        r="5.9"
+        fill="#f2f7fb"/>
+
+<circle cx="642" cy="432"
+        r="5.1"
+        fill="#edf5fa"/>
+
+<circle cx="597" cy="298"
+        r="5.6"
+        fill="#f2f7fb"/>
+
+
+<!-- Polaris -->
+
+<circle cx="441"
+        cy="1101"
+        r="7.2"
+        fill="#f5f8fa"/>
+
+
+<!-- =====================================================
+     REAL NEARBY STARS
+     ===================================================== -->
+
+<!-- Alcor -->
+
+<circle cx="633"
+        cy="418"
+        r="3.6"
+        fill="#dbe8f2"/>
+
+
+<!-- Kochab -->
+
+<circle cx="320"
+        cy="1211"
+        r="5"
+        fill="#e2dfd5"/>
+
+
+<!-- Pherkad -->
+
+<circle cx="561"
+        cy="1265"
+        r="4.3"
+        fill="#dbe7f0"/>
+
+
+<!-- Very subtle Ursa Minor indication -->
+
+<path d="
+M 441 1101
+L 320 1211
+
+M 441 1101
+L 561 1265
+"
+fill="none"
+stroke="#afc3d4"
+stroke-width="1"
+stroke-dasharray="3 11"
+opacity=".17"/>
+
+
+<!-- =====================================================
+     FEW DISTANT STARS
+     ===================================================== -->
+
+<g fill="#d5e1eb">
+
+  <circle cx="150"
+          cy="260"
+          r="1.2"
+          opacity=".55"/>
+
+  <circle cx="1160"
+          cy="260"
+          r="1.1"
+          opacity=".52"/>
+
+  <circle cx="1240"
+          cy="780"
+          r="1.2"
+          opacity=".52"/>
+
+  <circle cx="190"
+          cy="820"
+          r="1"
+          opacity=".50"/>
+
+  <circle cx="1080"
+          cy="1160"
+          r="1.1"
+          opacity=".52"/>
+
+</g>
+
+
+<!-- =====================================================
+     SMALL NATURAL STAR FIELD
+     ===================================================== -->
+
+<g fill="#d0deea">
+
+  <circle cx="90" cy="600" r=".75" opacity=".35"/>
+  <circle cx="230" cy="470" r=".65" opacity=".35"/>
+  <circle cx="320" cy="300" r=".75" opacity=".35"/>
+  <circle cx="1050" cy="420" r=".75" opacity=".35"/>
+  <circle cx="1190" cy="520" r=".65" opacity=".35"/>
+  <circle cx="1130" cy="980" r=".75" opacity=".35"/>
+  <circle cx="920" cy="1190" r=".65" opacity=".35"/>
+  <circle cx="760" cy="1260" r=".75" opacity=".35"/>
+  <circle cx="300" cy="1080" r=".65" opacity=".35"/>
+
+</g>
+
+</svg>
