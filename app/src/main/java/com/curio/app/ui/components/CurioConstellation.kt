@@ -98,7 +98,7 @@ fun CurioConstellation(
                         scaleY = zoomScale
                         rotationX = zoomRotationX
                         rotationY = zoomRotationY
-                        cameraDistance = 12f * density
+                        cameraDistance = 12f * density.density
                     }
                 }
                 .pointerInput(explored) {
