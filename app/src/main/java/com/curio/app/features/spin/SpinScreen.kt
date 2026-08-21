@@ -3072,6 +3072,7 @@ private fun HeroTicketCard(
                         CategoryId.FILMS -> "Director"
                         CategoryId.ARTWORKS -> "Painter"
                         CategoryId.DISCOVERIES -> "Discovered by"
+                        CategoryId.QUOTES -> "Author"
                         else -> null
                     }
                     // v141 — the top-left corner is a pill ROW: the byline

@@ -107,28 +107,23 @@ fun TopicHistoryScreen(navController: NavController) {
     // v6.7 — pinned-for-later topics from the Topic Reveal screen, listed
     // above the day-grouped capture history so the user can revisit them.
     val pinnedTopics = AppPreferences.pinnedTopicsState
-    // v21 — liked & disliked topics (Topic Reveal's like/dislike buttons),
+    // v21 — favorited topics (Topic Reveal's favorite button),
     // resolved to catalog topics so the rows show real topic names. Reactive
     // off the sentiments state, so a vote flips the section instantly.
     // Topic names live in the JSON catalogs, so resolution is suspend:
     // produceState re-runs whenever the sentiments map is replaced.
     // Null until the first resolution completes, so the empty state never
-    // flashes before the catalog lookups land (a user with only likes would
-    // otherwise see a one-frame "No shuffles yet").
-    val sentimentsState = produceState<Pair<List<CurioTopic>, List<CurioTopic>>?>(
+    // flashes before the catalog lookups land.
+    val sentimentsState = produceState<List<CurioTopic>?>(
         initialValue = null,
         AppPreferences.topicSentimentsState
     ) {
         value = resolveSentimentTopics(
             AppPreferences.topicSentimentsState,
             AppPreferences.SENTIMENT_LIKE
-        ) to resolveSentimentTopics(
-            AppPreferences.topicSentimentsState,
-            AppPreferences.SENTIMENT_DISLIKE
         )
     }
-    val likedTopics = sentimentsState.value?.first.orEmpty()
-    val dislikedTopics = sentimentsState.value?.second.orEmpty()
+    val favoritedTopics = sentimentsState.value.orEmpty()
     val sentimentsLoaded = sentimentsState.value != null
     // v21 — unpin confirmation (mirrors Home's Saved-shelf dialog): the
     // bookmark button never drops a pin silently.
@@ -166,17 +161,14 @@ fun TopicHistoryScreen(navController: NavController) {
     val filteredEntries = remember(entries, needle, filterCategoryId) {
         entries.filter { matches(it.categoryId, it.topicName) }
     }
-    val filteredLiked = remember(likedTopics, needle, filterCategoryId) {
-        likedTopics.filter { matches(it.categoryId, it.name) }
-    }
-    val filteredDisliked = remember(dislikedTopics, needle, filterCategoryId) {
-        dislikedTopics.filter { matches(it.categoryId, it.name) }
+    val filteredFavorited = remember(favoritedTopics, needle, filterCategoryId) {
+        favoritedTopics.filter { matches(it.categoryId, it.name) }
     }
     val grouped = remember(filteredEntries) { filteredEntries.groupBy { it.dayLabel } }
     // Chips only for categories that actually appear in the history.
-    val availableCats = remember(entries, pinnedTopics, likedTopics, dislikedTopics) {
+    val availableCats = remember(entries, pinnedTopics, favoritedTopics) {
         (entries.map { it.categoryId } + pinnedTopics.map { it.categoryId } +
-            likedTopics.map { it.categoryId } + dislikedTopics.map { it.categoryId })
+            favoritedTopics.map { it.categoryId })
             .distinct()
             .map { CurioCategories.byId(it) }
     }
@@ -196,7 +188,7 @@ fun TopicHistoryScreen(navController: NavController) {
         HistoryHeroHeader(onBack = { navController.popBackStack() })
 
         if (sentimentsLoaded && entries.isEmpty() && pinnedTopics.isEmpty() &&
-            likedTopics.isEmpty() && dislikedTopics.isEmpty()
+            favoritedTopics.isEmpty()
         ) {
             CurioEmptyState(
                 glyph = CurioIcons.History,
@@ -224,7 +216,7 @@ fun TopicHistoryScreen(navController: NavController) {
         }
 
         if (filteredEntries.isEmpty() && filteredPinned.isEmpty() &&
-            filteredLiked.isEmpty() && filteredDisliked.isEmpty()
+            filteredFavorited.isEmpty()
         ) {
             // Filters narrowed everything away — offer a one-tap reset.
             // (Same ScreenEntrance fade-up as the list, so the whole results
@@ -267,46 +259,20 @@ fun TopicHistoryScreen(navController: NavController) {
                     ),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // ── Liked topics (v21) — the Topic Reveal like button ──
-                    if (filteredLiked.isNotEmpty()) {
-                        item(key = "liked_header") {
+                    // ── Favorited topics — the Topic Reveal favorite button ──
+                    if (filteredFavorited.isNotEmpty()) {
+                        item(key = "favorited_header") {
                             HistorySectionHeader(
-                                glyph = CurioIcons.ThumbUp,
-                                label = "Liked",
-                                count = filteredLiked.size,
+                                glyph = CurioIcons.Star,
+                                label = "Favorite",
+                                count = filteredFavorited.size,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
-                        items(filteredLiked, key = { "like_${it.categoryId.name}_${it.id}" }) { topic ->
+                        items(filteredFavorited, key = { "fav_${it.categoryId.name}_${it.id}" }) { topic ->
                             SentimentTopicRow(
                                 topic = topic,
-                                glyph = CurioIcons.ThumbUp,
-                                onClick = {
-                                    navController.navigate(
-                                        com.curio.app.navigation.CurioRoutes.revealFor(
-                                            topic.categoryId.routeSlug,
-                                            topic.name
-                                        )
-                                    ) { launchSingleTop = true }
-                                }
-                            )
-                        }
-                    }
-
-                    // ── Disliked topics (v21) — the Topic Reveal dislike button ──
-                    if (filteredDisliked.isNotEmpty()) {
-                        item(key = "disliked_header") {
-                            HistorySectionHeader(
-                                glyph = CurioIcons.ThumbDown,
-                                label = "Disliked",
-                                count = filteredDisliked.size,
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        items(filteredDisliked, key = { "dislike_${it.categoryId.name}_${it.id}" }) { topic ->
-                            SentimentTopicRow(
-                                topic = topic,
-                                glyph = CurioIcons.ThumbDown,
+                                glyph = CurioIcons.Star,
                                 onClick = {
                                     navController.navigate(
                                         com.curio.app.navigation.CurioRoutes.revealFor(
@@ -565,7 +531,7 @@ private fun HistoryHeroHeader(onBack: () -> Unit) {
                             maxLines = 1
                         )
                         Text(
-                            "Liked, disliked & every spin you've explored",
+                            "Favorites & every spin you've explored",
                             style = MaterialTheme.typography.labelMedium,
                             color = ink.copy(alpha = 0.82f),
                             maxLines = 1
@@ -721,7 +687,7 @@ private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
 }
 
 
-// ── Section header for the sentiment lists (Liked / Disliked) ─────────────
+// ── Section header for the sentiment lists (Favorite) ─────────────
 
 @Composable
 private fun HistorySectionHeader(

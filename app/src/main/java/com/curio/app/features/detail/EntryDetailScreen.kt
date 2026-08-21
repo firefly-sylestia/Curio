@@ -260,6 +260,8 @@ fun EntryDetailScreen(
 
     val resolvedEntry = entry ?: return
     val cat = CurioCategories.byId(resolvedEntry.topic.categoryId)
+    val isQuotesCategory = resolvedEntry.topic.categoryId ==
+        com.curio.app.data.CategoryId.QUOTES
     // The page's category tint wash — the saved-entry page wears the entry's
     // wash over the theme background (same as Spin / Save / Cabinet), so a
     // capture from the Cabinet reads in its category's color story instead of
@@ -499,8 +501,15 @@ fun EntryDetailScreen(
                     // washed out in every pastel mode. No colored plate,
                     // gradient, rim or other title background — the hero
                     // color remains the backdrop, the title stays crisp.
+                    // QUOTES category: show the writer/byline instead of
+                    // the quote text (the quote is shown in the body).
+                    val heroTitle = if (isQuotesCategory && resolvedEntry.topic.byline.isNotBlank()) {
+                        resolvedEntry.topic.byline
+                    } else {
+                        resolvedEntry.topic.name
+                    }
                     Text(
-                        text = resolvedEntry.topic.name,
+                        text = heroTitle,
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.ExtraBold
                         ),
@@ -712,10 +721,18 @@ fun EntryDetailScreen(
                 ) {
                     // ── Quick fact (v7.38) — the topic's teaser directly under
                     // the fixed category label, backgroundless on the page wash.
-                    QuickFactCard(
-                        cat = cat,
-                        teaser = resolvedEntry.topic.teaser
-                    )
+                    // QUOTES category: show the full quote instead of the teaser.
+                    if (isQuotesCategory) {
+                        QuickFactCard(
+                            cat = cat,
+                            teaser = resolvedEntry.topic.name
+                        )
+                    } else {
+                        QuickFactCard(
+                            cat = cat,
+                            teaser = resolvedEntry.topic.teaser
+                        )
+                    }
 
                     // ── Saved quick title (v125) — the user's OWN title from
                     // Save your take, shown just below the quick fact on a

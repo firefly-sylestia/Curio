@@ -2221,9 +2221,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 val restOfName = nameParts.drop(1).joinToString(" ")
-                                if (restOfName.isNotBlank()) {
+                                val bio = AppPreferences.getCustomStreakTagline(context)
+                                val subtitle = restOfName.ifBlank { bio }
+                                if (subtitle.isNotBlank()) {
                                     Text(
-                                        restOfName,
+                                        subtitle,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = drawerInk.copy(alpha = 0.78f),
                                         maxLines = 1,

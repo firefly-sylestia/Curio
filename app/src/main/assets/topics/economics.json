@@ -1,1 +1,1902 @@
-[]
+[
+ {
+  "id": "economics-supply-and-demand",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Supply and Demand",
+  "teaser": "The most fundamental force in economics: when something is scarce and wanted, its price rises; when it's abundant and ignored, its price falls. This single mechanism coordinates the decisions of billions of strangers.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "microeconomics",
+   "basics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The logic of supply and demand",
+   "durationMinutes": 8,
+   "instruction": "Read a clear explanation of how supply and demand curves interact to set prices, then find one real-world example where a supply shock changed prices overnight."
+  }
+ },
+ {
+  "id": "economics-invisible-hand",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "The Invisible Hand",
+  "teaser": "Adam Smith's metaphor for how individuals pursuing their own self-interest inadvertently benefit society. A baker doesn't make bread out of charity — but you eat because he profits.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "classical",
+   "smith"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Adam Smith's original passage on the invisible hand",
+   "durationMinutes": 10,
+   "instruction": "Find Smith's actual words in The Wealth of Nations (Book IV, Chapter II) and note how modern economists interpret — and misinterpret — the metaphor."
+  }
+ },
+ {
+  "id": "economics-opportunity-cost",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Opportunity Cost",
+  "teaser": "The value of the next best alternative you give up when making a choice. Every decision has a hidden price tag — not what you pay, but what you sacrifice.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "microeconomics",
+   "decision-making"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The concept of opportunity cost",
+   "durationMinutes": 6,
+   "instruction": "Think of three decisions you made this week. For each, identify the opportunity cost — what you gave up — and consider whether the trade was worth it."
+  }
+ },
+ {
+  "id": "economics-comparative-advantage",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Comparative Advantage",
+  "teaser": "Even if you're better at everything than someone else, you both benefit from specializing. Trade isn't about who's best — it's about who gives up the least to produce.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "trade",
+   " Ricardo"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "David Ricardo's comparative advantage argument",
+   "durationMinutes": 10,
+   "instruction": "Read a clear exposition of Ricardo's England-Portugal cloth-wine example, then explain why the principle still holds even when one country is more efficient at everything."
+  }
+ },
+ {
+  "id": "economics-gdp",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Gross Domestic Product",
+  "teaser": "GDP sums the market value of every final good and service produced in a country in a year. It's the most widely used scorecard for economies — and one of the most misunderstood.",
+  "imageUrl": "",
+  "tier": 1,
+   "tags": [
+   "economics",
+   "macroeconomics",
+   "measurement"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How GDP is calculated and what it misses",
+   "durationMinutes": 7,
+   "instruction": "Learn the three methods of calculating GDP (production, income, expenditure), then name two important things GDP fails to measure."
+  }
+ },
+ {
+  "id": "economics-inflation",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Inflation",
+  "teaser": "When prices rise across the economy, each unit of currency buys less. Moderate inflation is normal; runaway inflation destroys savings and trust in money itself.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "macroeconomics",
+   "monetary"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What causes inflation and why it matters",
+   "durationMinutes": 7,
+   "instruction": "Learn the difference between demand-pull and cost-push inflation, then look up the current inflation rate in your country and what's driving it."
+  }
+ },
+ {
+  "id": "economics-interest-rate",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Interest Rates",
+  "teaser": "The price of borrowing money. Central banks raise rates to cool inflation and lower them to刺激 growth — making this the most powerful lever in macroeconomic policy.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "monetary-policy",
+   "central-banks"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How interest rates shape the economy",
+   "durationMinutes": 8,
+   "instruction": "Understand how the Federal Reserve's federal funds rate ripples through mortgages, savings accounts, and business investment, then check today's rate."
+  }
+ },
+ {
+  "id": "economics-commodity",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Commodities",
+  "teaser": "Wheat, oil, copper, gold — things that are identical no matter who produces them. Commodity prices are the raw pulse of the global economy, reacting to weather, wars, and demand in real time.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "markets",
+   "trading"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How commodity markets work",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between spot and futures markets for commodities, then check the current price of crude oil and what's moving it."
+  }
+ },
+ {
+  "id": "economics-trade-deficit",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Trade Deficit",
+  "teaser": "When a country imports more than it exports, the gap is a trade deficit. It's not inherently bad — it can mean consumers are thriving — but it reveals structural dependencies.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "trade",
+   "balance-of-payments"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Trade deficits: problem or feature?",
+   "durationMinutes": 7,
+   "instruction": "Learn why the US has run persistent trade deficits for decades without economic collapse, and why the deficit number alone doesn't tell the full story."
+  }
+ },
+ {
+  "id": "economics-fiscal-policy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Fiscal Policy",
+  "teaser": "Government spending and taxation as tools to steer the economy. Cut taxes and spend more to stimulate; raise taxes and cut spending to cool down. Simple in theory, brutal in practice.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "government",
+   "macroeconomics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How fiscal policy works",
+   "durationMinutes": 8,
+   "instruction": "Compare Keynesian and austerity approaches to fiscal policy, then look at one real-world example where fiscal stimulus succeeded or failed."
+  }
+ },
+ {
+  "id": "economics-monetary-policy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Monetary Policy",
+  "teaser": "Central banks control the money supply and interest rates to manage inflation and employment. It's the unseen hand that moves markets while most people never notice.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "central-banks",
+   "policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How central banks use monetary policy",
+   "durationMinutes": 8,
+   "instruction": "Learn the three main tools of monetary policy (open market operations, discount rate, reserve requirements), then explain why inflation targeting became the dominant framework."
+  }
+ },
+ {
+  "id": "economics-quantitative-easing",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Quantitative Easing",
+  "teaser": "When interest rates hit zero, central banks buy bonds to inject money directly into the economy. It's emergency medicine for the financial system — powerful, controversial, and hard to reverse.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "monetary-policy",
+   "central-banks"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How QE works and its consequences",
+   "durationMinutes": 10,
+   "instruction": "Understand how the Fed's QE programs after 2008 and 2020 expanded the balance sheet, then discuss whether QE primarily helped asset owners or the broader economy."
+  }
+ },
+ {
+  "id": "economics-keynes",
+  "categoryId": "ECONOMICS",
+  "subtype": "Economist",
+  "name": "John Maynard Keynes",
+  "teaser": "The economist who argued that governments must spend during downturns to prevent spiraling unemployment. His ideas reshaped how the world manages recessions — and his name became a political label.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "keynesian",
+   "history-of-thought"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Keynes's core argument in The General Theory",
+   "durationMinutes": 12,
+   "instruction": "Read a summary of Keynes's central insight — that aggregate demand drives employment, not just supply — and consider why governments still debate his ideas 90 years later."
+  }
+ },
+ {
+  "id": "economics-smith",
+  "categoryId": "ECONOMICS",
+  "subtype": "Economist",
+  "name": "Adam Smith",
+  "teaser": "The Scottish moral philosopher who wrote The Wealth of Nations (1776), arguing that free markets, division of labor, and self-regulating competition create prosperity. Often called the father of economics.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "classical",
+   "history-of-thought"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The opening chapter of The Wealth of Nations",
+   "durationMinutes": 15,
+   "instruction": "Read Smith's famous pin factory example about division of labor, then note how modern assembly lines and software development embody the same principle."
+  }
+ },
+ {
+  "id": "economics-milton-friedman",
+  "categoryId": "ECONOMICS",
+  "subtype": "Economist",
+  "name": "Milton Friedman",
+  "teaser": "The monetarist who argued that inflation is always a monetary phenomenon — too much money chasing too few goods. His free-market ideas influenced Reagan and Thatcher.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "monetarism",
+   "history-of-thought"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Friedman's monetarist argument",
+   "durationMinutes": 10,
+   "instruction": "Understand Friedman's claim that controlling the money supply is the key to controlling inflation, then compare his view with Keynesian fiscal stimulus."
+  }
+ },
+ {
+  "id": "economics-piketty",
+  "categoryId": "ECONOMICS",
+  "subtype": "Economist",
+  "name": "Thomas Piketty",
+  "teaser": "The French economist whose book Capital in the Twenty-First Century (2013) used 200 years of data to argue that capitalism naturally concentrates wealth unless governments intervene.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "inequality",
+   "capital"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "Piketty's core inequality argument",
+   "durationMinutes": 12,
+   "instruction": "Learn Piketty's famous r > g formula (returns on capital exceed economic growth), then consider what policies could counteract wealth concentration."
+  }
+ },
+ {
+  "id": "economics-game-theory",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Game Theory",
+  "teaser": "The mathematics of strategic decision-making: when your outcome depends on what others do, how do you choose? Prisoner's dilemma, Nash equilibrium, and the logic of cooperation.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "game-theory",
+   "strategy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The basics of game theory",
+   "durationMinutes": 10,
+   "instruction": "Learn the prisoner's dilemma and Nash equilibrium, then find a real-world example where strategic interdependence shaped an economic outcome."
+  }
+ },
+ {
+  "id": "economics-behavioral-economics",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Behavioral Economics",
+  "teaser": "People aren't rational calculators. We're biased, emotional, and predictably irrational. Behavioral economics studies how psychology distorts economic decisions — and how to design around it.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "behavioral",
+   "psychology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Key findings in behavioral economics",
+   "durationMinutes": 8,
+   "instruction": "Learn about loss aversion, anchoring, and the endowment effect, then notice one of these biases in your own recent spending decisions."
+  }
+ },
+ {
+  "id": "economics-externalities",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Externalities",
+  "teaser": "When a factory pollutes, the cost falls on everyone nearby — not just the buyer. Externalities are the costs or benefits that markets ignore, and they're why markets sometimes fail.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "market-failure",
+   "environment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Positive and negative externalities",
+   "durationMinutes": 7,
+   "instruction": "Understand how pollution is a negative externality and education is a positive one, then explain why carbon taxes try to 'internalize' the externality."
+  }
+ },
+ {
+  "id": "economics-gini-coefficient",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Gini Coefficient",
+  "teaser": "A number between 0 and 1 measuring how unequally income is distributed. Zero means everyone earns the same; one means one person has everything. Most countries fall between 0.25 and 0.60.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "inequality",
+   "measurement"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Understanding the Gini coefficient",
+   "durationMinutes": 6,
+   "instruction": "Learn how the Gini coefficient is calculated from the Lorenz curve, then compare the Gini values of three countries with very different economic systems."
+  }
+ },
+ {
+  "id": "economics-sunk-cost-fallacy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Sunk Cost Fallacy",
+  "teaser": "Money you've already spent shouldn't influence your next decision — but it does. We keep watching bad movies because we paid for the ticket, and finish bad meals because we ordered them.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "behavioral",
+   "decision-making"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The sunk cost fallacy in everyday life",
+   "durationMinutes": 5,
+   "instruction": "Identify a time you kept investing in something just because you'd already invested, then explain why a rational decision-maker would ignore sunk costs."
+  }
+ },
+ {
+  "id": "economics-price-discrimination",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Price Discrimination",
+  "teaser": "Charging different prices to different people for the same product. Student discounts, airline tickets, and happy hours are all forms of extracting more value from different willingness to pay.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "microeconomics",
+   "pricing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "First, second, and third-degree price discrimination",
+   "durationMinutes": 7,
+   "instruction": "Learn the three degrees of price discrimination and find one real example of each in your daily life."
+  }
+ },
+ {
+  "id": "economics-capitalism",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Capitalism",
+  "teaser": "An economic system where private individuals own the means of production and prices are set by markets. In practice, every capitalist economy is a hybrid — the debate is how much government belongs in the mix.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "systems",
+   "political-economy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Capitalism and its variants",
+   "durationMinutes": 8,
+   "instruction": "Compare laissez-faire capitalism, social democracy, and state capitalism, then identify which model best describes the country you live in."
+  }
+ },
+ {
+  "id": "economics-socialism",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Socialism",
+  "teaser": "An economic system where the means of production are owned collectively — by the state, workers, or communities. The goal is equitable distribution; the challenge is coordination without markets.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "systems",
+   "political-economy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Socialism: theory vs practice",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between democratic socialism and authoritarian socialism, then examine one country where socialist policies coexist with market economies."
+  }
+ },
+ {
+  "id": "economics-central-bank",
+  "categoryId": "ECONOMICS",
+  "subtype": "Institution",
+  "name": "Central Banks",
+  "teaser": "The Federal Reserve, European Central Bank, Bank of Japan — institutions that control interest rates, print money, and serve as lenders of last resort. They steer economies without elections.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "institutions",
+   "monetary-policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What central banks actually do",
+   "durationMinutes": 7,
+   "instruction": "Learn the mandate of the Federal Reserve (dual mandate: maximum employment and stable prices), then compare it with the ECB's single mandate of price stability."
+  }
+ },
+ {
+  "id": "economics-globalization",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "Globalization",
+  "teaser": "The increasing interconnectedness of economies through trade, investment, and technology. It lifted hundreds of millions from poverty — and hollowed out manufacturing in developed nations.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "trade",
+   "globalization"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The waves of globalization",
+   "durationMinutes": 8,
+   "instruction": "Trace the three waves of globalization (1870–1914, 1945–1980, 1990–present), then identify which benefits and costs you personally experience from global trade."
+  }
+ },
+ {
+  "id": "economics-command-economy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Command Economy",
+  "teaser": "When the government owns everything and makes all production decisions. The Soviet Union, Maoist China, and North Korea tried it. The results were shortages, stagnation, and eventual collapse or reform.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "systems",
+   "Soviet-Union"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why command economies fail",
+   "durationMinutes": 8,
+   "instruction": "Learn the 'calculation problem' — why central planners can't efficiently allocate resources without market prices — and find one historical example of its consequences."
+  }
+ },
+ {
+  "id": "economics-mercantilism",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "Mercantilism",
+  "teaser": "The pre-industrial belief that a nation's wealth is measured in gold and silver. Governments restricted imports and boosted exports to accumulate precious metals — an obsession that fueled colonial empires.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "history",
+   "trade"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Mercantilism and the age of empires",
+   "durationMinutes": 8,
+   "instruction": "Understand how mercantilist policies drove European colonialism, then explain why Adam Smith argued against mercantilism in favor of free trade."
+  }
+ },
+ {
+  "id": "economics-labor-theory-of-value",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Labor Theory of Value",
+  "teaser": "The idea that a good's value comes from the labor needed to produce it. Ricardo proposed it; Marx used it to argue that workers are exploited. Neoclassical economics replaced it with marginal utility.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Marx",
+   "value-theory"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "From Ricardo to Marx: the labor theory of value",
+   "durationMinutes": 10,
+   "instruction": "Learn how the labor theory of value evolved from classical economics to Marx's critique of capitalism, then explain why marginalism eventually displaced it."
+  }
+ },
+ {
+  "id": "economics-marginal-utility",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Marginal Utility",
+  "teaser": "The satisfaction from one more unit of something. The first sip of water on a hot day is priceless; the tenth is worthless. This diminishing satisfaction explains why demand curves slope downward.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "microeconomics",
+   "value"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The law of diminishing marginal utility",
+   "durationMinutes": 6,
+   "instruction": "Understand why the fifth slice of pizza brings less joy than the first, and how this principle explains pricing strategies like 'buy two, get one free.'"
+  }
+ },
+ {
+  "id": "economics-elasticity",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Elasticity",
+  "teaser": "How sensitive is demand to a price change? Insulin is inelastic — diabetics pay whatever they can. Netflix is elastic — raise the price, subscribers leave. Elasticity determines who has pricing power.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "microeconomics",
+   "demand"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Price elasticity of demand",
+   "durationMinutes": 7,
+   "instruction": "Learn how elasticity is calculated and why it matters for pricing, then compare the elasticity of gasoline versus restaurant meals."
+  }
+ },
+ {
+  "id": "economics-monopoly",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Monopoly",
+  "teaser": "When one firm controls the entire market, it can set prices without fear of competition. Monopolies are efficient for the producer and terrible for the consumer — which is why antitrust law exists.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "market-structure",
+   "competition"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How monopolies form and why they're regulated",
+   "durationMinutes": 8,
+   "instruction": "Learn the sources of monopoly power (economies of scale, network effects, patents, regulation), then find one modern monopoly or near-monopoly and its impact on consumers."
+  }
+ },
+ {
+  "id": "economics-oligopoly",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Oligopoly",
+  "teaser": "A market dominated by a few large firms — airlines, telecoms, auto manufacturers. Each firm's decisions depend on what rivals do, creating a strategic dance of price wars and collusion.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "market-structure",
+   "competition"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Oligopoly and strategic interdependence",
+   "durationMinutes": 7,
+   "instruction": "Learn how oligopolies differ from perfect competition and monopoly, then identify an oligopoly you interact with regularly and how it affects your choices."
+  }
+ },
+ {
+  "id": "economics-perfect-competition",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Perfect Competition",
+  "teaser": "A theoretical market where无数 small firms sell identical products, nobody can influence prices, and profits are driven to zero. No real market is perfect — but it's the benchmark everything else is measured against.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "microeconomics",
+   "market-structure"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The assumptions and implications of perfect competition",
+   "durationMinutes": 7,
+   "instruction": "Learn the four conditions for perfect competition (many buyers/sellers, identical products, free entry/exit, perfect information), then explain why no real market meets all four."
+  }
+ },
+ {
+  "id": "economics-creative-destruction",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Creative Destruction",
+  "teaser": "Joseph Schumpeter's idea that capitalism advances by destroying the old to make way for the new. The buggy whip maker died so the automobile could live. Progress is built on ruins.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Schumpeter",
+   "innovation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Schumpeter's creative destruction",
+   "durationMinutes": 8,
+   "instruction": "Understand how innovation destroys existing industries while creating new ones, then name three industries that were 'creatively destroyed' in your lifetime."
+  }
+ },
+ {
+  "id": "economics-great-depression",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Great Depression",
+  "teaser": "The 1929–1939 economic catastrophe: US GDP fell 30%, unemployment hit 25%, and banks collapsed by the thousands. It reshaped economics, government, and the relationship between the two.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "history",
+   "crisis"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "What caused the Great Depression",
+   "durationMinutes": 12,
+   "instruction": "Learn the chain of events from the 1929 crash to the banking panics, then explain how Friedman argued the Fed's failure to act made the depression worse."
+  }
+ },
+ {
+  "id": "economics-2008-financial-crisis",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The 2008 Financial Crisis",
+  "teaser": "Subprime mortgages, CDOs, and a global banking collapse. The crisis destroyed $2 trillion in economic activity, reshaped regulation, and left a generation skeptical of financial institutions.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "crisis",
+   "finance"
+  ],
+  "exploreAction": {
+   "verb": "Watch",
+   "targetName": "The Big Short (2015) or a documentary on the crisis",
+   "durationMinutes": 30,
+   "instruction": "Watch the opening hour of The Big Short or a documentary, then explain how mortgage-backed securities turned housing defaults into a global financial meltdown."
+  }
+ },
+ {
+  "id": "economics-stagflation",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "Stagflation",
+  "teaser": "The nightmare scenario: prices rise while the economy stagnates and unemployment climbs. The 1970s oil shocks proved that inflation and recession could happen simultaneously — breaking Keynesian orthodoxy.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "1970s",
+   "inflation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Stagflation in the 1970s",
+   "durationMinutes": 8,
+   "instruction": "Learn how the 1973 and 1979 oil shocks triggered stagflation, then explain why this combination of problems was so difficult for traditional economic policy to address."
+  }
+ },
+ {
+  "id": "economics-hyperinflation",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "Hyperinflation",
+  "teaser": "When inflation exceeds 50% per month, money becomes worthless. Weimar Germany, Zimbabwe, Venezuela — people carry wheelbarrows of cash for bread. It destroys savings, trust, and social fabric.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "crisis",
+   "inflation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Cases of hyperinflation in history",
+   "durationMinutes": 8,
+   "instruction": "Read about the Weimar Republic's hyperinflation (1923) or Zimbabwe's (2008), then explain what governments did to eventually restore monetary stability."
+  }
+ },
+ {
+  "id": "economics-european-union",
+  "categoryId": "ECONOMICS",
+  "subtype": "Institution",
+  "name": "The European Union",
+  "teaser": "A political and economic union of 27 countries that share a single market, a common regulatory framework, and (for 20 of them) a single currency. The most ambitious experiment in economic integration ever attempted.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "trade",
+   "Europe"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the EU single market works",
+   "durationMinutes": 10,
+   "instruction": "Learn the four freedoms of the EU single market (goods, services, capital, people), then consider how Brexit tested whether a country can leave a deeply integrated market."
+  }
+ },
+ {
+  "id": "economics-bretton-woods",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "Bretton Woods",
+  "teaser": "In 1944, 44 nations met in New Hampshire to design the post-war economic order: fixed exchange rates tied to the dollar, which was tied to gold. The system collapsed in 1971 but its institutions endure.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "history",
+   "international-finance"
+  ],
+  "exploreAction": {
+   "verb": "Read",
+   "targetName": "The Bretton Woods system and its legacy",
+   "durationMinutes": 10,
+   "instruction": "Learn how the Bretton Woods agreement created the IMF and World Bank, then explain what happened when Nixon ended dollar-gold convertibility in 1971."
+  }
+ },
+ {
+  "id": "economics-demographic-dividend",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Demographic Dividend",
+  "teaser": "When a country's working-age population grows faster than dependents, economic growth accelerates. East Asia's miracle was partly demographic — but the window closes as populations age.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "development",
+   "demographics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How demographics drive economic growth",
+   "durationMinutes": 8,
+   "instruction": "Learn how Japan, South Korea, and China each experienced a demographic dividend, then consider what happens when that window closes."
+  }
+ },
+ {
+  "id": "economics-dutch-disease",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Dutch Disease",
+  "teaser": "When a resource boom makes your currency stronger, killing your manufacturing exports. The Netherlands discovered this with natural gas in the 1960s — and many oil-rich nations have repeated the pattern.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "development",
+   "resources"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The resource curse and Dutch Disease",
+   "durationMinutes": 8,
+   "instruction": "Learn how a natural resource boom can paradoxically harm an economy, then find a modern example of a country suffering from Dutch Disease."
+  }
+ },
+ {
+  "id": "economics-middle-income-trap",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Middle-Income Trap",
+  "teaser": "Countries that grow rapidly from poverty to middle income often stall there. The low-wage advantage fades, but innovation hasn't yet taken hold. Getting rich is easier than staying rich.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "development",
+   "growth"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why some countries escape the middle-income trap",
+   "durationMinutes": 8,
+   "instruction": "Compare South Korea's escape (innovation, education) with Argentina's stagnation, then identify what policies distinguish countries that break through from those that don't."
+  }
+ },
+ {
+  "id": "economics-tragedy-of-the-commons",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Tragedy of the Commons",
+  "teaser": "When shared resources are free to use, individuals overconsume until the resource is destroyed. Overfishing, traffic congestion, and climate change are all commons problems in disguise.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "environment",
+   "game-theory"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The tragedy of the commons and solutions",
+   "durationMinutes": 7,
+   "instruction": "Understand Garrett Hardin's argument, then explore three solutions (privatization, regulation, community management) with real-world examples of each."
+  }
+ },
+ {
+  "id": "economics-asymmetric-information",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Asymmetric Information",
+  "teaser": "When one side of a deal knows more than the other, markets break down. Used car sellers know more than buyers; doctors know more than patients. This explains why trust, regulation, and signaling matter.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "market-failure",
+   "information"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Akerlof's market for lemons",
+   "durationMinutes": 8,
+   "instruction": "Read about George Akerlof's 'Market for Lemons' paper, then find a modern example where asymmetric information creates market problems (healthcare, used cars, or online shopping)."
+  }
+ },
+ {
+  "id": "economics-transaction-costs",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Transaction Costs",
+  "teaser": "The hidden costs of doing business: searching for partners, negotiating contracts, enforcing agreements. Ronald Coase argued that firms exist precisely to reduce these frictions.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Coase",
+   "institutions"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Coase and the nature of the firm",
+   "durationMinutes": 8,
+   "instruction": "Understand why Coase believed firms exist to minimize transaction costs, then explain why some activities happen inside firms while others happen in markets."
+  }
+ },
+ {
+  "id": "economics-public-goods",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Public Goods",
+  "teaser": "Street lights, national defense, clean air — things everyone benefits from but nobody wants to pay for individually. Free-riders let others foot the bill, so public goods are almost always underprovided by markets.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "market-failure",
+   "government"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why markets underprovide public goods",
+   "durationMinutes": 7,
+   "instruction": "Learn the two properties of public goods (non-excludable and non-rivalrous), then explain why private companies rarely build lighthouses."
+  }
+ },
+ {
+  "id": "economics-arsenal-of-democracy",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Arsenal of Democracy",
+  "teaser": "During WWII, the US transformed its civilian economy into a military production machine. Factories that made cars now made tanks. GDP doubled. It proved that government-directed spending could reshape an economy overnight.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "WWII",
+   "industrial-policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "WWII economic mobilization",
+   "durationMinutes": 10,
+   "instruction": "Learn how the US economy shifted from civilian to military production between 1941 and 1943, then consider what this tells us about the limits of peacetime industrial policy."
+  }
+ },
+ {
+  "id": "economics-planned-obsolescence",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Planned Obsolescence",
+  "teaser": "Deliberately designing products to fail or become outdated. Lightbulb manufacturers once conspired to limit bulb lifespan. Today, software updates and fashion cycles do the same job more subtly.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "industry",
+   "consumerism"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The history and ethics of planned obsolescence",
+   "durationMinutes": 7,
+   "instruction": "Read about the Phoebus cartel (lightbulb manufacturers), then identify a modern product where planned obsolescence is suspected and its economic consequences."
+  }
+ },
+ {
+  "id": "economics-basic-income",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Universal Basic Income",
+  "teaser": "A regular cash payment to every citizen, no strings attached. Advocates say it eliminates poverty traps and empowers individuals; critics worry about cost, work incentives, and inflation.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "welfare",
+   "policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The case for and against UBI",
+   "durationMinutes": 10,
+   "instruction": "Learn about UBI experiments in Finland, Kenya, and Stockton, then weigh the evidence on whether guaranteed income reduces poverty without killing work incentives."
+  }
+ },
+ {
+  "id": "economics-renminbi",
+  "categoryId": "ECONOMICS",
+  "subtype": "Institution",
+  "name": "The Renminbi and China's Rise",
+  "teaser": "China's currency went from worthless to a global reserve currency contender. The country's economic rise — from agrarian poverty to the world's second-largest economy in 40 years — is the greatest growth story in history.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "China",
+   "globalization"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "China's economic transformation",
+   "durationMinutes": 10,
+   "instruction": "Learn how Deng Xiaoping's reforms in 1978 unleashed China's growth, then consider whether the country's state-capitalist model can sustain growth as it ages."
+  }
+ },
+ {
+  "id": "economics-debt-to-gdp",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Debt-to-GDP Ratio",
+  "teaser": "A country's total government debt divided by its annual economic output. Japan's ratio exceeds 260% — yet it borrows at near-zero interest. The ratio matters, but context matters more.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "fiscal-policy",
+   "sovereign-debt"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How to interpret sovereign debt levels",
+   "durationMinutes": 7,
+   "instruction": "Compare the debt-to-GDP ratios of Japan, the US, and Greece, then explain why similar ratios can mean very different things depending on who borrows and in what currency."
+  }
+ },
+ {
+  "id": "economics-venture-capital",
+  "categoryId": "ECONOMICS",
+  "subtype": "Market",
+  "name": "Venture Capital",
+  "teaser": "The fuel of innovation: investors bet on unproven startups hoping one will become the next Google. Most fail; the winners pay for everything. It's high-risk, high-reward capitalism at its most concentrated.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "finance",
+   "startups"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How venture capital works",
+   "durationMinutes": 8,
+   "instruction": "Learn the VC funding stages (seed, Series A/B/C) and the power law distribution of returns, then explain why VCs push for exponential growth rather than steady profits."
+  }
+ },
+ {
+  "id": "economics-hedge-funds",
+  "categoryId": "ECONOMICS",
+  "subtype": "Market",
+  "name": "Hedge Funds",
+  "teaser": "Private investment funds that use aggressive strategies — short selling, leverage, derivatives — to generate returns. They charge high fees, are mostly unregulated, and serve only wealthy investors.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "finance",
+   "wall-street"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What hedge funds do and why they matter",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between hedge funds and mutual funds, then find a famous hedge fund strategy (long/short, macro, arbitrage) and one notable success or failure."
+  }
+ },
+ {
+  "id": "economics-crypto-economics",
+  "categoryId": "ECONOMICS",
+  "subtype": "Market",
+  "name": "Cryptocurrency Economics",
+  "teaser": "Bitcoin, Ethereum, and thousands of tokens: a parallel financial system built on cryptography and decentralization. Some see digital gold; others see speculative mania. The economics are genuinely novel.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "crypto",
+   "finance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The economic design of Bitcoin",
+   "durationMinutes": 10,
+   "instruction": "Learn how Bitcoin's fixed supply (21 million), halving schedule, and proof-of-work create digital scarcity, then debate whether this makes it money, gold, or speculation."
+  }
+ },
+ {
+  "id": "economics-scarcity",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Scarcity",
+  "teaser": "The foundational problem of economics: resources are finite, but wants are infinite. Every economic system — capitalism, socialism, communism — is ultimately a way of managing scarcity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "basics",
+   "philosophy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why scarcity is the root of economics",
+   "durationMinutes": 5,
+   "instruction": "Understand how scarcity forces trade-offs at every level — personal, corporate, national — then consider whether technology could ever eliminate scarcity."
+  }
+ },
+ {
+  "id": "economics-efficiency",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Economic Efficiency",
+  "teaser": "A state where resources are allocated so no one can be made better off without making someone worse off (Pareto efficiency). Beautiful in theory; ruthlessly indifferent to fairness in practice.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "welfare-economics",
+   "theory"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Pareto efficiency and its limits",
+   "durationMinutes": 7,
+   "instruction": "Learn the Pareto criterion, then explain why a perfectly efficient outcome can still be deeply unequal — and why economists debate whether efficiency or equity should come first."
+  }
+ },
+ {
+  "id": "economics-sole-proprietorship",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Sole Proprietorship",
+  "teaser": "The simplest business form: one person, unlimited liability, total control. More Americans are sole proprietors than any other business type — freelancers, consultants, food truck owners, and creators.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "business",
+   "entrepreneurship"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How sole proprietorships work",
+   "durationMinutes": 5,
+   "instruction": "Understand the advantages (simplicity, control) and disadvantages (unlimited liability, difficulty raising capital) of sole proprietorships compared to LLCs or corporations."
+  }
+ },
+ {
+  "id": "economics-monopsony",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Monopsony",
+  "teaser": "When there's only one buyer in a market, they can squeeze suppliers. Most people know about monopoly; monopsony is its overlooked twin — and it shapes labor markets more than you'd think.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "market-structure",
+   "labor"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Monopsony power in labor markets",
+   "durationMinutes": 7,
+   "instruction": "Learn how a dominant employer in a small town can suppress wages below competitive levels, then find evidence of monopsony in modern labor markets."
+  }
+ },
+ {
+  "id": "economics-golden-age",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Golden Age of Capitalism",
+  "teaser": "From 1945 to 1973, the Western world experienced unprecedented growth, falling inequality, and rising wages. High taxes, strong unions, and regulated finance created a broadly shared prosperity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "postwar",
+   "growth"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What made the postwar boom possible",
+   "durationMinutes": 10,
+   "instruction": "Learn the conditions that enabled the Golden Age (Bretton Woods, Marshall Plan, strong unions, Keynesian policy), then debate whether those conditions can be recreated."
+  }
+ },
+ {
+  "id": "economics-thatcher-reagan",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Neoliberal Turn",
+  "teaser": "In the 1980s, Reagan and Thatcher dismantled postwar economic consensus: deregulated markets, privatized industries, weakened unions, and cut taxes. It reshaped the global economy for decades.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "neoliberalism",
+   "policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Reaganomics and Thatcherism",
+   "durationMinutes": 10,
+   "instruction": "Learn the core policies of the neoliberal turn (tax cuts, deregulation, privatization), then evaluate what it delivered — and what it cost."
+  }
+ },
+ {
+  "id": "economics-brics",
+  "categoryId": "ECONOMICS",
+  "subtype": "Institution",
+  "name": "BRICS",
+  "teaser": "Brazil, Russia, India, China, South Africa — and now a dozen more. A bloc of developing nations challenging Western economic dominance. Whether they're a real alternative or a photo opportunity remains unclear.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "geopolitics",
+   "emerging-markets"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "BRICS and the shift in global economic power",
+   "durationMinutes": 8,
+   "instruction": "Learn why BRICS nations want alternatives to the dollar-dominated financial system, then assess whether the bloc can translate economic size into geopolitical influence."
+  }
+ },
+ {
+  "id": "economics-philippine-economy",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Asian Financial Crisis",
+  "teaser": "In 1997, a currency collapse in Thailand cascaded across Asia. Currencies plummeted, banks failed, and the IMF prescribed austerity that deepened the pain. It redrew the map of global finance.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "crisis",
+   "Asia"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the 1997 crisis unfolded",
+   "durationMinutes": 10,
+   "instruction": "Trace the contagion from Thailand's baht to Indonesia, Korea, and beyond, then evaluate whether the IMF's austerity prescriptions helped or hurt."
+  }
+ },
+ {
+  "id": "economics-future-of-work",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "The Future of Work",
+  "teaser": "Automation, AI, remote work, and the gig economy are transforming employment. The question isn't whether jobs will change — it's whether workers will be ready when they do.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "labor",
+   "technology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How technology is reshaping labor markets",
+   "durationMinutes": 8,
+   "instruction": "Learn about the gig economy, AI displacement, and remote work trends, then consider which jobs are most vulnerable and which are most resilient to automation."
+  }
+ },
+ {
+  "id": "economics-shareholder-primacy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Shareholder Primacy",
+  "teaser": "The doctrine that a corporation's sole purpose is to maximize shareholder value. Milton Friedman made it gospel. The Business Roundtable's 2019 reversal suggested the era may be ending.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "corporate-governance",
+   "Friedman"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The rise and fall of shareholder primacy",
+   "durationMinutes": 8,
+   "instruction": "Read Friedman's 1970 argument that corporate social responsibility is 'fundamentally subversive,' then explain why 181 CEOs reversed course in 2019."
+  }
+ },
+ {
+  "id": "economics-economic-growth",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Economic Growth Theory",
+  "teaser": "Why do some countries grow rich while others stay poor? Growth theory tries to answer: Solow's model says capital accumulation matters; endogenous growth theory says ideas and institutions matter more.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "growth",
+   "development"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Solow growth model vs endogenous growth",
+   "durationMinutes": 10,
+   "instruction": "Learn why Solow's model predicts convergence that never happens, then explain how Romer's endogenous growth theory makes ideas the engine of prosperity."
+  }
+ },
+ {
+  "id": "economics-economic-freedom",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Economic Freedom",
+  "teaser": "How free are people to trade, own property, start businesses, and keep their earnings? Indices like the Heritage Foundation's rank countries — but the link between freedom and prosperity is more nuanced than it appears.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "freedom",
+   "institutions"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Measuring economic freedom",
+   "durationMinutes": 7,
+   "instruction": "Learn how economic freedom indices are constructed (property rights, trade openness, regulatory burden), then examine whether high economic freedom always correlates with prosperity."
+  }
+ },
+ {
+  "id": "economics-de-industrialization",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "Deindustrialization",
+  "teaser": "When factories close and manufacturing jobs vanish from developed nations. The Rust Belt in America, the Midlands in Britain — entire communities hollowed out as production moves overseas.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "labor",
+   "globalization"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The causes and consequences of deindustrialization",
+   "durationMinutes": 8,
+   "instruction": "Learn how automation and offshoring together eliminated manufacturing jobs in developed nations, then consider what policies could help displaced workers."
+  }
+ },
+ {
+  "id": "economics-negative-interest-rates",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Negative Interest Rates",
+  "teaser": "When central banks push rates below zero, savers pay for the privilege of keeping money in the bank. Japan, Europe, and Switzerland tried it — a radical experiment in desperate economic times.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "monetary-policy",
+   "central-banks"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Negative interest rates: the experiment",
+   "durationMinutes": 8,
+   "instruction": "Learn which central banks used negative rates and why, then discuss whether they stimulated lending or just punished savers."
+  }
+ },
+ {
+  "id": "economics-modern-monetary-theory",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Modern Monetary Theory",
+  "teaser": "MMT argues that governments issuing their own currency can never 'run out of money' — the only real constraint is inflation. It's radical, controversial, and gaining influence in policy circles.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "MMT",
+   "fiscal-policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The core claims of MMT",
+   "durationMinutes": 10,
+   "instruction": "Learn MMT's key insight (sovereign currency issuers face real resource constraints, not financial ones), then compare its predictions with what happened during COVID-era spending."
+  }
+ },
+ {
+  "id": "economics-privatization",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Privatization",
+  "teaser": "Selling state-owned enterprises to private owners. In theory, private management is more efficient. In practice, privatization has produced both triumphs (British Telecom) and disasters (Russian oligarchs).",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "policy",
+   "state-owned"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The wave of privatizations in the 1980s–90s",
+   "durationMinutes": 8,
+   "instruction": "Compare successful privatizations (UK telecommunications) with failed ones (Russian energy sector), then identify what conditions make privatization work or fail."
+  }
+ },
+ {
+  "id": "economics-sanctions",
+  "categoryId": "ECONOMICS",
+  "subtype": "Policy",
+  "name": "Economic Sanctions",
+  "teaser": "When nations use trade restrictions as weapons. Sanctions can cripple economies — but they also hurt ordinary people and often fail to change the behavior of authoritarian regimes.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "geopolitics",
+   "trade"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Do sanctions actually work?",
+   "durationMinutes": 8,
+   "instruction": "Study the track record of sanctions (Cuba, Iran, Russia), then debate whether they achieve political goals or primarily inflict humanitarian suffering."
+  }
+ },
+ {
+  "id": "economics-creative-economy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "The Creative Economy",
+  "teaser": "Industries built on intellectual property and human creativity — film, music, design, gaming, software. The creative economy generates trillions globally and is increasingly where young people want to work.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "culture",
+   "intellectual-property"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the creative economy works",
+   "durationMinutes": 8,
+   "instruction": "Learn why creative industries have unusual economics (high fixed costs, near-zero marginal costs, winner-take-all markets), then identify a creative industry trend reshaping your world."
+  }
+ },
+ {
+  "id": "economics-philippine-economy-history",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Philippine Economic Story",
+  "teaser": "Once the second-richest country in Asia after Japan, the Philippines fell behind its neighbors through decades of misrule, crony capitalism, and population growth. Its diaspora became its greatest export.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "development",
+   "Philippines"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Philippine economic trajectory",
+   "durationMinutes": 10,
+   "instruction": "Learn how the Philippines went from postwar prosperity to relative decline, then examine how overseas remittances became a lifeline for the economy."
+  }
+ },
+ {
+  "id": "economics-regressive-tax",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Regressive vs Progressive Taxation",
+  "teaser": "A regressive tax hits the poor harder (sales tax, VAT). A progressive tax hits the rich harder (income tax, capital gains). The balance between them shapes inequality and public services.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "taxation",
+   "equity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Understanding tax progressivity",
+   "durationMinutes": 7,
+   "instruction": "Learn the difference between progressive, proportional, and regressive taxes, then find which type dominates your country's tax system and its effect on inequality."
+  }
+ },
+ {
+  "id": "economics-exchange-rate",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Exchange Rates",
+  "teaser": "The price of one currency in terms of another. Exchange rates affect everything from your vacation budget to national trade balances. They're set by markets, central banks, and geopolitics simultaneously.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "international-finance",
+   "currencies"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How exchange rates are determined",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between floating and fixed exchange rates, then check today's USD/EUR rate and what's driving it."
+  }
+ },
+ {
+  "id": "economics-stock-market",
+  "categoryId": "ECONOMICS",
+  "subtype": "Market",
+  "name": "The Stock Market",
+  "teaser": "Where companies sell ownership stakes and investors bet on the future. The stock market is not the economy — but it's the economy's most visible scoreboard, reflecting greed, fear, and expectation in real time.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "finance",
+   "investing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How stock markets work",
+   "durationMinutes": 8,
+   "instruction": "Learn the basics of stock exchanges, P/E ratios, and market indices, then check the S&P 500's year-to-date performance and what's driving it."
+  }
+ },
+ {
+  "id": "economics-bubble",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Economic Bubbles",
+  "teaser": "When asset prices detach from fundamental value and everyone buys because prices are rising. Tulips in 1637, dot-com in 2000, housing in 2008 — the pattern repeats because human psychology doesn't change.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "finance",
+   "crisis"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The anatomy of a bubble",
+   "durationMinutes": 8,
+   "instruction": "Learn the five stages of a bubble (displacement, boom, euphoria, profit-taking, panic), then compare the dot-com bubble with the 2008 housing bubble."
+  }
+ },
+ {
+  "id": "economics-paradox-of-thrift",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Paradox of Thrift",
+  "teaser": "Saving is good for you — but if everyone saves at once, spending collapses, businesses fail, and everyone gets poorer. Keynes's counterintuitive insight that personal virtue can be collective vice.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Keynes",
+   "paradox"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why saving too much can harm the economy",
+   "durationMinutes": 6,
+   "instruction": "Understand the paradox of thrift through a simple example, then explain why it matters during recessions when consumer confidence collapses."
+  }
+ },
+ {
+  "id": "economics-fisher-equation",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "The Fisher Effect",
+  "teaser": "Irving Fisher's elegant equation: nominal interest rate = real interest rate + expected inflation. When inflation rises, interest rates rise too — the real cost of borrowing stays constant.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "monetary",
+   "interest-rates"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Fisher equation and its implications",
+   "durationMinutes": 7,
+   "instruction": "Learn the Fisher equation, then explain why the Fed raises rates when inflation rises — and why savers aren't actually better off when nominal rates track inflation."
+  }
+ },
+ {
+  "id": "economics-creative-capitalism",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Stakeholder Capitalism",
+  "teaser": "The idea that corporations should serve workers, communities, and the environment — not just shareholders. It's making a comeback as trust in pure profit-maximization fades.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "corporate-governance",
+   "ESG"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Stakeholder vs shareholder capitalism",
+   "durationMinutes": 8,
+   "instruction": "Learn the stakeholder theory proposed by R. Edward Freeman, then evaluate whether companies can genuinely serve multiple stakeholders or if trade-offs make it impossible."
+  }
+ },
+ {
+  "id": "economics-philippine-remittances",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Remittance Economies",
+  "teaser": "Over 200 million migrants send money home — $656 billion in 2022. For the Philippines, Mexico, and dozens of other nations, remittances are a lifeline that keeps families afloat and economies running.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "migration",
+   "development"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How remittances shape developing economies",
+   "durationMinutes": 7,
+   "instruction": "Learn the scale and impact of global remittances, then examine whether remittance-dependent economies become trapped in a cycle of labor export."
+  }
+ },
+ {
+  "id": "economics-dao",
+  "categoryId": "ECONOMICS",
+  "subtype": "Market",
+  "name": "Decentralized Autonomous Organizations",
+  "teaser": "A company with no CEO, no board, no headquarters — just code and token-based voting. DAOs are experiments in radical decentralization. Some govern billions; most collapse in chaos.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "crypto",
+   "governance"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How DAOs work and what they govern",
+   "durationMinutes": 8,
+   "instruction": "Learn how DAOs use smart contracts and token voting to make collective decisions, then examine one successful DAO and one that failed spectacularly."
+  }
+ },
+ {
+  "id": "economics-philippine-migrant-workers",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Philippine Overseas Worker Program",
+  "teaser": "Since the 1970s, the Philippines has actively exported labor: nurses to the Gulf, seafarers worldwide, domestic workers to Hong Kong. It's both a success story and a structural dependency.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Philippines",
+   "labor-migration"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The economics of labor export",
+   "durationMinutes": 8,
+   "instruction": "Learn how the Philippine government institutionalized labor migration, then discuss the social costs of a policy that treats human capital as the country's main export."
+  }
+ },
+ {
+  "id": "economics-absolute-advantage",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Absolute Advantage",
+  "teaser": "When one country can produce more of a good with the same resources than another. It's simpler than comparative advantage — but it's the starting point for understanding why trade works.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "trade",
+   "Smith"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Absolute vs comparative advantage",
+   "durationMinutes": 6,
+   "instruction": "Learn the difference between absolute advantage (who produces more) and comparative advantage (who sacrifices less), then explain why comparative advantage matters more for trade."
+  }
+ },
+ {
+  "id": "economics-deflation",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Deflation",
+  "teaser": "When prices fall across the economy. Sounds great for consumers — but deflation makes debts harder to repay, delays purchases (why buy today if it's cheaper tomorrow?), and can spiral into depression.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "macroeconomics",
+   "price-level"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why deflation is dangerous",
+   "durationMinutes": 7,
+   "instruction": "Learn the deflationary spiral (falling prices → delayed spending → lower output → more unemployment → more deflation), then examine Japan's lost decades as a case study."
+  }
+ },
+ {
+  "id": "economics-neoliberalism",
+  "categoryId": "ECONOMICS",
+  "subtype": "Theory",
+  "name": "Neoliberalism",
+  "teaser": "The economic philosophy that free markets, deregulation, privatization, and minimal government intervention maximize prosperity. Dominant from the 1980s to 2008 — now facing serious critique.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "political-economy",
+   "policy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The rise and critique of neoliberalism",
+   "durationMinutes": 10,
+   "instruction": "Learn the core tenets of neoliberalism (Washington Consensus), then evaluate its track record: what it delivered and what it failed to deliver."
+  }
+ },
+ {
+  "id": "economics-gig-economy",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "The Gig Economy",
+  "teaser": "Uber, DoorDash, Fiverr — work fragmented into short-term tasks with no benefits, no job security, and algorithmic management. It's flexibility for some and precarity for others.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "labor",
+   "technology"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The economics of gig work",
+   "durationMinutes": 7,
+   "instruction": "Learn how gig platforms use algorithms to manage workers, then debate whether gig workers are independent entrepreneurs or misclassified employees."
+  }
+ },
+ {
+  "id": "economics-fiscal-multiplier",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "The Fiscal Multiplier",
+  "teaser": "When the government spends a dollar, does the economy grow by more or less than a dollar? The multiplier is Keynesian economics' most important — and most debated — number.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "fiscal-policy",
+   "Keynes"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What determines the size of the fiscal multiplier",
+   "durationMinutes": 8,
+   "instruction": "Learn why multipliers vary (higher in recessions, lower at full employment), then find an estimate of the multiplier for infrastructure spending vs tax cuts."
+  }
+ },
+ {
+  "id": "economics-fiat-currency",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Fiat Currency",
+  "teaser": "Money backed by nothing but government decree. The dollar, euro, and yen have no intrinsic value — they work because people trust the institutions behind them. Trust is the only collateral.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "money",
+   "monetary-system"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How fiat money differs from commodity money",
+   "durationMinutes": 6,
+   "instruction": "Learn the difference between fiat money (government decree) and commodity money (gold-backed), then explain why the world abandoned the gold standard."
+  }
+ },
+ {
+  "id": "economics-creative-economy-philippines",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Philippine BPO Boom",
+  "teaser": "Call centers, back-office processing, IT outsourcing — the Philippines became the world's second-largest BPO destination after India. It created millions of jobs and reshaped the urban middle class.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Philippines",
+   "outsourcing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the BPO industry transformed the Philippines",
+   "durationMinutes": 8,
+   "instruction": "Learn how English proficiency and time zone alignment gave the Philippines a BPO advantage, then examine the social costs of night-shift service work."
+  }
+ },
+ {
+  "id": "economics-economic-indicator",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Leading Economic Indicators",
+  "teaser": "Stock markets, building permits, consumer confidence — numbers that predict where the economy is heading. Economists build composite indices from these signals, but the economy always surprises.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "macroeconomics",
+   "forecasting"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Which indicators predict recessions",
+   "durationMinutes": 7,
+   "instruction": "Learn about the yield curve inversion, PMI, and initial jobless claims as recession predictors, then check the current state of two leading indicators."
+  }
+ },
+ {
+  "id": "economics-philippine-currency-history",
+  "categoryId": "ECONOMICS",
+  "subtype": "History",
+  "name": "The Philippine Peso Story",
+  "teaser": "From Spanish colonial silver to American-era pesos to the 1997 Asian crisis crash — the Philippine peso's history mirrors the country's turbulent journey through colonialism, dictatorship, and democracy.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "Philippines",
+   "currency"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The history of Philippine currency",
+   "durationMinutes": 8,
+   "instruction": "Trace the peso from Spanish colonial times through American influence to modern floating exchange rates, then explain how currency crises reflect deeper economic vulnerabilities."
+  }
+ },
+ {
+  "id": "economics-philippine-poverty",
+  "categoryId": "ECONOMICS",
+  "subtype": "Concept",
+  "name": "Poverty Traps",
+  "teaser": "When being poor makes it harder to stop being poor. Low income → no education → low productivity → low income. Breaking the cycle requires intervention — but what kind works?",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "economics",
+   "development",
+   "poverty"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How poverty traps work and how to break them",
+   "durationMinutes": 8,
+   "instruction": "Learn about the mechanisms that trap people in poverty (credit constraints, health shocks, educational gaps), then examine one successful anti-poverty program and why it worked."
+  }
+ }
+]

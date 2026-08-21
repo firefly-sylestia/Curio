@@ -613,52 +613,13 @@ fun TopicRevealScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // v35 — frosted category chip: the lane's glyph + small-caps
-            // name pinned to the top-left, so the category reads at a
-            // glance next to the pin/close buttons (weight leaves the
-            // end-aligned group in place).
-            // v36 — theme-aware treatment: the chip wears the category's
-            // tinted card surface, matching the page cards instead of the
-            // flat surfaceVariant.
-            // v146 — the year qualifier ("1851") rides NEXT to the category
-            // chip here at the top-left, NOT in the hero's top corner — the
-            // progress pill sits at the hero's top-right and a long byline
-            // pushed the year pill under it on topics with reading progress.
+            // v212 — category chip removed from top bar; category + Favorite
+            // now live in the bottom bar. Year pill stays in the top-left.
             Row(
                 modifier = Modifier.weight(1f, fill = false),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Row(
-                        // v51 — a touch larger so the corner chips read as real
-                        // controls next to the pin/close circles.
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(7.dp)
-                    ) {
-                        CurioIcon(
-                            name = cat.iconGlyph,
-                            contentDescription = null,
-                            tint = cat.categoryInk(),
-                            size = 18.dp
-                        )
-                        Text(
-                            text = cat.displayName.uppercase(),
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 1.2.sp
-                            ),
-                            color = cat.categoryInk(),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                // v146 — the year pill, alongside the category at the top-left.
                 val yearQual = resolved?.titleAndYearQualifier()?.second?.takeIf { it.isNotBlank() }
                 if (yearQual != null) {
                     Surface(
@@ -846,13 +807,10 @@ fun TopicRevealScreen(
 
         }
 
-        // ── Floating Like/Dislike pill (v132) ────────────────────────────
-        // The bottom band is gone (no Scaffold / reserved navbar slot — see
-        // CurioNavHost): the sentiment pair now rides a floating capsule
-        // over the page, mirroring the bottom nav's floating pill bar. It
-        // slides out of the way while the user scrolls DOWN and slides back
-        // in on scroll-up. Hidden in Browse-Topics mode: reading from the
-        // database must not shape the shuffle (pure read-only).
+        // ── Floating Category + Favorite bar (v212) ──────────────────────
+        // Replaces the old Like/Dislike pill: category icon + name on the
+        // left (expands on favorite), favorite star on the right. Slides
+        // away on scroll-down, back on scroll-up. Hidden in Browse-Topics.
         if (!browseMode && resolved != null) {
             AnimatedVisibility(
                 visible = !sentimentPillHidden,
@@ -1800,6 +1758,7 @@ private fun HeroCard(
                     CategoryId.FILMS -> "Director"
                     CategoryId.ARTWORKS -> "Painter"
                     CategoryId.DISCOVERIES -> "Discovered by"
+                    CategoryId.QUOTES -> "Author"
                     else -> null
                 }
                 if (byline != null && bylineLabel != null) {
@@ -2190,23 +2149,17 @@ private fun verbIcon(verb: String): String = when (verb.lowercase().trim()) {
     else -> "auto_awesome"
 }
 
-/** The reveal's floating Like/Dislike capsule (v132) — mirrors the bottom
- *  nav's floating pill bar: a raised capsule carrying the two sentiment
- *  segments. The active segment fills with the category accent (the v27q
- *  solid-selection rule); inactive segments stay transparent on the
- *  capsule. v149 — the segments animate EXACTLY like the nav bar's pills:
- *  icons at rest, the ACTIVE segment springs wider and slides its label
- *  out, the deselected one collapses back to its icon. */
+/** The reveal's floating Favorite capsule — a single raised pill with
+ *  a star icon. When tapped, the topic is marked as a favorite (liked).
+ *  The active state fills with the category accent; inactive is transparent.
+ *  Animates like the nav bar's expand-on-active pill. */
 @Composable
 private fun RevealSentimentPill(
     sentiment: String?,
     accent: Color,
     ink: Color,
-    // v167 — the dynamic page-tinted capsule (see the call site) — the
-    // static surfaceContainerHigh never picked up the reveal page's tint.
     container: Color,
-    onDislike: () -> Unit,
-    onLike: () -> Unit
+    onFavorite: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -2216,8 +2169,6 @@ private fun RevealSentimentPill(
         Surface(
             shape = RoundedCornerShape(50),
             color = container,
-            // v160 — the v149 dark-mode hairline rim is gone (see v157);
-            // the elevated fill alone defines the pill.
             shadowElevation = 6.dp
         ) {
             Row(
@@ -2282,7 +2233,8 @@ private fun SentimentSegment(
     active: Boolean,
     accent: Color,
     ink: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val pillWidth by animateDpAsState(
         targetValue = if (active) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
@@ -2314,7 +2266,7 @@ private fun SentimentSegment(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         color = fillColor,
-        modifier = Modifier
+        modifier = modifier
             .width(pillWidth)
             .height(RevealSentimentHeight)
     ) {
@@ -2345,6 +2297,157 @@ private fun SentimentSegment(
                     maxLines = 1,
                     modifier = Modifier.padding(start = 6.dp, end = 2.dp)
                 )
+            }
+        }
+    }
+}/** The reveal's floating Category + Favorite bar (v212) — category icon
+ *  + name on the left (auto-expands on entry to show name, collapses
+ *  when the bar exits), favorite star on the right. Wears the page's
+ *  dynamic tint. */
+@Composable
+private fun RevealCategoryFavoriteBar(
+    cat: CurioCategory,
+    isFavorited: Boolean,
+    accent: Color,
+    ink: Color,
+    container: Color,
+    onFavorite: () -> Unit
+) {
+    val haptics = LocalHapticFeedback.current
+    // Category pill: auto-expands from icon-only to showing name on entry.
+    var categoryExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { categoryExpanded = true }
+    val categoryWidth by animateDpAsState(
+        targetValue = if (categoryExpanded) 160.dp else 56.dp,
+        animationSpec = RevealWidthSpring,
+        label = "categoryBarWidth"
+    )
+    val categoryFill by animateColorAsState(
+        targetValue = accent,
+        animationSpec = RevealColorSpring,
+        label = "categoryBarFill"
+    )
+    val categoryInk by animateColorAsState(
+        targetValue = ink,
+        animationSpec = RevealColorSpring,
+        label = "categoryBarInk"
+    )
+    // Favorite star: icon-only at rest, expands to show label when favorited.
+    val favWidth by animateDpAsState(
+        targetValue = if (isFavorited) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
+        animationSpec = RevealWidthSpring,
+        label = "favBarWidth"
+    )
+    val favIconTint by animateColorAsState(
+        targetValue = if (isFavorited) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = RevealColorSpring,
+        label = "favIconTint"
+    )
+    val favFill by animateColorAsState(
+        targetValue = if (isFavorited) accent else Color.Transparent,
+        animationSpec = RevealColorSpring,
+        label = "favFill"
+    )
+    val favLabelInk by animateColorAsState(
+        targetValue = if (isFavorited) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = RevealColorSpring,
+        label = "favLabelInk"
+    )
+    Box(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .padding(bottom = 12.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = container,
+            shadowElevation = 6.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                // Category pill — auto-expands on entry showing icon + name.
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = categoryFill,
+                    modifier = Modifier
+                        .width(categoryWidth)
+                        .height(RevealSentimentHeight)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CurioIcon(
+                            name = cat.iconGlyph,
+                            contentDescription = cat.displayName,
+                            tint = categoryInk,
+                            size = 24.dp
+                        )
+                        AnimatedVisibility(
+                            visible = categoryExpanded,
+                            enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
+                            exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
+                        ) {
+                            Text(
+                                text = cat.displayName,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = ChangaOneFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 15.sp
+                                ),
+                                color = categoryInk,
+                                maxLines = 1,
+                                modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                            )
+                        }
+                    }
+                }
+                // Favorite pill — icon-only when not favorited, expands when favorited.
+                Surface(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onFavorite()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = favFill,
+                    modifier = Modifier
+                        .width(favWidth)
+                        .height(RevealSentimentHeight)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CurioIcon(
+                            name = if (isFavorited) CurioIcons.Star else CurioIcons.StarOutline,
+                            contentDescription = if (isFavorited) "Unfavorite" else "Favorite",
+                            tint = favLabelInk,
+                            size = 26.dp
+                        )
+                        AnimatedVisibility(
+                            visible = isFavorited,
+                            enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
+                            exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
+                        ) {
+                            Text(
+                                text = "Favorite",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = ChangaOneFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 15.sp
+                                ),
+                                color = favLabelInk,
+                                maxLines = 1,
+                                modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     }

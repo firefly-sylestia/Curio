@@ -376,7 +376,7 @@ private fun StatsConstellationCard(
                 recentCutoff = recentCutoff,
                 selected = selected,
                 onSelect = onSelect,
-                modifier = Modifier.fillMaxWidth().height(230.dp)
+                modifier = Modifier.fillMaxWidth().height(260.dp)
             )
             AnimatedVisibility(
                 visible = selectedCat != null,
@@ -583,8 +583,7 @@ private fun LifetimeTotalsCard(lifetime: CurioQuests.LifetimeCounters) {
         LifetimeStat(CurioIcons.Bookmark, "Saved", lifetime.saves, Color(0xFFB98A5E)),
         LifetimeStat("format_quote", "Quotes", lifetime.quotes, Color(0xFF7FA0C8)),
         LifetimeStat("push_pin", "Pins", lifetime.pins, Color(0xFFC96F4A)),
-        LifetimeStat(CurioIcons.ThumbUp, "Likes", lifetime.likes, Color(0xFFD9A85C)),
-        LifetimeStat(CurioIcons.ThumbDown, "Dislikes", lifetime.dislikes, Color(0xFF8A8FA3)),
+        LifetimeStat(CurioIcons.Star, "Favorites", lifetime.likes, Color(0xFFD9A85C)),
         LifetimeStat("task_alt", "Daily quests", lifetime.dailyCompleted, Color(0xFF7F9B6E))
     )
     StatsCard {
