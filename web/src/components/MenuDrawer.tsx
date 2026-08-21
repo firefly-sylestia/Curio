@@ -1,18 +1,22 @@
 // Curio Web App - Menu Drawer
-// Matches Android HomeDrawer: torn rose hero, menu items with icons
+// Matches Android HomeDrawer: sky hero with constellation background below,
+// bio fallback when no 2nd/3rd name, scrollable content
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, getTextColor } from '../theme/ThemeContext';
 import { MaterialIcon } from './SharedComponents';
 import { TornHero, DRAWER_HERO_SYMBOLS } from './TornHero';
+import { Constellation } from './Constellation';
 
 const MenuRow: React.FC<{
   icon: string;
   label: string;
+  subtitle?: string;
   iconColor: string;
+  expanded?: boolean;
   onClick: () => void;
-}> = ({ icon, label, iconColor, onClick }) => {
+}> = ({ icon, label, subtitle, iconColor, expanded, onClick }) => {
   const { isDark } = useTheme();
   const [pressed, setPressed] = useState(false);
 
@@ -22,17 +26,30 @@ const MenuRow: React.FC<{
       onMouseDown={() => setPressed(true)}
       onMouseUp={() => setPressed(false)}
       onMouseLeave={() => setPressed(false)}
-      className="w-full flex items-center gap-3 px-5 py-3.5 rounded-xl transition-all duration-150 text-left"
+      className="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-150 text-left"
       style={{
-        background: pressed ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)') : 'transparent',
+        background: pressed
+          ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)')
+          : isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)',
       }}
     >
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center"
         style={{ background: `${iconColor}20` }}>
-        <MaterialIcon name={icon} size={20} style={{ color: iconColor }} />
+        <MaterialIcon name={icon} size={22} style={{ color: iconColor }} />
       </div>
-      <span className="text-sm font-semibold flex-1" style={{ color: getTextColor(isDark) }}>{label}</span>
-      <MaterialIcon name="chevron_right" size={18} style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }} />
+      <div className="flex-1 min-w-0">
+        <span className="text-sm font-bold block" style={{ color: getTextColor(isDark) }}>{label}</span>
+        {subtitle && (
+          <span className="text-[11px] block mt-0.5" style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+            {subtitle}
+          </span>
+        )}
+      </div>
+      <MaterialIcon
+        name={expanded === true ? 'keyboard_arrow_up' : expanded === false ? 'keyboard_arrow_down' : 'chevron_right'}
+        size={18}
+        style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }}
+      />
     </button>
   );
 };
@@ -45,6 +62,8 @@ export const MenuDrawer: React.FC<{
   const { isDark } = useTheme();
   const [visible, setVisible] = useState(false);
   const [slideX, setSlideX] = useState(-320);
+  const [displayName] = useState(() => localStorage.getItem('curio-display-name') || 'Explorer');
+  const [bio] = useState(() => localStorage.getItem('curio-custom-tagline') || '');
 
   useEffect(() => {
     if (isOpen) {
@@ -59,7 +78,16 @@ export const MenuDrawer: React.FC<{
 
   if (!visible && !isOpen) return null;
 
-  const heroFill = '#C46B7C'; // Rose-wood
+  // Sky colors — match Android drawerSkyColors()
+  const skyTop = isDark ? '#12313A' : '#C2E8DE';
+  const skyBottom = isDark ? '#1D4750' : '#E9F6F0';
+  const skyInk = isDark ? '#F4F1E7' : '#2C5A53';
+
+  // Bio fallback: if no 2nd/3rd name parts, show bio
+  const nameParts = displayName.trim().split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || displayName;
+  const restOfName = nameParts.slice(1).join(' ');
+  const subtitle = restOfName || bio;
 
   const handleNavigate = (path: string) => {
     onClose();
@@ -76,19 +104,19 @@ export const MenuDrawer: React.FC<{
 
       {/* Drawer sheet */}
       <div
-        className="absolute top-0 left-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col transition-transform duration-350"
+        className="absolute top-0 left-0 bottom-0 w-[336px] max-w-[85vw] flex flex-col transition-transform duration-350"
         style={{
           transform: `translateX(${slideX}px)`,
           background: isDark ? '#1a1a2e' : '#FFFBF5',
           boxShadow: '4px 0 24px rgba(0,0,0,0.12)',
         }}
       >
-        {/* Torn rose hero — matching Android HomeDrawerContent (186dp, seed 0xD2A7E) */}
-        <div className="flex-shrink-0">
+        {/* Sky hero with constellation background below */}
+        <div className="flex-shrink-0 relative">
           <TornHero
             height={186}
-            fill={heroFill}
-            ink="#fff"
+            fill={skyTop}
+            ink={skyInk}
             tearSeed={0xD2A7E}
             bold={true}
             symbols={DRAWER_HERO_SYMBOLS}
@@ -96,36 +124,78 @@ export const MenuDrawer: React.FC<{
             sheetColor={isDark ? '#1a1a2e' : '#FFFBF5'}
           >
             <div className="flex flex-col h-full px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top, 8px) + 40px)' }}>
-              <p className="text-white/70 text-xs font-medium mb-1">Welcome back</p>
-              <h2 className="text-xl font-extrabold text-white" style={{ fontFamily: 'Geom, Inter, sans-serif' }}>
-                Hi Explorer
+              <p className="text-[10px] font-bold tracking-[2px] uppercase mb-1"
+                style={{ color: `${skyInk}D9` }}>CURIO</p>
+              <h2 className="text-[22px] font-extrabold leading-tight"
+                style={{ fontFamily: 'Geom, Inter, sans-serif', color: skyInk }}>
+                Hi {firstName}
               </h2>
-              <p className="text-white/60 text-xs mt-1.5">Spin it. Explore it. Capture it.</p>
+              {subtitle && (
+                <p className="text-[13px] mt-1.5 max-w-full truncate"
+                  style={{ color: `${skyInk}CC` }}>
+                  {subtitle}
+                </p>
+              )}
             </div>
           </TornHero>
         </div>
 
-        {/* Menu items */}
-        <div className="flex-1 overflow-y-auto px-3 pt-4 pb-8 space-y-1">
-          <MenuRow icon="travel_explore" label="Browse Topics" iconColor="#38BDF8"
-            onClick={() => handleNavigate('/browse')} />
-          <MenuRow icon="workspace_premium" label="Quests & Levels" iconColor="#E8A838"
-            onClick={() => handleNavigate('/quests')} />
-          <MenuRow icon="history" label="Topic History" iconColor="#6366F1"
-            onClick={() => handleNavigate('/history')} />
+        {/* Scrollable content with constellation background */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Constellation background fills the area below the hero */}
+          <div className="relative">
+            <Constellation isDark={isDark} height={260} />
 
-          <div className="my-3 mx-3 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+            {/* Menu items floating over the constellation */}
+            <div className="relative z-10 px-3 pt-3 pb-2 space-y-1.5">
+              {/* Curiosity map tap target */}
+              <button
+                onClick={() => handleNavigate('/stats')}
+                className="w-full text-left px-4 py-3 rounded-2xl transition-all duration-150"
+                style={{
+                  background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ background: '#7FA0C820' }}>
+                    <MaterialIcon name="auto_awesome" size={22} style={{ color: '#7FA0C8' }} />
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-sm font-bold block" style={{ color: getTextColor(isDark) }}>
+                      Your Curiosity
+                    </span>
+                    <span className="text-[11px] block mt-0.5"
+                      style={{ color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+                      Stats, streaks & insights
+                    </span>
+                  </div>
+                  <MaterialIcon name="chevron_right" size={18}
+                    style={{ color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }} />
+                </div>
+              </button>
+            </div>
+          </div>
 
-          <MenuRow icon="settings" label="Settings" iconColor="rgba(0,0,0,0.45)"
-            onClick={() => handleNavigate('/settings')} />
-          <MenuRow icon="person" label="Profile" iconColor="rgba(0,0,0,0.45)"
-            onClick={() => handleNavigate('/profile')} />
+          {/* Menu rows below the constellation */}
+          <div className="px-3 pt-1 pb-8 space-y-1">
+            <MenuRow icon="workspace_premium" label="Quests & Levels" subtitle="Track your journey"
+              iconColor="#E8A838" onClick={() => handleNavigate('/quests')} />
+
+            {/* Divider */}
+            <div className="my-2 mx-3 border-t"
+              style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+
+            <MenuRow icon="info" label="About" subtitle="App info & more"
+              iconColor="#C46B7C" onClick={() => handleNavigate('/settings')} />
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-5 py-3 border-t" style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+        {/* Footer — scrolls with content */}
+        <div className="px-5 py-3 border-t flex-shrink-0"
+          style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
           <p className="text-[10px] opacity-40" style={{ color: getTextColor(isDark) }}>
-            Curio v1.0 — Keep exploring
+            v1.0 · Made with curiosity ❤️
           </p>
         </div>
       </div>
