@@ -90,7 +90,7 @@
   "tags": [
    "medicine",
    "surgery",
-    "anesthesia"
+   "anesthesia"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -686,7 +686,7 @@
   "name": "Evidence-Based Medicine",
   "teaser": "Decisions based on the best available research, not tradition or intuition. EBM transformed medicine in the 1990s — but critics argue it can ignore individual patient needs.",
   "imageUrl": "",
-   "tier": 1,
+  "tier": 1,
   "tags": [
    "medicine",
    "methodology",
@@ -710,7 +710,7 @@
   "tags": [
    "medicine",
    "genomics",
-    "personalized"
+   "personalized"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -850,7 +850,7 @@
   "tags": [
    "medicine",
    "pandemic",
-    "virology"
+   "virology"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -1157,6 +1157,693 @@
    "targetName": "How countries prepare for pandemics",
    "durationMinutes": 8,
    "instruction": "Learn about strategic national stockpiles and disease surveillance networks, then find one lesson from COVID that's being applied to future preparedness."
+  }
+ },
+ {
+  "id": "medicine-smallpox-eradication",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "The Eradication of Smallpox",
+  "teaser": "Smallpox killed 300 million people in the 20th century alone. The WHO's global vaccination campaign eradicated it in 1980 — the only human disease ever completely wiped out by deliberate effort.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "vaccination",
+   "public-health"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How smallpox was eradicated",
+   "durationMinutes": 8,
+   "instruction": "Learn about the ring vaccination strategy that finally eradicated smallpox, then find one lesson from that campaign being applied to polio eradication today."
+  }
+ },
+ {
+  "id": "medicine-mrna-vaccines",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "mRNA Vaccines",
+  "teaser": "Instead of injecting a weakened virus, mRNA vaccines teach your cells to build a viral protein themselves — your immune system then learns to recognise it. Katalin Kariko and Drew Weissman spent 20 years perfecting it before COVID made it urgent.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "vaccines",
+   "mRNA"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How mRNA vaccines work",
+   "durationMinutes": 8,
+   "instruction": "Learn about lipid nanoparticle delivery of mRNA, then find one disease beyond COVID where mRNA vaccines are now in clinical trials."
+  }
+ },
+ {
+  "id": "medicine-crispr",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "CRISPR Gene Editing",
+  "teaser": "CRISPR-Cas9 lets scientists cut DNA at precise locations like molecular scissors — adapted from a bacterial immune system, it won the 2020 Nobel Prize and has already cured sickle cell disease in clinical trials.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genetics",
+   "CRISPR"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "CRISPR gene editing explained",
+   "durationMinutes": 8,
+   "instruction": "Learn how CRISPR-Cas9 works as a bacterial immune defence, then find one ethical debate about using it on human embryos."
+  }
+ },
+ {
+  "id": "medicine-human-genome-project",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "The Human Genome Project",
+  "teaser": "A 13-year international effort that mapped all 3 billion base pairs of human DNA — completed in 2003, it cost $2.7 billion and revolutionised medicine. Today a whole genome can be sequenced for $200.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genetics",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Human Genome Project and its impact",
+   "durationMinutes": 8,
+   "instruction": "Learn what the Human Genome Project discovered, then find one medical breakthrough that was only possible because of it."
+  }
+ },
+ {
+  "id": "medicine-circulation-harvey",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "William Harvey and Blood Circulation",
+  "teaser": "In 1628 Harvey proved that blood circulates through the body in a loop — overturning 1,400 years of Galen's theory that blood was made in the liver and consumed by the organs.",
+  "imageUrl": "",
+  "byline": "William Harvey",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "history",
+   "circulation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How Harvey overturned Galen",
+   "durationMinutes": 7,
+   "instruction": "Learn about Harvey's quantitative approach — he calculated blood volume to prove circulation — then find one consequence of getting circulation wrong."
+  }
+ },
+ {
+  "id": "medicine-aspirin",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Aspirin",
+  "teaser": "Willow bark was used as pain relief for 4,000 years before chemists isolated salicylic acid in 1897 and buffered it to stop stomach irritation. Aspirin remains the most widely used drug on Earth — over 100 billion tablets per year.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "drugs",
+   "pain"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "From willow bark to aspirin",
+   "durationMinutes": 7,
+   "instruction": "Learn about the 4,000-year journey from willow bark to acetylsalicylic acid, then find one surprising modern use for aspirin beyond pain relief."
+  }
+ },
+ {
+  "id": "medicine-lymphatic-system",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Lymphatic System",
+  "teaser": "A parallel circulatory network of vessels and nodes that drains fluid from tissues and fights infection — it has no pump of its own, relying on muscle movement and gravity. When it fails, limbs swell to enormous size.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "anatomy",
+   "immune"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The lymphatic system",
+   "durationMinutes": 7,
+   "instruction": "Learn how lymph nodes filter pathogens, then find one condition caused by a blocked lymphatic system."
+  }
+ },
+ {
+  "id": "medicine-endocrine-system",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "The Endocrine System",
+  "teaser": "Hormones are the body's slow messaging system — released into the bloodstream by glands, they regulate metabolism, growth, mood, and reproduction. The thyroid alone controls how fast every cell in your body burns energy.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "hormones",
+   "glands"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the endocrine system works",
+   "durationMinutes": 7,
+   "instruction": "Learn about the hypothalamus–pituitary axis, then find one disease caused by hormone imbalance that most people have heard of."
+  }
+ },
+ {
+  "id": "medicine-liver",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Liver",
+  "teaser": "The liver performs over 500 functions — it detoxifies blood, produces bile, stores glucose, and can regenerate from as little as 25% of its original mass. It's the only internal organ with this power.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "anatomy",
+   "regeneration"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Liver functions and regeneration",
+   "durationMinutes": 7,
+   "instruction": "Learn about liver regeneration, then find one lifestyle factor that damages the liver faster than it can repair itself."
+  }
+ },
+ {
+  "id": "medicine-respiratory-system",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Respiratory System",
+  "teaser": "Your lungs contain 480 million alveoli — tiny air sacs with a combined surface area of 70 m², roughly the size of a tennis court, all folded inside your chest. Every breath exchanges gases across a membrane just one cell thick.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "anatomy",
+   "lungs"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How gas exchange works in the lungs",
+   "durationMinutes": 6,
+   "instruction": "Learn how oxygen crosses the alveolar membrane, then find one lung disease that destroys alveoli and explain how it limits breathing."
+  }
+ },
+ {
+  "id": "medicine-skin",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Skin",
+  "teaser": "Your skin is your largest organ — 1.7 m² of barrier tissue that sheds 30,000–40,000 dead cells every hour. It has its own immune cells, sensory neurons, and microbiome. You replace your entire outer layer every 2–3 weeks.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "anatomy",
+   "barrier"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The skin as an immune organ",
+   "durationMinutes": 6,
+   "instruction": "Learn about Langerhans cells in the skin, then find one way the skin microbiome protects against infection."
+  }
+ },
+ {
+  "id": "medicine-eye-vision",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Eye and Vision",
+  "teaser": "The human eye can distinguish about 10 million colours but only 5 million of those are differentiable. The retina has 6 million cones and 120 million rods — your peripheral vision is almost entirely black-and-white.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "anatomy",
+   "vision"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the eye processes light",
+   "durationMinutes": 7,
+   "instruction": "Learn about rod and cone cells, then find one reason colour-blind people see the world differently than you think."
+  }
+ },
+ {
+  "id": "medicine-ear-hearing",
+  "categoryId": "MEDICINE",
+  "subtype": "Anatomy",
+  "name": "The Ear and Hearing",
+  "teaser": "The smallest bones in your body are in your ear — the stapes is just 3 mm long. Hair cells in the cochlea convert vibrations into electrical signals at frequencies from 20 Hz to 20,000 Hz. Once damaged, they never regenerate.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "anatomy",
+   "hearing"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the ear converts sound to signal",
+   "durationMinutes": 7,
+   "instruction": "Learn about cochlear hair cells, then find one everyday noise level that can permanently damage them."
+  }
+ },
+ {
+  "id": "medicine-pain-science",
+  "categoryId": "MEDICINE",
+  "subtype": "Concept",
+  "name": "Pain Science",
+  "teaser": "Pain is not a simple signal from injury to brain — it's constructed by the brain based on context, expectation, and emotion. Phantom limb pain proves this: people feel excruciating pain in limbs that no longer exist.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "neuroscience",
+   "pain"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How pain is created in the brain",
+   "durationMinutes": 7,
+   "instruction": "Learn about the gate control theory of pain, then find one example where expectation changed how much pain someone felt."
+  }
+ },
+ {
+  "id": "medicine-migraine",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Migraine",
+  "teaser": "A migraine is not a bad headache — it's a neurological event involving cortical spreading depression, a wave of brain activity that sweeps across the visual cortex causing aura, followed by hours of throbbing pain, nausea, and light sensitivity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "neurology",
+   "headache"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What a migraine actually is",
+   "durationMinutes": 7,
+   "instruction": "Learn about cortical spreading depression, then find one new class of migraine drugs that targets the CGRP pathway."
+  }
+ },
+ {
+  "id": "medicine-influenza",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Influenza",
+  "teaser": "The flu kills 290,000–650,000 people every year. The virus mutates so rapidly that last year's vaccine barely recognises this year's strain — that's why you need a new flu shot annually.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "virus",
+   "pandemic"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How influenza evades immunity",
+   "durationMinutes": 7,
+   "instruction": "Learn about antigenic drift and shift, then find one reason the 1918 flu was so deadly compared to seasonal flu."
+  }
+ },
+ {
+  "id": "medicine-tuberculosis",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "Tuberculosis",
+  "teaser": "TB has killed more people than any other infectious disease in history — over 1 billion in the last 200 years alone. Mycobacterium tuberculosis hides inside your own immune cells, and treatment takes 6 months of multiple antibiotics.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "bacteria",
+   "infectious"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why TB is so hard to beat",
+   "durationMinutes": 7,
+   "instruction": "Learn about granuloma formation, then find one reason antibiotic-resistant TB is a growing global threat."
+  }
+ },
+ {
+  "id": "medicine-hiv-aids",
+  "categoryId": "MEDICINE",
+  "subtype": "Condition",
+  "name": "HIV/AIDS",
+  "teaser": "HIV destroys CD4 T-cells — the coordinators of the immune system — leaving the body vulnerable to infections it would normally fight easily. Antiretroviral therapy turned HIV from a death sentence into a manageable chronic condition.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "virus",
+   "immune"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How HIV evades the immune system",
+   "durationMinutes": 8,
+   "instruction": "Learn about HIV's reverse transcriptase and high mutation rate, then find one case where someone appears naturally resistant to HIV."
+  }
+ },
+ {
+  "id": "medicine-cholera",
+  "categoryId": "MEDICINE",
+  "subtype": "Discovery",
+  "name": "Cholera and John Snow",
+  "teaser": "In 1854 John Snow traced a London cholera outbreak to a single water pump — he removed the handle and the epidemic stopped. It was the birth of epidemiology, proving cholera was waterborne before germs were even discovered.",
+  "imageUrl": "",
+  "byline": "John Snow",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "epidemiology",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Broad Street pump",
+   "durationMinutes": 7,
+   "instruction": "Learn how John Snow mapped cholera cases, then find one modern epidemiological tool that traces disease spread the same way."
+  }
+ },
+ {
+  "id": "medicine-semmelweis",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Ignaz Semmelweis",
+  "teaser": "In 1847 Semmelweis showed that handwashing in maternity wards cut death rates from 10% to 1%. His colleagues rejected him — he died in an asylum. Germ theory vindicated him 20 years later.",
+  "imageUrl": "",
+  "byline": "Ignaz Semmelweis",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "history",
+   "hygiene"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Semmelweis and the handwashing revolution",
+   "durationMinutes": 7,
+   "instruction": "Learn about the 'cadaverous particles' hypothesis, then find one reason doctors resisted handwashing despite the data."
+  }
+ },
+ {
+  "id": "medicine-alexander-fleming",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Alexander Fleming",
+  "teaser": "Fleming noticed mould killing bacteria in a petri dish he'd left out by accident in 1928 — the discovery of penicillin launched the antibiotic era and has saved an estimated 200 million lives.",
+  "imageUrl": "",
+  "byline": "Alexander Fleming",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "antibiotics",
+   "discovery"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Fleming's accidental discovery",
+   "durationMinutes": 7,
+   "instruction": "Learn about the mould Penicillium notatum, then find one reason Fleming warned about antibiotic resistance in his Nobel Prize speech."
+  }
+ },
+ {
+  "id": "medicine-rosalind-franklin",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Rosalind Franklin",
+  "teaser": "Franklin's X-ray diffraction image 'Photo 51' revealed the helical structure of DNA in 1952 — without her data, Watson and Crick could not have built their model. She died of cancer at 37 and never received the Nobel Prize.",
+  "imageUrl": "",
+  "byline": "Rosalind Franklin",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genetics",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Franklin's contribution to DNA structure",
+   "durationMinutes": 7,
+   "instruction": "Learn about X-ray crystallography, then find one reason Franklin's contribution was overlooked for decades."
+  }
+ },
+ {
+  "id": "medicine-galen",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Galen",
+  "teaser": "Galen was the most influential doctor for 1,300 years — his anatomy was wrong in many places (he never dissected humans, only animals), but his authority was so absolute that questioning him was forbidden in universities until the 1600s.",
+  "imageUrl": "",
+  "byline": "Galen of Pergamon",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "history",
+   "anatomy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why Galen's wrong ideas lasted so long",
+   "durationMinutes": 7,
+   "instruction": "Learn about Galen's animal-based anatomy, then find one anatomical error he made that persisted for centuries."
+  }
+ },
+ {
+  "id": "medicine-ibn-sina",
+  "categoryId": "MEDICINE",
+  "subtype": "Pioneer",
+  "name": "Ibn Sina (Avicenna)",
+  "teaser": "Ibn Sina's 'Canon of Medicine' (1025 CE) systematised medical knowledge into a single textbook that was used in European universities until the 1650s — a 600-year standard. He described contagion, quarantine, and over 760 drugs.",
+  "imageUrl": "",
+  "byline": "Ibn Sina",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "history",
+   "Islamic-golden-age"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Ibn Sina's medical legacy",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Canon of Medicine's structure, then find one medical concept Ibn Sina described 600 years before Europe rediscovered it."
+  }
+ },
+ {
+  "id": "medicine-black-death",
+  "categoryId": "MEDICINE",
+  "subtype": "History",
+  "name": "The Black Death",
+  "teaser": "The bubonic plague killed 75–200 million people in the 14th century — up to 60% of Europe's population. It took 200 years for the population to recover, and the labour shortage that followed helped end feudalism.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "plague",
+   "history"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the Black Death changed medicine",
+   "durationMinutes": 8,
+   "instruction": "Learn about the quarantine concept's origin in Ragusa (1377), then find one lasting change the Black Death caused in European medicine."
+  }
+ },
+ {
+  "id": "medicine-bloodletting",
+  "categoryId": "MEDICINE",
+  "subtype": "History",
+  "name": "Bloodletting",
+  "teaser": "For 2,000 years doctors believed that removing blood cured disease — George Washington died after losing 2.5 litres of blood in a single day. The practice persisted long after evidence showed it was harmful.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "history",
+   "treatment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why bloodletting lasted so long",
+   "durationMinutes": 7,
+   "instruction": "Learn about Galen's humoral theory, then find one controlled trial that proved bloodletting does more harm than good."
+  }
+ },
+ {
+  "id": "medicine-medical-leeches",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Medical Leeches and Maggots",
+  "teaser": "Leeches and maggots are FDA-approved medical devices. Leeches relieve venous congestion after reattachment surgery; sterile maggots debride dead tissue from wounds without damaging healthy skin. Medieval medicine was right about something.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "biotherapy",
+   "wound-care"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How leeches and maggots are used in modern medicine",
+   "durationMinutes": 6,
+   "instruction": "Learn about Hirudo medicinalis in microsurgery, then find one condition where maggot debridement therapy outperforms surgery."
+  }
+ },
+ {
+  "id": "medicine-blood-transfusion",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Blood Transfusion",
+  "teaser": "Karl Landsteiner discovered the ABO blood groups in 1901 — before that, transfusions were a deadly gamble. Today over 118 million units of blood are donated worldwide every year, and your donation can be split into red cells, platelets, and plasma.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "blood",
+   "transfusion"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Blood types and transfusion",
+   "durationMinutes": 7,
+   "instruction": "Learn about blood type compatibility, then find one reason Type O-negative blood is called the universal donor."
+  }
+ },
+ {
+  "id": "medicine-organ-donation",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Organ Donation and Transplantation",
+  "teaser": "The first successful kidney transplant was in 1954 — the donor was the patient's identical twin, so no immunosuppression was needed. Today over 150,000 organ transplants are performed globally each year, and the waiting list always outnumbers donors.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "transplant",
+   "surgery"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How organ transplantation works",
+   "durationMinutes": 7,
+   "instruction": "Learn about tissue matching and immunosuppression, then find one experimental approach to growing transplantable organs in the lab."
+  }
+ },
+ {
+  "id": "medicine-ivf",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "In Vitro Fertilisation (IVF)",
+  "teaser": "Louise Brown, born in 1978, was the first IVF baby — her parents had tried for nine years. Today over 10 million IVF babies have been born worldwide. The treatment bypasses blocked fallopian tubes by fertilising eggs outside the body.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "fertility",
+   "reproduction"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How IVF works",
+   "durationMinutes": 7,
+   "instruction": "Learn about the IVF cycle, then find one reason IVF success rates vary by age."
+  }
+ },
+ {
+  "id": "medicine-contraceptive-pill",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "The Contraceptive Pill",
+  "teaser": "Approved in 1960, the pill gave women control over fertility for the first time in history — it's been called the most important invention of the 20th century. Over 100 million women use it today.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "contraception",
+   "social-change"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How the pill prevents pregnancy",
+   "durationMinutes": 7,
+   "instruction": "Learn about how synthetic hormones suppress ovulation, then find one social change that researchers attribute to the pill's introduction."
+  }
+ },
+ {
+  "id": "medicine-gene-therapy",
+  "categoryId": "MEDICINE",
+  "subtype": "Treatment",
+  "name": "Gene Therapy",
+  "teaser": "Gene therapy replaces faulty genes with working copies — in 2023 the first CRISPR-based therapy (Casgevy) was approved for sickle cell disease. It took 30 years of failed attempts before the technique finally worked safely.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "genetics",
+   "treatment"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Gene therapy's long road to success",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Jesse Gelsinger tragedy (1999) and how it set gene therapy back a decade, then find one condition gene therapy can now treat."
+  }
+ },
+ {
+  "id": "medicine-sleep-medicine",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Sleep Medicine",
+  "teaser": "Humans spend a third of their lives sleeping — and sleep deprivation increases risk of heart disease, diabetes, and Alzheimer's. During sleep the brain's glymphatic system clears toxic waste proteins, which is why chronic insomnia accelerates cognitive decline.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "sleep",
+   "brain"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why sleep matters for health",
+   "durationMinutes": 7,
+   "instruction": "Learn about the glymphatic system, then find one sleep habit that measurably improves cognitive performance."
+  }
+ },
+ {
+  "id": "medicine-emergency-medicine",
+  "categoryId": "MEDICINE",
+  "subtype": "System",
+  "name": "Emergency Medicine",
+  "teaser": "Emergency medicine didn't exist as a specialty until the 1960s — before that, ERs were run by whoever was available. Today the 'golden hour' principle means trauma survival depends on getting care within 60 minutes of injury.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "medicine",
+   "emergency",
+   "trauma"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The golden hour in trauma care",
+   "durationMinutes": 7,
+   "instruction": "Learn about the ATLS (Advanced Trauma Life Support) protocol, then find one innovation that shortened emergency response times."
   }
  }
 ]
