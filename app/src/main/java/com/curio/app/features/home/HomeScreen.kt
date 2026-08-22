@@ -154,7 +154,6 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
-import com.curio.app.ui.theme.SansFlexFontFamily
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
@@ -2835,7 +2834,7 @@ private fun ExploreTopicRow(
                 }
                 Text(
                     subtitle,
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -2955,7 +2954,6 @@ private fun CurrentlyExploringCard(
                         Text(
                             "CURRENTLY EXPLORING",
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontFamily = SansFlexFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 1.4.sp
                             ),
@@ -2981,7 +2979,7 @@ private fun CurrentlyExploringCard(
                         else ->
                             "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far · ~${session.durationMinutes} min recommended"
                     },
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
+                    style = MaterialTheme.typography.bodySmall,
                     color = if (session.paused) exploreInk else MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -3067,7 +3065,7 @@ private fun QueuedExploreRow(
             )
             Text(
                 "Paused at ${formatElapsed(session.elapsedMillis())} · tap to resume",
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -3121,7 +3119,7 @@ private fun CancelledExploreRow(
             )
             Text(
                 "Cancelled at ${formatElapsed(session.elapsedMillis())} · tap to resume",
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

@@ -6,12 +6,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
@@ -93,6 +94,11 @@ object CurioToast {
  * bottom-center pill was removed): compact padding, smaller glyph/text,
  * slides down from above instead of up from below. The NavHost places it
  * with statusBarsPadding + a corner margin.
+ * v227b — WIDTH CAP + app-pill styling: the text used to run unconstrained
+ * on a single line, so longer notices stretched the capsule across the
+ * whole screen width. The pill is now capped at 300dp (text ellipsizes),
+ * reads start-aligned like every other app pill, and slides back up on
+ * exit instead of just fading.
  */
 @Composable
 fun CurioInAppToastHost(
@@ -114,7 +120,9 @@ fun CurioInAppToastHost(
         enter = slideInVertically(
             animationSpec = tween(260, easing = FastOutSlowInEasing)
         ) { height -> -height / 2 } + fadeIn(animationSpec = tween(220)),
-        exit = fadeOut(animationSpec = tween(180))
+        exit = slideOutVertically(
+            animationSpec = tween(180, easing = FastOutSlowInEasing)
+        ) { height -> -height / 2 } + fadeOut(animationSpec = tween(160))
     ) {
         message?.let { m ->
             val action = m.actionId
@@ -122,7 +130,10 @@ fun CurioInAppToastHost(
                 shape = RoundedCornerShape(50),
                 color = curioDialogContainerColor(),
                 shadowElevation = 6.dp,
+                // v227b — hard width cap: a corner notice, never a
+                // screen-spanning band. Long text ellipsizes.
                 modifier = Modifier
+                    .widthIn(max = 300.dp)
                     .then(
                         if (action != null) Modifier.clickable {
                             CurioToast.dismiss(m.id)
@@ -151,11 +162,11 @@ fun CurioInAppToastHost(
                             fontWeight = FontWeight.SemiBold
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        // v99 — a toast is a one-line pill: ellipsize instead
-                        // of wrapping so it never reads as a huge block.
+                        // v227b — start-aligned (centering read odd once the
+                        // pill stopped stretching); still one line, ellipsized.
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     if (m.actionLabel != null) {
                         VerticalDivider(

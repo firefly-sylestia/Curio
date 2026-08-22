@@ -52,7 +52,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.isLiquidGlassPillsActive
-import com.curio.app.ui.theme.SansFlexFontFamily
+import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.fromHsl
@@ -511,12 +511,9 @@ private fun FloatingNavPill(
                     // v186 — the user asked for the labels EVEN LARGER in
                     // the default look: 13 → 15sp (still fits the 136dp
                     // expanded pill: icon 26 + label ~70sp + padding).
-                    // v226 — Sans Flex Bold replaces the Changa One
-                    // display face on the tab labels (user request); same
-                    // 15sp so the expanded pill metrics are unchanged.
                     style = MaterialTheme.typography.labelMedium.copy(
-                        fontFamily = SansFlexFontFamily,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = ChangaOneFontFamily,
+                        fontWeight = FontWeight.Normal,
                         fontSize = 15.sp
                     ),
                     color = activeInk,
@@ -603,8 +600,8 @@ fun CurioNavigationRail(
                             // labels (Normal — the single-weight display face
                             // needs no fake bold).
                             style = MaterialTheme.typography.labelMedium.copy(
-                                fontFamily = SansFlexFontFamily,
-                                fontWeight = FontWeight.Bold
+                                fontFamily = ChangaOneFontFamily,
+                                fontWeight = FontWeight.Normal
                             )
                         )
                     },
