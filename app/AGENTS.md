@@ -4880,6 +4880,9 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v229 — Live Update promotion fix + notification permission checker**
+  - The v227 `ProgressStyle` alone never promoted: the service now calls `setRequestPromotedOngoing(true)` + `setStyledByProgress(true)` + `setShortCriticalText` (the exact LiveBridge recipe) so Android 16 can render the status-bar chip / lock-screen live activity.
+  - Topic Reveal explore flow: when POST_NOTIFICATIONS is permanently denied (no rationale after denial), an app-styled checker dialog offers Open settings (ON_RESUME continues the pending session) or Start anyway — previously the runtime prompt silently no-op'd and the session ran with no visible timer.
 - **v228 — liquid-glass self-capture crash fix**
   - Root cause of the Pet Designer RenderThread SIGSEGV (stack overflow in `RenderNode.prepareTreeImpl`): `layerBackdrop` records the page subtree AFTER drawing it, so glass pills INSIDE the captured Box (Pet Designer studio bar, Topic Reveal bar) re-drew during the record pass and sampled their own GraphicsLayer — a cyclic render node.
   - Fix: the NavHost's `rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })` sets `CurioGlassPills.isCapturingBackdrop` for the record pass; `liquidGlassCapsule` wraps its backdrop node with a `drawWithContent` guard that paints a plain translucent capsule while capturing. Bottom tab bar unaffected (sibling overlay).

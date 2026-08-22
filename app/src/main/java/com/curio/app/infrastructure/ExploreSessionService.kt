@@ -413,17 +413,22 @@ class ExploreSessionService : Service() {
             .addAction(0, "Cancel", cancelSessionIntent())
 
         if (!paused && android.os.Build.VERSION.SDK_INT >= 36) {
-            // v227 — RUNNING on Android 16+: post a genuine LIVE UPDATE.
+            // v227/v229 — RUNNING on Android 16+: post a genuine LIVE UPDATE.
             // The framework's ProgressStyle is the rich ongoing-notification
             // surface (the same one LiveBridge promotes other apps' progress
             // notifications into): the shade renders a styled segment bar,
             // and the system may promote the notification to a status-bar
-            // chip / lock-screen live activity. Segment length defines the
-            // bar's max (durationMinutes); the tracker icon rides the
-            // elapsed position. Paused and pre-16 keep the classic style
-            // below (the frozen readout + reflection question).
+            // chip / lock-screen live activity. v229 fix — the style alone
+            // was never enough: promotion must be REQUESTED via
+            // `setRequestPromotedOngoing(true)` (exactly what LiveBridge
+            // does before posting), the segments need
+            // `setStyledByProgress(true)` so the fill tracks progress, and
+            // `setShortCriticalText` carries the readout onto the chip.
+            builder.setRequestPromotedOngoing(true)
+            builder.setShortCriticalText("${progressMins}m")
             val liveUpdateStyle = NotificationCompat.ProgressStyle()
                 .setProgress(progressMins)
+                .setStyledByProgress(true)
                 .addProgressSegment(
                     NotificationCompat.ProgressStyle.Segment(totalMins).setColor(accent)
                 )

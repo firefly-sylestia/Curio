@@ -1,6 +1,7 @@
 package com.curio.app.features.reveal
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -363,17 +364,35 @@ fun TopicRevealScreen(
 
     val requestNotifications = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ ->
+    ) { granted ->
         val pending = pendingNotificationSession
         pendingNotificationSession = null
         if (pending != null) {
-            // Start the service for whatever can show right now — the live
-            // notification needs the grant, but the FLOATING BUBBLE needs
-            // only the separate "Display over other apps" permission, so
-            // denying POST_NOTIFICATIONS must never silently kill the
-            // bubble too. The service's render() picks what actually shows
-            // from the current permission state. The browser hasn't opened
-            // yet (proceed is deferred to here), so the activity is still
+            // v229 — PERMISSION CHECKER: if the grant came back denied AND
+            // the system no longer shows the rationale, the prompt was
+            // permanently dismissed ("Don't ask again") — re-launching it is
+            // a silent no-op and the session would run with NO visible
+            // timer at all (no shade notification, no chip). Surface the
+            // app-styled guidance dialog instead; "Open settings" resumes
+            // this same pending session via ON_RESUME.
+            val permanentlyDenied = !granted &&
+                !hasNotificationPermission(context) &&
+                (context as? Activity)?.shouldShowRequestPermissionRationale(
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == false
+            if (permanentlyDenied) {
+                pendingNotificationSession = pending
+                showNotificationsBlockedDialog = true
+                return@rememberLauncherForActivityResult
+            }
+            // Granted (or a plain first-time denial): start the service for
+            // whatever can show right now — the live notification needs the
+            // grant, but the FLOATING BUBBLE needs only the separate
+            // "Display over other apps" permission, so denying
+            // POST_NOTIFICATIONS must never silently kill the bubble too.
+            // The service's render() picks what actually shows from the
+            // current permission state. The browser hasn't opened yet
+            // (proceed is deferred to here), so the activity is still
             // foreground — starting the foreground service is allowed.
             if (AppPreferences.exploreServiceShouldRun(context)) {
                 ExploreSessionService.start(context, pending)
@@ -393,6 +412,10 @@ fun TopicRevealScreen(
     var pendingOverlaySession by remember { mutableStateOf<ExploreSession?>(null) }
     var overlayNeedsNotification by remember { mutableStateOf(false) }
     var showOverlayPermissionDialog by rememberSaveable { mutableStateOf(false) }
+    // v229 — POST_NOTIFICATIONS permanently-denied checker dialog + the
+    // settings-return flag for its ON_RESUME continuation.
+    var showNotificationsBlockedDialog by rememberSaveable { mutableStateOf(false) }
+    var awaitingNotificationsSettings by remember { mutableStateOf(false) }
     // Only consume the pending session after the app has actually launched
     // the system overlay-settings page. A dialog dismissal can produce an
     // ON_RESUME callback while permission is still missing; consuming here
@@ -456,6 +479,21 @@ fun TopicRevealScreen(
                         // granting: that's a "no" — record it so the prompt
                         // never re-asks on every explore.
                         AppPreferences.setOverlayAskDeclined(context, true)
+                    }
+                    continueExploreFlow(pending)
+                }
+            }
+            // v229 — returned from the app-notification settings page after
+            // the permanently-denied checker dialog: re-check and continue
+            // the SAME pending session (grant → service starts; still denied
+            // → session runs without the shade timer, bubble permitting).
+            if (event == Lifecycle.Event.ON_RESUME && awaitingNotificationsSettings) {
+                awaitingNotificationsSettings = false
+                val pending = pendingNotificationSession
+                pendingNotificationSession = null
+                if (pending != null) {
+                    if (AppPreferences.exploreServiceShouldRun(context)) {
+                        ExploreSessionService.start(context, pending)
                     }
                     continueExploreFlow(pending)
                 }
@@ -946,6 +984,69 @@ fun TopicRevealScreen(
                     pendingOverlaySession = null
                     if (s != null) continueExploreFlow(s)
                 }) { Text("Not now", color = curioDialogActionColor()) }
+            }
+        )
+    }
+
+    // v229 — POST_NOTIFICATIONS permanently-denied checker: the runtime
+    // prompt can never come back after "Don't ask again", so without this
+    // guidance the explore session silently ran with no visible timer.
+    if (showNotificationsBlockedDialog) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = {
+                showNotificationsBlockedDialog = false
+                val s = pendingNotificationSession
+                pendingNotificationSession = null
+                if (s != null) continueExploreFlow(s)
+            },
+            title = { Text("Notifications are off") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "The live explore timer — the shade notification with " +
+                        "the progress bar and pause/cancel buttons — needs " +
+                        "notification permission, which was turned off for " +
+                        "Curio earlier."
+                    )
+                    Text(
+                        "You can still explore without it. To bring the timer " +
+                        "back, allow notifications in system settings.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNotificationsBlockedDialog = false
+                    val s = pendingNotificationSession
+                    if (s != null) {
+                        val launched = runCatching {
+                            awaitingNotificationsSettings = true
+                            context.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            )
+                        }.isSuccess
+                        if (!launched) {
+                            awaitingNotificationsSettings = false
+                            pendingNotificationSession = null
+                            continueExploreFlow(s)
+                        }
+                    }
+                }) {
+                    Text("Open settings", color = curioDialogActionColor())
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showNotificationsBlockedDialog = false
+                    val s = pendingNotificationSession
+                    pendingNotificationSession = null
+                    if (s != null) continueExploreFlow(s)
+                }) { Text("Start anyway", color = curioDialogActionColor()) }
             }
         )
     }

@@ -1,36 +1,40 @@
 # Prompt.md — current request log
 
-## Request (complete): Pet Designer crash — RenderThread stack overflow (v228)
+## Request (complete): Live notification fix + permission checker (v229)
 
-User reported Pet Designer crashing on open with a native crash: SIGSEGV
-(SEGV_ACCERR) on RenderThread, "stack pointer is not in a rw map; likely due to
-stack overflow", 512 frames alternating between
-`RenderNode::prepareTreeImpl` and its child-traversal lambda — an infinitely
-deep render-node tree.
+User: "the live notification style isn't working. add its permission checker
+dialog. and proper logic how it forces other apps to show… properly analyse"
+(referencing https://github.com/appsfolder/livebridge).
 
-### Root cause
+### Analysis
 
-The v227 liquid-glass experiment: `Modifier.layerBackdrop(navGlassBackdrop)`
-on the NavHost's page-content Box records that subtree into a GraphicsLayer —
-the library draws the content FIRST, then re-invokes the draw chain inside
-`recordLayer`. Glass pills living INSIDE the captured subtree (Pet Designer
-studio bar, Topic Reveal category/favorite bar) therefore drew a second time
-during the record pass and sampled `navGlassBackdrop` itself — drawing the
-GraphicsLayer into its own recording = cyclic render node → HWUI recursed in
-`prepareTreeImpl` until the RenderThread stack overflowed. The bottom tab bar
-was immune (sibling overlay of the captured Box).
+Fetched LiveBridge's `LiveUpdateNotifier.kt` (~5000 lines) and compared with
+Curio's `ExploreSessionService.liveNotification()`. Curio already posted
+`NotificationCompat.ProgressStyle`, but three things LiveBridge always does
+were missing:
 
-### Fix
+1. `builder.setRequestPromotedOngoing(true)` — the actual request for the
+   system to promote the ongoing notification to a status-bar chip /
+   lock-screen live activity. Without it, no promotion ever happens.
+2. `.setStyledByProgress(true)` on the ProgressStyle.
+3. `builder.setShortCriticalText(...)` — the readout shown on the chip.
 
-- `LiquidGlassPills.kt`: added `CurioGlassPills.isCapturingBackdrop`
-  (@Volatile, UI-thread-only draw-phase flag); new `curioGlassCaptureDraw()`
-  ContentDrawScope extension sets it around `drawContent()`.
-- `CurioNavHost.kt`: `rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })`.
-- `liquidGlassCapsule`: outer `drawWithContent` guard — during a capture pass
-  it skips the backdrop node entirely and paints a plain translucent rounded
-  capsule instead. Both in-screen pill sites are fixed via the shared helper.
+Verified all three exist in androidx core 1.18.0 (`/tmp/core-src`).
 
-Verification: delimiter balance OK; Gradle is forbidden here so CI on push is
-the compile source of truth.
+Separately, the Reveal explore flow requested POST_NOTIFICATIONS at session
+start, but after a permanent denial ("Don't ask again") the runtime prompt is
+a silent no-op → the session ran with NO visible timer anywhere.
 
-Docs: store changelog 20260920.txt FIX bullet + app/AGENTS.md v228 entry.
+### Changes
+
+- `ExploreSessionService.kt`: in the running + API 36+ branch, add
+  setRequestPromotedOngoing(true), setShortCriticalText("${progressMins}m"),
+  and .setStyledByProgress(true). Paused / pre-16 unchanged.
+- `TopicRevealScreen.kt`: permission checker — when the grant result is denied
+  AND no rationale AND notifications off, show an app-styled dialog
+  ("Notifications are off"): Open settings (ACTION_APP_NOTIFICATION_SETTINGS,
+  ON_RESUME continues the same pending session) or Start anyway. First-time
+  denials keep the old quiet behavior.
+
+Verification: delimiter balance OK on both files; CI on push compiles.
+Docs: changelog FIX bullet + app/AGENTS.md v229 entry.

@@ -74,6 +74,7 @@ ADD
 - Explore: on Android 16+ the running explore session posts a genuine Live Update notification - a system-styled progress bar wearing your lane's color that can promote to a status-bar chip; earlier versions keep the current look.
 
 FIX
+- Explore live notification on Android 16 now actually requests Live Update promotion (status-bar chip), styles the bar by progress, and a permission dialog appears when notifications were permanently turned off for Curio.
 - Crash fix: Pet Designer (and the Reveal bar) could crash the whole app with a render-thread stack overflow when the Liquid glass pills experiment is on - glass pills no longer sample their own capture layer.
 - Auto backup: pick how often it runs - Daily, Every 3 days or Weekly - and it now also fires on schedule while the app stays in memory (not just on a fresh launch).
 - Detail page: opening an entry no longer shows a blank gap before the quick fact and body appear - the content fades in immediately.
