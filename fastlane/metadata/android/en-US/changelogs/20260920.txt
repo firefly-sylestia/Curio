@@ -64,6 +64,7 @@ ADD
 - Curie pet: evolving companion with moods, games, three voices, 150+ reactions and a full Pet Designer.
 - Quests: daily and journey quests, path chains, medals and a badge shelf.
 - Backup & restore: streamed in-app backup of entries, media, preferences and pet designs.
+- Liquid-glass nav: the active tab expands like the classic pill - icon with the label beside it in accent ink - and the indicator now wears a faint accent glow.
 
 ADD
 - Stats page: a new "Your Curiosity" screen that turns the drawer's observatory into a full page — a celestial sky header, an INTERACTIVE constellation where every star is a lane you've explored (bigger = more saved there, glowing when active this week, tap a star for its stats), your streak + level with XP progress, lifetime totals (spins, explores, saves, quotes, pins, likes, dislikes, daily quests), journey badges and a per-lane breakdown. Reached from the drawer (tap the curiosity map or "Stats & insights") and from Profile.
@@ -254,6 +255,8 @@ FIX
 - Profile: pick an avatar photo in Edit profile — it shows on the Profile hero and in the Home menu drawer.
 - Pet Designer: fixed a crash when opening the studio on some devices; the studio tab bar keeps its solid style for now.
 - Crash detection: native crashes (RenderThread) are now captured on next launch, and the app auto-disables the glass experiment after one so it can't crash-loop silently.
+- Fixed a native crash while scrolling with liquid glass on: top-bar pills keep their solid-to-frost scroll morph again (live glass stays only where it is safe).
+- Crash detector: native crashes are now captured from system exit records and shown on next launch, with the glass experiment auto-disabled to stop silent crash loops.
 
 REMOVE
 - Experiments: the five Spin visuals toggles are gone - all five looks are now the default.

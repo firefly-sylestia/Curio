@@ -1,32 +1,29 @@
 # Prompt.md — current request log
 
-## Request (complete): Pet Designer crash follow-up + native crash reporting (v232)
+## Request (complete): scroll crash + crash-log UI + classic-style glass tabs (v233)
 
-User: opening Pet Designer still crashes even though the Topic Reveal screen and Home
-don't — and the in-app crash detector doesn't pick the crash up.
+User: still crashing while scrolling (probably the floating pill); make the crash
+detector show the native crash log; the expanded glass nav pill doesn't follow the
+old look (side text); improve the active indicator.
 
-### Analysis
-- Structurally, Reveal's category/favorite bar and the Pet Designer studio bar are
-  IDENTICAL: both are `liquidGlassCapsule` pills inside the NavHost's captured page Box,
-  both covered by the v228 `isCapturingBackdrop` self-capture guard. No Popups, no extra
-  layerBackdrop/recordLayer sites in Pet Designer. So "why only Pet Designer" has no
-  remaining code-level answer we can see — some device-specific path (Samsung A35 /
-  Android 16 / Vulkan / libhwui) still recurses natively on that screen.
-- The crash detector missed it because SIGSEGV on RenderThread kills the process inside
-  libc; Java's UncaughtExceptionHandler never runs. Only ApplicationExitInfo can see it.
-
-### Changes
-1. `CurioCrashReporter.checkNativeCrash()` — called from `init()` (API 30+). Reads the
-   previous process exit via `getHistoricalProcessExitReasons`: SIGNALED exits and CRASH
-   exits without our pending flag count as native crashes → persisted into the same
-   crash history + pending-crash flow (crash screen now shows them) and into the same
-   loop window (repeated native deaths trip safe mode). Dedup via last-seen timestamp.
-2. Self-heal: if liquid glass was enabled at death, both glass toggles auto-OFF before
-   UI comes up; noted in the persisted log. Invisible crash-loops can't persist.
-3. `PetDesignerScreen` studio bar: glass disabled for now (always solid elevated fill)
-   pending a real tombstone from the new reporter. Everything else unchanged.
+### Root causes / analysis
+1. Scroll crash: Home menu/profile pills and detail back/more pills are INSIDE the
+   NavHost capture subtree AND rebuild `drawBackdrop` on every scroll frame
+   (`washAlpha = lerp(..., frostShift)` changes per frame → modifier chain teardown/
+   rebuild + full-subtree re-record per frame). Same native-crash class as Pet
+   Designer. Fix: `glassOn = false` at those sites (code kept, imports cleaned);
+   classic solid→frost morph restored; live glass only on the bottom-nav overlay.
+2. Crash log display: pipeline already complete after v232 (checkNativeCrash →
+   persistCrash → pending flag → Splash routes to CRASH screen → log shown) — no
+   extra wiring needed; verified SplashScreen + CurioCrashScreen read paths.
+3. Glass tabs now follow the classic pill language: inactive icon-only; active
+   springs to 136dp with label sliding out BESIDE the icon (Changa One 15sp,
+   accent ink crossfade via curioActivePillInk). Item container Column→Row.
+4. Indicator: per-tab measured widths (LocalLiquidGlassTabMetrics, tabWidthsPx +
+   version counter) replace the even-split assumption everywhere — indicator box,
+   drag math, RTL canDrag, specular highlight position — plus a constant faint
+   accent wash so it reads as active at rest.
 
 ### Status
-DONE — committed & pushed. Next step when a native crash log shows up in-app: use its
-reason/signal/description to pin the exact render-node cycle and re-enable studio-bar
-glass with a targeted fix.
+DONE — committed & pushed. If any further native crash occurs with glass ON, the
+reporter captures it and self-heals (toggles off) so it can never loop silently.

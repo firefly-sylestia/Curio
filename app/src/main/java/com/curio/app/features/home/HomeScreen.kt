@@ -143,7 +143,6 @@ import com.curio.app.ui.components.ProfileAvatarImage
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
-import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
@@ -1161,7 +1160,16 @@ fun HomeScreen(navController: NavController) {
             // pill keeps the classic morph while an avatar photo is set (a
             // photo can't sit on glass) — so menu and profile animate their
             // fills independently.
-            val glassOn = isLiquidGlassPillsActive()
+            // v232 — GLASS HANDOFF DISABLED on these top-bar pills. They sit
+            // INSIDE the NavHost capture subtree AND rebuild the drawBackdrop
+            // node on every scroll frame (the per-frame washAlpha), a combo
+            // that natively SIGSEGVs RenderThread while flinging on some
+            // devices (same class as the Pet Designer studio-bar crash).
+            // The classic solid→frost morph below is fully restored; live
+            // liquid glass stays only on the bottom nav overlay (a SIBLING
+            // of the capture Box — the one configuration that has never
+            // crashed). Revisit once a tombstone pins the exact cycle.
+            val glassOn = false
             val profileAvatarPath = AppPreferences.getProfileAvatarPath(context)
             val profileGlassOn = glassOn && profileAvatarPath.isNullOrBlank()
             // Resolve solid target colors from scroll, then animate the paint

@@ -154,7 +154,6 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
-import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
@@ -1109,7 +1108,12 @@ private fun BoxScope.DetailStickyBar(
     // applied through the scroll shift instead. When the liquid-glass
     // experiment is on AND the morph has begun, the classic frosted brush
     // is replaced by a real liquid-glass capsule entirely.
-    val glassOn = isLiquidGlassPillsActive()
+    // v232 — GLASS HANDOFF DISABLED here (see HomeScreen): these pills are
+    // inside the capture subtree and rebuild the backdrop node every scroll
+    // frame — native RenderThread crash class on some devices. The classic
+    // solid-hero → frost morph below runs again; live glass stays only on
+    // the bottom nav overlay.
+    val glassOn = false
     val detailGlassActive = glassOn && frostShift > 0.01f
     val frostFill = if (isCurioDarkTheme())
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)

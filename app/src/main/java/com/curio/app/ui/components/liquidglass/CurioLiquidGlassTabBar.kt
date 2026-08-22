@@ -19,16 +19,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -76,14 +71,26 @@ import kotlin.math.sign
 
 val LocalLiquidGlassTabScale = staticCompositionLocalOf { { 1f } }
 
+/**
+ * v232 — PER-TAB METRICS. Each item reports its measured width so the bar
+ * can lay the draggable active indicator over REAL tab widths instead of
+ * assuming equal division — required now that tabs expand/collapse
+ * classic-style (icon-only ↔ icon+side-label).
+ */
+val LocalLiquidGlassTabMetrics =
+    staticCompositionLocalOf<(index: Int, widthPx: Float) -> Unit> { { _, _ -> } }
+
 @Composable
 fun RowScope.CurioLiquidGlassTabBarItem(
+    // v232 — position of this tab within the bar; used to report width.
+    index: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable RowScope.() -> Unit
 ) {
     val scale = LocalLiquidGlassTabScale.current
-    Column(
+    val reportWidth = LocalLiquidGlassTabMetrics.current
+    Row(
         modifier
             .clip(CircleShape)
             .clickable(
@@ -92,17 +99,16 @@ fun RowScope.CurioLiquidGlassTabBarItem(
                 role = Role.Tab,
                 onClick = onClick
             )
-            .fillMaxHeight()
-            // v231 — natural content width with a generous floor instead of
-            // weight(1f): equal-ish tabs that can never collapse.
-            .widthIn(min = 64.dp)
+            .onGloballyPositioned { coordinates ->
+                reportWidth(index, coordinates.size.width.toFloat())
+            }
             .graphicsLayer {
                 val currentScale = scale()
                 scaleX = currentScale
                 scaleY = currentScale
             },
-        verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
         content = content
     )
 }
@@ -124,8 +130,34 @@ fun CurioLiquidGlassTabBar(
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
 
-    var tabWidthPx by remember { mutableFloatStateOf(0f) }
     var totalWidthPx by remember { mutableFloatStateOf(0f) }
+    // v232 — REAL per-tab widths: tabs expand/collapse classic-style now
+    // (icon-only ↔ icon+side-label), so the indicator can't assume an even
+    // split any more. Falls back to an even division until all tabs report.
+    val tabWidthsPx = remember(tabsCount) { FloatArray(tabsCount) }
+    var tabMetricsVersion by androidx.compose.runtime.mutableIntStateOf(0)
+
+    fun evenTabWidth(): Float =
+        if (tabsCount == 0) 0f
+        else (totalWidthPx - with(density) { 8.dp.toPx() }) / tabsCount
+
+    fun widthAtFraction(f: Float): Float {
+        if (tabWidthsPx.any { it <= 0f }) return evenTabWidth()
+        val i = f.toInt().fastCoerceIn(0, tabsCount - 1)
+        val frac = (f - i).fastCoerceIn(0f, 1f)
+        val next = if (i + 1 < tabsCount) tabWidthsPx[i + 1] else tabWidthsPx[i]
+        return tabWidthsPx[i] + (next - tabWidthsPx[i]) * frac
+    }
+
+    /** Left edge (LTR) of the fractional tab index across the real widths. */
+    fun offsetOfFraction(f: Float): Float {
+        if (tabWidthsPx.any { it <= 0f }) return f * evenTabWidth()
+        val i = f.toInt().fastCoerceIn(0, tabsCount - 1)
+        val frac = (f - i).fastCoerceIn(0f, 1f)
+        var x = 0f
+        for (j in 0 until i) x += tabWidthsPx[j]
+        return x + tabWidthsPx[i] * frac
+    }
 
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
@@ -155,15 +187,15 @@ fun CurioLiquidGlassTabBar(
             pressedScale = 78f / 56f,
             canDrag = { offset ->
                 val animation = holder.instance ?: return@DampedDragAnimation true
-                if (tabWidthPx == 0f) return@DampedDragAnimation false
+                if (totalWidthPx == 0f) return@DampedDragAnimation false
 
                 val currentValue = animation.value
-                val indicatorX = currentValue * tabWidthPx
+                val indicatorX = offsetOfFraction(currentValue)
                 val padding = with(density) { 4.dp.toPx() }
                 val touchX = if (isLtr) {
                     padding + indicatorX + offset.x
                 } else {
-                    totalWidthPx - padding - tabWidthPx - indicatorX + offset.x
+                    totalWidthPx - padding - widthAtFraction(currentValue) - indicatorX + offset.x
                 }
                 touchX in 0f..totalWidthPx
             },
@@ -177,9 +209,10 @@ fun CurioLiquidGlassTabBar(
                 onSelected(targetIndex)
             },
             onDrag = { _, dragAmount ->
-                if (tabWidthPx > 0f) {
+                if (totalWidthPx > 0f) {
                     updateValue(
-                        (targetValue + dragAmount.x / tabWidthPx * if (isLtr) 1f else -1f)
+                        (targetValue + dragAmount.x /
+                            maxOf(widthAtFraction(targetValue), 1f) * if (isLtr) 1f else -1f)
                             .fastCoerceIn(0f, (tabsCount - 1).toFloat())
                     )
                     animationScope.launch {
@@ -194,14 +227,14 @@ fun CurioLiquidGlassTabBar(
         dampedDragAnimation.animateToValue(selectedIndex.toFloat())
     }
 
-    val interactiveHighlight = remember(animationScope, tabWidthPx) {
+    val interactiveHighlight = remember(animationScope, totalWidthPx) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             InteractiveHighlight(
                 animationScope = animationScope,
                 position = { size, _ ->
                     Offset(
-                        if (isLtr) (dampedDragAnimation.value + 0.5f) * tabWidthPx + panelOffset
-                        else size.width - (dampedDragAnimation.value + 0.5f) * tabWidthPx + panelOffset,
+                        if (isLtr) offsetOfFraction(dampedDragAnimation.value + 0.5f) + panelOffset
+                        else size.width - offsetOfFraction(dampedDragAnimation.value + 0.5f) + panelOffset,
                         size.height / 2f
                     )
                 }
@@ -209,6 +242,19 @@ fun CurioLiquidGlassTabBar(
         } else {
             null
         }
+    }
+
+    // v232 — both copies of the tab row (visible + hidden accent-tinted)
+    // run inside the metrics provider so every item reports its width.
+    val measuringContent: @Composable RowScope.() -> Unit = {
+        CompositionLocalProvider(
+            LocalLiquidGlassTabMetrics provides { i, w ->
+                if (i in tabWidthsPx.indices && w > 0f && tabWidthsPx[i] != w) {
+                    tabWidthsPx[i] = w
+                    tabMetricsVersion++
+                }
+            }
+        ) { content() }
     }
 
     // v231 — SQUISH FIX: the old `width(IntrinsicSize.Min)` + weight(1f)
@@ -224,8 +270,6 @@ fun CurioLiquidGlassTabBar(
             Modifier
                 .onGloballyPositioned { coordinates ->
                     totalWidthPx = coordinates.size.width.toFloat()
-                    val contentWidthPx = totalWidthPx - with(density) { 8.dp.toPx() }
-                    tabWidthPx = contentWidthPx / tabsCount
                 }
                 .graphicsLayer { translationX = panelOffset }
                 .clickable(
@@ -261,11 +305,10 @@ fun CurioLiquidGlassTabBar(
                     },
                     onDrawSurface = { drawRect(containerColor) }
                 )
-                .then(interactiveHighlight?.modifier ?: Modifier)
-                .height(64.dp)
-                .padding(4.dp),
+                .then(interactiveHighlight?.modifier ?: Modifier)                    .height(64.dp)
+                    .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            content = content
+            content = measuringContent
         )
 
         CompositionLocalProvider(
@@ -301,19 +344,19 @@ fun CurioLiquidGlassTabBar(
                     .padding(horizontal = 4.dp)
                     .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
                 verticalAlignment = Alignment.CenterVertically,
-                content = content
+                content = measuringContent
             )
         }
 
-        if (tabWidthPx > 0f) {
+        if (totalWidthPx > 0f) {
             Box(
                 Modifier
                     .padding(horizontal = 4.dp)
                     .graphicsLayer {
                         translationX = if (isLtr) {
-                            dampedDragAnimation.value * tabWidthPx + panelOffset
+                            offsetOfFraction(dampedDragAnimation.value) + panelOffset
                         } else {
-                            -dampedDragAnimation.value * tabWidthPx + panelOffset
+                            -offsetOfFraction(dampedDragAnimation.value) + panelOffset
                         }
                     }
                     .then(interactiveHighlight?.gestureModifier ?: Modifier)
@@ -352,6 +395,10 @@ fun CurioLiquidGlassTabBar(
                         },
                         onDrawSurface = {
                             val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                            // v232 — a constant faint ACCENT wash marks this pill
+                            // as the active-tab indicator even at rest (before,
+                            // it only read while pressed); press deepens it.
+                            drawRect(accentColor.copy(alpha = 0.14f))
                             drawRect(
                                 color = Color.Black.copy(alpha = 0.10f),
                                 alpha = 1f - progress
@@ -360,7 +407,12 @@ fun CurioLiquidGlassTabBar(
                         }
                     )
                     .height(56.dp)
-                    .width(with(density) { tabWidthPx.toDp() }),
+                    .width(with(density) {
+                        // Reads the metrics version so width changes from the
+                        // per-frame expand/collapse springs re-compose us.
+                        @Suppress("UNUSED_EXPRESSION") tabMetricsVersion
+                        widthAtFraction(dampedDragAnimation.targetValue).toDp()
+                    }),
             )
         }
     }

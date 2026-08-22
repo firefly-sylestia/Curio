@@ -368,33 +368,55 @@ fun CurioFloatingNavBar(
                 },
                 modifier = Modifier
             ) {
-                items.forEach { destination ->
+                // v232 — the glass tabs now follow the CLASSIC pill language:
+                // inactive tabs are icon-only, the active one springs wider and
+                // slides its label out BESIDE the icon (not stacked under it),
+                // with the same accent fill-ink crossfade as FloatingNavPill.
+                // The draggable indicator tracks the real per-tab widths.
+                val activeInk = curioActivePillInk(pageAccent)
+                items.forEachIndexed { index, destination ->
                     val selected = destination.route == selectedRoute ||
                         destination.route == routePrefix
+                    val tabWidth by animateDpAsState(
+                        targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+                        animationSpec = PillWidthSpring,
+                        label = "glassNavTabWidth"
+                    )
                     CurioLiquidGlassTabBarItem(
+                        index = index,
                         onClick = {
                             if (!selected && selectedRoute != destination.route) {
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 navController.navigateToTab(destination.route)
                             }
-                        }
+                        },
+                        modifier = Modifier.width(tabWidth)
                     ) {
                         CurioIcon(
                             name = if (selected) destination.selectedIcon else destination.icon,
                             contentDescription = destination.label,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 22.dp
+                            tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 26.dp
                         )
-                        Text(
-                            text = destination.label,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontFamily = ChangaOneFontFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 11.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
-                        )
+                        AnimatedVisibility(
+                            visible = selected,
+                            enter = expandHorizontally(PillExpandSpring, expandFrom = Alignment.Start) +
+                                fadeIn(PillMotionSpring),
+                            exit = shrinkHorizontally(PillExpandSpring, shrinkTowards = Alignment.Start) +
+                                fadeOut(PillMotionSpring)
+                        ) {
+                            Text(
+                                text = destination.label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = ChangaOneFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 15.sp
+                                ),
+                                color = activeInk,
+                                maxLines = 1,
+                                modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                            )
+                        }
                     }
                 }
             }

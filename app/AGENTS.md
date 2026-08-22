@@ -4886,6 +4886,21 @@ app/src/main/java/com/curio/app/
   - MoodBoard quote slips: default slot width 240→180px cap, resize ceiling 60%→42% of board, textScale hard-capped at 1.6× (degenerate baseW could stretch a slip over the full board height).
   - Constellation tap-centering: targets now use the letterboxed 1400-viewBox mapping (`ox + x*s`) instead of `nx*w`, and pixel offsets are divided by density before animation (double-scale overshoot).
 
+
+- **v233 — scroll-crash fix (in-page glass off) + crash-log UI + classic-style glass tabs**
+  - Scroll native-crash class eliminated: Home menu/profile pills and detail back/more
+    pills sat INSIDE the capture subtree AND rebuilt drawBackdrop per scroll frame
+    (per-frame washAlpha). Glass handoff disabled there (`glassOn = false`, code kept);
+    classic solid-hero → frost morph restored. Live glass remains ONLY on the bottom-
+    nav overlay (sibling of the capture Box — never crashed).
+  - Native crashes surface end-to-end: checkNativeCrash → persistCrash → pending flag →
+    Splash routes to CRASH screen → log displayed (no extra wiring needed).
+  - Glass tabs follow the classic pill language: inactive icon-only, active springs to
+    FloatingPillExpandedWidth with side label (Changa One 15sp) + accent ink crossfade;
+    item API takes an index and reports measured width via LocalLiquidGlassTabMetrics.
+  - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
+    offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
+    specular highlight) and wears a constant faint accent wash so it reads at rest.
 - **v232 — Pet Designer crash: glass off + native-crash reporter + self-heal**
   - Pet Designer still SIGSEGV'd natively (RenderThread stack overflow, cyclic render
     node) on some devices even with the v228 guard; Reveal's identical in-subtree pill
