@@ -136,7 +136,7 @@ fun CurioLiquidGlassTabBar(
     // (icon-only ↔ icon+side-label), so the indicator can't assume an even
     // split any more. Falls back to an even division until all tabs report.
     val tabWidthsPx = remember(tabsCount) { FloatArray(tabsCount) }
-    var tabMetricsVersion by androidx.compose.runtime.mutableIntStateOf(0)
+    var tabMetricsVersion by remember { androidx.compose.runtime.mutableIntStateOf(0) }
 
     fun evenTabWidth(): Float =
         if (tabsCount == 0) 0f
