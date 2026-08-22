@@ -4827,6 +4827,22 @@ app/src/main/java/com/curio/app/
   (front ellipse 1.35×holeR, back arc inside, per-hole tilt). All three
   now visibly pass through the hole instead of decorating it.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
+- **v223 — drawer top slot: constellation experiment + Material stat
+  strip (default).** The drawer's first slot under the hero is now gated:
+  `AppPreferences.drawerConstellationState` (Experiments → Constellation →
+  "Drawer constellation", default OFF, seeded in initThemeMode) shows the
+  full `DrawerCuriosityMap` only when ON. When OFF (the default) a new
+  small pure-Material stat strip renders instead (`DrawerMaterialStatStrip`
+  + `DrawerMaterialStatPane` in HomeScreen.kt): one tonal M3 card
+  (`surfaceContainerLow`, 18dp corners, 1dp shadow) with a tiny "YOUR
+  CURIOSITY" caption and three divider-separated panes — day streak
+  (`StreakTracker`), level (`CurioQuests.levelForXp(xpState)`), saved count
+  (`repo.getAll()` via produceState) — all in plain M3 roles (primary /
+  onSurface / onSurfaceVariant); tapping either slot still opens STATS.
+  Both slots share `CurioConstellation.plainBackground: Boolean = false`
+  — the DRAWER passes `true` so the map paints ONLY the star pattern
+  (lines + stars, no opaque page fill, no nebulae/starfield sky); the
+  Stats page keeps the default false (full deep-space sky unchanged).
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.
 - Edge-to-edge is enabled at the Activity level; the system bars are themed by `CurioTheme`'s `SideEffect` to match the current color scheme + light/dark mode.
