@@ -403,12 +403,6 @@ object AppPreferences {
     var starZoom3dState by mutableStateOf(true)
         private set
 
-    // Drawer constellation experiment — the "Your Curiosity Map" star
-    // pattern at the top of the navigation drawer is OPT-IN (default OFF);
-    // the default drawer shows a small Material-style stat strip instead.
-    var drawerConstellationState by mutableStateOf(false)
-        private set
-
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
@@ -645,7 +639,6 @@ object AppPreferences {
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
-        drawerConstellationState = isDrawerConstellationEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -930,7 +923,6 @@ object AppPreferences {
     private const val KEY_HEADER_DEEP = "header_deep"
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
-    private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1092,15 +1084,6 @@ object AppPreferences {
     fun setStarZoom3dEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_STAR_ZOOM_3D, enabled).apply()
         starZoom3dState = enabled
-    }
-
-    // ── Drawer constellation (experiment, default OFF) ───────────────
-    fun isDrawerConstellationEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_DRAWER_CONSTELLATION, false)
-
-    fun setDrawerConstellationEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_DRAWER_CONSTELLATION, enabled).apply()
-        drawerConstellationState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────

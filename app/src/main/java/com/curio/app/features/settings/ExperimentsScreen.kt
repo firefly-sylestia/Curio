@@ -220,10 +220,6 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("3D star zoom", "Tap a constellation star for a perspective tilt + glow", AppPreferences.starZoom3dState) {
                         AppPreferences.setStarZoom3dEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Drawer constellation", "The star map at the top of the navigation drawer — off shows a small stat strip", AppPreferences.drawerConstellationState) {
-                        AppPreferences.setDrawerConstellationEnabled(context, it)
-                    }
                 }
                 }
             }
