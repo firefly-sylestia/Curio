@@ -150,7 +150,7 @@
   "tags": [
    "mathematics",
    "geometry",
-    "nature"
+   "nature"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -270,7 +270,7 @@
   "tags": [
    "mathematics",
    "graph-theory",
-    "proof"
+   "proof"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -1050,7 +1050,7 @@
   "tags": [
    "mathematics",
    "number-theory",
-    "approximation"
+   "approximation"
   ],
   "exploreAction": {
    "verb": "Explore",
@@ -1237,6 +1237,568 @@
    "targetName": "How Wallis discovered his product for pi",
    "durationMinutes": 8,
    "instruction": "Learn about Wallis's derivation using integrals, then compute the first 10 terms of the product to see it converge to π/2."
+  }
+ },
+ {
+  "id": "mathematics-eulers-number",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Euler's Number (e)",
+  "teaser": "e = 2.71828... — the base of natural logarithms, appearing wherever growth or compound interest is involved. If you compound 100% interest infinitely often, you get e. Euler called it the most beautiful number.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "calculus",
+   "constants"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The significance of e",
+   "durationMinutes": 7,
+   "instruction": "Learn about compound interest approaching e, then find one natural phenomenon described by exponential growth using e."
+  }
+ },
+ {
+  "id": "mathematics-basel-problem",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Problem",
+  "name": "The Basel Problem",
+  "teaser": "Euler solved it in 1734: the sum of all reciprocals of perfect squares (1/1 + 1/4 + 1/9 + ...) equals exactly pi squared divided by six. No one had cracked it for 90 years — it announced Euler as a mathematical genius.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "series",
+   "pi"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Euler's Basel solution",
+   "durationMinutes": 8,
+   "instruction": "Learn about Euler's proof using sine function factorisation, then compute the first 10 terms to see convergence toward pi^2/6."
+  }
+ },
+ {
+  "id": "mathematics-ramanujan",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Srinivasa Ramanujan",
+  "teaser": "A self-taught Indian mathematician who sent 120 theorems to Cambridge without proof — Hardy recognised genius. Ramanujan produced 3,900 results in his short life, many still unproven, including infinite series for pi that power modern computing.",
+  "imageUrl": "",
+  "byline": "Srinivasa Ramanujan",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "history",
+   "genius"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Ramanujan's mathematical legacy",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Hardy-Ramanujan number 1729, then find one Ramanujan result used in modern physics or computing."
+  }
+ },
+ {
+  "id": "mathematics-fermat-little",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Theorem",
+  "name": "Fermat's Little Theorem",
+  "teaser": "If p is prime, then a^p minus a is divisible by p for any integer a — a simple statement that's the backbone of RSA encryption. Every time you bank online, Fermat's 300-year-old theorem is protecting your data.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "primes",
+   "cryptography"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Fermat's Little Theorem",
+   "durationMinutes": 7,
+   "instruction": "Learn about Fermat's Little Theorem with a worked example, then find one way it's used in RSA encryption."
+  }
+ },
+ {
+  "id": "mathematics-chinese-remainder",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Theorem",
+  "name": "The Chinese Remainder Theorem",
+  "teaser": "A 3rd-century problem about counting soldiers: if a number leaves specific remainders when divided by several values, you can find it exactly. It's now fundamental in error-correcting codes and RSA cryptography.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "number-theory",
+   "cryptography"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Chinese Remainder Theorem",
+   "durationMinutes": 7,
+   "instruction": "Learn about Sun Zi's original soldier-counting problem, then find one modern application in computer science."
+  }
+ },
+ {
+  "id": "mathematics-non-euclidean",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Branch",
+  "name": "Non-Euclidean Geometry",
+  "teaser": "Euclid's parallel postulate — that exactly one line can be drawn parallel to another through a point — can be replaced: in hyperbolic geometry there are infinite parallels; in spherical geometry none. Einstein showed spacetime is non-Euclidean.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "geometry",
+   "space"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What happens without Euclid's parallel postulate",
+   "durationMinutes": 8,
+   "instruction": "Learn the difference between hyperbolic, spherical, and Euclidean geometry, then find one example of each in the real world."
+  }
+ },
+ {
+  "id": "mathematics-banach-tarski",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Problem",
+  "name": "The Banach-Tarski Paradox",
+  "teaser": "A solid sphere can be decomposed into five pieces and reassembled into two identical spheres — same size as the original. It sounds impossible but it's mathematically valid: the 'pieces' are infinitely scattered point sets that can't have a defined volume.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "paradox",
+   "set-theory"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Banach-Tarski Paradox",
+   "durationMinutes": 7,
+   "instruction": "Learn about the role of the Axiom of Choice in the paradox, then explain why the pieces can't be measured."
+  }
+ },
+ {
+  "id": "mathematics-axiom-of-choice",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "The Axiom of Choice",
+  "teaser": "The most controversial axiom in mathematics — it says you can always pick one element from each set in an infinite collection, even when you can't define a rule for choosing. It enables Banach-Tarski and well-ordering, but some mathematicians refuse to use it.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "set-theory",
+   "logic"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The Axiom of Choice debate",
+   "durationMinutes": 8,
+   "instruction": "Learn what the Axiom of Choice actually states, then find one theorem that requires it and one that doesn't."
+  }
+ },
+ {
+  "id": "mathematics-knot-theory",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Branch",
+  "name": "Knot Theory",
+  "teaser": "In mathematics a knot is a closed loop that can't be untangled — knot theory classifies them using polynomials that can distinguish knots too subtle for visual inspection. It's now used in studying how DNA knots and unknots during replication.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "topology",
+   "knots"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Knot theory basics",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Jones polynomial, then find one biological process that involves knotting or unknotting DNA."
+  }
+ },
+ {
+  "id": "mathematics-ramsey-theory",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Branch",
+  "name": "Ramsey Theory",
+  "teaser": "Complete disorder is impossible — in any group of six people, there are either three mutual friends or three mutual strangers. Ramsey theory proves that structure is always hiding in large enough systems, no matter how random they look.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "combinatorics",
+   "structure"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why complete disorder is impossible",
+   "durationMinutes": 7,
+   "instruction": "Learn about the party problem (six people), then find one application of Ramsey theory in computer science."
+  }
+ },
+ {
+  "id": "mathematics-modular-arithmetic",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Modular Arithmetic",
+  "teaser": "When clocks hit 12 they go back to 1 — that's modular arithmetic, the mathematics of cycles. A clock runs mod 12; weekdays run mod 7. Gauss called it 'arithmetic modulo m' and it underpins all of modern cryptography.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "number-theory",
+   "cycles"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Modular arithmetic in daily life",
+   "durationMinutes": 6,
+   "instruction": "Learn about clock arithmetic, then find one example where modular arithmetic is essential to computer security."
+  }
+ },
+ {
+  "id": "mathematics-perfect-numbers",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Number",
+  "name": "Perfect Numbers",
+  "teaser": "A number equals the sum of its divisors: 6 = 1+2+3, 28 = 1+2+4+7+14. Perfect numbers are rare — only 51 are known, all even. Whether an odd perfect number exists is one of the oldest unsolved questions in mathematics.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "number-theory",
+   "divisors"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Perfect numbers and their rarity",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Euclid-Euler theorem for even perfect numbers, then find one conjecture about odd perfect numbers."
+  }
+ },
+ {
+  "id": "mathematics-riemann-zeta",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "The Riemann Zeta Function",
+  "teaser": "Zeta(s) = 1/1^s + 1/2^s + 1/3^s + ... — when s=2 it equals pi squared over six. Riemann showed its zeros encode the distribution of prime numbers, and proving where they all sit is the most important unsolved problem in mathematics.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "primes",
+   "analysis"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The zeta function and primes",
+   "durationMinutes": 8,
+   "instruction": "Learn about the Euler product formula linking zeta to primes, then find one consequence if the Riemann Hypothesis is proven."
+  }
+ },
+ {
+  "id": "mathematics-hilbert-problems",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Problem",
+  "name": "Hilbert's Problems",
+  "teaser": "In 1900 David Hilbert listed 23 unsolved problems to guide mathematics into the next century — several were solved, some are still open, and Hilbert's 'physics has nothing left for us to do' quote about the Riemann Hypothesis proved spectacularly premature.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "history",
+   "unsolved"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Hilbert's 23 problems",
+   "durationMinutes": 8,
+   "instruction": "Learn which of Hilbert's problems remain unsolved, then find one whose solution changed mathematics."
+  }
+ },
+ {
+  "id": "mathematics-poincare-conjecture",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Problem",
+  "name": "The Poincare Conjecture",
+  "teaser": "Every simply connected 3D surface is topologically a sphere — Poincare proposed this in 1904, and it took a century to prove. Perelman proved it in 2003, declined the Fields Medal and the million-dollar prize, and said the money was irrelevant.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "topology",
+   "proof"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Perelman's proof",
+   "durationMinutes": 8,
+   "instruction": "Learn about Perelman's Ricci flow proof, then find one reason he turned down the Millennium Prize."
+  }
+ },
+ {
+  "id": "mathematics-fermi-estimates",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Fermi Estimates",
+  "teaser": "Enrico Fermi could estimate the number of piano tuners in Chicago to within a factor of two using nothing but logic and rough arithmetic — Fermi estimation is the art of answering impossible questions with reasonable approximations.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "estimation",
+   "problem-solving"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Fermi estimation",
+   "durationMinutes": 6,
+   "instruction": "Learn Fermi estimation technique, then try one yourself: how many piano tuners are in your city?"
+  }
+ },
+ {
+  "id": "mathematics-benfords-law",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Benford's Law",
+  "teaser": "In real-world data, the digit 1 appears as the first digit 30% of the time, while 9 appears less than 5% — accounting fraudsters who fabricate numbers usually distribute first digits evenly, and Benford's Law catches them.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "statistics",
+   "fraud"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Benford's Law",
+   "durationMinutes": 7,
+   "instruction": "Learn why Benford's Law works for naturally occurring data, then find one example where forensic accountants used it to detect fraud."
+  }
+ },
+ {
+  "id": "mathematics-birthday-paradox",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "The Birthday Paradox",
+  "teaser": "In a room of 23 people, there's a 50% chance two share a birthday — in 70 people it's 99.9%. It's counterintuitive because we think about matching our own birthday, not any pair among the group.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "probability",
+   "intuition"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why 23 people suffice",
+   "durationMinutes": 6,
+   "instruction": "Learn about the combinatorial calculation behind the birthday problem, then find one real-world application in hash collisions."
+  }
+ },
+ {
+  "id": "mathematics-simpsons-paradox",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Simpson's Paradox",
+  "teaser": "A treatment can appear better for men AND women individually while being worse overall — Simpson's Paradox occurs when aggregated data reverses the trend seen in subgroups, making statistics dangerously misleading.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "statistics",
+   "paradox"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How aggregated data can lie",
+   "durationMinutes": 7,
+   "instruction": "Learn about the kidney stone treatment paradox, then find one example of Simpson's Paradox in public health data."
+  }
+ },
+ {
+  "id": "mathematics-central-limit-theorem",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Theorem",
+  "name": "The Central Limit Theorem",
+  "teaser": "No matter how weird the original distribution, the average of enough samples follows a bell curve — this is why the normal distribution appears everywhere in nature and makes polling work with just 1,000 people.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "statistics",
+   "probability"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why averages form bell curves",
+   "durationMinutes": 8,
+   "instruction": "Learn about the CLT's implications for polling and measurement, then find one distribution where the CLT fails to converge."
+  }
+ },
+ {
+  "id": "mathematics-markov-chains",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Markov Chains",
+  "teaser": "A system where the next state depends only on the current state, not the path that got there — Google's PageRank, stock price models, and predictive text all use Markov chains. They're the simplest model of randomness that's still useful.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "probability",
+   "models"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Markov chains explained",
+   "durationMinutes": 7,
+   "instruction": "Learn about the weather example (sunny/cloudy states), then find one way Markov chains are used in natural language processing."
+  }
+ },
+ {
+  "id": "mathematics-game-theory",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Branch",
+  "name": "Game Theory",
+  "teaser": "The mathematics of strategic decision-making — von Neumann and Morgenstern formalised it in 1944. It explains why oligopolies keep prices high, why nuclear deterrence works, and why cooperation evolves among selfish agents.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "strategy",
+   "economics"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Game theory basics",
+   "durationMinutes": 7,
+   "instruction": "Learn about zero-sum vs non-zero-sum games, then find one way the Prisoner's Dilemma models real-world conflicts."
+  }
+ },
+ {
+  "id": "mathematics-nash-equilibrium",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Nash Equilibrium",
+  "teaser": "A state where no player can improve their outcome by changing strategy alone — Nash proved every game has at least one. It explains why drivers stay on the right, why arms races persist, and why restaurants cluster together.",
+  "imageUrl": "",
+  "byline": "John Nash",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "strategy",
+   "equilibrium"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Nash Equilibrium in practice",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Nash Equilibrium in the Prisoner's Dilemma, then find one real market that settles into a Nash Equilibrium."
+  }
+ },
+ {
+  "id": "mathematics-traveling-salesman",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Problem",
+  "name": "The Traveling Salesman Problem",
+  "teaser": "Visit every city exactly once and return home with the shortest route — with just 25 cities there are more possible routes than atoms in the universe. No efficient algorithm exists; finding one would earn a million dollars.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "optimization",
+   "NP"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The hardest route-planning problem",
+   "durationMinutes": 8,
+   "instruction": "Learn about the P vs NP connection to TSP, then find one heuristic that gets close to optimal in practice."
+  }
+ },
+ {
+  "id": "mathematics-big-o",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "Big O Notation",
+  "teaser": "Big O describes how an algorithm scales: O(n) means time grows linearly, O(n squared) grows quadratically — an O(n squared) sort on 1 million items takes 1 trillion operations while O(n log n) takes 20 million. Algorithm choice is the difference between seconds and years.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "computer-science",
+   "complexity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Big O notation",
+   "durationMinutes": 7,
+   "instruction": "Learn the difference between O(1), O(log n), O(n), and O(n squared), then find one sorting algorithm for each complexity class."
+  }
+ },
+ {
+  "id": "mathematics-zenos-paradoxes",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Problem",
+  "name": "Zeno's Paradoxes",
+  "teaser": "Zeno argued motion is impossible: to cross a room you must cross half, then half of half, then half of half of half — an infinite number of steps. It took 2,000 years for calculus and convergent series to fully resolve the paradox.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "paradox",
+   "infinity"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Zeno's Dichotomy Paradox",
+   "durationMinutes": 7,
+   "instruction": "Learn all four of Zeno's paradoxes, then find one that was fully resolved by calculus."
+  }
+ },
+ {
+  "id": "mathematics-quadratic-formula",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Theorem",
+  "name": "The Quadratic Formula",
+  "teaser": "x = (-b +/- sqrt(b squared - 4ac)) / 2a — the universal solution to any quadratic equation. Known to Babylonians in 2000 BCE, it was the first algebraic formula to solve a general class of problems.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "algebra",
+   "equations"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The quadratic formula and its history",
+   "durationMinutes": 6,
+   "instruction": "Learn the quadratic formula and its derivation, then find one historical civilisation that solved quadratics without our notation."
+  }
+ },
+ {
+  "id": "mathematics-harmonic-series",
+  "categoryId": "MATHEMATICS",
+  "subtype": "Concept",
+  "name": "The Harmonic Series",
+  "teaser": "1 + 1/2 + 1/3 + 1/4 + ... grows to infinity, but so slowly you need 22,876,792,454,961 terms to reach 100. The paradox is that while the terms approach zero, the sum diverges — one of the most mind-bending facts in mathematics.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "mathematics",
+   "series",
+   "divergence"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The diverging harmonic series",
+   "durationMinutes": 7,
+   "instruction": "Learn about Nicole Oresme's 14th-century proof, then compare the harmonic series to the convergent p-series (1/n squared)."
   }
  }
 ]

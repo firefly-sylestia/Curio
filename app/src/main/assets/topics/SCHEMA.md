@@ -2,40 +2,57 @@
 
 This file is the in-folder quick reference for the canonical topic data format
 shipped under `app/src/main/assets/topics/{categoryId}.json`. The schema is
-enforced by `TopicJsonLoader` (`app/src/main/java/com/curio/app/data/TopicJsonLoader.kt`)
+enforced by `TopicJsonLoader` (`TopicJsonLoader.kt`)
 and the `CurioTopic` data class (`CurioTopic.kt`).
 
 ---
 
 ## Files in this directory
 
-| File | CategoryId | Subtype | Verb |
+| File | CategoryId | Subtypes | Default Verb |
 |---|---|---|---|
 | `artists.json` | `ARTISTS` | Artist | Listen |
-| `albums.json` | `ALBUMS` | Album / Track / EP | Listen |
+| `albums.json` | `ALBUMS` | Album / EP | Listen |
+| `songs.json` | `SONGS` | Song | Listen |
 | `directors.json` | `DIRECTORS` | Director | Watch |
-| `films.json` | `FILMS` | Film | Watch |
+| `films.json` | `FILMS` | Film / Documentary | Watch |
+| `animated-movies.json` | `ANIMATED_MOVIES` | Animated Movie | Watch |
+| `series.json` | `SERIES` | Series | Watch |
 | `authors.json` | `AUTHORS` | Author | Read |
 | `books.json` | `BOOKS` | Book | Read |
-| `painters.json` | `PAINTERS` | Painter / Sculptor / Photographer | Look at |
-| `artworks.json` | `ARTWORKS` | Painting / Sculpture / Photograph / Installation | Look at |
-| `scientists.json` | `SCIENTISTS` | Scientist / Mathematician / Inventor / Philosopher | Read |
-| `discoveries.json` | `DISCOVERIES` | Discovery / Theory / Invention / Phenomenon | Explore |
-| `songs.json` | `SONGS` | Song | Listen |
-| `series.json` | `SERIES` | Series | Watch |
-| `anime.json` | `ANIME` | Anime | Watch |
 | `manga.json` | `MANGA` | Manga | Read |
 | `manhwa.json` | `MANHWA` | Manhwa | Read |
+| `painters.json` | `PAINTERS` | Painter / Sculptor / Photographer | Look at |
+| `artworks.json` | `ARTWORKS` | Painting / Sculpture / Photograph / Installation | Look at |
+| `scientists.json` | `SCIENTISTS` | Scientist / Mathematician / Inventor | Read |
+| `discoveries.json` | `DISCOVERIES` | Discovery / Theory / Invention / Phenomenon | Explore |
+| `anime.json` | `ANIME` | Anime | Watch |
 | `games.json` | `GAMES` | Game | Watch |
 | `mythology.json` | `MYTHOLOGY` | Myth / Legend / Tale / Tall Tale | Read |
 | `sports.json` | `SPORTS` | Sport / Legend | Watch |
 | `food.json` | `FOOD` | Dish / Recipe | Read |
-| `internet.json` | `INTERNET` | Meme / Viral / Slang / Creepypasta | Watch |
 | `wildcard.json` | `WILDCARD` | Curiosity / Mystery / Phenomenon / Ritual / etc. | varies |
+| `oceans.json` | `OCEANS` | Creature / Ecosystem / Expedition / Feature / Ocean / Phenomenon | Explore |
+| `medicine.json` | `MEDICINE` | Anatomy / Concept / Condition / Discovery / History / Pioneer / System / Treatment | Explore |
+| `psychology.json` | `PSYCHOLOGY` | Bias / Concept / Effect / Phenomenon / Theory / Condition | Explore |
+| `mathematics.json` | `MATHEMATICS` | Branch / Concept / Number / Problem / Theorem | Explore |
+| `biology.json` | `BIOLOGY` | varies | Explore |
+| `chemistry.json` | `CHEMISTRY` | varies | Explore |
+| `astronomy.json` | `ASTRONOMY` | varies | Explore |
+| `geology.json` | `GEOLOGY` | varies | Explore |
+| `history.json` | `HISTORY` | varies | Read |
+| `plants.json` | `PLANTS` | varies | Explore |
+| `animals.json` | `ANIMALS` | varies | Explore |
+| `quotes.json` | `QUOTES` | varies | Explore |
+| `technologies.json` | `TECHNOLOGIES` | varies | Explore |
+| `language.json` | `LANGUAGE` | Concept / Family / Linguist / Phenomenon / Script / Word | Explore |
+| `engineering.json` | `ENGINEERING` | Concept / Discipline / History / Inventor / Material / Structure / System | Explore |
+| `economics.json` | `ECONOMICS` | Concept / Economist / History / Institution / Market / Policy / Theory | Explore |
+| `internet.json` | `INTERNET` | Meme / Viral / Slang / Creepypasta | Watch |
 
+**38 files total** — one per `CategoryId` enum value.  
 The filename (minus `.json`) MUST equal `CategoryId.routeSlug` from
-`Category.kt` so `TopicJsonLoader` can find the file. 21 files total —
-one per `CategoryId` enum value.
+`Category.kt` so `TopicJsonLoader` can find the file.
 
 There is **no root wrapper object**. The file is a bare JSON array. The
 `categoryId` on every topic must match the filename's enum value.
@@ -72,21 +89,22 @@ There is **no root wrapper object**. The file is a bare JSON array. The
 
 | Field | Type | Required | Notes |
 |---|---|:---:|---|
-| `id` | string | ✅ | Unique **across all 11 files**. Kebab-case. Convention: `{subtype-prefix}-{slug}` (`album-bjork-vespertine`, `film-godfather-1972`, `discovery-penicillin-1928`). Never recycle — Room will FK on this. |
-| `categoryId` | string | ✅ | Must be one of the 21 `CategoryId` enum values: `ARTISTS`, `ALBUMS`, `SONGS`, `DIRECTORS`, `FILMS`, `SERIES`, `AUTHORS`, `BOOKS`, `PAINTERS`, `ARTWORKS`, `SCIENTISTS`, `DISCOVERIES`, `ANIME`, `MANGA`, `MANHWA`, `GAMES`, `MYTHOLOGY`, `SPORTS`, `FOOD`, `INTERNET`, `WILDCARD`. Must match the filename's category. |
-| `subtype` | string | ✅ | Category-specific vocabulary. Music: `Album` \| `Track` \| `EP` \| `Artist`. Films: `Film` \| `Documentary` \| `Short`. Books: `Book` \| `Collection` \| `Essay`. Painters: `Painter` \| `Sculptor` \| `Photographer`. See table above for defaults. |
+| `id` | string | ✅ | Unique **across all files**. Kebab-case. Convention: `{subtype-prefix}-{slug}` (`album-bjork-vespertine`, `film-godfather-1972`, `discovery-penicillin-1928`). Never recycle — Room will FK on this. |
+| `categoryId` | string | ✅ | Must be one of the 38 `CategoryId` enum values (see table above). Must match the filename's category. |
+| `subtype` | string | ✅ | Category-specific vocabulary. See per-file table above for defaults. |
 | `name` | string | ✅ | Display title. ≤ 80 chars. For works, format as `Title (Year) — Author` or `Title (Year)` — whichever reads best. |
-| `teaser` | string | ✅ | 1–2 sentences, ≤ 450 chars. The "one quirky fact" surfaced on Topic Reveal (CURIO_SPEC §6). NOT a Wikipedia bio — find a surprising angle. |
+| `teaser` | string | ✅ | 1–2 sentences, **≤ 450 chars**. The "one quirky fact" surfaced on Topic Reveal (CURIO_SPEC §6). NOT a Wikipedia bio — find a surprising angle. |
 | `imageUrl` | string | ✅ | Empty string `""` for now (image strategy deferred to a later phase). |
 | `byline` | string | ❌ | Creator tag shown as a pill on the Topic Reveal hero card (`Artist · The Beatles`, `Author · George Orwell`, `Discovered by · Alexander Fleming`). Albums → artist, Books → author, Films → director, Artworks → painter, Discoveries → discoverer. Optional, default `""`. Populated by `scripts/enrich_topics.py` + `scripts/enrich_discoveries_bylines.py`. |
 | `exploreAction.verb` | string | ✅ | Exploration verbs only — `Listen` \| `Watch` \| `Read` \| `Look at` \| `Explore` \| `Visit` \| `Learn` \| `Discover`. **Never a making/doing verb** (`Cook`, `Play`, `Make`, `Try`, `Build`, `Write`, `Fold`) — every instruction must be about exploring (reading/watching/learning), not doing. Drives the icon glyph on the action card. See table above for per-category defaults. |
 | `exploreAction.targetName` | string | ✅ | The exact artifact to consume. `Vespertine (2001) end-to-end`, not `an album by Björk`. |
 | `exploreAction.durationMinutes` | int | ✅ | Realistic human time-to-engage. ≤ 60 unless the artifact genuinely demands more. |
-| `exploreAction.instruction` | string | ✅ | ≤ 600 chars (matches the `validateTopics` Gradle task cap). Must pass the **quality bar** below. |
-| `tags` | string[] | ❌ | Free-form tags for the Spin screen's dynamic filter chip row. Default `[]`. Tags are category-specific: Artists might use `["Rock", "1970s"]`, Films might use `["Drama", "1990s"]`, Painters might use `["Impressionism", "Oil"]`. Films + Directors use the industry-region tags `Hollywood` (US studio system, replaces the plain `American` origin tag on those two categories) and `Bollywood` (Hindi cinema) — `SpinScreen` buckets both into the filter sheet's Origin group. Franchise tags (`MCU`, `Star Wars`, `DC`, `Harry Potter`, `Lord of the Rings`, `Pixar`, `Studio Ghibli`, `Disney`) are bucketed into their own **Franchise** filter row — see `FranchiseTags` in `SpinScreen.kt` (`scripts/add_franchise_tags.py` maintains them on `films.json`/`anime.json`). |
+| `exploreAction.instruction` | string | ✅ | **≤ 600 chars** (matches the `validateTopics` Gradle task cap). Must pass the **quality bar** below. |
+| `tags` | string[] | ❌ | Free-form tags for the Spin screen's dynamic filter chip row. Default `[]`. **Science/education categories use lowercase tags** (e.g. `["oceans", "geology", "coral"]`). **Media/entertainment categories use Title-case tags** (e.g. `["Comedy", "Sitcom", "American"]`). Films + Directors use the industry-region tags `Hollywood` (US studio system, replaces the plain `American` origin tag on those two categories) and `Bollywood` (Hindi cinema) — `SpinScreen` buckets both into the filter sheet's Origin group. Franchise tags (`MCU`, `Star Wars`, `DC`, `Harry Potter`, `Lord of the Rings`, `Pixar`, `Studio Ghibli`, `Disney`) are bucketed into their own **Franchise** filter row — see `FranchiseTags` in `SpinScreen.kt`. |
 | `tier` | int 1 | ❌ | Quality tier. 1 = human-curated marquee (highest quality, surfaces most often). 2 = AI-curated long-tail (still good). 3 = draft / placeholder. Default 1 omitted. |
 | `altPageCount` | int | ❌ | **Books only** (v126). A second common edition's page count when editions differ hugely (translations / annotated editions / print size). Powers the alternate-edition pill beside the progress pill — tapping it pre-fills the editor with that count. Default omitted. |
 | `altPageLabel` | string | ❌ | **Books only** (v126). Short label for `altPageCount` — the edition name (`"Lombardo"`, `"Wordsworth"`, `"Modern Library"`, `"Penguin Classics"`, `"Corrected text"`). Default `""`. |
+| `episodeCount` | int | ❌ | **Anime only** (v29). Total episodes for watching progress tracking. Anime films deliberately carry no `episodeCount`. Default omitted. |
 
 ---
 
@@ -99,6 +117,7 @@ Every `instruction` field must pass all four checks:
 3. **Time-bounded** — ≤ 60 minutes unless the topic genuinely demands more. `"Read chapter 1"`, not `"read the whole thing."`
 4. **Curiously-framed** — invites the user to notice something they wouldn't notice casually. Not "listen to Vespertine" but "Notice how the beats hit your chest vs your head — that's intentional."
 5. **Try in small batches of 20 to 40**
+
 ---
 
 ## Validation
@@ -128,8 +147,36 @@ into `preBuild` automatically when JSON files exist.
 4. **Set `imageUrl` to `""`** (image strategy deferred).
 5. **Pick an ID** using the `{subtype-prefix}-{slug}` convention. If the ID already exists in another category file, change the slug.
 6.  For human-curated marquee content, set `tier: 1`.
+7.  **Keep teasers ≤ 450 chars and instructions ≤ 600 chars** — the `validateTopics` task will catch violations.
+8.  **Batch 20–40 topics at a time**, deduping against existing names and IDs in every file.
 
-For the full LLM authoring prompt template, see `master.md`'s Phase 4 plan.
+For the full LLM authoring prompt template, see `CURIO_DATA_PLAN.md` §6.
+
+---
+
+## Topic counts (as of this update)
+
+| File | Count | File | Count |
+|---|---|---|---|
+| biology.json | 1202 | quotes.json | 1094 |
+| plants.json | 1030 | artworks.json | 1023 |
+| chemistry.json | 1010 | animals.json | 1006 |
+| artists.json | 1004 | astronomy.json | 1002 |
+| technologies.json | 1000 | songs.json | 1000 |
+| history.json | 1000 | geology.json | 1000 |
+| albums.json | 1000 | films.json | 948 |
+| authors.json | 688 | animated-movies.json | 591 |
+| directors.json | 508 | painters.json | 506 |
+| discoveries.json | 506 | wildcard.json | 503 |
+| scientists.json | 501 | books.json | 444 |
+| economics.json | 95 | food.json | 77 |
+| sports.json | 76 | manga.json | 75 |
+| engineering.json | 75 | language.json | 71 |
+| games.json | 65 | manhwa.json | 64 |
+| mathematics.json | 90 | psychology.json | 89 |
+| ocean.json | 83 | internet.json | 61 |
+| anime.json | 61 | series.json | 60 |
+| mythology.json | 60 | medicine.json | 92 |
 
 ---
 
