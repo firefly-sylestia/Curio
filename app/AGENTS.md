@@ -4880,6 +4880,9 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v228 — liquid-glass self-capture crash fix**
+  - Root cause of the Pet Designer RenderThread SIGSEGV (stack overflow in `RenderNode.prepareTreeImpl`): `layerBackdrop` records the page subtree AFTER drawing it, so glass pills INSIDE the captured Box (Pet Designer studio bar, Topic Reveal bar) re-drew during the record pass and sampled their own GraphicsLayer — a cyclic render node.
+  - Fix: the NavHost's `rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })` sets `CurioGlassPills.isCapturingBackdrop` for the record pass; `liquidGlassCapsule` wraps its backdrop node with a `drawWithContent` guard that paints a plain translucent capsule while capturing. Bottom tab bar unaffected (sibling overlay).
 - **v227b/d — full liquid-glass nav port + update dialog**
   - `ui/components/liquidglass/` — four files ADAPTED FROM vFlow
     (github.com/ChaoMixian/vFlow, **GPL-2.0-or-later**; attribution headers

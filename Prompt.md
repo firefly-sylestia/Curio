@@ -1,20 +1,36 @@
 # Prompt.md — current request log
 
-## Request (complete): vFlow-exact liquid glass nav + update toast → dialog
+## Request (complete): Pet Designer crash — RenderThread stack overflow (v228)
 
-1. **Full liquid-glass nav (vFlow port)** — user asked for the exact vFlow look AND touch/drag.
-   Ported four files from ChaoMixian/vFlow into `ui/components/liquidglass/` with GPL-2.0 attribution
-   headers (DragGestureInspector, DampedDragAnimation, InteractiveHighlight, CurioLiquidGlassTabBar).
-   `CurioFloatingNavBar` now renders the full tab bar (equal-width tabs, ONE refracting capsule, hidden
-   accent-tinted layer so the pill refracts colored icons, DRAGGABLE active pill with velocity
-   squash/stretch, press-scale, inner shadow, API-33+ specular highlight) when the Experiments toggle is
-   ON; classic pill row otherwise. Reveal/pet-studio keep the simple frosted capsule. LICENSE NOTE: these
-   ports are GPL-2.0-derived — flagged to the user in the summary.
+User reported Pet Designer crashing on open with a native crash: SIGSEGV
+(SEGV_ACCERR) on RenderThread, "stack pointer is not in a rw map; likely due to
+stack overflow", 512 frames alternating between
+`RenderNode::prepareTreeImpl` and its child-traversal lambda — an infinitely
+deep render-node tree.
 
-2. **Update toast → dialog** — corner toast fully removed (`CurioInAppToast.kt` deleted). UpdateChecker
-   raises `CurioUpdatePrompt.pending` (global state, once-per-version gate kept); NavHost renders a themed
-   AlertDialog ("Curio vX is available" / body / Open Updates / Later) at the root.
+### Root cause
 
-Verification: delimiter balance OK on all touched files; imports verified (CurioUpdatePrompt added to
-NavHost; stale CurioToast/CurioIcons references gone); changelog cleaned (duplicate line dropped, toast
-bullet replaced by dialog bullet). CI validates compile on push.
+The v227 liquid-glass experiment: `Modifier.layerBackdrop(navGlassBackdrop)`
+on the NavHost's page-content Box records that subtree into a GraphicsLayer —
+the library draws the content FIRST, then re-invokes the draw chain inside
+`recordLayer`. Glass pills living INSIDE the captured subtree (Pet Designer
+studio bar, Topic Reveal category/favorite bar) therefore drew a second time
+during the record pass and sampled `navGlassBackdrop` itself — drawing the
+GraphicsLayer into its own recording = cyclic render node → HWUI recursed in
+`prepareTreeImpl` until the RenderThread stack overflowed. The bottom tab bar
+was immune (sibling overlay of the captured Box).
+
+### Fix
+
+- `LiquidGlassPills.kt`: added `CurioGlassPills.isCapturingBackdrop`
+  (@Volatile, UI-thread-only draw-phase flag); new `curioGlassCaptureDraw()`
+  ContentDrawScope extension sets it around `drawContent()`.
+- `CurioNavHost.kt`: `rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })`.
+- `liquidGlassCapsule`: outer `drawWithContent` guard — during a capture pass
+  it skips the backdrop node entirely and paints a plain translucent rounded
+  capsule instead. Both in-screen pill sites are fixed via the shared helper.
+
+Verification: delimiter balance OK; Gradle is forbidden here so CI on push is
+the compile source of truth.
+
+Docs: store changelog 20260920.txt FIX bullet + app/AGENTS.md v228 entry.

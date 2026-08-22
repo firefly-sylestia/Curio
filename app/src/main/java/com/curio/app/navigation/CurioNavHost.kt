@@ -126,6 +126,7 @@ import com.curio.app.ui.components.CurioFloatingNavBar
 import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
+import com.curio.app.ui.components.curioGlassCaptureDraw
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -448,7 +449,12 @@ fun CurioNavHost(
     // everything the page Row draws (marked below); the glass capsules
     // refract that recording. Published via [CurioGlassPills] (the
     // CurioNavTint handoff pattern) so all three pill sites read it.
-    val navGlassBackdrop = rememberLayerBackdrop()
+    // v228 — the capture onDraw flags the record pass (see
+    // [curioGlassCaptureDraw]) so glass pills INSIDE this subtree — the
+    // Reveal bar, the Pet Designer studio bar — paint a plain fallback
+    // during recording instead of sampling the layer into themselves
+    // (that cycle crashed HWUI with a RenderThread stack overflow).
+    val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
     SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
 
     ModalNavigationDrawer(
