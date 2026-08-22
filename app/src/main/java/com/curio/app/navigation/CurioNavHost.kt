@@ -329,6 +329,11 @@ fun CurioNavHost(
     // Survives rotation so the startup prompt only fires on a truly fresh
     // process (an active session left behind by a killed app).
     var startupPromptDone by rememberSaveable { mutableStateOf(false) }
+    // v226 - the done prompt shows ONCE per session: after the user
+    // dismisses it (Keep exploring / back), returning to the foreground
+    // must not nag again for the SAME session (keyed by startMillis). A
+    // different session re-arms it naturally.
+    var dialogDismissedFor by rememberSaveable { mutableStateOf(0L) }
 
     // Ask "are you done exploring?" whenever the app returns to the
     // foreground while an explore session is active — mid-session, after
@@ -338,7 +343,9 @@ fun CurioNavHost(
             if (event == Lifecycle.Event.ON_RESUME) {
                 if (AppPreferences.isExploreSessionsEnabled(context)) {
                     val resumed = ExploreSessionStore.getActiveSession(context)
-                    showDoneDialog = resumed != null
+                    // v226 - once per session (see dialogDismissedFor).
+                    showDoneDialog = resumed != null &&
+                        dialogDismissedFor != resumed.startMillis
                     // A background/foreground cycle must not reopen the dialog
                     // already sitting in the cancel-confirm step.
                     confirmSessionCancel = false
@@ -372,7 +379,9 @@ fun CurioNavHost(
             startupPromptDone = true
             if (AppPreferences.isExploreSessionsEnabled(context)) {
                 val session = ExploreSessionStore.getActiveSession(context)
-                showDoneDialog = session != null
+                // v226 - once per session (see dialogDismissedFor).
+                showDoneDialog = session != null &&
+                    dialogDismissedFor != session.startMillis
                 confirmSessionCancel = false
                 if (session != null && AppPreferences.exploreServiceShouldRun(context)) {
                     ExploreSessionService.start(context, session)
@@ -1047,6 +1056,7 @@ fun CurioNavHost(
             onDismissRequest = {
                 showDoneDialog = false
                 confirmSessionCancel = false
+                activeSession.let { dialogDismissedFor = it.startMillis }
             },
             title = {
                 Text(
@@ -1098,6 +1108,10 @@ fun CurioNavHost(
                     TextButton(onClick = {
                         showDoneDialog = false
                         confirmSessionCancel = false
+                        // v226 — stash the cancelled session so Home can
+                        // offer it back (recovery card) instead of the
+                        // banked time vanishing.
+                        ExploreSessionStore.stashCancelledSession(context, activeSession)
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)
@@ -1137,7 +1151,7 @@ fun CurioNavHost(
                         ) { launchSingleTop = true }
                     },
                         colors = curioDialogActionButtonColors()
-                    ) { Text("Done and write about it") }
+                    ) { Text("Express yourself") }
                 }
             },
             dismissButton = {
@@ -1152,7 +1166,10 @@ fun CurioNavHost(
                         TextButton(onClick = { confirmSessionCancel = true }) {
                             Text("Cancel session", color = MaterialTheme.colorScheme.error)
                         }
-                        TextButton(onClick = { showDoneDialog = false }, colors = curioDialogActionButtonColors()) { Text("Keep exploring") }
+                        TextButton(onClick = {
+                            showDoneDialog = false
+                            activeSession.let { dialogDismissedFor = it.startMillis }
+                        }, colors = curioDialogActionButtonColors()) { Text("Keep exploring") }
                     }
                 }
             }

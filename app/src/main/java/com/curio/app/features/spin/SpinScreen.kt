@@ -151,7 +151,7 @@ import com.curio.app.ui.components.curioFloatingNavContainerFor
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.theme.ChangaOneFontFamily
+import com.curio.app.ui.theme.SansFlexFontFamily
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
@@ -4198,10 +4198,12 @@ private fun VerticalDeckButton(
                 // v208 — nav-pill mode uses the nav bar's Changa One label
                 // (13sp fits the narrow vertical pill); otherwise the stock
                 // bold label.
+                // v226 — nav-pill mode wears Sans Flex BOLD (was Changa
+                // One); 13sp still fits the narrow vertical pill.
                 style = if (navPill) {
                     MaterialTheme.typography.labelMedium.copy(
-                        fontFamily = ChangaOneFontFamily,
-                        fontWeight = FontWeight.Normal,
+                        fontFamily = SansFlexFontFamily,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )
                 } else {
@@ -4283,10 +4285,12 @@ private fun DeckControlButton(
                 text = label,
                 // v208 — nav-pill mode uses the nav bar's Changa One label
                 // (15sp, exactly like the bar); otherwise the stock label.
+                // v226 — nav-pill mode wears Sans Flex BOLD (was Changa
+                // One), matching the home nav pills.
                 style = if (navPill) {
                     MaterialTheme.typography.labelMedium.copy(
-                        fontFamily = ChangaOneFontFamily,
-                        fontWeight = FontWeight.Normal,
+                        fontFamily = SansFlexFontFamily,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
                 } else {

@@ -154,6 +154,7 @@ import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.SansFlexFontFamily
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
@@ -813,6 +814,9 @@ fun HomeScreen(navController: NavController) {
                         // Top-corner stop — quiet teardown, same as the
                         // notification's Cancel action (no write-it-down
                         // page, no done prompt on the next return).
+                        // v226 — stash first so the session is recoverable
+                        // from Home's cancelled-explore card.
+                        ExploreSessionStore.stashCancelledSession(context, activeSession)
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)
@@ -870,6 +874,31 @@ fun HomeScreen(navController: NavController) {
                         }
                     }
                 }
+                Spacer(Modifier.height(12.dp))
+            }
+
+            // ── 3b. Cancelled explore — recoverable until discarded ────
+            // v226 — cancelling no longer eats the session: the last
+        // cancelled one shows here as a resumable row (banked time
+            // continues where the cancel stopped it). Gated on NO active
+            // session — reviving replaces the slot.
+            val cancelledSession = ExploreSessionStore.cancelledSessionState
+            if (cancelledSession != null && activeSession == null) {
+                CancelledExploreRow(
+                    session = cancelledSession,
+                    onResume = {
+                        val revived = ExploreSessionStore.resumeCancelledSession(context)
+                        if (revived != null) {
+                            ExploreReminderScheduler.schedule(
+                                context, revived.startMillis, revived.durationMinutes
+                            )
+                            if (AppPreferences.exploreServiceShouldRun(context)) {
+                                ExploreSessionService.start(context, revived)
+                            }
+                        }
+                    },
+                    onDiscard = { ExploreSessionStore.clearCancelledSession(context) }
+                )
                 Spacer(Modifier.height(12.dp))
             }
 
@@ -2806,7 +2835,7 @@ private fun ExploreTopicRow(
                 }
                 Text(
                     subtitle,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -2926,6 +2955,7 @@ private fun CurrentlyExploringCard(
                         Text(
                             "CURRENTLY EXPLORING",
                             style = MaterialTheme.typography.labelSmall.copy(
+                                fontFamily = SansFlexFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 1.4.sp
                             ),
@@ -2951,7 +2981,7 @@ private fun CurrentlyExploringCard(
                         else ->
                             "${session.verb.lowercase()} ${session.targetName} · ${formatElapsed(elapsedMillis)} so far · ~${session.durationMinutes} min recommended"
                     },
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
                     color = if (session.paused) exploreInk else MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -2970,17 +3000,31 @@ private fun CurrentlyExploringCard(
                         ),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Done and write about it", style = MaterialTheme.typography.labelLarge)
+                        // v226 — "Express yourself": the reveal page's
+                        // write-it-down language, on every surface.
+                        Text("Express yourself", style = MaterialTheme.typography.labelLarge)
                     }
-                    OutlinedButton(
+                    // v226 — "Keep exploring" is a proper pill now: the
+                    // old borderless OutlinedButton read as a floating
+                    // label. Soft accent-tinted fill + play glyph — the
+                    // same language as the card's corner Stop button.
+                    Surface(
                         onClick = onKeepExploring,
                         shape = RoundedCornerShape(50),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
-                        border = BorderStroke(0.dp, Color.Transparent),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = exploreInk),
-                        modifier = Modifier.weight(1f)
+                        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
+                        shadowElevation = 2.dp,
+                        modifier = Modifier
+                            .weight(1f)
+                            .curioDarkGlow(2.dp, RoundedCornerShape(50))
                     ) {
-                        Text("Keep exploring", style = MaterialTheme.typography.labelLarge)
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                        ) {
+                            CurioIcon(CurioIcons.PlayArrow, null, tint = exploreInk, size = 16.dp)
+                            Text("Keep exploring", style = MaterialTheme.typography.labelLarge, color = exploreInk)
+                        }
                     }
                 }
             }
@@ -3023,7 +3067,7 @@ private fun QueuedExploreRow(
             )
             Text(
                 "Paused at ${formatElapsed(session.elapsedMillis())} · tap to resume",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -3036,6 +3080,60 @@ private fun QueuedExploreRow(
         ) {
             CurioIcon(
                 CurioIcons.Close, "Discard queued explore",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp,
+                modifier = Modifier.padding(5.dp)
+            )
+        }
+    }
+}
+
+/**
+ * v226 — the last CANCELLED explore session, offered back as a resumable
+ * row (same language as [QueuedExploreRow]): replay glyph, topic, banked
+ * elapsed readout, and a discard ✕. Tapping resumes the session with its
+ * banked time intact.
+ */
+@Composable
+private fun CancelledExploreRow(
+    session: ExploreSession,
+    onResume: () -> Unit,
+    onDiscard: () -> Unit
+) {
+    val ink = CurioCategories.byId(session.categoryId).categoryInk()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onResume)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CurioIcon(CurioIcons.Replay, null, tint = ink, size = 22.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                session.topicName,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                "Cancelled at ${formatElapsed(session.elapsedMillis())} · tap to resume",
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = SansFlexFontFamily),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Surface(
+            onClick = onDiscard,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            CurioIcon(
+                CurioIcons.Close, "Discard cancelled explore",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 16.dp,
                 modifier = Modifier.padding(5.dp)

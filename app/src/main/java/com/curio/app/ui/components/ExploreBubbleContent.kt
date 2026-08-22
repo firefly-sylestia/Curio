@@ -73,7 +73,7 @@ import kotlinx.coroutines.delay
  *    readout. Tapping it expands.
  *  - **Expanded**: a rounded card panel. Header (glyph + topic + elapsed +
  *    minimize chevron), then a compact ICON-ONLY control row — Pause /
- *    Resume, Hide —
+ *    Resume, Hide, Cancel —
  *    then the shared session note field, then the Finish button that ends
  *    the session and opens the write-it-down page.
  *
@@ -105,6 +105,9 @@ fun ExploreBubbleContent(
     onNoteChange: (String) -> Unit,
     // v27 — Finish button: end the session and open the write-it-down page.
     onFinish: () -> Unit,
+    // v226 — Cancel button: end the session WITHOUT the write-it-down page
+    // (the session is stashed for Home's cancelled-explore recovery row).
+    onCancel: () -> Unit,
     // v27 — focus changes on the note field; the service makes the overlay
     // window focusable (so the keyboard can type) and restores it on blur.
     onNoteFocusChange: (Boolean) -> Unit,
@@ -220,6 +223,7 @@ fun ExploreBubbleContent(
                 },
                 onNoteFocusChange = onNoteFocusChange,
                 onFinish = onFinish,
+                onCancel = onCancel,
                 onMinimize = { minimized = true }
             )
         }
@@ -301,6 +305,7 @@ private fun ExpandedPanel(
     onNoteChange: (String) -> Unit,
     onNoteFocusChange: (Boolean) -> Unit,
     onFinish: () -> Unit,
+    onCancel: () -> Unit,
     onMinimize: () -> Unit
 ) {
     Column(
@@ -343,7 +348,7 @@ private fun ExpandedPanel(
             )
         }
 
-        // ── Icon-only controls: Pause/Resume · Hide · Screenshot ──
+        // ── Icon-only controls: Pause/Resume · Hide · Cancel ──
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             BubbleIconButton(
                 icon = if (session.paused) CurioIcons.PlayArrow else CurioIcons.Pause,
@@ -357,6 +362,17 @@ private fun ExpandedPanel(
                 tint = if (AppPreferences.pastelColorsState) ink
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onHide
+            )
+            // v226 — Cancel ends the session outright (no write-it-down
+            // page). Home keeps the cancelled session recoverable, so this
+            // is a safe destructive-looking action — the row offers a
+            // revive.
+            BubbleIconButton(
+                icon = CurioIcons.Delete,
+                contentDescription = "Cancel session",
+                tint = if (AppPreferences.pastelColorsState) ink
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = onCancel
             )
         }
 

@@ -377,11 +377,13 @@ class ExploreSessionService : Service() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setProgress(totalMins, progressMins, false)
 
-        // One shared readout used by BOTH the collapsed content text (the
-        // live timer above the progress bar) and the expanded big text, so
-        // the two can never drift.
-        val body = if (paused) "Paused · ${formatElapsed(elapsed)}"
-                   else "${formatElapsed(elapsed)} in"
+        // v226 — the stale inner readout is gone while running: the
+        // shade's own live chronometer IS the timer now (the old text only
+        // refreshed on the service's periodic re-render, so it visibly
+        // lagged the ticking chronometer next to it). Paused keeps a frozen
+        // text readout — the chronometer is dropped there, so text is the
+        // only time shown and it never drifts.
+        val body = if (paused) "Paused · ${formatElapsed(elapsed)}" else ""
         if (paused) {
             // Frozen readout — the chronometer would keep counting, so drop
             // it and print the banked elapsed time as text instead. The
@@ -401,7 +403,6 @@ class ExploreSessionService : Service() {
                 .setUsesChronometer(true)
                 .setShowWhen(true)
                 .setWhen(session.startMillis + session.accumulatedPausedMillis)
-                .setContentText(body)
                 .addAction(0, "Pause", togglePauseIntent())
         }
         builder
@@ -416,7 +417,10 @@ class ExploreSessionService : Service() {
         // the short live timer above the progress bar.
         builder.setStyle(
             NotificationCompat.BigTextStyle()
-                .bigText("$body\n${session.reflectionQuestion()}")
+                .bigText(
+                    if (paused) "$body\n${session.reflectionQuestion()}"
+                    else session.reflectionQuestion()
+                )
         )
         return builder.build()
     }
@@ -432,7 +436,6 @@ class ExploreSessionService : Service() {
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(accent)
             .setContentTitle("Explore bubble · ${session.topicName}")
-            .setContentText("${formatElapsed(session.elapsedMillis())} in")
             .setContentIntent(openAppIntent())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -574,6 +577,19 @@ class ExploreSessionService : Service() {
                             // user to the write-it-down page.
                             onFinish = {
                                 finishToWritePage()
+                            },
+                            // v226 — Cancel: same teardown as the
+                            // notification's Cancel action, but the session
+                            // is stashed first so Home's cancelled-explore
+                            // row can revive it. No write-it-down
+                            // navigation.
+                            onCancel = {
+                                val current = ExploreSessionStore.getActiveSession(this@ExploreSessionService)
+                                    ?: return@ExploreBubbleContent
+                                ExploreSessionStore.stashCancelledSession(this@ExploreSessionService, current)
+                                ExploreSessionStore.clearSession(this@ExploreSessionService)
+                                ExploreReminderScheduler.cancel(this@ExploreSessionService)
+                                stopQuietly()
                             },
                             // v27 — typing in the note field needs a FOCUSABLE
                             // window (an overlay with FLAG_NOT_FOCUSABLE can't

@@ -23,6 +23,7 @@ import com.curio.app.data.UpdateChecker
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.curio.app.infrastructure.CurioCrashReporter
+import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
@@ -178,6 +179,31 @@ class MainActivity : ComponentActivity() {
         // (the vanish-then-reappear-after-restart symptom). The read is a
         // tiny prefs load and the in-memory state is always newer-or-equal.
         TopicProgressStore.seed(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // v226 — closing the app auto-pauses the running explore session so
+        // the timer stops counting while Curio is closed (the paused state
+        // is what makes it resumable from Home / the return prompt instead
+        // of silently burning minutes in a drawer). Configuration changes
+        // (rotation, fold, dark-mode flip) are excluded — isFinishing is
+        // false on a recents-swipe destroy too, so this also covers the
+        // swipe-the-app-away path.
+        if (!isChangingConfigurations) {
+            val session = ExploreSessionStore.getActiveSession(this)
+            if (session != null && !session.paused) {
+                ExploreSessionStore.pauseSession(this)
+                // Re-arm the service so the shade flips to its Paused
+                // readout instead of ticking a chronometer that the frozen
+                // session no longer agrees with.
+                ExploreSessionStore.getActiveSession(this)?.let { paused ->
+                    if (AppPreferences.exploreServiceShouldRun(this)) {
+                        ExploreSessionService.start(this, paused)
+                    }
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

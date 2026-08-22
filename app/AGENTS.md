@@ -4880,6 +4880,13 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v226 — explore sessions round-trip + Sans Flex voice**
+  - `MainActivity.onDestroy` auto-pauses the active explore session when the app truly closes (`!isChangingConfigurations`), re-arming the service so the shade flips to Paused. Rotation/fold skips it.
+  - Cancelled sessions are stashed (`ExploreSessionStore.stashCancelledSession` / `resumeCancelledSession`) and surface as a recovery row on Home (`CancelledExploreRow`, gated on no active session). The done-dialog confirm-cancel, Home stop button and the bubble's new Cancel all stash first.
+  - `ExploreBubbleContent` grew an `onCancel` param (Delete glyph in the expanded control row); only call site is the service, which mirrors the notification-Cancel teardown.
+  - Notification staleness: the live notif drops its collapsed content text while running — the shade chronometer is the timer. Bubble-only quiet notif dropped its elapsed line too. Paused keeps a frozen readout.
+  - Done prompt fires once per session (`dialogDismissedFor` keyed by startMillis). Home CTA renamed "Express yourself".
+  - Fonts: `SansFlexFontFamily` (Roboto Flex variable, `res/font/roboto_flex.ttf`, real wght-axis instances 400/600/700/800) replaces Changa One on nav tab labels, Spin Categories/Filter pills and Home subtitle rows.
 - **v224 — drawer curiosity map: MATERIAL ink + centering fix.**
   (1) `CurioConstellation` gained `materialInk: Boolean = false` (drawer
   passes true; the Stats deep-space page keeps the SVG palette): theme-role

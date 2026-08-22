@@ -2,7 +2,9 @@ package com.curio.app.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -71,6 +73,38 @@ val PatrickHandFontFamily: FontFamily = FontFamily(
  */
 val ChangaOneFontFamily: FontFamily = FontFamily(
     Font(R.font.changa_one_regular)
+)
+
+/**
+ * Sans Flex — Roboto Flex (OFL), the UI's neutral SANS voice (v226).
+ * Bundled variable font at `res/font/roboto_flex.ttf` (license:
+ * `res/font/OFL_roboto_flex.txt`). Used for the home nav pill labels,
+ * the Spin Categories/Filter pills (bold), and Home's session /
+ * recents subtitle rows.
+ *
+ * Every declared weight pins a REAL variation-axis value via
+ * [FontVariation.weight] — without it each request would match this
+ * single file's 400 default instance and bold text would silently
+ * render regular glyphs.
+ */
+@OptIn(ExperimentalTextApi::class)
+val SansFlexFontFamily: FontFamily = FontFamily(
+    Font(
+        R.font.roboto_flex, FontWeight.Normal,
+        variationSettings = FontVariation.Settings(FontVariation.weight(400))
+    ),
+    Font(
+        R.font.roboto_flex, FontWeight.SemiBold,
+        variationSettings = FontVariation.Settings(FontVariation.weight(600))
+    ),
+    Font(
+        R.font.roboto_flex, FontWeight.Bold,
+        variationSettings = FontVariation.Settings(FontVariation.weight(700))
+    ),
+    Font(
+        R.font.roboto_flex, FontWeight.ExtraBold,
+        variationSettings = FontVariation.Settings(FontVariation.weight(800))
+    )
 )
 
 /**
