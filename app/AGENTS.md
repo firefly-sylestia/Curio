@@ -4880,6 +4880,14 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v227c — auto-backup frequency + detail entrance delay fix**
+  - Auto backup: `AppPreferences.getAutoBackupFrequencyDays` (1/3/7, default 1) picked via chips in
+    BackupToolsScreen; `MainActivity.runAutoBackupIfDue()` honors the chosen interval and is called from
+    BOTH onCreate and onResume (the old onCreate-only hook never fired in warm processes). Due-date gate
+    keeps repeat calls as no-ops.
+  - `EntryDetailScreen.DetailContentEntrance`: the 200ms delay was paced to the removed Cabinet→Detail
+    shared morph (v8.38 replaced it with a center pop-up), so quick fact + body appeared late. Now
+    tween(260) with no delay.
 - **v227 — Android 16 Live Update + liquid-glass pills experiment + cabinet full-bleed grid**
   - `ExploreSessionService.liveNotification`: RUNNING sessions on API 36+ post a genuine Live Update via
     `NotificationCompat.ProgressStyle` (one accent-colored Segment of durationMinutes defines the max,

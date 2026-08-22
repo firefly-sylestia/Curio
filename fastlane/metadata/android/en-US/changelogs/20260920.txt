@@ -74,6 +74,8 @@ ADD
 - Explore: on Android 16+ the running explore session posts a genuine Live Update notification - a system-styled progress bar wearing your lane's color that can promote to a status-bar chip; earlier versions keep the current look.
 
 FIX
+- Auto backup: pick how often it runs - Daily, Every 3 days or Weekly - and it now also fires on schedule while the app stays in memory (not just on a fresh launch).
+- Detail page: opening an entry no longer shows a blank gap before the quick fact and body appear - the content fades in immediately.
 - Update toast: the corner pill no longer stretches across the whole screen on long text - it is capped at 300dp, reads start-aligned like every app pill, and slides back up on dismiss.
 - Cabinet: entry cards no longer get chopped at a hard line above the bottom nav - the grid scrolls full-bleed under the floating pill now, with only the last row lifted clear.
 - Explore: closing the app auto-pauses the running session so the timer stops counting while you're away.

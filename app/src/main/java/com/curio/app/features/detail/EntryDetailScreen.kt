@@ -908,11 +908,14 @@ fun EntryDetailScreen(
 private fun detailBodyGutter(): Dp = if (windowWidthSizeClass().isWide) 28.dp else 20.dp
 
 /**
- * v8.36 — soft entrance for the detail content below the morphing hero.
+ * v8.36 — soft entrance for the detail content below the hero.
  * The body is placed in a normal measured [Box] immediately; only its alpha
- * animates. This keeps long descriptions and note sections in their final
- * positions while the Cabinet/Detail shared morph settles, instead of letting
- * an AnimatedVisibility container resize or translate siblings mid-entrance.
+ * animates, keeping long descriptions and note sections in their final
+ * positions instead of resizing/translating siblings mid-entrance.
+ * v227c — the 200ms DELAY is gone: it was paced to the old Cabinet→Detail
+ * shared MORPH, which v8.38 replaced with a center pop-up — so opening an
+ * entry from the Cabinet showed a blank gap before the quick fact + body
+ * even started fading in. Now the fade begins immediately (260ms).
  */
 @Composable
 private fun DetailContentEntrance(content: @Composable () -> Unit) {
@@ -920,7 +923,7 @@ private fun DetailContentEntrance(content: @Composable () -> Unit) {
     LaunchedEffect(Unit) { visible = true }
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing),
+        animationSpec = tween(260, easing = FastOutSlowInEasing),
         label = "detailContentFade"
     )
     Box(

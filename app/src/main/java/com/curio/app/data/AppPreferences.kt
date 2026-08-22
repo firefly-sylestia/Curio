@@ -700,6 +700,7 @@ object AppPreferences {
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
         autoBackupEnabledState = isAutoBackupEnabled(context)
+        autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────
@@ -1887,6 +1888,7 @@ object AppPreferences {
     private const val KEY_AUTO_BACKUP_ENABLED = "auto_backup_enabled"
     private const val KEY_AUTO_BACKUP_URI = "auto_backup_uri"
     private const val KEY_AUTO_BACKUP_LAST_AT = "auto_backup_last_at"
+    private const val KEY_AUTO_BACKUP_FREQUENCY_DAYS = "auto_backup_frequency_days"
 
     var autoBackupEnabledState by mutableStateOf(false)
         private set
@@ -1905,6 +1907,22 @@ object AppPreferences {
 
     fun setAutoBackupUri(context: Context, uri: String) {
         prefs(context).edit().putString(KEY_AUTO_BACKUP_URI, uri).apply()
+    }
+
+    // v227c — auto-backup FREQUENCY in days: 1 = daily (the old fixed
+    // cadence, still the default), 3, or 7. MainActivity reads this for
+    // its due check; BackupToolsScreen renders the picker.
+    val autoBackupFrequencyDaysOptions = intArrayOf(1, 3, 7)
+
+    var autoBackupFrequencyDaysState by mutableIntStateOf(1)
+        private set
+
+    fun getAutoBackupFrequencyDays(context: Context): Int =
+        prefs(context).getInt(KEY_AUTO_BACKUP_FREQUENCY_DAYS, 1)
+
+    fun setAutoBackupFrequencyDays(context: Context, days: Int) {
+        prefs(context).edit().putInt(KEY_AUTO_BACKUP_FREQUENCY_DAYS, days).apply()
+        autoBackupFrequencyDaysState = days
     }
 
     /** Milliseconds of the last AUTO backup run, or 0 if never. */

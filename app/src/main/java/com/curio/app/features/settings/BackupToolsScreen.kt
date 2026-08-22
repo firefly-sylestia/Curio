@@ -12,10 +12,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -368,7 +372,12 @@ fun BackupToolsScreen(navController: NavController) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Auto backup", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                text = if (autoBackupEnabled) "Saves to your location about once a day"
+                                text = if (autoBackupEnabled)
+                                    "Saves to your location " + when (AppPreferences.autoBackupFrequencyDaysState) {
+                                        1 -> "about once a day"
+                                        3 -> "about every 3 days"
+                                        else -> "about once a week"
+                                    }
                                 else "Pick a location once, back up on its own",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -392,6 +401,43 @@ fun BackupToolsScreen(navController: NavController) {
                     }
                     if (autoBackupEnabled) {
                         CurioSettingsDivider()
+                        // v227c — HOW OFTEN: Daily / Every 3 days / Weekly.
+                        // Selection reads through a solid primary fill with
+                        // on-primary ink (the app's selection contract).
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp, vertical = 10.dp)
+                        ) {
+                            Text("Backup frequency", style = MaterialTheme.typography.bodyLarge)
+                            Spacer(Modifier.height(9.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                AppPreferences.autoBackupFrequencyDaysOptions.forEach { days ->
+                                    val selected = AppPreferences.autoBackupFrequencyDaysState == days
+                                    Surface(
+                                        onClick = {
+                                            AppPreferences.setAutoBackupFrequencyDays(context, days)
+                                        },
+                                        shape = RoundedCornerShape(50),
+                                        color = if (selected) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.surfaceContainerLow
+                                    ) {
+                                        Text(
+                                            text = when (days) {
+                                                1 -> "Daily"
+                                                3 -> "Every 3 days"
+                                                else -> "Weekly"
+                                            },
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                         val locationName = autoBackupUriStr
                             .takeIf { it.isNotBlank() }
                             ?.let { runCatching { Uri.parse(it).lastPathSegment }.getOrNull() }
