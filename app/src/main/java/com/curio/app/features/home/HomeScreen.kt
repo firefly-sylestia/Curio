@@ -143,6 +143,8 @@ import com.curio.app.ui.components.ProfileAvatarImage
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -1152,16 +1154,32 @@ fun HomeScreen(navController: NavController) {
             val frostRim = if (isCurioDarkTheme()) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
             val frostIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
                             else homeReadableInk(frostBg)
+            // v230 — LIQUID-GLASS MORPH ENDPOINT: when the experiment is on,
+            // the scrolled pills become real liquid-glass capsules instead of
+            // the flat frosted plate. At rest BOTH paths show the exact same
+            // SOLID hero fill, so the resting look never changes. The profile
+            // pill keeps the classic morph while an avatar photo is set (a
+            // photo can't sit on glass) — so menu and profile animate their
+            // fills independently.
+            val glassOn = isLiquidGlassPillsActive()
+            val profileAvatarPath = AppPreferences.getProfileAvatarPath(context)
+            val profileGlassOn = glassOn && profileAvatarPath.isNullOrBlank()
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
             // another geometric transition or ripple-like flash.
-            val targetPillBg = lerp(heroPillBg, frostBg, frostShift)
+            val targetMenuBg = lerp(heroPillBg, if (glassOn) Color.Transparent else frostBg, frostShift)
+            val targetProfileBg = lerp(heroPillBg, if (profileGlassOn) Color.Transparent else frostBg, frostShift)
             val targetPillRim = lerp(heroPillRim, frostRim, frostShift)
             val targetPillIcon = lerp(heroPillIcon, frostIcon, frostShift)
-            val pillBg by animateColorAsState(
-                targetValue = targetPillBg,
+            val menuPillBg by animateColorAsState(
+                targetValue = targetMenuBg,
                 animationSpec = tween(CurioMotion.Durations.Quick),
-                label = "homeStickyPillBackground"
+                label = "homeStickyMenuBackground"
+            )
+            val profilePillBg by animateColorAsState(
+                targetValue = targetProfileBg,
+                animationSpec = tween(CurioMotion.Durations.Quick),
+                label = "homeStickyProfileBackground"
             )
             val pillRim by animateColorAsState(
                 targetValue = targetPillRim,
@@ -1197,24 +1215,42 @@ fun HomeScreen(navController: NavController) {
                     glyph = CurioIcons.Menu,
                     contentDescription = "Open menu",
                     shape = RoundedCornerShape(50),
-                    bg = pillBg,
+                    bg = menuPillBg,
                     rim = pillRim,
                     iconTint = pillIcon,
-                    elevation = 6.dp * frostShift
+                    // v230 — glass draws its own soft shadow, so the Surface
+                    // elevation drops when the morph hands off to it.
+                    elevation = if (glassOn) 0.dp else 6.dp * frostShift,
+                    // v230 — liquid-glass capsule once the scroll morph has
+                    // started: solid hero fill → refracting blur pill.
+                    modifier = if (glassOn && frostShift > 0.01f)
+                        Modifier.liquidGlassCapsule(
+                            heroPillBg,
+                            // Strong wash while the handoff is young so the
+                            // swap from the solid fill doesn't pop.
+                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                        ) else Modifier
                 )
                 TopBarPill(
                     onClick = { navController.navigate(CurioRoutes.PROFILE) { launchSingleTop = true } },
                     glyph = CurioIcons.Person,
                     contentDescription = "Profile",
                     shape = CircleShape,
-                    bg = pillBg,
+                    bg = profilePillBg,
                     rim = pillRim,
                     iconTint = pillIcon,
-                    elevation = 6.dp * frostShift,
+                    elevation = if (profileGlassOn) 0.dp else 6.dp * frostShift,
+                    // v230 — glass only while NO avatar photo is set; the
+                    // photo keeps the classic frosted morph underneath it.
+                    modifier = if (profileGlassOn && frostShift > 0.01f)
+                        Modifier.liquidGlassCapsule(
+                            heroPillBg,
+                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                        ) else Modifier,
                     // v118 — the profile pill wears the avatar photo when
                     // one is set (fresh pref read each composition, like the
                     // drawer) and falls back to the Person glyph otherwise.
-                    avatarPath = AppPreferences.getProfileAvatarPath(context)
+                    avatarPath = profileAvatarPath
                 )
             }
         }
@@ -1349,6 +1385,9 @@ private fun TopBarPill(
     rim: Color,
     iconTint: Color,
     elevation: Dp,
+    // v230 — optional outer modifier carrying the liquid-glass capsule
+    // (drawBackdrop) that replaces the flat frost once scrolled.
+    modifier: Modifier = Modifier,
     // v118 — when set, the avatar photo replaces the glyph; the pill's
     // animated rim still draws on top so the frosted scroll morph reads.
     avatarPath: String? = null
@@ -1358,7 +1397,7 @@ private fun TopBarPill(
         shape = shape,
         color = bg,
         shadowElevation = elevation,
-        modifier = Modifier
+        modifier = modifier
             .size(42.dp)
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(elevation, shape)

@@ -90,7 +90,16 @@ internal fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.curioGlassC
  * has published its capture layer — callers must keep their classic path.
  */
 @Composable
-fun Modifier.liquidGlassCapsule(container: Color): Modifier {
+fun Modifier.liquidGlassCapsule(
+    container: Color,
+    // v230 — scroll-morph support: the translucent wash over the refracted
+    // backdrop. The floating nav pills keep the default 40%; the Home
+    // menu/profile pills and the detail back/more pills pass a stronger
+    // wash while the scroll morph is young (so the handoff from their
+    // resting SOLID hero fill doesn't pop) easing down to ~45% when fully
+    // scrolled.
+    washAlpha: Float = 0.40f
+): Modifier {
     if (!isLiquidGlassPillsActive()) return this
     val backdrop = CurioGlassPills.backdrop ?: return this
     // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
@@ -129,7 +138,7 @@ fun Modifier.liquidGlassCapsule(container: Color): Modifier {
                 },
                 // The translucent wash over the refracted backdrop — 40% like
                 // the reference glass bar, so the tint reads but content shows.
-                onDrawSurface = { drawRect(container.copy(alpha = 0.40f)) }
+                onDrawSurface = { drawRect(container.copy(alpha = washAlpha)) }
             )
         )
 }

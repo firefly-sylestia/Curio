@@ -1,4 +1,5 @@
 ADD
+- Liquid glass: the Home menu/profile pills and the detail back/more pills now start as a solid hero-colored fill and morph into real refracting glass as you scroll (experiment toggle; profile keeps its photo off glass).
 - Drawer: the curiosity constellation is now true Material style — theme-colored lines and stars that are finally visible in light mode, bigger explored-lane stars with a gentle twinkle, a pulse ring on the tapped star, and the map now actually centers the star you tap.
 - Splash: bigger logo with a calm breathing motion instead of the odd up-down movement, plus a real progress bar that fills as your topics load — everything is ready the moment the app opens.
 - Appearance: a new "Material hero tears" option rides Material theme - the torn heroes wear the theme's own container color instead of the app's rose.

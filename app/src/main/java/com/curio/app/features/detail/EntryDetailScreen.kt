@@ -154,6 +154,8 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
@@ -1102,8 +1104,16 @@ private fun BoxScope.DetailStickyBar(
     // v108 — the dark frost is a HERO-HUED glass (the same white-lift lip
     // the under-sheet wears) instead of the near-black plate, so the back /
     // more buttons read as part of the hero instead of a black slab on it.
-    val frostFill = if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
-                    else lerp(heroFill, curioPillTintLift(), 0.38f)
+    // v230 — the RESTING plate is now the exact SOLID hero fill (the old
+    // 10%/38% lifts started the pills a shade off the hero); the lift is
+    // applied through the scroll shift instead. When the liquid-glass
+    // experiment is on AND the morph has begun, the classic frosted brush
+    // is replaced by a real liquid-glass capsule entirely.
+    val glassOn = isLiquidGlassPillsActive()
+    val detailGlassActive = glassOn && frostShift > 0.01f
+    val frostFill = if (isCurioDarkTheme())
+        lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
+        else lerp(heroFill, lerp(heroFill, curioPillTintLift(), 0.38f), frostShift)
     val stickyFrostBrush = Brush.verticalGradient(0f to frostFill, 1f to frostFill.copy(alpha = 0.97f))
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time
     // graphicsLayer translation — the more-menu's popup anchors to the
@@ -1133,12 +1143,19 @@ private fun BoxScope.DetailStickyBar(
             contentColor = heroCardInk,
             shadowElevation = 0.dp,
             disableRipple = true,
-            modifier = Modifier.heroFrostPlate(
-                heroCardInk,
-                RoundedCornerShape(50),
-                elevation = 6.dp * frostShift,
-                frostBrush = stickyFrostBrush
-            )
+            // v230 — scrolled endpoint: real liquid-glass (refraction + blur)
+            // when the experiment is on; the classic frosted plate otherwise.
+            modifier = if (detailGlassActive)
+                Modifier.liquidGlassCapsule(
+                    heroFill,
+                    washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                )
+                else Modifier.heroFrostPlate(
+                    heroCardInk,
+                    RoundedCornerShape(50),
+                    elevation = 6.dp * frostShift,
+                    frostBrush = stickyFrostBrush
+                )
         )
         Box {
             val moreInteraction = remember { MutableInteractionSource() }
@@ -1146,13 +1163,17 @@ private fun BoxScope.DetailStickyBar(
                 shape = RoundedCornerShape(50),
                 color = Color.Transparent,
                 shadowElevation = 0.dp,
-                modifier = Modifier
-                    .heroFrostPlate(
-                        heroCardInk,
-                RoundedCornerShape(50),
-                elevation = 6.dp * frostShift,
-                frostBrush = stickyFrostBrush
+                modifier = (if (detailGlassActive)
+                    Modifier.liquidGlassCapsule(
+                        heroFill,
+                        washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
                     )
+                else Modifier.heroFrostPlate(
+                    heroCardInk,
+                    RoundedCornerShape(50),
+                    elevation = 6.dp * frostShift,
+                    frostBrush = stickyFrostBrush
+                ))
                     .clickable(
                         interactionSource = moreInteraction,
                         indication = null

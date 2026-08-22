@@ -4880,6 +4880,9 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v230 — liquid-glass scroll morph on the top-bar pills**
+  - Home menu/profile pills and EntryDetail back/more pills: resting look is unchanged SOLID hero fill; once scrolled past the threshold the flat frost endpoint is replaced by `liquidGlassCapsule` (refraction + blur), with `washAlpha` easing 0.92→0.45 so the handoff doesn't pop.
+  - Profile pill keeps the classic morph while an avatar photo is set; detail's classic path now also starts at the exact hero fill (lift applied through frostShift instead of baked into the rest color).
 - **v229 — Live Update promotion fix + notification permission checker**
   - The v227 `ProgressStyle` alone never promoted: the service now calls `setRequestPromotedOngoing(true)` + `setStyledByProgress(true)` + `setShortCriticalText` (the exact LiveBridge recipe) so Android 16 can render the status-bar chip / lock-screen live activity.
   - Topic Reveal explore flow: when POST_NOTIFICATIONS is permanently denied (no rationale after denial), an app-styled checker dialog offers Open settings (ON_RESUME continues the pending session) or Start anyway — previously the runtime prompt silently no-op'd and the session ran with no visible timer.
