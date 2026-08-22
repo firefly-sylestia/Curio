@@ -346,6 +346,12 @@ fun TopicRevealScreen(
     // continuation, but the session is already persisted and the user can
     // simply tap "Explore now" again.
     var pendingNotificationSession by remember { mutableStateOf<ExploreSession?>(null) }
+    // v229 — POST_NOTIFICATIONS permanently-denied checker dialog + the
+    // settings-return flag for its ON_RESUME continuation. Declared BEFORE
+    // the permission launcher below: Kotlin locals aren't visible to a
+    // lambda that appears earlier in the function (the CI compile error).
+    var showNotificationsBlockedDialog by rememberSaveable { mutableStateOf(false) }
+    var awaitingNotificationsSettings by remember { mutableStateOf(false) }
 
     /** Opens the search page (the chosen search engine — YouTube for music),
      *  then lands back on Home — returning to the
@@ -412,10 +418,6 @@ fun TopicRevealScreen(
     var pendingOverlaySession by remember { mutableStateOf<ExploreSession?>(null) }
     var overlayNeedsNotification by remember { mutableStateOf(false) }
     var showOverlayPermissionDialog by rememberSaveable { mutableStateOf(false) }
-    // v229 — POST_NOTIFICATIONS permanently-denied checker dialog + the
-    // settings-return flag for its ON_RESUME continuation.
-    var showNotificationsBlockedDialog by rememberSaveable { mutableStateOf(false) }
-    var awaitingNotificationsSettings by remember { mutableStateOf(false) }
     // Only consume the pending session after the app has actually launched
     // the system overlay-settings page. A dialog dismissal can produce an
     // ON_RESUME callback while permission is still missing; consuming here
