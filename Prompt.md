@@ -1,20 +1,22 @@
 # Prompt — Current Request
 
-## Request (7 parts, Android app only) — Status: COMPLETE
-1. **"Material hero tears"** Appearance option (default OFF, greys out while Material theme off): torn shared heroes wear `primaryContainer`/`onPrimaryContainer` instead of rose/azure. Shared gate `materialHeroTearsOn()` in SettingsHubScreen.kt, checked first in settings/home/profile accent + readable-ink resolvers.
-2. **Five Spin-visuals experiments concluded ON:** Main card shadow, Nav-style buttons, Top-lit deck cards, Tinted deck edges, Roomier deck titles — Experiments toggles + "Spin visuals" section removed; SpinScreen reads hardcoded true; pref APIs dormant with defaults flipped true.
-3. **Reveal category pill** expands to its measured name width (TextMeasurer) instead of fixed 200dp.
-4. **Reveal favorite pill** plays the entry expand animation when opening an already-favorited topic (`favoriteRevealed` mirrors the category pill).
-5. **Cabinet nav strip gone:** Cabinet publishes its real page bg (filter wash OR adaptive-hero lane wash) so the floating capsule no longer paints plain background behind a lane-washed page.
-6+7. **Progress editor corner redesigned:** shows/edits the TOTAL ("N pages"), hairline-bordered numeric field while editing, solid TICK button commits (Enter too); replay/reset removed.
+## Request
+Splash screen redesign: "make the splash screen simple and modern and material style. the current one is too bad looking and also too huge. add dynamic animation and add like your curiosity loading something."
 
-## Files touched
-AppPreferences.kt · ExperimentsScreen.kt · SpinScreen.kt · SettingsSectionScreen.kt · SettingsHubScreen.kt · HomeScreen.kt · ProfileScreen.kt · TopicRevealScreen.kt · CabinetScreen.kt · CurioProgressPill.kt · app/AGENTS.md · changelogs/20260920.txt
+## Status: COMPLETE
+
+## Changes (`features/splash/SplashScreen.kt`, full rewrite of the UI body)
+- STRIPPED: 280dp animated halo, shimmer sweep, bottom ground band, 144dp logo box + 112dp art, 72sp gradient wordmark, 18sp tagline, 3-dot pulse loader (~200 lines of layered decoration).
+- NEW compact M3 composition on plain `colorScheme.background`:
+  - 64dp logomark in a 72dp box — entrance scale 0.7→1 (zero-overshoot tween) + endless ±5dp vertical float (1.9s reverse).
+  - "Curio" wordmark, `headlineMedium` (Geom via theme), `onSurface`.
+  - ONE M3 `LinearProgressIndicator` (148dp) — Material's own loading language.
+  - FOUR rotating curiosity lines ("Loading your curiosity…" / "Warming up the topics…" / "Sharpening the shuffle…" / "Opening the cabinet…") crossfaded via `AnimatedContent` every 1.1s.
+- Every color is a plain theme role → light/dark/pastel/Material all correct with zero special-casing.
+- UNCHANGED: catalog warm-up + CRASH/ONBOARDING/HOME routing, 800ms minimum, 6s cap.
 
 ## Verification
-- Delimiter-balance check passed on all 10 Kotlin files.
-- Grep hygiene: no leftover `editingValue`/`valueText`/`resetValue`/`commitValueEdit`/`Replay` refs in CurioProgressPill; no `heroShadowState|peek*State|navPillButtonsState` reads left outside AppPreferences.
-- Gradle builds are forbidden here; CI validates compilation on push.
+- Delimiter balance OK; APIs verified against compose animation 1.11.2 (`AnimatedContent`+`togetherWith` stable, `mutableIntStateOf` used app-wide); no other file references removed symbols; `app_tagline` still used by Onboarding so the resource stays.
 
-## Notes / gotchas
-- str_replace failed on multi-line blocks again this session (same as last) — all edits applied via assertion-guarded Python scripts under tools/, each deleted after use.
+## Docs
+- app/AGENTS.md ownership descriptor updated (v224 note); changelog 20260920.txt ADD bullet added.

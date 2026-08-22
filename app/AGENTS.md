@@ -46,7 +46,13 @@ app/src/main/java/com/curio/app/
 │       ├── CurioHeroCard.kt        # ~40% vertical hero Spin card on Home
 │       └── CurioStreakPill.kt      # streak indicator pill + CurioSecondaryAction helper
 └── features/
-    ├── splash/SplashScreen.kt      # §13.1 splash — cosmic mark (ic_launcher_foreground) + "Curio" + 3-dot pulse, 800ms → HOME
+    ├── splash/SplashScreen.kt      # §13.1 splash — v224 SIMPLE/MODERN/MATERIAL redesign: small
+    │                               # floating logomark (64dp art, entrance scale + endless ±5dp float),
+    │                               # modest Geom wordmark, ONE M3 LinearProgressIndicator (148dp), and
+    │                               # four rotating curiosity loading lines crossfaded via AnimatedContent
+    │                               # every ~1.1s ("Loading your curiosity…"). The old halo / shimmer /
+    │                               # ground band / 72sp gradient wordmark / dot loader are GONE; every
+    │                               # color is a plain theme role. Warm-up + routing logic unchanged.
     ├── home/HomeScreen.kt          # §3 home — top bar, greeting, streak, hero, chips, recently explored empty state
     └── PlaceholderScreens.kt       # ONE file containing 11 stubs: Spin, Cabinet, CategoryPicker, TopicReveal, SaveCapture, EntryDetail, Settings, Onboarding, ManageCategories, TopicHistory, Lightbox. Each uses a shared `PlaceholderScaffold` with back arrow + glyph + title + subtitle + "Design phase · logic comes later". Real implementations replace these one-by-one in later phases.
 ```

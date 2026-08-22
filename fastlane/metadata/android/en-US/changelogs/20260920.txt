@@ -1,4 +1,5 @@
 ADD
+- Splash: redesigned simple, modern and Material — a small gently floating logo, one clean progress bar, and rotating curiosity lines ("Loading your curiosity…") instead of the big gradient stack.
 - Appearance: a new "Material hero tears" option rides Material theme - the torn heroes wear the theme's own container color instead of the app's rose.
 - Spin: Main card shadow, Nav-style buttons, Top-lit deck cards, Tinted deck edges and Roomier deck titles are now always on - they won their experiments.
 - Drawer: a new Experiments toggle — "Drawer constellation" (off by default) — brings back the curiosity-map stars at the top of the drawer, now drawn as just the constellation pattern with no painted sky behind it.
