@@ -4879,6 +4879,22 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v224 — drawer curiosity map: MATERIAL ink + centering fix.**
+  (1) `CurioConstellation` gained `materialInk: Boolean = false` (drawer
+  passes true; the Stats deep-space page keeps the SVG palette): theme-role
+  lines (`onSurfaceVariant` @ ~0.55, thicker 3.4-unit stroke), EXPLORED
+  lane stars in `primary` at 1.45× size with dim (0.40-alpha) unexplored
+  dots — the old near-white `0xFFeef5fa` stars were INVISIBLE on the cream
+  drawer surface in light mode. A 7s sine `twinklePhase` animates every
+  star's radius (±10%, phase-staggered) and the selected star wears an
+  expanding `selPulse` ring in primary. Drawer map height 280 → 320dp.
+  (2) TAP-CENTER FIX: the auto-zoom `LaunchedEffect` moved INSIDE
+  `BoxWithConstraints` (it now reads the real `wPx`/`hPx` instead of a
+  hardcoded ±80px guess) and cancels the 2× scale about the layer's center
+  pivot exactly: `offset = -2 * (star - center)`. (3) The selection popover
+  now applies the same layer transform (scale about center + translation)
+  to the star's position, so the card tracks the VISUAL star while the map
+  zooms instead of sitting at the un-zoomed spot.
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.
 - Edge-to-edge is enabled at the Activity level; the system bars are themed by `CurioTheme`'s `SideEffect` to match the current color scheme + light/dark mode.

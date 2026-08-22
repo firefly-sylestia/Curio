@@ -74,10 +74,19 @@ fun CurioConstellation(
     onSelect: (CategoryId?) -> Unit,
     modifier: Modifier = Modifier,
     plainBackground: Boolean = false,
+    // v224 - MATERIAL ink mode (the drawer's curiosity map): lines and
+    // stars wear THEME ROLES (onSurfaceVariant lines, primary explored
+    // stars, dim unexplored) instead of the fixed pale cosmic palette,
+    // whose near-white stars were invisible on the cream drawer surface
+    // in light mode. The Stats deep-space page stays on the SVG palette.
+    materialInk: Boolean = false,
     popoverContent: (@Composable (CategoryId) -> Unit)? = null
 ) {
     val isDark = isCurioDarkTheme()
     val pageBg = MaterialTheme.colorScheme.background
+    // v224 - theme-role inks for material mode.
+    val matLine = MaterialTheme.colorScheme.onSurfaceVariant
+    val matPrimary = MaterialTheme.colorScheme.primary
     val haptics = LocalHapticFeedback.current
 
     // Named star positions in the 1400×1400 viewBox, normalized to 0–1.
@@ -123,35 +132,61 @@ fun CurioConstellation(
         ),
         label = "nebulaPulse"
     )
-
-    // Auto-zoom to star on tap (when 3D zoom enabled) + star-based tilt
-    LaunchedEffect(selected, zoom3d) {
-        if (selected != null && zoom3d) {
-            val star = stars.getOrNull(explored.indexOf(selected)) ?: return@LaunchedEffect
-            val cx = (star.nx - 0.5f) * 80f
-            val cy = (star.ny - 0.5f) * 80f
-            // Tilt toward the star's position relative to center
-            tiltY = (star.nx - 0.5f) * 16f
-            tiltX = -(star.ny - 0.5f) * 10f
-            coroutineScope {
-                launch { zoom.animateTo(2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-                launch { offsetX.animateTo(-cx, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-                launch { offsetY.animateTo(-cy, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-            }
-        } else {
-            coroutineScope {
-                launch { zoom.animateTo(1f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-                launch { offsetX.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-                launch { offsetY.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-            }
-            tiltX = 0f; tiltY = 0f
-        }
-    }
+    // v224 - star twinkle phase (drives EVERY named star's gentle sine
+    // alpha in material mode - the map feels alive, not printed) and an
+    // expanding pulse ring on the SELECTED star.
+    val twinklePhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 7000, easing = androidx.compose.animation.core.LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "twinklePhase"
+    )
+    val selPulse by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = androidx.compose.animation.core.LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "selPulse"
+    )
 
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
         val wPx = with(density) { maxWidth.toPx() }
         val hPx = with(density) { maxHeight.toPx() }
+
+        // v224 - CENTERING FIX: the old effect lived OUTSIDE the layout
+        // scope and guessed the distance with a hardcoded 80px constant,
+    // so the tapped star never landed at the center (and ignored the
+        // zoom factor entirely). Now it reads the REAL canvas size and
+        // cancels the scale-out about the layer's center pivot exactly:
+        // rendered(p) = z*(p-c) + c + t  =>  t = -z*(p-c) puts the tapped
+        // star at the center at zoom 2.
+        LaunchedEffect(selected, zoom3d, wPx, hPx) {
+            if (selected != null && zoom3d) {
+                val star = stars.getOrNull(explored.indexOf(selected)) ?: return@LaunchedEffect
+                val dx = (star.nx - 0.5f) * wPx
+                val dy = (star.ny - 0.5f) * hPx
+                tiltY = (star.nx - 0.5f) * 10f
+                tiltX = -(star.ny - 0.5f) * 6f
+                coroutineScope {
+                    launch { zoom.animateTo(2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                    launch { offsetX.animateTo(-dx * 2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                    launch { offsetY.animateTo(-dy * 2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                }
+            } else {
+                coroutineScope {
+                    launch { zoom.animateTo(1f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                    launch { offsetX.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                    launch { offsetY.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                }
+                tiltX = 0f; tiltY = 0f
+            }
+        }
 
         Canvas(
             modifier = Modifier
@@ -271,7 +306,23 @@ fun CurioConstellation(
             }
 
             // ── Constellation lines ─────────────────────────────
-            if (isDark) {
+            if (materialInk) {
+                // v224 — theme-role lines: stronger weight + readable
+                // contrast on the drawer surface in BOTH modes (the old
+                // pale-blue hairlines vanished on cream in light mode).
+                val lc = matLine.copy(alpha = if (isDark) 0.50f else 0.58f)
+                val dc = matLine.copy(alpha = if (isDark) 0.20f else 0.24f)
+                drawConstellationLine(px(872f), py(751f), px(961f), py(689f), lc, 1f, pr(3.4f))
+                drawConstellationLine(px(961f), py(689f), px(894f), py(539f), lc, 1f, pr(3.4f))
+                drawConstellationLine(px(894f), py(539f), px(801f), py(556f), lc, 1f, pr(3.4f))
+                drawConstellationLine(px(801f), py(556f), px(872f), py(751f), lc, 1f, pr(3.4f))
+                drawConstellationLine(px(801f), py(556f), px(716f), py(483f), lc, 1f, pr(3.4f))
+                drawConstellationLine(px(716f), py(483f), px(642f), py(432f), lc, 1f, pr(3.4f))
+                drawConstellationLine(px(642f), py(432f), px(597f), py(298f), lc, 1f, pr(3.4f))
+                drawDashedLine(px(872f), py(751f), px(441f), py(1101f), dc, 1f, pr(1.7f))
+                drawDashedLine(px(441f), py(1101f), px(320f), py(1211f), dc, 1f, pr(1.3f))
+                drawDashedLine(px(441f), py(1101f), px(561f), py(1265f), dc, 1f, pr(1.3f))
+            } else if (isDark) {
                 drawConstellationLine(px(872f), py(751f), px(961f), py(689f), Color(0xFFc9e5ff), 0.72f, pr(2.4f))
                 drawConstellationLine(px(961f), py(689f), px(894f), py(539f), Color(0xFFc9e5ff), 0.72f, pr(2.4f))
                 drawConstellationLine(px(894f), py(539f), px(801f), py(556f), Color(0xFFc9e5ff), 0.72f, pr(2.4f))
@@ -296,15 +347,26 @@ fun CurioConstellation(
             }
 
             // ── Stars ───────────────────────────────────────────
-            stars.forEach { star ->
+            stars.forEachIndexed { idx, star ->
                 val cx = px(star.x)
                 val cy = py(star.y)
-                val r = pr(star.r)
-                val color = if (isDark) star.darkColor else star.lightColor
+                val color = if (materialInk) {
+                    // Explored lanes lead in primary; unexplored stay as
+                    // quiet dim dots on the surface.
+                    if (idx < explored.size) matPrimary else matLine.copy(alpha = 0.40f)
+                } else if (isDark) star.darkColor else star.lightColor
+                val r = if (materialInk) {
+                    // Explored stars read bigger; a gentle sine twinkle keeps
+                    // the whole map alive (phase-staggered per star).
+                    val isExploredStar = idx < explored.size
+                    val tw = 0.90f + 0.10f * sin(twinklePhase + idx * 1.13f)
+                    pr(star.r * (if (isExploredStar) 1.45f else 1f)) * tw
+                } else pr(star.r)
                 val isSelected = selected?.let { s ->
-                    explored.indexOf(s) == stars.indexOf(star)
+                    explored.indexOf(s) == idx
                 } == true
                 if (isSelected && zoom3d) {
+                    // Static halos (kept from v221)…
                     drawCircle(
                         color = Color.White.copy(alpha = 0.35f),
                         radius = r * 3f,
@@ -313,6 +375,15 @@ fun CurioConstellation(
                     drawCircle(
                         color = Color.White.copy(alpha = 0.18f),
                         radius = r * 5f,
+                        center = Offset(cx, cy)
+                    )
+                }
+                if (isSelected && materialInk) {
+                    // …plus an EXPANDING PULSE ring in material mode — the
+                    // selected star visibly radiates instead of sitting still.
+                    drawCircle(
+                        color = matPrimary.copy(alpha = (1f - selPulse) * 0.45f),
+                        radius = r * (2.2f + selPulse * 2.2f),
                         center = Offset(cx, cy)
                     )
                 }
@@ -326,7 +397,17 @@ fun CurioConstellation(
         if (popoverContent != null && selStarIdx != null) {
             val star = stars[selStarIdx]
             var cardSize by remember { mutableStateOf(IntSize.Zero) }
-            val starPx = Offset(star.nx * wPx, star.ny * hPx)
+            // v224 — ZOOM-AWARE placement: apply the same layer transform
+            // as the canvas (scale about center + translation) so the card
+            // tracks the star's VISUAL position while the map animates it
+            // to the center — before, the card sat at the un-zoomed spot.
+            val zv = if (zoom3d) zoom.value else 1f
+            val tx = if (zoom3d) offsetX.value * density.density else 0f
+            val ty = if (zoom3d) offsetY.value * density.density else 0f
+            val starPx = Offset(
+                (star.nx * wPx - wPx / 2f) * zv + wPx / 2f + tx,
+                (star.ny * hPx - hPx / 2f) * zv + hPx / 2f + ty
+            )
             val gap = with(density) { 8.dp.toPx() }
             val pad = with(density) { 4.dp.toPx() }
             Box(

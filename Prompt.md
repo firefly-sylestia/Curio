@@ -1,22 +1,18 @@
 # Prompt — Current Request
 
 ## Request
-Splash screen redesign: "make the splash screen simple and modern and material style. the current one is too bad looking and also too huge. add dynamic animation and add like your curiosity loading something."
+Drawer constellation: "more material style, fix in light mode as not visible properly, more larger, move around, tapping the star doesnt properly centres it, not visually appealing — fix it properly and keep it material style."
 
 ## Status: COMPLETE
 
-## Changes (`features/splash/SplashScreen.kt`, full rewrite of the UI body)
-- STRIPPED: 280dp animated halo, shimmer sweep, bottom ground band, 144dp logo box + 112dp art, 72sp gradient wordmark, 18sp tagline, 3-dot pulse loader (~200 lines of layered decoration).
-- NEW compact M3 composition on plain `colorScheme.background`:
-  - 64dp logomark in a 72dp box — entrance scale 0.7→1 (zero-overshoot tween) + endless ±5dp vertical float (1.9s reverse).
-  - "Curio" wordmark, `headlineMedium` (Geom via theme), `onSurface`.
-  - ONE M3 `LinearProgressIndicator` (148dp) — Material's own loading language.
-  - FOUR rotating curiosity lines ("Loading your curiosity…" / "Warming up the topics…" / "Sharpening the shuffle…" / "Opening the cabinet…") crossfaded via `AnimatedContent` every 1.1s.
-- Every color is a plain theme role → light/dark/pastel/Material all correct with zero special-casing.
-- UNCHANGED: catalog warm-up + CRASH/ONBOARDING/HOME routing, 800ms minimum, 6s cap.
+## Root causes found
+- Light-mode invisibility: stars were near-white (`0xFFeef5fa`) and lines pale blue (`0xFFc7d9e8`) on the cream drawer surface.
+- Centering: the auto-zoom effect used a hardcoded ±80px guess and lived outside the layout scope (no real size); the popover also ignored the zoom transform.
+
+## Changes
+- `CurioConstellation.kt`: new `materialInk` param — theme-role lines (`onSurfaceVariant`, thicker), explored stars in `primary` @ 1.45×, dim unexplored dots; 7s sine twinkle on all stars + expanding pulse ring on the selected star; auto-center `LaunchedEffect` relocated inside BoxWithConstraints using real wPx/hPx with exact pivot math (`t = -2·(p−c)`); popover placement applies the layer transform so the card tracks the visual star. Stats page untouched (materialInk=false).
+- `HomeScreen.kt` DrawerCuriosityMap: passes materialInk, height 280→320dp.
+- Docs: AGENTS.md v224 note, changelog bullet.
 
 ## Verification
-- Delimiter balance OK; APIs verified against compose animation 1.11.2 (`AnimatedContent`+`togetherWith` stable, `mutableIntStateOf` used app-wide); no other file references removed symbols; `app_tagline` still used by Onboarding so the resource stays.
-
-## Docs
-- app/AGENTS.md ownership descriptor updated (v224 note); changelog 20260920.txt ADD bullet added.
+- Delimiter balance OK on both files; single LaunchedEffect(selected…) confirmed; Stats path unaffected (defaults).

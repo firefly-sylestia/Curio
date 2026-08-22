@@ -1,4 +1,5 @@
 ADD
+- Drawer: the curiosity constellation is now true Material style — theme-colored lines and stars that are finally visible in light mode, bigger explored-lane stars with a gentle twinkle, a pulse ring on the tapped star, and the map now actually centers the star you tap.
 - Splash: redesigned simple, modern and Material — a small gently floating logo, one clean progress bar, and rotating curiosity lines ("Loading your curiosity…") instead of the big gradient stack.
 - Appearance: a new "Material hero tears" option rides Material theme - the torn heroes wear the theme's own container color instead of the app's rose.
 - Spin: Main card shadow, Nav-style buttons, Top-lit deck cards, Tinted deck edges and Roomier deck titles are now always on - they won their experiments.

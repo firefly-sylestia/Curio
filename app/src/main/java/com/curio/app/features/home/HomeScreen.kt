@@ -2508,9 +2508,13 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             selected = selected,
             onSelect = { selected = it },
             plainBackground = true,
+            // v224 — MATERIAL ink: theme-role lines/stars (visible in light
+            // mode at last), explored lanes in primary with glow, gentle
+            // twinkle + a pulse ring on the tapped star.
+            materialInk = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp),
+                .height(320.dp),
             popoverContent = { id ->
                 val cat = CurioCategories.byId(id)
                 val k = knowledge[id] ?: LaneKnowledge(0, 0, 0, 0, 0L)
