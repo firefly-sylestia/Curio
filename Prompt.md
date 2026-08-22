@@ -1,22 +1,20 @@
 # Prompt.md — current request log
 
-## Request (complete): auto-backup frequency + cabinet→detail entrance fix
+## Request (complete): vFlow-exact liquid glass nav + update toast → dialog
 
-1. **Auto backup frequency (added + made reliable):**
-   - `AppPreferences`: `autoBackupFrequencyDaysOptions = [1,3,7]`, `get/setAutoBackupFrequencyDays`
-     (KEY `auto_backup_frequency_days`), reactive `autoBackupFrequencyDaysState`, seeded on startup.
-   - `BackupToolsScreen` (Settings → Backup & restore → Auto backup): a "Backup frequency" chip row
-     (Daily / Every 3 days / Weekly, solid primary fill = selected) shows when auto backup is enabled;
-     the toggle subtitle now reflects the chosen cadence.
-   - `MainActivity`: new `runAutoBackupIfDue()` replaces the hardcoded-24h inline block — interval =
-     chosen days × 24h; called from onCreate AND onResume so warm processes still fire on schedule
-     ("it should work too" — the old onCreate-only hook could go days without firing). Due-date gate
-     keeps repeat calls no-ops.
+1. **Full liquid-glass nav (vFlow port)** — user asked for the exact vFlow look AND touch/drag.
+   Ported four files from ChaoMixian/vFlow into `ui/components/liquidglass/` with GPL-2.0 attribution
+   headers (DragGestureInspector, DampedDragAnimation, InteractiveHighlight, CurioLiquidGlassTabBar).
+   `CurioFloatingNavBar` now renders the full tab bar (equal-width tabs, ONE refracting capsule, hidden
+   accent-tinted layer so the pill refracts colored icons, DRAGGABLE active pill with velocity
+   squash/stretch, press-scale, inner shadow, API-33+ specular highlight) when the Experiments toggle is
+   ON; classic pill row otherwise. Reveal/pet-studio keep the simple frosted capsule. LICENSE NOTE: these
+   ports are GPL-2.0-derived — flagged to the user in the summary.
 
-2. **Cabinet→detail entrance:** `DetailContentEntrance` faded the body in with `tween(400,
-   delayMillis=200)` — a delay paced to the OLD shared morph that v8.38 replaced with a center pop-up.
-   Result: quick fact + entry sat invisible ~200ms after opening. Now `tween(260)`, no delay.
+2. **Update toast → dialog** — corner toast fully removed (`CurioInAppToast.kt` deleted). UpdateChecker
+   raises `CurioUpdatePrompt.pending` (global state, once-per-version gate kept); NavHost renders a themed
+   AlertDialog ("Curio vX is available" / body / Open Updates / Later) at the root.
 
-Verification: delimiter balance OK on all touched files; imports verified (mutableIntStateOf,
-Surface/RoundedCornerShape/Spacer/height in BackupToolsScreen, lifecycleScope/Uri in MainActivity).
-CI validates compile on push.
+Verification: delimiter balance OK on all touched files; imports verified (CurioUpdatePrompt added to
+NavHost; stale CurioToast/CurioIcons references gone); changelog cleaned (duplicate line dropped, toast
+bullet replaced by dialog bullet). CI validates compile on push.

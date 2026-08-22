@@ -70,13 +70,13 @@ ADD
 - Explore: cancelling is no longer forever — a cancelled session shows on Home as a resumable card (banked time continues where it stopped), and the floating bubble got its own Cancel button.
 
 ADD
-- Experiments: a new "Liquid glass pills" toggle (off by default) turns the bottom nav, the reveal's category/favorite bar and the pet-studio bar into real frosted glass - a live blurred, refracted view of whatever is behind them (Android 12+).
+- Experiments: "Liquid glass pills" (off by default) now matches the reference exactly - the bottom nav becomes ONE refracting glass capsule with equal-width tabs and a DRAGGABLE active pill (drag between tabs with velocity stretch, press-scale and a touch-following specular sheen); the reveal and pet-studio bars get the frosted treatment.
 - Explore: on Android 16+ the running explore session posts a genuine Live Update notification - a system-styled progress bar wearing your lane's color that can promote to a status-bar chip; earlier versions keep the current look.
 
 FIX
 - Auto backup: pick how often it runs - Daily, Every 3 days or Weekly - and it now also fires on schedule while the app stays in memory (not just on a fresh launch).
 - Detail page: opening an entry no longer shows a blank gap before the quick fact and body appear - the content fades in immediately.
-- Update toast: the corner pill no longer stretches across the whole screen on long text - it is capped at 300dp, reads start-aligned like every app pill, and slides back up on dismiss.
+- Updates: the in-app update notice is now a proper themed dialog with Open Updates / Later actions instead of a corner pill.
 - Cabinet: entry cards no longer get chopped at a hard line above the bottom nav - the grid scrolls full-bleed under the floating pill now, with only the last row lifted clear.
 - Explore: closing the app auto-pauses the running session so the timer stops counting while you're away.
 - Explore: the notification's inner timer text no longer lags behind — the shade's own live chronometer IS the timer now (the stale text is gone).

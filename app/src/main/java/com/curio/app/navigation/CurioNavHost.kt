@@ -69,6 +69,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CurioUpdatePrompt
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPet
@@ -125,7 +126,6 @@ import com.curio.app.ui.components.CurioFloatingNavBar
 import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
-import com.curio.app.ui.components.CurioInAppToastHost
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -1193,25 +1193,37 @@ fun CurioNavHost(
         )
     }
 
-    // v63 — the app's IN-APP toast (the update notice, etc.) floats above
-    // every screen. v112 — REMADE as a SMALL pill anchored to the TOP-RIGHT
-    // corner (below the status bar) instead of the old bottom-center pill.
-    // It lives in its own full-size Box at the NavHost root (after the
-    // Scaffold), so `align` resolves to a BoxScope regardless of the
-    // enclosing screen state. v63b — toasts with an action are tappable:
-    // the update toast's "support" action opens the Updates page.
-    Box(modifier = Modifier.fillMaxSize()) {
-        CurioInAppToastHost(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(top = 8.dp, end = 16.dp),
-            onAction = { actionId ->
-                if (actionId == "support") {
-                    navController.navigate(CurioRoutes.UPDATES) {
-                        launchSingleTop = true
-                    }
-                }
+    // v227d — the update notice is now a proper themed DIALOG (the old
+    // corner toast pill is fully removed). Rendered at the NavHost root so
+    // it floats above every screen; "Open Updates" navigates to the
+    // Updates page, "Later" just dismisses (the once-per-version gate in
+    // UpdateChecker means it never nags again for the same release).
+    CurioUpdatePrompt.pending?.let { pendingVersion ->
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { CurioUpdatePrompt.dismiss() },
+            title = { Text("Curio $pendingVersion is available") },
+            text = {
+                Text(
+                    "A newer version of Curio is ready. See what changed and install it from the Updates page.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        CurioUpdatePrompt.dismiss()
+                        navController.navigate(CurioRoutes.UPDATES) { launchSingleTop = true }
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Open Updates") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { CurioUpdatePrompt.dismiss() },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Later") }
             }
         )
     }

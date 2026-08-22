@@ -4880,6 +4880,25 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v227b/d — full liquid-glass nav port + update dialog**
+  - `ui/components/liquidglass/` — four files ADAPTED FROM vFlow
+    (github.com/ChaoMixian/vFlow, **GPL-2.0-or-later**; attribution headers
+    in every file — this makes those parts of Curio GPL-derived):
+    DragGestureInspector (raw non-consuming drags), DampedDragAnimation
+    (critically-damped value spring + lagging velocity spring for
+    squash/stretch + press-progress), InteractiveHighlight (API-33+
+    RuntimeShader specular sheen that follows the finger), and
+    CurioLiquidGlassTabBar (three stacked layers: visible refracting
+    capsule, invisible accent-tinted tab row recorded into a second
+    backdrop so the pill refracts COLORED icons, draggable active pill).
+  - CurioFloatingNavBar renders the full tab bar when the Experiments
+    toggle is ON (Android 12+; lens needs 33+ where it self-guards);
+    classic expanding-pill row otherwise. Reveal/pet-studio keep the
+    simpler frosted capsule.
+  - The corner update TOAST is fully removed (CurioInAppToast.kt
+    deleted): UpdateChecker now raises CurioUpdatePrompt.pending (global
+    state, once-per-version gate unchanged) and the NavHost renders a
+    themed AlertDialog — Open Updates / Later.
 - **v227c — auto-backup frequency + detail entrance delay fix**
   - Auto backup: `AppPreferences.getAutoBackupFrequencyDays` (1/3/7, default 1) picked via chips in
     BackupToolsScreen; `MainActivity.runAutoBackupIfDue()` honors the chosen interval and is called from

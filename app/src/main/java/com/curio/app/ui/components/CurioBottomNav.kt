@@ -51,7 +51,10 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.components.liquidGlassCapsule
+import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -340,10 +343,62 @@ fun CurioFloatingNavBar(
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {
-        // v227 — liquid-glass experiment: when ON (Android 12+), the
-        // capsule's fill is the real-time refracted backdrop and the
-        // classic elevated fill yields (transparent + no shadow).
+        // v227b — FULL liquid-glass mode: the vFlow-style bar replaces
+        // the whole pill row — equal-width tabs inside one refracting
+        // capsule, with a DRAGGABLE active pill (damped-drag physics,
+        // velocity squash/stretch, touch-following specular highlight).
         val glassOn = isLiquidGlassPillsActive()
+        val glassBackdrop = if (glassOn) CurioGlassPills.backdrop else null
+        if (glassOn && glassBackdrop != null) {
+            val items = CurioBottomNavItems.all
+            val glassIndex = items.indexOfFirst { it.route == selectedRoute }
+                .takeIf { it >= 0 }
+                ?: items.indexOfFirst { it.route == routePrefix }.coerceAtLeast(0)
+            CurioLiquidGlassTabBar(
+                backdrop = glassBackdrop,
+                tabsCount = items.size,
+                selectedIndex = glassIndex,
+                accentColor = pageAccent ?: MaterialTheme.colorScheme.primary,
+                onSelected = { index ->
+                    val destination = items.getOrNull(index) ?: return@CurioLiquidGlassTabBar
+                    if (selectedRoute != destination.route) {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        navController.navigateToTab(destination.route)
+                    }
+                },
+                modifier = Modifier
+            ) {
+                items.forEach { destination ->
+                    val selected = destination.route == selectedRoute ||
+                        destination.route == routePrefix
+                    CurioLiquidGlassTabBarItem(
+                        onClick = {
+                            if (!selected && selectedRoute != destination.route) {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                navController.navigateToTab(destination.route)
+                            }
+                        }
+                    ) {
+                        CurioIcon(
+                            name = if (selected) destination.selectedIcon else destination.icon,
+                            contentDescription = destination.label,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 22.dp
+                        )
+                        Text(
+                            text = destination.label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontFamily = ChangaOneFontFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 11.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+        } else {
         val classicContainer = curioFloatingNavContainer(routePrefix)
         Surface(
             shape = RoundedCornerShape(50),
@@ -398,6 +453,7 @@ fun CurioFloatingNavBar(
                 }
             }
         }
+        }  // else — classic pill row (liquid glass off)
     }
 }
 
