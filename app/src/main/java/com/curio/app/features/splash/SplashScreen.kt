@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,7 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -64,56 +66,54 @@ private const val CATALOG_WARM_TIMEOUT_MS = 6_000L
 private const val LOADING_LINE_SWAP_MS = 1_100L
 
 /**
- * Splash screen — SIMPLE / MODERN / MATERIAL (v224 redesign).
+ * Splash screen — SIMPLE / MODERN / MATERIAL.
  *
- * The old splash was a tall stack: 144dp logo box, 72sp gradient wordmark,
- * tagline, dot loader, animated halo and a ground band. This redesign strips
- * it to a compact, restrained M3 composition on the plain theme background:
+ * v224b sizing pass:
+ *  - BIGGER presence: 88dp logomark, display-size wordmark, 180dp bar
+ *  - The logo no longer BOBS up and down (the movement read badly) — instead
+ *    it BREATHES: a slow, subtle scale pulse around its resting size
+ *  - The progress bar is DETERMINATE and wired to the REAL catalog warm-up:
+ *    every topic lane that finishes parsing fills the bar, so "loading your
+ *    curiosity" is literally true — the app finishes loading its topics ON
+ *    this screen and Spin/Home open ready
  *
- *  - Small 64dp logomark: scales+fades in, then floats gently forever
- *  - Modest "Curio" wordmark in the theme ink (Geom display face)
- *  - ONE Material [LinearProgressIndicator] — the M3 loading language
- *  - Rotating curiosity lines ("Loading your curiosity…") crossfading under
- *    the bar — the dynamic, alive part of the page
- *
- * Everything oversized/shimmery is gone; the theme owns every color so light,
- * dark, pastel and Material modes all read right with zero special-casing.
- *
- * Navigation behavior is UNCHANGED: hold until the bundled topic catalog has
- * warmed (800ms minimum, ~6s cap), then route to CRASH / ONBOARDING / HOME.
- * No back button. No interaction.
+ * Everything wears plain theme roles, so light, dark, pastel and Material
+ * modes all read right with zero special-casing. Navigation behavior is
+ * UNCHANGED: hold until the bundled topic catalog has warmed (800ms minimum,
+ * ~6s cap), then route to CRASH / ONBOARDING / HOME. No back button. No
+ * interaction.
  */
 @Composable
 fun SplashScreen(navController: NavHostController) {
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    // ── Entrance trigger: everything animates from this single flag ──────
+    // ── Entrance trigger ───────────────────────────────────────────────────
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(60)
         entered = true
     }
-    val logoScale by animateFloatAsState(
-        targetValue = if (entered) 1f else 0.7f,
-        animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
-        label = "splashLogoScale"
+    val entranceScale by animateFloatAsState(
+        targetValue = if (entered) 1f else 0.82f,
+        animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing),
+        label = "splashEntranceScale"
     )
     val contentAlpha by animateFloatAsState(
         targetValue = if (entered) 1f else 0f,
-        animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing),
         label = "splashContentAlpha"
     )
 
-    // ── Gentle endless float — the logo breathes while the catalog warms ─
-    val floatTransition = rememberInfiniteTransition(label = "splashFloat")
-    val floatPhase by floatTransition.animateFloat(
-        initialValue = -1f,
-        targetValue = 1f,
+    // ── Breathing logo — scale pulse only, never positional movement ──────
+    val breatheTransition = rememberInfiniteTransition(label = "splashBreathe")
+    val breatheScale by breatheTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.035f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1900, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 2300, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "splashFloatPhase"
+        label = "splashBreatheScale"
     )
 
     // ── Rotating curiosity loading lines ──────────────────────────────────
@@ -130,6 +130,22 @@ fun SplashScreen(navController: NavHostController) {
             lineIndex = (lineIndex + 1) % loadingLines.size
         }
     }
+
+    // ── REAL topic warm-up progress ────────────────────────────────────────
+    // The determinate bar tracks actual lane parses: each lane whose bundled
+    // catalog finished loading fills the bar one step, so the topics are
+    // READY when the splash hands off (Spin / Topic Database / counts all
+    // read the warm cache immediately).
+    val totalLanes = remember {
+        CurioCategories.visible.count { it.id != CategoryId.WILDCARD }.coerceAtLeast(1)
+    }
+    var warmedLanes by remember { mutableIntStateOf(0) }
+    val loadProgress = (warmedLanes.toFloat() / totalLanes).coerceIn(0f, 1f)
+    val shownProgress by animateFloatAsState(
+        targetValue = loadProgress,
+        animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing),
+        label = "splashLoadProgress"
+    )
 
     LaunchedEffect(Unit) {
         // Warm the canonical catalog while the splash branding plays, and
@@ -152,12 +168,16 @@ fun SplashScreen(navController: NavHostController) {
                     } catch (_: Throwable) {
                         // One broken lane never blocks the rest from warming.
                     }
+                    // Advance the bar whether the lane parsed or not — a
+                    // broken asset must never stall the indicator.
+                    warmedLanes++
                 }
         }
         delay(800)
         // Cap the total warm-up at ~6s (a cold first parse of the bundled
         // 5MB+ catalogs can outlast the 800ms branding on slow devices).
         withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
+        warmedLanes = totalLanes
         // Check for pending crash from previous session — also route to the
         // crash screen when the crash-loop guard flipped on safe mode, so the
         // user always gets the log + safe restart instead of an endless loop.
@@ -185,42 +205,50 @@ fun SplashScreen(navController: NavHostController) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // ── Logomark — small, floating ────────────────────────────
+                // ── Logomark — big, breathing (scale only, no bobbing) ────
                 Box(
                     modifier = Modifier
-                        .size(72.dp)
-                        .graphicsLayer { translationY = floatPhase * 5.dp.toPx() }
-                        .scale(logoScale),
+                        .size(100.dp)
+                        .graphicsLayer {
+                            scaleX = entranceScale * breatheScale
+                            scaleY = entranceScale * breatheScale
+                            alpha = contentAlpha
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_launcher_icon),
                         contentDescription = null,
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(88.dp),
                         contentScale = ContentScale.Fit
                     )
                 }
 
-                // ── Wordmark — modest, theme ink ──────────────────────────
+                // ── Wordmark — display size, theme ink ────────────────────
                 Text(
                     text = "Curio",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
-                        .padding(top = 18.dp)
+                        .padding(top = 22.dp)
                         .alpha(contentAlpha)
                 )
 
-                // ── Material loading: one linear indicator + rotating lines ─
+                // ── Determinate Material bar + rotating lines ─────────────
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
-                        .padding(top = 26.dp)
+                        .padding(top = 30.dp)
                         .alpha(contentAlpha)
                 ) {
                     LinearProgressIndicator(
-                        modifier = Modifier.width(148.dp)
+                        progress = { shownProgress },
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(50)),
+                        trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                     )
                     AnimatedContent(
                         targetState = lineIndex,
@@ -231,7 +259,7 @@ fun SplashScreen(navController: NavHostController) {
                     ) { index ->
                         Text(
                             text = loadingLines[index],
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )

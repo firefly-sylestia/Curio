@@ -1,18 +1,14 @@
 # Prompt — Current Request
 
 ## Request
-Drawer constellation: "more material style, fix in light mode as not visible properly, more larger, move around, tapping the star doesnt properly centres it, not visually appealing — fix it properly and keep it material style."
+Splash follow-up: "too small", "the icon itself moving looks bad try something else", "load the topics in the splash screen so it's ready."
 
 ## Status: COMPLETE
 
-## Root causes found
-- Light-mode invisibility: stars were near-white (`0xFFeef5fa`) and lines pale blue (`0xFFc7d9e8`) on the cream drawer surface.
-- Centering: the auto-zoom effect used a hardcoded ±80px guess and lived outside the layout scope (no real size); the popover also ignored the zoom transform.
-
-## Changes
-- `CurioConstellation.kt`: new `materialInk` param — theme-role lines (`onSurfaceVariant`, thicker), explored stars in `primary` @ 1.45×, dim unexplored dots; 7s sine twinkle on all stars + expanding pulse ring on the selected star; auto-center `LaunchedEffect` relocated inside BoxWithConstraints using real wPx/hPx with exact pivot math (`t = -2·(p−c)`); popover placement applies the layer transform so the card tracks the visual star. Stats page untouched (materialInk=false).
-- `HomeScreen.kt` DrawerCuriosityMap: passes materialInk, height 280→320dp.
-- Docs: AGENTS.md v224 note, changelog bullet.
+## Changes (`features/splash/SplashScreen.kt`)
+- BIGGER: logomark 64 → 88dp art (100dp box), wordmark headlineMedium → displaySmall, bar 148 → 180dp / 8dp tall rounded, spacing opened up.
+- Motion swap: the vertical bobbing is GONE — the logo now BREATHES (slow 2.3s scale pulse 1.0→1.035 combined with the entrance scale via graphicsLayer; no positional movement).
+- Topics loaded ON the splash: the bar is DETERMINATE and wired to the real catalog warm-up — `warmedLanes` increments per parsed lane (background thread snapshot write is safe), `shownProgress` animates to it, and it's forced to 100% right before navigation. Warm-up/routing logic unchanged (800ms min, ~6s cap).
 
 ## Verification
-- Delimiter balance OK on both files; single LaunchedEffect(selected…) confirmed; Stats path unaffected (defaults).
+- Delimiter balance OK; `progress = { }` lambda overload matches project-wide usage (material3 1.5.0-alpha20); no unused imports.
