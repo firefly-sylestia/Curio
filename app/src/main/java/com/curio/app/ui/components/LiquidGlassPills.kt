@@ -57,6 +57,9 @@ fun isLiquidGlassPillsActive(): Boolean =
 fun Modifier.liquidGlassCapsule(container: Color): Modifier {
     if (!isLiquidGlassPillsActive()) return this
     val backdrop = CurioGlassPills.backdrop ?: return this
+    // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
+    // below is NOT a composable context.
+    val dark = isCurioDarkTheme()
     return this.then(
         Modifier.drawBackdrop(
             backdrop = backdrop,
@@ -69,7 +72,7 @@ fun Modifier.liquidGlassCapsule(container: Color): Modifier {
             highlight = { Highlight.Default },
             shadow = {
                 Shadow.Default.copy(
-                    color = Color.Black.copy(alpha = if (isCurioDarkTheme()) 0.20f else 0.10f)
+                    color = Color.Black.copy(alpha = if (dark) 0.20f else 0.10f)
                 )
             },
             // The translucent wash over the refracted backdrop — 40% like
