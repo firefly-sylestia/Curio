@@ -1,46 +1,37 @@
 # Prompt.md — current request log
 
-## Request (complete): liquid-glass scroll morph on top-bar pills (v230) — COMMITTED, NOT PUSHED
+## Request (complete): v231 batch — nav squish, quote card, parallax toggle, constellation centering
 
-User clarified "that blue" = the liquid-glass blur. Ask: expand the glass to
-the floating top-bar buttons — Home drawer-menu pill, profile pill (only when
-no avatar photo), and the EntryDetail back/more pills — where the resting
-color stays solid exactly like the hero, and the scrolled endpoint becomes a
-real liquid-glass pill. Parallax-on-tilt was asked as a QUESTION ONLY — user
-said don't build it; answered in the summary, not implemented.
-
-Also first: pushed the stranded CI fix `ab42002` (dialog states declared
-before the permission launcher that captures them).
+User (multi-part): fix the Home nav pills being squished with text/icons cut
+("keep it expanded for all"); do the previous requests (constellation
+centering + moodboard quote card too wide / "expanding fully to the bottom
+from the top"); add the parallax-on-tilt effect as a NEW experiment toggle;
+push everything together.
 
 ### Changes
 
-- `LiquidGlassPills.kt`: `liquidGlassCapsule` gains `washAlpha: Float = 0.40f`
-  (the translucent wash over the refracted backdrop) so callers can drive the
-  glass strength with scroll.
-- `HomeScreen.kt`: menu + profile pills animate fills independently — when the
-  experiment is on their background lerps hero→TRANSPARENT and a
-  `liquidGlassCapsule(heroPillBg, washAlpha lerp(0.92→0.45))` takes over past
-  1% frostShift (Surface elevation drops, glass draws its own shadow).
-  Profile keeps the CLASSIC morph while an avatar photo is set.
-- `EntryDetailScreen.kt` DetailStickyBar: classic path now rests at the exact
-  solid hero fill (lift moved into frostShift); scrolled back/more buttons
-  swap `heroFrostPlate` for `liquidGlassCapsule(heroFill, …)` under the
-  experiment.
+1. **Nav-bar squish** (`CurioLiquidGlassTabBar.kt`): the glass bar used
+   `width(IntrinsicSize.Min)` on its container + `weight(1f)` tabs. Intrinsic
+   MIN width of Text is tiny (soft wrap), so every tab collapsed to a sliver
+   and icons/labels clipped. Now: natural content sizing + `widthIn(min =
+   64.dp)` floor — always expanded.
+2. **Constellation centering** (`CurioConstellation.kt`): two real bugs —
+   (a) targets used `(star.nx - 0.5) * wPx` but stars live in a LETTERBOXED
+   1400-viewBox (`px(x)=ox+x*s`, s=min(w,h)/1400), wrong whenever w≠h;
+   (b) pixel targets were multiplied by density a SECOND time inside
+   graphicsLayer → overshoot by the density factor (2.8× on the reporter's
+   A35). Fixed both.
+3. **Moodboard quote slips** (`MoodBoardZoom.kt`): default slot cap 240→180px,
+   resize ceiling 60%→42% of board, and a hard 1.6× cap on textScale — a
+   degenerate baseW could explode the font and stretch a slip over the full
+   board height ("expanding fully to the bottom from the top").
+4. **Glass parallax tilt** (new Experiments toggle, default OFF):
+   `GlassParallax.kt` gravity listener (TYPE_GRAVITY, low-pass 0.18,
+   dead-zone 0.12) exposes normalized tilt; `liquidGlassCapsule` sways the
+   capsule against it via a graphicsLayer block (snapshot reads only — no
+   recomposition per frame). Listener lifecycle managed in CurioNavHost
+   LaunchedEffect + the Settings toggle.
 
-Safety: all three pill sites sit INSIDE the NavHost capture subtree — covered
-by the v228 self-capture guard (plain capsule during record passes).
-
-Verification: delimiter balance OK on all three files; no stale `pillBg`
-refs; CI on push compiles (push pending per user).
-
-Docs: changelog ADD bullet + app/AGENTS.md v230 entry.
-
-## Parallax question (answered only, intentionally NOT implemented)
-
-Yes it's feasible: Android's hardware sensors (ROTATION_VECTOR / GYROSCOPE)
-can feed a parallax offset into the backdrop sampling transform — kyant0's
-backdrop supports a `layerBlock` GraphicsLayerScope transform per draw, so the
-glass could subtly counter-shift its refraction/lens highlight against device
-tilt like iOS liquid glass. Costs: a sensor listener lifecycle, ~1 extra
-transform per frame while glass is on screen, and tuning so it doesn't fight
-the draggable pill. Deferred at the user's request.
+Verification: delimiter balance OK on all 8 touched files; CI compiles on push.
+Docs: changelog ADD bullets + app/AGENTS.md v231 entry. Committed AND pushed
+(user asked for everything together).

@@ -1,4 +1,8 @@
 ADD
+- Bottom nav: the liquid-glass bar no longer squishes - tabs keep their full icon and label, always expanded.
+- Liquid glass: new "Glass parallax tilt" experiment - the glass pills sway against the phone's tilt for a floating depth effect.
+- Mood board: floating quote slips are smaller and can no longer stretch across the whole collage.
+- Drawer constellation: tapping a star now truly centers it on any screen shape.
 - Liquid glass: the Home menu/profile pills and the detail back/more pills now start as a solid hero-colored fill and morph into real refracting glass as you scroll (experiment toggle; profile keeps its photo off glass).
 - Drawer: the curiosity constellation is now true Material style — theme-colored lines and stars that are finally visible in light mode, bigger explored-lane stars with a gentle twinkle, a pulse ring on the tapped star, and the map now actually centers the star you tap.
 - Splash: bigger logo with a calm breathing motion instead of the odd up-down movement, plus a real progress bar that fills as your topics load — everything is ready the moment the app opens.

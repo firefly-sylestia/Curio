@@ -4880,6 +4880,11 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v231 — nav-bar squish fix + glass parallax tilt + quote slip bounds + constellation centering**
+  - CurioLiquidGlassTabBar: dropped `width(IntrinsicSize.Min)` + `weight(1f)` (intrinsic-min collapsed tabs, cutting icons/labels); tabs are content-sized with a 64dp floor.
+  - New Experiments toggle "Glass parallax tilt": `CurioGlassParallax` gravity listener (TYPE_GRAVITY, low-pass, dead-zone) drives a counter-tilt sway in `liquidGlassCapsule`'s graphicsLayer; listener runs only while enabled.
+  - MoodBoard quote slips: default slot width 240→180px cap, resize ceiling 60%→42% of board, textScale hard-capped at 1.6× (degenerate baseW could stretch a slip over the full board height).
+  - Constellation tap-centering: targets now use the letterboxed 1400-viewBox mapping (`ox + x*s`) instead of `nx*w`, and pixel offsets are divided by density before animation (double-scale overshoot).
 - **v230 — liquid-glass scroll morph on the top-bar pills**
   - Home menu/profile pills and EntryDetail back/more pills: resting look is unchanged SOLID hero fill; once scrolled past the threshold the flat frost endpoint is replaced by `liquidGlassCapsule` (refraction + blur), with `washAlpha` easing 0.92→0.45 so the handoff doesn't pop.
   - Profile pill keeps the classic morph while an avatar photo is set; detail's classic path now also starts at the exact hero fill (lift applied through frostShift instead of baked into the rest color).

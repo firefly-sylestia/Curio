@@ -181,6 +181,13 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Liquid glass pills", "Frosted-glass blur + refraction on the bottom nav, reveal and pet-studio pills (Android 12+)", AppPreferences.liquidGlassPillsState) {
                         AppPreferences.setLiquidGlassPillsEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Glass parallax tilt", "The glass pills sway against the phone's tilt for a floating depth effect (needs Liquid glass pills)", AppPreferences.glassParallaxState) {
+                        AppPreferences.setGlassParallaxEnabled(context, it)
+                        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
+                            context, it && AppPreferences.liquidGlassPillsState
+                        )
+                    }
                 }
                 }
             }

@@ -456,6 +456,15 @@ fun CurioNavHost(
     // (that cycle crashed HWUI with a RenderThread stack overflow).
     val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
     SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
+    // v231 — glass parallax tilt experiment: run the gravity listener only
+    // while the toggle is on (and the glass itself can render), so the
+    // sensor costs nothing otherwise.
+    LaunchedEffect(AppPreferences.glassParallaxState) {
+        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
+            context,
+            AppPreferences.glassParallaxState && isLiquidGlassPillsActive()
+        )
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,

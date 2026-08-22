@@ -663,7 +663,9 @@ private fun moodBoardQuoteSlot(index: Int, boardW: Float, boardH: Float): MoodQu
     val col = index % cols
     val row = index / cols
     val slotW = boardW * 0.5f
-    val cardW = (slotW * 0.82f).coerceIn(120f, 240f)
+    // v231 — tighter default slip: the old 240px ceiling read as a wide
+    // plank across half the collage; notes now hug their two lines.
+    val cardW = (slotW * 0.82f).coerceIn(110f, 180f)
     val cardH = cardW * 0.62f
     val x = col * slotW + (slotW - cardW) / 2f
     val y = boardH * 0.56f + row * (cardH * 1.02f) + (if (col == 1) cardH * 0.45f else 0f)
@@ -866,10 +868,10 @@ private fun MoodBoardFloatingCard(
     // grip gesture reads the LATEST clamps (a dragged/resized card moves
     // them).
     val minW = (w * 0.5f).coerceAtLeast(48f)
-    // v145 — a SIZE LIMIT on resizing: a card can grow to at most 60% of
-    // the visible board (still respecting the space to its right), so a
-    // stretched note can't balloon across the whole collage.
-    val maxW = ((boardW - x).coerceAtMost(boardW * 0.60f)).coerceAtLeast(minW)
+    // v145/v231 — a SIZE LIMIT on resizing: a card can grow to at most 42%
+    // of the visible board (was 60% — resized slips ballooned across the
+    // whole collage), so a stretched note stays a note.
+    val maxW = ((boardW - x).coerceAtMost(boardW * 0.42f)).coerceAtLeast(minW)
     val currentMinW by rememberUpdatedState(minW)
     val currentMaxW by rememberUpdatedState(maxW)
     val renderW = (w + resizeDelta).coerceIn(currentMinW, currentMaxW)
@@ -1008,10 +1010,15 @@ private fun MoodBoardFloatingCard(
             // copy (RichTextEditor enforces the real 280-char / five-line
             // input limit when editing).
             val previewText = limitQuoteContent(text).first
-            // v171 — the text scales WITH the card (renderW ÷ the card's
+            // v171/v231 — the text scales WITH the card (renderW ÷ the card's
             // base width), so a resized quote reads as a uniformly zoomed
             // note instead of a fixed-size slip that only stretches wider.
-            val textScale = (renderW / baseW.coerceAtLeast(1f)).coerceAtLeast(0.5f)
+            // v231 — HARD CAP at 1.6×: a degenerate baseW (legacy data,
+            // zero-width first frame) previously let the font explode and
+            // the slip stretch the full board height — the "quote expanding
+            // fully to the bottom from the top" bug.
+            val textScale = (renderW / baseW.coerceAtLeast(1f))
+                .coerceIn(0.5f, 1.6f)
             val baseFont = MaterialTheme.typography.bodySmall
             Text(
                 text = if (previewText.isBlank()) "Quote…" else "“$previewText”",

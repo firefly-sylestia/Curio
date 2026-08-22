@@ -169,14 +169,29 @@ fun CurioConstellation(
         LaunchedEffect(selected, zoom3d, wPx, hPx) {
             if (selected != null && zoom3d) {
                 val star = stars.getOrNull(explored.indexOf(selected)) ?: return@LaunchedEffect
-                val dx = (star.nx - 0.5f) * wPx
-                val dy = (star.ny - 0.5f) * hPx
+                // v231 — CENTERING FIX #2: stars don't fill the canvas
+                // edge-to-edge — they live in a letterboxed 1400×1400 view
+                // box (px(x) = ox + x*s, s = min(w,h)/1400, ox/oy centering).
+                // The old math used (star.nx - 0.5f) * wPx, which assumed a
+                // full-bleed mapping and was wrong whenever w ≠ h (the
+                // drawer map is always taller than wide). Compute the REAL
+                // rendered position instead.
+                val vs = minOf(wPx, hPx) / 1400f
+                val vox = (wPx - 1400f * vs) / 2f
+                val voy = (hPx - 1400f * vs) / 2f
+                val dx = (vox + star.x * vs) - wPx / 2f
+                val dy = (voy + star.y * vs) - hPx / 2f
                 tiltY = (star.nx - 0.5f) * 10f
                 tiltX = -(star.ny - 0.5f) * 6f
                 coroutineScope {
                     launch { zoom.animateTo(2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-                    launch { offsetX.animateTo(-dx * 2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
-                    launch { offsetY.animateTo(-dy * 2f, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                    // v231 — CENTERING FIX #1: offsetX/Y are DP-ish values
+                    // (graphicsLayer multiplies them by density again), but
+                    // dx/dy are PIXELS — without the division here every
+                    // device overshot the center by its density factor
+                    // (2.8× on the reporter's phone).
+                    launch { offsetX.animateTo(-dx * 2f / density.density, spring(dampingRatio = 0.7f, stiffness = 200f)) }
+                    launch { offsetY.animateTo(-dy * 2f / density.density, spring(dampingRatio = 0.7f, stiffness = 200f)) }
                 }
             } else {
                 coroutineScope {

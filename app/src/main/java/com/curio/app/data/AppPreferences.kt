@@ -428,6 +428,12 @@ object AppPreferences {
     var liquidGlassPillsState by mutableStateOf(false)
         private set
 
+    // Glass parallax tilt experiment (v231) — OPT-IN (default OFF): when the
+    // liquid-glass pills are showing, the device's gravity sensor makes them
+    // sway subtly AGAINST the phone's tilt — the iOS liquid-glass depth cue.
+    var glassParallaxState by mutableStateOf(false)
+        private set
+
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
@@ -667,6 +673,7 @@ object AppPreferences {
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
+        glassParallaxState = isGlassParallaxEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -963,6 +970,7 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
+    private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1143,6 +1151,15 @@ object AppPreferences {
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
         liquidGlassPillsState = enabled
+    }
+
+    // ── Glass parallax tilt (experiment, default OFF) ────────────────
+    fun isGlassParallaxEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_PARALLAX, false)
+
+    fun setGlassParallaxEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_PARALLAX, enabled).apply()
+        glassParallaxState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────

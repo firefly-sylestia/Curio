@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
@@ -106,6 +107,16 @@ fun Modifier.liquidGlassCapsule(
     // below is NOT a composable context.
     val dark = isCurioDarkTheme()
     return this
+        // v231 — glass parallax tilt (experiment): sway subtly AGAINST the
+        // device's tilt so the pane feels like it floats above the content.
+        // Reads snapshot state inside the layer block, so sensor updates
+        // only touch the layer properties — no recomposition per frame.
+        .then(
+            if (AppPreferences.glassParallaxState) Modifier.graphicsLayer {
+                translationX = -com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX * 5.dp.toPx()
+                translationY = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY * 4.dp.toPx()
+            } else Modifier
+        )
         // v228 — outer guard: during a capture record pass, skip the
         // backdrop-drawing inner node entirely and paint a plain capsule,
         // so the pill never samples its own recording layer.

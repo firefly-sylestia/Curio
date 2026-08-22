@@ -22,13 +22,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -93,7 +93,9 @@ fun RowScope.CurioLiquidGlassTabBarItem(
                 onClick = onClick
             )
             .fillMaxHeight()
-            .weight(1f)
+            // v231 — natural content width with a generous floor instead of
+            // weight(1f): equal-ish tabs that can never collapse.
+            .widthIn(min = 64.dp)
             .graphicsLayer {
                 val currentScale = scale()
                 scaleX = currentScale
@@ -209,8 +211,13 @@ fun CurioLiquidGlassTabBar(
         }
     }
 
+    // v231 — SQUISH FIX: the old `width(IntrinsicSize.Min)` + weight(1f)
+    // combination collapsed the bar — the intrinsic MIN width of a Text is
+    // tiny (soft wrap), so every tab shrank to a sliver and the icons and
+    // labels clipped. The bar now wraps its content naturally and each tab
+    // keeps a generous minimum width — always expanded, nothing cut.
     Box(
-        modifier = modifier.width(IntrinsicSize.Min),
+        modifier = modifier,
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
