@@ -1,6 +1,4 @@
 ADD
-- Drawer: a new Experiments toggle — "Drawer constellation" (off by default) — brings back the curiosity-map stars at the top of the drawer, now drawn as just the constellation pattern with no painted sky behind it.
-- Drawer: by default the top slot is now a small Material-style stat strip — day streak, level and saved count in one clean card; tap it to open your stats.
 - Constellation: redesigned as the real Corvus (The Crow) star pattern — the mythological symbol of curiosity. Space aesthetic with deep void background, faint nebula, gossamer constellation lines, and small bright stars. The brain mesh is gone.
 - Drawer: the planet footer now sits flush above the gesture bar — the art is no longer cut off behind the system nav area, and the footer SVG is trimmed 44 units from the bottom so it reads as one clean band.
 - Paper: the hole-ring coil is mirrored to match the reference art — the wire now starts inside the hole on the right, arches over, and the left leg dives past the card's left edge to an open end.

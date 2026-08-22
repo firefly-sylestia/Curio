@@ -98,7 +98,6 @@ import com.curio.app.data.laneKnowledge
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
-import com.curio.app.data.CurioQuests
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.PromoMode
 import com.curio.app.data.TopicCatalog
@@ -1932,15 +1931,9 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                 // brain with the user's REAL stats orbiting it ("Your
                 // Curiosity Map").
                 item("curiosityMap") {
-                    if (AppPreferences.drawerConstellationState) {
-                        // Experiment (Experiments → Constellation → "Drawer
-                        // constellation", default OFF) — the full curiosity-map
-                        // constellation: pattern only, no painted sky.
-                        DrawerCuriosityMap(onClick = { onNavigate(CurioRoutes.STATS) })
-                    } else {
-                        // Default — a small Material-style stat summary.
-                        DrawerMaterialStatStrip(onClick = { onNavigate(CurioRoutes.STATS) })
-                    }
+                    // v174c — the map is the stats page's summary: tapping it
+                    // opens the full observatory stats screen.
+                    DrawerCuriosityMap(onClick = { onNavigate(CurioRoutes.STATS) })
                 }
                 item("quests") {
                     DrawerNavRow(
@@ -2351,112 +2344,6 @@ private fun drawerSkyColors(): Triple<Color, Color, Color> {
  *  to see that lane's real data (spins, reveals, explores, saves, last
  *  explored) straight from the passport. Inactive lanes are solid but
  *  smaller and muted; a few extra tiny stars fill the sky. */
-/** v223 — the drawer's DEFAULT top slot while the drawer-constellation
- *  experiment is OFF: a small pure-Material stat summary — one tonal M3
- *  card with three mini panes (day streak · level · saved) separated by
- *  hairline dividers, under a tiny "Your curiosity" caption. Tapping it
- *  opens the full stats page, exactly like the constellation map did. */
-@Composable
-private fun DrawerMaterialStatStrip(onClick: () -> Unit) {
-    val context = LocalContext.current
-    val streak = remember(context) { StreakTracker.getStreak(context) }
-    val level = CurioQuests.levelForXp(CurioQuests.xpState)
-    val saved by produceState(initialValue = 0) {
-        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull()?.size ?: 0
-    }
-
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = 1.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            // Tiny caption so the strip reads as a miniature stats screen.
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CurioIcon(
-                    name = CurioIcons.AutoAwesome,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    size = 14.dp
-                )
-                Text(
-                    "YOUR CURIOSITY",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.5.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.height(10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                DrawerMaterialStatPane(
-                    glyph = CurioIcons.LocalFire,
-                    value = "$streak",
-                    label = "day streak",
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(modifier = Modifier.height(38.dp))
-                DrawerMaterialStatPane(
-                    glyph = CurioIcons.WorkspacePremium,
-                    value = "$level",
-                    label = "level",
-                    modifier = Modifier.weight(1f)
-                )
-                VerticalDivider(modifier = Modifier.height(38.dp))
-                DrawerMaterialStatPane(
-                    glyph = CurioIcons.Inventory2,
-                    value = "$saved",
-                    label = "saved",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
-}
-
-/** One mini pane of [DrawerMaterialStatStrip]: accent glyph, big value,
- *  quiet label — all pure Material roles (primary / onSurface / muted). */
-@Composable
-private fun DrawerMaterialStatPane(
-    glyph: String,
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        CurioIcon(
-            name = glyph,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            size = 18.dp
-        )
-        Text(
-            value,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
 @Composable
 private fun DrawerCuriosityMap(onClick: () -> Unit) {
     val context = LocalContext.current
@@ -2500,7 +2387,6 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             recentCutoff = 0L,
             selected = selected,
             onSelect = { selected = it },
-            plainBackground = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp),
