@@ -50,6 +50,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.curio.app.data.AppPreferences
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.theme.SansFlexFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -338,14 +340,20 @@ fun CurioFloatingNavBar(
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {
+        // v227 — liquid-glass experiment: when ON (Android 12+), the
+        // capsule's fill is the real-time refracted backdrop and the
+        // classic elevated fill yields (transparent + no shadow).
+        val glassOn = isLiquidGlassPillsActive()
+        val classicContainer = curioFloatingNavContainer(routePrefix)
         Surface(
             shape = RoundedCornerShape(50),
             // v149 — the container follows the page tint dynamically
             // (animated, theme-aware) while staying elevated.
             // v157 — the dark-mode hairline rim is GONE (the user asked):
             // the capsule stays defined by its elevated fill alone.
-            color = curioFloatingNavContainer(routePrefix),
-            shadowElevation = 6.dp
+            color = if (glassOn) Color.Transparent else classicContainer,
+            shadowElevation = if (glassOn) 0.dp else 6.dp,
+            modifier = if (glassOn) Modifier.liquidGlassCapsule(classicContainer) else Modifier
         ) {
             Row(
                 // v184 — more breathing room: bar padding 7 → 8dp and pill

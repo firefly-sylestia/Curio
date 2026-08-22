@@ -418,6 +418,16 @@ object AppPreferences {
     var drawerConstellationState by mutableStateOf(false)
         private set
 
+    // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
+    // OFF): the three floating nav-style capsules (bottom tab bar, Topic
+    // Reveal category/favorite bar, Pet Designer studio bar) render a
+    // REAL-TIME frosted backdrop — vibrancy + blur + lens refraction of
+    // whatever is behind them (the io.github.kyant0:backdrop recipe) —
+    // instead of the solid elevated fill. Needs Android 12+ (RenderEffect);
+    // older devices silently keep the current look.
+    var liquidGlassPillsState by mutableStateOf(false)
+        private set
+
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
@@ -656,6 +666,7 @@ object AppPreferences {
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
+        liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -950,6 +961,7 @@ object AppPreferences {
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
+    private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1121,6 +1133,15 @@ object AppPreferences {
     fun setDrawerConstellationEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_DRAWER_CONSTELLATION, enabled).apply()
         drawerConstellationState = enabled
+    }
+
+    // ── Liquid-glass navigation pills (experiment, default OFF) ──────
+    fun isLiquidGlassPillsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LIQUID_GLASS_PILLS, false)
+
+    fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
+        liquidGlassPillsState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────

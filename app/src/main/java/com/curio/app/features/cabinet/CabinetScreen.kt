@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -344,13 +343,13 @@ fun CabinetScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // v129 — the pill bar floats over the page now (no Scaffold
-                // slot), so the grid clears the gesture bar + the floating
-                // pill on phones; wide windows use the rail and just need
-                // the gesture-bar inset (which windowInsetsPadding provides).
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                // v131 — clearance grew with the bigger pill (76 → 84dp).
-                .padding(bottom = if (wide) 0.dp else 84.dp)
+            // v227 — NO reserved bottom band anymore: the grid now scrolls
+            // FULL-BLEED to the screen edge and entries pass UNDER the
+            // floating pill (the Home reference behavior). The old reserved
+            // clearance clipped every card at a hard horizontal line at the
+            // capsule's top — a visible "strip" the pill sat on. Clearance
+            // moved into the grid's own contentPadding below, so only the
+            // LAST row is lifted clear while scrolling runs under the pill.
         ) {
         // ── Grid or empty state — the scroll content fills the screen and
         // runs UNDER the torn hero banner and the sticky chip bar (both are
@@ -454,7 +453,13 @@ fun CabinetScreen(navController: NavController) {
                         start = 16.dp,
                         end = 16.dp,
                         top = contentTop,
-                        bottom = 24.dp
+                        // v227 — gesture-bar inset + the floating pill's
+                        // 84dp slot + breathing room, so the LAST entry can
+                        // scroll fully clear of the bar while every other
+                        // card passes underneath it.
+                        bottom = 24.dp + 84.dp +
+                            WindowInsets.navigationBars.asPaddingValues()
+                                .calculateBottomPadding()
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),

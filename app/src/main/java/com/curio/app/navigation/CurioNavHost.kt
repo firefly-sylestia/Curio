@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -121,10 +122,14 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioFloatingNavBar
+import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.CurioInAppToastHost
 import com.curio.app.ui.components.CurioNavigationRail
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
@@ -439,6 +444,13 @@ fun CurioNavHost(
     // floating pill bar + the tour dock): it draws ABOVE the nav bar, which
     // stays composed underneath, so opening the drawer slides the sheet and
     // scrim over the bar instead of making it vanish and pop back.
+    // v227 — liquid-glass pills experiment: one LayerBackdrop records
+    // everything the page Row draws (marked below); the glass capsules
+    // refract that recording. Published via [CurioGlassPills] (the
+    // CurioNavTint handoff pattern) so all three pill sites read it.
+    val navGlassBackdrop = rememberLayerBackdrop()
+    SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -477,6 +489,11 @@ fun CurioNavHost(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    // v227 — the liquid-glass capture layer: pages only.
+                    // The floating bar / sentiment pill / tour dock
+                    // overlays are SIBLINGS of this Box, so they never
+                    // record themselves into their own blurred backdrop.
+                    .then(if (isLiquidGlassPillsActive()) Modifier.layerBackdrop(navGlassBackdrop) else Modifier)
                     .then(
                         if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)

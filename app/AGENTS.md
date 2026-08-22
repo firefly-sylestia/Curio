@@ -4880,6 +4880,22 @@ app/src/main/java/com/curio/app/
   border, and while editing the trailing button is a solid TICK
   (`CurioIcons.Check`, contentColor fill / surface ink) that commits
   (Enter too); the replay/reset-to-zero button is gone.
+- **v227 — Android 16 Live Update + liquid-glass pills experiment + cabinet full-bleed grid**
+  - `ExploreSessionService.liveNotification`: RUNNING sessions on API 36+ post a genuine Live Update via
+    `NotificationCompat.ProgressStyle` (one accent-colored Segment of durationMinutes defines the max,
+    progress = elapsed minutes, tracker icon = ic_notification). Paused / pre-16 keep the BigTextStyle path.
+  - Liquid glass (experiment, OFF by default): new `ui/components/LiquidGlassPills.kt` —
+    `CurioGlassPills.backdrop` (NavHost-published LayerBackdrop via SideEffect, the CurioNavTint handoff
+    pattern) + `Modifier.liquidGlassCapsule(container)` (vibrancy + blur(8) + lens(24), Highlight.Default
+    rim, Shadow.Default, 40%-alpha container wash). Gate: `isLiquidGlassPillsActive()` = pref ON && API ≥ 31.
+    Dependency: `io.github.kyant0:backdrop:1.0.6` (Apache-2.0). NavHost marks ONLY the content-wrapper Box
+    with `.layerBackdrop(...)` so overlay pills never record themselves. Call sites: CurioFloatingNavBar,
+    RevealCategoryFavoriteBar, PetDesigner studio bar — each swaps its Surface to Transparent + 0 elevation
+    when active. Toggle: Settings → Experiments → "Liquid glass pills".
+  - Cabinet strip root cause: the grid Column reserved navigationBars + 84dp clearance, so the
+    LazyVerticalGrid CLIPPED every card at a hard horizontal line exactly at the capsule top ("the strip").
+    Fix: clearance moved into the grid's contentPadding bottom (24 + 84 + navBars) — entries scroll
+    full-bleed under the floating pill, only the last row lifts clear.
 - **v226 — explore sessions round-trip + Sans Flex voice**
   - `MainActivity.onDestroy` auto-pauses the active explore session when the app truly closes (`!isChangingConfigurations`), re-arming the service so the shade flips to Paused. Rotation/fold skips it.
   - Cancelled sessions are stashed (`ExploreSessionStore.stashCancelledSession` / `resumeCancelledSession`) and surface as a recovery row on Home (`CancelledExploreRow`, gated on no active session). The done-dialog confirm-cancel, Home stop button and the bubble's new Cancel all stash first.

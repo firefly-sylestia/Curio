@@ -177,6 +177,10 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Drawer constellation", "The star map at the top of the navigation drawer — off shows a small stat strip", AppPreferences.drawerConstellationState) {
                         AppPreferences.setDrawerConstellationEnabled(context, it)
                     }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Liquid glass pills", "Frosted-glass blur + refraction on the bottom nav, reveal and pet-studio pills (Android 12+)", AppPreferences.liquidGlassPillsState) {
+                        AppPreferences.setLiquidGlassPillsEnabled(context, it)
+                    }
                 }
                 }
             }

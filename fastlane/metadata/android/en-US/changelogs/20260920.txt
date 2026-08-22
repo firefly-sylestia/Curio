@@ -70,7 +70,12 @@ ADD
 - Fonts: the nav bar labels, Spin's Categories/Filter pills and Home's subtitle rows now use Sans Flex (bold) — a cleaner neutral sans voice.
 - Explore: cancelling is no longer forever — a cancelled session shows on Home as a resumable card (banked time continues where it stopped), and the floating bubble got its own Cancel button.
 
+ADD
+- Experiments: a new "Liquid glass pills" toggle (off by default) turns the bottom nav, the reveal's category/favorite bar and the pet-studio bar into real frosted glass - a live blurred, refracted view of whatever is behind them (Android 12+).
+- Explore: on Android 16+ the running explore session posts a genuine Live Update notification - a system-styled progress bar wearing your lane's color that can promote to a status-bar chip; earlier versions keep the current look.
+
 FIX
+- Cabinet: entry cards no longer get chopped at a hard line above the bottom nav - the grid scrolls full-bleed under the floating pill now, with only the last row lifted clear.
 - Explore: closing the app auto-pauses the running session so the timer stops counting while you're away.
 - Explore: the notification's inner timer text no longer lags behind — the shade's own live chronometer IS the timer now (the stale text is gone).
 - Explore: the "Done exploring?" prompt shows once per session instead of nagging every time you return to the app; Home's button reads "Express yourself" with a properly styled Keep-exploring pill.

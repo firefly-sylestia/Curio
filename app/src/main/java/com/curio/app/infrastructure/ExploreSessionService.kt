@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnLayout
@@ -410,18 +411,41 @@ class ExploreSessionService : Service() {
             // Plain cancel — end the session without jumping to the
             // write-it-down page (Done exploring opens it).
             .addAction(0, "Cancel", cancelSessionIntent())
-        // Category-flavored reflection question — shown under the live timer
-        // when the notification is expanded ("Finished listening? What track
-        // or lyric landed hardest?" etc.), so the wrap-up nudge leaves the
-        // user with something to write down. The collapsed content text stays
-        // the short live timer above the progress bar.
-        builder.setStyle(
-            NotificationCompat.BigTextStyle()
-                .bigText(
-                    if (paused) "$body\n${session.reflectionQuestion()}"
-                    else session.reflectionQuestion()
+
+        if (!paused && android.os.Build.VERSION.SDK_INT >= 36) {
+            // v227 — RUNNING on Android 16+: post a genuine LIVE UPDATE.
+            // The framework's ProgressStyle is the rich ongoing-notification
+            // surface (the same one LiveBridge promotes other apps' progress
+            // notifications into): the shade renders a styled segment bar,
+            // and the system may promote the notification to a status-bar
+            // chip / lock-screen live activity. Segment length defines the
+            // bar's max (durationMinutes); the tracker icon rides the
+            // elapsed position. Paused and pre-16 keep the classic style
+            // below (the frozen readout + reflection question).
+            val liveUpdateStyle = NotificationCompat.ProgressStyle()
+                .setProgress(progressMins)
+                .addProgressSegment(
+                    NotificationCompat.ProgressStyle.Segment(totalMins).setColor(accent)
                 )
-        )
+                // IconCompat (NOT the framework Icon) — the compat style
+                // bridges it to the framework tracker itself on API 36+.
+                .setProgressTrackerIcon(
+                    IconCompat.createWithResource(this, R.drawable.ic_notification)
+                )
+            builder.setStyle(liveUpdateStyle)
+        } else {
+            // Category-flavored reflection question — shown under the timer
+            // when the notification is expanded ("Finished listening? What
+            // track or lyric landed hardest?" etc.), so the wrap-up nudge
+            // leaves the user with something to write down.
+            builder.setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(
+                        if (paused) "$body\n${session.reflectionQuestion()}"
+                        else session.reflectionQuestion()
+                    )
+            )
+        }
         return builder.build()
     }
 

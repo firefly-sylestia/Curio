@@ -174,6 +174,9 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    // Liquid-glass pills experiment (v227): real-time backdrop
+    // vibrancy/blur/lens for the floating nav-style capsules.
+    implementation(libs.backdrop)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.savedstate)
