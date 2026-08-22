@@ -165,8 +165,6 @@ export const TopicHistoryScreen: React.FC = () => {
     return acc;
   }, {} as Record<string, CaptureEntity[]>), [entries]);
 
-  const totalCount = entries.length + favorites.length;
-
   return (
     <div className="min-h-screen pb-24 relative" style={{ backgroundColor: getBackgroundColor(isDark, isAmoled) }}>
       <CurioWatermarkBackdrop topClearance={HISTORY_HERO_HEIGHT + 30} alphaScale={0.45} />
