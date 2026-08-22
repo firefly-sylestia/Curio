@@ -73,6 +73,7 @@ fun CurioConstellation(
     selected: CategoryId?,
     onSelect: (CategoryId?) -> Unit,
     modifier: Modifier = Modifier,
+    plainBackground: Boolean = false,
     popoverContent: (@Composable (CategoryId) -> Unit)? = null
 ) {
     val isDark = isCurioDarkTheme()
@@ -257,13 +258,17 @@ fun CurioConstellation(
             fun py(y: Float) = oy + y * s
             fun pr(r: Float) = r * s
 
-            // ── Opaque background fill ──────────────────────────
-            drawRect(color = pageBg)
-
-            // v222 — pass animated nebula alpha + twinkle data
-            val twinkleValues = twinkleAlphas.map { it.value }
-            if (isDark) drawDarkBackground(w, h, ::px, ::py, ::pr, s, nebulaAlpha, twinkleValues)
-            else drawLightBackground(w, h, ::px, ::py, ::pr, s, nebulaAlpha, twinkleValues)
+            // ── Background ─────────────────────────────────────
+            // plainBackground (the drawer's curiosity map): NO painted sky —
+            // just the constellation pattern (lines + stars) floating on the
+            // caller's surface. The stats page keeps the full deep-space sky.
+            if (!plainBackground) {
+                drawRect(color = pageBg)
+                // v222 — pass animated nebula alpha + twinkle data
+                val twinkleValues = twinkleAlphas.map { it.value }
+                if (isDark) drawDarkBackground(w, h, ::px, ::py, ::pr, s, nebulaAlpha, twinkleValues)
+                else drawLightBackground(w, h, ::px, ::py, ::pr, s, nebulaAlpha, twinkleValues)
+            }
 
             // ── Constellation lines ─────────────────────────────
             if (isDark) {
