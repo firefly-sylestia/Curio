@@ -82,6 +82,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -2333,8 +2334,27 @@ private fun RevealCategoryFavoriteBar(
     // Category pill: auto-expands from icon-only to showing name on entry.
     var categoryExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { categoryExpanded = true }
+    // v223 — the expanded width now FITS the category name: measure the
+    // name at the exact label style and size the pill to icon + paddings
+    // + text (+ a little slack), instead of the old fixed 200dp that
+    // always expanded to the max no matter how short or long the name.
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val categoryNameStyle = MaterialTheme.typography.labelMedium.copy(
+        fontFamily = ChangaOneFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp
+    )
+    val categoryNamePx = remember(cat.displayName) {
+        textMeasurer.measure(AnnotatedString(cat.displayName), style = categoryNameStyle)
+            .size.width
+    }
+    val expandedCategoryWidth = with(density) {
+        (24.dp.toPx() + 6.dp.toPx() + 2.dp.toPx() + categoryNamePx.toFloat() + 14.dp.toPx())
+            .toDp()
+    }
     val categoryWidth by animateDpAsState(
-        targetValue = if (categoryExpanded) 200.dp else 56.dp,
+        targetValue = if (categoryExpanded) expandedCategoryWidth else 56.dp,
         animationSpec = RevealWidthSpring,
         label = "categoryBarWidth"
     )
@@ -2348,9 +2368,16 @@ private fun RevealCategoryFavoriteBar(
         animationSpec = RevealColorSpring,
         label = "categoryBarInk"
     )
-    // Favorite star: icon-only at rest, expands to show label when favorited.
+    // Favorite star: icon-only at rest, expands to show label when
+    // favorited. v223 — it now plays the SAME entry animation as the
+    // category pill: starts collapsed on entry and springs open when the
+    // topic is ALREADY favorited (before, opening a favorited topic just
+    // sat there fully expanded with no animation).
+    var favoriteRevealed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { favoriteRevealed = true }
+    val favoriteShown = isFavorited && favoriteRevealed
     val favWidth by animateDpAsState(
-        targetValue = if (isFavorited) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
+        targetValue = if (favoriteShown) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
         animationSpec = RevealWidthSpring,
         label = "favBarWidth"
     )
@@ -2446,7 +2473,7 @@ private fun RevealCategoryFavoriteBar(
                             size = 26.dp
                         )
                         AnimatedVisibility(
-                            visible = isFavorited,
+                            visible = favoriteShown,
                             enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
                             exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
                         ) {

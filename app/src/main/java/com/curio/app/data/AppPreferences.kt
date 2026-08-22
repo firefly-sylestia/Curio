@@ -63,6 +63,7 @@ object AppPreferences {
     // color system re-does per M3 guidelines (single primary, neutral
     // surfaces, 36 lane accents collapsed to ~6 muted families).
     private const val KEY_MATERIAL_THEME = "material_theme"
+    private const val KEY_MATERIAL_HERO_TEARS = "material_hero_tears"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
     // v28 — dark-mode elevation visibility: black shadows vanish on
@@ -268,6 +269,15 @@ object AppPreferences {
     var materialThemeState by mutableStateOf(false)
         private set
 
+    // v223 — "Material hero tears" (Appearance, default OFF): when the
+    // Material theme is on AND this option is on, the shared torn heroes
+    // (Home / Profile / Settings / Cabinet-All / drawer / onboarding) wear
+    // the scheme's primaryContainer (+ onPrimaryContainer ink) instead of
+    // the app-default rose/azure. Only meaningful while [materialThemeState]
+    // is on — the Appearance row greys out otherwise.
+    var materialHeroTearsState by mutableStateOf(false)
+        private set
+
     // Sky-azure hero variant (v27l) — when ON, the shared torn hero
     // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
     // azure instead of the rose-wood. v42 — azure is back AND the DEFAULT
@@ -308,19 +318,18 @@ object AppPreferences {
     var promoModeState by mutableStateOf(false)
         private set
 
-    // Peek-deck redesign (v7.7, EXPERIMENTAL) — the Spin deck's background
-    // peek cards wear four independently-toggleable upgrades: a top-lit
-    // gradient fill, a category-tinted hairline border, soft ambient
-    // shadows, and roomier two-line near-card titles. Each defaults OFF;
-    // the classic flat deck stays the default until the experiment
-    // concludes (then the winning path is hardcoded and the toggles removed).
-    var peekGradientState by mutableStateOf(false)
+    // Peek-deck upgrades (v7.7) — the Spin deck's background peek cards:
+    // top-lit gradient fill, category-tinted hairline border, roomier
+    // two-line near-card titles. v223 — the experiments CONCLUDED with all
+    // three ON: the toggles were removed from Experiments and the reads in
+    // SpinScreen are hardcoded true; these APIs stay dormant (defaults true).
+    var peekGradientState by mutableStateOf(true)
         private set
-    var peekHairlineState by mutableStateOf(false)
+    var peekHairlineState by mutableStateOf(true)
         private set
     var peekShadowsState by mutableStateOf(false)
         private set
-    var peekTitlesState by mutableStateOf(false)
+    var peekTitlesState by mutableStateOf(true)
         private set
     /** Experimental newer peek motion: travel first, then fade at the exit tail. */
     var peekTailFadeState by mutableStateOf(false)
@@ -339,9 +348,9 @@ object AppPreferences {
     // hero card is now the shipped default.
     var heroBorderState by mutableStateOf(true)
         private set
-    // v92 — the One UI tinted shadow (accent-colored layered glow) is now
-    // the shipped default for the hero ticket; the Experiments toggle
-    // remains for comparison.
+    // v223 — the Main card shadow experiment CONCLUDED ON: the One UI
+    // tinted shadow is the shipped default, the toggle is removed and the
+    // read in SpinScreen is hardcoded true. API stays dormant (default true).
     var heroShadowState by mutableStateOf(true)
     /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
     var paperHeaderCutsState by mutableStateOf(false)
@@ -362,10 +371,10 @@ object AppPreferences {
     // paper under-sheet (the extra layered lip below the seam) is an opt-in
     // experiment in Settings → Experiments → Paper & headers.
     var heroTearSheetState by mutableStateOf(false)
-    // v208 — experiment: the Spin Categories/Filter buttons (and their
-    // vertical variants) wear the floating NAV-PILL look (capsule, calmed
-    // accent active fill, elevated container) instead of the category
-    // rounded-24 buttons. Default OFF.
+    // v223 — the Nav-style buttons experiment CONCLUDED ON: the Spin
+    // Categories/Filter buttons (and their vertical variants) wear the
+    // floating NAV-PILL look as the shipped default; the toggle is removed
+    // and the reads in SpinScreen are hardcoded true. API stays dormant.
     var navPillButtonsState by mutableStateOf(true)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
@@ -616,6 +625,7 @@ object AppPreferences {
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         materialThemeState = isMaterialThemeEnabled(context)
+        materialHeroTearsState = isMaterialHeroTearsEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
@@ -720,6 +730,15 @@ object AppPreferences {
         materialThemeState = enabled
     }
 
+    /** Whether the torn heroes follow the Material theme (v223, default off). */
+    fun isMaterialHeroTearsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MATERIAL_HERO_TEARS, false)
+
+    fun setMaterialHeroTearsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MATERIAL_HERO_TEARS, enabled).apply()
+        materialHeroTearsState = enabled
+    }
+
     // ── Pastel crown depth (v7.12 experimental) ───────────────────────
     /** Whether pastel card gradients get a subtle 5% black deepen at the top (default on). */
     fun isPastelCrownDepthEnabled(context: Context): Boolean =
@@ -772,18 +791,18 @@ object AppPreferences {
     }
 
     // ── Peek-deck redesign (v7.7 experimental) ────────────────────────
-    /** Whether the top-lit gradient peek-card fill is on (default off). */
+    /** Whether the top-lit gradient peek-card fill is on (v223 — concluded ON, toggle removed). */
     fun isPeekGradientEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PEEK_GRADIENT, false)
+        prefs(context).getBoolean(KEY_PEEK_GRADIENT, true)
 
     fun setPeekGradientEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_GRADIENT, enabled).apply()
         peekGradientState = enabled
     }
 
-    /** Whether the category-tinted peek-card hairline is on (default off). */
+    /** Whether the category-tinted peek-card hairline is on (v223 — concluded ON, toggle removed). */
     fun isPeekHairlineEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PEEK_HAIRLINE, false)
+        prefs(context).getBoolean(KEY_PEEK_HAIRLINE, true)
 
     fun setPeekHairlineEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_HAIRLINE, enabled).apply()
@@ -799,9 +818,9 @@ object AppPreferences {
         peekShadowsState = enabled
     }
 
-    /** Whether roomier two-line near-card titles are on (default off). */
+    /** Whether roomier two-line near-card titles are on (v223 — concluded ON, toggle removed). */
     fun isPeekTitlesEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PEEK_TITLES, false)
+        prefs(context).getBoolean(KEY_PEEK_TITLES, true)
 
     fun setPeekTitlesEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_TITLES, enabled).apply()
@@ -903,9 +922,9 @@ object AppPreferences {
         heroBorderState = enabled
     }
 
-    /** Whether the soft hero-card shadow is on — v92: the One UI tinted
-     *  shadow is now the shipped default (was off); the Experiments toggle
-     *  remains for comparison. */
+    /** Whether the soft hero-card shadow is on — v223: the experiment
+     *  CONCLUDED ON (the One UI tinted shadow is the shipped default); the
+     *  Experiments toggle is removed and the read is hardcoded true. */
     fun isHeroShadowEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_HERO_SHADOW, true)
 
@@ -978,7 +997,8 @@ object AppPreferences {
         homeTintState = enabled
     }
 
-    /** Whether the Spin Categories/Filter buttons wear the nav-pill look (experimental, default off). */
+    /** Whether the Spin Categories/Filter buttons wear the nav-pill look
+     *  (v223 — concluded ON, toggle removed; default true). */
     fun isNavPillButtonsEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_NAV_PILL_BUTTONS, true)
 

@@ -237,6 +237,21 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v223 — one more Material option: the torn shared heroes
+        // follow the Material theme (primaryContainer + its ink)
+        // instead of the app-default rose/azure. Only meaningful while
+        // Material theme is on — the row greys out otherwise.
+        SettingsRowPulse(highlightKey == "appearance-material-hero-tears") {
+            CompactSwitchRow(
+                "Material hero tears",
+                "Torn heroes wear the theme's container color, not rose",
+                AppPreferences.materialHeroTearsState,
+                enabled = AppPreferences.materialThemeState
+            ) {
+                AppPreferences.setMaterialHeroTearsEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
         // v101 — the dark-mode pill glow is the subtle top-only version by
         // default; the toggle restores the fuller glow for comparison.
         SettingsRowPulse(highlightKey == "appearance-pill-glow") {

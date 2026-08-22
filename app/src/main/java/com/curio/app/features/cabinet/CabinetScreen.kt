@@ -285,7 +285,15 @@ fun CabinetScreen(navController: NavController) {
     // blend with the tinted Cabinet page (mirrors Spin's CurioNavTint
     // handoff — the bar lives outside the NavHost and can't read this
     // screen's state directly). Null on "All" so the bar stays plain.
+    // v223 — the wash now mirrors the page's ACTUAL background: the active
+    // filter's wash when a category is selected, else the shared-hero
+    // family's lane wash (Adaptive Hero) — the same fallback the page's own
+    // .background() uses below. Publishing null on "All" left the floating
+    // nav capsule painting the PLAIN theme background behind the
+    // lane-washed page — a visible strip the entries scrolled behind (Home
+    // never had it because it publishes its real homeBg).
     val cabinetWash = filterCat?.categoryBackgroundWash()
+        ?: heroLaneCategory()?.categoryBackgroundWash()
     // v149 — the active filter's accent (resolved in composition —
     // themedAccent is @Composable and can't run inside the effect).
     val cabinetAccent = filterCat?.themedAccent()

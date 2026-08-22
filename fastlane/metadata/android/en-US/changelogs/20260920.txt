@@ -1,4 +1,6 @@
 ADD
+- Appearance: a new "Material hero tears" option rides Material theme - the torn heroes wear the theme's own container color instead of the app's rose.
+- Spin: Main card shadow, Nav-style buttons, Top-lit deck cards, Tinted deck edges and Roomier deck titles are now always on - they won their experiments.
 - Drawer: a new Experiments toggle — "Drawer constellation" (off by default) — brings back the curiosity-map stars at the top of the drawer, now drawn as just the constellation pattern with no painted sky behind it.
 - Drawer: by default the top slot is now a small Material-style stat strip — day streak, level and saved count in one clean card; tap it to open your stats.
 - Constellation: redesigned as the real Corvus (The Crow) star pattern — the mythological symbol of curiosity. Space aesthetic with deep void background, faint nebula, gossamer constellation lines, and small bright stars. The brain mesh is gone.
@@ -63,6 +65,10 @@ ADD
 - Drawer: the curiosity constellation actually responds to your activity — stars grow brighter and bigger where you've liked, saved and pinned more, and the more connections you've made (quotes, pins, likes) the more lines bridge the brain's two halves; the sky also gets a whisper of paper grain.
 
 FIX
+- Topic Reveal: the category pill now expands just enough to fit its name instead of always stretching to the max width.
+- Topic Reveal: the Favorite pill plays its expand animation when you open an already-favorited topic (it used to sit there already expanded).
+- Cabinet: no more background strip behind the floating nav pills - the bar blends into the page like on Home.
+- Progress editor: the top corner shows and edits the pages/episodes TOTAL (not the progress number), in a cleaner chip, with a tick button to confirm while editing.
 - Drawer: the planet footer now sits in normal flow below the drawer's rows — it never floats, and expanding the About / Your Curiosity sections scrolls them above the footer instead of hiding them behind it.
 - Paper: the hole-ring coil's protruding left end now curves like a wire wrapping around the card edge (a small hook) instead of ending blunt — still fully visible past the card.
 - Navigation: the pill bar's collapse is even calmer still — the tab pills glide at ~20% slower pace, with the same smooth motion on the Like/Dislike pill and the Pet Studio bar.
@@ -225,5 +231,6 @@ FIX
 - Profile: pick an avatar photo in Edit profile — it shows on the Profile hero and in the Home menu drawer.
 
 REMOVE
+- Experiments: the five Spin visuals toggles are gone - all five looks are now the default.
 - The old update card in Support & diagnostics is gone — checking, release notes and installing now live on the dedicated Updates page.
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).

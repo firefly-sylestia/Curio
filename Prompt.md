@@ -1,22 +1,20 @@
 # Prompt — Current Request
 
-## Request
-Drawer top slot rework (Android app only):
-1. Keep the drawer constellation as PATTERN ONLY — no painted background (just lines + stars on the drawer surface).
-2. Stats page constellation stays EXACTLY as-is (full deep-space sky).
-3. Drawer constellation OFF by default, behind an Experiments toggle.
-4. Default drawer shows a small unique Material-style stat screen instead.
+## Request (7 parts, Android app only) — Status: COMPLETE
+1. **"Material hero tears"** Appearance option (default OFF, greys out while Material theme off): torn shared heroes wear `primaryContainer`/`onPrimaryContainer` instead of rose/azure. Shared gate `materialHeroTearsOn()` in SettingsHubScreen.kt, checked first in settings/home/profile accent + readable-ink resolvers.
+2. **Five Spin-visuals experiments concluded ON:** Main card shadow, Nav-style buttons, Top-lit deck cards, Tinted deck edges, Roomier deck titles — Experiments toggles + "Spin visuals" section removed; SpinScreen reads hardcoded true; pref APIs dormant with defaults flipped true.
+3. **Reveal category pill** expands to its measured name width (TextMeasurer) instead of fixed 200dp.
+4. **Reveal favorite pill** plays the entry expand animation when opening an already-favorited topic (`favoriteRevealed` mirrors the category pill).
+5. **Cabinet nav strip gone:** Cabinet publishes its real page bg (filter wash OR adaptive-hero lane wash) so the floating capsule no longer paints plain background behind a lane-washed page.
+6+7. **Progress editor corner redesigned:** shows/edits the TOTAL ("N pages"), hairline-bordered numeric field while editing, solid TICK button commits (Enter too); replay/reset removed.
 
-## Status: COMPLETE
-
-## Changes
-- `ui/components/CurioConstellation.kt`: new `plainBackground: Boolean = false` param — when true, skips the opaque page fill + nebula/starfield sky, drawing only constellation lines + stars. Stats page call unchanged (default false).
-- `data/AppPreferences.kt`: `drawerConstellationState` (default OFF), `KEY_DRAWER_CONSTELLATION`, getter/setter, seeded in initThemeMode.
-- `features/settings/ExperimentsScreen.kt`: "Drawer constellation" toggle in the Constellation section.
-- `features/home/HomeScreen.kt`: drawer's curiosity-map item gated on the toggle (ON → `DrawerCuriosityMap` with `plainBackground = true`; OFF → new `DrawerMaterialStatStrip` — small tonal M3 card, "YOUR CURIOSITY" caption, three panes: day streak · level · saved, tap → STATS).
+## Files touched
+AppPreferences.kt · ExperimentsScreen.kt · SpinScreen.kt · SettingsSectionScreen.kt · SettingsHubScreen.kt · HomeScreen.kt · ProfileScreen.kt · TopicRevealScreen.kt · CabinetScreen.kt · CurioProgressPill.kt · app/AGENTS.md · changelogs/20260920.txt
 
 ## Verification
-- Delimiter-balance check passed on all 4 touched files (Gradle builds are forbidden here; CI validates compilation on push).
+- Delimiter-balance check passed on all 10 Kotlin files.
+- Grep hygiene: no leftover `editingValue`/`valueText`/`resetValue`/`commitValueEdit`/`Replay` refs in CurioProgressPill; no `heroShadowState|peek*State|navPillButtonsState` reads left outside AppPreferences.
+- Gradle builds are forbidden here; CI validates compilation on push.
 
 ## Notes / gotchas
-- The str_replace tool failed to match multi-line blocks in this session — edits to HomeScreen.kt / AGENTS.md / changelog were applied via a verified Python script instead (each replacement asserted exactly one match).
+- str_replace failed on multi-line blocks again this session (same as last) — all edits applied via assertion-guarded Python scripts under tools/, each deleted after use.

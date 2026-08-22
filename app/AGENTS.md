@@ -4843,6 +4843,36 @@ app/src/main/java/com/curio/app/
   — the DRAWER passes `true` so the map paints ONLY the star pattern
   (lines + stars, no opaque page fill, no nebulae/starfield sky); the
   Stats page keeps the default false (full deep-space sky unchanged).
+- **v223 — Material hero tears + spin experiments concluded + reveal/cabinet/
+  progress fixes.** (1) NEW Appearance option **"Material hero tears"**
+  (`AppPreferences.materialHeroTearsState`, KEY_MATERIAL_HERO_TEARS, default
+  OFF, seeded in initThemeMode; row GREYS OUT while Material theme is off):
+  when ON together with `materialThemeState`, the shared torn heroes wear
+  `colorScheme.primaryContainer` (+ `onPrimaryContainer` ink) instead of the
+  rose/azure default or a lane. The gate lives in ONE shared helper
+  `materialHeroTearsOn()` (SettingsHubScreen.kt) checked FIRST in
+  `settingsRoseAccent()` / `homeRoseAccent()` / `profileRoseAccent()` and
+  their three readable-ink twins. (2) The five Spin-visuals experiments
+  CONCLUDED with the new look ON — Main card shadow, Nav-style buttons,
+  Top-lit deck cards, Tinted deck edges, Roomier deck titles: their
+  Experiments toggles (and the whole "Spin visuals" section) are REMOVED and
+  the SpinScreen reads are hardcoded `true`; the pref APIs stay dormant
+  (defaults flipped true). (3) Topic Reveal's floating bar: the category
+  pill's expanded width now FITS the name (TextMeasurer-measured label +
+  icon/padding slack) instead of a fixed 200dp, and the favorite pill plays
+  the SAME entry animation as the category pill (starts collapsed,
+  springs open via `favoriteRevealed`) so an already-favorited topic no
+  longer sits pre-expanded. (4) Cabinet publishes its REAL page background
+  to the nav chrome — `cabinetWash` falls back to
+  `heroLaneCategory()?.categoryBackgroundWash()` like the page's own
+  `.background()` — killing the plain-background strip behind the floating
+  nav pills on Cabinet-"All"+Adaptive Hero (Home never had it because it
+  publishes homeBg). (5) Progress editor corner control REDESIGNED: it now
+  shows and edits the TOTAL ("328 pages"), not the progress number (ring %
+  + steppers own progress); tap opens an inline numeric field with a hairline
+  border, and while editing the trailing button is a solid TICK
+  (`CurioIcons.Check`, contentColor fill / surface ink) that commits
+  (Enter too); the replay/reset-to-zero button is gone.
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.
 - Edge-to-edge is enabled at the Activity level; the system bars are themed by `CurioTheme`'s `SideEffect` to match the current color scheme + light/dark mode.

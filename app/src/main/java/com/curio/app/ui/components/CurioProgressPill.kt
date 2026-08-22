@@ -1,6 +1,7 @@
 package com.curio.app.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -222,6 +223,11 @@ fun CurioProgressPill(
 }
 
 /**
+ * v223 — the corner control shows and edits the TOTAL ("328 pages"),
+ * not the progress number — progress lives in the ring % + steppers.
+ * While editing, the trailing button is a TICK that commits the
+ * corrected total.
+ *
  * v167 — the count QUICK-EDIT moved to the dialog's top corner: ONE
  * number (the current count, no "/ total" suffix) sits top-right — tap it
  * and the inline numeric field opens right there, Enter saves it, and a
@@ -284,30 +290,21 @@ fun CurioProgressEditorDialog(
     val start = TopicProgressStore.get(topic.id).coerceIn(0, target)
     var value by remember { mutableIntStateOf(start) }
     val fraction = (value.toFloat() / target).coerceIn(0f, 1f)
-    // v167 — the dialog's TOP-CORNER single count is the quick-edit: tap
-    // it and an inline numeric field opens; Enter saves it; the replay
-    // icon beside it resets the count to the default (0). The old "0 /
-    // pages" line under the ring AND the "Edit total" chip are GONE (the
-    // user asked to remove them — the count moved to the corner and the
-    // total stays baked / alt-pill prefill).
-    var editingValue by remember { mutableStateOf(false) }
-    var valueText by remember { mutableStateOf(value.toString()) }
-    // Enter on the field saves the typed count immediately.
-    val commitValueEdit: () -> Unit = {
-        val typed = valueText.toIntOrNull()
-        value = (typed ?: value).coerceIn(0, target)
-        valueText = value.toString()
-        editingValue = false
-        if (value <= 0) TopicProgressStore.clear(context, topic.id)
-        else TopicProgressStore.set(context, topic.id, value, target)
-    }
-    // Reset the count back to the default (0 — the store treats it as
-    // cleared), persisted the same way the Enter-save does.
-    val resetValue: () -> Unit = {
-        value = 0
-        valueText = "0"
-        editingValue = false
-        TopicProgressStore.clear(context, topic.id)
+    // v223 — REDESIGNED corner control: it shows the TOTAL ("328 pages"),
+    // not the progress number (that's the ring % + steppers below). Tap
+    // the total chip and an inline numeric field opens in its place;
+    // while editing, the trailing button becomes a TICK that commits the
+    // corrected total (Enter commits too). Nothing persists until Save.
+    var editingTarget by remember { mutableStateOf(false) }
+    var targetText by remember { mutableStateOf(target.toString()) }
+    val commitTargetEdit: () -> Unit = {
+        val typed = targetText.toIntOrNull()
+        if (typed != null && typed > 0) {
+            target = typed.coerceAtMost(100_000)
+            value = value.coerceIn(0, target)
+        }
+        targetText = target.toString()
+        editingTarget = false
     }
 
     AlertDialog(
@@ -332,81 +329,85 @@ fun CurioProgressEditorDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // ── Top corner — the single current count (v167): tap it
-                //    and the inline numeric field opens right there, Enter
-                //    saves it, and the replay icon resets it to the default
-                //    (0). The old "0 / pages" line and "Edit total" chip
-                //    are gone — the count now lives here, one number only.
+                // ── Top corner — the TOTAL (v223): tap the chip to correct
+                //    the pages/episodes total; while editing, a TICK button
+                //    commits it (Enter too). The progress number lives in the
+                //    ring % + steppers below.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    // v174b CI fix — Row uses horizontalARRANGEMENT (the
-                    // count field + replay icon group sits at the top-right).
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
-                    if (editingValue) {
+                    if (editingTarget) {
                         BasicTextField(
-                            value = valueText,
-                            onValueChange = { valueText = it.filter { c -> c.isDigit() }.take(5) },
+                            value = targetText,
+                            onValueChange = { targetText = it.filter { c -> c.isDigit() }.take(6) },
                             singleLine = true,
-                            textStyle = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = contentColor
+                            textStyle = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = contentColor,
+                                textAlign = TextAlign.Center
                             ),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Done
                             ),
-                            keyboardActions = KeyboardActions(onDone = { commitValueEdit() }),
+                            keyboardActions = KeyboardActions(onDone = { commitTargetEdit() }),
                             cursorBrush = SolidColor(contentColor),
                             modifier = Modifier
-                                .width(56.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(contentColor.copy(alpha = 0.12f))
-                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                                .width(84.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(contentColor.copy(alpha = 0.10f))
+                                .border(
+                                    width = 1.dp,
+                                    color = contentColor.copy(alpha = 0.35f),
+                                    shape = RoundedCornerShape(14.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 9.dp)
                         )
+                        // Tick — commit the edited total.
+                        Surface(
+                            onClick = { commitTargetEdit() },
+                            shape = CircleShape,
+                            color = contentColor,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                CurioIcon(
+                                    name = CurioIcons.Check,
+                                    contentDescription = "Confirm total",
+                                    tint = MaterialTheme.colorScheme.surface,
+                                    size = 16.dp
+                                )
+                            }
+                        }
                     } else {
                         Surface(
                             onClick = {
-                                valueText = value.toString()
-                                editingValue = true
+                                targetText = target.toString()
+                                editingTarget = true
                             },
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(50),
                             color = contentColor.copy(alpha = 0.08f)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.padding(start = 14.dp, end = 11.dp, top = 7.dp, bottom = 7.dp)
                             ) {
                                 Text(
-                                    text = "$value",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = contentColor
+                                    text = "$target $unit",
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = contentColor,
+                                    maxLines = 1
                                 )
                                 CurioIcon(
                                     name = CurioIcons.Edit,
-                                    contentDescription = "Edit progress",
+                                    contentDescription = "Edit total",
                                     tint = contentColor.copy(alpha = 0.6f),
-                                    size = 12.dp
+                                    size = 13.dp
                                 )
                             }
-                        }
-                    }
-                    // Reset to default (0).
-                    Surface(
-                        onClick = { resetValue() },
-                        shape = CircleShape,
-                        color = contentColor.copy(alpha = 0.08f),
-                        modifier = Modifier.size(26.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            CurioIcon(
-                                name = CurioIcons.Replay,
-                                contentDescription = "Reset to default",
-                                tint = contentColor.copy(alpha = 0.6f),
-                                size = 14.dp
-                            )
                         }
                     }
                 }

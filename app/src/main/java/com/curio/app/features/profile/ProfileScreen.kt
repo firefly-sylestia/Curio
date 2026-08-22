@@ -82,6 +82,7 @@ import androidx.compose.ui.unit.IntRect
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.ui.components.AvatarCropDialog
 import com.curio.app.ui.components.ProfileAvatarImage
@@ -1306,6 +1307,10 @@ private fun BoxScope.ProfileHeroSymbol(
  */
 @Composable
 private fun profileRoseAccent(): Color {
+    // v223 — "Material hero tears": when the Material theme AND this
+    // option are both on, the torn hero wears the scheme's
+    // primaryContainer instead of the app-default rose/azure (or a lane).
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.primaryContainer
     // v31 — "Adaptive Hero" (v30's "Hero follows Spin lane"): Profile's
     // hero must follow the spin lane like Home/Settings do. The hero wears
     // the last-picked lane's accent.
@@ -1340,6 +1345,8 @@ private fun profileRoseAccent(): Color {
 /** Readable ink for content sitting on the rose banner (Home's helper). */
 @Composable
 private fun profileReadableInk(fill: Color): Color {
+    // v223 — Material hero tears: readable ink on primaryContainer.
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
     // Hero), the text must be accent-aware: white/cream on the deep accent
     // (never the fixed dark onSurface, which was invisible on a vivid lane
