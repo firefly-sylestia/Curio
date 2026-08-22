@@ -4885,6 +4885,19 @@ app/src/main/java/com/curio/app/
   - New Experiments toggle "Glass parallax tilt": `CurioGlassParallax` gravity listener (TYPE_GRAVITY, low-pass, dead-zone) drives a counter-tilt sway in `liquidGlassCapsule`'s graphicsLayer; listener runs only while enabled.
   - MoodBoard quote slips: default slot width 240→180px cap, resize ceiling 60%→42% of board, textScale hard-capped at 1.6× (degenerate baseW could stretch a slip over the full board height).
   - Constellation tap-centering: targets now use the letterboxed 1400-viewBox mapping (`ox + x*s`) instead of `nx*w`, and pixel offsets are divided by density before animation (double-scale overshoot).
+
+- **v232 — Pet Designer crash: glass off + native-crash reporter + self-heal**
+  - Pet Designer still SIGSEGV'd natively (RenderThread stack overflow, cyclic render
+    node) on some devices even with the v228 guard; Reveal's identical in-subtree pill
+    is fine. Root cause not yet reproducible from code alone.
+  - `PetDesignerScreen` studio bar: liquid-glass path disabled (solid elevated fill
+    always) pending a real tombstone. Reveal/Home/detail glass unchanged.
+  - `CurioCrashReporter.checkNativeCrash()` (called from `init`, API 30+): reconstructs
+    native deaths via `ActivityManager.getHistoricalProcessExitReasons` — SIGNALED and
+    unhandled CRASH exits land in the same history/pending/loop-window flow so the
+    crash screen finally shows them and repeated native deaths trip safe mode.
+  - Self-heal: if the liquid-glass experiment was ON at death, both glass toggles are
+    auto-disabled before the UI comes up (noted in the persisted log).
 - **v230 — liquid-glass scroll morph on the top-bar pills**
   - Home menu/profile pills and EntryDetail back/more pills: resting look is unchanged SOLID hero fill; once scrolled past the threshold the flat frost endpoint is replaced by `liquidGlassCapsule` (refraction + blur), with `washAlpha` easing 0.92→0.45 so the handoff doesn't pop.
   - Profile pill keeps the classic morph while an avatar photo is set; detail's classic path now also starts at the exact hero fill (lift applied through frostShift instead of baked into the rest color).

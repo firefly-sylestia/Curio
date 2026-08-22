@@ -252,6 +252,8 @@ FIX
 - YouTube Music: the "Listen in" link opens inside the YouTube Music app; Apple Music songs resolve to their album page with the track id.
 - Pet Designer: auto-import's bob animation plays, eye-size presets visibly change the eyes, and a new Pet size option scales the whole pet.
 - Profile: pick an avatar photo in Edit profile — it shows on the Profile hero and in the Home menu drawer.
+- Pet Designer: fixed a crash when opening the studio on some devices; the studio tab bar keeps its solid style for now.
+- Crash detection: native crashes (RenderThread) are now captured on next launch, and the app auto-disables the glass experiment after one so it can't crash-loop silently.
 
 REMOVE
 - Experiments: the five Spin visuals toggles are gone - all five looks are now the default.

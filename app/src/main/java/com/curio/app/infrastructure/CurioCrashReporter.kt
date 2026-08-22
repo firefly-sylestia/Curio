@@ -1,11 +1,14 @@
 package com.curio.app.infrastructure
 
+import android.app.ActivityManager
+import android.app.ApplicationExitInfo
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Process
 import android.util.Log
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.ExploreReminderScheduler
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,6 +39,7 @@ object CurioCrashReporter {
     private const val KEY_HAS_PENDING_CRASH = "has_pending_crash"
     private const val KEY_CRASH_TIMESTAMPS = "crash_timestamps"
     private const val KEY_SAFE_MODE = "safe_mode"
+    private const val KEY_LAST_NATIVE_EXIT = "last_native_exit_ts"
 
     // A crash loop = this many crashes within this window (gap-based: a lone
     // crash after a long healthy stretch never trips it — old stamps drop out
@@ -87,6 +91,88 @@ object CurioCrashReporter {
         }
 
         Log.d(TAG, "CrashReporter initialized")
+        // v232 — the Java handler above can never see a native SIGSEGV
+        // (RenderThread stack overflow): the process dies inside libc before
+        // any Java code runs. Reconstruct what happened from the OS instead.
+        checkNativeCrash(context)
+    }
+
+    /**
+     * v232 — NATIVE CRASH DETECTION + GLASS SELF-HEAL.
+     *
+     * Reads the PREVIOUS process exit from ActivityManager
+     * ([ActivityManager.getHistoricalProcessExitReasons], API 30+). A
+     * signalled exit (SIGSEGV/SIGABRT from libhwui — e.g. the Pet Designer
+     * studio-bar cyclic-render-node crash) or a crash exit with no pending
+     * flag of ours (the handler never ran) is recorded as a NATIVE crash:
+     * it goes into the same crash history + pending-crash flow so the crash
+     * screen finally shows it, and into the same loop window so repeated
+     * native deaths still trip safe mode.
+     *
+     * Self-heal: if the liquid-glass experiment was enabled at death, both
+     * glass toggles are switched OFF before the UI comes up — an invisible
+     * native crash-loop must not be able to persist across relaunches.
+     */
+    fun checkNativeCrash(context: Context) {
+        if (Build.VERSION.SDK_INT < 30) return
+        val app = context.applicationContext
+        runCatching {
+            val am = app.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val exits = am.getHistoricalProcessExitReasons(app.packageName, 0, 3)
+            if (exits.isEmpty()) return
+            val prefs = app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val seenUpTo = prefs.getLong(KEY_LAST_NATIVE_EXIT, 0L)
+            // Most recent first; only entries newer than the last one we
+            // processed are new information.
+            val fresh = exits.filter { it.timestamp > seenUpTo }
+            if (fresh.isEmpty()) return
+            prefs.edit().putLong(KEY_LAST_NATIVE_EXIT, fresh.maxOf { it.timestamp }).apply()
+
+            val info = fresh.first()
+            val native = when (info.reason) {
+                ApplicationExitInfo.REASON_SIGNALED,
+                ApplicationExitInfo.REASON_CRASH ->
+                    // A plain REASON_CRASH with our pending flag set was
+                    // already recorded by the Java handler — don't double-log.
+                    !(info.reason == ApplicationExitInfo.REASON_CRASH && hasPendingCrash(app))
+                else -> false
+            }
+            if (!native) return
+
+            val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+            val signal = runCatching { info.status }.getOrDefault(0)
+            val log = buildString {
+                appendLine("Curio Crash Report (native)")
+                appendLine("Time: ${fmt.format(java.util.Date(info.timestamp))}")
+                appendLine("Kind: Native process exit (no Java exception — RenderThread/native crash)")
+                appendLine("Reason: ${exitReasonName(info.reason)}${if (info.reason == ApplicationExitInfo.REASON_SIGNALED && signal != 0) " (signal $signal)" else ""}")
+                appendLine("Description: ${info.description ?: "none"}")
+                appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL}")
+                appendLine("Android: ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})")
+                if (AppPreferences.isLiquidGlassPillsEnabled(app)) {
+                    appendLine()
+                    appendLine("Self-heal: Liquid glass pills + parallax tilt were ON at death — auto-disabled to stop the crash loop. Re-enable in Settings → Experiments once the cause is fixed.")
+                    AppPreferences.setLiquidGlassPillsEnabled(app, false)
+                    AppPreferences.setGlassParallaxEnabled(app, false)
+                    Log.w(TAG, "Native crash with glass experiment ON — toggles auto-disabled (self-heal)")
+                }
+            }
+            Log.e(TAG, "Native crash reconstructed: reason=${info.reason} status=$signal")
+            persistCrash(app, log)
+            enterSafeModeIfLooping(app)
+        }.onFailure { Log.w(TAG, "native-crash check failed", it) }
+    }
+
+    private fun exitReasonName(reason: Int): String = when (reason) {
+        ApplicationExitInfo.REASON_SIGNALED -> "SIGNALED"
+        ApplicationExitInfo.REASON_CRASH -> "CRASH"
+        ApplicationExitInfo.REASON_ANR -> "ANR"
+        ApplicationExitInfo.REASON_LOW_MEMORY -> "LOW_MEMORY"
+        ApplicationExitInfo.REASON_USER_REQUESTED -> "USER_REQUESTED"
+        ApplicationExitInfo.REASON_USER_STOPPED -> "USER_STOPPED"
+        ApplicationExitInfo.REASON_EXIT_SELF -> "EXIT_SELF"
+        ApplicationExitInfo.REASON_OTHER -> "OTHER"
+        else -> "UNKNOWN($reason)"
     }
 
     fun testCrash() {

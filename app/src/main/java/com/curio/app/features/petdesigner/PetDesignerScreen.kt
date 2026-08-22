@@ -135,8 +135,6 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainer
-import com.curio.app.ui.components.isLiquidGlassPillsActive
-import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
 import com.curio.app.ui.theme.ChangaOneFontFamily
@@ -1415,9 +1413,12 @@ private fun PetStudioBottomNav(
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-    // v227 — liquid-glass experiment: refracted backdrop instead of the
-    // solid elevated fill when the toggle is on (Android 12+).
-    val glassOn = isLiquidGlassPillsActive()
+    // v232 — GLASS DISABLED on this bar pending a real tombstone: the v228
+    // self-capture guard holds for Reveal's identical in-subtree pill, but
+    // the Pet Designer screen still SIGSEGVs natively on RenderThread on
+    // some devices (Samsung A35 / Android 16 / Vulkan). The native-crash
+    // reporter will capture the next occurrence; until then this bar keeps
+    // its proven solid elevated fill on every device.
     val studioContainer = curioFloatingNavContainer(null)
     Surface(
         shape = RoundedCornerShape(50),
@@ -1425,9 +1426,8 @@ private fun PetStudioBottomNav(
         // page publishes no wash, so this resolves to the elevated surface
         // with the theme-aware fallback). v160 — the dark-mode hairline
         // rim is gone (see v157).
-        color = if (glassOn) Color.Transparent else studioContainer,
-        shadowElevation = if (glassOn) 0.dp else 6.dp,
-        modifier = if (glassOn) Modifier.liquidGlassCapsule(studioContainer) else Modifier
+        color = studioContainer,
+        shadowElevation = 6.dp
     ) {
         Row(
             modifier = Modifier.padding(7.dp),
