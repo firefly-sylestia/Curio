@@ -1512,8 +1512,7 @@ private fun PetStudioBottomNav(
                 }
             }
         }
-        return
-    }
+    } else {
     Surface(
         shape = RoundedCornerShape(50),
         // v149 — same dynamic container as the floating nav bar (the pet
@@ -1551,6 +1550,7 @@ private fun PetStudioBottomNav(
             }
         }
     }
+    } // v245 — else (solid bar)
     }
 }
 
