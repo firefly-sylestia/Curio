@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -55,6 +56,9 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.FullBleedHeroItem
+import com.curio.app.features.settings.SettingsStickyBackPill
+import com.curio.app.features.settings.isPastHero
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -251,7 +255,9 @@ fun UpdatesScreen(navController: NavController) {
         }
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
+            val listState = rememberLazyListState()
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 // v255 — SCROLLING HERO: the banner is the list's first item
                 // and scrolls away with the page (the Home/Profile way).
@@ -264,11 +270,14 @@ fun UpdatesScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item {
-                    SettingsHeroHeader(
-                        title = "Updates",
-                        subtitle = "Your build and what's new",
-                        onBack = { navController.popBackStack() }
-                    )
+                    // v257 — full-bleed banner (no edge-padding inset).
+                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                        SettingsHeroHeader(
+                            title = "Updates",
+                            subtitle = "Your build and what's new",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
                 item { CurioSectionLabel("Updates") }
                 // ── Status card — current version, check state, the
@@ -698,6 +707,16 @@ private fun ReleaseNotesBlock(notes: String, accent: Color) {
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
             }
+        }
+        // v257 — sticky back pill once the scrolling hero moves up.
+        // Explicit Box: guarantees a BoxScope receiver for align() no matter
+        // which composable lambda this sits in.
+        Box(modifier = Modifier.fillMaxSize()) {
+            SettingsStickyBackPill(
+                onBack = { navController.popBackStack() },
+                visible = listState.isPastHero(),
+                modifier = Modifier.align(Alignment.TopStart)
+            )
         }
     }
 }

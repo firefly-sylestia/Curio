@@ -1,5 +1,27 @@
 # Prompt.md — current request log
 
+## Request: v258 — CI fix for PetOverlayService; hero side-cut + sticky back regressions
+
+1. **CI**: PetOverlayService missing `android.app.PendingIntent` +
+   `androidx.core.view.doOnLayout` imports → added.
+2. **Hero cut from the sides** (v255 regression): heroes became list items
+   measured inside contentPadding start/end. New shared
+   `FullBleedHeroItem(edgePad)` in SettingsHubScreen.kt applies the
+   negative-offset/requiredWidth viewport trick; applied to hub grid,
+   SettingsSection, Experiments, Backup, Support, Updates, Promo, Quests,
+   RecycleBin, Recent, ManageCategories.
+3. **Sticky back with glass morph**: new shared `SettingsStickyBackPill`
+   (fades/scales in once scrolled past hero top; wears liquidGlassCapsule
+   when in-screen glass active, solid surfaceVariant otherwise). Wired on
+   all the above + LazyListState/LazyGridState.isPastHero() helpers;
+   added rememberLazyListState where screens lacked one.
+
+## Status: complete — commit & push this turn.
+
+---
+
+# Prompt.md — current request log
+
 ## Request: v257 — bubble expand glitch + redesign; pet-designer bottom strip
 
 1. **Bubble glitch root cause**: AnimatedContent's SizeTransform animated the

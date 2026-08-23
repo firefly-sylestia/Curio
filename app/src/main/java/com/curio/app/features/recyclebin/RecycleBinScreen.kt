@@ -48,6 +48,9 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ImageStorageManager
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.FullBleedHeroItem
+import com.curio.app.features.settings.SettingsStickyBackPill
+import com.curio.app.features.settings.isPastHero
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -148,11 +151,14 @@ fun RecycleBinScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item("bin-hero") {
-                        SettingsHeroHeader(
-                            title = "Recycle bin",
-                            subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you",
-                            onBack = { navController.popBackStack() }
-                        )
+                        // v257 — full-bleed banner (no edge-padding inset).
+                        FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                            SettingsHeroHeader(
+                                title = "Recycle bin",
+                                subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you",
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                     }
                     item("bin-controls") {
                         Row(
@@ -238,6 +244,12 @@ fun RecycleBinScreen(navController: NavController) {
                     .padding(top = 10.dp, bottom = 16.dp)
             )
         }
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = trashed.isNotEmpty() && listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
+        )
     }
 
     // ── Delete forever (single entry) ──────────────────────────────────

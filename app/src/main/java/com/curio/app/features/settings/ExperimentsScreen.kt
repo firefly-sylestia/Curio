@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -80,17 +82,22 @@ fun ExperimentsScreen(navController: NavController) {
         // lives INSIDE the list as the first item and scrolls away with the
         // page. It still runs up behind the status bar (the header applies
         // its own status-bar inset for the back pill).
+        val listState = rememberLazyListState()
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                SettingsHeroHeader(
-                    title = "Experiments",
-                    subtitle = "Try ideas before they ship",
-                    onBack = { navController.popBackStack() }
-                )
+                // v257 — full-bleed banner (no edge-padding inset).
+                FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                    SettingsHeroHeader(
+                        title = "Experiments",
+                        subtitle = "Try ideas before they ship",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
             // v223 — the "Spin visuals" section is GONE: all five
             // experiments (Main card shadow, Nav-style buttons, Top-lit deck
@@ -207,6 +214,12 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
         }
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
+        )
     }
 
     // ── Ring style picker — the three 3D ring looks, single-select ──

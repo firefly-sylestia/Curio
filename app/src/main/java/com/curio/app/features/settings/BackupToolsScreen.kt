@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -323,17 +324,22 @@ fun BackupToolsScreen(navController: NavController) {
         // lives INSIDE the list as the first item and scrolls away with the
         // page. It still runs up behind the status bar (the header applies
         // its own status-bar inset for the back pill).
+        val listState = rememberLazyListState()
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                SettingsHeroHeader(
-                    title = "Backup & restore",
-                    subtitle = "Keep your captures safe",
-                    onBack = { navController.popBackStack() }
-                )
+                // v257 — full-bleed banner (no edge-padding inset).
+                FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                    SettingsHeroHeader(
+                        title = "Backup & restore",
+                        subtitle = "Keep your captures safe",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
             item { CurioSectionLabel("Your data") }
             item {
@@ -489,5 +495,11 @@ fun BackupToolsScreen(navController: NavController) {
                 }
             }
         }
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
+        )
     }
 }

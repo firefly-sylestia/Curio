@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +50,9 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.FullBleedHeroItem
+import com.curio.app.features.settings.SettingsStickyBackPill
+import com.curio.app.features.settings.isPastHero
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -115,7 +119,9 @@ fun PromoModeScreen(navController: NavController) {
         }
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
+            val listState = rememberLazyListState()
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 // v255 — SCROLLING HERO: the banner is the list's first item
                 // and scrolls away with the page (the Home/Profile way).
@@ -128,11 +134,14 @@ fun PromoModeScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
-                    SettingsHeroHeader(
-                        title = "Promo mode",
-                        subtitle = if (promoOn) "Demo content on · share-ready" else "Store-ready promo art",
-                        onBack = { navController.popBackStack() }
-                    )
+                    // v257 — full-bleed banner (no edge-padding inset).
+                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                        SettingsHeroHeader(
+                            title = "Promo mode",
+                            subtitle = if (promoOn) "Demo content on · share-ready" else "Store-ready promo art",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
                 item { CurioSectionLabel("Demo content") }
                 item { PromoStatusCard(on = promoOn, onToggle = { AppPreferences.setPromoModeEnabled(context, !promoOn) }) }
@@ -1048,6 +1057,16 @@ private fun PhoneMockup(
                     }
                 }
             }
+        }
+        // v257 — sticky back pill once the scrolling hero moves up.
+        // Explicit Box: guarantees a BoxScope receiver for align() no matter
+        // which composable lambda this sits in.
+        Box(modifier = Modifier.fillMaxSize()) {
+            SettingsStickyBackPill(
+                onBack = { navController.popBackStack() },
+                visible = listState.isPastHero(),
+                modifier = Modifier.align(Alignment.TopStart)
+            )
         }
     }
 }

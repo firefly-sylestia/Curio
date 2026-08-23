@@ -6,6 +6,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
@@ -31,6 +35,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -91,6 +98,8 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
@@ -399,6 +408,83 @@ fun SettingsHeroHeader(
         }
     }
 }
+
+/**
+ * v257 — full-bleed wrapper for the settings-family heroes that now live
+ * INSIDE their scrolling lists: the list's edge padding would inset the
+ * banner from both sides ("cut from the sides"). This measures the padded
+ * width, offsets left by the edge padding and forces the viewport width —
+ * the tear reaches both screen edges again (the Pet Designer v179 trick,
+ * now shared).
+ */
+@Composable
+internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val viewportWidth = maxWidth + edgePad * 2
+        Box(
+            modifier = Modifier
+                .offset(x = -edgePad)
+                .requiredWidth(viewportWidth)
+        ) { hero() }
+    }
+}
+
+/**
+ * v257 — the sticky back pill for the scrolling-hero screens. The banner
+ * itself scrolls away now, so once the page is scrolled past its top the
+ * back control fades in as a floating 44dp pill that wears clear liquid
+ * glass when that's active — the Home/Profile sticky-pill language.
+ */
+@Composable
+internal fun SettingsStickyBackPill(
+    onBack: () -> Unit,
+    visible: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(160)) + scaleIn(initialScale = 0.8f),
+        exit = fadeOut(tween(140)) + scaleOut(targetScale = 0.85f),
+        modifier = modifier
+    ) {
+        val container = MaterialTheme.colorScheme.surfaceVariant
+        val glassOn = isInScreenGlassActive()
+        Surface(
+            shape = CircleShape,
+            color = if (glassOn) Color.Transparent else container,
+            shadowElevation = if (glassOn) 0.dp else 3.dp,
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(start = 16.dp, top = 8.dp)
+                .size(44.dp)
+                .then(if (glassOn) Modifier.liquidGlassCapsule(container) else Modifier)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onBack
+                )
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CurioIcon(
+                    name = CurioIcons.ChevronLeft,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    size = 24.dp
+                )
+            }
+        }
+    }
+}
+
+/** True once a scrolling page has moved past its hero's top region. */
+internal fun LazyListState.isPastHero(): Boolean =
+    firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 200
+
+internal fun LazyGridState.isPastHero(): Boolean =
+    firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 200
 
 /** One ink-glass action pill on the hero — the banner's readable ink at a
  *  soft alpha (the Cabinet hero pill language), so hero action pills like
@@ -751,12 +837,16 @@ fun SettingsHubScreen(navController: NavController) {
             ) {
                 // ── Hero banner — scrolls away with the page ──
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    SettingsHeroHeader(
-                        title = "Settings",
-                        subtitle = "Tune Curio your way",
-                        onBack = { navController.popBackStack() },
-                        compact = wide
-                    )
+                    // v257 — full-bleed: the grid's edge padding must not
+                    // inset the torn banner from the screen sides.
+                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                        SettingsHeroHeader(
+                            title = "Settings",
+                            subtitle = "Tune Curio your way",
+                            onBack = { navController.popBackStack() },
+                            compact = wide
+                        )
+                    }
                 }
                 // ── Search — filters every section below as you type ──
                 item(span = { GridItemSpan(maxLineSpan) }) {
@@ -840,6 +930,13 @@ fun SettingsHubScreen(navController: NavController) {
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .padding(top = 10.dp, bottom = 16.dp)
+        )
+        // v257 — the back control returns once the scrolling hero has moved
+        // up: a floating pill that wears clear liquid glass when active.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = gridState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
         )
         } else {
             SettingsTwoPaneHub(

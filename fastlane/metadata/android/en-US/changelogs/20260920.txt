@@ -1,3 +1,6 @@
+FIX: Pet overlay companion compiles (missing imports).
+FIX: Scrolling heroes were inset from the screen sides - every settings-family banner is full-bleed again.
+ADD: The back pill returns as a sticky floating control (with the glass morph) once a scrolling hero moves up.
 FIX: Explore bubble expand is smooth now - the panel has a fixed width so the overlay window resizes in one step instead of fighting itself.
 NEW: Redesigned explore bubble panel - big chronometer readout, labeled Pause/Hide/Cancel controls, note field and Finish action.
 FIX: Pet Designer - the bare background strip behind the studio capsule is gone; the page runs edge-to-edge to the bottom.

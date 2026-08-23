@@ -42,6 +42,9 @@ import com.curio.app.data.UnexploredTopic
 import com.curio.app.data.formatSessionShort
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.FullBleedHeroItem
+import com.curio.app.features.settings.SettingsStickyBackPill
+import com.curio.app.features.settings.isPastHero
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -185,11 +188,14 @@ fun RecentScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item("recents-hero") {
-                        SettingsHeroHeader(
-                            title = "Recents",
-                            subtitle = "Your latest discoveries, all in one place",
-                            onBack = { navController.popBackStack() }
-                        )
+                        // v257 — full-bleed banner (no edge-padding inset).
+                        FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                            SettingsHeroHeader(
+                                title = "Recents",
+                                subtitle = "Your latest discoveries, all in one place",
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                     }
                     items(feed, key = { it.key }) { item ->
                         RecentFeedRow(item = item, navController = navController)
@@ -210,6 +216,12 @@ fun RecentScreen(navController: NavController) {
                     .padding(top = 10.dp, bottom = 16.dp)
             )
         }
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = feed.isNotEmpty() && listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
+        )
     }
 }
 

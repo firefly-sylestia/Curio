@@ -182,7 +182,11 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
+                // v257 — full-bleed banner (the list's edge padding must not
+                // inset the torn hero from the screen sides).
+                FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                    SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
+                }
             }
             item { CurioSectionLabel(page.title) }
             item {
@@ -197,6 +201,12 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .padding(top = 8.dp, bottom = 16.dp)
+        )
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
         )
     }
 }

@@ -49,6 +49,9 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.FullBleedHeroItem
+import com.curio.app.features.settings.SettingsStickyBackPill
+import com.curio.app.features.settings.isPastHero
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -164,11 +167,14 @@ fun ManageCategoriesScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 item("hero") {
-                    SettingsHeroHeader(
-                        title = "Manage categories",
-                        subtitle = "Show, hide, or reorder lanes",
-                        onBack = { navController.popBackStack() }
-                    )
+                    // v257 — full-bleed banner (no edge-padding inset).
+                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                        SettingsHeroHeader(
+                            title = "Manage categories",
+                            subtitle = "Show, hide, or reorder lanes",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
                 // ── Helper text + Reset order — flat caption under the hero
                 item("help") {
@@ -262,6 +268,12 @@ fun ManageCategoriesScreen(navController: NavController) {
                 .fillMaxHeight()
                 .navigationBarsPadding()
                 .padding(top = 10.dp, bottom = 16.dp)
+        )
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
         )
     }
 }

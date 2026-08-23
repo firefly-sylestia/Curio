@@ -81,6 +81,9 @@ import com.curio.app.data.PromoMode
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.FullBleedHeroItem
+import com.curio.app.features.settings.SettingsStickyBackPill
+import com.curio.app.features.settings.isPastHero
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -231,11 +234,14 @@ fun QuestsScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
-                    SettingsHeroHeader(
-                        title = "Quests & levels",
-                        subtitle = "Grow your curiosity, one chain at a time",
-                        onBack = { navController.popBackStack() }
-                    )
+                    // v257 — full-bleed banner (no edge-padding inset).
+                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
+                        SettingsHeroHeader(
+                            title = "Quests & levels",
+                            subtitle = "Grow your curiosity, one chain at a time",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
                 // v8.5 — Pet hero: the level card is replaced by the pet
                 // companion (level + XP ring + growth line + speech bubble)
@@ -350,6 +356,12 @@ fun QuestsScreen(navController: NavController) {
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .padding(top = 10.dp, bottom = 16.dp)
+        )
+        // v257 — sticky back pill once the scrolling hero moves up.
+        SettingsStickyBackPill(
+            onBack = { navController.popBackStack() },
+            visible = listState.isPastHero(),
+            modifier = Modifier.align(Alignment.TopStart)
         )
         // v8.6 — non-blocking level-up celebration (spec §9.1): tap to
         // dismiss; also auto-dismisses after ~2.5s. The pet hops with the
