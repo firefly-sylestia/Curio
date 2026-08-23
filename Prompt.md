@@ -1,3 +1,15 @@
+## Request: v261 — hero geometry + floating pet (COMPLETE)
+
+1. CI fix: LazyGridItemInfo uses rowIndex/columnIndex (not `path`).
+2. FullBleedHeroItem rewritten MEASURED: reads slot distance from window
+   edge via findRootCoordinates + offsets/resizes exactly — kills the
+   left-shifted tear / right gap regardless of nesting. Pet Designer hero
+   now shares this helper (was its own inline copy).
+3. Floating pet overlay: position persisted (stays where placed), wander
+   loop (idle strolls with eased glide + facing flips), long-press opens an
+   in-window menu (Send home / Wander toggle) instead of silently exiting,
+   sprite rendered directly at 84dp (ghost shadow disc removed).
+
 ## Request: v260 — crash + duplicate fixes (COMPLETE)
 
 1. RenderThread SIGSEGV on settings sub-pages: in-screen pills (sticky back

@@ -337,3 +337,5 @@ Crash: floating pills no longer sample the page capture layer (RenderThread cras
 Tab bar: active pill no longer doubles the icon/label under it; glow toned down.
 Settings family: sticky back pill appears only after the hero scrolls away; hero tear starts flush at the top.
 Explore bubble: smoother expand, glass rim follows the animated shape.
+Heroes: tear + back pill sit pixel-exact on every scrolling-hero screen.
+Floating pet: stays where placed, wanders on its own, long-press menu.
