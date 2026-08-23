@@ -253,37 +253,46 @@ fun Modifier.curioGlassPressBlob(
 }
 
 /**
- * v233 — PARALLAX TILT EDGE GLOW. Draws a soft white rim glow whose bright
- * spot slides AGAINST the device's current gravity tilt (see
- * [com.curio.app.ui.components.liquidglass.CurioGlassParallax]) — the iOS
- * depth cue where the pane's EDGES catch the light as the phone moves,
- * instead of the whole pane translating. Call INSIDE a DrawScope after
- * drawContent(). Reads the tilt snapshot state directly, so sensor updates
- * invalidate just this draw — zero recomposition.
+ * v238 — PARALLAX TILT LIGHT ARC (rewritten). The v233 version stroked a
+ * FULL white circle whose gradient center shifted with tilt — on every
+ * always-glass surface (bottom nav pill, Pet Designer bar, Reveal bar) that
+ * read as an unwanted PERFECT CIRCLE the moment the phone tilted at all.
+ *
+ * The cue is now a TOP-EDGE light arc instead: an ~100° stroke hugging the
+ * capsule's top rim that SLIDES sideways with tiltX and fades in with tilt
+ * magnitude — light catching the pane's top edge as the phone moves, never
+ * a full ring, invisible when the phone is level. Call INSIDE a DrawScope
+ * after drawContent(). Reads tilt snapshot state directly, so sensor
+ * updates invalidate just this draw — zero recomposition.
  */
 internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGlassTiltEdgeGlow() {
     if (!AppPreferences.glassParallaxState) return
     val tx = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX
     val ty = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY
-    if (tx == 0f && ty == 0f) return
+    // Strength tracks HOW MUCH the phone is tilted — level phone = no arc.
+    val strength = kotlin.math.sqrt(tx * tx + ty * ty).coerceIn(0f, 1f)
+    if (strength < 0.08f) return
     val r = minOf(size.width, size.height) / 2f
     if (r <= 0f) return
-    val glowCenter = Offset(
-        size.width / 2f - tx * r * 0.9f,
-        size.height / 2f - ty * r * 0.9f
-    )
-    drawCircle(
+    // Arc center slides AGAINST horizontal tilt along the top rim.
+    val cx = size.width / 2f - tx * size.width * 0.30f
+    val cy = size.height * 0.10f - ty * r * 0.35f
+    drawArc(
         brush = Brush.radialGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.65f),
-                Color.White.copy(alpha = 0.14f),
+                Color.White.copy(alpha = 0.55f),
+                Color.White.copy(alpha = 0.12f),
                 Color.Transparent
             ),
-            center = glowCenter,
-            radius = r * 1.6f
+            center = Offset(cx, cy),
+            radius = size.minDimension * 0.9f
         ),
-        radius = r - 0.75f.dp.toPx() / 2f,
-        center = Offset(size.width / 2f, size.height / 2f),
-        style = Stroke(width = 1.5f.dp.toPx())
+        startAngle = -145f,
+        sweepAngle = 110f,
+        useCenter = false,
+        topLeft = Offset.Zero,
+        size = this.size,
+        style = Stroke(width = 1.5f.dp.toPx()),
+        alpha = 0.30f + 0.45f * strength
     )
 }

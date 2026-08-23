@@ -4901,6 +4901,15 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v238 — THE perfect circle found: tilt edge-glow ring → top light arc**
+  - User pinned it to the ALWAYS-GLASS surfaces (bottom-nav pill, Pet Designer bar,
+    Reveal bar — not the menu pill, which is solid until scrolled). Common factor:
+    `drawGlassTiltEdgeGlow()` (v233) stroked a FULL white circle whose gradient
+    center shifted with tilt — with Glass parallax ON, any tilt painted a literal
+    perfect circle on every glass surface.
+  - Rewritten as a TOP-EDGE LIGHT ARC: ~110° stroke hugging the top rim, sliding
+    against tiltX, fading with tilt magnitude (`strength < 0.08 → invisible`,
+    alpha 0.30–0.75). Never a full ring; nothing shows on a level phone.
 - **v237 — revert v235 indicator blur (smudge) + size-capped lens ring**
   - The v235 always-on blur on the draggable indicator was WRONG: at rest its raw
     backdrop sample is EXACTLY aligned under the real tab content (invisible);
