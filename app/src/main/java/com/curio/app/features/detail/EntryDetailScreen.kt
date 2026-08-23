@@ -305,6 +305,12 @@ fun EntryDetailScreen(
             .fillMaxSize()
             .background(wash)
     ) {
+        // Hoisted scroll state — the sticky top bar (back + more controls)
+        // reads it to pop out of the hero into frosted floating pills, the
+        // same scroll-linked clock Home uses for its menu / profile pills.
+        // Declared OUTSIDE the v234 capture wrapper so sibling overlays
+        // (sticky bar, progress pill) can read it.
+        val detailScroll = rememberScrollState()
         // v234 — LOCAL GLASS CAPTURE: the page behind the sticky back/more
         // pills records into its own layerBackdrop layer, pills OUTSIDE the
         // wrapper (sibling overlay). Sampling a capture that excludes the
@@ -336,10 +342,6 @@ fun EntryDetailScreen(
                 modifier = Modifier.fillMaxSize()
             )
         }
-        // Hoisted scroll state — the sticky top bar (back + more controls)
-        // reads it to pop out of the hero into frosted floating pills, the
-        // same scroll-linked clock Home uses for its menu / profile pills.
-        val detailScroll = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
