@@ -434,6 +434,13 @@ object AppPreferences {
     var glassParallaxState by mutableStateOf(false)
         private set
 
+    // v248 — CLASSIC ACTIVE INDICATOR (experiment, default OFF): the nav
+    // bar's draggable blob renders as fully TRANSPARENT refracting glass
+    // (the pre-v247 style) instead of the solid white/black pill. Needs
+    // Liquid glass pills on.
+    var glassClassicIndicatorState by mutableStateOf(false)
+        private set
+
     // v233 — Clear-glass style (experiment, default OFF): when the liquid-
     // glass pills are showing, drop the heavy frost (blur 8dp → 2dp, wash
     // cut to a third) so the capsule reads CLEAR and refractive — like the
@@ -696,6 +703,7 @@ object AppPreferences {
         drawerConstellationState = isDrawerConstellationEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         glassParallaxState = isGlassParallaxEnabled(context)
+        glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -998,6 +1006,7 @@ object AppPreferences {
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
+    private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
@@ -1192,6 +1201,15 @@ object AppPreferences {
     fun setGlassParallaxEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_PARALLAX, enabled).apply()
         glassParallaxState = enabled
+    }
+
+    // ── Classic active indicator (experiment, default OFF) ───────────
+    fun isGlassClassicIndicatorEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_CLASSIC_INDICATOR, false)
+
+    fun setGlassClassicIndicatorEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_CLASSIC_INDICATOR, enabled).apply()
+        glassClassicIndicatorState = enabled
     }
 
     // ── Clear-glass style (experiment, default OFF) ──────────────────

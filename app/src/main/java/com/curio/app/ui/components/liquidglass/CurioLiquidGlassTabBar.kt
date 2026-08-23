@@ -154,6 +154,10 @@ fun CurioLiquidGlassTabBar(
     val reflScale = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
     // v243 — user tuning: strength of the draggable indicator's shadow.
     val indShadowScale = AppPreferences.glassIndicatorShadowScaleState.coerceIn(0f, 2f)
+    // v248 — CLASSIC indicator experiment (Experiments): ON renders the
+    // blob as fully TRANSPARENT refracting glass (the pre-v247 style);
+    // OFF (default) is the solid white/black pill.
+    val classicIndicator = AppPreferences.glassClassicIndicatorState
     // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
     // accent wash gave the active ink almost nothing to read against on a
     // bright page; light mode now gets double the bed (dark keeps 16%).
@@ -450,18 +454,28 @@ fun CurioLiquidGlassTabBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
-                                lens(
-                                    10f.dp.toPx() * refrScale * progress,
-                                    14f.dp.toPx() * refrScale * progress,
-                                    true
-                                )
+                                if (classicIndicator) {
+                                    // v248 — classic style: ALWAYS-ON full
+                                    // refraction, exactly like the nav capsule
+                                    // (the pre-v247 look).
+                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
+                                    lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                                } else {
+                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
+                                    lens(
+                                        10f.dp.toPx() * refrScale * progress,
+                                        14f.dp.toPx() * refrScale * progress,
+                                        true
+                                    )
+                                }
                             }
                         },
                         highlight = {
                             Highlight.Default.copy(
-                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) *
-                                    reflScale
+                                alpha = (if (isBlurEnabled) {
+                                    if (classicIndicator) 1f
+                                    else dampedDragAnimation.pressProgress
+                                } else 0f) * reflScale
                             )
                         },
                         shadow = {
@@ -470,8 +484,12 @@ fun CurioLiquidGlassTabBar(
                                 offset = tiltGlowOffset(),
                                 // v247 — a quiet resting shadow lifts the now-
                                 // solid idle pill off the page; press deepens it.
-                                alpha = (if (isBlurEnabled) 0.22f + 0.78f * dampedDragAnimation.pressProgress else 0f) *
-                                    indShadowScale
+                                // v248 — classic style keeps the old fully
+                                // press-gated shadow instead.
+                                alpha = (if (isBlurEnabled) {
+                                    if (classicIndicator) dampedDragAnimation.pressProgress
+                                    else 0.22f + 0.78f * dampedDragAnimation.pressProgress
+                                } else 0f) * indShadowScale
                             )
                         },
                         innerShadow = {
@@ -492,15 +510,21 @@ fun CurioLiquidGlassTabBar(
                         },
                         onDrawSurface = {
                             val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            // v247 — SOLID idle pill: pure WHITE in light mode,
-                            // pure BLACK in dark, so the theme ink (black/white)
-                            // always sits on maximum contrast. Holding the pill
-                            // eases the fill away and lets the press-glass
-                            // (refraction + highlight + shadows) take over.
-                            drawRect(
-                                color = if (dark) Color.Black else Color.White,
-                                alpha = 1f - progress
-                            )
+                            if (classicIndicator) {
+                                // v248 — classic: FULLY transparent at rest
+                                // (the pre-v247 refracting-glass look).
+                                drawRect(Color.Black.copy(alpha = 0.03f * progress))
+                            } else {
+                                // v247 — SOLID idle pill: pure WHITE in light
+                                // mode, pure BLACK in dark, so the theme ink
+                                // (black/white) always sits on maximum contrast.
+                                // Holding the pill eases the fill away and lets
+                                // the press-glass take over.
+                                drawRect(
+                                    color = if (dark) Color.Black else Color.White,
+                                    alpha = 1f - progress
+                                )
+                            }
                         }
                     )
                     .height(56.dp)

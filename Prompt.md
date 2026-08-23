@@ -1,3 +1,14 @@
+## v249: classic active indicator experiment
+
+User asked for the previous liquid-glass style active indicator (transparent,
+always-refracting, pre-v247) as an Experiments option. Added
+`glassClassicIndicatorState` (default OFF = current solid white/black pill):
+state + key + is/set + load in AppPreferences, an Experiments switch row, and
+a branch in CurioLiquidGlassTabBar's pill recipe (always-on blur + 24dp lens +
+full highlight + press-gated-only shadow + fully transparent surface when ON;
+solid fill and gentle press-glass when OFF). Crisp ink overlay stays in both
+modes. Balance-checked; CI validates.
+
 ## Addendum (v248): mood-board quote slip still max-sized
 
 User: the quote card is ALWAYS at the max — not fixed by the spare-line pass.

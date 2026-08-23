@@ -178,6 +178,14 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setDrawerConstellationEnabled(context, it)
                     }
                     CurioSettingsDivider()
+                    ExperimentSwitchRow(
+                        "Classic active indicator",
+                        "The nav bar's blob renders as fully transparent refracting glass instead of the solid white/black pill (needs Liquid glass)",
+                        AppPreferences.glassClassicIndicatorState
+                    ) {
+                        AppPreferences.setGlassClassicIndicatorEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
                     ExperimentSwitchRow("Glass parallax tilt", "The glass pills sway against the phone's tilt for a floating depth effect (needs Liquid glass pills)", AppPreferences.glassParallaxState) {
                         AppPreferences.setGlassParallaxEnabled(context, it)
                         com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
