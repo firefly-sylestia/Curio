@@ -293,6 +293,7 @@ fun SettingsHeroHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        val backInteraction = remember { MutableInteractionSource() }
                         CurioBackButton(
                             onClick = onBack,
                             modifier = Modifier.then(
@@ -309,7 +310,8 @@ fun SettingsHeroHeader(
                                         },
                                         washAlpha = 0.45f,
                                         backdrop = glassBackdrop,
-                                        alwaysClear = true
+                                        alwaysClear = true,
+                                        interactionSource = backInteraction
                                     )
                                 else Modifier
                             ),
@@ -330,7 +332,8 @@ fun SettingsHeroHeader(
                             },
                             contentColor = symbolTint,
                             shadowElevation = 3.dp,
-                            disableRipple = true
+                            disableRipple = true,
+                            pillInteraction = backInteraction
                         )
                         if (searchActive) {
                             // Search is open — the trailing pills are swapped
@@ -831,7 +834,7 @@ fun SettingsHubScreen(navController: NavController) {
                 state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
                 modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {

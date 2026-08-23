@@ -184,7 +184,7 @@ val glassBackdrop = rememberLayerBackdrop()
             modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
             // v255 — SCROLLING HERO (the Home/Profile construction): the
             // banner lives INSIDE the list and scrolls away with the page.
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
                         item { CurioSectionLabel(page.title) }
@@ -923,7 +923,7 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(230.dp)                       // tall enough for the pill to roam
+                        .height(260.dp)                       // tall enough for the pill to roam freely
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     // ── Gradient card — the content the pill refracts ──

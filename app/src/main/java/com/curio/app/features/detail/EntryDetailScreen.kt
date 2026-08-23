@@ -1334,17 +1334,12 @@ private fun BoxScope.DetailStickyBar(
         // that fades the pill, so the handoff reads as one morphing surface.
         // A full-screen scrim behind it dismisses on any outside tap.
         if (detailGlassActive && morph > 0.01f) {
-            // v252 — an explicit Box WRAPPER supplies the BoxScope dispatch
-            // receiver: K2 refuses BoxScope members called on the extension
-            // receiver alone (matchParentSize / align below).
+            // v264 — the scrim was removed: a full-screen Box covered the
+            // back button and blocked its touch. BackHandler (line 1156)
+            // handles system-back; tapping the glass panel's own items
+            // dismisses via their onClick. A half-screen scrim below the
+            // panel still catches outside taps on the menu area.
             Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                Modifier
-                    .matchParentSize()
-                    .clickable(interactionSource = null, indication = null) {
-                        menuExpanded = false
-                    }
-            )
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Transparent,

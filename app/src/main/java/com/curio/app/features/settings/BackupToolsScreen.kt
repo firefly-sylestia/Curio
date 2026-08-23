@@ -331,7 +331,7 @@ val glassBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
             modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
                         item { CurioSectionLabel("Your data") }

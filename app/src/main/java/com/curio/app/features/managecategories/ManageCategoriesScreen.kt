@@ -161,7 +161,7 @@ val glassBackdrop = rememberLayerBackdrop()
                     end = wideContentEdgePadding(),
                     // v255 — SCROLLING HERO: the banner is the list's first
                     // item and scrolls away with the page.
-                    top = 0.dp,
+                    top = SettingsHeroTotalHeight,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)

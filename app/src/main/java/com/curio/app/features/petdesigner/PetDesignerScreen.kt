@@ -650,31 +650,11 @@ fun PetDesignerScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = edgePad,
                 end = edgePad,
+                top = SettingsHeroTotalHeight,
                 bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // ── The torn rose banner (v156) — the FIRST scrollable item:
-            //    the tear is part of the page's background itself, and it
-            //    scrolls away with the content. The floating action capsule
-            //    (save / undo / redo / share) is a fixed overlay pinned to
-            //    the top of the screen, so it stays while the banner rides
-            //    away under it.
-            item {
-                // v261 — shares the MEASURED FullBleedHeroItem helper (the
-                // settings family): reads the slot's real distance from the
-                // window edge instead of guessing inset arithmetic, so the
-                // tear and back pill sit exactly like Home/Profile.
-                com.curio.app.features.settings.FullBleedHeroItem(edgePad = edgePad) {
-                    SettingsHeroHeader(
-                        title = "Pet designer",
-                        subtitle = "Draw your own Curie",
-                        onBack = { navController.popBackStack() },
-                        compact = wide
-                    )
-                }
-            }
-
             // ── Editor page: picker trigger / Editing header (v8.56) ──
             //    The editor is the center of the screen — one dialog is the
             //    only chooser, and after that ONLY the chosen editor renders.
@@ -1208,6 +1188,17 @@ fun PetDesignerScreen(navController: NavController) {
             glassOn = isInScreenGlassActive()
         )
         }
+
+        // RESTORED (user request) — STICKY HERO: pinned on top while the
+        // editor list scrolls behind the tear. Glass back pill refracts
+        // the captured content.
+        SettingsHeroHeader(
+            title = "Pet designer",
+            subtitle = "Draw your own Curie",
+            onBack = { navController.popBackStack() },
+            compact = wide,
+            glassBackdrop = petGlassBackdrop
+        )
 
         // v156 — the floating action capsule pinned to the TOP of the
         // screen: save / undo / redo / reset / share / import. At rest it

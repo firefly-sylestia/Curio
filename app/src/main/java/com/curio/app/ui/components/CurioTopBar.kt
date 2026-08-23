@@ -66,10 +66,9 @@ fun CurioBackButton(
             tint = contentColor,
             size = 24.dp,
             modifier = Modifier
-                // v244 — 10dp padding grows the pill to 44dp so the chevron's
-                // line box centers at every font size (CurioIcon now measures
-                // and centers the ink itself).
-                .padding(10.dp)
+                // v264 — 12dp padding grows the pill to 48dp for better touch
+                // targets and visual presence.
+                .padding(12.dp)
         )
     }
     if (disableRipple) {

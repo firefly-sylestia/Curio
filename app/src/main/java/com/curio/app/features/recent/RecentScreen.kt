@@ -182,7 +182,7 @@ val glassBackdrop = rememberLayerBackdrop()
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = 0.dp,
+                        top = SettingsHeroTotalHeight,
                         bottom = 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)

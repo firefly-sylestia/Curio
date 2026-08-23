@@ -343,3 +343,4 @@ FIX: Explore bubble & floating pet: free placement anywhere, no edge snapping, n
 FIX: Ghost text in the Pet Designer studio bar removed; home nav blob effect untouched.
 FIX: Settings & sub-pages: taller Home-style hero, sticky back pill now morphs smoothly with scroll into real liquid glass.
 FIX: Settings sticky hero restored; glassy back pill refracts content; tuning preview real refraction.
+FIX: Pet Designer sticky hero + glassy back pill; detail morph back button unblocked; pills 48dp; content gap removed.

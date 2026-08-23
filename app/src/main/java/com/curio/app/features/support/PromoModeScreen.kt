@@ -128,7 +128,7 @@ fun PromoModeScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = 0.dp,
+                    top = SettingsHeroTotalHeight,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)

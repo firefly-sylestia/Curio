@@ -402,3 +402,12 @@ User's batched asks across the session:
 - Glass-tuning dialog preview FIXED: the preview capsule now records the colorful gradient card into its OWN local `dialogBackdrop` and wraps `liquidGlassCapsule` with that backdrop (real refraction); the `Container.removeClipToPadding()`-style fix: the capsule is a SIBLING overlay outside the captured card, outer box sized 230dp + `.background(brush, RoundedCornerShape(18.dp))` (background-only clip) so the pill can drag freely beyond the card bounds without being clipped.
 - All 11 converted screens verified balanced + imports cleaned.
 - Status: pushed. CI validates compilation.
+
+## 2026-08-23 — Pet Designer hero, pill sizes, content gap, detail morph fix (v264)
+- Pet Designer converted to sticky hero: banner removed from LazyColumn, pinned as overlay outside the Column (after Column close), contentPadding top = SettingsHeroTotalHeight, back pill wears glass via petGlassBackdrop.
+- CurioBackButton pill size increased: padding 10dp→12dp (44→48dp) for better touch targets.
+- Content gap fix: ALL converted screens' contentPadding top changed from `SettingsHeroTotalHeight + 8.dp` to `SettingsHeroTotalHeight` so content starts flush with the tear edge instead of 8dp below.
+- Detail morph back button unblocked: removed the full-screen scrim Box that intercepted all touches including the back button; BackHandler (line 1156) handles system-back dismiss; dropdown item onClicks handle their own dismiss.
+- Tuning preview: outer Box height 230→260dp so the draggable capsule can roam freely beyond the gradient card bounds.
+- Glass tap effect: backInteraction wired through SettingsHeroHeader's CurioBackButton + liquidGlassCapsule.
+- Status: pushed. CI validates.
