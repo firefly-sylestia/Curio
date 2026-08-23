@@ -154,7 +154,14 @@ fun Modifier.liquidGlassCapsule(
         // carries the v233 PARALLAX EDGE GLOW (after drawContent, so it
         // rides on top of the rendered glass).
         .drawWithContent {
-            if (CurioGlassPills.isCapturingBackdrop) {
+            // v243 — the guard must ONLY flatten pills that sample the
+            // GLOBAL NavHost capture (backdrop == null): during its record
+            // pass such a pill would sample a layer containing itself.
+            // Local-backdrop pills sit OUTSIDE their captured subtree, so
+            // the global re-records that fire on every scroll frame must
+            // not touch them — this condition is why the in-screen pills
+            // never showed glass (they were flattened permanently).
+            if (CurioGlassPills.isCapturingBackdrop && backdrop == null) {
                 drawRoundRect(
                     color = container.copy(alpha = 0.88f),
                     cornerRadius = CornerRadius(

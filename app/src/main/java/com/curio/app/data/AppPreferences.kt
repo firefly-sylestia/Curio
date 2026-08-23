@@ -451,6 +451,8 @@ object AppPreferences {
         private set
     var glassReflectionScaleState by mutableStateOf(1f)
         private set
+    var glassIndicatorShadowScaleState by mutableStateOf(1f)
+        private set
 
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
@@ -696,6 +698,7 @@ object AppPreferences {
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
         glassReflectionScaleState = getGlassReflectionScale(context)
+        glassIndicatorShadowScaleState = getGlassIndicatorShadowScale(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -997,6 +1000,7 @@ object AppPreferences {
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
+    private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1217,6 +1221,12 @@ object AppPreferences {
     fun setGlassReflectionScale(context: Context, value: Float) {
         prefs(context).edit().putInt(KEY_GLASS_REFLECTION_SCALE, (value * 100).toInt()).apply()
         glassReflectionScaleState = value.coerceIn(0f, 2f)
+    }
+
+    fun getGlassIndicatorShadowScale(context: Context): Float = readScale(context, KEY_GLASS_INDICATOR_SHADOW_SCALE)
+    fun setGlassIndicatorShadowScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_INDICATOR_SHADOW_SCALE, (value * 100).toInt()).apply()
+        glassIndicatorShadowScaleState = value.coerceIn(0f, 2f)
     }
 
     // ── Category tint wash ────────────────────────────────────────────

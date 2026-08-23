@@ -288,6 +288,10 @@ private fun AppearanceSection(highlightKey: String? = null) {
             CompactSliderRow("Blur", "Frostiness of the glass — lower for clearer, higher for frostier", AppPreferences.glassBlurScaleState) {
                 AppPreferences.setGlassBlurScale(context, it)
             }
+            CurioSettingsDivider()
+            CompactSliderRow("Indicator shadow", "Strength of the draggable active pill's shadow", AppPreferences.glassIndicatorShadowScaleState) {
+                AppPreferences.setGlassIndicatorShadowScale(context, it)
+            }
         }
         CurioSettingsDivider()
         // v42 — the hero picker is a two-option control (Rose hero / Azure

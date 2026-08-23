@@ -139,6 +139,8 @@ fun CurioLiquidGlassTabBar(
     val blurScale = AppPreferences.glassBlurScaleState
     val refrScale = AppPreferences.glassRefractionScaleState
     val reflScale = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
+    // v243 — user tuning: strength of the draggable indicator's shadow.
+    val indShadowScale = AppPreferences.glassIndicatorShadowScaleState.coerceIn(0f, 2f)
     // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
     // accent wash gave the active ink almost nothing to read against on a
     // bright page; light mode now gets double the bed (dark keeps 16%).
@@ -226,9 +228,14 @@ fun CurioLiquidGlassTabBar(
             },
             onDrag = { _, dragAmount ->
                 if (totalWidthPx > 0f) {
+                    // v243 — UNIFORM drag sensitivity: dividing by the width
+                    // under the finger made fast drags hypersensitive wherever
+                    // a NARROW (collapsed) tab sat — visibly erratic on the
+                    // right side of Cabinet. A fixed per-tab stride keeps the
+                    // feel identical across the whole bar in both directions.
+                    val tabStride = maxOf(totalWidthPx / tabsCount, 1f)
                     updateValue(
-                        (targetValue + dragAmount.x /
-                            maxOf(widthAtFraction(targetValue), 1f) * if (isLtr) 1f else -1f)
+                        (targetValue + dragAmount.x / tabStride * if (isLtr) 1f else -1f)
                             .fastCoerceIn(0f, (tabsCount - 1).toFloat())
                     )
                     animationScope.launch {
@@ -410,12 +417,16 @@ fun CurioLiquidGlassTabBar(
                             )
                         },
                         shadow = {
-                            Shadow(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
+                            Shadow(
+                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) *
+                                    indShadowScale
+                            )
                         },
                         innerShadow = {
                             InnerShadow(
                                 radius = 8.dp * dampedDragAnimation.pressProgress,
-                                alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) *
+                                    indShadowScale
                             )
                         },
                         layerBlock = {
@@ -429,12 +440,9 @@ fun CurioLiquidGlassTabBar(
                         },
                         onDrawSurface = {
                             val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            // v232 — a constant faint ACCENT wash marks this pill
-                            // as the active-tab indicator even at rest (before,
-                            // it only read while pressed); press deepens it.
-                            // v233 — theme-aware: light mode doubles the bed so
-                            // the active ink actually reads against a bright page.
-                            drawRect(accentColor.copy(alpha = if (dark) 0.16f else 0.30f))
+                            // v243 — the accent wash is GONE: it painted OVER
+                            // the visible tab icons/labels and re-tinted them
+                            // category-color no matter what ink they used.
                             drawRect(
                                 color = Color.Black.copy(alpha = 0.10f),
                                 alpha = 1f - progress

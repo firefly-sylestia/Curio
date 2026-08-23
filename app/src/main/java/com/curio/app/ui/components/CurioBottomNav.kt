@@ -351,9 +351,17 @@ fun CurioFloatingNavBar(
         val glassBackdrop = if (glassOn) CurioGlassPills.backdrop else null
         if (glassOn && glassBackdrop != null) {
             val items = CurioBottomNavItems.all
-            val glassIndex = items.indexOfFirst { it.route == selectedRoute }
+            // v243 — remember the LAST real tab: on pushed routes (entry
+            // detail, settings sub-pages…) neither selectedRoute nor
+            // routePrefix matches a tab, and the old coerceAtLeast(0)
+            // fallback snapped the blob back to HOME (it visibly flew home
+            // then collapsed while the new page opened). Hold the origin.
+            val lastTabIndex = remember { androidx.compose.runtime.mutableIntStateOf(0) }
+            val matchedIndex = items.indexOfFirst { it.route == selectedRoute }
                 .takeIf { it >= 0 }
-                ?: items.indexOfFirst { it.route == routePrefix }.coerceAtLeast(0)
+                ?: items.indexOfFirst { it.route == routePrefix }
+            if (matchedIndex >= 0) lastTabIndex.intValue = matchedIndex
+            val glassIndex = if (matchedIndex >= 0) matchedIndex else lastTabIndex.intValue
             CurioLiquidGlassTabBar(
                 backdrop = glassBackdrop,
                 tabsCount = items.size,

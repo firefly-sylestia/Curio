@@ -1,4 +1,12 @@
 ADD
+- Liquid glass: a new "Indicator shadow" slider tunes the draggable active pill's shadow strength.
+- Liquid glass: the active pill no longer tints the tab icons and labels with the category color - your chosen ink shows true.
+
+FIX
+- Home: the drawer-menu and avatar pills now actually render liquid glass (a capture guard was flattening every in-screen pill on each scroll frame).
+- Navigation: opening an entry from Cabinet/Spin no longer flies the active blob back to Home before collapsing - it stays on the tab you left.
+- Navigation: fast-drags the active blob on the right side of Cabinet no longer behave erratically (drag sensitivity is uniform across the bar).
+
 - Appearance: "Liquid glass" moved here from Experiments and merged into ONE switch (the nav bar and all floating pills now share it), with an inline "Clear glass" option and live sliders for Reflection, Refraction and Blur so you can tune the glass recipe yourself.
 - Liquid glass nav: dark mode uses pure white ink for the active tab's icon and label.
 
