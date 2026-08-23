@@ -300,7 +300,7 @@ internal fun tiltGlowOffset(): DpOffset {
     val ty = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY
     return DpOffset(
         x = (-tx * 10f).dp,
-        y = baseY - ty * 8f.dp
+        y = baseY - (ty * 8f).dp
     )
 }
 
