@@ -242,6 +242,8 @@ fun PromoModeScreen(navController: NavController) {
                     )
                 }
 
+            }
+
             // v257 — sticky back pill once the scrolling hero moves up.
             // Explicit Box: guarantees a BoxScope receiver for align() inside
             // the ScreenEntrance lambda.
@@ -251,7 +253,6 @@ fun PromoModeScreen(navController: NavController) {
                     visible = listState.isPastHero(),
                     modifier = Modifier.align(Alignment.TopStart)
                 )
-            }
             }
         }
     }
