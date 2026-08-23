@@ -81,9 +81,6 @@ import com.curio.app.data.PromoMode
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.FullBleedHeroItem
-import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -208,7 +205,7 @@ fun QuestsScreen(navController: NavController) {
         navController.navigateToQuestRoute(route)
     }
     val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+val glassBackdrop = rememberLayerBackdrop()
 
     Box(
         modifier = Modifier
@@ -232,21 +229,11 @@ val listBackdrop = rememberLayerBackdrop()
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                item {
-                    // v257 — full-bleed banner (no edge-padding inset).
-                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                        SettingsHeroHeader(
-                            title = "Quests & levels",
-                            subtitle = "Grow your curiosity, one chain at a time",
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                }
-                // v8.5 — Pet hero: the level card is replaced by the pet
+                                // v8.5 — Pet hero: the level card is replaced by the pet
                 // companion (level + XP ring + growth line + speech bubble)
                 // when the pet is enabled; the classic level card returns
                 // when the toggle is off.
@@ -360,13 +347,11 @@ val listBackdrop = rememberLayerBackdrop()
                 .fillMaxHeight()
                 .padding(top = 10.dp, bottom = 16.dp)
         )
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
-            onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Quests & levels", subtitle = "Grow your curiosity, one chain at a time", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
         // v8.6 — non-blocking level-up celebration (spec §9.1): tap to
         // dismiss; also auto-dismisses after ~2.5s. The pet hops with the
         // claim and wears its proud mood.

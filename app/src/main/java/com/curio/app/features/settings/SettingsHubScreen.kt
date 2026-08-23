@@ -130,7 +130,7 @@ private const val SETTINGS_HERO_TEAR_SEED = 0x5EED
  *  back pill on top, title + subtitle pinned just above the tear. Held
  *  with flex slack so the title block clears the tear even at large font
  *  scales. */
-private val SettingsHeroBannerHeight = 216.dp
+private val SettingsHeroBannerHeight = 180.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val SettingsHeroSheetExtent = 24.dp
 /** Total header footprint — the torn banner plus its under-sheet extent.
@@ -188,7 +188,12 @@ fun SettingsHeroHeader(
     // v42 — an optional control that rides INSIDE the banner beside the
     // title (directly under the trailing pills): the Topic Database's
     // Category pill. Screens that don't pass it render the plain title.
-    titleTrailing: (@Composable (ink: Color) -> Unit)? = null
+    titleTrailing: (@Composable (ink: Color) -> Unit)? = null,
+    // v263 — RESTORED sticky-hero architecture: the scroll content records
+    // into this LOCAL capture; the hero sits OUTSIDE it (drawn on top), so
+    // its back pill can refract the rows scrolling behind it with REAL
+    // liquid glass — no self-sample cycle. Null → classic opaque pill.
+    glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
@@ -290,6 +295,24 @@ fun SettingsHeroHeader(
                     ) {
                         CurioBackButton(
                             onClick = onBack,
+                            modifier = Modifier.then(
+                                // v263 — GLASSY BACK BUTTON (user request): when
+                                // a local capture is provided and Liquid glass is
+                                // active, the pill becomes clear refraction over
+                                // the scrolling rows behind the tear.
+                                if (glassBackdrop != null && isInScreenGlassActive())
+                                    Modifier.liquidGlassCapsule(
+                                        if (isCurioDarkTheme()) {
+                                            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+                                        } else {
+                                            lerp(fill, curioPillTintLift(), 0.38f)
+                                        },
+                                        washAlpha = 0.45f,
+                                        backdrop = glassBackdrop,
+                                        alwaysClear = true
+                                    )
+                                else Modifier
+                            ),
                             // v76 — OPAQUE theme-aware pill, the same fill the
                             // hero action pills wear ([SettingsHeroActionPill]'s
                             // v27n opaque conversion): the old 18% ink glass
@@ -460,98 +483,6 @@ internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
     }
 }
 
-/**
- * v257/v263 — the sticky back pill for the scrolling-hero screens, rebuilt
- * as the HOME sticky-bar language: instead of popping in after the hero is
- * gone, it now fades/scales/settles CONTINUOUSLY with scroll progress (fully
- * scrubable with the finger) and hands off to REAL liquid glass — sampling
- * the screen's LOCAL content capture ([backdrop], recorded by the scroll
- * list itself; the pill is a sibling OUTSIDE that capture, so no self-
- * sample cycle). Null backdrop → the safe simulated pane.
- */
-@Composable
-internal fun SettingsStickyBackPill(
-    onBack: () -> Unit,
-    // 0 = hero fully on screen, 1 = hero completely scrolled away.
-    progress: Float,
-    backdrop: LayerBackdrop?,
-    modifier: Modifier = Modifier
-) {
-    val t = FastOutSlowInEasing.transform(progress.coerceIn(0f, 1f))
-    val alphaT = ((t - 0.35f) / 0.65f).coerceIn(0f, 1f)
-    if (alphaT <= 0.01f) return
-    val glassOn = isInScreenGlassActive()
-    val dark = isCurioDarkTheme()
-    val frostBg = if (dark) Color(0xFF1B1B1D) else Color.White
-    val frostRim = if (dark) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
-    val interaction = remember { MutableInteractionSource() }
-    Surface(
-        shape = CircleShape,
-        color = frostBg,
-        shadowElevation = if (glassOn) 0.dp else (3.dp * alphaT),
-        border = BorderStroke(1.dp, frostRim.copy(alpha = 0.8f * alphaT)),
-        modifier = modifier
-            .graphicsLayer {
-                alpha = alphaT
-                val s = androidx.compose.ui.util.lerp(0.94f, 1f, t)
-                scaleX = s
-                scaleY = s
-                translationY = (-4.dp).toPx() * (1f - t)
-            }
-            .statusBarsPadding()
-            .padding(start = 16.dp, top = 8.dp)
-            .size(44.dp)
-            // v263 — PROPER liquid glass: real refraction over the captured
-            // page content, exactly like Home's morphed menu/profile pills.
-            .then(
-                if (glassOn && t > 0.01f) Modifier.liquidGlassCapsule(
-                    frostBg,
-                    washAlpha = 0.45f,
-                    backdrop = backdrop,
-                    alwaysClear = true,
-                    interactionSource = interaction
-                ) else Modifier
-            )
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onBack
-            )
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CurioIcon(
-                name = CurioIcons.ChevronLeft,
-                contentDescription = "Back",
-                tint = MaterialTheme.colorScheme.onSurface,
-                size = 24.dp
-            )
-        }
-    }
-}
-
-/** v263 — CONTINUOUS hero-exit progress for the morphing sticky pill:
- *  0 while the hero is fully on screen, easing to 1 as it scrolls out.
- *  Replaces the old boolean isPastHero (which popped the pill in at a
- *  hard threshold — no morph). LazyList variant. */
-internal fun LazyListState.heroExitProgress(): Float {
-    if (firstVisibleItemIndex > 0) return 1f
-    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
-    if (hero.index != 0 || hero.size <= 0) return 0f
-    val remaining = hero.size + hero.offset
-    return (1f - remaining.toFloat() / hero.size).coerceIn(0f, 1f)
-}
-
-/** Grid variant of [heroExitProgress] (the Settings hub's LazyVerticalGrid). */
-internal fun LazyGridState.heroExitProgress(): Float {
-    if (firstVisibleItemIndex > 0) return 1f
-    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
-    if (hero.size.height <= 0) return 0f
-    val remaining = hero.size.height + hero.offset.y
-    return (1f - remaining.toFloat() / hero.size.height).coerceIn(0f, 1f)
-}
 
 /** One ink-glass action pill on the hero — the banner's readable ink at a
  *  soft alpha (the Cabinet hero pill language), so hero action pills like
@@ -885,7 +816,11 @@ fun SettingsHubScreen(navController: NavController) {
         // state always span the full width.
         val wide = windowWidthSizeClass().isWide
         val gridState = rememberLazyGridState()
-val listBackdrop = rememberLayerBackdrop()
+        // RESTORED (user request) — STICKY HERO: the grid records into a
+        // local capture; the hero is pinned ON TOP of it after the grid,
+        // so rows scroll UP BEHIND the ragged tear and the hero's back
+        // pill refracts them with REAL liquid glass.
+        val glassBackdrop = rememberLayerBackdrop()
         // v27t — wide windows (tablet / landscape) render the two-pane
         // master-detail layout ([SettingsTwoPaneHub]): the full settings nav
         // list stays on the left while the selected page's options show on
@@ -895,27 +830,11 @@ val listBackdrop = rememberLayerBackdrop()
             LazyVerticalGrid(
                 state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
-                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
-                // v255 — SCROLLING HERO (the reverted Home/Profile
-                // construction): the banner lives INSIDE the grid as the
-                // first item and scrolls away with the page.
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // ── Hero banner — scrolls away with the page ──
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    // v257 — full-bleed: the grid's edge padding must not
-                    // inset the torn banner from the screen sides.
-                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                        SettingsHeroHeader(
-                            title = "Settings",
-                            subtitle = "Tune Curio your way",
-                            onBack = { navController.popBackStack() },
-                            compact = wide
-                        )
-                    }
-                }
                 // ── Search — filters every section below as you type ──
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     CurioSearchField(
@@ -999,13 +918,14 @@ val listBackdrop = rememberLayerBackdrop()
                 .fillMaxHeight()
                 .padding(top = 10.dp, bottom = 16.dp)
         )
-        // v257 — the back control returns once the scrolling hero has moved
-        // up: a floating pill that wears clear liquid glass when active.
-        SettingsStickyBackPill(
+        // Pinned hero, drawn on TOP of the grid — cards slide under the
+        // ragged tear as they scroll up.
+        SettingsHeroHeader(
+            title = "Settings",
+            subtitle = "Tune Curio your way",
             onBack = { navController.popBackStack() },
-            progress = gridState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
+            compact = wide,
+            glassBackdrop = glassBackdrop
         )
         } else {
             SettingsTwoPaneHub(

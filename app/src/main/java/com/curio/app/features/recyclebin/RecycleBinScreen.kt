@@ -48,9 +48,6 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ImageStorageManager
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.FullBleedHeroItem
-import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -89,7 +86,7 @@ fun RecycleBinScreen(navController: NavController) {
         }
     }
     val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+val glassBackdrop = rememberLayerBackdrop()
     // Single-confirm dialogs for the permanent actions (already in the bin).
     var purgeTarget by remember { mutableStateOf<CurioEntry?>(null) }
     var showEmptyBinConfirm by remember { mutableStateOf(false) }
@@ -144,7 +141,7 @@ val listBackdrop = rememberLayerBackdrop()
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
+                    modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
@@ -153,17 +150,7 @@ val listBackdrop = rememberLayerBackdrop()
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    item("bin-hero") {
-                        // v257 — full-bleed banner (no edge-padding inset).
-                        FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                            SettingsHeroHeader(
-                                title = "Recycle bin",
-                                subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you",
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                    }
-                    item("bin-controls") {
+                                        item("bin-controls") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -247,13 +234,11 @@ val listBackdrop = rememberLayerBackdrop()
                     .padding(top = 10.dp, bottom = 16.dp)
             )
         }
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
-            onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Recycle bin", subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 
     // ── Delete forever (single entry) ──────────────────────────────────

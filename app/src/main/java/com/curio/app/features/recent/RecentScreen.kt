@@ -42,9 +42,6 @@ import com.curio.app.data.UnexploredTopic
 import com.curio.app.data.formatSessionShort
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.FullBleedHeroItem
-import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -138,7 +135,7 @@ fun RecentScreen(navController: NavController) {
         buildRecentFeed(entries, explored, unexplored)
     }
     val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+val glassBackdrop = rememberLayerBackdrop()
 
     Box(
         modifier = Modifier
@@ -181,7 +178,7 @@ val listBackdrop = rememberLayerBackdrop()
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
+                    modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
@@ -190,17 +187,7 @@ val listBackdrop = rememberLayerBackdrop()
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    item("recents-hero") {
-                        // v257 — full-bleed banner (no edge-padding inset).
-                        FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                            SettingsHeroHeader(
-                                title = "Recents",
-                                subtitle = "Your latest discoveries, all in one place",
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                    }
-                    items(feed, key = { it.key }) { item ->
+                                        items(feed, key = { it.key }) { item ->
                         RecentFeedRow(item = item, navController = navController)
                     }
                     item { Spacer(Modifier.size(12.dp)) }
@@ -219,13 +206,11 @@ val listBackdrop = rememberLayerBackdrop()
                     .padding(top = 10.dp, bottom = 16.dp)
             )
         }
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
-            onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Recents", subtitle = "Your latest discoveries, all in one place", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 }
 

@@ -49,9 +49,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.FullBleedHeroItem
-import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -113,7 +110,7 @@ fun ManageCategoriesScreen(navController: NavController) {
     val dragStepPx = with(LocalDensity.current) { 76.dp.toPx() }
     // v5.8 — saveable-backed: keep the list's scroll position on rotation.
     val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+val glassBackdrop = rememberLayerBackdrop()
 
     fun shiftDraft(id: CategoryId, delta: Int) {
         val idx = draft.indexOfFirst { it.id == id }
@@ -156,7 +153,7 @@ val listBackdrop = rememberLayerBackdrop()
                 // v142 — full-bleed bottom: the NavHost no longer reserves
                 // the nav-bar slot for this route, so the page clears the
                 // gesture bar itself (the wash runs to the bottom edge).
-                modifier = Modifier.layerBackdrop(listBackdrop)
+                modifier = Modifier.layerBackdrop(glassBackdrop)
                     .fillMaxSize()
                     .navigationBarsPadding(),
                 contentPadding = PaddingValues(
@@ -169,17 +166,7 @@ val listBackdrop = rememberLayerBackdrop()
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                item("hero") {
-                    // v257 — full-bleed banner (no edge-padding inset).
-                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                        SettingsHeroHeader(
-                            title = "Manage categories",
-                            subtitle = "Show, hide, or reorder lanes",
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                }
-                // ── Helper text + Reset order — flat caption under the hero
+                                // ── Helper text + Reset order — flat caption under the hero
                 item("help") {
                     Row(
                         modifier = Modifier
@@ -272,13 +259,11 @@ val listBackdrop = rememberLayerBackdrop()
                 .navigationBarsPadding()
                 .padding(top = 10.dp, bottom = 16.dp)
         )
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
-            onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Manage categories", subtitle = "Show, hide, or reorder lanes", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 }
 

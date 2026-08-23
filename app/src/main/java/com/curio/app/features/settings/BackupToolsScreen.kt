@@ -327,24 +327,14 @@ fun BackupToolsScreen(navController: NavController) {
         // page. It still runs up behind the status bar (the header applies
         // its own status-bar inset for the back pill).
         val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+val glassBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
-            modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item {
-                // v257 — full-bleed banner (no edge-padding inset).
-                FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                    SettingsHeroHeader(
-                        title = "Backup & restore",
-                        subtitle = "Keep your captures safe",
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-            }
-            item { CurioSectionLabel("Your data") }
+                        item { CurioSectionLabel("Your data") }
             item {
                 // v115 — the backup rows sit in the shared settings card so
                 // the workspace reads as settings options, not transparent
@@ -498,12 +488,10 @@ val listBackdrop = rememberLayerBackdrop()
                 }
             }
         }
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
-            onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Backup & restore", subtitle = "Keep your captures safe", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 }

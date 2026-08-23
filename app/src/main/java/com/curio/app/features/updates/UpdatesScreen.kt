@@ -56,9 +56,6 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.FullBleedHeroItem
-import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -258,10 +255,10 @@ fun UpdatesScreen(navController: NavController) {
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
             val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+            val glassBackdrop = rememberLayerBackdrop()
             LazyColumn(
                 state = listState,
-                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
                 // v255 — SCROLLING HERO: the banner is the list's first item
                 // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
@@ -272,16 +269,6 @@ val listBackdrop = rememberLayerBackdrop()
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    // v257 — full-bleed banner (no edge-padding inset).
-                    FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                        SettingsHeroHeader(
-                            title = "Updates",
-                            subtitle = "Your build and what's new",
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                }
                 item { CurioSectionLabel("Updates") }
                 // ── Status card — current version, check state, the
                 //    update action (when one is available) and the checker
@@ -559,17 +546,15 @@ val listBackdrop = rememberLayerBackdrop()
                 }
             }
 
-            // v257 — sticky back pill once the scrolling hero moves up.
-            // Explicit Box: guarantees a BoxScope receiver for align() inside
-            // the ScreenEntrance lambda.
-            Box(modifier = Modifier.fillMaxSize()) {
-                SettingsStickyBackPill(
-                    onBack = { navController.popBackStack() },
-                    progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-                    modifier = Modifier.align(Alignment.TopStart)
-                )
-            }
+            // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+            // content: rows slide under the ragged tear as they scroll up, and
+            // the back pill refracts them through REAL liquid glass.
+            SettingsHeroHeader(
+                title = "Updates",
+                        subtitle = "Your build and what's new",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
         }
     }
 }

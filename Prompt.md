@@ -392,3 +392,13 @@ User's batched asks across the session:
 - SettingsHeroBannerHeight 180→216dp for Home-like hero presence.
 - Home blob question: confirmed restored — CurioBottomNav uses default ghostFreeTabs=false → combined page+tab sample; only Pet Designer opts out.
 - Status: pushed. CI validates.
+
+## 2026-08-23 — Sticky hero restore + glassy back pill + tuning preview fix (v263)
+- Settings + all sub-page screens restored to STICKY (pinned) hero: banner overlay on top, content scrolls behind the ragged tear (the original construction before the v255 scrolling conversion).
+- Hero's own back pill now wears REAL liquid glass when liquid-glass is enabled: each screen's scroll list records into a local `layerBackdrop`, the hero sits OUTSIDE that capture (no self-sample cycle), CurioBackButton wrapped in `liquidGlassCapsule(backdrop, alwaysClear=true)`.
+- Floating morph pill (`SettingsStickyBackPill`) + `heroExitProgress` helpers fully removed (no longer needed with pinned hero).
+- SettingsHeroHeader gained `glassBackdrop: LayerBackdrop? = null` param; Topic Database / other unconverted callers unaffected (null → classic opaque pill).
+- `SettingsHeroBannerHeight` reverted 216→180dp (original value).
+- Glass-tuning dialog preview FIXED: the preview capsule now records the colorful gradient card into its OWN local `dialogBackdrop` and wraps `liquidGlassCapsule` with that backdrop (real refraction); the `Container.removeClipToPadding()`-style fix: the capsule is a SIBLING overlay outside the captured card, outer box sized 230dp + `.background(brush, RoundedCornerShape(18.dp))` (background-only clip) so the pill can drag freely beyond the card bounds without being clipped.
+- All 11 converted screens verified balanced + imports cleaned.
+- Status: pushed. CI validates compilation.

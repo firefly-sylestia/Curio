@@ -80,28 +80,19 @@ fun ExperimentsScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
-        // v255 — SCROLLING HERO (the Home/Profile construction): the banner
-        // lives INSIDE the list as the first item and scrolls away with the
-        // page. It still runs up behind the status bar (the header applies
-        // its own status-bar inset for the back pill).
+        // RESTORED (user request) — STICKY HERO: the banner is pinned on top
+        // of the page and rows scroll UP BEHIND the ragged tear. The list
+        // records into a local capture so the hero's back pill can wear REAL
+        // liquid glass (rows bending through it) — the pill itself lives
+        // OUTSIDE this capture, so no self-sample cycle.
         val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+        val glassBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
-            modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item {
-                // v257 — full-bleed banner (no edge-padding inset).
-                FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                    SettingsHeroHeader(
-                        title = "Experiments",
-                        subtitle = "Try ideas before they ship",
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-            }
             // v223 — the "Spin visuals" section is GONE: all five
             // experiments (Main card shadow, Nav-style buttons, Top-lit deck
             // cards, Tinted deck edges, Roomier deck titles) CONCLUDED with
@@ -217,12 +208,13 @@ val listBackdrop = rememberLayerBackdrop()
                 }
             }
         }
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
+        // Drawn on TOP of the scroll content — rows slide under the ragged
+        // tear as they scroll up. Its back pill refracts the captured rows.
+        SettingsHeroHeader(
+            title = "Experiments",
+            subtitle = "Try ideas before they ship",
             onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
+            glassBackdrop = glassBackdrop
         )
     }
 

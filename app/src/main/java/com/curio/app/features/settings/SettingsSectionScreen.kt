@@ -146,7 +146,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         SettingsHighlightTarget.rowKey = null
     }
     val listState = rememberLazyListState()
-val listBackdrop = rememberLayerBackdrop()
+val glassBackdrop = rememberLayerBackdrop()
     // v255 — the hero is now item 0 of the list; the highlight target is
     // the page-content item that follows the section label.
     LaunchedEffect(highlightKey) {
@@ -181,20 +181,13 @@ val listBackdrop = rememberLayerBackdrop()
         // at a straight line.
         LazyColumn(
             state = listState,
-            modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
             // v255 — SCROLLING HERO (the Home/Profile construction): the
             // banner lives INSIDE the list and scrolls away with the page.
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item {
-                // v257 — full-bleed banner (the list's edge padding must not
-                // inset the torn hero from the screen sides).
-                FullBleedHeroItem(edgePad = wideContentEdgePadding()) {
-                    SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
-                }
-            }
-            item { CurioSectionLabel(page.title) }
+                        item { CurioSectionLabel(page.title) }
             item {
                 SettingsPageContent(page, navController, highlightKey)
             }
@@ -208,13 +201,11 @@ val listBackdrop = rememberLayerBackdrop()
                 .fillMaxHeight()
                 .padding(top = 8.dp, bottom = 16.dp)
         )
-        // v257 — sticky back pill once the scrolling hero moves up.
-        SettingsStickyBackPill(
-            onBack = { navController.popBackStack() },
-            progress = listState.heroExitProgress(),
-            backdrop = listBackdrop,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 }
 
@@ -921,39 +912,54 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                 // you can DRAG over a colorful collage. Every slider writes
                 // the same preference state the real capsules read, so the
                 // pill under your finger IS how the nav pills will render.
+                // v263 — REAL PREVIEW FIXED: the gradient card records into a
+                // LOCAL backdrop; the draggable capsule sits as a SIBLING
+                // OUTSIDE that capture (no self-sample cycle) and refracts
+                // the colorful collage behind it — exactly how real in-app
+                // pills behave. Removing .clip() lets the pill float beyond
+                // the card bounds.
                 var previewOffset by remember { mutableStateOf(Offset.Zero) }
+                val dialogBackdrop = rememberLayerBackdrop()
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp)
+                        .height(230.dp)                       // tall enough for the pill to roam
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    Color(0xFF7E57C2),
-                                    Color(0xFFEF9A9A),
-                                    Color(0xFF80DEEA),
-                                    Color(0xFFFFD54F)
-                                )
-                            )
-                        )
                 ) {
-                    // Collage content behind the glass — real text to bend.
-                    Text(
-                        text = "Aa Bb Cc\n123 456",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = Color.Black.copy(alpha = 0.35f),
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                    Text(
-                        text = "Curio",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White.copy(alpha = 0.85f),
+                    // ── Gradient card — the content the pill refracts ──
+                    Box(
                         modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(10.dp)
-                    )
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .layerBackdrop(dialogBackdrop)     // records into this layer
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFF7E57C2),
+                                        Color(0xFFEF9A9A),
+                                        Color(0xFF80DEEA),
+                                        Color(0xFFFFD54F)
+                                    )
+                                ),
+                                RoundedCornerShape(18.dp)       // clip background only, not children
+                            )
+                    ) {
+                        Text(
+                            text = "Aa Bb Cc\n123 456",
+                            style = MaterialTheme.typography.displayMedium,
+                            color = Color.Black.copy(alpha = 0.35f),
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                        Text(
+                            text = "Curio",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(10.dp)
+                        )
+                    }
+                    // ── Draggable capsule — sibling overlay, NOT clipped ──
                     Surface(
                         shape = CircleShape,
                         color = Color.Transparent,
@@ -962,7 +968,14 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                             .align(Alignment.Center)
                             .offset { IntOffset(previewOffset.x.roundToInt(), previewOffset.y.roundToInt()) }
                             .size(width = 132.dp, height = 48.dp)
-                            .liquidGlassCapsule(MaterialTheme.colorScheme.surfaceVariant)
+                            // v263 — PROPER glass: real refraction over the
+                            // captured gradient + text content behind it.
+                            .liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                washAlpha = 0.45f,
+                                backdrop = dialogBackdrop,
+                                alwaysClear = true
+                            )
                             .pointerInput(Unit) {
                                 detectDragGestures { change, amount ->
                                     change.consume()
