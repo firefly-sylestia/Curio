@@ -122,6 +122,7 @@ import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Quests & levels — Curio's gamification home (v8.0).

@@ -78,6 +78,7 @@ import java.io.File
 import kotlinx.coroutines.launch
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Updates — the dedicated sub-page for the in-app updater (v112). Own UI

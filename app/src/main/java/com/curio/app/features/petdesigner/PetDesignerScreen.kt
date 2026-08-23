@@ -150,6 +150,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /** One editable color in the palette — its grid key, name and hex. */
 private data class PaletteSlot(val key: Char, val name: String)

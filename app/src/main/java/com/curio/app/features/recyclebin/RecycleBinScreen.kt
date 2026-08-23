@@ -67,6 +67,7 @@ import com.curio.app.ui.theme.themedAccent
 import kotlinx.coroutines.launch
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Recycle bin (v26) — every soft-deleted capture lands here instead of being

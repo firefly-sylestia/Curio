@@ -52,6 +52,7 @@ import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Support & diagnostics — the dedicated page behind Profile's

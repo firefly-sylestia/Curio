@@ -62,6 +62,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Manage Categories — see Curio category-management contract.
