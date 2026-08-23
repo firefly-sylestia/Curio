@@ -1166,7 +1166,7 @@ private fun BoxScope.DetailStickyBar(
                 Modifier.liquidGlassCapsule(
                     heroFill,
                     washAlpha = 0.45f,
-                    backdrop = detailGlassBackdrop,
+                    backdrop = glassBackdrop,
                     alwaysClear = true
                 )
                 else Modifier.heroFrostPlate(
@@ -1186,7 +1186,7 @@ private fun BoxScope.DetailStickyBar(
                     Modifier.liquidGlassCapsule(
                         heroFill,
                         washAlpha = 0.45f,
-                        backdrop = detailGlassBackdrop,
+                        backdrop = glassBackdrop,
                         alwaysClear = true
                     )
                 else Modifier.heroFrostPlate(
