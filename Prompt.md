@@ -1,3 +1,13 @@
+## Addendum (v248): mood-board quote slip still max-sized
+
+User: the quote card is ALWAYS at the max — not fixed by the spare-line pass.
+Root cause: the floating card's Box forced `.width(renderW)` and NotePaperCard
+did `fillMaxWidth()`, so every slip stretched to the full slot/resize width no
+matter how short the quote. Fix: Box now `widthIn(max = renderW)` (slot width
+or user resize = MAXIMUM, not fixed) and NotePaperCard wraps content with a
+96dp floor for tappability. Height already wrapped; drag/resize mechanics
+unchanged. File: MoodBoardZoom.kt (+widthIn import).
+
 ## Request: v247 - solid idle blob, gentle press refraction, Apple press feel (COMPLETE, pushed)
 
 User (after v246 build): home active indicator is good, but (1) its refraction

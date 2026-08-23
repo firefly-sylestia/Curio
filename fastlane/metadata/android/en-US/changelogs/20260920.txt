@@ -1,3 +1,4 @@
+FIX: Mood-board quote slips hug their text instead of always rendering at max size.
 FIX: Active blob is now solid white/black at rest (theme ink stays crisp); gentle press-glass refraction only while held.
 IMPROVE: Apple-style pill press animation — crisp press-in, springy release.
 ADD: Liquid glass on Cabinet & Topic DB category chips, single theme ink.

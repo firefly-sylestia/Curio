@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -884,7 +885,11 @@ private fun MoodBoardFloatingCard(
             // up to two lines at the scaled font. The old fixed slot-height
             // (min h / max 1.5h in the editor, exact h when saved) fought
             // the scaled text — resize now scales the whole note uniformly.
-            .width(with(density) { renderW.toDp() })
+            // v248 — the slip HUGS its text: renderW (slot width or the
+            // user's resize) is now only a MAXIMUM. A short quote renders as
+            // a small note instead of always stretching to the full slot —
+            // the "card always at max size" complaint.
+            .widthIn(max = with(density) { renderW.toDp() })
             .rotate(rotation)
             .onSizeChanged { measuredHeightPx = it.height }
             // v57 — pinch-to-expand (EDITOR ONLY, when a resize handler
@@ -1008,7 +1013,10 @@ private fun MoodBoardFloatingCard(
                 top = 8.dp,
                 bottom = 24.dp
             ),
-            modifier = Modifier.fillMaxWidth()
+            // v248 — wrap content: the paper hugs the text's natural width
+            // (bounded by the Box's max) instead of filling it. A floor keeps
+            // one-line quotes comfortably tappable/draggable.
+            modifier = Modifier.widthIn(min = 96.dp)
         ) {
             // Quote cards show up to TWO lines on the board — editor and
             // saved views alike. The old editor branch used Int.MAX_VALUE, so
