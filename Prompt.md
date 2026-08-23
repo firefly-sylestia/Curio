@@ -1,5 +1,26 @@
 # Prompt.md — current request log
 
+## Request: v255 — scrolling-hero conversion for ALL pinned-hero screens (+ CI import fix)
+
+- CI fix first (bf2b037): GlassTuningDialog needed geometry.CornerRadius +
+  CurioCardHeader import; deduped 5 duplicate imports.
+- User confirmed scope: ALL screens with the shared SettingsHeroHeader.
+- Converted pinned overlay hero → first scroll item (Home/Profile way) in:
+  SettingsHubScreen (compact grid; two-pane hub hero was already static
+  flow), SettingsSectionScreen (scrollToItem highlight 1→2), Experiments,
+  BackupTools, Support, Updates, PromoMode, Quests, RecycleBin (incl. empty-
+  state Column variant), Recent, ManageCategories.
+- NOT converted: TopicDatabaseScreen — its pinned hero IS the toolbar
+  (search morph + Category pill + chip-bar/back-to-top geometry keyed to
+  DatabaseHeroTotalHeight). Flagged to user as a separate surgery if wanted.
+- PetDesignerScreen already scrolled its hero — untouched.
+
+## Status: complete — commit & push this turn.
+
+---
+
+# Prompt.md — current request log
+
 ## Request: v254 — hero-tear revert + explore bubble pass (COMPLETE, pushed)
 
 1. **Revert the v251 sticky hero tear** (f7e9ad7): user wanted the OPPOSITE

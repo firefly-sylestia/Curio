@@ -141,8 +141,10 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         SettingsHighlightTarget.rowKey = null
     }
     val listState = rememberLazyListState()
+    // v255 — the hero is now item 0 of the list; the highlight target is
+    // the page-content item that follows the section label.
     LaunchedEffect(highlightKey) {
-        if (highlightKey != null) listState.scrollToItem(1)
+        if (highlightKey != null) listState.scrollToItem(2)
     }
     Box(
         modifier = Modifier
@@ -174,9 +176,14 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            // v255 — SCROLLING HERO (the Home/Profile construction): the
+            // banner lives INSIDE the list and scrolls away with the page.
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item {
+                SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
+            }
             item { CurioSectionLabel(page.title) }
             item {
                 SettingsPageContent(page, navController, highlightKey)
@@ -189,11 +196,8 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = SettingsHeroTotalHeight + 8.dp, bottom = 16.dp)
+                .padding(top = 8.dp, bottom = 16.dp)
         )
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
     }
 }
 

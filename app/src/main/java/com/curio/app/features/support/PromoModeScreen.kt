@@ -49,7 +49,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -118,14 +117,23 @@ fun PromoModeScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                // v255 — SCROLLING HERO: the banner is the list's first item
+                // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = 10.dp,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                item {
+                    SettingsHeroHeader(
+                        title = "Promo mode",
+                        subtitle = if (promoOn) "Demo content on · share-ready" else "Store-ready promo art",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
                 item { CurioSectionLabel("Demo content") }
                 item { PromoStatusCard(on = promoOn, onToggle = { AppPreferences.setPromoModeEnabled(context, !promoOn) }) }
                 item { CurioSectionLabel("Promo card") }
@@ -226,13 +234,6 @@ fun PromoModeScreen(navController: NavController) {
                 }
             }
         }
-        // ── Torn rose hero on top — rows disappear under the tear (the
-        // settings overlay pattern).
-        SettingsHeroHeader(
-            title = "Promo mode",
-            subtitle = if (promoOn) "Demo content on · share-ready" else "Store-ready promo art",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
 

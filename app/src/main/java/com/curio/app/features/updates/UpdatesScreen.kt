@@ -55,7 +55,6 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -254,14 +253,23 @@ fun UpdatesScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                // v255 — SCROLLING HERO: the banner is the list's first item
+                // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = 10.dp,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                item {
+                    SettingsHeroHeader(
+                        title = "Updates",
+                        subtitle = "Your build and what's new",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
                 item { CurioSectionLabel("Updates") }
                 // ── Status card — current version, check state, the
                 //    update action (when one is available) and the checker
@@ -539,12 +547,6 @@ fun UpdatesScreen(navController: NavController) {
                 }
             }
         }
-        // ── Torn rose hero on top — rows disappear under the tear.
-        SettingsHeroHeader(
-            title = "Updates",
-            subtitle = "Your build and what's new",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
 

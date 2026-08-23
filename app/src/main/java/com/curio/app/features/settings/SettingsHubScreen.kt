@@ -731,9 +731,6 @@ fun SettingsHubScreen(navController: NavController) {
         // the familiar single column. Search, section labels and the empty
         // state always span the full width.
         val wide = windowWidthSizeClass().isWide
-        // Compact hero on tablets/landscape — 140dp instead of 180dp so
-        // the torn banner doesn't dominate the short vertical space.
-        val heroTotal = if (wide) 140.dp + SettingsHeroSheetExtent else SettingsHeroTotalHeight
         val gridState = rememberLazyGridState()
         // v27t — wide windows (tablet / landscape) render the two-pane
         // master-detail layout ([SettingsTwoPaneHub]): the full settings nav
@@ -745,10 +742,22 @@ fun SettingsHubScreen(navController: NavController) {
                 state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = heroTotal + 10.dp, bottom = 24.dp),
+                // v255 — SCROLLING HERO (the reverted Home/Profile
+                // construction): the banner lives INSIDE the grid as the
+                // first item and scrolls away with the page.
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 10.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // ── Hero banner — scrolls away with the page ──
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    SettingsHeroHeader(
+                        title = "Settings",
+                        subtitle = "Tune Curio your way",
+                        onBack = { navController.popBackStack() },
+                        compact = wide
+                    )
+                }
                 // ── Search — filters every section below as you type ──
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     CurioSearchField(
@@ -830,15 +839,7 @@ fun SettingsHubScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = heroTotal + 10.dp, bottom = 16.dp)
-        )
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Settings",
-            subtitle = "Tune Curio your way",
-            onBack = { navController.popBackStack() },
-            compact = wide
+                .padding(top = 10.dp, bottom = 16.dp)
         )
         } else {
             SettingsTwoPaneHub(

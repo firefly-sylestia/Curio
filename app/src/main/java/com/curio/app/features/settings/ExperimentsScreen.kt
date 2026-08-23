@@ -76,16 +76,22 @@ fun ExperimentsScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
-        // The hero banner runs up BEHIND the status bar (the header applies
-        // its own status-bar inset for the back pill) — Profile/Home style.
-        // The hero is drawn LAST (on top of the scroll content): the rows
-        // scroll UP and disappear behind the ragged tear instead of clipping
-        // at a straight line.
+        // v255 — SCROLLING HERO (the Home/Profile construction): the banner
+        // lives INSIDE the list as the first item and scrolls away with the
+        // page. It still runs up behind the status bar (the header applies
+        // its own status-bar inset for the back pill).
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item {
+                SettingsHeroHeader(
+                    title = "Experiments",
+                    subtitle = "Try ideas before they ship",
+                    onBack = { navController.popBackStack() }
+                )
+            }
             // v223 — the "Spin visuals" section is GONE: all five
             // experiments (Main card shadow, Nav-style buttons, Top-lit deck
             // cards, Tinted deck edges, Roomier deck titles) CONCLUDED with
@@ -201,13 +207,6 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
         }
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Experiments",
-            subtitle = "Try ideas before they ship",
-            onBack = { navController.popBackStack() }
-        )
     }
 
     // ── Ring style picker — the three 3D ring looks, single-select ──

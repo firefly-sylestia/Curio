@@ -32,7 +32,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -105,14 +104,23 @@ fun SupportScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                // v255 — SCROLLING HERO: the banner is the list's first item
+                // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = 10.dp,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                item {
+                    SettingsHeroHeader(
+                        title = "Support & diagnostics",
+                        subtitle = "Reports & help",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
                 item { CurioSectionLabel("Feedback") }
                 item {
                     CurioSettingsCard(shadowElevation = 0.dp) {
@@ -264,12 +272,5 @@ fun SupportScreen(navController: NavController) {
                 }
             }
         }
-        // ── Torn rose hero on top — rows disappear under the tear as they
-        // scroll (the settings overlay pattern).
-        SettingsHeroHeader(
-            title = "Support & diagnostics",
-            subtitle = "Reports & help",
-            onBack = { navController.popBackStack() }
-        )
     }
 }

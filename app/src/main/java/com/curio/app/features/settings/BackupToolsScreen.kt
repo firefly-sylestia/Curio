@@ -319,16 +319,22 @@ fun BackupToolsScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
-        // The hero banner runs up BEHIND the status bar (the header applies
-        // its own status-bar inset for the back pill) — Profile/Home style.
-        // The hero is drawn LAST (on top of the scroll content): the rows
-        // scroll UP and disappear behind the ragged tear instead of clipping
-        // at a straight line.
+        // v255 — SCROLLING HERO (the Home/Profile construction): the banner
+        // lives INSIDE the list as the first item and scrolls away with the
+        // page. It still runs up behind the status bar (the header applies
+        // its own status-bar inset for the back pill).
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item {
+                SettingsHeroHeader(
+                    title = "Backup & restore",
+                    subtitle = "Keep your captures safe",
+                    onBack = { navController.popBackStack() }
+                )
+            }
             item { CurioSectionLabel("Your data") }
             item {
                 // v115 — the backup rows sit in the shared settings card so
@@ -483,12 +489,5 @@ fun BackupToolsScreen(navController: NavController) {
                 }
             }
         }
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Backup & restore",
-            subtitle = "Keep your captures safe",
-            onBack = { navController.popBackStack() }
-        )
     }
 }

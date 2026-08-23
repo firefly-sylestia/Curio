@@ -49,7 +49,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -157,11 +156,20 @@ fun ManageCategoriesScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    // v255 — SCROLLING HERO: the banner is the list's first
+                    // item and scrolls away with the page.
+                    top = 10.dp,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+                item("hero") {
+                    SettingsHeroHeader(
+                        title = "Manage categories",
+                        subtitle = "Show, hide, or reorder lanes",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
                 // ── Helper text + Reset order — flat caption under the hero
                 item("help") {
                     Row(
@@ -253,15 +261,7 @@ fun ManageCategoriesScreen(navController: NavController) {
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .navigationBarsPadding()
-                .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
-        )
-
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Manage categories",
-            subtitle = "Show, hide, or reorder lanes",
-            onBack = { navController.popBackStack() }
+                .padding(top = 10.dp, bottom = 16.dp)
         )
     }
 }

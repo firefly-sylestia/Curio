@@ -48,7 +48,6 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ImageStorageManager
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -118,14 +117,24 @@ fun RecycleBinScreen(navController: NavController) {
             )
         }
         ScreenEntrance {
+            // v255 — SCROLLING HERO (the Home/Profile construction): the
+            // banner leads the page — as the empty state's top block or the
+            // list's first item — and scrolls away with it.
             if (trashed.isEmpty()) {
-                CurioEmptyState(
-                    glyph = CurioIcons.Restore,
-                    headline = "Recycle bin is empty",
-                    subtext = "Deleted captures wait here so you can bring them back — nothing is lost yet.",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-                    modifier = Modifier.padding(top = SettingsHeroTotalHeight)
-                )
+                Column {
+                    SettingsHeroHeader(
+                        title = "Recycle bin",
+                        subtitle = "Recently deleted captures",
+                        onBack = { navController.popBackStack() }
+                    )
+                    CurioEmptyState(
+                        glyph = CurioIcons.Restore,
+                        headline = "Recycle bin is empty",
+                        subtext = "Deleted captures wait here so you can bring them back — nothing is lost yet.",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             } else {
                 LazyColumn(
                     state = listState,
@@ -133,11 +142,18 @@ fun RecycleBinScreen(navController: NavController) {
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = SettingsHeroTotalHeight + 10.dp,
+                        top = 10.dp,
                         bottom = 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    item("bin-hero") {
+                        SettingsHeroHeader(
+                            title = "Recycle bin",
+                            subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                     item("bin-controls") {
                         Row(
                             modifier = Modifier
@@ -219,14 +235,9 @@ fun RecycleBinScreen(navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+                    .padding(top = 10.dp, bottom = 16.dp)
             )
         }
-        SettingsHeroHeader(
-            title = "Recycle bin",
-            subtitle = if (trashed.isEmpty()) "Recently deleted captures" else "${trashed.size} capture(s) awaiting you",
-            onBack = { navController.popBackStack() }
-        )
     }
 
     // ── Delete forever (single entry) ──────────────────────────────────
