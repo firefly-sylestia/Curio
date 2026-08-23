@@ -448,7 +448,13 @@ fun CurioFloatingNavBar(
             color = if (glassOn) Color.Transparent else classicContainer,
             shadowElevation = if (glassOn) 0.dp else 6.dp,
             modifier = when {
-                glassOn -> Modifier.liquidGlassCapsule(classicContainer)
+                glassOn -> Modifier.liquidGlassCapsule(
+                    classicContainer,
+                    // v260 — the nav bar is a SIBLING OVERLAY of the NavHost
+                    // capture (outside it), so it's the ONLY caller allowed
+                    // to fall back to the global layer.
+                    useGlobalCapture = true
+                )
                 // v243 — pre-Android-12: keep the solid dynamic bar but add
                 // the sheen + rim so it reads glassy too.
                 glassWanted -> Modifier.curioFauxGlassSheen()

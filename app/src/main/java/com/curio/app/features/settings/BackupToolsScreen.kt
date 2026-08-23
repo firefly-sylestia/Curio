@@ -328,7 +328,7 @@ fun BackupToolsScreen(navController: NavController) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {

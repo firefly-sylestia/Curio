@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
@@ -135,7 +136,13 @@ internal fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.curioGlassC
  * "liquid glass" — just without live refraction of the content behind it.
  */
 @Composable
-fun Modifier.fauxGlassCapsule(container: Color): Modifier {
+fun Modifier.fauxGlassCapsule(
+    container: Color,
+    // v260 — optional explicit corner radius: the simulated recipe defaults
+    // to a stadium (min(w,h)/2), which mismatches surfaces whose shape
+    // animates (the explore bubble's expanding panel).
+    corner: Dp? = null
+): Modifier {
     val dark = isCurioDarkTheme()
     // v245 — CRISPER, not frosty: real per-frame blur is impossible below
     // Android 12, so the recipe leans clear-pane (light veil, strong sheen +
@@ -148,7 +155,7 @@ fun Modifier.fauxGlassCapsule(container: Color): Modifier {
     val rim = if (dark) Color.White.copy(alpha = 0.32f) else Color.White.copy(alpha = 0.90f)
     return this.drawWithContent {
         drawContent()
-        val r = CornerRadius(minOf(size.width, size.height) / 2f)
+        val r = CornerRadius(corner?.toPx() ?: minOf(size.width, size.height) / 2f)
         // Frosted veil — the "blur" stand-in.
         drawRoundRect(color = veil, cornerRadius = r)
         // Top-down sheen — light catching the pane.
@@ -173,13 +180,13 @@ fun Modifier.fauxGlassCapsule(container: Color): Modifier {
  * bar's dynamic container color still reads.
  */
 @Composable
-fun Modifier.curioFauxGlassSheen(): Modifier {
+fun Modifier.curioFauxGlassSheen(corner: Dp? = null): Modifier {
     val dark = isCurioDarkTheme()
     val sheen = if (dark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.40f)
     val rim = if (dark) Color.White.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.70f)
     return this.drawWithContent {
         drawContent()
-        val r = CornerRadius(minOf(size.width, size.height) / 2f)
+        val r = CornerRadius(corner?.toPx() ?: minOf(size.width, size.height) / 2f)
         drawRoundRect(
             brush = Brush.verticalGradient(listOf(sheen, Color.Transparent)),
             cornerRadius = r
@@ -213,6 +220,15 @@ fun Modifier.liquidGlassCapsule(
     // (Pet Designer studio bar) pass RoundedCornerShape(50) so the glass
     // clips to a stadium instead of an ellipse.
     shape: Shape = CircleShape,
+    // v260 — CRASH FIX: opt-in for the GLOBAL NavHost capture. Only callers
+    // that sit OUTSIDE the captured subtree (the floating bottom nav) may
+    // sample it — an in-screen caller with backdrop == null used to fall
+    // through to the global capture, sampled a layer containing ITSELF, and
+    // produced the v228 cyclic render node again: RenderThread SIGSEGV
+    // (stack overflow in prepareTreeImpl) on Samsung A35 / Android 16.
+    // In-screen callers without a local capture now get the SAFE simulated
+    // recipe instead — never the global layer.
+    useGlobalCapture: Boolean = false,
     // v246 — TOUCH FEEL returns: pass the pill's click InteractionSource
     // and holding it springs the whole capsule slightly SMALLER while the
     // lens refraction blooms at the corners under the finger — the tactile
@@ -223,7 +239,9 @@ fun Modifier.liquidGlassCapsule(
     // v243 — pre-Android-12: no RenderEffect → serve the simulated glass
     // recipe so those users get the look instead of nothing.
     if (android.os.Build.VERSION.SDK_INT < 31) return this.fauxGlassCapsule(container)
-    val backdrop = backdrop ?: CurioGlassPills.backdrop ?: return this
+    val effectiveBackdrop = backdrop
+        ?: (if (useGlobalCapture) CurioGlassPills.backdrop else null)
+        ?: return this.fauxGlassCapsule(container)
     // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
     // below is NOT a composable context.
     val dark = isCurioDarkTheme()
@@ -275,7 +293,11 @@ fun Modifier.liquidGlassCapsule(
             // the global re-records that fire on every scroll frame must
             // not touch them — this condition is why the in-screen pills
             // never showed glass (they were flattened permanently).
-            if (CurioGlassPills.isCapturingBackdrop && backdrop == null) {
+            // v260 — only GLOBAL samplers (useGlobalCapture) reference the
+            // layer being recorded here, so only they must flatten. Local-
+            // backdrop pills sit outside their captured subtree and must
+            // keep drawing through global re-records (the v243 fix).
+            if (CurioGlassPills.isCapturingBackdrop && useGlobalCapture) {
                 drawRoundRect(
                     color = container.copy(alpha = 0.88f),
                     cornerRadius = CornerRadius(
@@ -289,7 +311,7 @@ fun Modifier.liquidGlassCapsule(
         }
         .then(
             Modifier.drawBackdrop(
-                backdrop = backdrop,
+                backdrop = effectiveBackdrop,
                 shape = { shape },
                 effects = {
                     vibrancy()

@@ -181,7 +181,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
             modifier = Modifier.fillMaxSize(),
             // v255 — SCROLLING HERO (the Home/Profile construction): the
             // banner lives INSIDE the list and scrolls away with the page.
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {

@@ -1,3 +1,18 @@
+## Request: v260 — crash + duplicate fixes (COMPLETE)
+
+1. RenderThread SIGSEGV on settings sub-pages: in-screen pills (sticky back
+   pills, tuning preview, Topic Reveal) fell back to the GLOBAL NavHost
+   capture they sit inside -> cyclic render node. liquidGlassCapsule now
+   requires opt-in (useGlobalCapture) for the global layer; others get the
+   safe simulated recipe. Bottom nav is the only opt-in.
+2. Tab-bar duplicate icon/label: blob's combined backdrop sampled a hidden
+   copy of the tab row; default style now samples page only.
+3. Nav glow toned down (highlight capped 55%, resting shadow 0.22->0.12).
+4. Duplicate back pills: isPastHero waits until <45% of hero remains.
+5. Hero tear flush at top (contentPadding top 0) across converted screens.
+6. Explore bubble: AnimatedContent fade+scale expand; sheen corner matches
+   the animated radius.
+
 # Prompt.md — current request log
 
 ## Request: v259 — CI fixes for sticky-back rollout; real tuning preview; panel blur; defaults reverted

@@ -145,7 +145,7 @@ fun RecycleBinScreen(navController: NavController) {
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = 10.dp,
+                        top = 0.dp,
                         bottom = 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)

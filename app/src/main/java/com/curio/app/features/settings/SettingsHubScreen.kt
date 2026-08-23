@@ -480,12 +480,27 @@ internal fun SettingsStickyBackPill(
     }
 }
 
-/** True once a scrolling page has moved past its hero's top region. */
-internal fun LazyListState.isPastHero(): Boolean =
-    firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 200
+/** True once a scrolling page has moved PAST its hero. v260 — DUPLICATE
+ *  BACK-PILL FIX: the old `scrollOffset > 200` fired while the hero was
+ *  still on screen (its height is far more than 200px), so the banner's own
+ *  back pill AND the floating one showed together. Now the sticky pill waits
+ *  until the hero item itself is mostly scrolled away (less than ~45% of it
+ *  remains visible) or has left the list entirely. */
+internal fun LazyListState.isPastHero(): Boolean {
+    if (firstVisibleItemIndex > 0) return true
+    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return false
+    if (hero.index != 0 || hero.size <= 0) return false
+    val remaining = hero.size + hero.offset
+    return remaining < hero.size * 0.45f
+}
 
-internal fun LazyGridState.isPastHero(): Boolean =
-    firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 200
+internal fun LazyGridState.isPastHero(): Boolean {
+    if (firstVisibleItemIndex > 0) return true
+    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return false
+    if (!hero.path.any { it == 0 } || hero.size.height <= 0) return false
+    val remaining = hero.size.height + hero.offset.y
+    return remaining < hero.size.height * 0.45f
+}
 
 /** One ink-glass action pill on the hero — the banner's readable ink at a
  *  soft alpha (the Cabinet hero pill language), so hero action pills like
@@ -832,7 +847,7 @@ fun SettingsHubScreen(navController: NavController) {
                 // v255 — SCROLLING HERO (the reverted Home/Profile
                 // construction): the banner lives INSIDE the grid as the
                 // first item and scrolls away with the page.
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 10.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {

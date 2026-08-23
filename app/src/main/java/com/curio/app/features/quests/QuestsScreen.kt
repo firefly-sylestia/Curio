@@ -230,7 +230,7 @@ fun QuestsScreen(navController: NavController) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 10.dp, bottom = 20.dp),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {

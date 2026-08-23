@@ -332,3 +332,8 @@ REMOVE
 - Experiments: the five Spin visuals toggles are gone - all five looks are now the default.
 - The old update card in Support & diagnostics is gone — checking, release notes and installing now live on the dedicated Updates page.
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
+FIX
+Crash: floating pills no longer sample the page capture layer (RenderThread crash on Settings sub-pages).
+Tab bar: active pill no longer doubles the icon/label under it; glow toned down.
+Settings family: sticky back pill appears only after the hero scrolls away; hero tear starts flush at the top.
+Explore bubble: smoother expand, glass rim follows the animated shape.

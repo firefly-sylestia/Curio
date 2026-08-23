@@ -1,6 +1,11 @@
 package com.curio.app.ui.components
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
@@ -283,7 +288,13 @@ fun ExploreBubbleContent(
         // comes from the container step + accent glow, not a shadow.
         shadowElevation = 0.dp,
         modifier = modifier
-            .then(if (bubbleGlass) Modifier.curioFauxGlassSheen() else Modifier)
+            // v260 — the sheen/rim follow the ANIMATED corner radius; the old
+            // fixed stadium radius painted a pill-shaped outline over the
+            // expanding rounded panel (the "weird rounded look").
+            .then(
+                if (bubbleGlass) Modifier.curioFauxGlassSheen(corner = cornerRadius)
+                else Modifier
+            )
             // Edge dock FIRST in the chain, so every interaction modifier
             // below lives inside the translated layer and the peek sliver
             // is exactly what receives touches.
@@ -317,9 +328,15 @@ fun ExploreBubbleContent(
         // springs; the window itself resizes in ONE step (the panel has a
         // FIXED width and the pill is fixed too), so the service sees one or
         // two size callbacks instead of forty.
-        Crossfade(
+// v260 — fade + gentle scale beats a bare crossfade: the incoming state
+        // grows in from 92% like iOS, and since both states have FIXED sizes
+        // there is no geometry fight with the window resize.
+        AnimatedContent(
             targetState = minimized,
-            animationSpec = tween(180),
+            transitionSpec = {
+                (fadeIn(tween(180)) + scaleIn(initialScale = 0.92f, animationSpec = tween(180))) togetherWith
+                    (fadeOut(tween(140)) + scaleOut(targetScale = 0.94f, animationSpec = tween(140)))
+            },
             label = "bubbleExpand"
         ) { m ->
             if (m) {

@@ -161,7 +161,7 @@ fun ManageCategoriesScreen(navController: NavController) {
                     end = wideContentEdgePadding(),
                     // v255 — SCROLLING HERO: the banner is the list's first
                     // item and scrolls away with the page.
-                    top = 10.dp,
+                    top = 0.dp,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)

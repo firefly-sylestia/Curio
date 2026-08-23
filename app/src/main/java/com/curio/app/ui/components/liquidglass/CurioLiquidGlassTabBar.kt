@@ -343,7 +343,12 @@ fun CurioLiquidGlassTabBar(
                         }
                     },
                     highlight = {
-                        Highlight.Default.copy(alpha = (if (isBlurEnabled) 1f else 0f) * reflScale)
+                        // v260 — GLOW TONE-DOWN: this rim highlight ran at
+                        // FULL reflection scale, reading as a harsh white
+                        // bloom on bright pages. Capped at 55%.
+                        Highlight.Default.copy(
+                            alpha = (if (isBlurEnabled) 1f else 0f) * 0.55f * minOf(reflScale, 1f)
+                        )
                     },
                     shadow = {
                         Shadow.Default.copy(
@@ -441,13 +446,20 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        // v251 — COMBINED sample restored (reverting v250):
-                        // page + the untinted tab-row copy, so the lens bends
-                        // the CONTENT under the finger — the full-capsule
-                        // refraction look the page-only sample had flattened.
-                        // Ghost doubles are solved by the overlay gating
-                        // below instead.
-                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
+                        // v260 — DUPLICATE-TEXT FIX: the default (solid idle
+                        // pill) style now samples the PAGE ONLY. The v251
+                        // combined sample (page + the hidden tab-row copy)
+                        // made the active tab's icon/label appear TWICE while
+                        // pressed — once refracted inside the blob, once in
+                        // the crisp overlay that hasn't fully faded yet. The
+                        // classic (transparent) experiment keeps the combined
+                        // sample, since its whole point is bending the tab
+                        // content under the finger.
+                        backdrop = if (classicIndicator) {
+                            rememberCombinedBackdrop(backdrop, tabsBackdrop)
+                        } else {
+                            backdrop
+                        },
                         shape = { CircleShape },
                         effects = {
                             // v247 — GENTLE press-gated glass again (as in
@@ -478,9 +490,13 @@ fun CurioLiquidGlassTabBar(
                         highlight = {
                             Highlight.Default.copy(
                                 alpha = (if (isBlurEnabled) {
-                                    if (classicIndicator) 1f
-                                    else dampedDragAnimation.pressProgress
-                                } else 0f) * reflScale
+                                    // v260 — GLOW TONE-DOWN: the highlight was
+                                    // peaking at full reflection scale, reading
+                                    // as a harsh white bloom on bright pages.
+                                    // Capped at 55% and softened on press.
+                                    if (classicIndicator) 0.55f
+                                    else 0.35f * dampedDragAnimation.pressProgress
+                                } else 0f) * minOf(reflScale, 1f)
                             )
                         },
                         shadow = {
@@ -491,9 +507,11 @@ fun CurioLiquidGlassTabBar(
                                 // solid idle pill off the page; press deepens it.
                                 // v248 — classic style keeps the old fully
                                 // press-gated shadow instead.
+                                // v260 — resting glow 0.22 → 0.12 (too bright
+                                // on light pages).
                                 alpha = (if (isBlurEnabled) {
                                     if (classicIndicator) dampedDragAnimation.pressProgress
-                                    else 0.22f + 0.78f * dampedDragAnimation.pressProgress
+                                    else 0.12f + 0.68f * dampedDragAnimation.pressProgress
                                 } else 0f) * indShadowScale
                             )
                         },
