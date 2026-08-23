@@ -36,12 +36,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.CornerRadius
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -277,20 +293,17 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setGlassClarityEnabled(context, it)
             }
             CurioSettingsDivider()
-            CompactSliderRow("Reflection", "Strength of the light sheen on the glass", AppPreferences.glassReflectionScaleState) {
-                AppPreferences.setGlassReflectionScale(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Refraction", "How strongly the glass bends the content behind it", AppPreferences.glassRefractionScaleState) {
-                AppPreferences.setGlassRefractionScale(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Blur", "Frostiness of the glass — lower for clearer, higher for frostier", AppPreferences.glassBlurScaleState) {
-                AppPreferences.setGlassBlurScale(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Indicator shadow", "Strength of the draggable active pill's shadow", AppPreferences.glassIndicatorShadowScaleState) {
-                AppPreferences.setGlassIndicatorShadowScale(context, it)
+            // v252 — the tuning sliders live in a DIALOG whose header is a
+            // live glass preview: dragging updates every capsule instantly.
+            // (The old Indicator-shadow slider is gone.)
+            var showGlassTuning by remember { mutableStateOf(false) }
+            CurioSettingsRow(
+                CurioIcons.Tune,
+                "Tune glass",
+                "Reflection, refraction and blur — with a live preview"
+            ) { showGlassTuning = true }
+            if (showGlassTuning) {
+                GlassTuningDialog(onDismiss = { showGlassTuning = false })
             }
         }
         CurioSettingsDivider()
@@ -872,4 +885,88 @@ private fun SettingsRowPulse(
     ) {
         content()
     }
+}
+
+
+/**
+ * v252 — LIQUID GLASS TUNING DIALOG. The three recipe sliders
+ * (Reflection / Refraction / Blur) with a LIVE PREVIEW capsule above them:
+ * the preview draws over a colorful collage and re-renders on every slider
+ * tick using the exact same preference values the real capsules read, so
+ * what you see is what the nav pill will do.
+ */
+@Composable
+fun GlassTuningDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    Dialog(onDismissRequest = onDismiss) {
+        CurioSettingsCard(shadowElevation = 0.dp) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                CurioCardHeader(CurioIcons.Info, "Tune liquid glass", "Drag a slider — the capsule previews it live")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Canvas(Modifier.matchParentSize()) {
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                listOf(
+                                    Color(0xFF7E57C2),
+                                    Color(0xFFEF9A9A),
+                                    Color(0xFF80DEEA),
+                                    Color(0xFFFFD54F)
+                                )
+                            )
+                        )
+                        drawGlassPreviewCapsule()
+                    }
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Aa")
+                    }
+                }
+                CompactSliderRow("Reflection", "Light sheen strength", AppPreferences.glassReflectionScaleState) {
+                    AppPreferences.setGlassReflectionScale(context, it)
+                }
+                CompactSliderRow("Refraction", "Edge bending strength", AppPreferences.glassRefractionScaleState) {
+                    AppPreferences.setGlassRefractionScale(context, it)
+                }
+                CompactSliderRow("Blur", "Frostiness", AppPreferences.glassBlurScaleState) {
+                    AppPreferences.setGlassBlurScale(context, it)
+                }
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Done") }
+            }
+        }
+    }
+}
+
+/** The preview capsule: veil scales with Blur, sheen with Reflection, rim with Refraction. */
+private fun DrawScope.drawGlassPreviewCapsule() {
+    val blur = AppPreferences.glassBlurScaleState.coerceIn(0f, 2f)
+    val refl = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
+    val refr = AppPreferences.glassRefractionScaleState.coerceIn(0f, 2f)
+    val cx = size.width / 2f
+    val cy = size.height / 2f
+    val w = size.width * 0.46f
+    val h = size.height * 0.42f
+    val r = CornerRadius(minOf(w, h) / 2f)
+    val topLeft = Offset(cx - w / 2f, cy - h / 2f)
+    val sz = Size(w, h)
+    // Veil — the blur stand-in.
+    drawRoundRect(color = Color.White.copy(alpha = 0.18f * blur), topLeft = topLeft, size = sz, cornerRadius = r)
+    // Sheen — top light band.
+    drawRoundRect(
+        brush = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.55f * refl), Color.Transparent)),
+        topLeft = topLeft, size = sz.copy(height = h / 2f), cornerRadius = r
+    )
+    // Rim — brighter with refraction.
+    drawRoundRect(
+        color = Color.White.copy(alpha = 0.35f * refr),
+        topLeft = topLeft, size = sz, cornerRadius = r,
+        style = Stroke(width = 1.5.dp.toPx())
+    )
 }

@@ -1,3 +1,6 @@
+FIX: Pet hide-and-seek peeks on all screen sides, not just corners.
+FIX: Star-catch stars fall faster and stop piling up; taps no longer cancel a running game.
+IMPROVE: Glass tuning moves into a live-preview dialog; indicator-shadow slider removed.
 ADD: Sticky hero tear on Home & Profile - content slides under the pinned tear like Settings.
 ADD: iOS-style search field - flat gray capsule, Cancel while focused.
 FIX: Blob doubles killed per mode; full-content refraction restored under the finger.

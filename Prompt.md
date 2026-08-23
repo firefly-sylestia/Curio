@@ -1,3 +1,25 @@
+## v254 batch (PARTIAL - remaining items listed)
+
+Shipped:
+1. Pet games (CurioFloatingPet.kt):
+   - Hide-seek teleports now pick from EIGHT perimeter spots (corners + all
+     four side middles), ending the same-corner repeats.
+   - Star-catch: fall speed 0.06->0.14 px/tick and speed range 70-160,
+     spawn gap 700-1200ms - faster stars that no longer pile up together.
+   - Tap during an ACTIVE round no longer queues the wander-dart that was
+     yanking the pet off its chase/hide spot (the tap-cancels-game bug).
+2. Appearance: the four inline glass sliders replaced by a single "Tune
+   glass" row opening a dialog with a LIVE PREVIEW capsule (veil=shear blur,
+   sheen=reflection, rim=refraction over a colorful collage). The Indicator-
+   shadow slider row is REMOVED (pref stays functional, just unexposed).
+
+NOT shipped this turn (need their own pass):
+- Explore bubble: icon-only pill / smooth expand / edge-collapse / note-sheet
+  cover / liquid glass (ExploreSessionService is a 964-line service; the
+  overlay window cannot sample app content for real kyant backdrop - faux
+  glass only).
+- Pet outside the app as an option: requires a new system-overlay window
+  service (same infra as the bubble).
 ## v253: BoxScope wrapper fix + vFlow credits
 
 CI: matchParentSize/align still rejected - K2 will not resolve BoxScope

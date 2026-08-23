@@ -736,16 +736,21 @@ fun CurioFloatingPet(
                 squishKey++
                 val from = pos
                 burstPoof(from)
-                // Teleport to a random corner — mostly off-screen so only a
-                // little of the pet pokes into view (a tappable sliver).
-                val corner = Random.nextInt(4)
-                val peekX = when (corner) {
-                    0, 2 -> -petPx * 0.62f // left corners
-                    else -> maxW - petPx * 0.38f // right corners
+                // v252 — Teleport to one of EIGHT peek spots: the four
+                // corners AND the middle of each screen side, so the pet
+                // stops always hiding in the same corners.
+                val spot = Random.nextInt(8)
+                val peekX = when (spot) {
+                    0, 2, 6 -> -petPx * 0.62f            // left edge (TL / BL / mid)
+                    1, 3, 7 -> maxW - petPx * 0.38f      // right edge (TR / BR / mid)
+                    else -> (maxW - petPx) / 2f          // top / bottom center
                 }
-                val peekY = when (corner) {
-                    0, 1 -> -petPx * 0.32f // top corners
-                    else -> maxH - petPx * 0.68f // bottom corners
+                val peekY = when (spot) {
+                    0, 1 -> -petPx * 0.32f               // top corners
+                    2, 3 -> maxH - petPx * 0.68f         // bottom corners
+                    4 -> -petPx * 0.32f                  // top center
+                    5 -> maxH - petPx * 0.68f            // bottom center
+                    else -> (maxH - petPx) / 2f          // side middles
                 }
                 pos = Offset(peekX, peekY)
                 facing = if (peekX < 0f) 1f else -1f
@@ -889,12 +894,14 @@ fun CurioFloatingPet(
                     val now = System.currentTimeMillis()
                     if (now >= nextSpawnAt) {
                         val sx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
-                        stars = stars + FallingStar(starId++, sx, -sparkPx, 30f + Random.nextFloat() * 50f)
-                        nextSpawnAt = now + Random.nextLong(500, 850)
+                        // v252 — livelier round: faster stars, wider spawn
+                        // gaps, so they don't pile up drifting together.
+                        stars = stars + FallingStar(starId++, sx, -sparkPx, 70f + Random.nextFloat() * 90f)
+                        nextSpawnAt = now + Random.nextLong(700, 1200)
                     }
                     // Stars fall slowly; drop the ones past the bottom.
                     stars = stars
-                        .map { it.copy(y = it.y + it.speed * 0.06f) }
+                        .map { it.copy(y = it.y + it.speed * 0.14f) }
                         .filter { it.y < maxH + 40f }
                     // Dragging the pet onto a star catches it.
                     if (dragged && stars.isNotEmpty()) {
@@ -1921,9 +1928,11 @@ fun CurioFloatingPet(
                             fireCustomActions(PetActionTrigger.TAP)
                             // The pet dashes to a nearby spot after the
                             // reaction — it wants to play (not in reduced
-                            // motion, and not while watching the Spin deck;
-                            // the wander loop is what moves it).
-                            if (autoWander && !watching) {
+                            // motion, not while watching the Spin deck, and
+                            // NEVER while a game round is active: the dart
+                            // used to yank the pet off its star-chase/hide
+                            // spot and effectively cancel the round).
+                            if (autoWander && !watching && !gameActive) {
                                 val tx = (pos.x + Random.nextFloat() * 140f - 70f)
                                     .coerceIn(marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx))
                                 val ty = (pos.y + Random.nextFloat() * 120f - 60f)
