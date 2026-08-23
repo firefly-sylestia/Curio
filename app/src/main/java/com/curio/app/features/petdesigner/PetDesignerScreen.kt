@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -662,26 +661,17 @@ fun PetDesignerScreen(navController: NavController) {
             //    the top of the screen, so it stays while the banner rides
             //    away under it.
             item {
-                // v181 — full-bleed banner WITHOUT negative padding (Compose
-                // forbids it: the v179 `padding(horizontal = -edgePad)`
-                // crashed with "Padding must be non-negative"). The item is
-                // measured with the PADDED width, so measure it, offset the
-                // hero left by the edge padding and force its width to the
-                // full viewport — the tear reaches both screen edges.
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val viewportWidth = maxWidth + edgePad * 2
-                    Box(
-                        modifier = Modifier
-                            .offset(x = -edgePad)
-                            .requiredWidth(viewportWidth)
-                    ) {
-                        SettingsHeroHeader(
-                            title = "Pet designer",
-                            subtitle = "Draw your own Curie",
-                            onBack = { navController.popBackStack() },
-                            compact = wide
-                        )
-                    }
+                // v261 — shares the MEASURED FullBleedHeroItem helper (the
+                // settings family): reads the slot's real distance from the
+                // window edge instead of guessing inset arithmetic, so the
+                // tear and back pill sit exactly like Home/Profile.
+                com.curio.app.features.settings.FullBleedHeroItem(edgePad = edgePad) {
+                    SettingsHeroHeader(
+                        title = "Pet designer",
+                        subtitle = "Draw your own Curie",
+                        onBack = { navController.popBackStack() },
+                        compact = wide
+                    )
                 }
             }
 

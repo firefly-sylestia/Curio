@@ -112,6 +112,12 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.readableLightInk
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.toHsl
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import androidx.compose.ui.platform.LocalDensity
 
 /** Fixed tear seed — every settings header tears in the SAME bold pattern
  *  (Settings's own pattern; Profile wears 0xC0FEE). Never re-rolls. */
@@ -420,13 +426,33 @@ fun SettingsHeroHeader(
  */
 @Composable
 internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val viewportWidth = maxWidth + edgePad * 2
-        Box(
-            modifier = Modifier
-                .offset(x = -edgePad)
-                .requiredWidth(viewportWidth)
-        ) { hero() }
+    // v261 — MEASURED full bleed: instead of guessing the inset arithmetic
+    // (offset -edgePad + requiredWidth(maxWidth + 2·edgePad)), read the
+    // slot's REAL distance from the window's left edge and the window's
+    // real width, then shift/resize by exactly those values. Pixel-perfect
+    // under any nesting (list content padding, wide-window centering,
+    // future outer paddings) — fixes the tear sitting left-shifted with a
+    // gap on the right.
+    var shiftLeftPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var viewportWidthDp by remember { androidx.compose.runtime.mutableStateOf(Dp.Unspecified) }
+    val density = LocalDensity.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coords ->
+                val root = coords.findRootCoordinates()
+                val leftInset = coords.positionInRoot().x - root.positionInRoot().x
+                shiftLeftPx = leftInset
+                viewportWidthDp = with(density) { root.size.width.toFloat().toDp() }
+            }
+    ) {
+        if (viewportWidthDp != Dp.Unspecified) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(-shiftLeftPx.roundToInt(), 0) }
+                    .requiredWidth(viewportWidthDp)
+            ) { hero() }
+        }
     }
 }
 
