@@ -1,3 +1,24 @@
+## v251: detail more-menu glass morph + moodboard quote card from m3-layout-sweep
+
+User: (1) detail page 3-dot should MORPH open into its dropdown with liquid
+glass, iOS-smooth; (2) quotes STILL not fixed - use m3-layout-sweep branch
+as-is for the inside-moodboard quote card, editor and save.
+
+1. MoodBoardZoom.kt taken verbatim from origin/m3-layout-sweep (user-confirmed
+   "as-is"): slot width coerceIn(120,240), maxW 60% board, fixed .width(renderW)
+   slip + fillMaxWidth paper, textScale floor 0.5 without the 1.6 cap,
+   padding back to 10/8. NOTE: this intentionally supersedes v231/v246/v248
+   tweaks in that file per explicit user instruction.
+2. Detail more-menu (EntryDetailScreen): with detail glass ON, tapping the dot
+   crossfades the pill out while a liquid-glass panel (same capsule recipe +
+   backdrop) blooms from its corner - spring(0.85,420), scale 0.55->1 anchored
+   TransformOrigin(1f,0f), full-screen scrim dismiss + BackHandler. Classic
+   path keeps CurioDropdownMenu popup untouched. New MoreMenuWidth=236dp;
+   imports: BackHandler, animateContentSize(unused-safe), spring, ui.util.lerp,
+   TransformOrigin, wrapContentSize.
+
+Balance-checked both files; CI validates.
+
 ## v250: press ghost fix + iOS tab glide
 
 User: touching the blob showed DUPLICATE text/icons over it (also Pet
