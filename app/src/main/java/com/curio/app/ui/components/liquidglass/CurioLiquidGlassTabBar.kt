@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.DpOffset
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -194,6 +193,11 @@ fun CurioLiquidGlassTabBar(
         return x + tabWidthsPx[i] * frac
     }
 
+    // v249 — iOS-style TAB-SWITCH GLIDE: programmatic moves (tapping a
+    // tab, drag release) used the class's default critically-damped 1000-
+    // stiffness spring, which snaps between tabs almost instantly. This
+    // softer spring glides the blob across (~350ms) with a gentle settle.
+    val tabGlideSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 380f)
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
         derivedStateOf {
@@ -237,7 +241,7 @@ fun CurioLiquidGlassTabBar(
             onDragStarted = {},
             onDragStopped = {
                 val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
-                animateToValue(targetIndex.toFloat())
+                animateToValue(targetIndex.toFloat(), tabGlideSpec)
                 animationScope.launch {
                     offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
                 }
@@ -273,7 +277,7 @@ fun CurioLiquidGlassTabBar(
             pendingFirstSnap = false
             dampedDragAnimation.updateValue(selectedIndex.toFloat())
         } else {
-            dampedDragAnimation.animateToValue(selectedIndex.toFloat())
+            dampedDragAnimation.animateToValue(selectedIndex.toFloat(), tabGlideSpec)
         }
     }
 
@@ -436,13 +440,15 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        // v246 — sample PAGE + TAB ROW again. The v244
-                        // page-only sample painted blurred page OVER the
-                        // visible tab content, so the active icon + label
-                        // vanished wherever the pill sat. The combined sample
-                        // shows them refracting through the glass — with the
-                        // hidden copy untinted, no colored ghosts return.
-                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
+                        // v249 — sample ONLY the page again. The combined
+                        // sample (page + the hidden tab-row copy) made every
+                        // press show BLURRED GHOST icons/labels under the
+                        // crisp overlay copy — an ugly double image. Since
+                        // v247's crisp ink overlay keeps the labels visible on
+                        // top of the pill in every state, the sample only
+                        // needs the PAGE: refraction bends the page behind,
+                        // the ink stays single and sharp.
+                        backdrop = backdrop,
                         shape = { CircleShape },
                         effects = {
                             // v247 — GENTLE press-gated glass again (as in

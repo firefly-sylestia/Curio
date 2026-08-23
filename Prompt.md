@@ -1,3 +1,21 @@
+## v250: press ghost fix + iOS tab glide
+
+User: touching the blob showed DUPLICATE text/icons over it (also Pet
+Designer); tab switches snapped instead of gliding.
+
+1. Ghost fix: the pill's sample went back to PAGE-ONLY. The v246 combined
+   sample (page + hidden tab-row copy) re-introduced blurred ghost labels
+   under the v247 crisp overlay whenever the fill faded on press - a double
+   image, worse in classic mode. With the overlay guaranteeing visible ink,
+   the sample no longer needs the tab row at all. rememberCombinedBackdrop
+   import removed; hidden row now unsampled (harmless).
+2. Glide: DampedDragAnimation.animateToValue gains an optional AnimationSpec;
+   tab bar passes spring(0.82, 380) for tap switches and drag release -
+   ~350ms iOS-style glide with gentle settle instead of the default 1000-
+   stiffness snap.
+
+Balance-checked both files; CI validates.
+
 ## v249: classic active indicator experiment
 
 User asked for the previous liquid-glass style active indicator (transparent,
