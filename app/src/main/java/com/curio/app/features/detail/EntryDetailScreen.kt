@@ -154,7 +154,6 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
-import com.curio.app.ui.components.curioGlassPressBlob
 import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.CurioDialogEntrance
@@ -1168,18 +1167,15 @@ private fun BoxScope.DetailStickyBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // v236 — the back pill carries the touch press-blob like the nav pill.
-        val backSource = remember { MutableInteractionSource() }
         CurioBackButton(
             onClick = { navController.popBackStack() },
             containerColor = Color.Transparent,
             contentColor = heroCardInk,
             shadowElevation = 0.dp,
             disableRipple = true,
-            interactionSource = backSource,
             // v230 — scrolled endpoint: real liquid-glass (refraction + blur)
             // when the experiment is on; the classic frosted plate otherwise.
-            modifier = (if (detailGlassActive)
+            modifier = if (detailGlassActive)
                 Modifier.liquidGlassCapsule(
                     heroFill,
                     washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
@@ -1190,7 +1186,7 @@ private fun BoxScope.DetailStickyBar(
                     RoundedCornerShape(50),
                     elevation = 6.dp * frostShift,
                     frostBrush = stickyFrostBrush
-                )).curioGlassPressBlob(backSource)
+                )
         )
         Box {
             val moreInteraction = remember { MutableInteractionSource() }
@@ -1214,8 +1210,6 @@ private fun BoxScope.DetailStickyBar(
                         interactionSource = moreInteraction,
                         indication = null
                     ) { menuExpanded = true }
-                    // v236 — touch press-blob.
-                    .curioGlassPressBlob(moreInteraction)
             ) {
                 CurioIcon(
                     name = CurioIcons.MoreVert,

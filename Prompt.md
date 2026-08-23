@@ -1,30 +1,33 @@
 # Prompt.md — current request log
 
-## Request (complete): v237 — un-smudge the indicator + kill the perfect-circle ring
+## Request (complete): v239 — full revert of b8d43c7 + refraction/indicator corrections
 
-User reported (pointing at 2569b76 as the last-good state): (1) a perfect-circle
-artifact still visible in Home pills, Pet Designer and Topic Reveal; (2) the active
-indicator AND touch blob became blurrier; (3) active indicator text smudged;
-(4) light-mode text/icon still not dark enough.
+User: revert commit b8d43c7 fully (the v236 press-blob rollout); keep the light
+mode text fix; no color on the active indicator; restore the original (Apple-
+style) select blob behavior of the nav bar; floating pills had become less
+refractive; indicator was non-refracting; Pet Designer middle tab showed
+duplicated text/icon at the sides while dragging.
 
-### Root causes (both mine, from v235)
-1. **Smudge**: I added an always-on `blur(4/8dp)` to the draggable indicator's
-   backdrop sample. At rest that sample is EXACTLY aligned under the real tab
-   content — drawing it raw is invisible; blurring it created the accent halo
-   that smudged label + indicator. REVERTED: press optics are press-scaled only.
-2. **Perfect circle**: fixed-height lens refraction bands (24/14dp) wrapped small
-   ROUND capsules entirely and folded a ring into their center. Now size-capped:
-   `rh = minOf(baseHeight, size.minDimension * 0.16f)` in `liquidGlassCapsule` and
-   the tab bar's main capsule. Small pills get a thin edge bend; tall surfaces
-   keep the full refraction.
-3. Ink darker still: light-mode glass active ink is now
-   `fromHsl(hsl.h, s>=0.50, min(l*0.42, 0.24))` in both CurioBottomNav and the
-   Pet Designer glass tab branch.
+### What shipped
+1. **`git revert --no-commit b8d43c7`** — press-blob helper and every call site
+   gone (Home menu/profile, detail back/more, Reveal favorite, tour dock glass +
+   buttons); Pet Designer studio bar back to the v234 simple glass capsule
+   Surface. Conflicts resolved by hand in LiquidGlassPills.kt (kept the v238 tilt
+   arc, dropped the helper) and PetDesignerScreen.kt (kept the classic branch).
+2. **Refraction restored**: undid the v237 size-cap — fixed lens heights
+   (`clear ? 14/18dp : 24/24dp`) back in `liquidGlassCapsule` and the tab bar.
+3. **Indicator**: accent fill REMOVED (neutral black shading only); always mildly
+   refracting at rest (`lens 6→12dp` with press), blur only while pressed/dragging
+   so mid-drag neighbor copies can't duplicate on the Pet Designer middle tab.
+4. **Light-mode active ink**: plain dark `colorScheme.onSurface`; dark mode keeps
+   `curioActivePillInk`. Applied in CurioBottomNav; Pet Designer no longer has its
+   own ink (branch reverted).
 
-Files: CurioLiquidGlassTabBar.kt, LiquidGlassPills.kt, CurioBottomNav.kt,
-PetDesignerScreen.kt + changelog + app/AGENTS.md (v237). Balance checks OK ×4.
-CI validates compilation on push.
+Files: LiquidGlassPills.kt, CurioLiquidGlassTabBar.kt, CurioBottomNav.kt,
+CurioTopBar.kt, CurioNavHost.kt, HomeScreen.kt, EntryDetailScreen.kt,
+TopicRevealScreen.kt, PetDesignerScreen.kt (+ docs). Balance checks OK ×9;
+zero `curioGlassPressBlob` references remain. CI validates compilation.
 
-Lesson recorded: on this glass stack, NEVER blur a sample that sits pixel-aligned
-under real content, and never use fixed-px refraction bands without capping to
-pill size.
+Lesson: the vFlow select blob belongs ONLY to the bottom-nav draggable indicator;
+bolting glow-blob presses onto ordinary pills read as blur. Refraction heights are
+tuned values — don't "fix" them without a reproduced visual bug.

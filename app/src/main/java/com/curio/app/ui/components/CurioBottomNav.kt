@@ -373,15 +373,12 @@ fun CurioFloatingNavBar(
                 // slides its label out BESIDE the icon (not stacked under it),
                 // with the same accent fill-ink crossfade as FloatingNavPill.
                 // The draggable indicator tracks the real per-tab widths.
-                // v235 — LIGHT-MODE ACTIVE INK: `curioActivePillInk` pairs with
-                // the classic pill's SOLID accent fill, but the glass indicator
-                // only wears a translucent wash — pastel accents vanished. Light
-                // mode now uses a deep, saturated hue twin (lightness cut ~in
-                // half, saturation floored) so the active label/icon reads on
-                // glass in every category color. Dark keeps the classic ink.
-                val activeInk = if (!isCurioDarkTheme() && pageAccent != null) {
-                    val hsl = toHsl(pageAccent)
-                    fromHsl(hsl.h, hsl.s.coerceAtLeast(0.50f), (hsl.l * 0.42f).coerceAtMost(0.24f))
+                // v239 — LIGHT MODE USES PLAIN DARK TEXT (user: "use a dark
+                // text"): the indicator carries no accent fill anymore, so the
+                // theme's near-black onSurface is the readable choice; dark
+                // mode keeps the classic light ink.
+                val activeInk = if (!isCurioDarkTheme()) {
+                    MaterialTheme.colorScheme.onSurface
                 } else {
                     curioActivePillInk(pageAccent)
                 }

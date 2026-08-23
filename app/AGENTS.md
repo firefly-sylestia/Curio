@@ -4901,6 +4901,20 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v239 — FULL REVERT of v236 (b8d43c7) + refraction/indicator corrections**
+  - `git revert b8d43c7`: curioGlassPressBlob removed everywhere (Home menu/profile,
+    detail back/more, Reveal favorite, tour dock — dock also back to solid
+    container); Pet Designer studio bar back to the v234 simple
+    `liquidGlassCapsule` Surface (no tab-bar conversion).
+  - Floating pills LESS REFRACTIVE fix: undid the v237 size-cap — fixed lens
+    heights restored (`clear ? 14/18dp : 24/24dp`) in `liquidGlassCapsule` AND the
+    tab bar's main capsule.
+  - Indicator: NO accent fill anymore (neutral black shading only, user request);
+    ALWAYS mildly refracting at rest (`lens(6..12dp)` progress-scaled up) instead
+    of dead-flat; blur ONLY while pressed/dragging so mid-drag neighbor copies
+    can't show as duplicates (Pet Designer middle-tab bug).
+  - Light-mode active ink: plain dark `MaterialTheme.colorScheme.onSurface`
+    (user: "use a dark text"); dark mode keeps `curioActivePillInk`.
 - **v238 — THE perfect circle found: tilt edge-glow ring → top light arc**
   - User pinned it to the ALWAYS-GLASS surfaces (bottom-nav pill, Pet Designer bar,
     Reveal bar — not the menu pill, which is solid until scrolled). Common factor:

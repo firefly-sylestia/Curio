@@ -55,10 +55,7 @@ fun CurioBackButton(
     // detail screen passes true and the press is conveyed by the frost and
     // shadow alone (the same fix Home's sticky pills use — clickable with
     // indication = null). Every other screen keeps the standard ripple.
-    disableRipple: Boolean = false,
-    // v236 — optional external source so callers can attach the glass
-    // press-blob to this button's presses (EntryDetail sticky back pill).
-    interactionSource: MutableInteractionSource? = null
+    disableRipple: Boolean = false
 ) {
     val icon: @Composable () -> Unit = {
         CurioIcon(
@@ -77,8 +74,7 @@ fun CurioBackButton(
         )
     }
     if (disableRipple) {
-        val fallbackSource = remember { MutableInteractionSource() }
-        val pressSource = interactionSource ?: fallbackSource
+        val interactionSource = remember { MutableInteractionSource() }
         Surface(
             shape = RoundedCornerShape(50),
             color = containerColor,
@@ -87,7 +83,7 @@ fun CurioBackButton(
                 // v28 — dark mode elevation visibility (glow + hairline).
                 .curioDarkGlow(shadowElevation, RoundedCornerShape(50))
                 .clickable(
-                    interactionSource = pressSource,
+                    interactionSource = interactionSource,
                     indication = null,
                     onClick = onClick
                 )

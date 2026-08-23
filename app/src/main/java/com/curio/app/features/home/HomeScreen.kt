@@ -145,7 +145,6 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
-import com.curio.app.ui.components.curioGlassPressBlob
 import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetHome
@@ -1439,8 +1438,6 @@ private fun TopBarPill(
                 indication = null,
                 onClick = onClick
             )
-            // v236 — touch press-blob (grows + finger glow while pressed).
-            .curioGlassPressBlob(interactionSource)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             if (!avatarPath.isNullOrBlank()) {

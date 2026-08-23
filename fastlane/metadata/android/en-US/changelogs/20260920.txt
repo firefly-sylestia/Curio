@@ -1,4 +1,6 @@
 ADD
+- Liquid glass: fully reverted the press-blob experiment - pills are back to the crisp glass you had, with the original refraction strength restored everywhere.
+- Liquid glass: the active indicator refracts again and carries no color fill; light mode uses plain dark text for the active tab.
 - Liquid glass: found and removed the perfect-circle artifact - the tilt glow was stroking a full ring on the always-glass bars; it is now a subtle top-edge light arc that only appears while the phone is actually tilting.
 - Liquid glass: removed the smudge - the active pill and its label are crisp again, and the perfect-circle ring inside small glass pills is gone.
 - Liquid glass: active tab text/icon in light mode is darker still for easy reading.

@@ -24,7 +24,6 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -141,7 +140,6 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
-import com.curio.app.ui.components.curioGlassPressBlob
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.categoryEdgeShine
@@ -2561,21 +2559,16 @@ private fun RevealCategoryFavoriteBar(
                     }
                 }
                 // Favorite pill — icon-only when not favorited, expands when favorited.
-                // v236 — touch press-blob: the pill grows and a soft glow
-                // blooms under the finger while pressed (the nav-pill feel).
-                val favSource = remember { MutableInteractionSource() }
                 Surface(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onFavorite()
                     },
-                    interactionSource = favSource,
                     shape = RoundedCornerShape(50),
                     color = favFill,
                     modifier = Modifier
                         .width(favWidth)
                         .height(RevealSentimentHeight)
-                        .curioGlassPressBlob(favSource)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxSize(),

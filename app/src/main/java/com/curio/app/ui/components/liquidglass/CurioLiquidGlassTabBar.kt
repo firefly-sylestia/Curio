@@ -58,7 +58,6 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
@@ -134,10 +133,6 @@ fun CurioLiquidGlassTabBar(
     val density = LocalDensity.current
     // v233 — CLEAR GLASS (experiment): less frost, more refraction.
     val clear = AppPreferences.glassClarityState
-    // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
-    // accent wash gave the active ink almost nothing to read against on a
-    // bright page; light mode now gets double the bed (dark keeps 16%).
-    val dark = isCurioDarkTheme()
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
 
@@ -295,13 +290,11 @@ fun CurioLiquidGlassTabBar(
                         if (isBlurEnabled) {
                             vibrancy()
                             blur((if (clear) 2.dp else 8.dp).toPx())
-                            // v237 — SIZE-CAPPED refraction: fixed 24dp bands fold
-                            // over themselves mid-capsule on short bars and read as
-                            // a perfect-circle ring; cap the band to ~16% of the
-                            // pill's own height so the ring can never form.
-                            val maxH = size.minDimension * 0.16f
-                            val rh = minOf((if (clear) 14.dp else 24.dp).toPx(), maxH)
-                            lens(rh, rh * 1.3f)
+                            // v239 — restored FIXED refraction heights (the v237
+                            // size-cap made every bar less refractive than when the
+                            // glass first shipped; the real circle bug was the tilt
+                            // glow ring, fixed separately in v238).
+                            lens((if (clear) 14.dp else 24.dp).toPx(), (if (clear) 18.dp else 24.dp).toPx())
                         }
                     },
                     highlight = {
@@ -390,12 +383,15 @@ fun CurioLiquidGlassTabBar(
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
-                                // v237 — REVERTED the v235 always-on blur: at rest
-                                // the raw sample is EXACTLY ALIGNED under the real
-                                // tab content (invisible), while any blur turns the
-                                // accent copy into the smudgy halo users saw. Press
-                                // optics stay press-scaled only.
-                                lens(10.dp.toPx() * progress, 14.dp.toPx() * progress, true)
+                                // v239 — ALWAYS refracting (a constant mild lens was
+                                // missing since the port: at rest the pill read as a
+                                // flat wash), growing with press…
+                                lens((6f + 6f * progress).dp.toPx(), (9f + 5f * progress).dp.toPx(), true)
+                                // …and blurring ONLY while pressed/dragging: at rest
+                                // the sample is pixel-aligned under the real content
+                                // (invisible); mid-drag the misaligned neighbor copies
+                                // would show as duplicates without this.
+                                blur(7.dp.toPx() * progress)
                             }
                         },
                         highlight = {
@@ -423,12 +419,9 @@ fun CurioLiquidGlassTabBar(
                         },
                         onDrawSurface = {
                             val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            // v232 — a constant faint ACCENT wash marks this pill
-                            // as the active-tab indicator even at rest (before,
-                            // it only read while pressed); press deepens it.
-                            // v233 — theme-aware: light mode doubles the bed so
-                            // the active ink actually reads against a bright page.
-                            drawRect(accentColor.copy(alpha = if (dark) 0.16f else 0.30f))
+                            // v239 — NO accent fill on the indicator (user: "don't
+                            // give color to the active indicator") — just neutral
+                            // shading; readability comes from the DARK ACTIVE TEXT.
                             drawRect(
                                 color = Color.Black.copy(alpha = 0.10f),
                                 alpha = 1f - progress
