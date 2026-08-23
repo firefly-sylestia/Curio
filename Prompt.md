@@ -1,39 +1,47 @@
 # Prompt.md — current request log
 
-## Request (complete): glass polish batch (v233) — committed & pushed
+## Request (complete): in-screen liquid glass restored behind its own toggle (v234) — committed & pushed
 
-User asked four things on top of the vFlow glass nav:
+User asked: what else can we do with liquid glass, and can we bring it back to the
+Pet Designer studio bar + floating top-bar pills — properly implemented, as a
+SEPARATE toggle.
 
-1. **Light-mode active-indicator text hard to read** → the draggable indicator's
-   constant 0.14 accent wash was too faint a bed on bright pages. Now theme-aware:
-   light 0.30 / dark 0.16 (hoisted `isCurioDarkTheme()` in CurioLiquidGlassTabBar).
-2. **Pill too frosty — make it glassy like the touch blob, as a separate option** →
-   new pref `glassClarityState` (`glass_clear_style`) + Experiments row "Clear glass".
-   When ON: blur 8dp→2dp and container wash cut to ~35% in `liquidGlassCapsule` and
-   all three tab-bar layers (main capsule, hidden tinted copy, active pill).
-3. **Parallax tilt doesn't work — the EDGE GLOW should move, not the glass** →
-   v231's whole-capsule translation removed. New `drawGlassTiltEdgeGlow()`
-   (LiquidGlassPills.kt): white rim stroke with a radial gradient whose bright spot
-   slides against `CurioGlassParallax.tiltX/Y`. Applied in `liquidGlassCapsule`'s
-   capture-guard drawWithContent + on the tab bar's main capsule and active pill.
-   Reads tilt snapshot state inside draw → per-tick draw invalidation, no recomposition.
-4. **Menu/profile avatar glyph off-center on some phones (and elsewhere)** → fixed-dp
-   nudges only center at fontScale 1.0 (CurioIcon shrinks glyphs below 1.0 but the
-   nudge stayed). New `Modifier.curioGlyphInkNudge(dp)` scales by
-   `fontScale.coerceAtMost(1f)`; replaced at all 9 call sites (Home menu/profile pill,
-   Home casino/stat chips ×3, Profile rows ×2, Spin die/glyphs ×2, CurioTopBar).
+### Root-cause insight that makes it safe this time
+The v228/v232 crashes were not mysterious: in-screen pills sampled the NavHost's
+WHOLE-PAGE capture, and that capture's record pass re-draws the page INCLUDING the
+pills — the pill drew the sample layer into the layer being recorded → cyclic
+render node → RenderThread SIGSEGV. The bottom bar never crashed because it is a
+SIBLING OVERLAY of the captured Box.
 
-Files: AppPreferences.kt, LiquidGlassPills.kt, CurioLiquidGlassTabBar.kt,
-ExperimentsScreen.kt, CurioIcons.kt, HomeScreen.kt, ProfileScreen.kt,
-SpinScreen.kt, CurioTopBar.kt + changelog 20260920.txt + app/AGENTS.md (v233).
+The proper fix: give each in-screen site its OWN local `rememberLayerBackdrop()`
+over a wrapper Box containing only what sits BEHIND the pill, pill outside the
+subtree. Self-capture becomes impossible by construction; the global-capture v228
+guard stays as belt-and-braces.
 
-Verification: balance check OK on all 9 Kotlin files; no stale `offset(y = (-…))`
-nudges remain; unused graphicsLayer import removed from LiquidGlassPills.kt.
-Note: str_replace flaked twice on HomeScreen/ProfileScreen ("file does not exist" /
-"not found" on plain-ASCII strings that verifiably existed) — fell back to the
-session's python-patch pattern and verified with grep afterward.
+### What shipped
+1. New pref `glassInScreenState` (`glass_in_screen`) + Experiments row
+   "In-screen glass" (OFF) + `isInScreenGlassActive()` gate (main toggle AND this,
+   API ≥ 31). Crash-reporter self-heal now disables it too.
+2. `liquidGlassCapsule(container, washAlpha, backdrop: LayerBackdrop? = null)` —
+   explicit local backdrop; null falls back to global capture.
+3. Pet Designer: wrapper captures watermark+list; studio bar pinned below via
+   weight-spacer Column (list bottom padding 16→96dp); `PetStudioBottomNav`
+   branches solid fill vs glass capsule on `(glassOn, glassBackdrop)`.
+4. Home: wrapper captures watermark+scroll column (`homeScroll` hoisted out so
+   the sticky-bar sibling block still reads it); menu/profile pills restored to
+   the v230 scroll morph → real glass, sampling the local capture. Profile pill
+   still keeps classic morph when an avatar photo is set.
+5. EntryDetail: same wrapper pattern; `DetailStickyBar(glassBackdrop = …)`; back/
+   more pills restored.
 
-Follow-ups / notes:
-- The scroll-morph glass on Home/detail top-bar pills stays OFF (v232 crash class);
-  clear-glass + edge glow apply wherever liquid glass is actually live today.
-- web/package-lock.json has a pre-existing local modification — left untouched.
+Files: AppPreferences.kt, LiquidGlassPills.kt, HomeScreen.kt,
+EntryDetailScreen.kt, PetDesignerScreen.kt, ExperimentsScreen.kt,
+CurioCrashReporter.kt + changelog 20260920.txt + app/AGENTS.md (v234).
+
+Verification: balance check OK ×7; no `glassOn = false` stubs remain; all new
+symbols imported. CI validates compilation on push.
+
+### Ideas for later (answered in chat, not implemented)
+- Drag-to-shrink glass sheets / expandable FABs; glass sliders & switches;
+  header→toolbar glass morph on scroll; glass side-rail for wide windows;
+  chromatic-aberration lens variant (library flag exists); glass toast/snackbar.

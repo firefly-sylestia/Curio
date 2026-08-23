@@ -134,6 +134,11 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
@@ -609,9 +614,23 @@ fun PetDesignerScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            // v30 — "Hero follows Spin lane": the page wears the lane wash.
             .background(heroPageBackground())
     ) {
+        // v234 — IN-SCREEN GLASS. Everything BEHIND the studio bar (lane
+        // wash + watermark + scrolling list) records into its own local
+        // layerBackdrop layer; the bar itself is pinned BELOW this wrapper as
+        // a sibling overlay. Sampling a capture that excludes the pill makes
+        // the v228 self-capture cycle (RenderThread SIGSEGV) impossible by
+        // construction — the bottom-nav architecture, applied in-screen.
+        val studioGlass = isInScreenGlassActive()
+        val studioGlassBackdrop = rememberLayerBackdrop()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                // v30 — "Hero follows Spin lane": the page wears the lane wash.
+                .background(heroPageBackground())
+                .layerBackdrop(studioGlassBackdrop)
+        ) {
         if (!windowWidthSizeClass().isWide) {
             CurioWatermarkBackdrop(
                 activeCat = CurioCategories.byId(CategoryId.WILDCARD),
@@ -637,7 +656,9 @@ fun PetDesignerScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = edgePad,
                 end = edgePad,
-                bottom = 16.dp
+                // v234 — clears the studio bar, which now floats OVER the
+                // list (pinned below the capture subtree) in every mode.
+                bottom = 96.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -1143,15 +1164,23 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
         }
-        // v8.56 — the studio's bottom navigation bar (Pets / Editor /
-        // Settings) — a real app-style bar, always visible.
-        PetStudioBottomNav(
-            page = page,
-            onSelect = { newPage ->
-                page = newPage
-                target = null
-            }
-        )
+        }
+        }
+        // v8.56 / v234 — the studio's bottom navigation bar (Pets / Editor /
+        // Settings): still always visible, but now pinned UNDER the captured
+        // subtree (sibling overlay = the safe liquid-glass architecture).
+        // The list's bottom contentPadding clears it in every mode.
+        Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(modifier = Modifier.weight(1f))
+            PetStudioBottomNav(
+                page = page,
+                onSelect = { newPage ->
+                    page = newPage
+                    target = null
+                },
+                glassOn = studioGlass,
+                glassBackdrop = studioGlassBackdrop
+            )
         }
 
         // v156 — the floating action capsule pinned to the TOP of the
@@ -1395,7 +1424,11 @@ fun PetDesignerScreen(navController: NavController) {
 @Composable
 private fun PetStudioBottomNav(
     page: PetDesignerPage,
-    onSelect: (PetDesignerPage) -> Unit
+    onSelect: (PetDesignerPage) -> Unit,
+    // v234 — in-screen glass experiment state + the screen's LOCAL capture
+    // (which excludes this bar). Null/False keeps the solid elevated fill.
+    glassOn: Boolean = false,
+    glassBackdrop: LayerBackdrop? = null
 ) {
     // v188 — light tick when switching studio pages.
     val haptics = LocalHapticFeedback.current
@@ -1413,21 +1446,23 @@ private fun PetStudioBottomNav(
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-    // v232 — GLASS DISABLED on this bar pending a real tombstone: the v228
-    // self-capture guard holds for Reveal's identical in-subtree pill, but
-    // the Pet Designer screen still SIGSEGVs natively on RenderThread on
-    // some devices (Samsung A35 / Android 16 / Vulkan). The native-crash
-    // reporter will capture the next occurrence; until then this bar keeps
-    // its proven solid elevated fill on every device.
+    // v234 — GLASS RESTORED behind the "In-screen glass" experiment: the
+    // bar is a SIBLING OVERLAY of the screen's local capture, so the v228
+    // self-capture cycle is impossible by construction. OFF keeps the proven
+    // solid elevated fill everywhere.
     val studioContainer = curioFloatingNavContainer(null)
+    val glassActive = glassOn && glassBackdrop != null
     Surface(
         shape = RoundedCornerShape(50),
         // v149 — same dynamic container as the floating nav bar (the pet
         // page publishes no wash, so this resolves to the elevated surface
         // with the theme-aware fallback). v160 — the dark-mode hairline
         // rim is gone (see v157).
-        color = studioContainer,
-        shadowElevation = 6.dp
+        color = if (glassActive) Color.Transparent else studioContainer,
+        shadowElevation = if (glassActive) 0.dp else 6.dp,
+        modifier = if (glassActive)
+            Modifier.liquidGlassCapsule(studioContainer, backdrop = glassBackdrop)
+        else Modifier
     ) {
         Row(
             modifier = Modifier.padding(7.dp),

@@ -4901,6 +4901,28 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v234 — in-screen glass restored on a safe architecture (separate toggle)**
+  - NEW PREF `glassInScreenState` (`glass_in_screen`, Experiments → "In-screen glass",
+    OFF) gated by `isInScreenGlassActive()` = main toggle AND this AND API ≥ 31.
+  - WHY THE OLD VERSION CRASHED: in-screen pills sampled the NavHost's WHOLE-PAGE
+    capture, which records the page subtree INCLUDING the pills — during the record
+    pass the pill drew its sample layer into the very layer being recorded → cyclic
+    render node → RenderThread SIGSEGV (v228/v232).
+  - THE FIX (by construction, not guard): each site now captures a LOCAL
+    `rememberLayerBackdrop()` over a wrapper Box holding only what sits BEHIND the
+    pill, with the pill a SIBLING overlay outside the captured subtree — exactly the
+    bottom-nav architecture that has never crashed.
+    - Pet Designer: wrapper around watermark + list; studio bar pinned below via a
+      weight-spacer Column (list contentPadding bottom 16→96dp clears it);
+      `PetStudioBottomNav(glassOn, glassBackdrop)` branches Surface fill vs
+      `liquidGlassCapsule(studioContainer, backdrop=...)`.
+    - Home: wrapper around watermark + scroll column (`homeScroll` hoisted out so the
+      sticky-bar block still reads it); menu/profile capsules pass `backdrop`.
+    - EntryDetail: wrapper around watermark + scroll column; `DetailStickyBar` gains
+      `glassBackdrop: LayerBackdrop?`; back/more capsules pass it through.
+  - `liquidGlassCapsule` gains `backdrop: LayerBackdrop? = null` (null → global
+    NavHost capture, unchanged for overlay sites). The v228 global-capture guard and
+    v232 native-crash self-heal (now also disables this toggle) remain active.
 - **v233 — clear-glass option + parallax edge glow + light-mode indicator ink + glyph centering**
   - NEW PREF `glassClarityState` (`glass_clear_style`, Experiments → "Clear glass", OFF):
     when ON the glass drops its frost — blur 8dp→2dp and the container wash cut to ~35%

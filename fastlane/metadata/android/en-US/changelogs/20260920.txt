@@ -1,4 +1,5 @@
 ADD
+- Liquid glass: new "In-screen glass" option - the Pet Designer studio bar and the floating top-bar pills get real liquid glass too, rebuilt on a crash-safe capture so it can't take the app down.
 - Liquid glass: new "Clear glass" option - much less frost and a lighter tint, so the bar reads like clear refracting glass instead of milky.
 - Liquid glass: parallax tilt now moves the rim EDGE GLOW across the glass as you tilt the phone, not the whole pane.
 - Liquid glass: active tab text is much easier to read in light mode.

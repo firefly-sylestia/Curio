@@ -186,6 +186,10 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setGlassClarityEnabled(context, it)
                     }
                     CurioSettingsDivider()
+                    ExperimentSwitchRow("In-screen glass", "Liquid glass on the Pet Designer studio bar and the floating top-bar pills (needs Liquid glass pills)", AppPreferences.glassInScreenState) {
+                        AppPreferences.setGlassInScreenEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
                     ExperimentSwitchRow("Glass parallax tilt", "The glass pills sway against the phone's tilt for a floating depth effect (needs Liquid glass pills)", AppPreferences.glassParallaxState) {
                         AppPreferences.setGlassParallaxEnabled(context, it)
                         com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(

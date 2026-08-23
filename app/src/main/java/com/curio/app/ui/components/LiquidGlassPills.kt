@@ -70,6 +70,16 @@ fun isLiquidGlassPillsActive(): Boolean =
     AppPreferences.liquidGlassPillsState && android.os.Build.VERSION.SDK_INT >= 31
 
 /**
+ * v234 — whether IN-SCREEN glass is active: the main toggle AND the separate
+ * "In-screen glass" experiment. In-screen pills each sample a LOCAL backdrop
+ * layer that excludes them (sibling-overlay architecture — see the v234 note
+ * in [liquidGlassCapsule]), so they are structurally incapable of the v228
+ * self-capture cycle; the global-capture guard below stays as belt-and-braces.
+ */
+fun isInScreenGlassActive(): Boolean =
+    isLiquidGlassPillsActive() && AppPreferences.glassInScreenState
+
+/**
  * The capture onDraw for the NavHost's [com.kyant.backdrop.backdrops.rememberLayerBackdrop]:
  * flags the record pass so in-subtree glass capsules fall back to a plain
  * fill (see the v228 note on [CurioGlassPills]).
@@ -101,10 +111,17 @@ fun Modifier.liquidGlassCapsule(
     // wash while the scroll morph is young (so the handoff from their
     // resting SOLID hero fill doesn't pop) easing down to ~45% when fully
     // scrolled.
-    washAlpha: Float = 0.40f
+    washAlpha: Float = 0.40f,
+    // v234 — explicit LOCAL backdrop for in-screen pills. When null, falls
+    // back to the NavHost's whole-page capture (bottom-bar overlay sites).
+    // In-screen callers MUST pass their own local capture: one that records
+    // only what sits BEHIND the pill, with the pill itself OUTSIDE the
+    // captured subtree — the bottom-nav architecture. Sampling a capture
+    // that includes the pill is what produced the v228 cyclic render node.
+    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ): Modifier {
     if (!isLiquidGlassPillsActive()) return this
-    val backdrop = CurioGlassPills.backdrop ?: return this
+    val backdrop = backdrop ?: CurioGlassPills.backdrop ?: return this
     // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
     // below is NOT a composable context.
     val dark = isCurioDarkTheme()
