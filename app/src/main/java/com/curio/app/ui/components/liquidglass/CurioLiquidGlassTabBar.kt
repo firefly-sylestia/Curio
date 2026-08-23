@@ -134,6 +134,11 @@ fun CurioLiquidGlassTabBar(
     val density = LocalDensity.current
     // v233 — CLEAR GLASS (experiment): less frost, more refraction.
     val clear = AppPreferences.glassClarityState
+    // v242 — user tuning (Appearance → Liquid glass): multipliers around
+    // the tuned defaults, applied to blur / lens / highlight below.
+    val blurScale = AppPreferences.glassBlurScaleState
+    val refrScale = AppPreferences.glassRefractionScaleState
+    val reflScale = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
     // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
     // accent wash gave the active ink almost nothing to read against on a
     // bright page; light mode now gets double the bed (dark keeps 16%).
@@ -294,12 +299,12 @@ fun CurioLiquidGlassTabBar(
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur((if (clear) 1.dp else 8.dp).toPx())
-                            lens(24.dp.toPx(), 24.dp.toPx())
+                            blur((if (clear) 1f.dp else 8f.dp) * blurScale)
+                            lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                         }
                     },
                     highlight = {
-                        Highlight.Default.copy(alpha = if (isBlurEnabled) 1f else 0f)
+                        Highlight.Default.copy(alpha = (if (isBlurEnabled) 1f else 0f) * reflScale)
                     },
                     shadow = {
                         Shadow.Default.copy(
@@ -349,12 +354,12 @@ fun CurioLiquidGlassTabBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur((if (clear) 1.dp else 8.dp).toPx())
-                                lens(24.dp.toPx() * progress, 24.dp.toPx() * progress)
+                                blur((if (clear) 1f.dp else 8f.dp) * blurScale)
+                                lens(24f.dp.toPx() * refrScale * progress, 24f.dp.toPx() * refrScale * progress)
                             }
                         },
                         highlight = {
-                            Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
+                            Highlight.Default.copy(alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) * reflScale)
                         },
                         shadow = { null },
                         onDrawSurface = {
@@ -396,12 +401,12 @@ fun CurioLiquidGlassTabBar(
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
-                                lens(10.dp.toPx() * progress, 14.dp.toPx() * progress, true)
+                                lens(10f.dp.toPx() * refrScale * progress, 14f.dp.toPx() * refrScale * progress, true)
                             }
                         },
                         highlight = {
                             Highlight.Default.copy(
-                                alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) * reflScale
                             )
                         },
                         shadow = {

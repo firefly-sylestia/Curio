@@ -1,4 +1,7 @@
 ADD
+- Appearance: "Liquid glass" moved here from Experiments and merged into ONE switch (the nav bar and all floating pills now share it), with an inline "Clear glass" option and live sliders for Reflection, Refraction and Blur so you can tune the glass recipe yourself.
+- Liquid glass nav: dark mode uses pure white ink for the active tab's icon and label.
+
 - Liquid glass: the clear style is clearer still - the frost blur and milky tint are cut further, so glass reads crisp instead of foggy.
 - Liquid glass nav: the active tab's icon and label are now pure black in light mode (white in dark) - no more category tint fighting the glass.
 

@@ -442,13 +442,14 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
-    // v241 — In-screen glass (experiment, default OFF): extends liquid glass
-    // to pills that live INSIDE a screen's layout — the Pet Designer studio
-    // bar and the floating top-bar pills. Each site captures its own LOCAL
-    // backdrop layer that EXCLUDES the pill itself (sibling overlay — the
-    // bottom-nav architecture), so the old self-capture crash is impossible
-    // by construction.
-    var glassInScreenState by mutableStateOf(false)
+    // v242 — LIQUID GLASS TUNING: user-adjustable multipliers for the glass
+    // recipe (Appearance → Liquid glass). 1f = the tuned default; 0f turns
+    // the effect off; up to 2f doubles it.
+    var glassBlurScaleState by mutableStateOf(1f)
+        private set
+    var glassRefractionScaleState by mutableStateOf(1f)
+        private set
+    var glassReflectionScaleState by mutableStateOf(1f)
         private set
 
     /**
@@ -692,7 +693,9 @@ object AppPreferences {
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         glassParallaxState = isGlassParallaxEnabled(context)
         glassClarityState = isGlassClarityEnabled(context)
-        glassInScreenState = isGlassInScreenEnabled(context)
+        glassBlurScaleState = getGlassBlurScale(context)
+        glassRefractionScaleState = getGlassRefractionScale(context)
+        glassReflectionScaleState = getGlassReflectionScale(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -991,7 +994,9 @@ object AppPreferences {
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
-    private const val KEY_GLASS_IN_SCREEN = "glass_in_screen"
+    private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
+    private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
+    private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1192,13 +1197,26 @@ object AppPreferences {
         glassClarityState = enabled
     }
 
-    // ── In-screen glass (experiment, default OFF) ───────────────────
-    fun isGlassInScreenEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GLASS_IN_SCREEN, false)
+    // ── Liquid glass tuning (Appearance; stored as percent ints) ──────
+    private fun readScale(context: Context, key: String): Float =
+        (prefs(context).getInt(key, 100) / 100f).coerceIn(0f, 2f)
 
-    fun setGlassInScreenEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_GLASS_IN_SCREEN, enabled).apply()
-        glassInScreenState = enabled
+    fun getGlassBlurScale(context: Context): Float = readScale(context, KEY_GLASS_BLUR_SCALE)
+    fun setGlassBlurScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_BLUR_SCALE, (value * 100).toInt()).apply()
+        glassBlurScaleState = value.coerceIn(0f, 2f)
+    }
+
+    fun getGlassRefractionScale(context: Context): Float = readScale(context, KEY_GLASS_REFRACTION_SCALE)
+    fun setGlassRefractionScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_REFRACTION_SCALE, (value * 100).toInt()).apply()
+        glassRefractionScaleState = value.coerceIn(0f, 2f)
+    }
+
+    fun getGlassReflectionScale(context: Context): Float = readScale(context, KEY_GLASS_REFLECTION_SCALE)
+    fun setGlassReflectionScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_REFLECTION_SCALE, (value * 100).toInt()).apply()
+        glassReflectionScaleState = value.coerceIn(0f, 2f)
     }
 
     // ── Category tint wash ────────────────────────────────────────────

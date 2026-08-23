@@ -79,7 +79,10 @@ fun isLiquidGlassPillsActive(): Boolean =
  * capture guard below stays as belt-and-braces.
  */
 fun isInScreenGlassActive(): Boolean =
-    isLiquidGlassPillsActive() && AppPreferences.glassInScreenState
+    // v242 — merged into the single Liquid glass toggle (Appearance):
+    // in-screen sites use the same crash-safe local-capture architecture,
+    // so there is no reason to gate them separately anymore.
+    isLiquidGlassPillsActive()
 
 /**
  * The capture onDraw for the NavHost's [com.kyant.backdrop.backdrops.rememberLayerBackdrop]:
@@ -139,6 +142,11 @@ fun Modifier.liquidGlassCapsule(
     // reads like the bright refraction blob under a finger press rather
     // than milky frosted glass.
     val clear = AppPreferences.glassClarityState || alwaysClear
+    // v242 — user tuning (Appearance → Liquid glass): multipliers around
+    // the tuned defaults. Hoisted here; the draw lambdas are plain scopes.
+    val blurScale = AppPreferences.glassBlurScaleState
+    val refrScale = AppPreferences.glassRefractionScaleState
+    val reflScale = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
     return this
         // v228 — outer guard: during a capture record pass, skip the
         // backdrop-drawing inner node entirely and paint a plain capsule,
@@ -164,10 +172,10 @@ fun Modifier.liquidGlassCapsule(
                 shape = { shape },
                 effects = {
                     vibrancy()
-                    blur((if (clear) 1.dp else 8.dp).toPx())
-                    lens(24.dp.toPx(), 24.dp.toPx())
+                    blur((if (clear) 1f.dp else 8f.dp) * blurScale)
+                    lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                 },
-                highlight = { Highlight.Default },
+                highlight = { Highlight.Default.copy(alpha = reflScale) },
                 shadow = {
                     Shadow.Default.copy(
                         color = Color.Black.copy(alpha = if (dark) 0.20f else 0.10f)
