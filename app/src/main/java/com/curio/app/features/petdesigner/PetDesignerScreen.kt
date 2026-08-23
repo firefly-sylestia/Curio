@@ -139,7 +139,12 @@ import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.ui.components.curioActivePillInk
 import com.curio.app.ui.components.curioFloatingNavContainer
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
+import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.pet.CurioPetSprite
 import com.curio.app.ui.pet.EYE_STYLE_PIXELS
 import com.curio.app.ui.theme.ChangaOneFontFamily
@@ -1452,17 +1457,82 @@ private fun PetStudioBottomNav(
     // solid elevated fill everywhere.
     val studioContainer = curioFloatingNavContainer(null)
     val glassActive = glassOn && glassBackdrop != null
+    if (glassActive && glassBackdrop != null) {
+        // v236 — the SAME bar as the bottom nav: full liquid-glass with the
+        // DRAGGABLE active indicator (press blob, velocity squash/stretch,
+        // specular sheen) and classic expand-with-side-label tabs. Light mode
+        // wears the deep hue-twin ink (v235 recipe) so the active label reads.
+        val accent = MaterialTheme.colorScheme.primary
+        val activeInk = if (!isCurioDarkTheme()) {
+            val hsl = toHsl(accent)
+            fromHsl(hsl.h, hsl.s.coerceAtLeast(0.45f), (hsl.l * 0.55f).coerceAtMost(0.30f))
+        } else curioActivePillInk(null)
+        val pages = listOf(
+            Triple(PetDesignerPage.PETS, CurioIcons.Pets, "Pets"),
+            Triple(PetDesignerPage.EDITOR, CurioIcons.Brush, "Editor"),
+            Triple(PetDesignerPage.SETTINGS, CurioIcons.Settings, "Settings")
+        )
+        CurioLiquidGlassTabBar(
+            backdrop = glassBackdrop,
+            tabsCount = pages.size,
+            selectedIndex = pages.indexOfFirst { it.first == page }.coerceAtLeast(0),
+            accentColor = accent,
+            onSelected = { index ->
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onSelect(pages[index.coerceIn(0, pages.lastIndex)].first)
+            }
+        ) {
+            pages.forEachIndexed { index, tab ->
+                val (p, glyph, label) = tab
+                val selected = page == p
+                val tabWidth by animateDpAsState(
+                    targetValue = if (selected) StudioPillExpandedWidth else StudioPillIconWidth,
+                    animationSpec = StudioWidthSpring,
+                    label = "studioGlassTabWidth"
+                )
+                CurioLiquidGlassTabBarItem(
+                    index = index,
+                    onClick = {
+                        if (!selected) {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onSelect(p)
+                        }
+                    },
+                    modifier = Modifier.width(tabWidth)
+                ) {
+                    CurioIcon(
+                        name = glyph,
+                        contentDescription = label,
+                        tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 26.dp
+                    )
+                    AnimatedVisibility(
+                        visible = selected,
+                        enter = expandHorizontally(StudioExpandSpring, expandFrom = Alignment.Start) +
+                            fadeIn(StudioMotionSpring),
+                        exit = shrinkHorizontally(StudioExpandSpring, shrinkTowards = Alignment.Start) +
+                            fadeOut(StudioMotionSpring)
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontFamily = ChangaOneFontFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 15.sp
+                            ),
+                            color = activeInk,
+                            maxLines = 1,
+                            modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+    } else {
     Surface(
         shape = RoundedCornerShape(50),
-        // v149 — same dynamic container as the floating nav bar (the pet
-        // page publishes no wash, so this resolves to the elevated surface
-        // with the theme-aware fallback). v160 — the dark-mode hairline
-        // rim is gone (see v157).
-        color = if (glassActive) Color.Transparent else studioContainer,
-        shadowElevation = if (glassActive) 0.dp else 6.dp,
-        modifier = if (glassActive)
-            Modifier.liquidGlassCapsule(studioContainer, backdrop = glassBackdrop)
-        else Modifier
+        color = studioContainer,
+        shadowElevation = 6.dp
     ) {
         Row(
             modifier = Modifier.padding(7.dp),
@@ -1486,6 +1556,7 @@ private fun PetStudioBottomNav(
             }
         }
     }
+    } // else — classic solid bar
     }
 }
 

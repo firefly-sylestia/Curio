@@ -4901,6 +4901,19 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v236 — touch press-blob everywhere + studio bar gets the real nav bar**
+  - NEW `Modifier.curioGlassPressBlob(interactionSource)` (LiquidGlassPills.kt): the
+    nav-pill touch feel packaged for any capsule — spring grows up to 1.05x while
+    pressed and a soft white radial glow blooms at the finger and follows it.
+    Non-consuming pointerInput; glow clipped to CircleShape. Applied to: Home
+    TopBarPill (menu/profile), EntryDetail back (CurioBackButton gains optional
+    `interactionSource` passthrough) + more pills, Reveal favorite pill, tour dock
+    Skip/Next buttons. The tour DOCK also renders as a liquid-glass capsule when the
+    pills experiment is on (sibling overlay of the capture Box — safe architecture).
+  - Pet Designer studio bar: when In-screen glass is ON it now renders the FULL
+    `CurioLiquidGlassTabBar` — draggable accent indicator (damped drag,
+    squash/stretch, specular sheen) + classic expand-with-side-label tabs with the
+    v235 light-mode deep hue-twin ink. Classic solid bar unchanged when OFF.
 - **v235 — clear-glass blob fixes + dark light-mode active ink**
   - BLOBS with Clear glass (two artifacts): (1) the hidden accent-tinted tab-row copy
     ran its OWN glass rendering before being recorded into `tabsBackdrop`, so the

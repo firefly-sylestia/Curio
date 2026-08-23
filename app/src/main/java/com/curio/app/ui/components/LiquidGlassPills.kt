@@ -1,17 +1,27 @@
 package com.curio.app.ui.components
 
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -174,6 +184,69 @@ fun Modifier.liquidGlassCapsule(
                 }
             )
         )
+}
+
+/**
+ * v236 — TOUCH LIQUID-GLASS BLOB. The signature press feel of the bottom
+ * nav's active pill, packaged for every other glass element: while pressed,
+ * the capsule gently GROWS (spring, no overshoot) and a soft white radial
+ * glow blooms under the finger and follows it — the bright refraction blob
+ * iOS glass shows on touch. Non-consuming: pointer events pass straight
+ * through to the child clickable, so taps keep working unchanged.
+ *
+ * Apply to (or around) the pill Surface; the glow is clipped to a circle,
+ * which matches every capsule/circular glass pill in the app.
+ */
+@Composable
+fun Modifier.curioGlassPressBlob(
+    interactionSource: InteractionSource,
+    maxScale: Float = 1.05f
+): Modifier {
+    val pressed by interactionSource.collectIsPressedAsState()
+    val progress by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.55f, stiffness = 500f),
+        label = "glassPressBlob"
+    )
+    var pressPoint by remember { mutableStateOf(Offset.Zero) }
+    return this
+        .graphicsLayer {
+            val s = 1f + (maxScale - 1f) * progress
+            scaleX = s
+            scaleY = s
+        }
+        .pointerInput(Unit) {
+            awaitEachGesture {
+                awaitFirstDown(requireUnconsumed = false)
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull() ?: break
+                    pressPoint = change.position
+                    if (!change.pressed) break
+                }
+            }
+        }
+        .clip(CircleShape)
+        .drawWithContent {
+            drawContent()
+            if (progress > 0.01f && size.minDimension > 0f) {
+                val r = size.minDimension * 1.2f
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.38f),
+                            Color.White.copy(alpha = 0.10f),
+                            Color.Transparent
+                        ),
+                        center = pressPoint,
+                        radius = r
+                    ),
+                    radius = r,
+                    center = pressPoint,
+                    alpha = progress
+                )
+            }
+        }
 }
 
 /**

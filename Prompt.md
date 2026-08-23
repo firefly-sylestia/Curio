@@ -1,34 +1,35 @@
 # Prompt.md — current request log
 
-## Request (complete): clear-glass blobs + light-mode active ink (v235) — committed & pushed
+## Request (complete): touch press-blob everywhere + studio bar nav treatment (v236) — committed & pushed
 
-User reported, with Clear glass ON: (1) a small circular blob inside the shaded
-active indicator and another at the centre of the whole bar capsule; (2) active
-indicator category colors/label still unreadable in light mode.
+User asked: add the same touch liquid-glass blob (like the bottom-nav active pill)
+to other glass elements, a similar active indicator, and the same for the tour
+Skip/Next buttons.
 
-### Blob root causes (two distinct artifacts)
-1. The hidden accent-tinted tab-row copy (recorded into `tabsBackdrop` so the pill
-   refracts COLORED icons) ran its OWN full glass rendering — vibrancy + blur +
-   lens + surface wash — before recording. The draggable pill therefore refracted
-   a duplicated GLASS RENDER of the whole bar; with frost gone (blur 8→2dp) the
-   render's refraction rings became visible as circular blobs inside the indicator
-   and mid-capsule. Fix: the hidden row now records PLAIN accent-tinted content;
-   the pill applies its own optics.
-2. At rest the pill's drawBackdrop had NO effects at all (lens/highlight/shadow are
-   all press-scaled), so it drew the combined backdrop nearly RAW — the tinted icon
-   copy beneath showed sharply as a "blob". Fix: always-on soft blur on the pill's
-   sample (8dp normal / 4dp clear).
-Also: lens refraction bands shrink in clear mode (24→14/18dp) on the main bar and
-`liquidGlassCapsule`, so short capsules don't fold the top+bottom refraction bands
-over each other mid-pill.
+### What shipped
+1. **`Modifier.curioGlassPressBlob(interactionSource)`** in LiquidGlassPills.kt —
+   the nav-pill touch feel packaged: spring grow to 1.05x while pressed + soft
+   white radial glow blooming at the finger and following it. Non-consuming
+   pointerInput (taps unaffected), glow clipped to CircleShape. Applied to:
+   - Home TopBarPill (menu + profile pills)
+   - EntryDetail back pill (CurioBackButton gained an optional `interactionSource`
+     passthrough param) and more pill
+   - Reveal favorite pill (Surface now takes an explicit source)
+   - Tour dock Skip/Next buttons; the dock itself also renders as a liquid-glass
+     capsule when Liquid glass pills is on (sibling overlay of the capture Box —
+     the safe architecture).
+2. **Pet Designer studio bar**: when In-screen glass is ON it renders the FULL
+   `CurioLiquidGlassTabBar` — draggable accent indicator (damped drag, velocity
+   squash/stretch, specular sheen) + classic expand-with-side-label tabs, with the
+   v235 deep hue-twin ink for light mode. Classic solid bar unchanged when OFF.
 
-### Light-mode active ink
-`curioActivePillInk` pairs with the classic SOLID accent fill; the glass indicator
-only wears a translucent wash so pastel accents vanished. Glass tabs now compute a
-deep saturated hue twin in light mode:
-`fromHsl(hsl.h, hsl.s.coerceAtLeast(0.45f), (hsl.l * 0.55f).coerceAtMost(0.30f))`.
-Dark mode keeps the classic ink.
+Files: LiquidGlassPills.kt, CurioTopBar.kt, CurioNavHost.kt, PetDesignerScreen.kt,
+TopicRevealScreen.kt, HomeScreen.kt, EntryDetailScreen.kt + changelog +
+app/AGENTS.md (v236) + Prompt.md.
 
-Files: CurioLiquidGlassTabBar.kt, LiquidGlassPills.kt, CurioBottomNav.kt +
-changelog 20260920.txt + app/AGENTS.md (v235). Balance checks pass ×3.
-CI validates compilation on push.
+Verification: balance check OK ×7; all blob call sites have imports; studio-bar
+branch brace count fixed (initial replace dropped one closer — caught by balance
+check before commit). CI validates compilation on push.
+
+Note: str_replace flaked again on this file set ("not found" on verifiable strings);
+used the python-patch fallback throughout with assert-count guards.
