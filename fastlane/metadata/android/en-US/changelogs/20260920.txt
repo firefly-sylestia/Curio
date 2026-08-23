@@ -5,6 +5,10 @@ ADD
 - Liquid glass: the active pill no longer tints the tab icons and labels with the category color - your chosen ink shows true.
 
 FIX
+- Home: the drawer-menu and avatar pills really turn into liquid glass on scroll now - a duplicate scroll-state declaration was keeping the morph permanently at zero.
+- Liquid glass nav: the active pill is now fully transparent at rest and wears the exact same blur/refraction recipe as the other glass capsules - the colored ghost icons that re-tinted the labels when the blob settled are gone.
+- Floating pills (Home menu/profile, entry back/more, Profile search) are slightly larger (44dp) so the icons sit centered at every system font size.
+
 - Home: the drawer-menu and avatar pills now actually render liquid glass (a capture guard was flattening every in-screen pill on each scroll frame).
 - Navigation: opening an entry from Cabinet/Spin no longer flies the active blob back to Home before collapsing - it stays on the tab you left.
 - Navigation: fast-drags the active blob on the right side of Cabinet no longer behave erratically (drag sensitivity is uniform across the bar).

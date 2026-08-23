@@ -1205,7 +1205,8 @@ private fun BoxScope.DetailStickyBar(
                     contentDescription = "More",
                     tint = heroCardInk,
                     size = 24.dp,
-                    modifier = Modifier.padding(8.dp)
+                    // v244 — matches the back pill's 44dp growth.
+                    modifier = Modifier.padding(10.dp)
                 )
             }
             // v30 — the shared accent-themed menu: an opaque surface tinted

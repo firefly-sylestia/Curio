@@ -69,7 +69,10 @@ fun CurioBackButton(
             // natural line box centers the ink, but the < glyph's visual
             // mass sits slightly below its ink box center.
             modifier = Modifier
-                .padding(8.dp)
+                // v244 — 10dp padding grows the pill to 44dp so the chevron's
+                // line box centers at every font size (the optical nudge then
+                // only handles the < glyph's visual mass).
+                .padding(10.dp)
                 .curioGlyphInkNudge(-1f)
         )
     }

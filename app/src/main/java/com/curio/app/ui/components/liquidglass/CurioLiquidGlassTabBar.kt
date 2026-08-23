@@ -61,7 +61,6 @@ import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -403,18 +402,26 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
+                        // v244 — sample ONLY the page backdrop, exactly like
+                        // every other glass capsule. The old combined sample
+                        // included the hidden ACCENT-TINTED copy of the tab
+                        // row — with light blur its colored ghost icons bled
+                        // through and re-tinted the area whenever the pill
+                        // settled (the ink looked category-colored at rest).
+                        backdrop = backdrop,
                         shape = { CircleShape },
                         effects = {
+                            // v244 — the SAME recipe as the nav capsule:
+                            // always-on vibrancy + blur + refraction (user
+                            // tuning applies), not press-gated effects.
                             if (isBlurEnabled) {
-                                val progress = dampedDragAnimation.pressProgress
-                                lens(10f.dp.toPx() * refrScale * progress, 14f.dp.toPx() * refrScale * progress, true)
+                                vibrancy()
+                                blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
+                                lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                             }
                         },
                         highlight = {
-                            Highlight.Default.copy(
-                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) * reflScale
-                            )
+                            Highlight.Default.copy(alpha = reflScale)
                         },
                         shadow = {
                             Shadow(
@@ -440,13 +447,10 @@ fun CurioLiquidGlassTabBar(
                         },
                         onDrawSurface = {
                             val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            // v243 — the accent wash is GONE: it painted OVER
-                            // the visible tab icons/labels and re-tinted them
-                            // category-color no matter what ink they used.
-                            drawRect(
-                                color = Color.Black.copy(alpha = 0.10f),
-                                alpha = 1f - progress
-                            )
+                            // v244 — FULLY transparent at rest: no accent wash,
+                            // no shading bed (both painted over the visible
+                            // labels and fought the black/white ink). Only a
+                            // whisper of deepening while pressed remains.
                             drawRect(Color.Black.copy(alpha = 0.03f * progress))
                         }
                     )

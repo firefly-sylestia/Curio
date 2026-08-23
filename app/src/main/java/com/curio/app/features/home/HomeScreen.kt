@@ -391,9 +391,10 @@ fun HomeScreen(navController: NavController) {
                     activeCat = CurioCategories.byId(CategoryId.WILDCARD)
                 )
             }
-            // Hoisted scroll state — the sticky top bar (menu + profile
-            // pills) reads it to pop out of the hero into frosted pills.
-            val homeScroll = rememberScrollState()
+            // v243 — the DUPLICATE declaration is gone: this used to shadow
+            // the hoisted `homeScroll` above, so the sticky bar read a state
+            // that never scrolled and the glass morph never started. The
+            // scroll Column now uses the hoisted state the bar also reads.
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1424,7 +1425,9 @@ private fun TopBarPill(
         color = bg,
         shadowElevation = elevation,
         modifier = modifier
-            .size(42.dp)
+            // v244 — 44dp (was 42): the glyph's line box centers reliably in
+            // the larger circle at every system font size.
+            .size(44.dp)
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(elevation, shape)
             // Material's default indication is a circular ripple. On these

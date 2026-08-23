@@ -640,7 +640,8 @@ private fun ProfileSearchPill(
         color = bg,
         shadowElevation = elevation,
         modifier = modifier
-            .size(42.dp)
+            // v244 — 44dp keeps the magnifier centered at every font scale.
+            .size(44.dp)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
