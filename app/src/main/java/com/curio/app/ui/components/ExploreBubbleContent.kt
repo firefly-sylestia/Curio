@@ -532,7 +532,7 @@ private fun NoteField(
     val pastel = AppPreferences.pastelColorsState
     BasicTextField(
         value = note,
-        onValueChange = { onChange(it.take(240)) },
+        onValueChange = { onChange(it.take(600)) },
         textStyle = MaterialTheme.typography.bodySmall.copy(
             color = if (pastel) ink else MaterialTheme.colorScheme.onSurface
         ),

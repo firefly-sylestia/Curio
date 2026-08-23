@@ -721,7 +721,16 @@ fun settingsReadableInk(fill: Color): Color {
  * scheme roles, and the option cards' coral identity stays as today).
  */
 @Composable
-fun settingsCardAccentInk(): Color = MaterialTheme.colorScheme.primary
+fun settingsCardAccentInk(): Color {
+    // v78 — light Curio only (the Material/AMOLED rose fallback is gone
+    // with those styles).
+    heroLaneCategory()?.let { return it.categoryInk() }
+    if (AppPreferences.heroBlueState) {
+        if (isCurioDarkTheme()) return CurioColors.HomeAzure
+        return readableLightInk(CurioColors.HomeAzure)
+    }
+    return curioRoseInk()
+}
 
 /**
  * v72 — the option-card CHIP hue (the icon-chip fill + card-tint family),

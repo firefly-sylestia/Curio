@@ -65,6 +65,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.materialThemeOn
 import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.toHsl
+import com.curio.app.features.settings.materialHeroTearsOn
 
 /**
  * Out-of-band handoff for the Spin page's category tint wash — published by
@@ -338,7 +339,7 @@ fun CurioFloatingNavBar(
 
     // v149 — the ACTIVE pill wears the current page's category color
     // (published via [CurioNavTint]); null on plain pages → secondary.
-    val pageAccent = MaterialTheme.colorScheme.primary
+    val pageAccent = if (materialHeroTearsOn()) MaterialTheme.colorScheme.primary else curioNavActiveAccent(selectedRoute)
 
     Box(
         modifier = modifier
@@ -659,7 +660,7 @@ fun CurioNavigationRail(
     // the current page's accent CALMED (v166 muted the bright accents), else
     // the theme's muted secondaryContainer (the old hard-coded secondary /
     // primary fallbacks read as stray yellow / pink on Cabinet "All").
-    val pageAccent = MaterialTheme.colorScheme.primary
+    val pageAccent = if (materialHeroTearsOn()) MaterialTheme.colorScheme.primary else curioNavActiveAccent(selectedRoute)
     val railActiveFill = curioActivePillFill(pageAccent)
     val railActiveInk = curioActivePillInk(pageAccent)
 

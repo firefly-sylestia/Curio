@@ -333,15 +333,8 @@ REMOVE
 - The old update card in Support & diagnostics is gone — checking, release notes and installing now live on the dedicated Updates page.
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
 
-FIX: Settings & sub-pages: sticky hero restored with glassy back pill that refracts content; hero tear starts flush at the top; content gap removed (no more 8dp space below tear).
-FIX: Pet Designer sticky hero + glassy back pill; detail morph back button unblocked (scrim removed so back button stays interactive).
-FIX: Explore bubble & floating pet: free placement anywhere, no edge snapping, no glass on the bubble.
-FIX: Ghost text in Pet Designer studio bar removed; home nav blob effect untouched.
-FIX: Glass tuning preview: real refraction with local backdrop; draggable capsule can roam beyond the gradient card.
-FIX: CurioBackButton pill size increased to 48dp for better touch targets.
-FIX: Glass tap effect: interactionSource wired through settings hero back pill and liquidGlassCapsule.
-STYLE: Material color scheme applied: detail hero fill, settings icons, nav bar active state, quests icon all use MaterialTheme.colorScheme.primary.
-FIX: SettingsHeroTotalHeight import added across packages (ManageCategories, PetDesigner, Quests, Recent, RecycleBin, Support, PromoMode, Updates).
-FIX: MoodboardQuotesHidden flag moved below import block to fix syntax error.
-FIX: Pet overlay service imports fixed (PendingIntent, doOnLayout).
-FIX: Liquid glass + Clear glass defaults reverted to OFF per user request.
+HOTFIX v1.1.0-beta5:
+- Session note character limit increased to 600.
+- Detail hero fill reverted: uses Material primary only when Material theme is ON; original category gradient otherwise.
+- Settings/profile/quests icons reverted to original category-aware colors (not always Material primary).
+- Nav bar active accent reverted: uses Material primary only when Material theme is ON; category color otherwise.
