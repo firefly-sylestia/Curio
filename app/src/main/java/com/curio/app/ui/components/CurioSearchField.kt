@@ -1,7 +1,13 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.border
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,12 +24,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,23 +57,21 @@ fun curioSearchFill(backdrop: Color): Color =
     }
 
 /**
- * THE canonical Curio search box — one shared One UI style for every search
- * bar in the app (v90): a full 50dp capsule at the same 46dp height as the
- * hero action pills, a frosted glass fill, an ink hairline, and the shiny
- * glass edge in dark. Heroes (Cabinet, Topic Database, Spin filter sheet)
- * pass their banner ink + frosted category glass; pages (Settings hub,
- * Topic History) pass nothing and get the theme's own surface + ink.
+ * THE canonical Curio search box.
  *
- * Compact magnifier + live query + one-tap clear. The placeholder text is
- * supplied by the caller; it sits behind the field and shows only while the
- * query is empty.
+ * v251 — iOS STYLE: the One UI chrome (ink hairline, elevation shadow,
+ * glass edge) is gone — the field is now a flat gray capsule (the
+ * systemGray fill at ~12% in light / ~24% in dark), SF-gray magnifier,
+ * soft placeholder, one-tap clear, and while the field is FOCUSED a
+ * "Cancel" text button slides in from the right (fade + horizontal
+ * expand) that dismisses the keyboard and clears the query — the UISearch
+ * bar contract. Heroes still pass their banner ink + frosted glass via
+ * [ink]/[fill]; pages pass nothing and get the theme-resolved iOS look.
  *
  * @param ink hero callers pass their banner ink so the icon / placeholder /
- *   text / cursor / hairline all resolve theme-aware (the light twin on the
- *   dark frosted glass at night); null → theme onSurface (v100 — the
- *   standard theme text color, crisp on any glass).
- * @param fill the frosted container (heroes pass [curioSearchFill]; null →
- *   theme surfaceContainerLow).
+ *   text / cursor resolve theme-aware; null → theme onSurface.
+ * @param fill the container (heroes pass [curioSearchFill]; null → the iOS
+ *   system-gray capsule fill).
  */
 @Composable
 fun CurioSearchField(
@@ -80,46 +87,45 @@ fun CurioSearchField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     keyboardActions: KeyboardActions = KeyboardActions(onSearch = {})
 ) {
-    // v100 — the standard theme TEXT color (not the muted onSurfaceVariant):
-    // every search bar in the app reads crisp on its fill.
     val resolvedInk = ink ?: MaterialTheme.colorScheme.onSurface
-    val resolvedFill = fill ?: MaterialTheme.colorScheme.surfaceContainerLow
+    // v251 — iOS systemGray fill (secondarySystemFill): flat, borderless.
+    val iosFill = if (isCurioDarkTheme()) {
+        Color(0xFF767680).copy(alpha = 0.24f)
+    } else {
+        Color(0xFF767680).copy(alpha = 0.12f)
+    }
+    val resolvedFill = fill ?: iosFill
     val pillShape = RoundedCornerShape(50)
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val focused by interactionSource.collectIsFocusedAsState()
+    val focusManager = LocalFocusManager.current
+
     Surface(
         shape = pillShape,
         color = resolvedFill,
-        shadowElevation = 3.dp,
-        modifier = modifier
-            .fillMaxWidth()
-            // v90 — the One UI hairline: a subtle ink outline so the search
-            // bar reads as a defined field (not a floating chip), resolving
-            // to the light twin on the dark frosted glass at night.
-            .border(1.dp, resolvedInk.copy(alpha = 0.35f), pillShape)
-            // v28 — dark mode elevation visibility (glow + hairline).
-            // v81 — dark: the One UI shiny glass edge on the search pill.
-            .curioDarkGlow(3.dp, pillShape)
-            .curioGlassEdge(pillShape)
+        shadowElevation = 0.dp,
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
-                // v90 — fixed 46dp height — the same as the hero action
-                // pills, so every search bar in the app is ONE size.
-                .heightIn(min = 46.dp)
-                .padding(horizontal = 16.dp),
+                // v251 — 42dp: the iOS search field's compact height.
+                .heightIn(min = 42.dp)
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CurioIcon(
                 name = CurioIcons.Search,
                 contentDescription = null,
-                tint = resolvedInk,
-                size = 20.dp
+                tint = resolvedInk.copy(alpha = 0.55f),
+                size = 18.dp
             )
             Box(modifier = Modifier.weight(1f)) {
                 if (query.isEmpty()) {
                     Text(
                         placeholder,
-                        style = textStyle.copy(color = resolvedInk.copy(alpha = 0.7f)),
+                        style = textStyle.copy(color = resolvedInk.copy(alpha = 0.5f)),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -132,13 +138,14 @@ fun CurioSearchField(
                     cursorBrush = SolidColor(resolvedInk),
                     keyboardOptions = keyboardOptions,
                     keyboardActions = keyboardActions,
+                    interactionSource = interactionSource,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
             if (query.isNotEmpty()) {
                 Box(
                     modifier = Modifier
-                        .size(28.dp)
+                        .size(26.dp)
                         .clip(CircleShape)
                         .clickable { onQueryChange("") },
                     contentAlignment = Alignment.Center
@@ -146,10 +153,32 @@ fun CurioSearchField(
                     CurioIcon(
                         name = CurioIcons.Close,
                         contentDescription = "Clear search",
-                        tint = resolvedInk.copy(alpha = 0.85f),
-                        size = 18.dp
+                        tint = resolvedInk.copy(alpha = 0.55f),
+                        size = 16.dp
                     )
                 }
+            }
+            // v251 — iOS CANCEL: slides in only while the field is focused;
+            // taps drop focus and clear the query (the UISearchBar contract).
+            AnimatedVisibility(
+                visible = focused,
+                enter = expandHorizontally() + fadeIn(),
+                exit = shrinkHorizontally() + fadeOut()
+            ) {
+                Text(
+                    "Cancel",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                    ),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            onQueryChange("")
+                            focusManager.clearFocus()
+                        }
+                        .padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 2.dp)
+                )
             }
         }
     }

@@ -194,6 +194,11 @@ fun CurioLiquidGlassTabBar(
         return x + tabWidthsPx[i] * frac
     }
 
+    // v249 — iOS-style TAB-SWITCH GLIDE: programmatic moves (tapping a
+    // tab, drag release) used the class's default critically-damped 1000-
+    // stiffness spring, which snaps between tabs almost instantly. This
+    // softer spring glides the blob across (~350ms) with a gentle settle.
+    val tabGlideSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 380f)
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
         derivedStateOf {
@@ -237,7 +242,7 @@ fun CurioLiquidGlassTabBar(
             onDragStarted = {},
             onDragStopped = {
                 val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
-                animateToValue(targetIndex.toFloat())
+                animateToValue(targetIndex.toFloat(), tabGlideSpec)
                 animationScope.launch {
                     offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
                 }
@@ -273,7 +278,7 @@ fun CurioLiquidGlassTabBar(
             pendingFirstSnap = false
             dampedDragAnimation.updateValue(selectedIndex.toFloat())
         } else {
-            dampedDragAnimation.animateToValue(selectedIndex.toFloat())
+            dampedDragAnimation.animateToValue(selectedIndex.toFloat(), tabGlideSpec)
         }
     }
 
@@ -436,12 +441,12 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        // v246 — sample PAGE + TAB ROW again. The v244
-                        // page-only sample painted blurred page OVER the
-                        // visible tab content, so the active icon + label
-                        // vanished wherever the pill sat. The combined sample
-                        // shows them refracting through the glass — with the
-                        // hidden copy untinted, no colored ghosts return.
+                        // v251 — COMBINED sample restored (reverting v250):
+                        // page + the untinted tab-row copy, so the lens bends
+                        // the CONTENT under the finger — the full-capsule
+                        // refraction look the page-only sample had flattened.
+                        // Ghost doubles are solved by the overlay gating
+                        // below instead.
                         backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                         shape = { CircleShape },
                         effects = {
@@ -544,16 +549,21 @@ fun CurioLiquidGlassTabBar(
         // real tabs and the blob's drag handlers below), so the ink stays
         // perfectly sharp on top of the solid fill at rest and on top of
         // the press-glass while held.
-        CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
-            Row(
-                Modifier
-                    .clearAndSetSemantics {}
-                    .graphicsLayer { translationX = panelOffset }
-                    .height(64.dp)
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                content = measuringContent
-            )
+        if (!classicIndicator) {
+            CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
+                Row(
+                    Modifier
+                        .clearAndSetSemantics {}
+                        .graphicsLayer {
+                            translationX = panelOffset
+                            alpha = 1f - dampedDragAnimation.pressProgress
+                        }
+                        .height(64.dp)
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = measuringContent
+                )
+            }
         }
     }
 }

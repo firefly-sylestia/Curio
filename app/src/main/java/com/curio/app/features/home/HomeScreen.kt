@@ -397,331 +397,12 @@ fun HomeScreen(navController: NavController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    // v251 — STICKY TEAR (the Settings language): content
+                    // starts below the pinned hero and slides UNDER the
+                    // ragged tear as it scrolls.
+                    .padding(top = HomeQuestHeroHeight + HomeQuestSheetExtent)
                     .verticalScroll(homeScroll)
             ) {
-            // ── 1. Quest hero — the detail screen's torn-banner language,
-            // extended to the very top: the solid rose-wood banner runs up
-            // BEHIND the status bar, and the menu / avatar pills overlay it
-            // (added at the end of this Box, so they sit on the banner).
-            // Same seeded SOFT tear (SoftTornBottomShape) + white under-
-            // sheet (SoftTornSheetShape — same seed → aligned pixel-
-            // perfect): the identical EntryDetail construction, so the tear
-            // style stays UNIFORM across the app. No blur on the banner:
-            // flat color + a real torn seam. Fixed seed → never re-rolls.
-            // Inside: the greeting (one line) + name beneath, and the
-            // Streak · Cabinet · Recent bar pinned just above the tear on a
-            // soft rose gradient pane. The banner itself is NOT tappable —
-            // the Shuffle deck CTA lives below the hero.
-            // v7.37 — bold = the rougher Home tear personality (deeper,
-            // toothier seam); the under-sheet passes the SAME flag so both
-            // edges stay pixel-aligned.
-            val heroTornShape = remember(HOME_TEAR_SEED) { SoftTornBottomShape(HOME_TEAR_SEED, bold = true) }
-            val sheetShape = remember(HOME_TEAR_SEED) {
-                SoftTornSheetShape(HOME_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
-            }
-            // The quest is always the wildcard Surprise now (the category
-            // chip row is gone). The banner wears the muted rose-wood hero
-            // accent — in pastel mode (the shipped default) it resolves to
-            // the airy rose-wood pastel twin, otherwise the calm base.
-            // v27u/v27v — hero tint is resolved at the TOP of the screen
-            // (shared with the sticky pills); questInk = the readable ink on
-            // the active fill, carried through greeting, stat icons + watermark.
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(HomeQuestHeroHeight + HomeQuestSheetExtent)
-            ) {
-                // ── White under-sheet — same as the detail hero's: the
-                // sheet's torn top hides behind the opaque banner while its
-                // uneven lip reads white below the tear, and the page wash
-                // starts right after it.
-                // v108 — OFF by default (Settings → Experiments → Paper &
-                // headers): the hero tears straight into the page; the
-                // toggle restores this extra paper layer.
-                if (AppPreferences.heroTearSheetState) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .offset(y = HomeQuestHeroHeight - 18.dp)
-                        .clip(sheetShape)
-                        // v81 — dark: a subtle lighter lip under the tear so
-                        // the paper seam still reads on the dark banner.
-                        .background(
-                            if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
-                            else Color(0xFFFDFCF9)
-                        )
-                )
-                }
-                // ── Torn-edge shadow — a hairline dark rim just below the
-                // hero's torn seam (the SAME seeded torn shape, nudged down
-                // ~1dp) so the tear reads as a real paper edge casting a
-                // thin ~0.1 mm shadow onto the white sheet. Hidden behind
-                // the opaque banner everywhere except the sliver under the
-                // tear; through the up-bites the rim hugs the bite's bottom
-                // edge while the white still reads above it.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(HomeQuestHeroHeight)
-                        .offset(y = 1.dp)
-                        .clip(heroTornShape)
-                        .background(Color.Black.copy(alpha = 0.20f))
-                )
-                // ── Solid rose-wood banner, torn bottom edge. The banner is
-                // NOT tappable — only the Shuffle button below the hero
-                // drives the deck.
-                Surface(
-                    shape = heroTornShape,
-                    color = heroFill,
-                    shadowElevation = 0.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(HomeQuestHeroHeight)
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        // v27 — experimental paper accents (OFF by default;
-                        // toggle in Settings → Experiments → Paper & headers).
-                        if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
-                        }
-                        // v7.33 — detail-style mirrored watermark collage: the
-                        // quest family's symbols (casino, star, sparkle, …)
-                        // scatter around the banner edges in mirrored pairs —
-                        // the EXACT construction of the saved-entry hero, so
-                        // Home and Detail read as one torn-banner family. The
-                        // ink is the banner's own readable ink at a soft alpha
-                        // (the old fixed category glyphs wore dark category
-                        // inks that read muddy against the rose banner).
-                        val heroSymbols = CurioIcons.heroWatermarkSymbols(CategoryFamily.WILDCARD)
-                        val heroPairs = listOf(
-                            HomeHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
-                            HomeHeroPair(biasX = 0.55f, biasY = -0.64f, size = 48.dp, rotation = 8f, alpha = 0.13f),
-                            HomeHeroPair(biasX = 0.94f, biasY = -0.12f, size = 56.dp, rotation = 14f, alpha = 0.14f),
-                            HomeHeroPair(biasX = 0.56f, biasY = 0.54f, size = 50.dp, rotation = 10f, alpha = 0.13f),
-                            HomeHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
-                        )
-                        heroPairs.forEachIndexed { i, pair ->
-                            HomeHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, questInk)
-                            HomeHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, questInk)
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .statusBarsPadding()
-                                .padding(start = 20.dp, end = 20.dp, top = 64.dp, bottom = 18.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // Greeting — one line, left-aligned, with the
-                            // name beneath it (the quest CTA moved below the
-                            // hero). Proper hierarchy: the greeting reads as a
-                            // compact kicker, and the NAME is the star —
-                            // bigger and bolder than the greeting above it.
-                            // v8.16 — the greeting is a CURIOUS pet landmark:
-                            // the pet sometimes tiptoes over and reads it
-                            // (the text itself just pulses — no layout move).
-                            PetLandmark(
-                                id = "greeting",
-                                kind = PetLandmarks.Kind.CURIOUS,
-                                screen = "home"
-                            ) { m ->
-                                Text(
-                                    text = greetingWordForNow(),
-                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                        fontWeight = FontWeight.ExtraBold
-                                    ),
-                                    color = questInk.copy(alpha = 0.92f),
-                                    textAlign = TextAlign.Start,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = m.fillMaxWidth()
-                                )
-                            }
-                            Spacer(Modifier.height(4.dp))
-                            // v7.105 — the hero NAME is the hero now: larger
-                            // than the greeting (36sp ExtraBold vs the 24sp
-                            // kicker), full-strength ink, with tall leading
-                            // so the name block fills the dead space below
-                            // the greeting instead of reading as a small
-                            // caption. The leading is held to a FIXED ~48dp
-                            // box (glyphs still scale with the system font),
-                            // so the fill works at the default scale while
-                            // the stat bar keeps fitting when fonts enlarge.
-                            val nameFontScale = LocalDensity.current.fontScale
-                            Text(
-                                text = displayName,
-                                style = MaterialTheme.typography.headlineLarge.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 36.sp,
-                                    // Fixed ~48sp leading box held against font scaling (min 44sp).
-                                    // Plain Float math: TextUnit has no coerceAtLeast (it only
-                                    // exposes an operator compareTo, not the Comparable bound).
-                                    lineHeight = (48f / nameFontScale.coerceAtLeast(1f)).coerceAtLeast(44f).sp
-                                ),
-                                color = questInk,
-                                textAlign = TextAlign.Start,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            // v27 — experimental paper-title underline (two
-                            // short lines under the name; OFF by default).
-                            if (AppPreferences.paperHeaderCutsState) {
-                                PaperTitleLines(
-                                    ink = questInk,
-                                    title = displayName,
-                                    fontSize = 36.sp
-                                )
-                            }
-                            // Flex spacer — pins the stat card to the bottom
-                            // of the banner, just above the tear.
-                            Spacer(Modifier.weight(1f))
-                            // ── Streak · Cabinet · Recent — the detail bar's
-                            // icon/value/label design, sitting just above the
-                            // torn seam on a soft rose gradient pane (the
-                            // banner's own color, not white frost).
-                            // v27 — experimental: the same bar can wear a
-                            // solid paper card instead (soft rose-cream in
-                            // light, a warm rose-brown in dark) when the
-                            // "Paper stat card" experiment is on.
-                            val paperStatsOn = AppPreferences.paperStatCardsState
-                            // v27u — shared paper color (same cream/rose-brown
-                            // blend Profile's stat pane uses).
-                            val statGlass = heroFill
-                            val paperStatBg = paperStatCardColor(heroFill)
-                            // v27h — the Topics stat always shows the TRUE
-                            // catalog total: the splash warm-cache seeds the
-                            // first frame, then a lightweight IO count of the
-                            // JSON assets refreshes it — so the number never
-                            // reads 0 just because the database/catalog hasn't
-                            // finished loading, and it tracks content drops.
-                            val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
-                                value = TopicJsonLoader.countCanonicalTopics()
-                            }
-                            // v27h — torn paper edges (separate experiment):
-                            // when on, the paper card wears a real torn-paper
-                            // outline — an EXTENDED tear on the top edge and
-                            // sharper ragged tears on the other three — instead
-                            // of the rounded card.
-                            val tearOn = paperStatsOn && AppPreferences.paperStatTearState
-                            val statShape: Shape = remember(tearOn) {
-                                if (tearOn) TornStatPaperShape(0x5A7E4D) else RoundedCornerShape(20.dp)
-                            }
-                            // v27 — the paper card can carry REAL punch holes
-                            // (Stamped pin holes experiment): a vertical column
-                            // of holes down the LEFT edge, drawn as an EvenOdd
-                            // path so the holes stay transparent and the hero
-                            // banner shows through.
-                            val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
-                            val ringsOn = holesOn && AppPreferences.paperHoleRingsState
-                            // v27v — which 3D ring look the holes wear.
-                            val ringStyle = AppPreferences.paperHoleRingStyleState
-                            // v200 — the Surface wrapper is GONE: M3 Surface
-                            // (1.2+) clips its children to the shape, which CUT
-                            // the coil's left peek at the card edge. A plain
-                            // Box + shadow(clip = false) keeps the elevation
-                            // without the clip — the paper fill self-clips to
-                            // the shape outline, so the protruding wire can
-                            // render outside the card.
-                            // v27u — the paper surface (fill + 3-hole column
-                            // + pressed rims or tilted book rings) lives in the
-                            // shared paperStatCardFill component, so Profile's
-                            // stat pane wears the same card.
-                            // v74 — the pane always carries the elevation + dark
-                            // glow, exactly like Profile's stat pane.
-                            Box(
-                                modifier = Modifier
-                                    .curioDarkGlow(3.dp, statShape)
-                                    .shadow(3.dp, statShape, clip = false)
-                                    .then(
-                                        when {
-                                        paperStatsOn -> Modifier.paperStatCardFill(
-                                            shape = statShape,
-                                            fill = paperStatBg,
-                                            holesOn = holesOn,
-                                            ringsOn = ringsOn,
-                                            ringStyle = ringStyle,
-                                            ink = questInk,
-                                            // v81 — dark: light metal ring tones.
-                                            dark = isCurioDarkTheme()
-                                        )
-                                        else -> Modifier.background(
-                                            // v74 — OPAQUE theme-aware pane, the
-                                            // same construction as Profile's stat
-                                            // pane: the old 12–55% alpha glass
-                                            // read transparent and let the
-                                            // elevation shadow bleed through.
-                                            // The opaque blends resolve to the
-                                            // same perceived tints over the
-                                            // banner while keeping the shadow
-                                            // clean (theme-aware like Profile).
-                                            Brush.verticalGradient(
-                                                listOf(
-                                                    lerp(statGlass, Color.White, 0.06f),
-                                                    lerp(statGlass, Color.White, 0.26f)
-                                                )
-                                            ),
-                                            RoundedCornerShape(20.dp)
-                                        )
-                                    }
-                                )
-                            ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 6.dp, vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // Icons wear the HERO ink (not the
-                                        // pastel tints) so they stay visible
-                                        // on the rose pane — deeper, same
-                                        // family as the banner text.
-                                        HeroStatSegment(
-                                            glyph = "local_fire_department",
-                                            value = if (promoOn) PromoMode.DEMO_STREAK.toString() else "$streakDays",
-                                            label = "Streak",
-                                            tint = questInk,
-                                            ink = questInk,
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                        VerticalDivider(
-                                            modifier = Modifier.height(34.dp),
-                                            color = questInk.copy(alpha = 0.22f)
-                                        )
-                                        HeroStatSegment(
-                                            glyph = CurioIcons.Inventory2,
-                                            value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
-                                            label = "Cabinet",
-                                            tint = questInk,
-                                            ink = questInk,
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                        VerticalDivider(
-                                            modifier = Modifier.height(34.dp),
-                                            color = questInk.copy(alpha = 0.22f)
-                                        )
-                                        // v13 — the stat now shows the app's
-                                        // TOTAL topic count (the catalog is
-                                        // warmed during splash, so the sync
-                                        // read is ready on the first frame)
-                                        // instead of the recent-feed size.
-                                        HeroStatSegment(
-                                            glyph = CurioIcons.AutoAwesome,
-                                            value = "$topicsTotal",
-                                            label = "Topics",
-                                            tint = questInk,
-                                            ink = questInk,
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                    }
-                                }
-                        }
-                    }
-                }
-                // The menu + profile pills no longer live here — they moved
-                // to a scroll-reactive STICKY bar outside the hero (they pop
-                // out of the coral into frosted floating pills on scroll).
-            }
 
             // Give the quest block a deliberate breathing room below the
             // hero's white sheet so the shuffle deck never feels pinned to
@@ -1139,6 +820,337 @@ fun HomeScreen(navController: NavController) {
             // v131 — clearance grew with the bigger pill (92 → 100dp).
             Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 32.dp else 100.dp))
             Spacer(Modifier.height(navInsets.calculateBottomPadding()))
+            }
+
+            // v251 — PINNED HERO (the Settings construction): the quest
+            // banner no longer scrolls away — it lives ON TOP of the list,
+            // so rows disappear under the ragged tear exactly like the
+            // settings family. Drawn inside the capture wrapper so the
+            // floating pills keep sampling it for their glass.
+            Box(modifier = Modifier.align(Alignment.TopStart)) {
+            // ── 1. Quest hero — the detail screen's torn-banner language,
+            // extended to the very top: the solid rose-wood banner runs up
+            // BEHIND the status bar, and the menu / avatar pills overlay it
+            // (added at the end of this Box, so they sit on the banner).
+            // Same seeded SOFT tear (SoftTornBottomShape) + white under-
+            // sheet (SoftTornSheetShape — same seed → aligned pixel-
+            // perfect): the identical EntryDetail construction, so the tear
+            // style stays UNIFORM across the app. No blur on the banner:
+            // flat color + a real torn seam. Fixed seed → never re-rolls.
+            // Inside: the greeting (one line) + name beneath, and the
+            // Streak · Cabinet · Recent bar pinned just above the tear on a
+            // soft rose gradient pane. The banner itself is NOT tappable —
+            // the Shuffle deck CTA lives below the hero.
+            // v7.37 — bold = the rougher Home tear personality (deeper,
+            // toothier seam); the under-sheet passes the SAME flag so both
+            // edges stay pixel-aligned.
+            val heroTornShape = remember(HOME_TEAR_SEED) { SoftTornBottomShape(HOME_TEAR_SEED, bold = true) }
+            val sheetShape = remember(HOME_TEAR_SEED) {
+                SoftTornSheetShape(HOME_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
+            }
+            // The quest is always the wildcard Surprise now (the category
+            // chip row is gone). The banner wears the muted rose-wood hero
+            // accent — in pastel mode (the shipped default) it resolves to
+            // the airy rose-wood pastel twin, otherwise the calm base.
+            // v27u/v27v — hero tint is resolved at the TOP of the screen
+            // (shared with the sticky pills); questInk = the readable ink on
+            // the active fill, carried through greeting, stat icons + watermark.
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(HomeQuestHeroHeight + HomeQuestSheetExtent)
+            ) {
+                // ── White under-sheet — same as the detail hero's: the
+                // sheet's torn top hides behind the opaque banner while its
+                // uneven lip reads white below the tear, and the page wash
+                // starts right after it.
+                // v108 — OFF by default (Settings → Experiments → Paper &
+                // headers): the hero tears straight into the page; the
+                // toggle restores this extra paper layer.
+                if (AppPreferences.heroTearSheetState) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .offset(y = HomeQuestHeroHeight - 18.dp)
+                        .clip(sheetShape)
+                        // v81 — dark: a subtle lighter lip under the tear so
+                        // the paper seam still reads on the dark banner.
+                        .background(
+                            if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
+                            else Color(0xFFFDFCF9)
+                        )
+                )
+                }
+                // ── Torn-edge shadow — a hairline dark rim just below the
+                // hero's torn seam (the SAME seeded torn shape, nudged down
+                // ~1dp) so the tear reads as a real paper edge casting a
+                // thin ~0.1 mm shadow onto the white sheet. Hidden behind
+                // the opaque banner everywhere except the sliver under the
+                // tear; through the up-bites the rim hugs the bite's bottom
+                // edge while the white still reads above it.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(HomeQuestHeroHeight)
+                        .offset(y = 1.dp)
+                        .clip(heroTornShape)
+                        .background(Color.Black.copy(alpha = 0.20f))
+                )
+                // ── Solid rose-wood banner, torn bottom edge. The banner is
+                // NOT tappable — only the Shuffle button below the hero
+                // drives the deck.
+                Surface(
+                    shape = heroTornShape,
+                    color = heroFill,
+                    shadowElevation = 0.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(HomeQuestHeroHeight)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // v27 — experimental paper accents (OFF by default;
+                        // toggle in Settings → Experiments → Paper & headers).
+                        if (AppPreferences.paperHeaderCutsState || AppPreferences.paperHeaderHolesState) {
+                        }
+                        // v7.33 — detail-style mirrored watermark collage: the
+                        // quest family's symbols (casino, star, sparkle, …)
+                        // scatter around the banner edges in mirrored pairs —
+                        // the EXACT construction of the saved-entry hero, so
+                        // Home and Detail read as one torn-banner family. The
+                        // ink is the banner's own readable ink at a soft alpha
+                        // (the old fixed category glyphs wore dark category
+                        // inks that read muddy against the rose banner).
+                        val heroSymbols = CurioIcons.heroWatermarkSymbols(CategoryFamily.WILDCARD)
+                        val heroPairs = listOf(
+                            HomeHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
+                            HomeHeroPair(biasX = 0.55f, biasY = -0.64f, size = 48.dp, rotation = 8f, alpha = 0.13f),
+                            HomeHeroPair(biasX = 0.94f, biasY = -0.12f, size = 56.dp, rotation = 14f, alpha = 0.14f),
+                            HomeHeroPair(biasX = 0.56f, biasY = 0.54f, size = 50.dp, rotation = 10f, alpha = 0.13f),
+                            HomeHeroPair(biasX = 0.94f, biasY = 0.80f, size = 44.dp, rotation = 6f, alpha = 0.11f)
+                        )
+                        heroPairs.forEachIndexed { i, pair ->
+                            HomeHeroSymbol(heroSymbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, questInk)
+                            HomeHeroSymbol(heroSymbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, questInk)
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .statusBarsPadding()
+                                .padding(start = 20.dp, end = 20.dp, top = 64.dp, bottom = 18.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Greeting — one line, left-aligned, with the
+                            // name beneath it (the quest CTA moved below the
+                            // hero). Proper hierarchy: the greeting reads as a
+                            // compact kicker, and the NAME is the star —
+                            // bigger and bolder than the greeting above it.
+                            // v8.16 — the greeting is a CURIOUS pet landmark:
+                            // the pet sometimes tiptoes over and reads it
+                            // (the text itself just pulses — no layout move).
+                            PetLandmark(
+                                id = "greeting",
+                                kind = PetLandmarks.Kind.CURIOUS,
+                                screen = "home"
+                            ) { m ->
+                                Text(
+                                    text = greetingWordForNow(),
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold
+                                    ),
+                                    color = questInk.copy(alpha = 0.92f),
+                                    textAlign = TextAlign.Start,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = m.fillMaxWidth()
+                                )
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            // v7.105 — the hero NAME is the hero now: larger
+                            // than the greeting (36sp ExtraBold vs the 24sp
+                            // kicker), full-strength ink, with tall leading
+                            // so the name block fills the dead space below
+                            // the greeting instead of reading as a small
+                            // caption. The leading is held to a FIXED ~48dp
+                            // box (glyphs still scale with the system font),
+                            // so the fill works at the default scale while
+                            // the stat bar keeps fitting when fonts enlarge.
+                            val nameFontScale = LocalDensity.current.fontScale
+                            Text(
+                                text = displayName,
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 36.sp,
+                                    // Fixed ~48sp leading box held against font scaling (min 44sp).
+                                    // Plain Float math: TextUnit has no coerceAtLeast (it only
+                                    // exposes an operator compareTo, not the Comparable bound).
+                                    lineHeight = (48f / nameFontScale.coerceAtLeast(1f)).coerceAtLeast(44f).sp
+                                ),
+                                color = questInk,
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            // v27 — experimental paper-title underline (two
+                            // short lines under the name; OFF by default).
+                            if (AppPreferences.paperHeaderCutsState) {
+                                PaperTitleLines(
+                                    ink = questInk,
+                                    title = displayName,
+                                    fontSize = 36.sp
+                                )
+                            }
+                            // Flex spacer — pins the stat card to the bottom
+                            // of the banner, just above the tear.
+                            Spacer(Modifier.weight(1f))
+                            // ── Streak · Cabinet · Recent — the detail bar's
+                            // icon/value/label design, sitting just above the
+                            // torn seam on a soft rose gradient pane (the
+                            // banner's own color, not white frost).
+                            // v27 — experimental: the same bar can wear a
+                            // solid paper card instead (soft rose-cream in
+                            // light, a warm rose-brown in dark) when the
+                            // "Paper stat card" experiment is on.
+                            val paperStatsOn = AppPreferences.paperStatCardsState
+                            // v27u — shared paper color (same cream/rose-brown
+                            // blend Profile's stat pane uses).
+                            val statGlass = heroFill
+                            val paperStatBg = paperStatCardColor(heroFill)
+                            // v27h — the Topics stat always shows the TRUE
+                            // catalog total: the splash warm-cache seeds the
+                            // first frame, then a lightweight IO count of the
+                            // JSON assets refreshes it — so the number never
+                            // reads 0 just because the database/catalog hasn't
+                            // finished loading, and it tracks content drops.
+                            val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
+                                value = TopicJsonLoader.countCanonicalTopics()
+                            }
+                            // v27h — torn paper edges (separate experiment):
+                            // when on, the paper card wears a real torn-paper
+                            // outline — an EXTENDED tear on the top edge and
+                            // sharper ragged tears on the other three — instead
+                            // of the rounded card.
+                            val tearOn = paperStatsOn && AppPreferences.paperStatTearState
+                            val statShape: Shape = remember(tearOn) {
+                                if (tearOn) TornStatPaperShape(0x5A7E4D) else RoundedCornerShape(20.dp)
+                            }
+                            // v27 — the paper card can carry REAL punch holes
+                            // (Stamped pin holes experiment): a vertical column
+                            // of holes down the LEFT edge, drawn as an EvenOdd
+                            // path so the holes stay transparent and the hero
+                            // banner shows through.
+                            val holesOn = paperStatsOn && AppPreferences.paperHeaderHolesState
+                            val ringsOn = holesOn && AppPreferences.paperHoleRingsState
+                            // v27v — which 3D ring look the holes wear.
+                            val ringStyle = AppPreferences.paperHoleRingStyleState
+                            // v200 — the Surface wrapper is GONE: M3 Surface
+                            // (1.2+) clips its children to the shape, which CUT
+                            // the coil's left peek at the card edge. A plain
+                            // Box + shadow(clip = false) keeps the elevation
+                            // without the clip — the paper fill self-clips to
+                            // the shape outline, so the protruding wire can
+                            // render outside the card.
+                            // v27u — the paper surface (fill + 3-hole column
+                            // + pressed rims or tilted book rings) lives in the
+                            // shared paperStatCardFill component, so Profile's
+                            // stat pane wears the same card.
+                            // v74 — the pane always carries the elevation + dark
+                            // glow, exactly like Profile's stat pane.
+                            Box(
+                                modifier = Modifier
+                                    .curioDarkGlow(3.dp, statShape)
+                                    .shadow(3.dp, statShape, clip = false)
+                                    .then(
+                                        when {
+                                        paperStatsOn -> Modifier.paperStatCardFill(
+                                            shape = statShape,
+                                            fill = paperStatBg,
+                                            holesOn = holesOn,
+                                            ringsOn = ringsOn,
+                                            ringStyle = ringStyle,
+                                            ink = questInk,
+                                            // v81 — dark: light metal ring tones.
+                                            dark = isCurioDarkTheme()
+                                        )
+                                        else -> Modifier.background(
+                                            // v74 — OPAQUE theme-aware pane, the
+                                            // same construction as Profile's stat
+                                            // pane: the old 12–55% alpha glass
+                                            // read transparent and let the
+                                            // elevation shadow bleed through.
+                                            // The opaque blends resolve to the
+                                            // same perceived tints over the
+                                            // banner while keeping the shadow
+                                            // clean (theme-aware like Profile).
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    lerp(statGlass, Color.White, 0.06f),
+                                                    lerp(statGlass, Color.White, 0.26f)
+                                                )
+                                            ),
+                                            RoundedCornerShape(20.dp)
+                                        )
+                                    }
+                                )
+                            ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 6.dp, vertical = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Icons wear the HERO ink (not the
+                                        // pastel tints) so they stay visible
+                                        // on the rose pane — deeper, same
+                                        // family as the banner text.
+                                        HeroStatSegment(
+                                            glyph = "local_fire_department",
+                                            value = if (promoOn) PromoMode.DEMO_STREAK.toString() else "$streakDays",
+                                            label = "Streak",
+                                            tint = questInk,
+                                            ink = questInk,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        VerticalDivider(
+                                            modifier = Modifier.height(34.dp),
+                                            color = questInk.copy(alpha = 0.22f)
+                                        )
+                                        HeroStatSegment(
+                                            glyph = CurioIcons.Inventory2,
+                                            value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
+                                            label = "Cabinet",
+                                            tint = questInk,
+                                            ink = questInk,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        VerticalDivider(
+                                            modifier = Modifier.height(34.dp),
+                                            color = questInk.copy(alpha = 0.22f)
+                                        )
+                                        // v13 — the stat now shows the app's
+                                        // TOTAL topic count (the catalog is
+                                        // warmed during splash, so the sync
+                                        // read is ready on the first frame)
+                                        // instead of the recent-feed size.
+                                        HeroStatSegment(
+                                            glyph = CurioIcons.AutoAwesome,
+                                            value = "$topicsTotal",
+                                            label = "Topics",
+                                            tint = questInk,
+                                            ink = questInk,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                        }
+                    }
+                }
+                // The menu + profile pills no longer live here — they moved
+                // to a scroll-reactive STICKY bar outside the hero (they pop
+                // out of the coral into frosted floating pills on scroll).
+            }
             }
             } // v241 — end of the local glass capture subtree
 

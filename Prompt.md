@@ -1,3 +1,73 @@
+## v253: BoxScope wrapper fix + vFlow credits
+
+CI: matchParentSize/align still rejected - K2 will not resolve BoxScope
+members against a function's EXTENSION receiver alone. Fixed by wrapping the
+scrim + glass panel in an explicit `Box(Modifier.fillMaxSize())` whose content
+lambda provides BoxScope as dispatch receiver. Also: About Curio gains a
+"Liquid glass by vFlow" row (github.com/ChaoMixian/vFlow, GPL-2.0) and README
+Credits gained an Open source section crediting vFlow's LiquidGlassBottomBar.
+
+## v252 batch
+
+1. BLOB: reverted v250's page-only sample back to COMBINED (user said it
+   flattened the capsule-inside-blob look while pressing/moving). Doubles are
+   instead solved by gating: crisp overlay renders ONLY in solid mode (classic
+   mode shows the sampled row through clear glass) and FADES OUT with press so
+   the refracted sample is the single image while touching.
+2. HOME: quest hero moved OUT of the scroll column into a pinned overlay Box
+   (inside the capture wrapper); list gets top padding = hero height - rows
+   slide under the ragged tear, Settings-style. Profile: ProfileHero item
+   removed from LazyColumn into an overlay Box; list contentPadding top =
+   ProfileHeroTotalHeight; pills' existing frost morph now reacts to content
+   scrolling under the tear.
+3. SEARCH: CurioSearchField restyled iOS - flat systemGray capsule (no
+   border/shadow/glow), 42dp, gray magnifier/placeholder, clear button, and
+   Cancel sliding in while focused (fade+expand), which clears query + drops
+   focus. Heroes passing custom ink/fill keep their tints minus the chrome.
+4. Back buttons on pinned-hero screens ride the pinned bars and keep their
+   existing glass-on-scroll morph; no further change needed there.
+
+Balance-checked all touched files; CI validates.
+
+## v251: detail more-menu glass morph + moodboard quote card from m3-layout-sweep
+
+User: (1) detail page 3-dot should MORPH open into its dropdown with liquid
+glass, iOS-smooth; (2) quotes STILL not fixed - use m3-layout-sweep branch
+as-is for the inside-moodboard quote card, editor and save.
+
+1. MoodBoardZoom.kt taken verbatim from origin/m3-layout-sweep (user-confirmed
+   "as-is"): slot width coerceIn(120,240), maxW 60% board, fixed .width(renderW)
+   slip + fillMaxWidth paper, textScale floor 0.5 without the 1.6 cap,
+   padding back to 10/8. NOTE: this intentionally supersedes v231/v246/v248
+   tweaks in that file per explicit user instruction.
+2. Detail more-menu (EntryDetailScreen): with detail glass ON, tapping the dot
+   crossfades the pill out while a liquid-glass panel (same capsule recipe +
+   backdrop) blooms from its corner - spring(0.85,420), scale 0.55->1 anchored
+   TransformOrigin(1f,0f), full-screen scrim dismiss + BackHandler. Classic
+   path keeps CurioDropdownMenu popup untouched. New MoreMenuWidth=236dp;
+   imports: BackHandler, animateContentSize(unused-safe), spring, ui.util.lerp,
+   TransformOrigin, wrapContentSize.
+
+Balance-checked both files; CI validates.
+
+## v250: press ghost fix + iOS tab glide
+
+User: touching the blob showed DUPLICATE text/icons over it (also Pet
+Designer); tab switches snapped instead of gliding.
+
+1. Ghost fix: the pill's sample went back to PAGE-ONLY. The v246 combined
+   sample (page + hidden tab-row copy) re-introduced blurred ghost labels
+   under the v247 crisp overlay whenever the fill faded on press - a double
+   image, worse in classic mode. With the overlay guaranteeing visible ink,
+   the sample no longer needs the tab row at all. rememberCombinedBackdrop
+   import removed; hidden row now unsampled (harmless).
+2. Glide: DampedDragAnimation.animateToValue gains an optional AnimationSpec;
+   tab bar passes spring(0.82, 380) for tap switches and drag release -
+   ~350ms iOS-style glide with gentle settle instead of the default 1000-
+   stiffness snap.
+
+Balance-checked both files; CI validates.
+
 ## v249: classic active indicator experiment
 
 User asked for the previous liquid-glass style active indicator (transparent,

@@ -8,6 +8,7 @@
 package com.curio.app.ui.components.liquidglass
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.MutatorMutex
 import androidx.compose.runtime.snapshotFlow
@@ -111,12 +112,15 @@ class DampedDragAnimation(
         }
     }
 
-    fun animateToValue(value: Float) {
+    fun animateToValue(value: Float, spec: AnimationSpec<Float>? = null) {
         animationScope.launch {
             mutatorMutex.mutate {
                 press()
                 val clamped = value.coerceIn(valueRange)
-                launch { valueAnimation.animateTo(clamped, valueAnimationSpec) }
+                // v249 — callers can pass a softer spec: the default
+                // critically-damped 1000-stiffness spring SNAPSHOTS between
+                // tabs; programmatic switches deserve an iOS-style glide.
+                launch { valueAnimation.animateTo(clamped, spec ?: valueAnimationSpec) }
                 if (velocity != 0f) {
                     launch { velocityAnimation.animateTo(0f, velocityAnimationSpec) }
                 }
