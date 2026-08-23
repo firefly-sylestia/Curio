@@ -158,6 +158,7 @@ import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
@@ -843,6 +844,7 @@ fun EntryDetailScreen(
         // same, but only this small overlay now follows the scroll clock.
         DetailStickyBar(
             detailScroll = detailScroll,
+            glassBackdrop = detailGlassBackdrop,
             heroControlsProgress = heroControlsProgress,
             heroCardInk = heroCardInk,
             heroFill = heroStart,
@@ -1084,6 +1086,9 @@ private fun Modifier.heroFrostPlate(
 @Composable
 private fun BoxScope.DetailStickyBar(
     detailScroll: androidx.compose.foundation.ScrollState,
+    // v241 — the LOCAL capture of the scrolling content (sibling of the
+    // Column), threaded in so the glass pills sample only what's behind.
+    glassBackdrop: LayerBackdrop?,
     heroControlsProgress: Float,
     heroCardInk: Color,
     heroFill: Color,
