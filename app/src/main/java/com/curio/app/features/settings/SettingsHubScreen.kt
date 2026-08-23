@@ -522,8 +522,11 @@ internal fun LazyListState.isPastHero(): Boolean {
 
 internal fun LazyGridState.isPastHero(): Boolean {
     if (firstVisibleItemIndex > 0) return true
+    // Hero is item 0, so when firstVisibleItemIndex == 0 the first visible
+    // info IS the hero (no per-item row identity needed — that API differs
+    // across Compose versions and broke CI).
     val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return false
-    if (hero.rowIndex != 0 || hero.size.height <= 0) return false
+    if (hero.size.height <= 0) return false
     val remaining = hero.size.height + hero.offset.y
     return remaining < hero.size.height * 0.45f
 }
