@@ -4901,6 +4901,21 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v235 — clear-glass blob fixes + dark light-mode active ink**
+  - BLOBS with Clear glass (two artifacts): (1) the hidden accent-tinted tab-row copy
+    ran its OWN glass rendering before being recorded into `tabsBackdrop`, so the
+    draggable pill refracted a duplicated GLASS RENDER — its refraction rings showed
+    as circular blobs inside the indicator and mid-capsule once frost stopped masking
+    them. The recording is now PLAIN tinted content; the pill applies its own optics.
+    (2) The pill drew its combined-backdrop sample nearly RAW at rest (lens/highlight
+    all press-scaled), showing the tinted icon copy sharply — it now carries an
+    always-on soft blur (8dp / 4dp clear). Main bar + `liquidGlassCapsule` lens bands
+    shrink in clear mode (24dp→14/18dp) so short capsules don't fold the refraction
+    over itself mid-pill.
+  - LIGHT-MODE ACTIVE INK: `curioActivePillInk` pairs with the classic SOLID fill;
+    on the wash-only glass indicator pastel accents vanished. Glass tabs now use a
+    deep saturated hue twin in light mode (`fromHsl(h, max(s,0.45), min(l*0.55, 0.30))`);
+    dark keeps the classic ink.
 - **v234 — in-screen glass restored on a safe architecture (separate toggle)**
   - NEW PREF `glassInScreenState` (`glass_in_screen`, Experiments → "In-screen glass",
     OFF) gated by `isInScreenGlassActive()` = main toggle AND this AND API ≥ 31.

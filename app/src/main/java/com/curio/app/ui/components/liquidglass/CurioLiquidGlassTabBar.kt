@@ -295,7 +295,10 @@ fun CurioLiquidGlassTabBar(
                         if (isBlurEnabled) {
                             vibrancy()
                             blur((if (clear) 2.dp else 8.dp).toPx())
-                            lens(24.dp.toPx(), 24.dp.toPx())
+                            // v235 — clear-glass also shrinks the refraction band:
+                            // 24dp top+bottom folds over itself mid-capsule on a
+                            // bar this short once the frost stops hiding it.
+                            lens((if (clear) 14.dp else 24.dp).toPx(), (if (clear) 18.dp else 24.dp).toPx())
                         }
                     },
                     highlight = {
@@ -342,27 +345,15 @@ fun CurioLiquidGlassTabBar(
                     .alpha(0f)
                     .layerBackdrop(tabsBackdrop)
                     .graphicsLayer { translationX = panelOffset }
-                    .drawBackdrop(
-                        backdrop = backdrop,
-                        shape = { CircleShape },
-                        effects = {
-                            if (isBlurEnabled) {
-                                val progress = dampedDragAnimation.pressProgress
-                                vibrancy()
-                                blur((if (clear) 2.dp else 8.dp).toPx())
-                                lens(24.dp.toPx() * progress, 24.dp.toPx() * progress)
-                            }
-                        },
-                        highlight = {
-                            Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
-                        },
-                        shadow = { null },
-                        onDrawSurface = {
-                            // v233 — clear-glass cuts the frost wash to ~a third.
-                            drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.35f else 1f))
-                        }
-                    )
-                    .then(interactiveHighlight?.modifier ?: Modifier)
+                    // v235 — PLAIN TINTED COPY. This hidden row previously ran
+                    // its OWN full glass rendering (vibrancy + blur + lens +
+                    // surface wash) before being recorded into tabsBackdrop —
+                    // so the active pill refracted a duplicated GLASS RENDER,
+                    // whose refraction rings showed up as circular blobs inside
+                    // the indicator and mid-capsule once Clear glass removed the
+                    // frost that masked them. The recording now captures just
+                    // the accent-tinted tab content; the pill applies its own
+                    // optics on top.
                     .height(56.dp)
                     .padding(horizontal = 4.dp)
                     .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
@@ -396,6 +387,12 @@ fun CurioLiquidGlassTabBar(
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
+                                // v235 — ALWAYS-ON SOFT BLUR on the indicator's
+                                // sample: at rest it previously drew the combined
+                                // backdrop nearly RAW (lens/highlight are all
+                                // press-scaled), so the tinted icon copy beneath
+                                // read as a sharp circular blob under Clear glass.
+                                blur((if (clear) 4.dp else 8.dp).toPx())
                                 lens(10.dp.toPx() * progress, 14.dp.toPx() * progress, true)
                             }
                         },

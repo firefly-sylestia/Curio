@@ -155,7 +155,10 @@ fun Modifier.liquidGlassCapsule(
                 effects = {
                     vibrancy()
                     blur((if (clear) 2.dp else 8.dp).toPx())
-                    lens(24.dp.toPx(), 24.dp.toPx())
+                    // v235 — clear-glass shrinks the refraction band too: on
+                    // short capsules the 24dp top+bottom bands fold over each
+                    // other mid-pill once frost no longer hides the overlap.
+                    lens((if (clear) 14.dp else 24.dp).toPx(), (if (clear) 18.dp else 24.dp).toPx())
                 },
                 highlight = { Highlight.Default },
                 shadow = {

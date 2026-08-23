@@ -1,47 +1,34 @@
 # Prompt.md — current request log
 
-## Request (complete): in-screen liquid glass restored behind its own toggle (v234) — committed & pushed
+## Request (complete): clear-glass blobs + light-mode active ink (v235) — committed & pushed
 
-User asked: what else can we do with liquid glass, and can we bring it back to the
-Pet Designer studio bar + floating top-bar pills — properly implemented, as a
-SEPARATE toggle.
+User reported, with Clear glass ON: (1) a small circular blob inside the shaded
+active indicator and another at the centre of the whole bar capsule; (2) active
+indicator category colors/label still unreadable in light mode.
 
-### Root-cause insight that makes it safe this time
-The v228/v232 crashes were not mysterious: in-screen pills sampled the NavHost's
-WHOLE-PAGE capture, and that capture's record pass re-draws the page INCLUDING the
-pills — the pill drew the sample layer into the layer being recorded → cyclic
-render node → RenderThread SIGSEGV. The bottom bar never crashed because it is a
-SIBLING OVERLAY of the captured Box.
+### Blob root causes (two distinct artifacts)
+1. The hidden accent-tinted tab-row copy (recorded into `tabsBackdrop` so the pill
+   refracts COLORED icons) ran its OWN full glass rendering — vibrancy + blur +
+   lens + surface wash — before recording. The draggable pill therefore refracted
+   a duplicated GLASS RENDER of the whole bar; with frost gone (blur 8→2dp) the
+   render's refraction rings became visible as circular blobs inside the indicator
+   and mid-capsule. Fix: the hidden row now records PLAIN accent-tinted content;
+   the pill applies its own optics.
+2. At rest the pill's drawBackdrop had NO effects at all (lens/highlight/shadow are
+   all press-scaled), so it drew the combined backdrop nearly RAW — the tinted icon
+   copy beneath showed sharply as a "blob". Fix: always-on soft blur on the pill's
+   sample (8dp normal / 4dp clear).
+Also: lens refraction bands shrink in clear mode (24→14/18dp) on the main bar and
+`liquidGlassCapsule`, so short capsules don't fold the top+bottom refraction bands
+over each other mid-pill.
 
-The proper fix: give each in-screen site its OWN local `rememberLayerBackdrop()`
-over a wrapper Box containing only what sits BEHIND the pill, pill outside the
-subtree. Self-capture becomes impossible by construction; the global-capture v228
-guard stays as belt-and-braces.
+### Light-mode active ink
+`curioActivePillInk` pairs with the classic SOLID accent fill; the glass indicator
+only wears a translucent wash so pastel accents vanished. Glass tabs now compute a
+deep saturated hue twin in light mode:
+`fromHsl(hsl.h, hsl.s.coerceAtLeast(0.45f), (hsl.l * 0.55f).coerceAtMost(0.30f))`.
+Dark mode keeps the classic ink.
 
-### What shipped
-1. New pref `glassInScreenState` (`glass_in_screen`) + Experiments row
-   "In-screen glass" (OFF) + `isInScreenGlassActive()` gate (main toggle AND this,
-   API ≥ 31). Crash-reporter self-heal now disables it too.
-2. `liquidGlassCapsule(container, washAlpha, backdrop: LayerBackdrop? = null)` —
-   explicit local backdrop; null falls back to global capture.
-3. Pet Designer: wrapper captures watermark+list; studio bar pinned below via
-   weight-spacer Column (list bottom padding 16→96dp); `PetStudioBottomNav`
-   branches solid fill vs glass capsule on `(glassOn, glassBackdrop)`.
-4. Home: wrapper captures watermark+scroll column (`homeScroll` hoisted out so
-   the sticky-bar sibling block still reads it); menu/profile pills restored to
-   the v230 scroll morph → real glass, sampling the local capture. Profile pill
-   still keeps classic morph when an avatar photo is set.
-5. EntryDetail: same wrapper pattern; `DetailStickyBar(glassBackdrop = …)`; back/
-   more pills restored.
-
-Files: AppPreferences.kt, LiquidGlassPills.kt, HomeScreen.kt,
-EntryDetailScreen.kt, PetDesignerScreen.kt, ExperimentsScreen.kt,
-CurioCrashReporter.kt + changelog 20260920.txt + app/AGENTS.md (v234).
-
-Verification: balance check OK ×7; no `glassOn = false` stubs remain; all new
-symbols imported. CI validates compilation on push.
-
-### Ideas for later (answered in chat, not implemented)
-- Drag-to-shrink glass sheets / expandable FABs; glass sliders & switches;
-  header→toolbar glass morph on scroll; glass side-rail for wide windows;
-  chromatic-aberration lens variant (library flag exists); glass toast/snackbar.
+Files: CurioLiquidGlassTabBar.kt, LiquidGlassPills.kt, CurioBottomNav.kt +
+changelog 20260920.txt + app/AGENTS.md (v235). Balance checks pass ×3.
+CI validates compilation on push.

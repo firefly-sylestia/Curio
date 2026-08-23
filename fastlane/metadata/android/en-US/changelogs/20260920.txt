@@ -1,4 +1,6 @@
 ADD
+- Liquid glass: fixed the circular refraction blobs that showed inside the active pill and mid-bar with Clear glass.
+- Liquid glass: active tab text now uses a much darker shade of the category color in light mode - readable on every lane.
 - Liquid glass: new "In-screen glass" option - the Pet Designer studio bar and the floating top-bar pills get real liquid glass too, rebuilt on a crash-safe capture so it can't take the app down.
 - Liquid glass: new "Clear glass" option - much less frost and a lighter tint, so the bar reads like clear refracting glass instead of milky.
 - Liquid glass: parallax tilt now moves the rim EDGE GLOW across the glass as you tilt the phone, not the whole pane.
