@@ -13,8 +13,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
@@ -28,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import androidx.compose.material3.Text
 
 /**
@@ -320,6 +326,16 @@ fun CurioIcon(
     // inherit accessibility scaling and outgrow their centered icon slot.
     val iconSp = (size.value / LocalDensity.current.fontScale.coerceAtLeast(1f)).sp
 
+    // v246 — MEASURED INK CENTERING. Font-metric nudges (the old fixed dp
+    // offsets and their proportional successor) could never be right for
+    // every glyph at every font scale — some icons sat low, others rode
+    // high. Instead the actual rendered glyph bounds are measured from the
+    // text layout and the text is shifted by exactly the delta between the
+    // line-box center and the INK center, so every glyph self-centers in
+    // the icon box — menu, person, search, chevron, all of them, at any
+    // system font size.
+    var inkShiftPx by remember { mutableFloatStateOf(0f) }
+
     Box(
         modifier = modifier
             .size(size)
@@ -355,7 +371,18 @@ fun CurioIcon(
                 // dropped the baseline ~2dp below the icon box: every icon
                 // sat low and its ink bottom was cut by clipped parents.)
                 platformStyle = PlatformTextStyle(includeFontPadding = true)
-            )
+            ),
+            // v246 — the measured ink shift (see above), applied as a layout
+            // offset so the glyph's INK — not its line box — sits centered.
+            onTextLayout = { layout ->
+                val inkBounds = runCatching { layout.getBoundingBox(0) }.getOrNull()
+                if (inkBounds != null && layout.size.height > 0) {
+                    inkShiftPx = layout.size.height / 2f - (inkBounds.top + inkBounds.bottom) / 2f
+                }
+            },
+            modifier = Modifier.offset {
+                IntOffset(0, inkShiftPx.roundToInt())
+            }
         )
     }
 }

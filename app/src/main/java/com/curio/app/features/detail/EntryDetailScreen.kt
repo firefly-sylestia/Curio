@@ -1154,12 +1154,16 @@ private fun BoxScope.DetailStickyBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // v246 — one gesture stream per pill, shared by the click and the
+        // liquid-glass press feel (shrink + refraction bloom).
+        val backPillInteraction = remember { MutableInteractionSource() }
         CurioBackButton(
             onClick = { navController.popBackStack() },
             containerColor = Color.Transparent,
             contentColor = heroCardInk,
             shadowElevation = 0.dp,
             disableRipple = true,
+            pillInteraction = backPillInteraction,
             // v230 — scrolled endpoint: real liquid-glass (refraction + blur)
             // when the experiment is on; the classic frosted plate otherwise.
             modifier = if (detailGlassActive)
@@ -1167,7 +1171,8 @@ private fun BoxScope.DetailStickyBar(
                     heroFill,
                     washAlpha = 0.45f,
                     backdrop = glassBackdrop,
-                    alwaysClear = true
+                    alwaysClear = true,
+                    interactionSource = backPillInteraction
                 )
                 else Modifier.heroFrostPlate(
                     heroCardInk,
@@ -1187,7 +1192,8 @@ private fun BoxScope.DetailStickyBar(
                         heroFill,
                         washAlpha = 0.45f,
                         backdrop = glassBackdrop,
-                        alwaysClear = true
+                        alwaysClear = true,
+                        interactionSource = moreInteraction
                     )
                 else Modifier.heroFrostPlate(
                     heroCardInk,

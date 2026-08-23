@@ -97,6 +97,11 @@ import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassGlow
 import com.curio.app.ui.components.CurioEntryCard
@@ -160,6 +165,9 @@ fun CabinetScreen(navController: NavController) {
     var showLegacyOnly by rememberSaveable(CabinetSessionToken) { mutableStateOf(false) }
     // Saveable-backed scroll state — the grid keeps its position on rotation.
     val gridState = rememberLazyGridState()
+    // v245 — LOCAL GLASS CAPTURE for the floating category chip bar (the
+    // scrolling grid records; the chips are a sibling overlay).
+    val chipGlassBackdrop = rememberLayerBackdrop()
 
     // Search + sort — the search button expands into a real filter bar
     // (matches by topic name or custom title, case-insensitive), and the
@@ -447,6 +455,9 @@ fun CabinetScreen(navController: NavController) {
             ) { m ->
                 LazyVerticalGrid(
                     state = gridState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .layerBackdrop(chipGlassBackdrop),
                     // Phones keep the 2-column grid; wide windows gain columns
                     // automatically (3 across on the ~720dp content column).
                     columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
@@ -541,6 +552,7 @@ fun CabinetScreen(navController: NavController) {
             ) + fadeOut(animationSpec = tween(220))
         ) {
             CabinetStickyChipBar(
+                glassBackdrop = if (isLiquidGlassRequested()) chipGlassBackdrop else null,
                 gridState = gridState,
                 barTop = heroTotal,
                 entries = entries,
@@ -953,6 +965,9 @@ private fun CabinetHeroHeader(
  */
 @Composable
 private fun BoxScope.CabinetStickyChipBar(
+    // v245 — when Liquid glass is on, chips render as clear refracting
+    // capsules over this LOCAL page capture.
+    glassBackdrop: LayerBackdrop? = null,
     gridState: LazyGridState,
     // v31 — the top of the hero + Category pill row (the chip bar now sits
     // BELOW the pill row, so its rest/pin offsets derive from this).
@@ -1016,7 +1031,9 @@ private fun BoxScope.CabinetStickyChipBar(
                     chipSurface = surface,
                     popProgress = popProgress,
                     selected = selectedFilter == null && !showLegacyOnly,
-                    onClick = onSelectAll
+                    onClick = onSelectAll,
+                    glass = glassBackdrop != null,
+                    glassBackdrop = glassBackdrop
                 )
             }
         }
@@ -1042,7 +1059,9 @@ private fun BoxScope.CabinetStickyChipBar(
                     chipSurface = surface,
                     popProgress = popProgress,
                     selected = selectedFilter == cat.id && !showLegacyOnly,
-                    onClick = { onSelectCategory(cat.id) }
+                    onClick = { onSelectCategory(cat.id) },
+                    glass = glassBackdrop != null,
+                    glassBackdrop = glassBackdrop
                 )
             }
         }
@@ -1068,7 +1087,9 @@ private fun BoxScope.CabinetStickyChipBar(
                         chipSurface = surface,
                         popProgress = popProgress,
                         selected = showLegacyOnly,
-                        onClick = onToggleLegacy
+                        onClick = onToggleLegacy,
+                        glass = glassBackdrop != null,
+                        glassBackdrop = glassBackdrop
                     )
                 }
             }
@@ -1261,18 +1282,25 @@ private fun FilterChipLite(
     // 2dp.
     popProgress: Float = 0f,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    // v245 — liquid glass: clear refracting capsule over the local page
+    // capture; ONE theme ink for every label (no per-category colors).
+    glass: Boolean = false,
+    glassBackdrop: LayerBackdrop? = null
 ) {
-    val labelColor = if (selected) {
-        ink
-    } else {
-        lerp(
+    val themeInk = if (isCurioDarkTheme()) Color.White else Color.Black
+    val labelColor = when {
+        glass -> themeInk
+        selected -> ink
+        else -> lerp(
             MaterialTheme.colorScheme.onSurfaceVariant,
             accent,
             popProgress * 0.55f
         )
     }
-    val fillBrush = if (selected) {
+    val fillBrush = if (glass) {
+        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    } else if (selected) {
         // v27q — SOLID accent gradient — deeper at the base like the
         // category card fills, so the active pill reads premium.
         Brush.verticalGradient(listOf(accent, lerp(accent, Color.Black, 0.10f)))
@@ -1287,15 +1315,25 @@ private fun FilterChipLite(
         shape = RoundedCornerShape(50),
         color = Color.Transparent,
         // v27q — flat 2dp in both states (no selected raise).
-        shadowElevation = 2.dp,
+        shadowElevation = if (glass) 0.dp else 2.dp,
         // v28 — dark mode elevation visibility (glow + hairline).
         modifier = Modifier
-            .curioDarkGlow(2.dp, RoundedCornerShape(50))
+            .then(
+                if (glass && glassBackdrop != null)
+                    Modifier.liquidGlassCapsule(
+                        container = if (selected) accent
+                                    else MaterialTheme.colorScheme.surfaceContainerLow,
+                        washAlpha = if (selected) 0.60f else 0.45f,
+                        backdrop = glassBackdrop,
+                        alwaysClear = true
+                    ) else Modifier
+            )
+            .curioDarkGlow(if (glass) 0.dp else 2.dp, RoundedCornerShape(50))
     ) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(fillBrush)
+                .then(if (!glass) Modifier.background(fillBrush) else Modifier)
                 .padding(horizontal = 16.dp, vertical = 9.dp)
         ) {
             Text(

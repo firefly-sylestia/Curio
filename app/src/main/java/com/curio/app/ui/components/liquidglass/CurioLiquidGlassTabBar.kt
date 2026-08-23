@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -63,6 +62,7 @@ import androidx.compose.ui.unit.DpOffset
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -389,8 +389,12 @@ fun CurioLiquidGlassTabBar(
                     )
                     .then(interactiveHighlight?.modifier ?: Modifier)
                     .height(56.dp)
-                    .padding(horizontal = 4.dp)
-                    .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
+                    .padding(horizontal = 4.dp),
+                // v246 — the hidden copy is UNTINTED now. The old accent
+                // ColorFilter is what made the ink look category-colored
+                // whenever the pill settled over it; sampling the plain
+                // black/white row keeps the theme ink pure while still
+                // letting the icons/labels show through the glass.
                 verticalAlignment = Alignment.CenterVertically,
                 content = measuringContent
             )
@@ -416,13 +420,13 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        // v244 — sample ONLY the page backdrop, exactly like
-                        // every other glass capsule. The old combined sample
-                        // included the hidden ACCENT-TINTED copy of the tab
-                        // row — with light blur its colored ghost icons bled
-                        // through and re-tinted the area whenever the pill
-                        // settled (the ink looked category-colored at rest).
-                        backdrop = backdrop,
+                        // v246 — sample PAGE + TAB ROW again. The v244
+                        // page-only sample painted blurred page OVER the
+                        // visible tab content, so the active icon + label
+                        // vanished wherever the pill sat. The combined sample
+                        // shows them refracting through the glass — with the
+                        // hidden copy untinted, no colored ghosts return.
+                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                         shape = { CircleShape },
                         effects = {
                             // v244 — the SAME recipe as the nav capsule:

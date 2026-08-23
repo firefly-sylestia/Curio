@@ -1,9 +1,15 @@
 package com.curio.app.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -13,10 +19,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.curio.app.data.AppPreferences
+import import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
+import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -202,7 +210,12 @@ fun Modifier.liquidGlassCapsule(
     // v241 — capsule shape. CircleShape for the round pills; wide bars
     // (Pet Designer studio bar) pass RoundedCornerShape(50) so the glass
     // clips to a stadium instead of an ellipse.
-    shape: Shape = CircleShape
+    shape: Shape = CircleShape,
+    // v246 — TOUCH FEEL returns: pass the pill's click InteractionSource
+    // and holding it springs the whole capsule slightly SMALLER while the
+    // lens refraction blooms at the corners under the finger — the tactile
+    // press behavior from before the blob reverts.
+    interactionSource: InteractionSource? = null
 ): Modifier {
     if (!isLiquidGlassRequested()) return this
     // v243 — pre-Android-12: no RenderEffect → serve the simulated glass
@@ -221,7 +234,25 @@ fun Modifier.liquidGlassCapsule(
     val blurScale = AppPreferences.glassBlurScaleState
     val refrScale = AppPreferences.glassRefractionScaleState
     val reflScale = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
+    // v246 — spring-driven press progress (0 at rest → 1 while held).
+    val press = remember(interactionSource) { Animatable(0f) }
+    if (interactionSource != null) {
+        val pressed by interactionSource.collectIsPressedAsState()
+        LaunchedEffect(pressed) {
+            press.animateTo(
+                if (pressed) 1f else 0f,
+                spring(dampingRatio = 0.62f, stiffness = 520f)
+            )
+        }
+    }
     return this
+        // v246 — press shrink: the capsule eases ~4% down toward its middle
+        // while held, releasing with the same spring.
+        .graphicsLayer {
+            val s = lerp(1f, 0.96f, press.value)
+            scaleX = s
+            scaleY = s
+        }
         // v228 — outer guard: during a capture record pass, skip the
         // backdrop-drawing inner node entirely and paint a plain capsule,
         // so the pill never samples its own recording layer. The guard also
@@ -254,7 +285,11 @@ fun Modifier.liquidGlassCapsule(
                 effects = {
                     vibrancy()
                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
-                    lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                    // v246 — refraction blooms under the finger: the lens
+                    // deepens with press progress, so the corners visibly
+                    // bend the content while the pill is held.
+                    val lensR = 24f.dp.toPx() * refrScale * (1f + 0.45f * press.value)
+                    lens(lensR, lensR)
                 },
                 highlight = { Highlight.Default.copy(alpha = reflScale) },
                 shadow = {

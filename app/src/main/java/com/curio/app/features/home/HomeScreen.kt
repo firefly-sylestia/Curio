@@ -152,7 +152,6 @@ import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -1216,6 +1215,10 @@ fun HomeScreen(navController: NavController) {
                 animationSpec = tween(CurioMotion.Durations.Quick),
                 label = "homeStickyPillIcon"
             )
+            // v246 — one gesture stream per pill, shared by the click and
+            // the liquid-glass press feel (shrink + refraction bloom).
+            val menuPillInteraction = remember { MutableInteractionSource() }
+            val avatarPillInteraction = remember { MutableInteractionSource() }
             Row(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -1246,6 +1249,7 @@ fun HomeScreen(navController: NavController) {
                     // v230 — glass draws its own soft shadow, so the Surface
                     // elevation drops when the morph hands off to it.
                     elevation = if (glassOn) 0.dp else 6.dp * frostShift,
+                    pillInteraction = menuPillInteraction,
                     // v230 — liquid-glass capsule once the scroll morph has
                     // started: solid hero fill → refracting blur pill.
                     modifier = if (glassOn && frostShift > 0.01f)
@@ -1253,7 +1257,8 @@ fun HomeScreen(navController: NavController) {
                             heroPillBg,
                             washAlpha = 0.45f,
                             backdrop = homeGlassBackdrop,
-                            alwaysClear = true
+                            alwaysClear = true,
+                            interactionSource = menuPillInteraction
                         ) else Modifier
                 )
                 TopBarPill(
@@ -1265,6 +1270,7 @@ fun HomeScreen(navController: NavController) {
                     rim = pillRim,
                     iconTint = pillIcon,
                     elevation = if (profileGlassOn) 0.dp else 6.dp * frostShift,
+                    pillInteraction = avatarPillInteraction,
                     // v230 — glass only while NO avatar photo is set; the
                     // photo keeps the classic frosted morph underneath it.
                     modifier = if (profileGlassOn && frostShift > 0.01f)
@@ -1272,7 +1278,8 @@ fun HomeScreen(navController: NavController) {
                             heroPillBg,
                             washAlpha = 0.45f,
                             backdrop = homeGlassBackdrop,
-                            alwaysClear = true
+                            alwaysClear = true,
+                            interactionSource = avatarPillInteraction
                         ) else Modifier,
                     // v118 — the profile pill wears the avatar photo when
                     // one is set (fresh pref read each composition, like the
@@ -1417,9 +1424,13 @@ private fun TopBarPill(
     modifier: Modifier = Modifier,
     // v118 — when set, the avatar photo replaces the glyph; the pill's
     // animated rim still draws on top so the frosted scroll morph reads.
-    avatarPath: String? = null
+    avatarPath: String? = null,
+    // v246 — optional external gesture source: when the caller also wires
+    // liquid-glass press feel, both must read the SAME stream.
+    pillInteraction: MutableInteractionSource? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val fallbackInteraction = remember { MutableInteractionSource() }
+    val interactionSource = pillInteraction ?: fallbackInteraction
     Surface(
         shape = shape,
         color = bg,
@@ -1469,7 +1480,6 @@ private fun TopBarPill(
                     // (v115: deepened -0.5dp -> -1.5dp -> -2dp — the glyphs were
                     // still a touch low after the v114 centering fix).
                     // v233 — proportional nudge: stays centered at every font scale.
-                    modifier = Modifier.curioGlyphInkNudge(-2f)
                 )
             }
         }
@@ -1560,7 +1570,6 @@ private fun QuestShuffleCard(
                         // The shared icon renderer already applies the
                         // standard 1dp optical lift; this extra half-dp is
                         // only for the casino glyph's heavier visible base.
-                        modifier = Modifier.curioGlyphInkNudge(-0.5f)
                     )
                 }
             }
@@ -1872,7 +1881,6 @@ private fun FirstTimeEmpty(
                             size = 16.dp,
                             // Match the shared icon lift plus the casino
                             // glyph's half-dp extra correction.
-                            modifier = Modifier.curioGlyphInkNudge(-0.5f)
                         )
                         Text(
                             "Surprise me",
@@ -2779,7 +2787,6 @@ private fun DrawerNavItem(
                         // v115 — drawer menu glyphs read a hair low in the
                         // 40dp chip (same optical-weight correction as the
                         // Home top-bar pills).
-                        modifier = Modifier.curioGlyphInkNudge(-1f)
                     )
                 }
             }

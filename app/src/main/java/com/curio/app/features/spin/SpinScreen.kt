@@ -153,7 +153,6 @@ import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioColors
-import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMixedDeck
@@ -3793,7 +3792,6 @@ private fun SpinButton(
                                 .size(72.dp)
                                 // Keep the animated die on the same optical
                                 // center as the resting casino glyph.
-                                .curioGlyphInkNudge(-1f)
                         )
                     } else {
                         // Gentle idle breathe on the resting die — a slow,
@@ -3817,7 +3815,6 @@ private fun SpinButton(
                             // already centered; only the die's ink needs a
                             // tiny lift, including the idle Spin state.
                             modifier = Modifier
-                                .curioGlyphInkNudge(-1f)
                                 .graphicsLayer {
                                     scaleX = 1f + breathe * 0.05f
                                     scaleY = 1f + breathe * 0.05f

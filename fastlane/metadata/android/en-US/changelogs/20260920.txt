@@ -1,3 +1,7 @@
+ADD: Liquid glass on Cabinet & Topic DB category chips, single theme ink.
+FIX: Active tab icon + label stay visible under the glass blob (untinted sample).
+FIX: Pill icons self-center at any font size; press shrink + refraction bloom returns.
+FIX: Mood-board quote slips grow with text plus one spare line.
 ADD
 - Pet Designer: with Liquid glass on, the studio bar is now the SAME draggable glass tab bar as the bottom nav - one refracting capsule with the damped-drag blob, velocity squash and specular sheen.
 

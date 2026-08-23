@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.CurioIcons
 
 /**
@@ -55,7 +54,10 @@ fun CurioBackButton(
     // detail screen passes true and the press is conveyed by the frost and
     // shadow alone (the same fix Home's sticky pills use — clickable with
     // indication = null). Every other screen keeps the standard ripple.
-    disableRipple: Boolean = false
+    disableRipple: Boolean = false,
+    // v246 — optional external gesture source: when the caller also wires
+    // liquid-glass press feel, both must read the SAME stream.
+    pillInteraction: MutableInteractionSource? = null
 ) {
     val icon: @Composable () -> Unit = {
         CurioIcon(
@@ -63,21 +65,16 @@ fun CurioBackButton(
             contentDescription = contentDescription,
             tint = contentColor,
             size = 24.dp,
-            // v115 — the chevron's optical weight reads a hair low in the
-            // 40dp circular pill (the same optical-weight correction as the
-            // Home top-bar pills and the Profile/Settings sticky pills): the
-            // natural line box centers the ink, but the < glyph's visual
-            // mass sits slightly below its ink box center.
             modifier = Modifier
                 // v244 — 10dp padding grows the pill to 44dp so the chevron's
-                // line box centers at every font size (the optical nudge then
-                // only handles the < glyph's visual mass).
+                // line box centers at every font size (CurioIcon now measures
+                // and centers the ink itself).
                 .padding(10.dp)
-                .curioGlyphInkNudge(-1f)
         )
     }
     if (disableRipple) {
-        val interactionSource = remember { MutableInteractionSource() }
+        val fallbackInteraction = remember { MutableInteractionSource() }
+        val interactionSource = pillInteraction ?: fallbackInteraction
         Surface(
             shape = RoundedCornerShape(50),
             color = containerColor,

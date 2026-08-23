@@ -999,7 +999,15 @@ private fun MoodBoardFloatingCard(
             style = style,
             seed = seed,
             paperColor = color,
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
+            // v246 — the slip grows WITH its text (wrap height, capped at
+            // two preview lines) and keeps ONE spare ruled line of paper
+            // below the last line — no fixed tall box, no full-board stretch.
+            contentPadding = PaddingValues(
+                start = 10.dp,
+                end = 10.dp,
+                top = 8.dp,
+                bottom = 24.dp
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             // Quote cards show up to TWO lines on the board — editor and

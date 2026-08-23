@@ -124,7 +124,6 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -590,19 +589,25 @@ fun ProfileScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // v246 — one gesture stream per pill, shared by the click and
+            // the liquid-glass press feel (shrink + refraction bloom).
+            val backPillInteraction = remember { MutableInteractionSource() }
+            val searchPillInteraction = remember { MutableInteractionSource() }
             CurioBackButton(
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
                 shadowElevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
                 disableRipple = true,
+                pillInteraction = backPillInteraction,
                 // v241 — clear refracting glass once the morph begins.
                 modifier = if (glassOn && frostShift > 0.01f)
                     Modifier.liquidGlassCapsule(
                         restPillBg,
                         washAlpha = 0.45f,
                         backdrop = profileGlassBackdrop,
-                        alwaysClear = true
+                        alwaysClear = true,
+                        interactionSource = backPillInteraction
                     ) else Modifier
             )
             ProfileSearchPill(
@@ -610,12 +615,14 @@ fun ProfileScreen(navController: NavController) {
                 bg = pillBg,
                 iconTint = pillIcon,
                 elevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                pillInteraction = searchPillInteraction,
                 modifier = if (glassOn && frostShift > 0.01f)
                     Modifier.liquidGlassCapsule(
                         restPillBg,
                         washAlpha = 0.45f,
                         backdrop = profileGlassBackdrop,
-                        alwaysClear = true
+                        alwaysClear = true,
+                        interactionSource = searchPillInteraction
                     ) else Modifier
             )
         }
@@ -632,9 +639,12 @@ private fun ProfileSearchPill(
     bg: Color,
     iconTint: Color,
     elevation: Dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v246 — optional external gesture source shared with the glass press.
+    pillInteraction: MutableInteractionSource? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val fallbackInteraction = remember { MutableInteractionSource() }
+    val interactionSource = pillInteraction ?: fallbackInteraction
     Surface(
         shape = CircleShape,
         color = bg,
@@ -657,7 +667,6 @@ private fun ProfileSearchPill(
                 // v115 — the magnifier reads a hair low in the 42dp pill;
                 // deepened -1dp -> -2dp (still a touch low after the first
                 // pass). Same optical-weight correction as the Home pills.
-                modifier = Modifier.curioGlyphInkNudge(-2f)
             )
         }
     }
@@ -1580,7 +1589,6 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
                     CurioIcons.Settings, null,
                     tint = settingsCardAccentInk(),
                     size = 23.dp,
-                    modifier = Modifier.curioGlyphInkNudge(-2f)
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Settings & preferences", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))

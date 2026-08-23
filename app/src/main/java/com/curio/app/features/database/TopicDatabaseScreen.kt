@@ -68,6 +68,12 @@ import com.curio.app.data.publicationYear
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
+import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
@@ -189,6 +195,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     var savedScrollIndex by rememberSaveable { mutableIntStateOf(0) }
     var savedScrollOffset by rememberSaveable { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
+    // v245 — LOCAL GLASS CAPTURE for the floating category chip bar: the
+    // scrolling list records into its own layer; the chips (a sibling
+    // overlay) sample it — the crash-safe architecture.
+    val chipGlassBackdrop = rememberLayerBackdrop()
     // Reactive done-set — reading the value registers the dependency so the
     // list refreshes when the user marks a topic done (e.g. after returning
     // from a Topic Reveal) or a session records an exploration.
@@ -489,7 +499,7 @@ fun TopicDatabaseScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().layerBackdrop(chipGlassBackdrop),
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
@@ -669,6 +679,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             ) + fadeOut(animationSpec = tween(220))
         ) {
             DatabaseStickyChipBar(
+                glassBackdrop = if (isLiquidGlassRequested()) chipGlassBackdrop else null,
                 listState = listState,
                 catalog = catalog,
                 totalTopics = totalTopics,
@@ -776,22 +787,40 @@ private fun DatabaseFilterChip(
     onClick: () -> Unit,
     // v26 — the floating chip bar pops each pill on scroll: the label
     // blooms toward its accent as the pill pops (Cabinet's per-pill pop).
-    popProgress: Float = 0f
+    popProgress: Float = 0f,
+    // v245 — liquid glass: clear refracting capsule over the local page
+    // capture; ONE theme ink for every label (no per-category colors).
+    glass: Boolean = false,
+    glassBackdrop: LayerBackdrop? = null
 ) {
-    val labelColor = if (selected) pastelFillInk(accent)
-    else lerp(
-        MaterialTheme.colorScheme.onSurfaceVariant,
-        accent,
-        popProgress * 0.55f
-    )
+    val themeInk = if (isCurioDarkTheme()) Color.White else Color.Black
+    val labelColor = when {
+        // v245 — one color only, straight from the theme.
+        glass -> themeInk
+        selected -> pastelFillInk(accent)
+        else -> lerp(
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            accent,
+            popProgress * 0.55f
+        )
+    }
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
         // v27q — selection reads as a SOLID accent fill with pastel-aware
         // ink (the old primaryContainer/category-tint fills were translucent
         // and let the shadow bleed); elevation stays a flat 2dp.
-        color = if (selected) accent else MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = 2.dp
+        color = if (!glass && selected) accent else if (glass) Color.Transparent
+                else MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = if (glass) 0.dp else 2.dp,
+        modifier = if (glass && glassBackdrop != null)
+            Modifier.liquidGlassCapsule(
+                container = if (selected) accent
+                            else MaterialTheme.colorScheme.surfaceContainerLow,
+                washAlpha = if (selected) 0.60f else 0.45f,
+                backdrop = glassBackdrop,
+                alwaysClear = true
+            ) else Modifier
     ) {
         Text(
             text = if (count > 0) "$label $count" else label,
@@ -832,6 +861,9 @@ private const val BackToTopRowThreshold = 10
  */
 @Composable
 private fun BoxScope.DatabaseStickyChipBar(
+    // v245 — when Liquid glass is on, every chip renders as a clear
+    // refracting capsule over this LOCAL page capture.
+    glassBackdrop: LayerBackdrop? = null,
     listState: LazyListState,
     catalog: List<Pair<CurioCategory, List<CurioTopic>>>,
     totalTopics: Int,
@@ -874,7 +906,9 @@ private fun BoxScope.DatabaseStickyChipBar(
                     accent = MaterialTheme.colorScheme.primary,
                     selected = selectedCat == null,
                     onClick = onSelectAll,
-                    popProgress = popProgress
+                    popProgress = popProgress,
+                    glass = glassBackdrop != null,
+                    glassBackdrop = glassBackdrop
                 )
             }
         }
@@ -889,7 +923,9 @@ private fun BoxScope.DatabaseStickyChipBar(
                     accent = cat.themedAccent(),
                     selected = selectedCat == cat.id,
                     onClick = { onSelectCategory(cat.id) },
-                    popProgress = popProgress
+                    popProgress = popProgress,
+                    glass = glassBackdrop != null,
+                    glassBackdrop = glassBackdrop
                 )
             }
         }
