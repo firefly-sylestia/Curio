@@ -267,7 +267,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // safe local-capture architecture). Clear glass shows inline only
         // while liquid glass is on; the tuning sliders shape the recipe live.
         SettingsRowPulse(highlightKey == "appearance-liquid-glass") {
-            CompactSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (Android 12+)", AppPreferences.liquidGlassPillsState) {
+            CompactSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
                 AppPreferences.setLiquidGlassPillsEnabled(context, it)
             }
         }

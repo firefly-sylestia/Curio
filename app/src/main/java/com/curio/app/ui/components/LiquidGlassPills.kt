@@ -66,6 +66,15 @@ object CurioGlassPills {
     var isCapturingBackdrop: Boolean = false
 }
 
+/**
+ * Whether the user WANTS liquid glass (the toggle alone). On Android 12+
+ * this means real refracting glass; below it drives the SIMULATED glass
+ * recipe ([fauxGlassCapsule]) so older devices get the look instead of
+ * silently nothing.
+ */
+fun isLiquidGlassRequested(): Boolean =
+    AppPreferences.liquidGlassPillsState
+
 /** Whether the glass treatment is active (toggle ON and Android 12+). */
 fun isLiquidGlassPillsActive(): Boolean =
     AppPreferences.liquidGlassPillsState && android.os.Build.VERSION.SDK_INT >= 31
@@ -79,10 +88,11 @@ fun isLiquidGlassPillsActive(): Boolean =
  * capture guard below stays as belt-and-braces.
  */
 fun isInScreenGlassActive(): Boolean =
-    // v242 — merged into the single Liquid glass toggle (Appearance):
-    // in-screen sites use the same crash-safe local-capture architecture,
-    // so there is no reason to gate them separately anymore.
-    isLiquidGlassPillsActive()
+    // v242 — merged into the single Liquid glass toggle (Appearance).
+    // v243 — REQUESTED, not API-gated: on pre-Android-12 the capsule
+    // modifier itself falls back to the simulated recipe, so older
+    // devices get the glass look too instead of being silently left out.
+    isLiquidGlassRequested()
 
 /**
  * The capture onDraw for the NavHost's [com.kyant.backdrop.backdrops.rememberLayerBackdrop]:
@@ -107,6 +117,58 @@ internal fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.curioGlassC
  * No-op when the experiment is off, on Android < 12, or before the NavHost
  * has published its capture layer — callers must keep their classic path.
  */
+/**
+ * v243 — SIMULATED glass for pre-Android-12 devices (no RenderEffect, so
+ * no real backdrop blur/refraction). Draws a theme-aware frosted veil, a
+ * top-down sheen and a bright rim over the capsule so the look still reads
+ * "liquid glass" — just without live refraction of the content behind it.
+ */
+fun Modifier.fauxGlassCapsule(container: Color): Modifier {
+    val dark = isCurioDarkTheme()
+    val veil = if (dark) Color.White.copy(alpha = 0.07f) else Color.White.copy(alpha = 0.55f)
+    val sheen = if (dark) Color.White.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.65f)
+    val rim = if (dark) Color.White.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.85f)
+    return this.drawWithContent {
+        drawContent()
+        val r = CornerRadius(minOf(size.width, size.height) / 2f)
+        // Frosted veil — the "blur" stand-in.
+        drawRoundRect(color = veil, cornerRadius = r)
+        // Top-down sheen — light catching the pane.
+        drawRoundRect(
+            brush = Brush.verticalGradient(
+                listOf(sheen, Color.Transparent, Color.Transparent, sheen.copy(alpha = sheen.alpha * 0.4f))
+            ),
+            cornerRadius = r
+        )
+        // Bright rim.
+        drawRoundRect(
+            color = rim,
+            cornerRadius = r,
+            style = Stroke(width = 1.dp.toPx())
+        )
+    }
+}
+
+/**
+ * v243 — a LIGHTER faux-glass coat for surfaces that keep their own fill
+ * (the classic nav bar on old devices): sheen + rim only, no veil, so the
+ * bar's dynamic container color still reads.
+ */
+fun Modifier.curioFauxGlassSheen(): Modifier {
+    val dark = isCurioDarkTheme()
+    val sheen = if (dark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.40f)
+    val rim = if (dark) Color.White.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.70f)
+    return this.drawWithContent {
+        drawContent()
+        val r = CornerRadius(minOf(size.width, size.height) / 2f)
+        drawRoundRect(
+            brush = Brush.verticalGradient(listOf(sheen, Color.Transparent)),
+            cornerRadius = r
+        )
+        drawRoundRect(color = rim, cornerRadius = r, style = Stroke(width = 1.dp.toPx()))
+    }
+}
+
 @Composable
 fun Modifier.liquidGlassCapsule(
     container: Color,
@@ -133,7 +195,10 @@ fun Modifier.liquidGlassCapsule(
     // clips to a stadium instead of an ellipse.
     shape: Shape = CircleShape
 ): Modifier {
-    if (!isLiquidGlassPillsActive()) return this
+    if (!isLiquidGlassRequested()) return this
+    // v243 — pre-Android-12: no RenderEffect → serve the simulated glass
+    // recipe so those users get the look instead of nothing.
+    if (android.os.Build.VERSION.SDK_INT < 31) return this.fauxGlassCapsule(container)
     val backdrop = backdrop ?: CurioGlassPills.backdrop ?: return this
     // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
     // below is NOT a composable context.

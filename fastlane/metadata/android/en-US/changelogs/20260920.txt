@@ -1,4 +1,6 @@
 ADD
+- Liquid glass on older phones: devices below Android 12 now get a simulated glass look (frosted veil, sheen and rim) when the toggle is on - no one is left out, they just miss the live refraction.
+
 - Liquid glass: a new "Indicator shadow" slider tunes the draggable active pill's shadow strength.
 - Liquid glass: the active pill no longer tints the tab icons and labels with the category color - your chosen ink shows true.
 

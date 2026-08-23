@@ -52,7 +52,9 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.CurioGlassPills
+import com.curio.app.ui.components.curioFauxGlassSheen
 import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.isLiquidGlassRequested
 import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
 import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
 import com.curio.app.ui.theme.ChangaOneFontFamily
@@ -348,6 +350,10 @@ fun CurioFloatingNavBar(
         // capsule, with a DRAGGABLE active pill (damped-drag physics,
         // velocity squash/stretch, touch-following specular highlight).
         val glassOn = isLiquidGlassPillsActive()
+        // v243 — old devices can't run the real glass tab bar (it needs
+        // backdrop layers), but they still get a simulated glass coat on
+        // the classic bar so the toggle never does nothing.
+        val glassWanted = isLiquidGlassRequested()
         val glassBackdrop = if (glassOn) CurioGlassPills.backdrop else null
         if (glassOn && glassBackdrop != null) {
             val items = CurioBottomNavItems.all
@@ -441,7 +447,13 @@ fun CurioFloatingNavBar(
             // the capsule stays defined by its elevated fill alone.
             color = if (glassOn) Color.Transparent else classicContainer,
             shadowElevation = if (glassOn) 0.dp else 6.dp,
-            modifier = if (glassOn) Modifier.liquidGlassCapsule(classicContainer) else Modifier
+            modifier = when {
+                glassOn -> Modifier.liquidGlassCapsule(classicContainer)
+                // v243 — pre-Android-12: keep the solid dynamic bar but add
+                // the sheen + rim so it reads glassy too.
+                glassWanted -> Modifier.curioFauxGlassSheen()
+                else -> Modifier
+            }
         ) {
             Row(
                 // v184 — more breathing room: bar padding 7 → 8dp and pill

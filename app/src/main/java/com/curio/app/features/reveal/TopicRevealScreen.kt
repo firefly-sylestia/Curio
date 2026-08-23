@@ -140,7 +140,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
-import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.isLiquidGlassRequested
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
@@ -2507,8 +2507,10 @@ private fun RevealCategoryFavoriteBar(
             .padding(bottom = 12.dp)
     ) {
         // v227 — liquid-glass experiment: refracted backdrop instead of
-        // the solid elevated fill when the toggle is on (Android 12+).
-        val glassOn = isLiquidGlassPillsActive()
+        // the solid elevated fill when the toggle is on. v243 — gated on
+        // REQUESTED now: pre-Android-12 devices get the simulated glass
+        // recipe from inside [liquidGlassCapsule].
+        val glassOn = isLiquidGlassRequested()
         Surface(
             shape = RoundedCornerShape(50),
             color = if (glassOn) Color.Transparent else container,
