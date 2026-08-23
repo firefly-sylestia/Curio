@@ -94,6 +94,8 @@ import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** Settings destination selected from the compact hub. */
 enum class SettingsPage(val title: String, val subtitle: String) {
@@ -144,6 +146,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         SettingsHighlightTarget.rowKey = null
     }
     val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
     // v255 — the hero is now item 0 of the list; the highlight target is
     // the page-content item that follows the section label.
     LaunchedEffect(highlightKey) {
@@ -178,7 +181,7 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         // at a straight line.
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
             // v255 — SCROLLING HERO (the Home/Profile construction): the
             // banner lives INSIDE the list and scrolls away with the page.
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
@@ -208,7 +211,8 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

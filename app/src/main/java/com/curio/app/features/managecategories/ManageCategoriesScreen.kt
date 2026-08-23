@@ -51,7 +51,7 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.FullBleedHeroItem
 import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.isPastHero
+import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -63,6 +63,8 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Manage Categories — see Curio category-management contract.
@@ -111,6 +113,7 @@ fun ManageCategoriesScreen(navController: NavController) {
     val dragStepPx = with(LocalDensity.current) { 76.dp.toPx() }
     // v5.8 — saveable-backed: keep the list's scroll position on rotation.
     val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
 
     fun shiftDraft(id: CategoryId, delta: Int) {
         val idx = draft.indexOfFirst { it.id == id }
@@ -153,7 +156,7 @@ fun ManageCategoriesScreen(navController: NavController) {
                 // v142 — full-bleed bottom: the NavHost no longer reserves
                 // the nav-bar slot for this route, so the page clears the
                 // gesture bar itself (the wash runs to the bottom edge).
-                modifier = Modifier
+                modifier = Modifier.layerBackdrop(listBackdrop)
                     .fillMaxSize()
                     .navigationBarsPadding(),
                 contentPadding = PaddingValues(
@@ -272,7 +275,8 @@ fun ManageCategoriesScreen(navController: NavController) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

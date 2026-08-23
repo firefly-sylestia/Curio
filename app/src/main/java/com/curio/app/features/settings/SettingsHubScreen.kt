@@ -9,6 +9,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.BorderStroke
+import com.kyant.backdrop.backdrops.LayerBackdrop
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.animation.scaleOut
@@ -118,6 +120,8 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
 import androidx.compose.ui.platform.LocalDensity
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** Fixed tear seed — every settings header tears in the SAME bold pattern
  *  (Settings's own pattern; Profile wears 0xC0FEE). Never re-rolls. */
@@ -126,7 +130,7 @@ private const val SETTINGS_HERO_TEAR_SEED = 0x5EED
  *  back pill on top, title + subtitle pinned just above the tear. Held
  *  with flex slack so the title block clears the tear even at large font
  *  scales. */
-private val SettingsHeroBannerHeight = 180.dp
+private val SettingsHeroBannerHeight = 216.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val SettingsHeroSheetExtent = 24.dp
 /** Total header footprint — the torn banner plus its under-sheet extent.
@@ -457,78 +461,96 @@ internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
 }
 
 /**
- * v257 — the sticky back pill for the scrolling-hero screens. The banner
- * itself scrolls away now, so once the page is scrolled past its top the
- * back control fades in as a floating 44dp pill that wears clear liquid
- * glass when that's active — the Home/Profile sticky-pill language.
+ * v257/v263 — the sticky back pill for the scrolling-hero screens, rebuilt
+ * as the HOME sticky-bar language: instead of popping in after the hero is
+ * gone, it now fades/scales/settles CONTINUOUSLY with scroll progress (fully
+ * scrubable with the finger) and hands off to REAL liquid glass — sampling
+ * the screen's LOCAL content capture ([backdrop], recorded by the scroll
+ * list itself; the pill is a sibling OUTSIDE that capture, so no self-
+ * sample cycle). Null backdrop → the safe simulated pane.
  */
 @Composable
 internal fun SettingsStickyBackPill(
     onBack: () -> Unit,
-    visible: Boolean,
+    // 0 = hero fully on screen, 1 = hero completely scrolled away.
+    progress: Float,
+    backdrop: LayerBackdrop?,
     modifier: Modifier = Modifier
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(tween(160)) + scaleIn(initialScale = 0.8f),
-        exit = fadeOut(tween(140)) + scaleOut(targetScale = 0.85f),
+    val t = FastOutSlowInEasing.transform(progress.coerceIn(0f, 1f))
+    val alphaT = ((t - 0.35f) / 0.65f).coerceIn(0f, 1f)
+    if (alphaT <= 0.01f) return
+    val glassOn = isInScreenGlassActive()
+    val dark = isCurioDarkTheme()
+    val frostBg = if (dark) Color(0xFF1B1B1D) else Color.White
+    val frostRim = if (dark) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
+    val interaction = remember { MutableInteractionSource() }
+    Surface(
+        shape = CircleShape,
+        color = frostBg,
+        shadowElevation = if (glassOn) 0.dp else (3.dp * alphaT),
+        border = BorderStroke(1.dp, frostRim.copy(alpha = 0.8f * alphaT)),
         modifier = modifier
-    ) {
-        val container = MaterialTheme.colorScheme.surfaceVariant
-        val glassOn = isInScreenGlassActive()
-        Surface(
-            shape = CircleShape,
-            color = if (glassOn) Color.Transparent else container,
-            shadowElevation = if (glassOn) 0.dp else 3.dp,
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(start = 16.dp, top = 8.dp)
-                .size(44.dp)
-                .then(if (glassOn) Modifier.liquidGlassCapsule(container) else Modifier)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onBack
-                )
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                CurioIcon(
-                    name = CurioIcons.ChevronLeft,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    size = 24.dp
-                )
+            .graphicsLayer {
+                alpha = alphaT
+                val s = androidx.compose.ui.util.lerp(0.94f, 1f, t)
+                scaleX = s
+                scaleY = s
+                translationY = (-4.dp).toPx() * (1f - t)
             }
+            .statusBarsPadding()
+            .padding(start = 16.dp, top = 8.dp)
+            .size(44.dp)
+            // v263 — PROPER liquid glass: real refraction over the captured
+            // page content, exactly like Home's morphed menu/profile pills.
+            .then(
+                if (glassOn && t > 0.01f) Modifier.liquidGlassCapsule(
+                    frostBg,
+                    washAlpha = 0.45f,
+                    backdrop = backdrop,
+                    alwaysClear = true,
+                    interactionSource = interaction
+                ) else Modifier
+            )
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                onClick = onBack
+            )
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CurioIcon(
+                name = CurioIcons.ChevronLeft,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.onSurface,
+                size = 24.dp
+            )
         }
     }
 }
 
-/** True once a scrolling page has moved PAST its hero. v260 — DUPLICATE
- *  BACK-PILL FIX: the old `scrollOffset > 200` fired while the hero was
- *  still on screen (its height is far more than 200px), so the banner's own
- *  back pill AND the floating one showed together. Now the sticky pill waits
- *  until the hero item itself is mostly scrolled away (less than ~45% of it
- *  remains visible) or has left the list entirely. */
-internal fun LazyListState.isPastHero(): Boolean {
-    if (firstVisibleItemIndex > 0) return true
-    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return false
-    if (hero.index != 0 || hero.size <= 0) return false
+/** v263 — CONTINUOUS hero-exit progress for the morphing sticky pill:
+ *  0 while the hero is fully on screen, easing to 1 as it scrolls out.
+ *  Replaces the old boolean isPastHero (which popped the pill in at a
+ *  hard threshold — no morph). LazyList variant. */
+internal fun LazyListState.heroExitProgress(): Float {
+    if (firstVisibleItemIndex > 0) return 1f
+    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
+    if (hero.index != 0 || hero.size <= 0) return 0f
     val remaining = hero.size + hero.offset
-    return remaining < hero.size * 0.45f
+    return (1f - remaining.toFloat() / hero.size).coerceIn(0f, 1f)
 }
 
-internal fun LazyGridState.isPastHero(): Boolean {
-    if (firstVisibleItemIndex > 0) return true
-    // Hero is item 0, so when firstVisibleItemIndex == 0 the first visible
-    // info IS the hero (no per-item row identity needed — that API differs
-    // across Compose versions and broke CI).
-    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return false
-    if (hero.size.height <= 0) return false
+/** Grid variant of [heroExitProgress] (the Settings hub's LazyVerticalGrid). */
+internal fun LazyGridState.heroExitProgress(): Float {
+    if (firstVisibleItemIndex > 0) return 1f
+    val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return 0f
+    if (hero.size.height <= 0) return 0f
     val remaining = hero.size.height + hero.offset.y
-    return remaining < hero.size.height * 0.45f
+    return (1f - remaining.toFloat() / hero.size.height).coerceIn(0f, 1f)
 }
 
 /** One ink-glass action pill on the hero — the banner's readable ink at a
@@ -863,6 +885,7 @@ fun SettingsHubScreen(navController: NavController) {
         // state always span the full width.
         val wide = windowWidthSizeClass().isWide
         val gridState = rememberLazyGridState()
+val listBackdrop = rememberLayerBackdrop()
         // v27t — wide windows (tablet / landscape) render the two-pane
         // master-detail layout ([SettingsTwoPaneHub]): the full settings nav
         // list stays on the left while the selected page's options show on
@@ -872,7 +895,7 @@ fun SettingsHubScreen(navController: NavController) {
             LazyVerticalGrid(
                 state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
                 // v255 — SCROLLING HERO (the reverted Home/Profile
                 // construction): the banner lives INSIDE the grid as the
                 // first item and scrolls away with the page.
@@ -980,7 +1003,8 @@ fun SettingsHubScreen(navController: NavController) {
         // up: a floating pill that wears clear liquid glass when active.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = gridState.isPastHero(),
+            progress = gridState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
         } else {

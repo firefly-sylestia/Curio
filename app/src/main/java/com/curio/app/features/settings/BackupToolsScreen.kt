@@ -66,6 +66,8 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** Dedicated data workspace for Curio backups and additive FieldMind import. */
 @Composable
@@ -325,9 +327,10 @@ fun BackupToolsScreen(navController: NavController) {
         // page. It still runs up behind the status bar (the header applies
         // its own status-bar inset for the back pill).
         val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -498,7 +501,8 @@ fun BackupToolsScreen(navController: NavController) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

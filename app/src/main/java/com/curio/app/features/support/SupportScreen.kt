@@ -35,7 +35,7 @@ import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.FullBleedHeroItem
 import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.isPastHero
+import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -53,6 +53,8 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Support & diagnostics — the dedicated page behind Profile's
@@ -107,9 +109,10 @@ fun SupportScreen(navController: NavController) {
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
             val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
                 // v255 — SCROLLING HERO: the banner is the list's first item
                 // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
@@ -287,7 +290,8 @@ fun SupportScreen(navController: NavController) {
             Box(modifier = Modifier.fillMaxSize()) {
                 SettingsStickyBackPill(
                     onBack = { navController.popBackStack() },
-                    visible = listState.isPastHero(),
+                    progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
                     modifier = Modifier.align(Alignment.TopStart)
                 )
             }

@@ -50,7 +50,7 @@ import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.FullBleedHeroItem
 import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.isPastHero
+import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -68,6 +68,8 @@ import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.themedAccent
 import kotlinx.coroutines.launch
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Recycle bin (v26) — every soft-deleted capture lands here instead of being
@@ -87,6 +89,7 @@ fun RecycleBinScreen(navController: NavController) {
         }
     }
     val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
     // Single-confirm dialogs for the permanent actions (already in the bin).
     var purgeTarget by remember { mutableStateOf<CurioEntry?>(null) }
     var showEmptyBinConfirm by remember { mutableStateOf(false) }
@@ -141,7 +144,7 @@ fun RecycleBinScreen(navController: NavController) {
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
@@ -247,7 +250,8 @@ fun RecycleBinScreen(navController: NavController) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = trashed.isNotEmpty() && listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

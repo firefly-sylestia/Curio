@@ -385,3 +385,10 @@ User's batched asks across the session:
 - Tab-bar ghost-text fix now SCOPED: new `ghostFreeTabs` param — only Pet Designer's studio bar opts out (page-only sample, crisp overlay). Home nav keeps its combined-sample blob effect (restored, per user).
 - Mood-board quotes hidden behind `MoodboardQuotesHidden` flag (from previous request).
 - Status: pushed. CI validates compilation.
+
+## 2026-08-23 — Settings hero presence + true morph back pill (v263)
+- SettingsStickyBackPill rebuilt as the Home sticky-bar language: scroll-LINKED progress (`heroExitProgress()` LazyList+LazyGrid variants replace boolean isPastHero) drives a scrubable fade/scale/lift morph; glass handoff via liquidGlassCapsule sampling a LOCAL layerBackdrop recorded by each screen's list (pill = sibling overlay, no self-capture cycle); null backdrop keeps the safe simulated pane.
+- All 11 converted screens wired: list/grid marked `.layerBackdrop(listBackdrop)`, pill gets progress+backdrop.
+- SettingsHeroBannerHeight 180→216dp for Home-like hero presence.
+- Home blob question: confirmed restored — CurioBottomNav uses default ghostFreeTabs=false → combined page+tab sample; only Pet Designer opts out.
+- Status: pushed. CI validates.

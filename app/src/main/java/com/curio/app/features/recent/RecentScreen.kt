@@ -44,7 +44,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.FullBleedHeroItem
 import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.isPastHero
+import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -60,6 +60,8 @@ import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** A single unified item for the Home preview and the full Recents page. */
 internal sealed interface RecentFeedItem {
@@ -136,6 +138,7 @@ fun RecentScreen(navController: NavController) {
         buildRecentFeed(entries, explored, unexplored)
     }
     val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
 
     Box(
         modifier = Modifier
@@ -178,7 +181,7 @@ fun RecentScreen(navController: NavController) {
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
@@ -219,7 +222,8 @@ fun RecentScreen(navController: NavController) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = feed.isNotEmpty() && listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

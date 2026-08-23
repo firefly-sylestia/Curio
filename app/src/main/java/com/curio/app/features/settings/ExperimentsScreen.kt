@@ -46,6 +46,8 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Experimental controls live here instead of inside Appearance. Each switch
@@ -83,9 +85,10 @@ fun ExperimentsScreen(navController: NavController) {
         // page. It still runs up behind the status bar (the header applies
         // its own status-bar inset for the back pill).
         val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -217,7 +220,8 @@ fun ExperimentsScreen(navController: NavController) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
     }

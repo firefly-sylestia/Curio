@@ -83,7 +83,7 @@ import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.FullBleedHeroItem
 import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.isPastHero
+import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -123,6 +123,8 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Quests & levels — Curio's gamification home (v8.0).
@@ -206,6 +208,7 @@ fun QuestsScreen(navController: NavController) {
         navController.navigateToQuestRoute(route)
     }
     val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
 
     Box(
         modifier = Modifier
@@ -229,7 +232,7 @@ fun QuestsScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = 0.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -360,7 +363,8 @@ fun QuestsScreen(navController: NavController) {
         // v257 — sticky back pill once the scrolling hero moves up.
         SettingsStickyBackPill(
             onBack = { navController.popBackStack() },
-            visible = listState.isPastHero(),
+            progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
             modifier = Modifier.align(Alignment.TopStart)
         )
         // v8.6 — non-blocking level-up celebration (spec §9.1): tap to

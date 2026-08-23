@@ -52,7 +52,7 @@ import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.FullBleedHeroItem
 import com.curio.app.features.settings.SettingsStickyBackPill
-import com.curio.app.features.settings.isPastHero
+import com.curio.app.features.settings.heroExitProgress
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -69,6 +69,8 @@ import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Promo mode — the hidden, share-ready promo page. v24: reached from the
@@ -120,9 +122,10 @@ fun PromoModeScreen(navController: NavController) {
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
             val listState = rememberLazyListState()
+val listBackdrop = rememberLayerBackdrop()
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.layerBackdrop(listBackdrop).fillMaxSize(),
                 // v255 — SCROLLING HERO: the banner is the list's first item
                 // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
@@ -250,7 +253,8 @@ fun PromoModeScreen(navController: NavController) {
             Box(modifier = Modifier.fillMaxSize()) {
                 SettingsStickyBackPill(
                     onBack = { navController.popBackStack() },
-                    visible = listState.isPastHero(),
+                    progress = listState.heroExitProgress(),
+            backdrop = listBackdrop,
                     modifier = Modifier.align(Alignment.TopStart)
                 )
             }
