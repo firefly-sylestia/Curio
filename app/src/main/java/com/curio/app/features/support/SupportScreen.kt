@@ -175,6 +175,23 @@ fun SupportScreen(navController: NavController) {
                                 )
                             }
                         }
+                        CurioSettingsDivider()
+                        // v252 — open-source credit: the liquid-glass tab bar
+                        // is adapted from the vFlow project (GPL-2.0-or-later).
+                        CurioSettingsRow(
+                            CurioIcons.Info,
+                            "Liquid glass by vFlow",
+                            "github.com/ChaoMixian/vFlow (GPL-2.0)"
+                        ) {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://github.com/ChaoMixian/vFlow")
+                                    )
+                                )
+                            }
+                        }
                     }
                     }
                 }

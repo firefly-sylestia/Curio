@@ -1,3 +1,12 @@
+## v253: BoxScope wrapper fix + vFlow credits
+
+CI: matchParentSize/align still rejected - K2 will not resolve BoxScope
+members against a function's EXTENSION receiver alone. Fixed by wrapping the
+scrim + glass panel in an explicit `Box(Modifier.fillMaxSize())` whose content
+lambda provides BoxScope as dispatch receiver. Also: About Curio gains a
+"Liquid glass by vFlow" row (github.com/ChaoMixian/vFlow, GPL-2.0) and README
+Credits gained an Open source section crediting vFlow's LiquidGlassBottomBar.
+
 ## v252 batch
 
 1. BLOB: reverted v250's page-only sample back to COMBINED (user said it

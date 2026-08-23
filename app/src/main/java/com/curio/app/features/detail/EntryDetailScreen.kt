@@ -1334,6 +1334,10 @@ private fun BoxScope.DetailStickyBar(
         // that fades the pill, so the handoff reads as one morphing surface.
         // A full-screen scrim behind it dismisses on any outside tap.
         if (detailGlassActive && morph > 0.01f) {
+            // v252 — an explicit Box WRAPPER supplies the BoxScope dispatch
+            // receiver: K2 refuses BoxScope members called on the extension
+            // receiver alone (matchParentSize / align below).
+            Box(modifier = Modifier.fillMaxSize()) {
             Box(
                 Modifier
                     .matchParentSize()
@@ -1430,6 +1434,7 @@ private fun BoxScope.DetailStickyBar(
                 }
             }
         }
+            }
 
         // v149 — the share sheet (preview + Image/Text picker) opens from
         // the More menu; it lives here so it survives the sticky bar's

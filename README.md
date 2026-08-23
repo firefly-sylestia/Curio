@@ -271,6 +271,10 @@ Found a bug? Have an idea? Want to request a topic?
 
 Special thanks to the early testers and people who shared topics and feedback.
 
+### Open source
+
+- **[vFlow](https://github.com/ChaoMixian/vFlow)** (GPL-2.0-or-later) — the liquid-glass tab bar (draggable active blob, backdrop refraction) is adapted from vFlow's `LiquidGlassBottomBar`. Thanks to [@ChaoMixian](https://github.com/ChaoMixian) for the original implementation.
+
 ---
 
 *Explore something. Notice more. Keep the discovery.*
