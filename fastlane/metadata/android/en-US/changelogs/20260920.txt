@@ -1,4 +1,6 @@
 ADD
+- Pet Designer: with Liquid glass on, the studio bar is now the SAME draggable glass tab bar as the bottom nav - one refracting capsule with the damped-drag blob, velocity squash and specular sheen.
+
 - Liquid glass on older phones: devices below Android 12 now get a simulated glass look (frosted veil, sheen and rim) when the toggle is on - no one is left out, they just miss the live refraction.
 
 - Liquid glass: a new "Indicator shadow" slider tunes the draggable active pill's shadow strength.

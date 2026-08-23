@@ -134,6 +134,8 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
 import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -1442,6 +1444,76 @@ private fun PetStudioBottomNav(
     // soft shadow, so the Surface elevation drops with it. RoundedCorner(50)
     // keeps the stadium silhouette (CircleShape would ellipse-clip a bar).
     val glassActive = glassOn && glassBackdrop != null
+    // v245 — with glass on, render the SAME liquid-glass tab bar as the
+    // bottom nav: one refracting capsule with a DRAGGABLE active blob
+    // (damped-drag physics, velocity squash, specular sheen) and classic
+    // tabs that spring icon -> icon+label beside it. Pure black/white ink.
+    if (glassActive) {
+        val pages = PetDesignerPage.values()
+        val glyphs = listOf(CurioIcons.Pets, CurioIcons.Brush, CurioIcons.Settings)
+        val labels = listOf("Pets", "Editor", "Settings")
+        val activeInk = if (isCurioDarkTheme()) Color.White else Color.Black
+        CurioLiquidGlassTabBar(
+            backdrop = glassBackdrop,
+            tabsCount = pages.size,
+            selectedIndex = page.ordinal,
+            accentColor = MaterialTheme.colorScheme.primary,
+            onSelected = { index ->
+                val target = pages.getOrNull(index) ?: return@CurioLiquidGlassTabBar
+                if (target != page) {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onSelect(target)
+                }
+            },
+            modifier = Modifier
+        ) {
+            pages.forEachIndexed { index, candidate ->
+                val selected = page == candidate
+                val tabWidth by animateDpAsState(
+                    targetValue = if (selected) StudioPillExpandedWidth else StudioPillIconWidth,
+                    animationSpec = StudioWidthSpring,
+                    label = "studioGlassTabWidth"
+                )
+                CurioLiquidGlassTabBarItem(
+                    index = index,
+                    onClick = {
+                        if (!selected) {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onSelect(candidate)
+                        }
+                    },
+                    modifier = Modifier.width(tabWidth)
+                ) {
+                    CurioIcon(
+                        name = glyphs[index],
+                        contentDescription = labels[index],
+                        tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 26.dp
+                    )
+                    AnimatedVisibility(
+                        visible = selected,
+                        enter = expandHorizontally(StudioExpandSpring, expandFrom = Alignment.Start) +
+                            fadeIn(StudioMotionSpring),
+                        exit = shrinkHorizontally(StudioExpandSpring, shrinkTowards = Alignment.Start) +
+                            fadeOut(StudioMotionSpring)
+                    ) {
+                        Text(
+                            text = labels[index],
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontFamily = ChangaOneFontFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 15.sp
+                            ),
+                            color = activeInk,
+                            maxLines = 1,
+                            modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
     Surface(
         shape = RoundedCornerShape(50),
         // v149 — same dynamic container as the floating nav bar (the pet
