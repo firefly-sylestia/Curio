@@ -8,7 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
@@ -106,20 +108,16 @@ fun Modifier.liquidGlassCapsule(
     // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
     // below is NOT a composable context.
     val dark = isCurioDarkTheme()
+    // v233 — CLEAR GLASS (experiment): drop the heavy frost so the capsule
+    // reads like the bright refraction blob under a finger press rather
+    // than milky frosted glass.
+    val clear = AppPreferences.glassClarityState
     return this
-        // v231 — glass parallax tilt (experiment): sway subtly AGAINST the
-        // device's tilt so the pane feels like it floats above the content.
-        // Reads snapshot state inside the layer block, so sensor updates
-        // only touch the layer properties — no recomposition per frame.
-        .then(
-            if (AppPreferences.glassParallaxState) Modifier.graphicsLayer {
-                translationX = -com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX * 5.dp.toPx()
-                translationY = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY * 4.dp.toPx()
-            } else Modifier
-        )
         // v228 — outer guard: during a capture record pass, skip the
         // backdrop-drawing inner node entirely and paint a plain capsule,
-        // so the pill never samples its own recording layer.
+        // so the pill never samples its own recording layer. The guard also
+        // carries the v233 PARALLAX EDGE GLOW (after drawContent, so it
+        // rides on top of the rendered glass).
         .drawWithContent {
             if (CurioGlassPills.isCapturingBackdrop) {
                 drawRoundRect(
@@ -130,6 +128,7 @@ fun Modifier.liquidGlassCapsule(
                 )
             } else {
                 drawContent()
+                drawGlassTiltEdgeGlow()
             }
         }
         .then(
@@ -138,7 +137,7 @@ fun Modifier.liquidGlassCapsule(
                 shape = { CircleShape },
                 effects = {
                     vibrancy()
-                    blur(8.dp.toPx())
+                    blur((if (clear) 2.dp else 8.dp).toPx())
                     lens(24.dp.toPx(), 24.dp.toPx())
                 },
                 highlight = { Highlight.Default },
@@ -149,7 +148,46 @@ fun Modifier.liquidGlassCapsule(
                 },
                 // The translucent wash over the refracted backdrop — 40% like
                 // the reference glass bar, so the tint reads but content shows.
-                onDrawSurface = { drawRect(container.copy(alpha = washAlpha)) }
+                // Clear-glass cuts it to roughly a third.
+                onDrawSurface = {
+                    drawRect(container.copy(alpha = washAlpha * if (clear) 0.35f else 1f))
+                }
             )
         )
+}
+
+/**
+ * v233 — PARALLAX TILT EDGE GLOW. Draws a soft white rim glow whose bright
+ * spot slides AGAINST the device's current gravity tilt (see
+ * [com.curio.app.ui.components.liquidglass.CurioGlassParallax]) — the iOS
+ * depth cue where the pane's EDGES catch the light as the phone moves,
+ * instead of the whole pane translating. Call INSIDE a DrawScope after
+ * drawContent(). Reads the tilt snapshot state directly, so sensor updates
+ * invalidate just this draw — zero recomposition.
+ */
+internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGlassTiltEdgeGlow() {
+    if (!AppPreferences.glassParallaxState) return
+    val tx = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX
+    val ty = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY
+    if (tx == 0f && ty == 0f) return
+    val r = minOf(size.width, size.height) / 2f
+    if (r <= 0f) return
+    val glowCenter = Offset(
+        size.width / 2f - tx * r * 0.9f,
+        size.height / 2f - ty * r * 0.9f
+    )
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.65f),
+                Color.White.copy(alpha = 0.14f),
+                Color.Transparent
+            ),
+            center = glowCenter,
+            radius = r * 1.6f
+        ),
+        radius = r - 0.75f.dp.toPx() / 2f,
+        center = Offset(size.width / 2f, size.height / 2f),
+        style = Stroke(width = 1.5f.dp.toPx())
+    )
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.offset
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -357,6 +358,24 @@ fun CurioIcon(
             )
         )
     }
+}
+
+/**
+ * v233 — PROPORTIONAL GLYPH INK NUDGE. Material Symbols' ink reads a hair
+ * low inside small circular pills, so call sites used to pin a FIXED dp
+ * offset (e.g. `Modifier.offset(y = (-2f).dp)`). A fixed offset only
+ * centers correctly at the default font scale: below 1.0 the rendered
+ * glyph shrinks (CurioIcon divides sp by font scale, coerced at 1) while
+ * the nudge stays put — so the ink visibly rides HIGH on small-font
+ * devices ("why is the avatar icon not centered on my phone"). This
+ * helper scales the optical correction by the same factor the glyph
+ * itself scales by, so the ink stays optically centered at every font
+ * scale. Use INSTEAD of raw `offset(y = …)` nudges on CurioIcon.
+ */
+@Composable
+fun Modifier.curioGlyphInkNudge(yDp: Float): Modifier {
+    val fontScale = LocalDensity.current.fontScale.coerceAtMost(1f)
+    return this.offset(y = yDp.dp * fontScale)
 }
 
 /**

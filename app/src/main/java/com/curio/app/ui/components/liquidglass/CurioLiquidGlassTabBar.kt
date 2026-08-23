@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -55,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
+import com.curio.app.data.AppPreferences
+import com.curio.app.ui.components.drawGlassTiltEdgeGlow
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
@@ -128,6 +132,12 @@ fun CurioLiquidGlassTabBar(
 ) {
     val tabsBackdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
+    // v233 — CLEAR GLASS (experiment): less frost, more refraction.
+    val clear = AppPreferences.glassClarityState
+    // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
+    // accent wash gave the active ink almost nothing to read against on a
+    // bright page; light mode now gets double the bed (dark keeps 16%).
+    val dark = isCurioDarkTheme()
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
 
@@ -284,7 +294,7 @@ fun CurioLiquidGlassTabBar(
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur(8.dp.toPx())
+                            blur((if (clear) 2.dp else 8.dp).toPx())
                             lens(24.dp.toPx(), 24.dp.toPx())
                         }
                     },
@@ -296,6 +306,10 @@ fun CurioLiquidGlassTabBar(
                             color = Color.Black.copy(alpha = 0.10f)
                         )
                     },
+                    onDrawSurface = {
+                        // v233 — clear-glass cuts the frost wash to ~a third.
+                        drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.35f else 1f))
+                    },
                     layerBlock = {
                         if (isBlurEnabled) {
                             val progress = dampedDragAnimation.pressProgress
@@ -303,10 +317,15 @@ fun CurioLiquidGlassTabBar(
                             scaleX = scale
                             scaleY = scale
                         }
-                    },
-                    onDrawSurface = { drawRect(containerColor) }
+                    }
                 )
-                .then(interactiveHighlight?.modifier ?: Modifier)                    .height(64.dp)
+                .then(interactiveHighlight?.modifier ?: Modifier)
+                .drawWithContent {
+                    drawContent()
+                    // v233 — PARALLAX TILT EDGE GLOW: the bar's rim catches
+                    // the light against the device tilt (iOS depth cue).
+                    drawGlassTiltEdgeGlow()
+                }                    .height(64.dp)
                     .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
             content = measuringContent
@@ -330,7 +349,7 @@ fun CurioLiquidGlassTabBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur(8.dp.toPx())
+                                blur((if (clear) 2.dp else 8.dp).toPx())
                                 lens(24.dp.toPx() * progress, 24.dp.toPx() * progress)
                             }
                         },
@@ -338,7 +357,10 @@ fun CurioLiquidGlassTabBar(
                             Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
                         },
                         shadow = { null },
-                        onDrawSurface = { drawRect(containerColor) }
+                        onDrawSurface = {
+                            // v233 — clear-glass cuts the frost wash to ~a third.
+                            drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.35f else 1f))
+                        }
                     )
                     .then(interactiveHighlight?.modifier ?: Modifier)
                     .height(56.dp)
@@ -362,6 +384,12 @@ fun CurioLiquidGlassTabBar(
                     }
                     .then(interactiveHighlight?.gestureModifier ?: Modifier)
                     .then(dampedDragAnimation.modifier)
+                    .drawWithContent {
+                        drawContent()
+                        // v233 — PARALLAX TILT EDGE GLOW: the active pill's
+                        // rim catches the light against the device tilt too.
+                        drawGlassTiltEdgeGlow()
+                    }
                     .drawBackdrop(
                         backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                         shape = { CircleShape },
@@ -399,7 +427,9 @@ fun CurioLiquidGlassTabBar(
                             // v232 — a constant faint ACCENT wash marks this pill
                             // as the active-tab indicator even at rest (before,
                             // it only read while pressed); press deepens it.
-                            drawRect(accentColor.copy(alpha = 0.14f))
+                            // v233 — theme-aware: light mode doubles the bed so
+                            // the active ink actually reads against a bright page.
+                            drawRect(accentColor.copy(alpha = if (dark) 0.16f else 0.30f))
                             drawRect(
                                 color = Color.Black.copy(alpha = 0.10f),
                                 alpha = 1f - progress

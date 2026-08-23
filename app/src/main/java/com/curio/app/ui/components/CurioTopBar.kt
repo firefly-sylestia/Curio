@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.CurioIcons
 
 /**
@@ -69,7 +70,7 @@ fun CurioBackButton(
             // mass sits slightly below its ink box center.
             modifier = Modifier
                 .padding(8.dp)
-                .offset(y = (-1f).dp)
+                .curioGlyphInkNudge(-1f)
         )
     }
     if (disableRipple) {

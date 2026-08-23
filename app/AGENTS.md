@@ -4901,6 +4901,25 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v233 — clear-glass option + parallax edge glow + light-mode indicator ink + glyph centering**
+  - NEW PREF `glassClarityState` (`glass_clear_style`, Experiments → "Clear glass", OFF):
+    when ON the glass drops its frost — blur 8dp→2dp and the container wash cut to ~35%
+    in `liquidGlassCapsule` AND all three `CurioLiquidGlassTabBar` layers — so the bar
+    reads like the bright press-blob refraction instead of milky glass.
+  - PARALLAX v2: the v231 whole-capsule translation is GONE (imperceptible). Tilt now
+    drives an EDGE GLOW instead: `LiquidGlassPills.drawGlassTiltEdgeGlow()` draws a white
+    rim stroke with a radial gradient whose bright spot slides against
+    `CurioGlassParallax.tiltX/Y` — applied in `liquidGlassCapsule`'s capture-guard
+    drawWithContent and on the tab bar's main capsule + draggable active pill. Reads
+    snapshot tilt state inside draw → per-sensor-tick draw invalidation, zero recomposition.
+  - Light-mode active-indicator contrast: the constant 0.14 accent wash gave the active
+    ink nothing to read against; now theme-aware (light 0.30 / dark 0.16) via a hoisted
+    `isCurioDarkTheme()`.
+  - Glyph centering: fixed-dp optical nudges (`offset(y = (-2f).dp)` etc.) mis-centered on
+    fontScale ≠ 1 devices (CurioIcon shrinks the glyph below 1.0 but the nudge stayed).
+    New `Modifier.curioGlyphInkNudge(dp)` scales the nudge by `fontScale.coerceAtMost(1f)`;
+    replaced at all 9 call sites (Home menu/profile pill, Home casino/stat chips,
+    Profile rows ×2, Spin die/glyphs ×2, CurioTopBar).
 - **v232 — Pet Designer crash: glass off + native-crash reporter + self-heal**
   - Pet Designer still SIGSEGV'd natively (RenderThread stack overflow, cyclic render
     node) on some devices even with the v228 guard; Reveal's identical in-subtree pill

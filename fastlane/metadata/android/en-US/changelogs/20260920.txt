@@ -1,4 +1,8 @@
 ADD
+- Liquid glass: new "Clear glass" option - much less frost and a lighter tint, so the bar reads like clear refracting glass instead of milky.
+- Liquid glass: parallax tilt now moves the rim EDGE GLOW across the glass as you tilt the phone, not the whole pane.
+- Liquid glass: active tab text is much easier to read in light mode.
+- Fixed floating pill icons (menu/profile avatar and friends) sitting off-center on phones with non-default font sizes.
 - Bottom nav: the liquid-glass bar no longer squishes - tabs keep their full icon and label, always expanded.
 - Liquid glass: new "Glass parallax tilt" experiment - the glass pills sway against the phone's tilt for a floating depth effect.
 - Mood board: floating quote slips are smaller and can no longer stretch across the whole collage.

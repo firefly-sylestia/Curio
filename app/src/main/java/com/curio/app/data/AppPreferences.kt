@@ -434,6 +434,14 @@ object AppPreferences {
     var glassParallaxState by mutableStateOf(false)
         private set
 
+    // v233 — Clear-glass style (experiment, default OFF): when the liquid-
+    // glass pills are showing, drop the heavy frost (blur 8dp → 2dp, wash
+    // cut to a third) so the capsule reads CLEAR and refractive — like the
+    // bright blob it becomes under your finger while pressed — instead of
+    // milky frosted glass.
+    var glassClarityState by mutableStateOf(false)
+        private set
+
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
@@ -674,6 +682,7 @@ object AppPreferences {
         drawerConstellationState = isDrawerConstellationEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         glassParallaxState = isGlassParallaxEnabled(context)
+        glassClarityState = isGlassClarityEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -971,6 +980,7 @@ object AppPreferences {
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
+    private const val KEY_GLASS_CLARITY = "glass_clear_style"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1160,6 +1170,15 @@ object AppPreferences {
     fun setGlassParallaxEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_PARALLAX, enabled).apply()
         glassParallaxState = enabled
+    }
+
+    // ── Clear-glass style (experiment, default OFF) ──────────────────
+    fun isGlassClarityEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_CLARITY, false)
+
+    fun setGlassClarityEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_CLARITY, enabled).apply()
+        glassClarityState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────

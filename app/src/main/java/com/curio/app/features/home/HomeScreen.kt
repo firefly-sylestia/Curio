@@ -149,6 +149,7 @@ import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -1447,7 +1448,8 @@ private fun TopBarPill(
                     // reads a hair low inside the small 42dp pill — nudge it up
                     // (v115: deepened -0.5dp -> -1.5dp -> -2dp — the glyphs were
                     // still a touch low after the v114 centering fix).
-                    modifier = Modifier.offset(y = (-2f).dp)
+                    // v233 — proportional nudge: stays centered at every font scale.
+                    modifier = Modifier.curioGlyphInkNudge(-2f)
                 )
             }
         }
@@ -1538,7 +1540,7 @@ private fun QuestShuffleCard(
                         // The shared icon renderer already applies the
                         // standard 1dp optical lift; this extra half-dp is
                         // only for the casino glyph's heavier visible base.
-                        modifier = Modifier.offset(y = (-0.5f).dp)
+                        modifier = Modifier.curioGlyphInkNudge(-0.5f)
                     )
                 }
             }
@@ -1850,7 +1852,7 @@ private fun FirstTimeEmpty(
                             size = 16.dp,
                             // Match the shared icon lift plus the casino
                             // glyph's half-dp extra correction.
-                            modifier = Modifier.offset(y = (-0.5f).dp)
+                            modifier = Modifier.curioGlyphInkNudge(-0.5f)
                         )
                         Text(
                             "Surprise me",
@@ -2757,7 +2759,7 @@ private fun DrawerNavItem(
                         // v115 — drawer menu glyphs read a hair low in the
                         // 40dp chip (same optical-weight correction as the
                         // Home top-bar pills).
-                        modifier = Modifier.offset(y = (-1f).dp)
+                        modifier = Modifier.curioGlyphInkNudge(-1f)
                     )
                 }
             }

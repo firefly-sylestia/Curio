@@ -120,6 +120,7 @@ import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.curioGlyphInkNudge
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -626,7 +627,7 @@ private fun ProfileSearchPill(
                 // v115 — the magnifier reads a hair low in the 42dp pill;
                 // deepened -1dp -> -2dp (still a touch low after the first
                 // pass). Same optical-weight correction as the Home pills.
-                modifier = Modifier.offset(y = (-2f).dp)
+                modifier = Modifier.curioGlyphInkNudge(-2f)
             )
         }
     }
@@ -1549,7 +1550,7 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
                     CurioIcons.Settings, null,
                     tint = settingsCardAccentInk(),
                     size = 23.dp,
-                    modifier = Modifier.offset(y = (-2f).dp)
+                    modifier = Modifier.curioGlyphInkNudge(-2f)
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Settings & preferences", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
