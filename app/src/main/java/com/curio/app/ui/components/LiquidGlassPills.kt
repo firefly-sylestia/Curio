@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import import com.curio.app.data.AppPreferences
+import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop

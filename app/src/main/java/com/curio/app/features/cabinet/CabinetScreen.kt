@@ -455,9 +455,6 @@ fun CabinetScreen(navController: NavController) {
             ) { m ->
                 LazyVerticalGrid(
                     state = gridState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .layerBackdrop(chipGlassBackdrop),
                     // Phones keep the 2-column grid; wide windows gain columns
                     // automatically (3 across on the ~720dp content column).
                     columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
@@ -475,7 +472,11 @@ fun CabinetScreen(navController: NavController) {
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = m.fillMaxSize()
+                    // v245 — the grid records into the chip bar's LOCAL glass
+                    // capture while keeping its entrance-animated modifier.
+                    modifier = m
+                        .fillMaxSize()
+                        .layerBackdrop(chipGlassBackdrop)
                 ) {
                     items(visibleEntries, key = { it.id }) { entry ->
                         // v8.38 — the Cabinet→Detail morph is gone: the detail
