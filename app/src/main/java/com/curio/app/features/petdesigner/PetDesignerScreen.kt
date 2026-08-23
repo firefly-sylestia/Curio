@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -1479,6 +1480,10 @@ private fun PetStudioBottomNav(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            // v256 — the route is now full-bleed to the bottom (no reserved
+            // NavHost inset strip), so the bar clears the gesture area
+            // itself.
+            .navigationBarsPadding()
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {

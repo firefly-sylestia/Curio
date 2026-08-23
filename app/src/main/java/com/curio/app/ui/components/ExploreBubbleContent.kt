@@ -1,18 +1,12 @@
 package com.curio.app.ui.components
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -57,16 +51,17 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.ExploreSession
-import com.curio.app.data.formatElapsed
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
+import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
@@ -314,22 +309,17 @@ fun ExploreBubbleContent(
             // so the expanded bubble carries no dead clickable semantics.
             .then(if (minimized) Modifier.clickable { minimized = false } else Modifier)
     ) {
-        AnimatedContent(
+        // v257 — GLITCH FIX: the old AnimatedContent morph animated the
+        // container's SIZE every frame while the owning service re-centered
+        // the WRAP_CONTENT overlay window on every size callback — two
+        // animation loops fighting over the window geometry, which read as a
+        // jittery expand. Now the content crossfades while the corner radius
+        // springs; the window itself resizes in ONE step (the panel has a
+        // FIXED width and the pill is fixed too), so the service sees one or
+        // two size callbacks instead of forty.
+        Crossfade(
             targetState = minimized,
-            transitionSpec = {
-                (
-                    fadeIn(spring(stiffness = 220f)) + scaleIn(
-                        initialScale = 0.9f,
-                        animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f)
-                    )
-                    ) togetherWith
-                    (
-                        fadeOut(spring(stiffness = 260f)) + scaleOut(targetScale = 0.94f)
-                        ) using SizeTransform(clip = false) { _, _ ->
-                        spring(dampingRatio = 0.88f, stiffness = 300f)
-                    }
-            },
-            contentAlignment = Alignment.Center,
+            animationSpec = tween(180),
             label = "bubbleExpand"
         ) { m ->
             if (m) {
@@ -407,10 +397,15 @@ private fun MinimizedPill(
 }
 
 /**
- * The expanded card panel — header (glyph chip + topic + elapsed + Minimize
- * chevron), an ICON-ONLY control row (Pause/Resume, Hide, Screenshot), the
- * shared session note field, and the Finish button. Deliberately a rounded
- * rectangle, not a capsule, so it never reads as a circle.
+ * The expanded card panel — v257 REDESIGN with a FIXED width (the window
+ * resizes in one deterministic step when expanding, which is what kills the
+ * old morph glitch):
+ *
+ *   1. Header — glyph chip, marquee topic, minimize chevron.
+ *   2. Big chronometer readout, centered, with a Paused tag when frozen.
+ *   3. Three equal-weight labeled controls: Pause/Resume · Hide · Cancel.
+ *   4. The shared session note field.
+ *   5. The full-width Finish action.
  */
 @Composable
 private fun ExpandedPanel(
@@ -428,71 +423,86 @@ private fun ExpandedPanel(
     onCancel: () -> Unit,
     onMinimize: () -> Unit
 ) {
+    val pastel = AppPreferences.pastelColorsState
     Column(
-        modifier = Modifier.padding(12.dp),
+        modifier = Modifier
+            .width(PANEL_WIDTH)
+            .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // ── Header: glyph chip + topic + elapsed + minimize ────────
+        // ── Header: glyph chip + topic + minimize ──────────────────
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             CategoryGlyphChip(category = category, accent = accent, ink = ink)
-            Column(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .widthIn(max = EXPANDED_TOPIC_WIDTH)
-            ) {
-                MarqueeTopicText(
-                    text = session.topicName,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = if (AppPreferences.pastelColorsState) ink
-                            else MaterialTheme.colorScheme.onSurface,
-                    maxWidth = EXPANDED_TOPIC_WIDTH,
-                    paused = session.paused
-                )
-                Text(
-                    text = if (session.paused) "Paused · ${formatElapsed(elapsed)}"
-                           else formatElapsed(elapsed),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (session.paused) accent
-                            else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            MarqueeTopicText(
+                text = session.topicName,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = if (pastel) ink else MaterialTheme.colorScheme.onSurface,
+                maxWidth = PANEL_TOPIC_WIDTH,
+                paused = session.paused,
+                modifier = Modifier.weight(1f, fill = false)
+            )
             BubbleIconButton(
                 icon = CurioIcons.KeyboardArrowDown,
                 contentDescription = "Minimize timer",
-                tint = if (AppPreferences.pastelColorsState) ink
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (pastel) ink else MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onMinimize
             )
         }
 
-        // ── Icon-only controls: Pause/Resume · Hide · Cancel ──
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BubbleIconButton(
-                icon = if (session.paused) CurioIcons.PlayArrow else CurioIcons.Pause,
-                contentDescription = if (session.paused) "Resume timer" else "Pause timer",
-                tint = if (AppPreferences.pastelColorsState) ink else accent,
-                onClick = onTogglePause
+        // ── Big chronometer readout — the panel's hero line ────────
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = compactElapsed(elapsed),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFeatureSettings = "tnum"
+                ),
+                color = if (pastel) ink else MaterialTheme.colorScheme.onSurface
             )
-            BubbleIconButton(
-                icon = CurioIcons.Close,
-                contentDescription = "Hide timer",
-                tint = if (AppPreferences.pastelColorsState) ink
+            Text(
+                text = if (session.paused) "PAUSED" else "exploring ${session.topicName}",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = if (session.paused) FontWeight.Bold else FontWeight.Medium,
+                    letterSpacing = 1.sp
+                ),
+                color = if (session.paused) accent
                         else MaterialTheme.colorScheme.onSurfaceVariant,
-                onClick = onHide
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // ── Labeled controls: Pause/Resume · Hide · Cancel ─────────
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PanelControlButton(
+                icon = if (session.paused) CurioIcons.PlayArrow else CurioIcons.Pause,
+                label = if (session.paused) "Resume" else "Pause",
+                tint = if (pastel) ink else accent,
+                onClick = onTogglePause,
+                modifier = Modifier.weight(1f)
+            )
+            PanelControlButton(
+                icon = CurioIcons.Close,
+                label = "Hide",
+                tint = if (pastel) ink else MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = onHide,
+                modifier = Modifier.weight(1f)
             )
             // v226 — Cancel ends the session outright (no write-it-down
-            // page). Home keeps the cancelled session recoverable, so this
-            // is a safe destructive-looking action — the row offers a
-            // revive.
-            BubbleIconButton(
+            // page); Home keeps it recoverable via the cancelled-explore row.
+            PanelControlButton(
                 icon = CurioIcons.Delete,
-                contentDescription = "Cancel session",
-                tint = if (AppPreferences.pastelColorsState) ink
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                onClick = onCancel
+                label = "Cancel",
+                tint = MaterialTheme.colorScheme.error,
+                onClick = onCancel,
+                modifier = Modifier.weight(1f)
             )
         }
 
@@ -562,12 +572,9 @@ private fun NoteField(
         maxLines = 2,
         modifier = Modifier
             .fillMaxWidth()
-            // The overlay window is WRAP_CONTENT, so fillMaxWidth resolves to
-            // the field's natural (text) width instead of the bubble's width —
-            // an empty note field would collapse to a sliver. Pin a minimum so
-            // the field always reads as a real input box with room for its
-            // text, matching the expanded panel's topic width.
-            .widthIn(min = EXPANDED_TOPIC_WIDTH)
+            // v257 — the panel now has a FIXED width, so fillMaxWidth
+            // resolves to that width and the field can never collapse to a
+            // sliver (the old min-width pin is gone).
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (pastel) accent.copy(alpha = 0.14f)
@@ -720,14 +727,70 @@ private fun BubbleIconButton(
     }
 }
 
+/**
+ * v257 — one equal-width control in the panel's labeled row: a soft tonal
+ * pill with the glyph over its small caption, so Pause / Hide / Cancel read
+ * by name instead of by guessing icons.
+ */
+@Composable
+private fun PanelControlButton(
+    icon: String,
+    label: String,
+    tint: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.72f),
+        shadowElevation = 0.dp,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            CurioIcon(name = icon, contentDescription = null, tint = tint, size = 18.dp)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = tint
+            )
+        }
+    }
+}
+
+/**
+ * Compact chronometer-style reading ("12:34", "1:02:34") — the big panel
+ * readout and the docked pill both use it; tighter than the friendly
+ * [com.curio.app.data.formatElapsed] ("12m 5s").
+ */
+private fun compactElapsed(millis: Long): String {
+    val totalSeconds = (millis / 1000L).coerceAtLeast(0L)
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return if (hours > 0) {
+        "%d:%02d:%02d".format(Locale.US, hours, minutes, seconds)
+    } else {
+        "%02d:%02d".format(Locale.US, minutes, seconds)
+    }
+}
+
 // ── Tuning constants ────────────────────────────────────────────────────
 // Corner radii: a circle-ish collapsed pill (23dp ≈ the 46dp pill's radius
 // minus padding) and a refined card when expanded.
 private val PILL_CORNER_RADIUS = 23.dp
 private val PANEL_CORNER_RADIUS = 18.dp
 
-// Topic area width cap in the expanded panel. Longer topics slow-scroll.
-private val EXPANDED_TOPIC_WIDTH = 160.dp
+// v257 — the expanded panel has a FIXED width: expanding resizes the
+// overlay window in ONE deterministic step (no per-frame morph), which is
+// what kills the old expand glitch. PANEL_TOPIC_WIDTH caps the header's
+// marquee topic inside it.
+private val PANEL_WIDTH = 236.dp
+private val PANEL_TOPIC_WIDTH = 118.dp
 
 // Marquee tuning — a slow ticker (~42 px/s) that holds briefly at each end
 // before gliding back, so the full topic name reveals itself at a readable

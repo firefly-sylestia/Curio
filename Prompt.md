@@ -1,5 +1,28 @@
 # Prompt.md — current request log
 
+## Request: v257 — bubble expand glitch + redesign; pet-designer bottom strip
+
+1. **Bubble glitch root cause**: AnimatedContent's SizeTransform animated the
+   container size every frame WHILE the service re-centered the WRAP_CONTENT
+   overlay window on each onSizeChanged — two loops fighting over window
+   geometry. Fix: Crossfade content (180ms) + corner-radius spring; panel is
+   FIXED 236dp wide, pill fixed → one-step window resize.
+2. **Panel redesign**: header (chip + marquee topic + minimize), big tnum
+   chronometer centered with PAUSED/status caption, three equal-weight
+   labeled tonal controls (Pause/Resume · Hide · Cancel in error tone),
+   note field (min-width pin removed — fixed parent), Finish button.
+   compactElapsed restored for the big readout.
+3. **Pet designer strip**: route wasn't full-bleed-bottom → NavHost applied
+   navigationBars inset padding leaving a bare background band under the
+   studio capsule. Added PET_DESIGNER to fullBleedBottomRoutePrefixes +
+   navigationBarsPadding on PetStudioBottomNav's wrapper Box.
+
+## Status: complete — commit & push this turn.
+
+---
+
+# Prompt.md — current request log
+
 ## Request: v256 — defaults, pre-A12 glass scoping, icon optics, bubble glass, pet outside app
 
 1. **Defaults**: Liquid glass ON, Clear glass ON (getBoolean defaults flipped).

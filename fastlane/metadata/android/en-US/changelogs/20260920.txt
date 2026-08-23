@@ -1,3 +1,6 @@
+FIX: Explore bubble expand is smooth now - the panel has a fixed width so the overlay window resizes in one step instead of fighting itself.
+NEW: Redesigned explore bubble panel - big chronometer readout, labeled Pause/Hide/Cancel controls, note field and Finish action.
+FIX: Pet Designer - the bare background strip behind the studio capsule is gone; the page runs edge-to-edge to the bottom.
 ADD: Pet outside the app - an opt-in overlay companion that floats over other apps (Pet Designer > Settings; drag, tap to hop, long-press to send home).
 ADD: Explore bubble wears the simulated liquid-glass pane when Liquid glass is on.
 CHANGE: Liquid glass and Clear glass are now ON by default.

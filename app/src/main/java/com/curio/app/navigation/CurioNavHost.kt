@@ -324,7 +324,11 @@ fun CurioNavHost(
     // from the NavHost (the reveal's old 80dp band was removed in v132;
     // Manage Categories gets the same edge-to-edge treatment).
     val fullBleedBottomRoutePrefixes = setOf(
-        CurioRoutes.MANAGE_CATEGORIES.substringBefore("/")
+        CurioRoutes.MANAGE_CATEGORIES.substringBefore("/"),
+        // v256 — the Pet Designer paints to the bottom edge too; the old
+        // reserved nav-bar inset showed as a bare background STRIP behind
+        // the floating studio capsule.
+        CurioRoutes.PET_DESIGNER.substringBefore("/")
     )
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
