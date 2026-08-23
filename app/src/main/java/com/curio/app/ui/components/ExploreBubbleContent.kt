@@ -1,9 +1,20 @@
 package com.curio.app.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +67,6 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
-import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
@@ -66,16 +77,21 @@ import kotlinx.coroutines.delay
  * and a Finish action. No verb/target lines or
  * descriptions — those live in the done-prompt, not on a floating pill.
  *
- * Two states, swapped INSTANTLY (v27 — the old morph animation between the
- * pill and the panel was laggy on many devices and is gone):
- *  - **Minimized** (default): a compact capsule pill — category glyph chip,
- *    the topic name (long names slow-scroll/marquee), and a chronometer
- *    readout. Tapping it expands.
+ * Two states, morphed smoothly (v253 restored the animation the v27 instant
+ * swap removed — one shared spring drives the container size while the
+ * contents crossfade/scale):
+ *  - **Minimized** (default): JUST the category glyph in a small circle —
+ *    no topic, no timer — so the resting bubble takes the least possible
+ *    space over what the user is watching. Left idle at a snapped edge it
+ *    docks into the screen edge assistive-touch-style (a peek sliver);
+ *    touching it slides it back out.
  *  - **Expanded**: a rounded card panel. Header (glyph + topic + elapsed +
  *    minimize chevron), then a compact ICON-ONLY control row — Pause /
  *    Resume, Hide, Cancel —
- *    then the shared session note field, then the Finish button that ends
- *    the session and opens the write-it-down page.
+ *    then the shared session note field, then the Finish action that ends
+ *    the session and opens the write-it-down page. Left untouched (and not
+ *    typing) it auto-collapses back to the pill so it never keeps covering
+ *    the thing being watched.
  *
  * Dragging lives HERE (Compose), not on the window: a system-overlay
  * ComposeView's composed child consumes every View-level touch, so a View
@@ -99,6 +115,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun ExploreBubbleContent(
     session: ExploreSession,
+    // v253 — which horizontal edge the window last snapped to (-1 left,
+    // 1 right, 0 unknown), owned by the service; drives the edge dock.
+    edgeSnap: MutableState<Int>,
     onTogglePause: () -> Unit,
     onHide: () -> Unit,
     // v27 — the note field writes the session's SHARED note live.
@@ -143,10 +162,60 @@ fun ExploreBubbleContent(
     }
     val elapsed = session.elapsedMillis(now)
 
-    // Minimized by default — a compact chip + timer pill. Expanded shows the
-    // full controls. Transient UI state: whenever the window is rebuilt
+    // Minimized by default — a compact icon pill. Expanded shows the full
+    // controls. Transient UI state: whenever the window is rebuilt
     // (hide → re-show, service restart) the bubble comes back small.
     var minimized by remember { mutableStateOf(true) }
+
+    // v253 — whether the note field currently owns the keyboard. While it
+    // does, the panel must never auto-collapse under the user's hands.
+    var noteFocused by remember { mutableStateOf(false) }
+
+    // v253 — interaction clock for BOTH idle behaviors (panel auto-collapse
+    // and edge docking). The observe-only pointerInput below pokes it on
+    // every touch, so any contact resets both timers.
+    var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
+    // v253 — assistive-touch-style edge dock: after a few idle seconds at a
+    // snapped edge, the collapsed pill slides mostly off-screen leaving only
+    // a peek sliver; the next touch slides it back out.
+    var docked by remember { mutableStateOf(false) }
+    val dockOffset = remember { Animatable(0f) }
+    LaunchedEffect(docked, minimized) {
+        dockOffset.animateTo(
+            if (docked && minimized) 1f else 0f,
+            spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)
+        )
+    }
+    LaunchedEffect(minimized) {
+        if (!minimized) {
+            docked = false
+            return@LaunchedEffect
+        }
+        while (true) {
+            delay(400)
+            if (edgeSnap.value != 0 &&
+                System.currentTimeMillis() - lastInteraction >= EDGE_DOCK_IDLE_MS
+            ) {
+                docked = true
+                break
+            }
+        }
+    }
+
+    // v253 — an untouched expanded panel folds back to the pill so it never
+    // keeps covering what the user is watching. Typing (noteFocused) or any
+    // touch keeps it open.
+    LaunchedEffect(minimized, noteFocused) {
+        if (minimized || noteFocused) return@LaunchedEffect
+        while (true) {
+            delay(1_000)
+            if (System.currentTimeMillis() - lastInteraction >= AUTO_COLLAPSE_MS) {
+                minimized = true
+                break
+            }
+        }
+    }
 
     // v27 — the shared note's draft. Kept as LOCAL state so the field never
     // fights the store's recomposition (the session object changes on every
@@ -179,14 +248,53 @@ fun ExploreBubbleContent(
         }
     }
 
+    // v253 — observe-only pointer pass: pokes the interaction clock on every
+    // touch (resetting auto-collapse AND the dock timer) and undocks a
+    // docked pill the instant it's contacted.
+    val interactionModifier = Modifier.pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent()
+                if (event.changes.any { it.pressed }) {
+                    lastInteraction = System.currentTimeMillis()
+                    if (docked) docked = false
+                }
+            }
+        }
+    }
+
+    // v27 → v253 — smooth morph instead of the instant swap: one shared
+    // spring drives the container size (SizeTransform), while the outgoing
+    // state fades/scales down and the incoming one fades/scales up — the
+    // pill visibly grows into the panel around its center.
+    val cornerRadius by animateDpAsState(
+        targetValue = if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS,
+        animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f),
+        label = "bubbleCorner"
+    )
+
     Surface(
-        shape = RoundedCornerShape(if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS),
+        shape = RoundedCornerShape(cornerRadius),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         // Overlay windows clip elevation shadows into a hard, boxy edge
         // around the pill, so the bubble stays flat — its definition
         // comes from the container step + accent glow, not a shadow.
         shadowElevation = 0.dp,
         modifier = modifier
+            // Edge dock FIRST in the chain, so every interaction modifier
+            // below lives inside the translated layer and the peek sliver
+            // is exactly what receives touches.
+            .graphicsLayer {
+                if (dockOffset.value > 0f && edgeSnap.value != 0) {
+                    val hideBy = (size.width * dockOffset.value) - EDGE_PEEK.toPx()
+                    translationX = (
+                        if (edgeSnap.value < 0) -hideBy else hideBy
+                        ).coerceAtLeast(0f)
+                } else {
+                    translationX = 0f
+                }
+            }
+            .then(interactionModifier)
             .then(dragModifier)
             .onSizeChanged { size ->
                 // Only during the post-toggle burst — timer ticks change the
@@ -198,17 +306,34 @@ fun ExploreBubbleContent(
             // so the expanded bubble carries no dead clickable semantics.
             .then(if (minimized) Modifier.clickable { minimized = false } else Modifier)
     ) {
-        if (minimized) {
-            MinimizedPill(
-                session = session,
-                category = category,
-                accent = accent,
-                ink = ink,
-                elapsed = elapsed,
-                onExpand = { minimized = false }
-            )
-        } else {
-            ExpandedPanel(
+        AnimatedContent(
+            targetState = minimized,
+            transitionSpec = {
+                (
+                    fadeIn(spring(stiffness = 220f)) + scaleIn(
+                        initialScale = 0.9f,
+                        animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f)
+                    )
+                    ) togetherWith
+                    (
+                        fadeOut(spring(stiffness = 260f)) + scaleOut(targetScale = 0.94f)
+                        ) using SizeTransform(clip = false) { _, _ ->
+                        spring(dampingRatio = 0.88f, stiffness = 300f)
+                    }
+            },
+            contentAlignment = Alignment.Center,
+            label = "bubbleExpand"
+        ) { m ->
+            if (m) {
+                MinimizedPill(
+                    category = category,
+                    accent = accent,
+                    ink = ink,
+                    paused = session.paused,
+                    onExpand = { minimized = false }
+                )
+            } else {
+                ExpandedPanel(
                 session = session,
                 category = category,
                 accent = accent,
@@ -221,67 +346,54 @@ fun ExploreBubbleContent(
                     noteDraft = note
                     onNoteChange(note)
                 },
-                onNoteFocusChange = onNoteFocusChange,
+                onNoteFocusChange = { focused ->
+                    noteFocused = focused
+                    onNoteFocusChange(focused)
+                },
                 onFinish = onFinish,
                 onCancel = onCancel,
                 onMinimize = { minimized = true }
-            )
+                )
+            }
         }
     }
 }
 
-/** The compact capsule pill — glyph chip + scrolling topic + compact timer. */
+/**
+ * The collapsed pill — v253: JUST the category glyph in a small circle.
+ * No topic, no timer (tap to see them in the panel), so the resting bubble
+ * takes the least possible space over whatever the user is watching. While
+ * paused the glyph swaps to the pause mark and the accent ring drops to a
+ * neutral outline, so the frozen state reads at a glance.
+ */
 @Composable
 private fun MinimizedPill(
-    session: ExploreSession,
     category: CurioCategory,
     accent: Color,
     ink: Color,
-    elapsed: Long,
+    paused: Boolean,
     onExpand: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .size(46.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(
+                width = 2.dp,
+                color = if (paused) MaterialTheme.colorScheme.outlineVariant
+                        else accent.copy(alpha = 0.55f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        CategoryGlyphChip(category = category, accent = accent, ink = ink)
-
-        // Topic + live timer — the topic caps at [MINIMIZED_TOPIC_WIDTH] and
-        // slow-scrolls (marquee) when it's longer, so the pill stays small.
-        Column(
-            modifier = Modifier
-                .weight(1f, fill = false)
-                .widthIn(max = MINIMIZED_TOPIC_WIDTH)
-        ) {
-            MarqueeTopicText(
-                text = session.topicName,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (AppPreferences.pastelColorsState) ink
-                        else MaterialTheme.colorScheme.onSurface,
-                maxWidth = MINIMIZED_TOPIC_WIDTH,
-                paused = session.paused
-            )
-            Text(
-                text = if (session.paused) "Paused · ${compactElapsed(elapsed)}"
-                       else compactElapsed(elapsed),
-                style = MaterialTheme.typography.labelSmall,
-                color = if (session.paused) {
-                    if (AppPreferences.pastelColorsState) ink else accent
-                } else if (AppPreferences.pastelColorsState) {
-                    ink.copy(alpha = 0.78f)
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
-        }
-
-        // ── Expand to the full controls ────────────────────────────
-        BubbleIconButton(
-            icon = CurioIcons.KeyboardArrowUp,
-            contentDescription = "Expand timer",
-            tint = if (AppPreferences.pastelColorsState) ink else accent,
-            onClick = onExpand
+        CurioIcon(
+            name = if (paused) CurioIcons.Pause else category.iconGlyph,
+            contentDescription = if (paused) "Paused — tap for timer"
+                                else "Explore timer",
+            tint = ink,
+            size = 22.dp
         )
     }
 }
@@ -600,33 +712,13 @@ private fun BubbleIconButton(
     }
 }
 
-/**
- * Compact chronometer-style reading for the minimized pill ("12:34",
- * "1:02:34") — tighter than the friendly [formatElapsed] ("12m 5s") so the
- * small bubble stays small.
- */
-private fun compactElapsed(millis: Long): String {
-    val totalSeconds = (millis / 1000L).coerceAtLeast(0L)
-    val hours = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) / 60
-    val seconds = totalSeconds % 60
-    return if (hours > 0) {
-        "%d:%02d:%02d".format(Locale.US, hours, minutes, seconds)
-    } else {
-        "%02d:%02d".format(Locale.US, minutes, seconds)
-    }
-}
-
 // ── Tuning constants ────────────────────────────────────────────────────
-// Corner radii: a near-capsule pill when minimized (24dp ≈ the pill's
-// half-height, so the ends stay fully rounded) and a refined card when
-// expanded.
-private val PILL_CORNER_RADIUS = 24.dp
+// Corner radii: a circle-ish collapsed pill (23dp ≈ the 46dp pill's radius
+// minus padding) and a refined card when expanded.
+private val PILL_CORNER_RADIUS = 23.dp
 private val PANEL_CORNER_RADIUS = 18.dp
 
-// Topic area width caps: tight in the minimized pill, roomier in the
-// expanded panel. Longer topics slow-scroll within these bounds.
-private val MINIMIZED_TOPIC_WIDTH = 110.dp
+// Topic area width cap in the expanded panel. Longer topics slow-scroll.
 private val EXPANDED_TOPIC_WIDTH = 160.dp
 
 // Marquee tuning — a slow ticker (~42 px/s) that holds briefly at each end
@@ -636,7 +728,16 @@ private const val MARQUEE_PX_PER_MS = 0.042f
 private const val MARQUEE_START_HOLD_MS = 900L
 private const val MARQUEE_END_HOLD_MS = 1_100L
 
-// v27 — how long size callbacks forward after an expand/collapse toggle
-// (long enough for the instant swap + one window relayout to land, short
-// enough that a per-second timer tick can never slip into it).
-private const val RESIZE_BURST_MS = 120L
+// v253 — how long size callbacks forward after an expand/collapse toggle:
+// long enough for the full morph spring (~400ms) plus a window relayout,
+// short enough that a per-second timer tick can never slip into it.
+private const val RESIZE_BURST_MS = 600L
+
+// v253 — idle windows for the two auto behaviors. An untouched panel folds
+// back to the pill after this long (so it stops covering what you're
+// watching); a collapsed pill docks into its snapped edge after this long.
+private const val AUTO_COLLAPSE_MS = 12_000L
+private const val EDGE_DOCK_IDLE_MS = 4_000L
+
+// v253 — how much of the docked pill stays visible at the screen edge.
+private val EDGE_PEEK = 14.dp

@@ -1,3 +1,32 @@
+# Prompt.md — current request log
+
+## Request: v254 — hero-tear revert + explore bubble pass (COMPLETE, pushed)
+
+1. **Revert the v251 sticky hero tear** (f7e9ad7): user wanted the OPPOSITE
+   direction — screens with sticky heroes should act like Home/Profile, not
+   Home/Profile like Settings. `git checkout f7e9ad7^ --` on HomeScreen.kt +
+   ProfileScreen.kt; verified nothing from 6566ad0 was lost (its only
+   Profile change removed a wrapper f7e9ad7 introduced).
+2. **Explore bubble** (ExploreBubbleContent.kt + ExploreSessionService.kt):
+   - Minimized pill is now icon-ONLY (46dp glyph circle; pause glyph when
+     paused). Topic + timer live only in the expanded panel.
+   - Smooth expand: AnimatedContent morph (fade+scale+SizeTransform spring),
+     animated corner radius; RESIZE_BURST_MS 120→600 to cover the spring.
+   - Edge dock: service publishes snap side via bubbleEdgeSnap state;
+     after 4s idle at an edge the pill slides mostly off-screen (14dp peek,
+     graphicsLayer translate); any touch undocks.
+   - Auto-collapse: an untouched panel (12s) folds back to the pill unless
+     the note field is focused — stops it covering what's being watched.
+
+### Follow-ups / notes
+- Pet outside the app still open (needs overlay-window service; faux glass
+  only — backdrop capture can't cross windows).
+- Bubble liquid glass: same cross-window limitation.
+
+## Status: complete — commit & push this turn.
+
+---
+
 ## v254 batch (PARTIAL - remaining items listed)
 
 Shipped:

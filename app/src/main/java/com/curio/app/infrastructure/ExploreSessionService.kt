@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.view.WindowManager
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -113,6 +114,11 @@ class ExploreSessionService : Service() {
     // device-level rejection can never turn into a restart loop. Reset on
     // every explicit start (see onStartCommand).
     private var bubbleRetryCount = 0
+    // v253 — which horizontal edge the window last snapped to: -1 left,
+    // 1 right, 0 unknown. Read inside the bubble's composition to drive the
+    // assistive-touch-style edge dock (the pill slides mostly off-screen,
+    // leaving a peek sliver, after a few idle seconds at the edge).
+    private val bubbleEdgeSnap = mutableStateOf(0)
 
     // ── Periodic live-notification refresh ─────────────────────────────
     // The shade chronometer ticks live, but the progress bar and expanded
@@ -579,6 +585,7 @@ class ExploreSessionService : Service() {
                     ) {
                         ExploreBubbleContent(
                             session = session,
+                            edgeSnap = bubbleEdgeSnap,
                             onTogglePause = {
                                 val current = ExploreSessionStore.getActiveSession(this@ExploreSessionService)
                                     ?: return@ExploreBubbleContent
@@ -866,6 +873,9 @@ class ExploreSessionService : Service() {
             (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx)
         )
         runCatching { windowManager.updateViewLayout(view, params) }
+        // Tell the composition which edge it landed on so the pill can
+        // dock into it after idling (v253).
+        bubbleEdgeSnap.value = if (snapLeft) -1 else 1
     }
 
     private fun windowBounds(): Rect =

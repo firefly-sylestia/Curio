@@ -1,3 +1,6 @@
+FIX: Home & Profile hero tears scroll away again - the v251 pinned-tear change is reverted.
+ADD: Explore bubble rests as a small icon-only pill and docks into the screen edge after idling (touch to slide it back out).
+IMPROVE: Explore bubble expands smoothly now; an untouched panel folds itself back up so it never keeps covering what you're watching.
 FIX: Pet hide-and-seek peeks on all screen sides, not just corners.
 FIX: Star-catch stars fall faster and stop piling up; taps no longer cancel a running game.
 IMPROVE: Glass tuning moves into a live-preview dialog; indicator-shadow slider removed.
