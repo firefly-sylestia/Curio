@@ -245,8 +245,18 @@ fun CurioLiquidGlassTabBar(
         ).also { holder.instance = it }
     }
 
+    // v245 — SNAP to the selected tab on the bar's FIRST composition after
+    // (re-)entering it; only SUBSEQUENT changes animate. Re-entering Cabinet
+    // from an entry used to replay the fly-in because the fresh animation
+    // started from its initial value instead of the live selection.
+    var pendingFirstSnap = remember { true }
     LaunchedEffect(selectedIndex, dampedDragAnimation) {
-        dampedDragAnimation.animateToValue(selectedIndex.toFloat())
+        if (pendingFirstSnap) {
+            pendingFirstSnap = false
+            dampedDragAnimation.updateValue(selectedIndex.toFloat())
+        } else {
+            dampedDragAnimation.animateToValue(selectedIndex.toFloat())
+        }
     }
 
     val interactiveHighlight = remember(animationScope, totalWidthPx) {

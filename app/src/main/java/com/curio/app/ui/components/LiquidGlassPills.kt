@@ -126,9 +126,15 @@ internal fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.curioGlassC
 @Composable
 fun Modifier.fauxGlassCapsule(container: Color): Modifier {
     val dark = isCurioDarkTheme()
-    val veil = if (dark) Color.White.copy(alpha = 0.07f) else Color.White.copy(alpha = 0.55f)
-    val sheen = if (dark) Color.White.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.65f)
-    val rim = if (dark) Color.White.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.85f)
+    // v245 — CRISPER, not frosty: real per-frame blur is impossible below
+    // Android 12, so the recipe leans clear-pane (light veil, strong sheen +
+    // rim) instead of milk. The Appearance Blur slider drives the veil too —
+    // at the default 25% the capsule reads near-clear.
+    val veilScale = 0.30f + 0.70f * AppPreferences.glassBlurScaleState.coerceIn(0f, 2f)
+    val veilBase = if (dark) 0.05f else 0.34f
+    val veil = Color.White.copy(alpha = veilBase * veilScale)
+    val sheen = if (dark) Color.White.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.75f)
+    val rim = if (dark) Color.White.copy(alpha = 0.32f) else Color.White.copy(alpha = 0.90f)
     return this.drawWithContent {
         drawContent()
         val r = CornerRadius(minOf(size.width, size.height) / 2f)

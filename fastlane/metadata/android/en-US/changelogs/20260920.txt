@@ -7,6 +7,9 @@ ADD
 - Liquid glass: the active pill no longer tints the tab icons and labels with the category color - your chosen ink shows true.
 
 FIX
+- Navigation: returning to Cabinet (or leaving the topic reveal) no longer replays the blob flying in from Home - the pill snaps to the live tab instead of animating from a stale one.
+- Liquid glass on pre-Android-12: the simulated glass is much clearer now (light veil, stronger sheen + rim) and the Blur slider shapes the veil too, so it reads like a clear pane instead of milk.
+
 - Home: the drawer-menu and avatar pills really turn into liquid glass on scroll now - a duplicate scroll-state declaration was keeping the morph permanently at zero.
 - Liquid glass nav: the active pill is now fully transparent at rest and wears the exact same blur/refraction recipe as the other glass capsules - the colored ghost icons that re-tinted the labels when the blob settled are gone.
 - Floating pills (Home menu/profile, entry back/more, Profile search) are slightly larger (44dp) so the icons sit centered at every system font size.

@@ -362,7 +362,7 @@ fun CurioFloatingNavBar(
             // routePrefix matches a tab, and the old coerceAtLeast(0)
             // fallback snapped the blob back to HOME (it visibly flew home
             // then collapsed while the new page opened). Hold the origin.
-            val lastTabIndex = remember { androidx.compose.runtime.mutableIntStateOf(0) }
+            val lastTabIndex = androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) }
             val matchedIndex = items.indexOfFirst { it.route == selectedRoute }
                 .takeIf { it >= 0 }
                 ?: items.indexOfFirst { it.route == routePrefix }
