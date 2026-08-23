@@ -289,7 +289,7 @@ fun EntryDetailScreen(
     // (the exact light-mode reversal).
     val heroCardInk = if (isCurioDarkTheme()) Color(0xFFEDE7DC) else Color(0xFF232A35)
     val heroSheetColor = if (isCurioDarkTheme()) Color(0xFF121316) else Color(0xFFFDFCF9)
-    val heroStart = CurioGradients.categoryCardFill(cat.headerAccent())
+    val heroStart = MaterialTheme.colorScheme.primary
     // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
     // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,
     // see the meta card below), so the old translucent frost has no consumer.

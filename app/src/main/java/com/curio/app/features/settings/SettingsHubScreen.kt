@@ -721,19 +721,7 @@ fun settingsReadableInk(fill: Color): Color {
  * scheme roles, and the option cards' coral identity stays as today).
  */
 @Composable
-fun settingsCardAccentInk(): Color {
-    // v78 — light Curio only (the Material/AMOLED rose fallback is gone
-    // with those styles).
-    heroLaneCategory()?.let { return it.categoryInk() }
-    if (AppPreferences.heroBlueState) {
-        // v81 — dark: the light azure twin reads directly on the dark card.
-        if (isCurioDarkTheme()) return CurioColors.HomeAzure
-        // Light: a deep azure twin of the airy pastel azure so the glyphs
-        // read on the cream card.
-        return readableLightInk(CurioColors.HomeAzure)
-    }
-    return curioRoseInk()
-}
+fun settingsCardAccentInk(): Color = MaterialTheme.colorScheme.primary
 
 /**
  * v72 — the option-card CHIP hue (the icon-chip fill + card-tint family),

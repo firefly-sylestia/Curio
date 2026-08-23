@@ -490,7 +490,7 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
                 // Gold trophy — an earned rank reads better in warm gold
                 // than the coral used everywhere else (v7.103). v20 — deep
                 // gold ink on light cream so it never washes out.
-                tint = curioGoldInk(),
+                tint = MaterialTheme.colorScheme.primary,
                 size = 30.dp
             )
         }

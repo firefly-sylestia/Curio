@@ -338,7 +338,7 @@ fun CurioFloatingNavBar(
 
     // v149 — the ACTIVE pill wears the current page's category color
     // (published via [CurioNavTint]); null on plain pages → secondary.
-    val pageAccent = curioNavActiveAccent(selectedRoute)
+    val pageAccent = MaterialTheme.colorScheme.primary
 
     Box(
         modifier = modifier
@@ -659,7 +659,7 @@ fun CurioNavigationRail(
     // the current page's accent CALMED (v166 muted the bright accents), else
     // the theme's muted secondaryContainer (the old hard-coded secondary /
     // primary fallbacks read as stray yellow / pink on Cabinet "All").
-    val pageAccent = curioNavActiveAccent(selectedRoute)
+    val pageAccent = MaterialTheme.colorScheme.primary
     val railActiveFill = curioActivePillFill(pageAccent)
     val railActiveInk = curioActivePillInk(pageAccent)
 
