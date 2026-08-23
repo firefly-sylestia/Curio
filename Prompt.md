@@ -1,3 +1,31 @@
+## Request: v247 - solid idle blob, gentle press refraction, Apple press feel (COMPLETE, pushed)
+
+User (after v246 build): home active indicator is good, but (1) its refraction
+is too high, (2) make the IDLE active pill SOLID white (light) / black (dark)
+instead of transparent/reflective - while keeping the text - and restore the
+blob functionality from commit d442219, (3) better touch interaction with
+proper Apple-like animation.
+
+Also fixed the v246 CI failures first (pushed 17c693b): broken `import import`
+line in LiquidGlassPills.kt, IntOffset imported from the wrong package
+(geometry -> unit), and a duplicate `modifier =` argument on Cabinet's grid.
+
+## v247 implementation
+
+1. Solid idle blob (CurioLiquidGlassTabBar.kt): onDrawSurface draws White/Black
+   at alpha 1f - pressProgress; quiet resting shadow lifts the solid pill.
+2. Refraction tamed: indicator-only press-gated recipe from d442219 -
+   blur*xProgress, lens(10dp*p, 14dp*p, adaptive), highlight on press. Bar
+   capsule keeps its always-on recipe.
+3. Crisp ink overlay: third tab-row copy renders ABOVE the solid pill via new
+   LocalLiquidGlassTabOverlay; items strip clickables there so touches fall
+   through to the real tabs and the blob drag handlers below.
+4. Apple-style press feel (LiquidGlassPills.kt): asymmetric spring - fast
+   crisp press-in (stiffness 900 / damping 0.85), soft underdamped release
+   (380 / 0.55) with one gentle overshoot.
+
+Verified: balance-checked both files; CI validates compilation.
+
 # Prompt.md — current request log
 
 ## Request: v246 — chip-bar glass, blob visibility, press feel, icon centering (COMPLETE, pushed)

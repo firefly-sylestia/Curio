@@ -235,13 +235,20 @@ fun Modifier.liquidGlassCapsule(
     val refrScale = AppPreferences.glassRefractionScaleState
     val reflScale = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
     // v246 — spring-driven press progress (0 at rest → 1 while held).
+    // v247 — Apple-style feel: the press-IN is fast and crisp (high
+    // stiffness, near-critically damped — no wobble on the way down), the
+    // RELEASE is softer and slightly underdamped so the capsule springs
+    // back with one gentle overshoot, like iOS control centers.
     val press = remember(interactionSource) { Animatable(0f) }
     if (interactionSource != null) {
         val pressed by interactionSource.collectIsPressedAsState()
         LaunchedEffect(pressed) {
             press.animateTo(
                 if (pressed) 1f else 0f,
-                spring(dampingRatio = 0.62f, stiffness = 520f)
+                spring(
+                    dampingRatio = if (pressed) 0.85f else 0.55f,
+                    stiffness = if (pressed) 900f else 380f
+                )
             )
         }
     }

@@ -78,6 +78,14 @@ import kotlin.math.sign
 val LocalLiquidGlassTabScale = staticCompositionLocalOf { { 1f } }
 
 /**
+ * v247 — marks the CRISP OVERLAY copy of the tab row (drawn above the
+ * solid active pill). Overlay items drop their clickable so touches fall
+ * through to the real tabs underneath — the overlay exists purely to keep
+ * the icons/labels visible on top of the now-opaque idle pill.
+ */
+val LocalLiquidGlassTabOverlay = staticCompositionLocalOf { false }
+
+/**
  * v232 — PER-TAB METRICS. Each item reports its measured width so the bar
  * can lay the draggable active indicator over REAL tab widths instead of
  * assuming equal division — required now that tabs expand/collapse
@@ -96,14 +104,18 @@ fun RowScope.CurioLiquidGlassTabBarItem(
 ) {
     val scale = LocalLiquidGlassTabScale.current
     val reportWidth = LocalLiquidGlassTabMetrics.current
+    val isOverlay = LocalLiquidGlassTabOverlay.current
     Row(
         modifier
             .clip(CircleShape)
-            .clickable(
-                interactionSource = null,
-                indication = null,
-                role = Role.Tab,
-                onClick = onClick
+            .then(
+                if (isOverlay) Modifier
+                else Modifier.clickable(
+                    interactionSource = null,
+                    indication = null,
+                    role = Role.Tab,
+                    onClick = onClick
+                )
             )
             .onGloballyPositioned { coordinates ->
                 reportWidth(index, coordinates.size.width.toFloat())
@@ -429,23 +441,36 @@ fun CurioLiquidGlassTabBar(
                         backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                         shape = { CircleShape },
                         effects = {
-                            // v244 — the SAME recipe as the nav capsule:
-                            // always-on vibrancy + blur + refraction (user
-                            // tuning applies), not press-gated effects.
+                            // v247 — GENTLE press-gated glass again (as in
+                            // d442219): the idle pill is SOLID, so heavy
+                            // always-on refraction was over-bending the
+                            // sampled content for nothing. While held, a soft
+                            // vibrancy + blur + modest lens reveals the page
+                            // and tab content bending through the glass.
                             if (isBlurEnabled) {
+                                val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
-                                lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
+                                blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
+                                lens(
+                                    10f.dp.toPx() * refrScale * progress,
+                                    14f.dp.toPx() * refrScale * progress,
+                                    true
+                                )
                             }
                         },
                         highlight = {
-                            Highlight.Default.copy(alpha = reflScale)
+                            Highlight.Default.copy(
+                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) *
+                                    reflScale
+                            )
                         },
                         shadow = {
                             Shadow(
                                 // v245 — outer glow shifts with tilt.
                                 offset = tiltGlowOffset(),
-                                alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) *
+                                // v247 — a quiet resting shadow lifts the now-
+                                // solid idle pill off the page; press deepens it.
+                                alpha = (if (isBlurEnabled) 0.22f + 0.78f * dampedDragAnimation.pressProgress else 0f) *
                                     indShadowScale
                             )
                         },
@@ -467,11 +492,15 @@ fun CurioLiquidGlassTabBar(
                         },
                         onDrawSurface = {
                             val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            // v244 — FULLY transparent at rest: no accent wash,
-                            // no shading bed (both painted over the visible
-                            // labels and fought the black/white ink). Only a
-                            // whisper of deepening while pressed remains.
-                            drawRect(Color.Black.copy(alpha = 0.03f * progress))
+                            // v247 — SOLID idle pill: pure WHITE in light mode,
+                            // pure BLACK in dark, so the theme ink (black/white)
+                            // always sits on maximum contrast. Holding the pill
+                            // eases the fill away and lets the press-glass
+                            // (refraction + highlight + shadows) take over.
+                            drawRect(
+                                color = if (dark) Color.Black else Color.White,
+                                alpha = 1f - progress
+                            )
                         }
                     )
                     .height(56.dp)
@@ -481,6 +510,25 @@ fun CurioLiquidGlassTabBar(
                         @Suppress("UNUSED_EXPRESSION") tabMetricsVersion
                         widthAtFraction(dampedDragAnimation.targetValue).toDp()
                     }),
+            )
+        }
+
+        // v247 — CRISP INK OVERLAY: the solid idle pill paints OVER the
+        // real tab row (it must — its glass samples the page), which hid
+        // the active icon + label. This third copy of the row sits ABOVE
+        // the pill with clickables stripped (touches fall through to the
+        // real tabs and the blob's drag handlers below), so the ink stays
+        // perfectly sharp on top of the solid fill at rest and on top of
+        // the press-glass while held.
+        CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
+            Row(
+                Modifier
+                    .clearAndSetSemantics {}
+                    .graphicsLayer { translationX = panelOffset }
+                    .height(64.dp)
+                    .padding(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                content = measuringContent
             )
         }
     }
