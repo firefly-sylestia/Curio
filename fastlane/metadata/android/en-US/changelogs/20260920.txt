@@ -332,15 +332,16 @@ REMOVE
 - Experiments: the five Spin visuals toggles are gone - all five looks are now the default.
 - The old update card in Support & diagnostics is gone — checking, release notes and installing now live on the dedicated Updates page.
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
-FIX
-Crash: floating pills no longer sample the page capture layer (RenderThread crash on Settings sub-pages).
-Tab bar: active pill no longer doubles the icon/label under it; glow toned down.
-Settings family: sticky back pill appears only after the hero scrolls away; hero tear starts flush at the top.
-Explore bubble: smoother expand, glass rim follows the animated shape.
-Heroes: tear + back pill sit pixel-exact on every scrolling-hero screen.
-Floating pet: stays where placed, wanders on its own, long-press menu.
+
+FIX: Settings & sub-pages: sticky hero restored with glassy back pill that refracts content; hero tear starts flush at the top; content gap removed (no more 8dp space below tear).
+FIX: Pet Designer sticky hero + glassy back pill; detail morph back button unblocked (scrim removed so back button stays interactive).
 FIX: Explore bubble & floating pet: free placement anywhere, no edge snapping, no glass on the bubble.
-FIX: Ghost text in the Pet Designer studio bar removed; home nav blob effect untouched.
-FIX: Settings & sub-pages: taller Home-style hero, sticky back pill now morphs smoothly with scroll into real liquid glass.
-FIX: Settings sticky hero restored; glassy back pill refracts content; tuning preview real refraction.
-FIX: Pet Designer sticky hero + glassy back pill; detail morph back button unblocked; pills 48dp; content gap removed.
+FIX: Ghost text in Pet Designer studio bar removed; home nav blob effect untouched.
+FIX: Glass tuning preview: real refraction with local backdrop; draggable capsule can roam beyond the gradient card.
+FIX: CurioBackButton pill size increased to 48dp for better touch targets.
+FIX: Glass tap effect: interactionSource wired through settings hero back pill and liquidGlassCapsule.
+STYLE: Material color scheme applied: detail hero fill, settings icons, nav bar active state, quests icon all use MaterialTheme.colorScheme.primary.
+FIX: SettingsHeroTotalHeight import added across packages (ManageCategories, PetDesigner, Quests, Recent, RecycleBin, Support, PromoMode, Updates).
+FIX: MoodboardQuotesHidden flag moved below import block to fix syntax error.
+FIX: Pet overlay service imports fixed (PendingIntent, doOnLayout).
+FIX: Liquid glass + Clear glass defaults reverted to OFF per user request.
