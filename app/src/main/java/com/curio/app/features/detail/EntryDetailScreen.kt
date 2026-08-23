@@ -10,7 +10,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -1089,10 +1088,10 @@ private fun Modifier.heroFrostPlate(
  * Scroll-linked controls kept separate from the detail body so paper canvases,
  * rich text, and image content do not recompose for every scroll pixel.
  */
-@Composable
 // v250 — the glass more-menu's expanded width (matches CurioDropdownMenu's default).
 private val MoreMenuWidth = 236.dp
 
+@Composable
 private fun BoxScope.DetailStickyBar(
     detailScroll: androidx.compose.foundation.ScrollState,
     // v241 — the LOCAL capture of the scrolling content (sibling of the
@@ -1190,19 +1189,17 @@ private fun BoxScope.DetailStickyBar(
                     frostBrush = stickyFrostBrush
                 )
         )
+        // v250 — iOS-STYLE MORPH state lives at function scope: the pill
+        // below fades with it AND the floating glass panel appended after
+        // this Box reads the same progress.
+        val morph by animateFloatAsState(
+            targetValue = if (menuExpanded) 1f else 0f,
+            animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
+            label = "moreMenuMorph"
+        )
+        BackHandler(enabled = menuExpanded) { menuExpanded = false }
         Box {
             val moreInteraction = remember { MutableInteractionSource() }
-            // v250 — iOS-STYLE MORPH: with detail glass on, the ⋮ pill
-            // crossfades into a liquid-glass panel that BLOOMS OUT OF THE
-            // PILL'S OWN CORNER — shared spring, shared capsule recipe, so
-            // the two read as one surface morphing open. The classic
-            // (non-glass) path keeps the popup dropdown untouched.
-            val morph by animateFloatAsState(
-                targetValue = if (menuExpanded) 1f else 0f,
-                animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
-                label = "moreMenuMorph"
-            )
-            BackHandler(enabled = menuExpanded) { menuExpanded = false }
 
             Surface(
                 shape = RoundedCornerShape(50),
