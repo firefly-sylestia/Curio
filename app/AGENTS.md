@@ -4901,6 +4901,18 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v237 — revert v235 indicator blur (smudge) + size-capped lens ring**
+  - The v235 always-on blur on the draggable indicator was WRONG: at rest its raw
+    backdrop sample is EXACTLY aligned under the real tab content (invisible);
+    blurring it produced the accent halo that smudged the active label. Reverted —
+    press optics stay press-scaled only.
+  - THE PERFECT-CIRCLE RING: fixed 24dp lens refraction bands wrapped small ROUND
+    capsules entirely and folded a ring into their center (Home menu/profile pills;
+    visible on reveal/studio bars too). Lens refraction height is now capped to
+    ~16% of the pill's own minDimension (`minOf(base, size.minDimension*0.16f)`)
+    in `liquidGlassCapsule` AND the tab bar's main capsule — thin edge bend on
+    small pills, full 24dp only on tall surfaces.
+  - Light-mode active ink darkened further: `fromHsl(h, max(s,.50), min(l*.42,.24))`.
 - **v236 — touch press-blob everywhere + studio bar gets the real nav bar**
   - NEW `Modifier.curioGlassPressBlob(interactionSource)` (LiquidGlassPills.kt): the
     nav-pill touch feel packaged for any capsule — spring grows up to 1.05x while

@@ -381,7 +381,7 @@ fun CurioFloatingNavBar(
                 // glass in every category color. Dark keeps the classic ink.
                 val activeInk = if (!isCurioDarkTheme() && pageAccent != null) {
                     val hsl = toHsl(pageAccent)
-                    fromHsl(hsl.h, hsl.s.coerceAtLeast(0.45f), (hsl.l * 0.55f).coerceAtMost(0.30f))
+                    fromHsl(hsl.h, hsl.s.coerceAtLeast(0.50f), (hsl.l * 0.42f).coerceAtMost(0.24f))
                 } else {
                     curioActivePillInk(pageAccent)
                 }

@@ -1465,7 +1465,7 @@ private fun PetStudioBottomNav(
         val accent = MaterialTheme.colorScheme.primary
         val activeInk = if (!isCurioDarkTheme()) {
             val hsl = toHsl(accent)
-            fromHsl(hsl.h, hsl.s.coerceAtLeast(0.45f), (hsl.l * 0.55f).coerceAtMost(0.30f))
+            fromHsl(hsl.h, hsl.s.coerceAtLeast(0.50f), (hsl.l * 0.42f).coerceAtMost(0.24f))
         } else curioActivePillInk(null)
         val pages = listOf(
             Triple(PetDesignerPage.PETS, CurioIcons.Pets, "Pets"),

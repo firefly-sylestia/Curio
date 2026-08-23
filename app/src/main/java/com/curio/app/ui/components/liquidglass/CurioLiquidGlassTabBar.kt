@@ -295,10 +295,13 @@ fun CurioLiquidGlassTabBar(
                         if (isBlurEnabled) {
                             vibrancy()
                             blur((if (clear) 2.dp else 8.dp).toPx())
-                            // v235 — clear-glass also shrinks the refraction band:
-                            // 24dp top+bottom folds over itself mid-capsule on a
-                            // bar this short once the frost stops hiding it.
-                            lens((if (clear) 14.dp else 24.dp).toPx(), (if (clear) 18.dp else 24.dp).toPx())
+                            // v237 — SIZE-CAPPED refraction: fixed 24dp bands fold
+                            // over themselves mid-capsule on short bars and read as
+                            // a perfect-circle ring; cap the band to ~16% of the
+                            // pill's own height so the ring can never form.
+                            val maxH = size.minDimension * 0.16f
+                            val rh = minOf((if (clear) 14.dp else 24.dp).toPx(), maxH)
+                            lens(rh, rh * 1.3f)
                         }
                     },
                     highlight = {
@@ -387,12 +390,11 @@ fun CurioLiquidGlassTabBar(
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
-                                // v235 — ALWAYS-ON SOFT BLUR on the indicator's
-                                // sample: at rest it previously drew the combined
-                                // backdrop nearly RAW (lens/highlight are all
-                                // press-scaled), so the tinted icon copy beneath
-                                // read as a sharp circular blob under Clear glass.
-                                blur((if (clear) 4.dp else 8.dp).toPx())
+                                // v237 — REVERTED the v235 always-on blur: at rest
+                                // the raw sample is EXACTLY ALIGNED under the real
+                                // tab content (invisible), while any blur turns the
+                                // accent copy into the smudgy halo users saw. Press
+                                // optics stay press-scaled only.
                                 lens(10.dp.toPx() * progress, 14.dp.toPx() * progress, true)
                             }
                         },

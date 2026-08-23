@@ -165,10 +165,13 @@ fun Modifier.liquidGlassCapsule(
                 effects = {
                     vibrancy()
                     blur((if (clear) 2.dp else 8.dp).toPx())
-                    // v235 — clear-glass shrinks the refraction band too: on
-                    // short capsules the 24dp top+bottom bands fold over each
-                    // other mid-pill once frost no longer hides the overlap.
-                    lens((if (clear) 14.dp else 24.dp).toPx(), (if (clear) 18.dp else 24.dp).toPx())
+                    // v237 — SIZE-CAPPED refraction: on small ROUND pills the
+                    // fixed 24dp bands wrapped the whole capsule and folded a
+                    // perfect-circle ring into its center (Home menu/profile,
+                    // reveal + studio bars). Cap to ~16% of the pill's size;
+                    // small pills get a thin edge bend, big bars keep 24dp.
+                    val rh = minOf((if (clear) 14.dp else 24.dp).toPx(), size.minDimension * 0.16f)
+                    lens(rh, rh * 1.3f)
                 },
                 highlight = { Highlight.Default },
                 shadow = {

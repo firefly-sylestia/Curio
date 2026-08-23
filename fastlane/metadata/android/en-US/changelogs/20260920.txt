@@ -1,4 +1,6 @@
 ADD
+- Liquid glass: removed the smudge - the active pill and its label are crisp again, and the perfect-circle ring inside small glass pills is gone.
+- Liquid glass: active tab text/icon in light mode is darker still for easy reading.
 - Liquid glass: the touch press-blob comes to every glass pill - Home menu/profile, detail back/more, the reveal favorite pill and the tour dock buttons grow and glow under your finger.
 - Liquid glass: the Pet Designer studio bar now uses the same bar as the bottom nav - draggable active indicator with the full press feel.
 - Liquid glass: fixed the circular refraction blobs that showed inside the active pill and mid-bar with Clear glass.
