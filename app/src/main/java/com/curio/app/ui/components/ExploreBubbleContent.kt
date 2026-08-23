@@ -263,6 +263,12 @@ fun ExploreBubbleContent(
         }
     }
 
+    // v256 — BUBBLE LIQUID GLASS: an overlay window can't sample the apps
+    // behind it (the capture library only sees inside its own window), so
+    // the bubble wears the SIMULATED recipe — a translucent pane with the
+    // sheen + rim light-play — whenever Liquid glass is on.
+    val bubbleGlass = AppPreferences.liquidGlassPillsState
+
     // v27 → v253 — smooth morph instead of the instant swap: one shared
     // spring drives the container size (SizeTransform), while the outgoing
     // state fades/scales down and the incoming one fades/scales up — the
@@ -275,12 +281,14 @@ fun ExploreBubbleContent(
 
     Surface(
         shape = RoundedCornerShape(cornerRadius),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = if (bubbleGlass) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.74f)
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
         // Overlay windows clip elevation shadows into a hard, boxy edge
         // around the pill, so the bubble stays flat — its definition
         // comes from the container step + accent glow, not a shadow.
         shadowElevation = 0.dp,
         modifier = modifier
+            .then(if (bubbleGlass) Modifier.curioFauxGlassSheen() else Modifier)
             // Edge dock FIRST in the chain, so every interaction modifier
             // below lives inside the translated layer and the peek sliver
             // is exactly what receives touches.

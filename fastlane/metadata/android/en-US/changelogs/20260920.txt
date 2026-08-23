@@ -1,3 +1,8 @@
+ADD: Pet outside the app - an opt-in overlay companion that floats over other apps (Pet Designer > Settings; drag, tap to hop, long-press to send home).
+ADD: Explore bubble wears the simulated liquid-glass pane when Liquid glass is on.
+CHANGE: Liquid glass and Clear glass are now ON by default.
+CHANGE: Below Android 12 the simulated glass is limited to the bottom nav and Topic Reveal - every other pill keeps its classic solid look (the faux-blur pills read badly there).
+FIX: Pill icons sat a touch too high - a small optical bias now seats glyph mass just below center in round buttons.
 FIX: Glass tuning dialog compiles again (missing imports).
 CHANGE: Every torn-hero page (Settings hub & sub-pages, Experiments, Backup, Support, Updates, Promo, Quests, Recycle bin, Recents, Manage categories) now scrolls its hero away with the page like Home & Profile - no more pinned tear.
 FIX: Home & Profile hero tears scroll away again - the v251 pinned-tear change is reverted.

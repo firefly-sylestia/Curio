@@ -68,7 +68,7 @@ import com.curio.app.data.publicationYear
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
-import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -679,7 +679,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             ) + fadeOut(animationSpec = tween(220))
         ) {
             DatabaseStickyChipBar(
-                glassBackdrop = if (isLiquidGlassRequested()) chipGlassBackdrop else null,
+                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
                 listState = listState,
                 catalog = catalog,
                 totalTopics = totalTopics,

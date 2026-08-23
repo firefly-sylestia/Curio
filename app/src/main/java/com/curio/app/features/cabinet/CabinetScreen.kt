@@ -97,7 +97,7 @@ import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -553,7 +553,7 @@ fun CabinetScreen(navController: NavController) {
             ) + fadeOut(animationSpec = tween(220))
         ) {
             CabinetStickyChipBar(
-                glassBackdrop = if (isLiquidGlassRequested()) chipGlassBackdrop else null,
+                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
                 gridState = gridState,
                 barTop = heroTotal,
                 entries = entries,

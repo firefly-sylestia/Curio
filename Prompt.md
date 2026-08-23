@@ -1,5 +1,31 @@
 # Prompt.md — current request log
 
+## Request: v256 — defaults, pre-A12 glass scoping, icon optics, bubble glass, pet outside app
+
+1. **Defaults**: Liquid glass ON, Clear glass ON (getBoolean defaults flipped).
+2. **Pre-A12 scoping** ("only nav + topic reveal get it"):
+   - `isInScreenGlassActive()` re-gated on SDK >= 31 → all in-screen pills
+     (Home menu/avatar, Profile, Detail back/more, chip bars, Pet studio
+     bar) fall back to solid; detail more-menu returns to the classic
+     popup below 12 (fixes the ugly morph).
+   - Bottom nav keeps its `curioFauxGlassSheen` coat; Reveal's
+     `liquidGlassCapsule` still falls back to `fauxGlassCapsule`.
+   - Cabinet/TopicDB chip bars switched to `isLiquidGlassPillsActive()`.
+3. **Icon optics**: CurioIcon measured-ink shift += 4% of box height DOWN.
+4. **Bubble glass**: ExploreBubbleContent Surface translucent (0.74 alpha) +
+   curioFauxGlassSheen when Liquid glass on (cross-window capture impossible).
+5. **Pet outside app**: new PetOverlayService (overlay window, OverlayOwner
+   plumbing mirroring ExploreSessionService), manifest specialUse entry,
+   AppPreferences petOutsideAppState (+KEY), toggle card in Pet Designer >
+   Settings with overlay-permission intent. Tap = hop, drag + edge snap,
+   long-press sends home & clears pref.
+
+## Status: complete — commit & push this turn.
+
+---
+
+# Prompt.md — current request log
+
 ## Request: v255 — scrolling-hero conversion for ALL pinned-hero screens (+ CI import fix)
 
 - CI fix first (bf2b037): GlassTuningDialog needed geometry.CornerRadius +

@@ -95,13 +95,15 @@ fun isLiquidGlassPillsActive(): Boolean =
  * Box — exactly the bottom-nav architecture that has never crashed), so the
  * old v228 self-capture cycle is impossible by construction; the global
  * capture guard below stays as belt-and-braces.
+ *
+ * v256 — API-GATED again: below Android 12 there is no RenderEffect, and
+ * the simulated recipe read badly on these small floating pills (the user
+ * call). Only the BOTTOM NAV and TOPIC REVEAL keep simulated glass on old
+ * devices — every in-screen pill falls back to its classic solid path.
  */
 fun isInScreenGlassActive(): Boolean =
     // v242 — merged into the single Liquid glass toggle (Appearance).
-    // v243 — REQUESTED, not API-gated: on pre-Android-12 the capsule
-    // modifier itself falls back to the simulated recipe, so older
-    // devices get the glass look too instead of being silently left out.
-    isLiquidGlassRequested()
+    isLiquidGlassRequested() && android.os.Build.VERSION.SDK_INT >= 31
 
 /**
  * The capture onDraw for the NavHost's [com.kyant.backdrop.backdrops.rememberLayerBackdrop]:

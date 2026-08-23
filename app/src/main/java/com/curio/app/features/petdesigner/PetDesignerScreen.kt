@@ -1069,6 +1069,55 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
+            // ── Outside the app (Settings page, v256) — the overlay pet ──
+            item {
+                if (page == PetDesignerPage.SETTINGS) SectionCard(
+                    "Outside the app",
+                    "Let your pet tag along over other apps — drag it anywhere, tap it for a hop, long-press to send it home"
+                ) {
+                    val context = LocalContext.current
+                    val outsideOn = AppPreferences.petOutsideAppState
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Pet outside the app",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                if (outsideOn) "Floating over other apps — long-press the pet to bring it home"
+                                else "Off — needs the \"Display over other apps\" permission",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = outsideOn,
+                            onCheckedChange = { wanted ->
+                                if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
+                                    // Send the user to the system overlay
+                                    // permission page for Curio.
+                                    runCatching {
+                                        context.startActivity(
+                                            android.content.Intent(
+                                                android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                                android.net.Uri.parse("package:" + context.packageName)
+                                            ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        )
+                                    }
+                                } else {
+                                    AppPreferences.setPetOutsideAppEnabled(context, wanted)
+                                    com.curio.app.infrastructure.PetOverlayService.sync(context)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
             // ── Pet size (Settings page, v71) — whole-pet scale ─────
             item {
                 if (page == PetDesignerPage.SETTINGS) SectionCard(

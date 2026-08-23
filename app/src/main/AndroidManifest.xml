@@ -80,6 +80,17 @@
                 android:value="exploreSessionTimer" />
         </service>
 
+        <!-- v256 — the pet companion OUTSIDE the app: a tiny overlay window
+             that keeps the sprite floating over other apps (opt-in). -->
+        <service
+            android:name=".infrastructure.PetOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="petCompanionOverlay" />
+        </service>
+
         <receiver
             android:name=".infrastructure.ExploreReminderReceiver"
             android:exported="false" />

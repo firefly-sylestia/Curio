@@ -139,6 +139,9 @@ object AppPreferences {
     // companion design is decided).
     private const val KEY_PET_ENABLED = "pet_enabled"
     private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
+    // v256 — the pet companion OUTSIDE the app: a system-overlay window
+    // (PetOverlayService) that keeps the sprite floating over other apps.
+    private const val KEY_PET_OUTSIDE_APP = "pet_outside_app_enabled"
     // v8.43 — the pet's local LEARNING model (CurioPetBrain): the pet
     // observes real activity and grows its own personality + catchphrases.
     // Default ON per the user; off falls back to the classic rule-based
@@ -570,6 +573,9 @@ object AppPreferences {
     // while the floating companion is off (the pet then stays in its bed).
     var floatingPetEnabledState by mutableStateOf(true)
         private set
+    // v256 — whether the pet also floats OUTSIDE the app (overlay window).
+    var petOutsideAppState by mutableStateOf(false)
+        private set
     // v8.43 — whether the pet's learning brain is on (default ON): the pet
     // builds a personality from the user's real activity and develops its
     // own catchphrases. Off = classic rule-based lines only.
@@ -725,6 +731,7 @@ object AppPreferences {
         offlineModelIdState = getOfflineModelId(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
+        petOutsideAppState = isPetOutsideAppEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
         petChatterState = getPetChatter(context)
         petGameFrequencyState = getPetGameFrequency(context)
@@ -1187,7 +1194,7 @@ object AppPreferences {
 
     // ── Liquid-glass navigation pills (experiment, default OFF) ──────
     fun isLiquidGlassPillsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LIQUID_GLASS_PILLS, false)
+        prefs(context).getBoolean(KEY_LIQUID_GLASS_PILLS, true)
 
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
@@ -1214,7 +1221,7 @@ object AppPreferences {
 
     // ── Clear-glass style (experiment, default OFF) ──────────────────
     fun isGlassClarityEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GLASS_CLARITY, false)
+        prefs(context).getBoolean(KEY_GLASS_CLARITY, true)
 
     fun setGlassClarityEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLARITY, enabled).apply()
@@ -1760,6 +1767,17 @@ object AppPreferences {
     fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
         floatingPetEnabledState = enabled
+    }
+
+    // v256 — the outside-the-app companion toggle (default OFF: it needs
+    // the system "Display over other apps" permission, so it's an explicit
+    // opt-in from the Pet Designer's Settings page).
+    fun isPetOutsideAppEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_OUTSIDE_APP, false)
+
+    fun setPetOutsideAppEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_OUTSIDE_APP, enabled).apply()
+        petOutsideAppState = enabled
     }
 
     // v8.43 — the pet's learning brain toggle (default ON; Appearance).
