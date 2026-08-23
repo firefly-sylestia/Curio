@@ -1,3 +1,7 @@
+FIX: Compile errors from the sticky-back rollout (misplaced pills, missing imports).
+REVERT: Liquid glass and Clear glass stay OFF by default (the v256 default flip is undone).
+NEW: Glass tuning preview is a REAL draggable capsule over a collage - what you drag is how nav pills render.
+FIX: The detail page's glass more-menu is blurry by default now (was near-zero blur).
 FIX: Pet overlay companion compiles (missing imports).
 FIX: Scrolling heroes were inset from the screen sides - every settings-family banner is full-bleed again.
 ADD: The back pill returns as a sticky floating control (with the glass morph) once a scrolling hero moves up.

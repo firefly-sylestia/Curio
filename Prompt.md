@@ -1,5 +1,26 @@
 # Prompt.md — current request log
 
+## Request: v259 — CI fixes for sticky-back rollout; real tuning preview; panel blur; defaults reverted
+
+1. **CI**: AnimatedVisibility import in SettingsHubScreen; the Support/
+   Updates/Promo sticky pills had landed OUTSIDE their composables
+   (rindex anchor hit helper functions) — all three relocated INSIDE the
+   ScreenEntrance lambda via brace-matching, wrapped in an explicit
+   Box(fillMaxSize) for align().
+2. **Tuning dialog real preview**: Canvas fake replaced by a real
+   liquidGlassCapsule pill, draggable over a gradient collage with text —
+   sliders write the same preference state real capsules read.
+   drawGlassPreviewCapsule painter deleted + dead imports cleaned.
+3. **Detail more-panel**: dropped alwaysClear → standard 8dp×scale blur by
+   default (back/more pills keep alwaysClear).
+4. **Defaults reverted**: Liquid glass + Clear glass back to OFF.
+
+## Status: complete — commit & push this turn.
+
+---
+
+# Prompt.md — current request log
+
 ## Request: v258 — CI fix for PetOverlayService; hero side-cut + sticky back regressions
 
 1. **CI**: PetOverlayService missing `android.app.PendingIntent` +
