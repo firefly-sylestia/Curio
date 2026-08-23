@@ -154,7 +154,10 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
@@ -324,9 +327,15 @@ fun EntryDetailScreen(
         // reads it to pop out of the hero into frosted floating pills, the
         // same scroll-linked clock Home uses for its menu / profile pills.
         val detailScroll = rememberScrollState()
+        // v241 — LOCAL GLASS CAPTURE: the scrolling page content records
+        // into its own layer; the sticky back/more pills are a SIBLING of
+        // this Column (outside the captured node), so they can never sample
+        // themselves — the bottom-nav architecture, no self-capture cycle.
+        val detailGlassBackdrop = rememberLayerBackdrop()
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .layerBackdrop(detailGlassBackdrop)
                 .verticalScroll(detailScroll)
         ) {
         // ── Expressive hero banner — one composed card: the category glyph
@@ -1108,12 +1117,11 @@ private fun BoxScope.DetailStickyBar(
     // applied through the scroll shift instead. When the liquid-glass
     // experiment is on AND the morph has begun, the classic frosted brush
     // is replaced by a real liquid-glass capsule entirely.
-    // v232 — GLASS HANDOFF DISABLED here (see HomeScreen): these pills are
-    // inside the capture subtree and rebuild the backdrop node every scroll
-    // frame — native RenderThread crash class on some devices. The classic
-    // solid-hero → frost morph below runs again; live glass stays only on
-    // the bottom nav overlay.
-    val glassOn = false
+    // v241 — GLASS HANDOFF RESTORED through the SAFE architecture: the
+    // pills sample the LOCAL capture on the scroll Column above (they are
+    // siblings of it — nothing they sample contains them). Fully CLEAR
+    // refracting glass, per the request.
+    val glassOn = isInScreenGlassActive()
     val detailGlassActive = glassOn && frostShift > 0.01f
     val frostFill = if (isCurioDarkTheme())
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
@@ -1152,7 +1160,9 @@ private fun BoxScope.DetailStickyBar(
             modifier = if (detailGlassActive)
                 Modifier.liquidGlassCapsule(
                     heroFill,
-                    washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                    washAlpha = 0.45f,
+                    backdrop = detailGlassBackdrop,
+                    alwaysClear = true
                 )
                 else Modifier.heroFrostPlate(
                     heroCardInk,
@@ -1170,7 +1180,9 @@ private fun BoxScope.DetailStickyBar(
                 modifier = (if (detailGlassActive)
                     Modifier.liquidGlassCapsule(
                         heroFill,
-                        washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                        washAlpha = 0.45f,
+                        backdrop = detailGlassBackdrop,
+                        alwaysClear = true
                     )
                 else Modifier.heroFrostPlate(
                     heroCardInk,

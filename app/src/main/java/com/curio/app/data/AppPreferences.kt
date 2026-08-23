@@ -442,6 +442,15 @@ object AppPreferences {
     var glassClarityState by mutableStateOf(false)
         private set
 
+    // v241 — In-screen glass (experiment, default OFF): extends liquid glass
+    // to pills that live INSIDE a screen's layout — the Pet Designer studio
+    // bar and the floating top-bar pills. Each site captures its own LOCAL
+    // backdrop layer that EXCLUDES the pill itself (sibling overlay — the
+    // bottom-nav architecture), so the old self-capture crash is impossible
+    // by construction.
+    var glassInScreenState by mutableStateOf(false)
+        private set
+
     /**
      * Reactive category-tint state — updated by [setTintWashEnabled] so page
      * backgrounds (via categoryBackgroundWash) instantly revert to the plain
@@ -683,6 +692,7 @@ object AppPreferences {
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         glassParallaxState = isGlassParallaxEnabled(context)
         glassClarityState = isGlassClarityEnabled(context)
+        glassInScreenState = isGlassInScreenEnabled(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -981,6 +991,7 @@ object AppPreferences {
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
+    private const val KEY_GLASS_IN_SCREEN = "glass_in_screen"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1179,6 +1190,15 @@ object AppPreferences {
     fun setGlassClarityEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLARITY, enabled).apply()
         glassClarityState = enabled
+    }
+
+    // ── In-screen glass (experiment, default OFF) ───────────────────
+    fun isGlassInScreenEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_IN_SCREEN, false)
+
+    fun setGlassInScreenEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_IN_SCREEN, enabled).apply()
+        glassInScreenState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────

@@ -103,6 +103,10 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
@@ -403,9 +407,13 @@ fun ProfileScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
+        // v241 — LOCAL GLASS CAPTURE: the page content (hero + list)
+        // records into its own layer; the sticky back/search pills are a
+        // SIBLING of this LazyColumn, so they can never sample themselves.
+        val profileGlassBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().layerBackdrop(profileGlassBackdrop),
             contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -539,8 +547,13 @@ fun ProfileScreen(navController: NavController) {
         val frostPillRim = if (isCurioDarkTheme()) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
         val frostPillIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
                             else MaterialTheme.colorScheme.onSurfaceVariant
+        // v241 — IN-SCREEN GLASS: with the experiment on, the scrolled
+        // endpoint is a fully clear refracting glass capsule (fill fades to
+        // transparent; the capsule samples the local capture above). At
+        // rest both paths show the exact same SOLID hero fill.
+        val glassOn = isInScreenGlassActive()
         // Resolve solid target colors from scroll, then animate the paint.
-        val targetPillBg = lerp(restPillBg, frostPillBg, frostShift)
+        val targetPillBg = lerp(restPillBg, if (glassOn) Color.Transparent else frostPillBg, frostShift)
         val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
         val targetPillIcon = lerp(heroInk, frostPillIcon, frostShift)
         val pillBg by animateColorAsState(
@@ -581,14 +594,29 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
-                shadowElevation = 6.dp * frostShift,
-                disableRipple = true
+                shadowElevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                disableRipple = true,
+                // v241 — clear refracting glass once the morph begins.
+                modifier = if (glassOn && frostShift > 0.01f)
+                    Modifier.liquidGlassCapsule(
+                        restPillBg,
+                        washAlpha = 0.45f,
+                        backdrop = profileGlassBackdrop,
+                        alwaysClear = true
+                    ) else Modifier
             )
             ProfileSearchPill(
                 onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
                 bg = pillBg,
                 iconTint = pillIcon,
-                elevation = 6.dp * frostShift
+                elevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                modifier = if (glassOn && frostShift > 0.01f)
+                    Modifier.liquidGlassCapsule(
+                        restPillBg,
+                        washAlpha = 0.45f,
+                        backdrop = profileGlassBackdrop,
+                        alwaysClear = true
+                    ) else Modifier
             )
         }
     }
@@ -603,14 +631,15 @@ private fun ProfileSearchPill(
     onClick: () -> Unit,
     bg: Color,
     iconTint: Color,
-    elevation: Dp
+    elevation: Dp,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
         shape = CircleShape,
         color = bg,
         shadowElevation = elevation,
-        modifier = Modifier
+        modifier = modifier
             .size(42.dp)
             .clickable(
                 interactionSource = interactionSource,

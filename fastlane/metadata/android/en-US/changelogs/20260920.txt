@@ -1,4 +1,7 @@
 ADD
+- Liquid glass: a new "In-screen glass" experiment - the Home menu/profile pills, Profile's back/search pills, the detail page's back/more pills and the Pet Designer studio bar become real refracting, fully clear liquid glass once you scroll (each samples only what sits behind it, so the old crash is impossible by construction).
+- Liquid glass: the parallax tilt cue now draws a light arc hugging each capsule's TOP edge that slides as you tilt the phone - never a full circle, invisible when the phone is level.
+
 - Liquid glass: new "Clear glass" option - much less frost and a lighter tint, so the bar reads like clear refracting glass instead of milky.
 - Liquid glass: parallax tilt now moves the rim EDGE GLOW across the glass as you tilt the phone, not the whole pane.
 - Liquid glass: active tab text is much easier to read in light mode.

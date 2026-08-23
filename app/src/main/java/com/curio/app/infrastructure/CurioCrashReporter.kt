@@ -154,6 +154,7 @@ object CurioCrashReporter {
                     appendLine("Self-heal: Liquid glass pills + parallax tilt were ON at death — auto-disabled to stop the crash loop. Re-enable in Settings → Experiments once the cause is fixed.")
                     AppPreferences.setLiquidGlassPillsEnabled(app, false)
                     AppPreferences.setGlassParallaxEnabled(app, false)
+                    AppPreferences.setGlassInScreenEnabled(app, false)
                     Log.w(TAG, "Native crash with glass experiment ON — toggles auto-disabled (self-heal)")
                 }
             }

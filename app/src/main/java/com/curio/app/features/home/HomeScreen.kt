@@ -140,9 +140,12 @@ import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.ProfileAvatarImage
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
+import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
@@ -363,6 +366,20 @@ fun HomeScreen(navController: NavController) {
                 .fillMaxSize()
                 .background(homeBg)
         ) {
+            // Hoisted scroll state — read by the sticky-bar block below
+            // (a sibling of the v241 capture wrapper).
+            val homeScroll = rememberScrollState()
+            // v241 — LOCAL GLASS CAPTURE: everything BEHIND the floating
+            // top-bar pills records into its own layer; pills are a SIBLING
+            // overlay outside this wrapper (the bottom-nav architecture —
+            // no self-capture cycle by construction).
+            val homeGlassBackdrop = rememberLayerBackdrop()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(homeBg)
+                    .layerBackdrop(homeGlassBackdrop)
+            ) {
             // ── Watermark backdrop — muted category glyphs behind all ──
             //    content (same treatment as the Spin page). The quest is
             //    always the wildcard Surprise now (no category chips), so
@@ -1123,6 +1140,7 @@ fun HomeScreen(navController: NavController) {
             Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 32.dp else 100.dp))
             Spacer(Modifier.height(navInsets.calculateBottomPadding()))
             }
+            } // v241 — end of the local glass capture subtree
 
             // ── Sticky top bar — menu + profile pills ─────────────────
             // Pinned OUTSIDE the scroll content so they stay on screen.
@@ -1161,16 +1179,13 @@ fun HomeScreen(navController: NavController) {
             // pill keeps the classic morph while an avatar photo is set (a
             // photo can't sit on glass) — so menu and profile animate their
             // fills independently.
-            // v232 — GLASS HANDOFF DISABLED on these top-bar pills. They sit
-            // INSIDE the NavHost capture subtree AND rebuild the drawBackdrop
-            // node on every scroll frame (the per-frame washAlpha), a combo
-            // that natively SIGSEGVs RenderThread while flinging on some
-            // devices (same class as the Pet Designer studio-bar crash).
-            // The classic solid→frost morph below is fully restored; live
-            // liquid glass stays only on the bottom nav overlay (a SIBLING
-            // of the capture Box — the one configuration that has never
-            // crashed). Revisit once a tombstone pins the exact cycle.
-            val glassOn = false
+            // v241 — GLASS HANDOFF RESTORED through the SAFE architecture:
+            // the pills sample the LOCAL capture Box above (which contains
+            // only what sits BEHIND them — the pills are a sibling overlay,
+            // exactly the bottom-nav arrangement), so the old whole-page
+            // self-capture cycle is impossible by construction. Fully CLEAR
+            // glass (alwaysClear) with real refraction, per the request.
+            val glassOn = isInScreenGlassActive()
             val profileAvatarPath = AppPreferences.getProfileAvatarPath(context)
             val profileGlassOn = glassOn && profileAvatarPath.isNullOrBlank()
             // Resolve solid target colors from scroll, then animate the paint
@@ -1235,9 +1250,9 @@ fun HomeScreen(navController: NavController) {
                     modifier = if (glassOn && frostShift > 0.01f)
                         Modifier.liquidGlassCapsule(
                             heroPillBg,
-                            // Strong wash while the handoff is young so the
-                            // swap from the solid fill doesn't pop.
-                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                            washAlpha = 0.45f,
+                            backdrop = homeGlassBackdrop,
+                            alwaysClear = true
                         ) else Modifier
                 )
                 TopBarPill(
@@ -1254,7 +1269,9 @@ fun HomeScreen(navController: NavController) {
                     modifier = if (profileGlassOn && frostShift > 0.01f)
                         Modifier.liquidGlassCapsule(
                             heroPillBg,
-                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
+                            washAlpha = 0.45f,
+                            backdrop = homeGlassBackdrop,
+                            alwaysClear = true
                         ) else Modifier,
                     // v118 — the profile pill wears the avatar photo when
                     // one is set (fresh pref read each composition, like the

@@ -4968,6 +4968,22 @@ app/src/main/java/com/curio/app/
   - `EntryDetailScreen.DetailContentEntrance`: the 200ms delay was paced to the removed Cabinet→Detail
     shared morph (v8.38 replaced it with a center pop-up), so quick fact + body appeared late. Now
     tween(260) with no delay.
+- **v241 — in-screen glass (experiment) + tilt light-arc fix.**
+  - New toggle: Settings → Experiments → "In-screen glass" (`AppPreferences.glassInScreenState`,
+    default OFF; needs Liquid glass pills). `isInScreenGlassActive()` in LiquidGlassPills.kt gates it.
+  - Architecture (the crash-safe one): each in-screen site captures a LOCAL LayerBackdrop that contains
+    ONLY what sits behind the pill — Home: capture Box around page content, pills are sibling overlay;
+    Entry Detail + Profile: `.layerBackdrop(...)` hung directly on the scroll Column / LazyColumn, sticky
+    pill Row is its sibling; Pet Designer: LazyColumn captures, `PetStudioBottomNav` sits below it.
+    The pill is never inside its own sampled subtree, so the v228 self-capture cycle is impossible by
+    construction (the global guard stays as belt-and-braces). Self-heal also disables this toggle.
+  - `liquidGlassCapsule` grew `backdrop: LayerBackdrop?` (null = NavHost global capture), `alwaysClear`
+    (force the clear recipe), and `shape: Shape` (default CircleShape; wide bars pass
+    RoundedCornerShape(50) so they don't ellipse-clip). In-screen floating pills use alwaysClear=true,
+    constant washAlpha=0.45f (no per-frame effects rebuilds).
+  - Parallax tilt cue redrawn: `drawGlassTiltEdgeGlow` strokes a ~110° TOP-RIM light arc that slides with
+    tiltX and fades in with tilt magnitude — the old full white circle (visible on any tilted phone) is gone.
+
 - **v227 — Android 16 Live Update + liquid-glass pills experiment + cabinet full-bleed grid**
   - `ExploreSessionService.liveNotification`: RUNNING sessions on API 36+ post a genuine Live Update via
     `NotificationCompat.ProgressStyle` (one accent-colored Segment of durationMinutes defines the max,

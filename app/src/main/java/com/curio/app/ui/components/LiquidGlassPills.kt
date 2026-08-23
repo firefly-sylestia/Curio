@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -70,6 +71,17 @@ fun isLiquidGlassPillsActive(): Boolean =
     AppPreferences.liquidGlassPillsState && android.os.Build.VERSION.SDK_INT >= 31
 
 /**
+ * v241 — whether IN-SCREEN glass is active: the main toggle AND the separate
+ * "In-screen glass" experiment. In-screen pills each sample a LOCAL backdrop
+ * layer that EXCLUDES them (the pill is a sibling overlay of the captured
+ * Box — exactly the bottom-nav architecture that has never crashed), so the
+ * old v228 self-capture cycle is impossible by construction; the global
+ * capture guard below stays as belt-and-braces.
+ */
+fun isInScreenGlassActive(): Boolean =
+    isLiquidGlassPillsActive() && AppPreferences.glassInScreenState
+
+/**
  * The capture onDraw for the NavHost's [com.kyant.backdrop.backdrops.rememberLayerBackdrop]:
  * flags the record pass so in-subtree glass capsules fall back to a plain
  * fill (see the v228 note on [CurioGlassPills]).
@@ -101,17 +113,32 @@ fun Modifier.liquidGlassCapsule(
     // wash while the scroll morph is young (so the handoff from their
     // resting SOLID hero fill doesn't pop) easing down to ~45% when fully
     // scrolled.
-    washAlpha: Float = 0.40f
+    washAlpha: Float = 0.40f,
+    // v241 — explicit LOCAL backdrop for in-screen pills. When null, falls
+    // back to the NavHost's whole-page capture (bottom-bar overlay sites).
+    // In-screen callers MUST pass their own local capture: one that records
+    // only what sits BEHIND the pill, with the pill itself OUTSIDE the
+    // captured subtree — sampling a capture that includes the pill is what
+    // produced the v228 cyclic render node.
+    backdrop: LayerBackdrop? = null,
+    // v241 — force the CLEAR-glass recipe regardless of the Clear-glass
+    // toggle: the in-screen floating pills are requested to read as fully
+    // clear, refracting glass (blur 2dp, wash cut to ~a third).
+    alwaysClear: Boolean = false,
+    // v241 — capsule shape. CircleShape for the round pills; wide bars
+    // (Pet Designer studio bar) pass RoundedCornerShape(50) so the glass
+    // clips to a stadium instead of an ellipse.
+    shape: Shape = CircleShape
 ): Modifier {
     if (!isLiquidGlassPillsActive()) return this
-    val backdrop = CurioGlassPills.backdrop ?: return this
+    val backdrop = backdrop ?: CurioGlassPills.backdrop ?: return this
     // Hoisted — isCurioDarkTheme() is @Composable and the shadow lambda
     // below is NOT a composable context.
     val dark = isCurioDarkTheme()
     // v233 — CLEAR GLASS (experiment): drop the heavy frost so the capsule
     // reads like the bright refraction blob under a finger press rather
     // than milky frosted glass.
-    val clear = AppPreferences.glassClarityState
+    val clear = AppPreferences.glassClarityState || alwaysClear
     return this
         // v228 — outer guard: during a capture record pass, skip the
         // backdrop-drawing inner node entirely and paint a plain capsule,
@@ -134,7 +161,7 @@ fun Modifier.liquidGlassCapsule(
         .then(
             Modifier.drawBackdrop(
                 backdrop = backdrop,
-                shape = { CircleShape },
+                shape = { shape },
                 effects = {
                     vibrancy()
                     blur((if (clear) 2.dp else 8.dp).toPx())
@@ -157,37 +184,45 @@ fun Modifier.liquidGlassCapsule(
 }
 
 /**
- * v233 — PARALLAX TILT EDGE GLOW. Draws a soft white rim glow whose bright
- * spot slides AGAINST the device's current gravity tilt (see
- * [com.curio.app.ui.components.liquidglass.CurioGlassParallax]) — the iOS
- * depth cue where the pane's EDGES catch the light as the phone moves,
- * instead of the whole pane translating. Call INSIDE a DrawScope after
- * drawContent(). Reads the tilt snapshot state directly, so sensor updates
- * invalidate just this draw — zero recomposition.
+ * v241 — PARALLAX TILT LIGHT ARC (fixes the PERFECT CIRCLE). The v233
+ * version stroked a FULL white circle whose gradient center shifted with
+ * tilt — with Glass parallax ON, any tilt painted a literal perfect circle
+ * on every always-glass surface. The cue is now a TOP-EDGE light arc: an
+ * ~110° stroke hugging the capsule's top rim that SLIDES sideways with
+ * tiltX and fades in with tilt magnitude — light catching the pane's top
+ * edge as the phone moves, never a full ring, invisible when level. Call
+ * INSIDE a DrawScope after drawContent(). Reads tilt snapshot state
+ * directly, so sensor updates invalidate just this draw — zero
+ * recomposition.
  */
 internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGlassTiltEdgeGlow() {
     if (!AppPreferences.glassParallaxState) return
     val tx = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX
     val ty = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY
-    if (tx == 0f && ty == 0f) return
+    // Strength tracks HOW MUCH the phone is tilted — level phone = no arc.
+    val strength = kotlin.math.sqrt(tx * tx + ty * ty).coerceIn(0f, 1f)
+    if (strength < 0.08f) return
     val r = minOf(size.width, size.height) / 2f
     if (r <= 0f) return
-    val glowCenter = Offset(
-        size.width / 2f - tx * r * 0.9f,
-        size.height / 2f - ty * r * 0.9f
-    )
-    drawCircle(
+    // Arc bright spot slides AGAINST horizontal tilt along the top rim.
+    val cx = size.width / 2f - tx * size.width * 0.30f
+    val cy = size.height * 0.10f - ty * r * 0.35f
+    drawArc(
         brush = Brush.radialGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.65f),
-                Color.White.copy(alpha = 0.14f),
+                Color.White.copy(alpha = 0.55f),
+                Color.White.copy(alpha = 0.12f),
                 Color.Transparent
             ),
-            center = glowCenter,
-            radius = r * 1.6f
+            center = Offset(cx, cy),
+            radius = size.minDimension * 0.9f
         ),
-        radius = r - 0.75f.dp.toPx() / 2f,
-        center = Offset(size.width / 2f, size.height / 2f),
-        style = Stroke(width = 1.5f.dp.toPx())
+        startAngle = -145f,
+        sweepAngle = 110f,
+        useCenter = false,
+        topLeft = Offset.Zero,
+        size = this.size,
+        style = Stroke(width = 1.5f.dp.toPx()),
+        alpha = 0.30f + 0.45f * strength
     )
 }
