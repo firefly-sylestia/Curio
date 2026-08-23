@@ -4,6 +4,7 @@ kotlin = "2.3.21"
 ksp = "2.3.6"
 haze = "1.7.2"
 coreKtx = "1.18.0"
+backdrop = "1.0.6"
 core = "1.18.0"
 splashscreen = "1.2.0"
 junit = "4.13.2"
@@ -120,6 +121,7 @@ androidx-graphics-shapes = { group = "androidx.graphics", name = "graphics-shape
 
 # Haze - Real backdrop blur for glassmorphism effects
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 
 # Compose Multiplatform material3 (desktop port) — declared directly because
 # the `compose.material3` String accessor is deprecated in CMP 1.11+.

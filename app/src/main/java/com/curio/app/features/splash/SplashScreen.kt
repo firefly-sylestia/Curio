@@ -1,5 +1,6 @@
 package com.curio.app.features.splash
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -7,51 +8,45 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.background
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.curio.app.R
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.ui.theme.CurioColors
-import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.CurioTheme
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
@@ -67,71 +62,90 @@ import kotlinx.coroutines.withTimeoutOrNull
  *  pathological parse must not block the app past this. */
 private const val CATALOG_WARM_TIMEOUT_MS = 6_000L
 
+/** How long each loading line stays before the next fades in. */
+private const val LOADING_LINE_SWAP_MS = 1_100L
+
 /**
- * Splash screen — see Curio splash contract.
+ * Splash screen — SIMPLE / MODERN / MATERIAL.
  *
- * The first thing the user sees on app launch. Covers the gap between
- * process start and MainActivity being ready.
+ * v224b sizing pass:
+ *  - BIGGER presence: 88dp logomark, display-size wordmark, 180dp bar
+ *  - The logo no longer BOBS up and down (the movement read badly) — instead
+ *    it BREATHES: a slow, subtle scale pulse around its resting size
+ *  - The progress bar is DETERMINATE and wired to the REAL catalog warm-up:
+ *    every topic lane that finishes parsing fills the bar, so "loading your
+ *    curiosity" is literally true — the app finishes loading its topics ON
+ *    this screen and Spin/Home open ready
  *
- * Upgraded with:
- *  - Morph entrance: logo scales from 0 → 1 with elastic spring
- *  - Shimmer effect: subtle gradient sweep across the logo icon
- *  - Breathing dots: 3-dot loader with ambient pulse + individual wave
- *  - Animated background gradient: subtle tone shift during loading
- *
- * Phase 3+ will replace the LaunchedEffect body with:
- *   - init Room DB
- *   - read `onboardingComplete` flag from DataStore
- *   - if false → `CurioRoutes.ONBOARDING`
- *   - else    → `CurioRoutes.HOME`
- *
- * No back button. No interaction. Auto-dismisses after the branding plays
- * and the bundled topic catalog has warmed (800ms minimum, ~6s cap).
+ * Everything wears plain theme roles, so light, dark, pastel and Material
+ * modes all read right with zero special-casing. Navigation behavior is
+ * UNCHANGED: hold until the bundled topic catalog has warmed (800ms minimum,
+ * ~6s cap), then route to CRASH / ONBOARDING / HOME. No back button. No
+ * interaction.
  */
 @Composable
 fun SplashScreen(navController: NavHostController) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    var pulseIndex by remember { mutableStateOf(0) }
-    var entranceReady by remember { mutableStateOf(false) }
 
-    // ── Logo morph entrance trigger ───────────────────────────────────────
+    // ── Entrance trigger ───────────────────────────────────────────────────
+    var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        entranceReady = true
+        delay(60)
+        entered = true
     }
+    val entranceScale by animateFloatAsState(
+        targetValue = if (entered) 1f else 0.82f,
+        animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing),
+        label = "splashEntranceScale"
+    )
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (entered) 1f else 0f,
+        animationSpec = tween(durationMillis = 520, easing = FastOutSlowInEasing),
+        label = "splashContentAlpha"
+    )
 
-    // ── Breathing background gradient ─────────────────────────────────────
-    val bgTransition = rememberInfiniteTransition(label = "splashBg")
-    val bgShift by bgTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
+    // ── Breathing logo — scale pulse only, never positional movement ──────
+    val breatheTransition = rememberInfiniteTransition(label = "splashBreathe")
+    val breatheScale by breatheTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.035f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 2300, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "bgShift"
+        label = "splashBreatheScale"
     )
 
-    // ── Shimmer for the logo icon ─────────────────────────────────────────
-    val shimmerTransition = rememberInfiniteTransition(label = "splashShimmer")
-    val shimmerOffset by shimmerTransition.animateFloat(
-        initialValue = -1f,
-        targetValue = 2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = CurioMotion.Durations.Shimmer,
-                easing = FastOutSlowInEasing
-            )
-        ),
-        label = "shimmerOffset"
+    // ── Rotating curiosity loading lines ──────────────────────────────────
+    val loadingLines = listOf(
+        "Loading your curiosity…",
+        "Warming up the topics…",
+        "Sharpening the shuffle…",
+        "Opening the cabinet…"
     )
-
-    // ── Dot loader pulse wave ─────────────────────────────────────────────
+    var lineIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         while (true) {
-            pulseIndex = (pulseIndex + 1) % 3
-            delay(200)
+            delay(LOADING_LINE_SWAP_MS)
+            lineIndex = (lineIndex + 1) % loadingLines.size
         }
     }
+
+    // ── REAL topic warm-up progress ────────────────────────────────────────
+    // The determinate bar tracks actual lane parses: each lane whose bundled
+    // catalog finished loading fills the bar one step, so the topics are
+    // READY when the splash hands off (Spin / Topic Database / counts all
+    // read the warm cache immediately).
+    val totalLanes = remember {
+        CurioCategories.visible.count { it.id != CategoryId.WILDCARD }.coerceAtLeast(1)
+    }
+    var warmedLanes by remember { mutableIntStateOf(0) }
+    val loadProgress = (warmedLanes.toFloat() / totalLanes).coerceIn(0f, 1f)
+    val shownProgress by animateFloatAsState(
+        targetValue = loadProgress,
+        animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing),
+        label = "splashLoadProgress"
+    )
 
     LaunchedEffect(Unit) {
         // Warm the canonical catalog while the splash branding plays, and
@@ -154,12 +168,16 @@ fun SplashScreen(navController: NavHostController) {
                     } catch (_: Throwable) {
                         // One broken lane never blocks the rest from warming.
                     }
+                    // Advance the bar whether the lane parsed or not — a
+                    // broken asset must never stall the indicator.
+                    warmedLanes++
                 }
         }
         delay(800)
         // Cap the total warm-up at ~6s (a cold first parse of the bundled
         // 5MB+ catalogs can outlast the 800ms branding on slow devices).
         withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
+        warmedLanes = totalLanes
         // Check for pending crash from previous session — also route to the
         // crash screen when the crash-loop guard flipped on safe mode, so the
         // user always gets the log + safe restart instead of an endless loop.
@@ -182,160 +200,69 @@ fun SplashScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            Box(
+            Column(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                // ── Animated background halo ─────────────────────────────────
+                // ── Logomark — big, breathing (scale only, no bobbing) ────
                 Box(
                     modifier = Modifier
-                        .size(280.dp)
-                        .offset(x = ((bgShift - 0.5f) * 40).dp)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    CurioColors.CoralBlush.copy(alpha = 0.08f),
-                                    Color.Transparent
-                                )
-                            ),
-                            shape = RoundedCornerShape(50)
-                        )
-                )
+                        .size(100.dp)
+                        .graphicsLayer {
+                            scaleX = entranceScale * breatheScale
+                            scaleY = entranceScale * breatheScale
+                            alpha = contentAlpha
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_launcher_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(88.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
 
-                // v205 — a warm GROUND at the bottom: a soft gradient band in
-                // the app-background family (transparent → a warmed background
-                // tone), so the splash reads grounded instead of a flat void.
-                // Not full-bleed — just the bottom third (user: "at the buttom
-                // it have a similiar gradient backgroud of the app backgroud.
-                // not full just at the buttom").
-                val appBg = MaterialTheme.colorScheme.background
-                val bottomWarm = if (isCurioDarkTheme()) lerp(appBg, CurioColors.CoralBlush, 0.05f)
-                                 else lerp(appBg, CurioColors.ButterYellow, 0.14f)
-                Box(
+                // ── Wordmark — display size, theme ink ────────────────────
+                Text(
+                    text = "Curio",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.34f)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                0f to Color.Transparent,
-                                1f to bottomWarm
-                            )
-                        )
+                        .padding(top = 22.dp)
+                        .alpha(contentAlpha)
                 )
 
+                // ── Determinate Material bar + rotating lines ─────────────
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .padding(top = 30.dp)
+                        .alpha(contentAlpha)
                 ) {
-                    // ── Logomark with morph entrance + shimmer ────────────────
-                    Box(
-                        modifier = Modifier.size(144.dp)
-                            .scale(
-                                if (entranceReady) 1f else 0f
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // Shimmer overlay
-                        Box(
-                            modifier = Modifier
-                                .size(96.dp)
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            CurioColors.CreamWhite.copy(alpha = 0.25f),
-                                            Color.Transparent
-                                        ),
-                                        startX = shimmerOffset * 200f,
-                                        endX = (shimmerOffset + 0.3f) * 200f
-                                    ),
-                                    shape = RoundedCornerShape(50)
-                                )
-                        )
-                        // v126 — the splash renders the NEW v2 card art
-                        // directly (drawable-nodpi/ic_launcher_icon.png, the
-                        // same source as the launcher foreground), NOT the
-                        // old ic_launcher_art raster which carried the
-                        // previous white border. The raw art fills the 112dp
-                        // logo box at its native proportions — this is why
-                        // the icon looked BIGGER here than on the launcher
-                        // (the launcher foreground was inset to the adaptive
-                        // safe zone; v126 reduced that inset 28→18dp so the
-                        // launcher card now matches the splash's presence).
-                        Image(
-                            painter = painterResource(R.drawable.ic_launcher_icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(112.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                    }
-
-                    // ── App name ──────────────────────────────────────────────
-                    // v205 — the wordmark is BIGGER (36 → 72sp, same Geom Bold)
-                    // and wears a theme-aware GRADIENT echoing the cosmic mark:
-                    // bright mint → butter on the dark sky, deep rose → gold on
-                    // the light cream (user: "make the Curio tet bigger and with
-                    // gradient basced on the dark or light mode").
-                    val wordmarkBrush = if (isCurioDarkTheme()) {
-                        Brush.horizontalGradient(
-                            listOf(CurioColors.SkyMint, CurioColors.ButterYellow)
-                        )
-                    } else {
-                        Brush.horizontalGradient(
-                            listOf(CurioColors.CoralInk, CurioColors.GoldInk)
-                        )
-                    }
-                    Text(
-                        text = "Curio",
-                        style = MaterialTheme.typography.displaySmall.copy(
-                            fontSize = 72.sp,
-                            brush = wordmarkBrush
-                        )
+                    LinearProgressIndicator(
+                        progress = { shownProgress },
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(50)),
+                        trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                     )
-
-                    // ── Tagline — the app's identity line under the name ─────
-                    // v205 — a little bigger (14 → 18sp) and WARMER in both
-                    // themes: parchment on the dark sky, warm khaki on the light
-                    // cream (user: "discover something that text gets a little
-                    // bigger too and warmer in dark mode light mode you figure
-                    // it out").
-                    val taglineColor = if (isCurioDarkTheme()) Color(0xFFD8CDB4).copy(alpha = 0.90f)
-                                       else Color(0xFF7E6E50).copy(alpha = 0.92f)
-                    Text(
-                        text = stringResource(R.string.app_tagline),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 18.sp),
-                        color = taglineColor,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    // ── 3-dot loader — breathing pulse + sequence wave ──────
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(3) { index ->
-                            val isPulsing = index == pulseIndex
-                            val dotScale by animateFloatAsState(
-                                targetValue = if (isPulsing) 1.35f else 1f,
-                                animationSpec = CurioMotion.Springs.Snappy,
-                                label = "dotScale"
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .scale(dotScale)
-                                    .clip(RoundedCornerShape(50))
-                                    .background(
-                                        if (isPulsing)
-                                            MaterialTheme.colorScheme.primary
-                                        else
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-                                    )
-                            )
-                        }
+                    AnimatedContent(
+                        targetState = lineIndex,
+                        transitionSpec = {
+                            fadeIn(tween(280)) togetherWith fadeOut(tween(220))
+                        },
+                        label = "splashLoadingLine"
+                    ) { index ->
+                        Text(
+                            text = loadingLines[index],
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }

@@ -958,5 +958,567 @@
    "durationMinutes": 7,
    "instruction": "Learn about multibeam sonar and the Seabed 2030 project, then explain why mapping the ocean floor matters for climate science and navigation."
   }
+ },
+ {
+  "id": "oceans-great-white-shark",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Great White Shark",
+  "teaser": "The great white can detect a single drop of blood in 100 litres of water and sense electromagnetic fields from a beating heart. It hunts using six senses, not just sight and smell.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["sharks", "predators", "apex"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How the great white hunts",
+  "durationMinutes": 8,
+  "instruction": "Learn about the ampullae of Lorenzini — the electroreceptors on a shark's snout — then explain why great whites breach when hunting seals at the surface."
+  }
+ },
+ {
+  "id": "oceans-coral-bleaching",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Coral Bleaching",
+  "teaser": "When ocean temperatures rise just 1–2°C above normal, corals expel the algae living inside them and turn white. Without those algae the coral starves. Mass bleaching events have doubled since the 1980s.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["coral", "climate", "reef"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How coral bleaching works",
+  "durationMinutes": 7,
+  "instruction": "Learn about the zooxanthellae–coral symbiosis, then find one reef system where bleaching has been reversed by cooling or shading interventions."
+  }
+ },
+ {
+  "id": "oceans-sargasso-sea",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "The Sargasso Sea",
+  "teaser": "The only sea with no coastline — bounded by four ocean currents instead of land, it floats mats of Sargassum seaweed that serve as nursery habitat for eels, turtles, and juvenile fish.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["currents", "ecosystem", "atlantic"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "The Sargasso Sea ecosystem",
+  "durationMinutes": 7,
+  "instruction": "Learn why European and American eels travel thousands of miles to spawn here, then explain how the floating weed mats create a unique floating ecosystem."
+  }
+ },
+ {
+  "id": "oceans-gulf-stream",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "The Gulf Stream",
+  "teaser": "A river of warm water flowing through the Atlantic at 6.4 km/h, carrying 30 times more water than all the world's rivers combined. It keeps Western Europe 5–10°C warmer than it should be at that latitude.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["currents", "climate", "atlantic"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How the Gulf Stream shapes climate",
+  "durationMinutes": 8,
+  "instruction": "Learn about the Atlantic Meridional Overturning Circulation, then explain what would happen to London's weather if the Gulf Stream shut down."
+  }
+ },
+ {
+  "id": "oceans-antarctic-circumpolar",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "The Antarctic Circumpolar Current",
+  "teaser": "The largest ocean current on Earth — it circles Antarctica nonstop, connecting all three major oceans and trapping cold water around the continent. It's the reason Antarctica froze.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["currents", "antarctic", "climate"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "The Antarctic Circumpolar Current",
+  "durationMinutes": 7,
+  "instruction": "Learn how this current isolates Antarctica thermally, then find one species that depends on the current's upwelling for nutrients."
+  }
+ },
+ {
+  "id": "oceans-tube-worms",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Giant Tube Worms",
+  "teaser": "Riftia pachyptila lives next to hydrothermal vents at 350°C, has no mouth, no stomach, and no eyes — yet grows to 2 metres. It survives thanks to bacteria inside its body that convert hydrogen sulfide into food.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["creatures", "vents", "chemosynthesis"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How tube worms survive at hydrothermal vents",
+  "durationMinutes": 8,
+  "instruction": "Learn about chemosynthesis in tube worm trophosomes, then explain why tube worms challenge our definition of where life can exist."
+  }
+ },
+ {
+  "id": "oceans-anglerfish",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Anglerfish",
+  "teaser": "In the pitch-dark deep sea, the female anglerfish dangles a bioluminescent lure from a modified dorsal spine to attract prey. Males are tiny parasites — they fuse permanently to the female's body and share her bloodstream.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["creatures", "deep-sea", "bioluminescence"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Deep-sea anglerfish biology",
+  "durationMinutes": 7,
+  "instruction": "Learn about sexual parasitism in anglerfish, then find one other deep-sea creature that uses bioluminescence to survive."
+  }
+ },
+ {
+  "id": "oceans-coelacanth",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Coelacanth",
+  "teaser": "A living fossil thought extinct for 66 million years until a fisherman caught one off South Africa in 1938. Its lobed fins move like limbs — it's a close relative of the first fish that crawled onto land.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["creatures", "evolution", "living-fossil"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "The coelacanth's story",
+  "durationMinutes": 7,
+  "instruction": "Learn why the coelacanth matters for understanding fish-to-land evolution, then find the one anatomical feature that links it to tetrapods."
+  }
+ },
+ {
+  "id": "oceans-seahorses",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Seahorses",
+  "teaser": "Seahorses are the only animals where the male gets pregnant. They have no stomach — food passes through so quickly they must eat constantly. Their eyes move independently like a chameleon's.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["creatures", "reproduction", "camouflage"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Seahorse biology",
+  "durationMinutes": 7,
+  "instruction": "Learn about male pregnancy in seahorses, then find one reason seahorses are especially vulnerable to overfishing and habitat loss."
+  }
+ },
+ {
+  "id": "oceans-manta-rays",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Manta Rays",
+  "teaser": "Mantas are the largest rays on Earth, with wingspans up to 7 metres, and they are among the few fish that recognise themselves in a mirror — a sign of self-awareness.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["rays", "intelligence", "ocean"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Manta ray intelligence",
+  "durationMinutes": 7,
+  "instruction": "Learn about the mirror test in manta rays, then explain why mantas form cleaning stations where small fish pick parasites off their skin."
+  }
+ },
+ {
+  "id": "oceans-portuguese-man-o-war",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Portuguese Man o' War",
+  "teaser": "Not a jellyfish — it's a colony of four types of specialised polyps functioning as one organism. Its tentacles can trail 30 metres and deliver a sting that can kill a fish (and ruin a swimmer's day).",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["colonial", "tentacles", "drifter"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "What a Portuguese Man o' War actually is",
+  "durationMinutes": 6,
+  "instruction": "Learn the difference between a jellyfish and a siphonophore, then find one animal that is immune to the Man o' War's sting."
+  }
+ },
+ {
+  "id": "oceans-salt-marshes",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "Salt Marshes",
+  "teaser": "Coastal grasslands that flood and drain with tides — salt marshes store five times more carbon per hectare than tropical rainforests, and they're the nursery grounds for most commercial fish species.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["wetlands", "coast", "carbon"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Why salt marshes matter",
+  "durationMinutes": 7,
+  "instruction": "Learn about blue carbon storage in salt marshes, then find one coastal city that uses marsh restoration as flood protection."
+  }
+ },
+ {
+  "id": "oceans-intertidal-zone",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "The Rocky Intertidal Zone",
+  "teaser": "The strip of coastline between high and low tide — organisms here survive hours of air exposure, wave battering, and temperature swings of 20°C daily. It's one of the most physically demanding habitats on Earth.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["tidal", "intertidal", "coast"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Life in the intertidal zone",
+  "durationMinutes": 7,
+  "instruction": "Learn about zonation in the intertidal zone, then find one organism with an adaptation for surviving hours out of water."
+  }
+ },
+ {
+  "id": "oceans-estuaries",
+  "categoryId": "OCEANS",
+  "subtype": "Ecosystem",
+  "name": "Estuaries",
+  "teaser": "Where rivers meet the sea and fresh water mixes with salt — estuaries are among the most productive ecosystems on Earth, supporting more life per square metre than open ocean.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["rivers", "coast", "biodiversity"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Estuary ecosystems",
+   "durationMinutes": 6,
+  "instruction": "Learn about salinity gradients in estuaries, then find one fish species that uses estuaries as a nursery."
+  }
+ },
+ {
+  "id": "oceans-dead-zone",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Dead Zones",
+  "teaser": "When excess fertilizer runoff triggers an algal bloom that dies and decomposes, the process strips oxygen from the water, creating zones where almost nothing can survive. The Gulf of Mexico dead zone covers 15,000 km².",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["pollution", "hypoxia", "runoff"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How dead zones form",
+  "durationMinutes": 7,
+  "instruction": "Learn about eutrophication, then find one agricultural practice that reduces nutrient runoff into rivers."
+  }
+ },
+ {
+  "id": "oceans-whaling-history",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "The History of Whaling",
+  "teaser": "For 300 years humans hunted whales to near-extinction for oil that lit lamps and lubricated machines. The blue whale population dropped from 350,000 to just 5,000 before the 1986 ban.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["history", "whaling", "conservation"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "The whaling era",
+  "durationMinutes": 8,
+  "instruction": "Learn how whaling shaped early globalisation, then find one whale species that has NOT recovered from the hunting era."
+  }
+ },
+ {
+  "id": "oceans-jacques-cousteau",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "Jacques Cousteau",
+  "teaser": "The French naval officer who co-invented the Aqua-Lung (1943), making underwater exploration accessible. His TV series 'The Undersea World of Jacques Cousteau' turned ocean science into popular entertainment.",
+  "imageUrl": "",
+  "byline": "Jacques-Yves Cousteau",
+  "tier": 1,
+  "tags": ["explorer", "diving", "conservation"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Cousteau's contributions to ocean science",
+  "durationMinutes": 8,
+  "instruction": "Learn how the Aqua-Lung changed oceanography, then find one species or ecosystem Cousteau helped protect through his films."
+  }
+ },
+ {
+  "id": "oceans-bathysphere",
+  "categoryId": "OCEANS",
+  "subtype": "Expedition",
+  "name": "The Bathysphere",
+  "teaser": "In 1934 William Beebe and Otis Barton descended to 923 metres in a steel sphere with 2-inch-thick walls — the deepest humans had ever been. They saw bioluminescent creatures nobody had described before.",
+  "imageUrl": "",
+  "byline": "William Beebe",
+  "tier": 1,
+  "tags": ["exploration", "deep-sea", "history"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "The first deep-sea descent",
+  "durationMinutes": 7,
+  "instruction": "Learn about Beebe's 1934 bathysphere dive, then compare the technology to modern deep-sea submersibles."
+  }
+ },
+ {
+  "id": "oceans-marine-protected-areas",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Marine Protected Areas",
+  "teaser": "MPAs are ocean reserves where fishing and extraction are restricted — inside well-managed MPAs, fish populations double and biodiversity increases by 21% on average. Only 8% of the ocean is currently protected.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["conservation", "policy", "protection"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How MPAs help ocean recovery",
+  "durationMinutes": 7,
+  "instruction": "Learn about the 30x30 initiative (protecting 30% of the ocean by 2030), then find one MPA where fish populations have measurably recovered."
+  }
+ },
+ {
+  "id": "oceans-noise-pollution",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Ocean Noise Pollution",
+  "teaser": "Ship engines, sonar, and seismic surveys make the ocean noisier every decade. Right whales communicate at 150 Hz — cargo ships generate noise in the same range, masking their calls across hundreds of kilometres.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["pollution", "whales", "acoustics"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How noise affects marine life",
+  "durationMinutes": 7,
+  "instruction": "Learn how shipping noise has doubled each decade since the 1960s, then find one technology being tested to quiet ship engines."
+  }
+ },
+ {
+  "id": "oceans-milky-sea",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Milky Seas",
+  "teaser": "A rare phenomenon where vast stretches of ocean glow white from bioluminescent bacteria — one off Somalia in 2005 was spotted from space, covering 15,000 km². Jules Verne wrote about it in 1870.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["bioluminescence", "bacteria", "rare"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "What causes milky seas",
+  "durationMinutes": 7,
+  "instruction": "Learn about the bioluminescent bacteria responsible for milky seas, then find the ship log that inspired Jules Verne's '20,000 Leagues' milky sea scene."
+  }
+ },
+ {
+  "id": "oceans-rogue-waves",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Rogue Waves",
+  "teaser": "Waves that appear without warning and can be twice the height of surrounding swells — the RMS Queen Mary narrowly survived a 28-metre rogue wave in 1942. They were considered sailor myths until 1995.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["waves", "danger", "physics"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How rogue waves form",
+  "durationMinutes": 7,
+  "instruction": "Learn about the Draupner wave (1995, the first instrumentally confirmed rogue wave), then find one theory explaining why they form."
+  }
+ },
+ {
+  "id": "oceans-brinicles",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Brinicles",
+  "teaser": "Under sea ice, cold concentrated brine sinks and freezes surrounding seawater as it falls — forming an underwater icicle that can reach the seafloor and kill starfish and urchins on contact.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["ice", "physics", "antarctic"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How brinicles form and what they kill",
+  "durationMinutes": 6,
+  "instruction": "Learn about brine rejection in sea ice, then explain why brinicles are called the 'ice finger of death'."
+  }
+ },
+ {
+  "id": "oceans-marine-heatwaves",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Marine Heatwaves",
+  "teaser": "When sea surface temperatures stay abnormally high for weeks or months — the 2014–2016 'Blob' in the Pacific killed millions of seabirds and triggered harmful algal blooms along the entire US west coast.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["climate", "temperature", "extreme"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Marine heatwaves and their effects",
+   "durationMinutes": 8,
+  "instruction": "Learn about the Pacific Blob event, then find one marine species that shifted its range poleward during a heatwave."
+  }
+ },
+ {
+  "id": "oceans-krill",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Krill",
+  "teaser": "Antarctic krill are only 6 cm long but form swarms billions strong — their total biomass is estimated at 380 million tonnes, making them one of the most abundant animal species on Earth. They feed the whales.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["plankton", "antarctic", "food-web"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Why krill matter more than their size suggests",
+  "durationMinutes": 6,
+  "instruction": "Learn about krill's role in the Antarctic food web, then find one way climate change threatens krill populations."
+  }
+ },
+ {
+  "id": "oceans-vertical-migration",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Diel Vertical Migration",
+  "teaser": "Every day at dusk, trillions of deep-sea creatures swim upward to feed near the surface, then return at dawn. It's the largest animal migration on Earth — happening right now, invisibly.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["migration", "plankton", "daily"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "The largest migration you've never seen",
+  "durationMinutes": 7,
+  "instruction": "Learn how vertical migration works across 1,000 metres of water column, then explain how it affects the ocean's carbon pump."
+  }
+ },
+ {
+  "id": "oceans-greenland-shark",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Greenland Shark",
+  "teaser": "The longest-lived vertebrate on Earth — Greenland sharks can live over 400 years. They grow just 1 cm per year and don't reach sexual maturity until age 150. A 400-year-old shark was swimming when Shakespeare was born.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["sharks", "longevity", "arctic"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Greenland shark longevity",
+   "durationMinutes": 7,
+  "instruction": "Learn about radiocarbon dating of Greenland shark lenses, then find one hypothesis for why they live so long."
+  }
+ },
+ {
+  "id": "oceans-immortal-jellyfish",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Immortal Jellyfish",
+  "teaser": "Turritopsis dohrnii can revert from adult back to its juvenile polyp stage — theoretically dying of old age, then rebirthing itself. It's the only known animal capable of biological immortality.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["jellyfish", "immortality", "biology"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Biological immortality in jellyfish",
+   "durationMinutes": 7,
+   "instruction": "Learn how transdifferentiation lets Turritopsis revert to a polyp, then find one reason this hasn't made the species dominate the ocean."
+  }
+ },
+ {
+  "id": "oceans-parrotfish",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Parrotfish",
+  "teaser": "Parrotfish eat coral and excrete white sand — a single parrotfish produces up to 360 kg of sand per year. Most tropical beaches are literally fish poop. They also secrete a mucus cocoon at night to mask their scent from predators.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["reef", "sand", "reef-builders"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How parrotfish build beaches",
+  "durationMinutes": 6,
+  "instruction": "Learn about parrotfish bioerosion, then find one reef system where parrotfish are actively protected."
+  }
+ },
+ {
+  "id": "oceans-mimic-octopus",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "The Mimic Octopus",
+  "teaser": "Discovered in 1998 off Indonesia, the mimic octopus can impersonate at least 15 species — lionfish, sea snakes, flatfish, jellyfish — by changing its shape, colour, and behaviour on command.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["octopus", "mimicry", "camouflage"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How the mimic octopus impersonates other species",
+  "durationMinutes": 7,
+   "instruction": "Learn about mimic octopus transformations, then find one hypothesis for why they mimic dangerous species rather than hiding."
+  }
+ },
+ {
+  "id": "oceans-sea-otters",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Sea Otters",
+  "teaser": "Sea otters eat 25% of their body weight daily and use rocks as tools to crack open shellfish — the only marine mammal to use tools. Their dense fur (1 million hairs per cm²) traps air for insulation instead of blubber.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["otters", "tool-use", "kelp"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Sea otters and kelp forests",
+   "durationMinutes": 7,
+   "instruction": "Learn about the otter–urchin–kelp trophic cascade, then find one coastal area where sea otter recovery restored a kelp forest."
+  }
+ },
+ {
+  "id": "oceans-seabirds",
+  "categoryId": "OCEANS",
+  "subtype": "Creature",
+  "name": "Seabirds and the Ocean",
+  "teaser": "Seabirds are the ocean's messengers — the wandering albatross can fly 1,500 km a day without flapping, spending years at sea and only touching land to breed. Their guano once fueled entire economies.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["birds", "migration", "ocean"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How seabirds connect ocean health to land",
+   "durationMinutes": 7,
+   "instruction": "Learn about the albatross's dynamic soaring technique, then find one way seabird populations serve as indicators of ocean health."
+  }
+ },
+ {
+  "id": "oceans-tidal-bores",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Tidal Bores",
+  "teaser": "When a rising tide funnels into a narrowing river, it forms a solitary wave that travels upstream — the Qiantang River bore in China reaches 9 metres high and surfers ride it for 10 km.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["tides", "rivers", "waves"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "How tidal bores form",
+  "durationMinutes": 6,
+  "instruction": "Learn about the conditions that create a tidal bore, then find one river where surfers regularly ride the bore."
+  }
+ },
+ {
+  "id": "oceans-bioluminescent-bays",
+  "categoryId": "OCEANS",
+  "subtype": "Phenomenon",
+  "name": "Bioluminescent Bays",
+  "teaser": "Mosquito Bay in Puerto Rico glows electric blue when dinoflagellates are disturbed — a single gallon of water can contain 700,000 of these single-celled organisms, each one a tiny flash of light.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["bioluminescence", "bays", "bioluminescent"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "What makes a bay glow",
+  "durationMinutes": 6,
+  "instruction": "Learn about dinoflagellate bioluminescence, then find one man-made factor threatening bioluminescent bays."
+  }
+ },
+ {
+  "id": "oceans-submarine-volcanoes",
+  "categoryId": "OCEANS",
+  "subtype": "Feature",
+  "name": "Submarine Volcanoes",
+  "teaser": "More than 1 million submarine volcanoes dot the ocean floor — most are never seen. The 2022 Hunga Tonga eruption displaced 150 billion tonnes of water into the atmosphere, the largest explosion ever recorded by modern instruments.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": ["volcanoes", "geology", "eruptions"],
+  "exploreAction": {
+   "verb": "Explore",
+  "targetName": "Submarine volcanic activity",
+   "durationMinutes": 8,
+  "instruction": "Learn about the Hunga Tonga eruption's atmospheric impact, then find one way mid-ocean ridges continuously create new ocean floor."
+  }
  }
 ]

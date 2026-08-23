@@ -1,7 +1,8 @@
 // Curio Web App - Type Definitions
 // Mirrors Android app's data models
 
-// Category Systemexport type CategoryId = 
+// Category System
+export type CategoryId = 
   | 'ARTISTS' | 'ALBUMS' | 'SONGS'
   | 'DIRECTORS' | 'FILMS' | 'ANIMATED_MOVIES' | 'SERIES'
   | 'AUTHORS' | 'BOOKS'
@@ -55,6 +56,10 @@ export interface CurioTopic {
   subtype: string;
   name: string;
   teaser: string;
+  // Nullable mirror fields from the Android schema (absent from legacy JSON):
+  // display byline (e.g. album artist) and difficulty tier.
+  byline?: string;
+  tier?: number;
   imageUrl: string;
   actionPrompt: ExploreAction;
   aliases: string[];

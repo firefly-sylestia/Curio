@@ -1218,5 +1218,565 @@
    "durationMinutes": 7,
    "instruction": "Learn about meditation and brain structure changes, then find one habit that could reshape your brain for the better."
   }
+ },
+ {
+  "id": "psychology-impostor-syndrome",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Impostor Syndrome",
+  "teaser": "High-achieving people who believe they're frauds — despite clear evidence of competence. First described in 1978, it affects an estimated 70% of people at some point, and surprisingly gets worse with success.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "identity",
+   "self-doubt"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Impostor syndrome",
+   "durationMinutes": 7,
+   "instruction": "Learn about the five types of impostor syndrome, then find one high-profile person who has spoken about experiencing it."
+  }
+ },
+ {
+  "id": "psychology-hedonic-adaptation",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Hedonic Adaptation",
+  "teaser": "We quickly return to a baseline level of happiness after positive or negative events — lottery winners are not happier after a year, and amputees often recover similar life satisfaction. The 'hedonic treadmill' explains why more stuff doesn't make us happier.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "happiness",
+   "adaptation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The hedonic treadmill",
+   "durationMinutes": 7,
+   "instruction": "Learn about Brickman's lottery winner study, then find one strategy that genuinely counteracts hedonic adaptation."
+  }
+ },
+ {
+  "id": "psychology-peak-end-rule",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Peak-End Rule",
+  "teaser": "People judge experiences by their most intense moment and how they ended — not by the total time spent. A colonoscopy that ended with mild discomfort was remembered as less painful than a shorter one that ended badly, even though it was objectively worse.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "judgement"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How we remember experiences",
+   "durationMinutes": 6,
+   "instruction": "Learn about Kahneman's cold-water experiment, then find one way the peak-end rule shapes design decisions in products or services."
+  }
+ },
+ {
+  "id": "psychology-mere-exposure",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Mere Exposure Effect",
+  "teaser": "We prefer things simply because we've encountered them before — hearing a song 10 times makes it feel more pleasant. Zajonc proved it in 1968 with nonsense words, faces, and Chinese characters that subjects had never seen consciously.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "preference",
+   "repetition"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why familiarity breeds liking",
+   "durationMinutes": 6,
+   "instruction": "Learn about Zajonc's 1968 study, then find one way marketers use mere exposure without your conscious awareness."
+  }
+ },
+ {
+  "id": "psychology-spotlight-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "The Spotlight Effect",
+  "teaser": "We massively overestimate how much others notice about us — people see your embarrassing stain about half as often as you think. Gilovich's 2000 study had students wear embarrassing T-shirts; bystanders noticed far fewer than predicted.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "self-consciousness"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The spotlight effect",
+   "durationMinutes": 6,
+   "instruction": "Learn about Gilovich's T-shirt experiment, then find one real consequence of overestimating how much people are watching you."
+  }
+ },
+ {
+  "id": "psychology-negativity-bias",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Negativity Bias",
+  "teaser": "Bad events have a stronger psychological impact than good ones of equal intensity — one insult outweighs five compliments. Evolutionary psychologists think this kept our ancestors alive: missing a threat was deadlier than missing an opportunity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "emotion",
+   "evolution"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why bad is stronger than good",
+   "durationMinutes": 7,
+   "instruction": "Learn about Baumeister's 'bad is stronger than good' meta-analysis, then find one way negativity bias shapes news media."
+  }
+ },
+ {
+  "id": "psychology-reciprocity-norm",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "The Reciprocity Norm",
+  "teaser": "Humans are wired to return favours — even uninvited ones. When the Hare Krishna movement gave free flowers at airports, donations increased because people felt obligated. Cialdini showed it works even when the gift is unwanted.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "influence"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The reciprocity principle",
+   "durationMinutes": 6,
+   "instruction": "Learn about Cialdini's reciprocity experiments, then find one example of reciprocity being used in negotiation or sales."
+  }
+ },
+ {
+  "id": "psychology-social-loafing",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "Social Loafing",
+  "teaser": "People exert less effort in groups than alone — Ringelmann's 1913 tug-of-war study showed individual force dropped as team size grew. The bigger the group, the less any one person tries, because responsibility is diffused.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "groups",
+   "motivation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why groups reduce individual effort",
+   "durationMinutes": 6,
+   "instruction": "Learn about Ringelmann's experiment, then find one way to reduce social loafing in a team setting."
+  }
+ },
+ {
+  "id": "psychology-groupthink",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Groupthink",
+  "teaser": "Smart groups make dumb decisions when harmony overrides critical thinking — Irving Janis coined the term after analysing the Bay of Pigs fiasco. Warning signs include self-censorship, illusion of unanimity, and pressure on dissenters.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "groups",
+   "decision-making"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How groupthink derails decision-making",
+   "durationMinutes": 7,
+   "instruction": "Learn about the Bay of Pigs and the Challenger disaster as groupthink cases, then find one safeguard against it."
+  }
+ },
+ {
+  "id": "psychology-in-group-favoritism",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "In-Group Favoritism",
+  "teaser": "People favour members of their own group even when groups are assigned arbitrarily — Tajfel's minimal group study assigned children by coin flip and they still showed bias. The instinct to prefer 'us' over 'them' is disturbingly easy to trigger.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "social",
+   "bias"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Minimal group bias",
+   "durationMinutes": 7,
+   "instruction": "Learn about Tajfel's minimal group paradigm, then find one way in-group favoritism manifests in real-world institutions."
+  }
+ },
+ {
+  "id": "psychology-barnum-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Barnum Effect",
+  "teaser": "People rate vague, general personality descriptions as highly accurate when told they're personalised — this is why horoscopes and fortune cookies feel uncannily right. Forer proved it in 1949 with a fake personality test.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "personality",
+   "deception"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why horoscopes feel personal",
+   "durationMinutes": 6,
+   "instruction": "Learn about Forer's 1949 experiment, then find one other context where the Barnum effect influences judgement."
+  }
+ },
+ {
+  "id": "psychology-cbt",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Theory",
+  "name": "Cognitive Behavioral Therapy",
+  "teaser": "CBT is based on the idea that distorted thoughts cause emotional suffering — by identifying and challenging cognitive distortions, patients can rewire their responses. It's the most evidence-based psychotherapy, effective for depression, anxiety, PTSD, and OCD.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "therapy",
+   "cognitive"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How CBT works",
+   "durationMinutes": 7,
+   "instruction": "Learn about the cognitive distortion list, then find one common distortion that most people recognise in their own thinking."
+  }
+ },
+ {
+  "id": "psychology-zeigarnik",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Zeigarnik Effect",
+  "teaser": "We remember incomplete tasks better than completed ones — waiters recall unpaid orders perfectly but forget paid ones. Bluma Zeigarnik discovered it in 1927 in a Vienna cafe, and it explains why cliffhangers keep you watching.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "motivation"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why unfinished tasks stick in memory",
+   "durationMinutes": 6,
+   "instruction": "Learn about Zeigarnik's waiter observation, then find one way the Zeigarnik effect is used in storytelling or marketing."
+  }
+ },
+ {
+  "id": "psychology-method-of-loci",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Method of Loci (Memory Palace)",
+  "teaser": "A 2,500-year-old mnemonic technique where you place items along a familiar mental route — memory champions use it to memorise thousands of digits. Brain scans show it activates spatial memory regions, not just verbal ones.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "technique"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Building a memory palace",
+   "durationMinutes": 7,
+   "instruction": "Learn the method of loci, then try memorising five grocery items by placing them in rooms of your home."
+  }
+ },
+ {
+  "id": "psychology-flashbulb-memories",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Flashbulb Memories",
+  "teaser": "People remember exactly where they were on 9/11 with vivid confidence — but studies show those memories are no more accurate than ordinary ones. The feeling of certainty is the illusion; the content degrades like any other memory.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "emotion"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why vivid memories can still be wrong",
+   "durationMinutes": 7,
+   "instruction": "Learn about Talarico and Rubin's 9/11 flashbulb memory study, then find one reason emotional intensity creates the illusion of accuracy."
+  }
+ },
+ {
+  "id": "psychology-change-blindness",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Change Blindness",
+  "teaser": "People fail to notice large changes in their visual field when the change happens during a brief interruption — Simons and Levin's 1998 study swapped a conversation partner mid-dialogue and most people didn't notice the person changed entirely.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "perception",
+   "attention"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we miss big changes",
+   "durationMinutes": 6,
+   "instruction": "Learn about the door study, then find one implication of change blindness for eyewitness testimony reliability."
+  }
+ },
+ {
+  "id": "psychology-synesthesia",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Phenomenon",
+  "name": "Synesthesia",
+  "teaser": "One in 23 people experience senses blended together — letters have colours, music has textures, numbers have personalities. It's not imagination: synesthetes see consistent colours for the same letters across years of testing.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "perception",
+   "brain"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "What synesthesia reveals about the brain",
+   "durationMinutes": 7,
+   "instruction": "Learn about grapheme-colour synesthesia, then find one theory explaining why it develops."
+  }
+ },
+ {
+  "id": "psychology-mirror-neurons",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Mirror Neurons",
+  "teaser": "Neurons that fire both when you act and when you watch someone else act the same way — discovered in macaque monkeys in the 1990s, they may underlie empathy, imitation learning, and why watching sports makes you wince.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "neuroscience",
+   "empathy"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Mirror neurons and empathy",
+   "durationMinutes": 7,
+   "instruction": "Learn about Rizzolatti's mirror neuron discovery, then find one debate about whether mirror neurons truly explain human empathy."
+  }
+ },
+ {
+  "id": "psychology-dopamine-reward",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Dopamine and Reward",
+  "teaser": "Dopamine isn't the 'pleasure chemical' — it's the 'wanting chemical.' It spikes in anticipation of reward, not during enjoyment. Slot machines exploit this: unpredictable payouts create dopamine surges that keep you pulling the lever.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "neuroscience",
+   "reward"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Dopamine's real role",
+   "durationMinutes": 7,
+   "instruction": "Learn about the wanting vs liking distinction, then find one modern app or game design pattern that manipulates dopamine loops."
+  }
+ },
+ {
+  "id": "psychology-default-mode-network",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "The Default Mode Network",
+  "teaser": "Your brain is most active when you're doing nothing — the DMN activates during mind-wandering, daydreaming, and self-reflection, consuming 20% of total energy. It's why boredom is creative and constant stimulation is exhausting.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "neuroscience",
+   "brain"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "The brain's idle network",
+   "durationMinutes": 7,
+   "instruction": "Learn about the DMN's role in creativity, then find one practice that strengthens mind-wandering capacity."
+  }
+ },
+ {
+  "id": "psychology-nature-wellbeing",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "Nature and Mental Health",
+  "teaser": "Japanese forest bathing (shinrin-yoku) reduces cortisol by 12% in just 15 minutes — nature exposure lowers blood pressure, boosts immunity, and reduces rumination. The effect is measurable after a single walk in a park.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "wellbeing",
+   "nature"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How nature affects mental health",
+   "durationMinutes": 6,
+   "instruction": "Learn about shinrin-yoku research, then find one minimum dose of nature exposure that measurably improves mood."
+  }
+ },
+ {
+  "id": "psychology-loneliness",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Condition",
+  "name": "Loneliness",
+  "teaser": "Loneliness is as deadly as smoking 15 cigarettes a day — it activates the same stress pathways as physical danger. Social isolation increases mortality by 26%, and the health impact is worse than obesity or inactivity.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "health",
+   "social"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why loneliness is dangerous",
+   "durationMinutes": 7,
+   "instruction": "Learn about Cacioppo's loneliness research, then find one difference between being alone and being lonely."
+  }
+ },
+ {
+  "id": "psychology-overjustification",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Overjustification Effect",
+  "teaser": "Paying people to do something they already enjoy can kill their intrinsic motivation — Lepper's 1973 study gave children drawing prizes; those who were rewarded drew less when the prize disappeared. External rewards can replace internal motivation.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "motivation",
+   "reward"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "When rewards backfire",
+   "durationMinutes": 6,
+   "instruction": "Learn about Lepper's marker study, then find one real-world example of overjustification in schools or workplaces."
+  }
+ },
+ {
+  "id": "psychology-status-quo-bias",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Status Quo Bias",
+  "teaser": "People prefer things to stay the same — even when change is objectively better. In organ donation opt-in countries, only 15% donate; in opt-out countries, 90% do. The default choice is enormously powerful because of inertia.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "decision-making",
+   "inertia"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we resist change",
+   "durationMinutes": 6,
+   "instruction": "Learn about organ donation defaults across countries, then find one example of status quo bias in your own life."
+  }
+ },
+ {
+  "id": "psychology-endowment-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Effect",
+  "name": "The Endowment Effect",
+  "teaser": "We value things more once we own them — Kahneman gave students mugs worth $5; they demanded $7 to sell but would only pay $3.50 to buy. Ownership alone doubles the perceived value.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "economics",
+   "ownership"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why ownership inflates value",
+   "durationMinutes": 6,
+   "instruction": "Learn about Kahneman's mug experiment, then find one business strategy that exploits the endowment effect."
+  }
+ },
+ {
+  "id": "psychology-framing-effect",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "The Framing Effect",
+  "teaser": "How a choice is presented changes the decision — telling patients a surgery has a 90% survival rate gets more takers than one with a 10% mortality rate, even though they're identical. Framing is everything.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "decision-making",
+   "language"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "How framing changes decisions",
+   "durationMinutes": 6,
+   "instruction": "Learn about Tversky and Kahneman's disease problem, then find one example of framing in political communication."
+  }
+ },
+ {
+  "id": "psychology-hindsight-bias",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Bias",
+  "name": "Hindsight Bias",
+  "teaser": "After learning an outcome, people believe they 'knew it all along' — Fischhoff showed that even when subjects were told both possible outcomes, they rated the actual result as having been more predictable. It makes learning from mistakes harder.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "judgement"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Why we think we predicted the outcome",
+   "durationMinutes": 6,
+   "instruction": "Learn about Fischhoff's 1975 study, then find one way hindsight bias affects legal judgements."
+  }
+ },
+ {
+  "id": "psychology-forgetting-curve",
+  "categoryId": "PSYCHOLOGY",
+  "subtype": "Concept",
+  "name": "The Forgetting Curve",
+  "teaser": "Ebbinghaus showed in 1885 that you forget 70% of new information within 24 hours without review — but spaced repetition (reviewing at increasing intervals) can retain 90%+ long-term. The curve is why cramming never works.",
+  "imageUrl": "",
+  "tier": 1,
+  "tags": [
+   "psychology",
+   "memory",
+   "learning"
+  ],
+  "exploreAction": {
+   "verb": "Explore",
+   "targetName": "Spaced repetition and memory",
+   "durationMinutes": 7,
+   "instruction": "Learn about Ebbinghaus's forgetting curve, then find one spaced-repetition app or technique that uses this science."
+  }
  }
 ]

@@ -82,6 +82,7 @@ import androidx.compose.ui.unit.IntRect
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.ui.components.AvatarCropDialog
 import com.curio.app.ui.components.ProfileAvatarImage
@@ -102,6 +103,10 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioBadgeDetailDialog
 import com.curio.app.ui.components.CurioBadgeStrip
 import com.curio.app.ui.components.CurioCardHeader
@@ -401,9 +406,13 @@ fun ProfileScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
+        // v241 — LOCAL GLASS CAPTURE: the page content (hero + list)
+        // records into its own layer; the sticky back/search pills are a
+        // SIBLING of this LazyColumn, so they can never sample themselves.
+        val profileGlassBackdrop = rememberLayerBackdrop()
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().layerBackdrop(profileGlassBackdrop),
             contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -537,8 +546,13 @@ fun ProfileScreen(navController: NavController) {
         val frostPillRim = if (isCurioDarkTheme()) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
         val frostPillIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
                             else MaterialTheme.colorScheme.onSurfaceVariant
+        // v241 — IN-SCREEN GLASS: with the experiment on, the scrolled
+        // endpoint is a fully clear refracting glass capsule (fill fades to
+        // transparent; the capsule samples the local capture above). At
+        // rest both paths show the exact same SOLID hero fill.
+        val glassOn = isInScreenGlassActive()
         // Resolve solid target colors from scroll, then animate the paint.
-        val targetPillBg = lerp(restPillBg, frostPillBg, frostShift)
+        val targetPillBg = lerp(restPillBg, if (glassOn) Color.Transparent else frostPillBg, frostShift)
         val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
         val targetPillIcon = lerp(heroInk, frostPillIcon, frostShift)
         val pillBg by animateColorAsState(
@@ -575,18 +589,41 @@ fun ProfileScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // v246 — one gesture stream per pill, shared by the click and
+            // the liquid-glass press feel (shrink + refraction bloom).
+            val backPillInteraction = remember { MutableInteractionSource() }
+            val searchPillInteraction = remember { MutableInteractionSource() }
             CurioBackButton(
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
-                shadowElevation = 6.dp * frostShift,
-                disableRipple = true
+                shadowElevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                disableRipple = true,
+                pillInteraction = backPillInteraction,
+                // v241 — clear refracting glass once the morph begins.
+                modifier = if (glassOn && frostShift > 0.01f)
+                    Modifier.liquidGlassCapsule(
+                        restPillBg,
+                        washAlpha = 0.45f,
+                        backdrop = profileGlassBackdrop,
+                        alwaysClear = true,
+                        interactionSource = backPillInteraction
+                    ) else Modifier
             )
             ProfileSearchPill(
                 onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
                 bg = pillBg,
                 iconTint = pillIcon,
-                elevation = 6.dp * frostShift
+                elevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                pillInteraction = searchPillInteraction,
+                modifier = if (glassOn && frostShift > 0.01f)
+                    Modifier.liquidGlassCapsule(
+                        restPillBg,
+                        washAlpha = 0.45f,
+                        backdrop = profileGlassBackdrop,
+                        alwaysClear = true,
+                        interactionSource = searchPillInteraction
+                    ) else Modifier
             )
         }
     }
@@ -601,15 +638,20 @@ private fun ProfileSearchPill(
     onClick: () -> Unit,
     bg: Color,
     iconTint: Color,
-    elevation: Dp
+    elevation: Dp,
+    modifier: Modifier = Modifier,
+    // v246 — optional external gesture source shared with the glass press.
+    pillInteraction: MutableInteractionSource? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val fallbackInteraction = remember { MutableInteractionSource() }
+    val interactionSource = pillInteraction ?: fallbackInteraction
     Surface(
         shape = CircleShape,
         color = bg,
         shadowElevation = elevation,
-        modifier = Modifier
-            .size(42.dp)
+        modifier = modifier
+            // v244 — 44dp keeps the magnifier centered at every font scale.
+            .size(44.dp)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -625,7 +667,6 @@ private fun ProfileSearchPill(
                 // v115 — the magnifier reads a hair low in the 42dp pill;
                 // deepened -1dp -> -2dp (still a touch low after the first
                 // pass). Same optical-weight correction as the Home pills.
-                modifier = Modifier.offset(y = (-2f).dp)
             )
         }
     }
@@ -1306,6 +1347,10 @@ private fun BoxScope.ProfileHeroSymbol(
  */
 @Composable
 private fun profileRoseAccent(): Color {
+    // v223 — "Material hero tears": when the Material theme AND this
+    // option are both on, the torn hero wears the scheme's
+    // primaryContainer instead of the app-default rose/azure (or a lane).
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.primaryContainer
     // v31 — "Adaptive Hero" (v30's "Hero follows Spin lane"): Profile's
     // hero must follow the spin lane like Home/Settings do. The hero wears
     // the last-picked lane's accent.
@@ -1340,6 +1385,8 @@ private fun profileRoseAccent(): Color {
 /** Readable ink for content sitting on the rose banner (Home's helper). */
 @Composable
 private fun profileReadableInk(fill: Color): Color {
+    // v223 — Material hero tears: readable ink on primaryContainer.
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
     // Hero), the text must be accent-aware: white/cream on the deep accent
     // (never the fixed dark onSurface, which was invisible on a vivid lane
@@ -1542,7 +1589,6 @@ private fun SettingsNavCard(onOpenSettings: () -> Unit) {
                     CurioIcons.Settings, null,
                     tint = settingsCardAccentInk(),
                     size = 23.dp,
-                    modifier = Modifier.offset(y = (-2f).dp)
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Settings & preferences", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))

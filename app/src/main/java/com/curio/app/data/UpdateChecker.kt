@@ -13,8 +13,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.curio.app.BuildConfig
 import com.curio.app.R
-import com.curio.app.ui.components.CurioToast
-import com.curio.app.ui.theme.CurioIcons
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -267,10 +268,9 @@ object UpdateChecker {
     /**
      * v53 — background update notifier, run on app start. When the latest
      * release is newer than the installed build:
-     *  - an IN-APP toast ([CurioToast]) announces it (v63 — replaces the old
-     *    android.widget.Toast), tappable to open the Updates page (v63b /
-     *    v112), compact one-line pill that waits a few seconds past launch
-     *    so it isn't glued to the start screen (v99), and
+     *  - an IN-APP DIALOG ([CurioUpdatePrompt], v227d — the old corner
+     *    toast pill is gone) offers the Updates page, waiting a few seconds
+     *    past launch so it isn't glued to the start screen, and
      *  - a NOTIFICATION fires alongside it.
      * Both are ONCE PER VERSION — [AppPreferences] remembers the last
      * announced tag, so a pending update is announced on the first launch
@@ -290,19 +290,14 @@ object UpdateChecker {
         if (lastNotified == release.tagName) return@withContext
         AppPreferences.setLastNotifiedUpdateVersion(appContext, release.tagName)
         withContext(Dispatchers.Main) {
-            // In-app toast — rendered by CurioInAppToastHost in the NavHost;
-            // global state survives the check racing the UI's first frame.
-            // Tapping it opens the Updates page (actionId "support").
-            // v99 — wait a few seconds past launch so the pill reads as a
+            // v227d — IN-APP DIALOG instead of the corner pill: the
+            // NavHost observes [CurioUpdatePrompt.pending] and renders the
+            // themed offer. Global state survives the check racing the
+            // UI's first frame. v99's delay stays so the dialog reads as a
             // later announcement, not part of the start screen (the
             // notification below still fires immediately).
             delay(4_000)
-            CurioToast.show(
-                "Curio ${release.tagName} update available",
-                glyph = CurioIcons.Download,
-                actionLabel = "Open",
-                actionId = "support"
-            )
+            CurioUpdatePrompt.show(release.tagName)
         }
         // Notification — same once-per-version gate as the toast above.
         runCatching { ensureChannel(appContext) }
@@ -351,5 +346,25 @@ object UpdateChecker {
                 description = "New Curio releases"
             }
         )
+    }
+}
+
+/**
+ * v227d — the pending in-app UPDATE PROMPT version tag (null = nothing to
+ * show). The NavHost renders it as a themed AlertDialog offering the
+ * Updates page; this replaces the old corner toast pill entirely. Global
+ * snapshot state so the check (a data-layer coroutine) can raise it before
+ * or while the UI composes.
+ */
+object CurioUpdatePrompt {
+    var pending by mutableStateOf<String?>(null)
+        private set
+
+    fun show(versionTag: String) {
+        pending = versionTag
+    }
+
+    fun dismiss() {
+        pending = null
     }
 }

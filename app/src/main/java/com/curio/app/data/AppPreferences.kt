@@ -63,6 +63,7 @@ object AppPreferences {
     // color system re-does per M3 guidelines (single primary, neutral
     // surfaces, 36 lane accents collapsed to ~6 muted families).
     private const val KEY_MATERIAL_THEME = "material_theme"
+    private const val KEY_MATERIAL_HERO_TEARS = "material_hero_tears"
     private const val KEY_HERO_BLUE = "hero_azure_enabled"   // sky-azure hero variant (v27l)
     private const val KEY_HERO_FOLLOW_LANE = "hero_follow_lane"  // shared hero + page follow the Spin lane (v30)
     // v28 — dark-mode elevation visibility: black shadows vanish on
@@ -268,6 +269,15 @@ object AppPreferences {
     var materialThemeState by mutableStateOf(false)
         private set
 
+    // v223 — "Material hero tears" (Appearance, default OFF): when the
+    // Material theme is on AND this option is on, the shared torn heroes
+    // (Home / Profile / Settings / Cabinet-All / drawer / onboarding) wear
+    // the scheme's primaryContainer (+ onPrimaryContainer ink) instead of
+    // the app-default rose/azure. Only meaningful while [materialThemeState]
+    // is on — the Appearance row greys out otherwise.
+    var materialHeroTearsState by mutableStateOf(false)
+        private set
+
     // Sky-azure hero variant (v27l) — when ON, the shared torn hero
     // (Home / Profile / Settings / Cabinet) wears the app's airy pastel
     // azure instead of the rose-wood. v42 — azure is back AND the DEFAULT
@@ -308,19 +318,18 @@ object AppPreferences {
     var promoModeState by mutableStateOf(false)
         private set
 
-    // Peek-deck redesign (v7.7, EXPERIMENTAL) — the Spin deck's background
-    // peek cards wear four independently-toggleable upgrades: a top-lit
-    // gradient fill, a category-tinted hairline border, soft ambient
-    // shadows, and roomier two-line near-card titles. Each defaults OFF;
-    // the classic flat deck stays the default until the experiment
-    // concludes (then the winning path is hardcoded and the toggles removed).
-    var peekGradientState by mutableStateOf(false)
+    // Peek-deck upgrades (v7.7) — the Spin deck's background peek cards:
+    // top-lit gradient fill, category-tinted hairline border, roomier
+    // two-line near-card titles. v223 — the experiments CONCLUDED with all
+    // three ON: the toggles were removed from Experiments and the reads in
+    // SpinScreen are hardcoded true; these APIs stay dormant (defaults true).
+    var peekGradientState by mutableStateOf(true)
         private set
-    var peekHairlineState by mutableStateOf(false)
+    var peekHairlineState by mutableStateOf(true)
         private set
     var peekShadowsState by mutableStateOf(false)
         private set
-    var peekTitlesState by mutableStateOf(false)
+    var peekTitlesState by mutableStateOf(true)
         private set
     /** Experimental newer peek motion: travel first, then fade at the exit tail. */
     var peekTailFadeState by mutableStateOf(false)
@@ -339,9 +348,9 @@ object AppPreferences {
     // hero card is now the shipped default.
     var heroBorderState by mutableStateOf(true)
         private set
-    // v92 — the One UI tinted shadow (accent-colored layered glow) is now
-    // the shipped default for the hero ticket; the Experiments toggle
-    // remains for comparison.
+    // v223 — the Main card shadow experiment CONCLUDED ON: the One UI
+    // tinted shadow is the shipped default, the toggle is removed and the
+    // read in SpinScreen is hardcoded true. API stays dormant (default true).
     var heroShadowState by mutableStateOf(true)
     /** v27 — experimental paper accents (Settings → Experiments → Paper & headers). */
     var paperHeaderCutsState by mutableStateOf(false)
@@ -362,10 +371,10 @@ object AppPreferences {
     // paper under-sheet (the extra layered lip below the seam) is an opt-in
     // experiment in Settings → Experiments → Paper & headers.
     var heroTearSheetState by mutableStateOf(false)
-    // v208 — experiment: the Spin Categories/Filter buttons (and their
-    // vertical variants) wear the floating NAV-PILL look (capsule, calmed
-    // accent active fill, elevated container) instead of the category
-    // rounded-24 buttons. Default OFF.
+    // v223 — the Nav-style buttons experiment CONCLUDED ON: the Spin
+    // Categories/Filter buttons (and their vertical variants) wear the
+    // floating NAV-PILL look as the shipped default; the toggle is removed
+    // and the reads in SpinScreen are hardcoded true. API stays dormant.
     var navPillButtonsState by mutableStateOf(true)
         private set
     /** v27u — Home tint experiments (Settings → Experiments → Home tint). */
@@ -401,6 +410,57 @@ object AppPreferences {
     // v221 — constellation 3D star zoom: tapping a star shows a subtle
     // perspective tilt + white glow halo. Default ON.
     var starZoom3dState by mutableStateOf(true)
+        private set
+
+    // Drawer constellation experiment — the "Your Curiosity Map" star
+    // pattern at the top of the navigation drawer is OPT-IN (default OFF);
+    // the default drawer shows a small Material-style stat strip instead.
+    var drawerConstellationState by mutableStateOf(false)
+        private set
+
+    // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
+    // OFF): the three floating nav-style capsules (bottom tab bar, Topic
+    // Reveal category/favorite bar, Pet Designer studio bar) render a
+    // REAL-TIME frosted backdrop — vibrancy + blur + lens refraction of
+    // whatever is behind them (the io.github.kyant0:backdrop recipe) —
+    // instead of the solid elevated fill. Needs Android 12+ (RenderEffect);
+    // older devices silently keep the current look.
+    var liquidGlassPillsState by mutableStateOf(false)
+        private set
+
+    // Glass parallax tilt experiment (v231) — OPT-IN (default OFF): when the
+    // liquid-glass pills are showing, the device's gravity sensor makes them
+    // sway subtly AGAINST the phone's tilt — the iOS liquid-glass depth cue.
+    var glassParallaxState by mutableStateOf(false)
+        private set
+
+    // v248 — CLASSIC ACTIVE INDICATOR (experiment, default OFF): the nav
+    // bar's draggable blob renders as fully TRANSPARENT refracting glass
+    // (the pre-v247 style) instead of the solid white/black pill. Needs
+    // Liquid glass pills on.
+    var glassClassicIndicatorState by mutableStateOf(false)
+        private set
+
+    // v233 — Clear-glass style (experiment, default OFF): when the liquid-
+    // glass pills are showing, drop the heavy frost (blur 8dp → 2dp, wash
+    // cut to a third) so the capsule reads CLEAR and refractive — like the
+    // bright blob it becomes under your finger while pressed — instead of
+    // milky frosted glass.
+    var glassClarityState by mutableStateOf(false)
+        private set
+
+    // v242 — LIQUID GLASS TUNING: user-adjustable multipliers for the glass
+    // recipe (Appearance → Liquid glass). 1f = the tuned default; 0f turns
+    // the effect off; up to 2f doubles it.
+    // v243 — the DEFAULT sits at 25% (a much clearer glass than the old
+    // full-frost 100%); users can still slide 0–200% in Appearance.
+    var glassBlurScaleState by mutableStateOf(0.25f)
+        private set
+    var glassRefractionScaleState by mutableStateOf(1f)
+        private set
+    var glassReflectionScaleState by mutableStateOf(1f)
+        private set
+    var glassIndicatorShadowScaleState by mutableStateOf(1f)
         private set
 
     /**
@@ -610,6 +670,7 @@ object AppPreferences {
         pastelColorsState = isPastelColorsEnabled(context)
         pastelCrownDepthState = isPastelCrownDepthEnabled(context)
         materialThemeState = isMaterialThemeEnabled(context)
+        materialHeroTearsState = isMaterialHeroTearsEnabled(context)
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
@@ -639,6 +700,15 @@ object AppPreferences {
         heroBlendGradientState = isHeroBlendGradientEnabled(context)
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
+        drawerConstellationState = isDrawerConstellationEnabled(context)
+        liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
+        glassParallaxState = isGlassParallaxEnabled(context)
+        glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
+        glassClarityState = isGlassClarityEnabled(context)
+        glassBlurScaleState = getGlassBlurScale(context)
+        glassRefractionScaleState = getGlassRefractionScale(context)
+        glassReflectionScaleState = getGlassReflectionScale(context)
+        glassIndicatorShadowScaleState = getGlassIndicatorShadowScale(context)
         tintWashEnabledState = isTintWashEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
@@ -672,6 +742,7 @@ object AppPreferences {
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
         autoBackupEnabledState = isAutoBackupEnabled(context)
+        autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────
@@ -711,6 +782,15 @@ object AppPreferences {
     fun setMaterialThemeEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_MATERIAL_THEME, enabled).apply()
         materialThemeState = enabled
+    }
+
+    /** Whether the torn heroes follow the Material theme (v223, default off). */
+    fun isMaterialHeroTearsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MATERIAL_HERO_TEARS, false)
+
+    fun setMaterialHeroTearsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MATERIAL_HERO_TEARS, enabled).apply()
+        materialHeroTearsState = enabled
     }
 
     // ── Pastel crown depth (v7.12 experimental) ───────────────────────
@@ -765,18 +845,18 @@ object AppPreferences {
     }
 
     // ── Peek-deck redesign (v7.7 experimental) ────────────────────────
-    /** Whether the top-lit gradient peek-card fill is on (default off). */
+    /** Whether the top-lit gradient peek-card fill is on (v223 — concluded ON, toggle removed). */
     fun isPeekGradientEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PEEK_GRADIENT, false)
+        prefs(context).getBoolean(KEY_PEEK_GRADIENT, true)
 
     fun setPeekGradientEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_GRADIENT, enabled).apply()
         peekGradientState = enabled
     }
 
-    /** Whether the category-tinted peek-card hairline is on (default off). */
+    /** Whether the category-tinted peek-card hairline is on (v223 — concluded ON, toggle removed). */
     fun isPeekHairlineEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PEEK_HAIRLINE, false)
+        prefs(context).getBoolean(KEY_PEEK_HAIRLINE, true)
 
     fun setPeekHairlineEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_HAIRLINE, enabled).apply()
@@ -792,9 +872,9 @@ object AppPreferences {
         peekShadowsState = enabled
     }
 
-    /** Whether roomier two-line near-card titles are on (default off). */
+    /** Whether roomier two-line near-card titles are on (v223 — concluded ON, toggle removed). */
     fun isPeekTitlesEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PEEK_TITLES, false)
+        prefs(context).getBoolean(KEY_PEEK_TITLES, true)
 
     fun setPeekTitlesEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PEEK_TITLES, enabled).apply()
@@ -896,9 +976,9 @@ object AppPreferences {
         heroBorderState = enabled
     }
 
-    /** Whether the soft hero-card shadow is on — v92: the One UI tinted
-     *  shadow is now the shipped default (was off); the Experiments toggle
-     *  remains for comparison. */
+    /** Whether the soft hero-card shadow is on — v223: the experiment
+     *  CONCLUDED ON (the One UI tinted shadow is the shipped default); the
+     *  Experiments toggle is removed and the read is hardcoded true. */
     fun isHeroShadowEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_HERO_SHADOW, true)
 
@@ -923,6 +1003,15 @@ object AppPreferences {
     private const val KEY_HEADER_DEEP = "header_deep"
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
+    private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
+    private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
+    private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
+    private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
+    private const val KEY_GLASS_CLARITY = "glass_clear_style"
+    private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
+    private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
+    private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
+    private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -970,7 +1059,8 @@ object AppPreferences {
         homeTintState = enabled
     }
 
-    /** Whether the Spin Categories/Filter buttons wear the nav-pill look (experimental, default off). */
+    /** Whether the Spin Categories/Filter buttons wear the nav-pill look
+     *  (v223 — concluded ON, toggle removed; default true). */
     fun isNavPillButtonsEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_NAV_PILL_BUTTONS, true)
 
@@ -1084,6 +1174,79 @@ object AppPreferences {
     fun setStarZoom3dEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_STAR_ZOOM_3D, enabled).apply()
         starZoom3dState = enabled
+    }
+
+    // ── Drawer constellation (experiment, default OFF) ───────────────
+    fun isDrawerConstellationEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DRAWER_CONSTELLATION, false)
+
+    fun setDrawerConstellationEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DRAWER_CONSTELLATION, enabled).apply()
+        drawerConstellationState = enabled
+    }
+
+    // ── Liquid-glass navigation pills (experiment, default OFF) ──────
+    fun isLiquidGlassPillsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LIQUID_GLASS_PILLS, false)
+
+    fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
+        liquidGlassPillsState = enabled
+    }
+
+    // ── Glass parallax tilt (experiment, default OFF) ────────────────
+    fun isGlassParallaxEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_PARALLAX, false)
+
+    fun setGlassParallaxEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_PARALLAX, enabled).apply()
+        glassParallaxState = enabled
+    }
+
+    // ── Classic active indicator (experiment, default OFF) ───────────
+    fun isGlassClassicIndicatorEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_CLASSIC_INDICATOR, false)
+
+    fun setGlassClassicIndicatorEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_CLASSIC_INDICATOR, enabled).apply()
+        glassClassicIndicatorState = enabled
+    }
+
+    // ── Clear-glass style (experiment, default OFF) ──────────────────
+    fun isGlassClarityEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_GLASS_CLARITY, false)
+
+    fun setGlassClarityEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_GLASS_CLARITY, enabled).apply()
+        glassClarityState = enabled
+    }
+
+    // ── Liquid glass tuning (Appearance; stored as percent ints) ──────
+    private fun readScale(context: Context, key: String, defaultPercent: Int = 100): Float =
+        (prefs(context).getInt(key, defaultPercent) / 100f).coerceIn(0f, 2f)
+
+    fun getGlassBlurScale(context: Context): Float = readScale(context, KEY_GLASS_BLUR_SCALE, defaultPercent = 25)
+    fun setGlassBlurScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_BLUR_SCALE, (value * 100).toInt()).apply()
+        glassBlurScaleState = value.coerceIn(0f, 2f)
+    }
+
+    fun getGlassRefractionScale(context: Context): Float = readScale(context, KEY_GLASS_REFRACTION_SCALE)
+    fun setGlassRefractionScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_REFRACTION_SCALE, (value * 100).toInt()).apply()
+        glassRefractionScaleState = value.coerceIn(0f, 2f)
+    }
+
+    fun getGlassReflectionScale(context: Context): Float = readScale(context, KEY_GLASS_REFLECTION_SCALE)
+    fun setGlassReflectionScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_REFLECTION_SCALE, (value * 100).toInt()).apply()
+        glassReflectionScaleState = value.coerceIn(0f, 2f)
+    }
+
+    fun getGlassIndicatorShadowScale(context: Context): Float = readScale(context, KEY_GLASS_INDICATOR_SHADOW_SCALE)
+    fun setGlassIndicatorShadowScale(context: Context, value: Float) {
+        prefs(context).edit().putInt(KEY_GLASS_INDICATOR_SHADOW_SCALE, (value * 100).toInt()).apply()
+        glassIndicatorShadowScaleState = value.coerceIn(0f, 2f)
     }
 
     // ── Category tint wash ────────────────────────────────────────────
@@ -1829,6 +1992,7 @@ object AppPreferences {
     private const val KEY_AUTO_BACKUP_ENABLED = "auto_backup_enabled"
     private const val KEY_AUTO_BACKUP_URI = "auto_backup_uri"
     private const val KEY_AUTO_BACKUP_LAST_AT = "auto_backup_last_at"
+    private const val KEY_AUTO_BACKUP_FREQUENCY_DAYS = "auto_backup_frequency_days"
 
     var autoBackupEnabledState by mutableStateOf(false)
         private set
@@ -1847,6 +2011,22 @@ object AppPreferences {
 
     fun setAutoBackupUri(context: Context, uri: String) {
         prefs(context).edit().putString(KEY_AUTO_BACKUP_URI, uri).apply()
+    }
+
+    // v227c — auto-backup FREQUENCY in days: 1 = daily (the old fixed
+    // cadence, still the default), 3, or 7. MainActivity reads this for
+    // its due check; BackupToolsScreen renders the picker.
+    val autoBackupFrequencyDaysOptions = intArrayOf(1, 3, 7)
+
+    var autoBackupFrequencyDaysState by mutableIntStateOf(1)
+        private set
+
+    fun getAutoBackupFrequencyDays(context: Context): Int =
+        prefs(context).getInt(KEY_AUTO_BACKUP_FREQUENCY_DAYS, 1)
+
+    fun setAutoBackupFrequencyDays(context: Context, days: Int) {
+        prefs(context).edit().putInt(KEY_AUTO_BACKUP_FREQUENCY_DAYS, days).apply()
+        autoBackupFrequencyDaysState = days
     }
 
     /** Milliseconds of the last AUTO backup run, or 0 if never. */

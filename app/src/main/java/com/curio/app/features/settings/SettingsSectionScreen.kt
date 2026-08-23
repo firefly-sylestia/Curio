@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
@@ -237,11 +238,59 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
+        // v223 — one more Material option: the torn shared heroes
+        // follow the Material theme (primaryContainer + its ink)
+        // instead of the app-default rose/azure. Only meaningful while
+        // Material theme is on — the row greys out otherwise.
+        SettingsRowPulse(highlightKey == "appearance-material-hero-tears") {
+            CompactSwitchRow(
+                "Material hero tears",
+                "Torn heroes wear the theme's container color, not rose",
+                AppPreferences.materialHeroTearsState,
+                enabled = AppPreferences.materialThemeState
+            ) {
+                AppPreferences.setMaterialHeroTearsEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
         // v101 — the dark-mode pill glow is the subtle top-only version by
         // default; the toggle restores the fuller glow for comparison.
         SettingsRowPulse(highlightKey == "appearance-pill-glow") {
             CompactSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
                 AppPreferences.setPillGlowSubtleEnabled(context, it)
+            }
+        }
+        CurioSettingsDivider()
+        // v242 — LIQUID GLASS moved here from Experiments and MERGED with the
+        // former separate "In-screen glass" toggle (one switch now drives the
+        // nav bar AND every in-screen pill — they all share the same crash-
+        // safe local-capture architecture). Clear glass shows inline only
+        // while liquid glass is on; the tuning sliders shape the recipe live.
+        SettingsRowPulse(highlightKey == "appearance-liquid-glass") {
+            CompactSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
+                AppPreferences.setLiquidGlassPillsEnabled(context, it)
+            }
+        }
+        if (AppPreferences.liquidGlassPillsState) {
+            CurioSettingsDivider()
+            CompactSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
+                AppPreferences.setGlassClarityEnabled(context, it)
+            }
+            CurioSettingsDivider()
+            CompactSliderRow("Reflection", "Strength of the light sheen on the glass", AppPreferences.glassReflectionScaleState) {
+                AppPreferences.setGlassReflectionScale(context, it)
+            }
+            CurioSettingsDivider()
+            CompactSliderRow("Refraction", "How strongly the glass bends the content behind it", AppPreferences.glassRefractionScaleState) {
+                AppPreferences.setGlassRefractionScale(context, it)
+            }
+            CurioSettingsDivider()
+            CompactSliderRow("Blur", "Frostiness of the glass — lower for clearer, higher for frostier", AppPreferences.glassBlurScaleState) {
+                AppPreferences.setGlassBlurScale(context, it)
+            }
+            CurioSettingsDivider()
+            CompactSliderRow("Indicator shadow", "Strength of the draggable active pill's shadow", AppPreferences.glassIndicatorShadowScaleState) {
+                AppPreferences.setGlassIndicatorShadowScale(context, it)
             }
         }
         CurioSettingsDivider()
@@ -728,6 +777,36 @@ private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, 
             enabled = enabled,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors()
+        )
+    }
+}
+
+/** v242 — compact settings slider: label + live value, used by the Liquid
+ *  glass tuning rows in Appearance. `value` is 0f..2f (1f = default). */
+@Composable
+private fun CompactSliderRow(
+    title: String,
+    subtitle: String,
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                "${(value * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Slider(
+            value = value.coerceIn(0f, 2f),
+            onValueChange = onValueChange,
+            valueRange = 0f..2f,
+            steps = 7 // 25% increments — 0, 25, 50, 75, 100, 125, 150, 175, 200
         )
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnAttach
 import androidx.core.view.doOnLayout
@@ -377,11 +378,13 @@ class ExploreSessionService : Service() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setProgress(totalMins, progressMins, false)
 
-        // One shared readout used by BOTH the collapsed content text (the
-        // live timer above the progress bar) and the expanded big text, so
-        // the two can never drift.
-        val body = if (paused) "Paused · ${formatElapsed(elapsed)}"
-                   else "${formatElapsed(elapsed)} in"
+        // v226 — the stale inner readout is gone while running: the
+        // shade's own live chronometer IS the timer now (the old text only
+        // refreshed on the service's periodic re-render, so it visibly
+        // lagged the ticking chronometer next to it). Paused keeps a frozen
+        // text readout — the chronometer is dropped there, so text is the
+        // only time shown and it never drifts.
+        val body = if (paused) "Paused · ${formatElapsed(elapsed)}" else ""
         if (paused) {
             // Frozen readout — the chronometer would keep counting, so drop
             // it and print the banked elapsed time as text instead. The
@@ -401,7 +404,6 @@ class ExploreSessionService : Service() {
                 .setUsesChronometer(true)
                 .setShowWhen(true)
                 .setWhen(session.startMillis + session.accumulatedPausedMillis)
-                .setContentText(body)
                 .addAction(0, "Pause", togglePauseIntent())
         }
         builder
@@ -409,15 +411,46 @@ class ExploreSessionService : Service() {
             // Plain cancel — end the session without jumping to the
             // write-it-down page (Done exploring opens it).
             .addAction(0, "Cancel", cancelSessionIntent())
-        // Category-flavored reflection question — shown under the live timer
-        // when the notification is expanded ("Finished listening? What track
-        // or lyric landed hardest?" etc.), so the wrap-up nudge leaves the
-        // user with something to write down. The collapsed content text stays
-        // the short live timer above the progress bar.
-        builder.setStyle(
-            NotificationCompat.BigTextStyle()
-                .bigText("$body\n${session.reflectionQuestion()}")
-        )
+
+        if (!paused && android.os.Build.VERSION.SDK_INT >= 36) {
+            // v227/v229 — RUNNING on Android 16+: post a genuine LIVE UPDATE.
+            // The framework's ProgressStyle is the rich ongoing-notification
+            // surface (the same one LiveBridge promotes other apps' progress
+            // notifications into): the shade renders a styled segment bar,
+            // and the system may promote the notification to a status-bar
+            // chip / lock-screen live activity. v229 fix — the style alone
+            // was never enough: promotion must be REQUESTED via
+            // `setRequestPromotedOngoing(true)` (exactly what LiveBridge
+            // does before posting), the segments need
+            // `setStyledByProgress(true)` so the fill tracks progress, and
+            // `setShortCriticalText` carries the readout onto the chip.
+            builder.setRequestPromotedOngoing(true)
+            builder.setShortCriticalText("${progressMins}m")
+            val liveUpdateStyle = NotificationCompat.ProgressStyle()
+                .setProgress(progressMins)
+                .setStyledByProgress(true)
+                .addProgressSegment(
+                    NotificationCompat.ProgressStyle.Segment(totalMins).setColor(accent)
+                )
+                // IconCompat (NOT the framework Icon) — the compat style
+                // bridges it to the framework tracker itself on API 36+.
+                .setProgressTrackerIcon(
+                    IconCompat.createWithResource(this, R.drawable.ic_notification)
+                )
+            builder.setStyle(liveUpdateStyle)
+        } else {
+            // Category-flavored reflection question — shown under the timer
+            // when the notification is expanded ("Finished listening? What
+            // track or lyric landed hardest?" etc.), so the wrap-up nudge
+            // leaves the user with something to write down.
+            builder.setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(
+                        if (paused) "$body\n${session.reflectionQuestion()}"
+                        else session.reflectionQuestion()
+                    )
+            )
+        }
         return builder.build()
     }
 
@@ -432,7 +465,6 @@ class ExploreSessionService : Service() {
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(accent)
             .setContentTitle("Explore bubble · ${session.topicName}")
-            .setContentText("${formatElapsed(session.elapsedMillis())} in")
             .setContentIntent(openAppIntent())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -574,6 +606,19 @@ class ExploreSessionService : Service() {
                             // user to the write-it-down page.
                             onFinish = {
                                 finishToWritePage()
+                            },
+                            // v226 — Cancel: same teardown as the
+                            // notification's Cancel action, but the session
+                            // is stashed first so Home's cancelled-explore
+                            // row can revive it. No write-it-down
+                            // navigation.
+                            onCancel = {
+                                val current = ExploreSessionStore.getActiveSession(this@ExploreSessionService)
+                                    ?: return@ExploreBubbleContent
+                                ExploreSessionStore.stashCancelledSession(this@ExploreSessionService, current)
+                                ExploreSessionStore.clearSession(this@ExploreSessionService)
+                                ExploreReminderScheduler.cancel(this@ExploreSessionService)
+                                stopQuietly()
                             },
                             // v27 — typing in the note field needs a FOCUSABLE
                             // window (an overlay with FLAG_NOT_FOCUSABLE can't

@@ -154,6 +154,11 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
@@ -323,9 +328,15 @@ fun EntryDetailScreen(
         // reads it to pop out of the hero into frosted floating pills, the
         // same scroll-linked clock Home uses for its menu / profile pills.
         val detailScroll = rememberScrollState()
+        // v241 — LOCAL GLASS CAPTURE: the scrolling page content records
+        // into its own layer; the sticky back/more pills are a SIBLING of
+        // this Column (outside the captured node), so they can never sample
+        // themselves — the bottom-nav architecture, no self-capture cycle.
+        val detailGlassBackdrop = rememberLayerBackdrop()
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .layerBackdrop(detailGlassBackdrop)
                 .verticalScroll(detailScroll)
         ) {
         // ── Expressive hero banner — one composed card: the category glyph
@@ -833,6 +844,7 @@ fun EntryDetailScreen(
         // same, but only this small overlay now follows the scroll clock.
         DetailStickyBar(
             detailScroll = detailScroll,
+            glassBackdrop = detailGlassBackdrop,
             heroControlsProgress = heroControlsProgress,
             heroCardInk = heroCardInk,
             heroFill = heroStart,
@@ -908,11 +920,14 @@ fun EntryDetailScreen(
 private fun detailBodyGutter(): Dp = if (windowWidthSizeClass().isWide) 28.dp else 20.dp
 
 /**
- * v8.36 — soft entrance for the detail content below the morphing hero.
+ * v8.36 — soft entrance for the detail content below the hero.
  * The body is placed in a normal measured [Box] immediately; only its alpha
- * animates. This keeps long descriptions and note sections in their final
- * positions while the Cabinet/Detail shared morph settles, instead of letting
- * an AnimatedVisibility container resize or translate siblings mid-entrance.
+ * animates, keeping long descriptions and note sections in their final
+ * positions instead of resizing/translating siblings mid-entrance.
+ * v227c — the 200ms DELAY is gone: it was paced to the old Cabinet→Detail
+ * shared MORPH, which v8.38 replaced with a center pop-up — so opening an
+ * entry from the Cabinet showed a blank gap before the quick fact + body
+ * even started fading in. Now the fade begins immediately (260ms).
  */
 @Composable
 private fun DetailContentEntrance(content: @Composable () -> Unit) {
@@ -920,7 +935,7 @@ private fun DetailContentEntrance(content: @Composable () -> Unit) {
     LaunchedEffect(Unit) { visible = true }
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(400, delayMillis = 200, easing = FastOutSlowInEasing),
+        animationSpec = tween(260, easing = FastOutSlowInEasing),
         label = "detailContentFade"
     )
     Box(
@@ -1071,6 +1086,9 @@ private fun Modifier.heroFrostPlate(
 @Composable
 private fun BoxScope.DetailStickyBar(
     detailScroll: androidx.compose.foundation.ScrollState,
+    // v241 — the LOCAL capture of the scrolling content (sibling of the
+    // Column), threaded in so the glass pills sample only what's behind.
+    glassBackdrop: LayerBackdrop?,
     heroControlsProgress: Float,
     heroCardInk: Color,
     heroFill: Color,
@@ -1099,8 +1117,20 @@ private fun BoxScope.DetailStickyBar(
     // v108 — the dark frost is a HERO-HUED glass (the same white-lift lip
     // the under-sheet wears) instead of the near-black plate, so the back /
     // more buttons read as part of the hero instead of a black slab on it.
-    val frostFill = if (isCurioDarkTheme()) lerp(heroFill, Color.White, 0.10f)
-                    else lerp(heroFill, curioPillTintLift(), 0.38f)
+    // v230 — the RESTING plate is now the exact SOLID hero fill (the old
+    // 10%/38% lifts started the pills a shade off the hero); the lift is
+    // applied through the scroll shift instead. When the liquid-glass
+    // experiment is on AND the morph has begun, the classic frosted brush
+    // is replaced by a real liquid-glass capsule entirely.
+    // v241 — GLASS HANDOFF RESTORED through the SAFE architecture: the
+    // pills sample the LOCAL capture on the scroll Column above (they are
+    // siblings of it — nothing they sample contains them). Fully CLEAR
+    // refracting glass, per the request.
+    val glassOn = isInScreenGlassActive()
+    val detailGlassActive = glassOn && frostShift > 0.01f
+    val frostFill = if (isCurioDarkTheme())
+        lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
+        else lerp(heroFill, lerp(heroFill, curioPillTintLift(), 0.38f), frostShift)
     val stickyFrostBrush = Brush.verticalGradient(0f to frostFill, 1f to frostFill.copy(alpha = 0.97f))
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time
     // graphicsLayer translation — the more-menu's popup anchors to the
@@ -1124,18 +1154,32 @@ private fun BoxScope.DetailStickyBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // v246 — one gesture stream per pill, shared by the click and the
+        // liquid-glass press feel (shrink + refraction bloom).
+        val backPillInteraction = remember { MutableInteractionSource() }
         CurioBackButton(
             onClick = { navController.popBackStack() },
             containerColor = Color.Transparent,
             contentColor = heroCardInk,
             shadowElevation = 0.dp,
             disableRipple = true,
-            modifier = Modifier.heroFrostPlate(
-                heroCardInk,
-                RoundedCornerShape(50),
-                elevation = 6.dp * frostShift,
-                frostBrush = stickyFrostBrush
-            )
+            pillInteraction = backPillInteraction,
+            // v230 — scrolled endpoint: real liquid-glass (refraction + blur)
+            // when the experiment is on; the classic frosted plate otherwise.
+            modifier = if (detailGlassActive)
+                Modifier.liquidGlassCapsule(
+                    heroFill,
+                    washAlpha = 0.45f,
+                    backdrop = glassBackdrop,
+                    alwaysClear = true,
+                    interactionSource = backPillInteraction
+                )
+                else Modifier.heroFrostPlate(
+                    heroCardInk,
+                    RoundedCornerShape(50),
+                    elevation = 6.dp * frostShift,
+                    frostBrush = stickyFrostBrush
+                )
         )
         Box {
             val moreInteraction = remember { MutableInteractionSource() }
@@ -1143,13 +1187,20 @@ private fun BoxScope.DetailStickyBar(
                 shape = RoundedCornerShape(50),
                 color = Color.Transparent,
                 shadowElevation = 0.dp,
-                modifier = Modifier
-                    .heroFrostPlate(
-                        heroCardInk,
-                RoundedCornerShape(50),
-                elevation = 6.dp * frostShift,
-                frostBrush = stickyFrostBrush
+                modifier = (if (detailGlassActive)
+                    Modifier.liquidGlassCapsule(
+                        heroFill,
+                        washAlpha = 0.45f,
+                        backdrop = glassBackdrop,
+                        alwaysClear = true,
+                        interactionSource = moreInteraction
                     )
+                else Modifier.heroFrostPlate(
+                    heroCardInk,
+                    RoundedCornerShape(50),
+                    elevation = 6.dp * frostShift,
+                    frostBrush = stickyFrostBrush
+                ))
                     .clickable(
                         interactionSource = moreInteraction,
                         indication = null
@@ -1160,7 +1211,8 @@ private fun BoxScope.DetailStickyBar(
                     contentDescription = "More",
                     tint = heroCardInk,
                     size = 24.dp,
-                    modifier = Modifier.padding(8.dp)
+                    // v244 — matches the back pill's 44dp growth.
+                    modifier = Modifier.padding(10.dp)
                 )
             }
             // v30 — the shared accent-themed menu: an opaque surface tinted

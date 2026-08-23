@@ -1,6 +1,7 @@
 package com.curio.app.features.reveal
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -82,6 +83,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -138,6 +140,8 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
+import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.categoryEdgeShine
 import com.curio.app.ui.components.curioButtonColors
 import com.curio.app.ui.components.curioDarkGlow
@@ -342,6 +346,12 @@ fun TopicRevealScreen(
     // continuation, but the session is already persisted and the user can
     // simply tap "Explore now" again.
     var pendingNotificationSession by remember { mutableStateOf<ExploreSession?>(null) }
+    // v229 — POST_NOTIFICATIONS permanently-denied checker dialog + the
+    // settings-return flag for its ON_RESUME continuation. Declared BEFORE
+    // the permission launcher below: Kotlin locals aren't visible to a
+    // lambda that appears earlier in the function (the CI compile error).
+    var showNotificationsBlockedDialog by rememberSaveable { mutableStateOf(false) }
+    var awaitingNotificationsSettings by remember { mutableStateOf(false) }
 
     /** Opens the search page (the chosen search engine — YouTube for music),
      *  then lands back on Home — returning to the
@@ -360,17 +370,35 @@ fun TopicRevealScreen(
 
     val requestNotifications = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ ->
+    ) { granted ->
         val pending = pendingNotificationSession
         pendingNotificationSession = null
         if (pending != null) {
-            // Start the service for whatever can show right now — the live
-            // notification needs the grant, but the FLOATING BUBBLE needs
-            // only the separate "Display over other apps" permission, so
-            // denying POST_NOTIFICATIONS must never silently kill the
-            // bubble too. The service's render() picks what actually shows
-            // from the current permission state. The browser hasn't opened
-            // yet (proceed is deferred to here), so the activity is still
+            // v229 — PERMISSION CHECKER: if the grant came back denied AND
+            // the system no longer shows the rationale, the prompt was
+            // permanently dismissed ("Don't ask again") — re-launching it is
+            // a silent no-op and the session would run with NO visible
+            // timer at all (no shade notification, no chip). Surface the
+            // app-styled guidance dialog instead; "Open settings" resumes
+            // this same pending session via ON_RESUME.
+            val permanentlyDenied = !granted &&
+                !hasNotificationPermission(context) &&
+                (context as? Activity)?.shouldShowRequestPermissionRationale(
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == false
+            if (permanentlyDenied) {
+                pendingNotificationSession = pending
+                showNotificationsBlockedDialog = true
+                return@rememberLauncherForActivityResult
+            }
+            // Granted (or a plain first-time denial): start the service for
+            // whatever can show right now — the live notification needs the
+            // grant, but the FLOATING BUBBLE needs only the separate
+            // "Display over other apps" permission, so denying
+            // POST_NOTIFICATIONS must never silently kill the bubble too.
+            // The service's render() picks what actually shows from the
+            // current permission state. The browser hasn't opened yet
+            // (proceed is deferred to here), so the activity is still
             // foreground — starting the foreground service is allowed.
             if (AppPreferences.exploreServiceShouldRun(context)) {
                 ExploreSessionService.start(context, pending)
@@ -453,6 +481,21 @@ fun TopicRevealScreen(
                         // granting: that's a "no" — record it so the prompt
                         // never re-asks on every explore.
                         AppPreferences.setOverlayAskDeclined(context, true)
+                    }
+                    continueExploreFlow(pending)
+                }
+            }
+            // v229 — returned from the app-notification settings page after
+            // the permanently-denied checker dialog: re-check and continue
+            // the SAME pending session (grant → service starts; still denied
+            // → session runs without the shade timer, bubble permitting).
+            if (event == Lifecycle.Event.ON_RESUME && awaitingNotificationsSettings) {
+                awaitingNotificationsSettings = false
+                val pending = pendingNotificationSession
+                pendingNotificationSession = null
+                if (pending != null) {
+                    if (AppPreferences.exploreServiceShouldRun(context)) {
+                        ExploreSessionService.start(context, pending)
                     }
                     continueExploreFlow(pending)
                 }
@@ -943,6 +986,69 @@ fun TopicRevealScreen(
                     pendingOverlaySession = null
                     if (s != null) continueExploreFlow(s)
                 }) { Text("Not now", color = curioDialogActionColor()) }
+            }
+        )
+    }
+
+    // v229 — POST_NOTIFICATIONS permanently-denied checker: the runtime
+    // prompt can never come back after "Don't ask again", so without this
+    // guidance the explore session silently ran with no visible timer.
+    if (showNotificationsBlockedDialog) {
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = {
+                showNotificationsBlockedDialog = false
+                val s = pendingNotificationSession
+                pendingNotificationSession = null
+                if (s != null) continueExploreFlow(s)
+            },
+            title = { Text("Notifications are off") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "The live explore timer — the shade notification with " +
+                        "the progress bar and pause/cancel buttons — needs " +
+                        "notification permission, which was turned off for " +
+                        "Curio earlier."
+                    )
+                    Text(
+                        "You can still explore without it. To bring the timer " +
+                        "back, allow notifications in system settings.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNotificationsBlockedDialog = false
+                    val s = pendingNotificationSession
+                    if (s != null) {
+                        val launched = runCatching {
+                            awaitingNotificationsSettings = true
+                            context.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            )
+                        }.isSuccess
+                        if (!launched) {
+                            awaitingNotificationsSettings = false
+                            pendingNotificationSession = null
+                            continueExploreFlow(s)
+                        }
+                    }
+                }) {
+                    Text("Open settings", color = curioDialogActionColor())
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showNotificationsBlockedDialog = false
+                    val s = pendingNotificationSession
+                    pendingNotificationSession = null
+                    if (s != null) continueExploreFlow(s)
+                }) { Text("Start anyway", color = curioDialogActionColor()) }
             }
         )
     }
@@ -2333,8 +2439,27 @@ private fun RevealCategoryFavoriteBar(
     // Category pill: auto-expands from icon-only to showing name on entry.
     var categoryExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { categoryExpanded = true }
+    // v223 — the expanded width now FITS the category name: measure the
+    // name at the exact label style and size the pill to icon + paddings
+    // + text (+ a little slack), instead of the old fixed 200dp that
+    // always expanded to the max no matter how short or long the name.
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val categoryNameStyle = MaterialTheme.typography.labelMedium.copy(
+        fontFamily = ChangaOneFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp
+    )
+    val categoryNamePx = remember(cat.displayName) {
+        textMeasurer.measure(AnnotatedString(cat.displayName), style = categoryNameStyle)
+            .size.width
+    }
+    val expandedCategoryWidth = with(density) {
+        (24.dp.toPx() + 6.dp.toPx() + 2.dp.toPx() + categoryNamePx.toFloat() + 14.dp.toPx())
+            .toDp()
+    }
     val categoryWidth by animateDpAsState(
-        targetValue = if (categoryExpanded) 200.dp else 56.dp,
+        targetValue = if (categoryExpanded) expandedCategoryWidth else 56.dp,
         animationSpec = RevealWidthSpring,
         label = "categoryBarWidth"
     )
@@ -2348,9 +2473,16 @@ private fun RevealCategoryFavoriteBar(
         animationSpec = RevealColorSpring,
         label = "categoryBarInk"
     )
-    // Favorite star: icon-only at rest, expands to show label when favorited.
+    // Favorite star: icon-only at rest, expands to show label when
+    // favorited. v223 — it now plays the SAME entry animation as the
+    // category pill: starts collapsed on entry and springs open when the
+    // topic is ALREADY favorited (before, opening a favorited topic just
+    // sat there fully expanded with no animation).
+    var favoriteRevealed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { favoriteRevealed = true }
+    val favoriteShown = isFavorited && favoriteRevealed
     val favWidth by animateDpAsState(
-        targetValue = if (isFavorited) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
+        targetValue = if (favoriteShown) RevealSentimentExpandedWidth else RevealSentimentIconWidth,
         animationSpec = RevealWidthSpring,
         label = "favBarWidth"
     )
@@ -2374,10 +2506,16 @@ private fun RevealCategoryFavoriteBar(
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {
+        // v227 — liquid-glass experiment: refracted backdrop instead of
+        // the solid elevated fill when the toggle is on. v243 — gated on
+        // REQUESTED now: pre-Android-12 devices get the simulated glass
+        // recipe from inside [liquidGlassCapsule].
+        val glassOn = isLiquidGlassRequested()
         Surface(
             shape = RoundedCornerShape(50),
-            color = container,
-            shadowElevation = 6.dp
+            color = if (glassOn) Color.Transparent else container,
+            shadowElevation = if (glassOn) 0.dp else 6.dp,
+            modifier = if (glassOn) Modifier.liquidGlassCapsule(container) else Modifier
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
@@ -2446,7 +2584,7 @@ private fun RevealCategoryFavoriteBar(
                             size = 26.dp
                         )
                         AnimatedVisibility(
-                            visible = isFavorited,
+                            visible = favoriteShown,
                             enter = expandHorizontally(RevealExpandSpring, expandFrom = Alignment.Start) + fadeIn(RevealMotionSpring),
                             exit = shrinkHorizontally(RevealExpandSpring, shrinkTowards = Alignment.Start) + fadeOut(RevealMotionSpring)
                         ) {

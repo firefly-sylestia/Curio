@@ -143,6 +143,9 @@ object ExploreSessionStore {
     private const val KEY_EXPLORED = "explore_recently_explored"
     private const val KEY_UNEXPLORED = "explore_recently_unexplored"
     private const val KEY_QUEUED_SESSIONS = "explore_queued_sessions"
+    // v226 — the most recent CANCELLED session, stashed so Home can
+    // offer it back (resume) instead of the banked time vanishing.
+    private const val KEY_CANCELLED_SESSION = "explore_cancelled_session"
     // v7.80 — topics the user has EXPLORED or marked "Already watched /
     // listened / read / explored". Persistent and unbounded (unlike the
     // capped recents list) because the shuffle deck must never deal one of
@@ -163,6 +166,9 @@ object ExploreSessionStore {
         private set
     var queuedSessionsState by mutableStateOf<List<ExploreSession>>(emptyList())
         private set
+    // v226 — the stashed cancelled session (null once discarded).
+    var cancelledSessionState by mutableStateOf<ExploreSession?>(null)
+        private set
     var recentlyExploredState by mutableStateOf<List<ExploredTopic>>(emptyList())
         private set
     var recentlyUnexploredState by mutableStateOf<List<UnexploredTopic>>(emptyList())
@@ -179,6 +185,7 @@ object ExploreSessionStore {
     fun seed(context: Context) {
         activeSessionState = readSession(context)
         queuedSessionsState = readQueued(context)
+        cancelledSessionState = getCancelledSession(context)
         recentlyExploredState = readExplored(context)
         recentlyUnexploredState = readUnexplored(context)
         doneTopicsState = readDone(context)
@@ -201,6 +208,63 @@ object ExploreSessionStore {
     fun clearSession(context: Context) {
         prefs(context).edit().remove(KEY_ACTIVE_SESSION).apply()
         activeSessionState = null
+    }
+
+    // ── Cancelled-session recovery (v226) ──────────────────────────────
+    // Cancelling used to be a dead end — the banked time vanished. Now
+    // every cancel path stashes the session (with its banked elapsed)
+    // and Home offers it back as a resumable card until discarded.
+
+    /** Stashes a just-cancelled session for later recovery. */
+    fun stashCancelledSession(context: Context, session: ExploreSession) {
+        prefs(context).edit().putString(
+            KEY_CANCELLED_SESSION,
+            JSONObject()
+                .put("session", session.toJson())
+                .put("cancelledAt", System.currentTimeMillis())
+                .toString()
+        ).apply()
+        cancelledSessionState = session
+    }
+
+    /** Reads the stashed cancelled session (null when none/discarded). */
+    fun getCancelledSession(context: Context): ExploreSession? {
+        val raw = prefs(context).getString(KEY_CANCELLED_SESSION, null) ?: return null
+        return try {
+            parseExploreSession(JSONObject(raw).optString("session"))
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** Discards the stashed cancelled session for good. */
+    fun clearCancelledSession(context: Context) {
+        prefs(context).edit().remove(KEY_CANCELLED_SESSION).apply()
+        cancelledSessionState = null
+    }
+
+    /**
+     * Revives the stashed cancelled session into the ACTIVE slot. The
+     * offline span banks like a pause, so elapsed continues from where
+     * the cancel stopped it. Returns the revived session (the caller
+     * re-arms the reminder + service), or null when nothing is stashed.
+     * Callers gate this on NO active session.
+     */
+    fun resumeCancelledSession(context: Context): ExploreSession? {
+        val raw = prefs(context).getString(KEY_CANCELLED_SESSION, null) ?: return null
+        val obj = JSONObject(raw)
+        val session = parseExploreSession(obj.optString("session")) ?: return null
+        val cancelledAt = obj.optLong("cancelledAt", System.currentTimeMillis())
+        val now = System.currentTimeMillis()
+        val revived = session.copy(
+            paused = false,
+            pausedAtMillis = null,
+            accumulatedPausedMillis =
+                session.accumulatedPausedMillis + (now - cancelledAt).coerceAtLeast(0L)
+        )
+        startSession(context, revived)
+        clearCancelledSession(context)
+        return revived
     }
 
     // v17/v27 — write-session handoff. The "write about it" flows (the done

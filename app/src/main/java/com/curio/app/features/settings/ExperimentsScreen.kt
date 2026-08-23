@@ -86,60 +86,13 @@ fun ExperimentsScreen(navController: NavController) {
             contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item { CurioSectionLabel("Spin visuals") }
-            item {
-                // v115 — the experiment rows sit in the shared settings card
-                // so the page reads as settings options, not transparent
-                // rows floating on the backdrop.
-                CurioSettingsCard(shadowElevation = 0.dp) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // v25 — the Enhanced main gradient experiment PASSED
-                    // (always ON), so its toggle was removed here.
-                    // v24 — the dual-accent hero gradient experiment was
-                    // rejected (ugly golden blend); always OFF, so its toggle
-                    // was removed here.
-                    ExperimentSwitchRow("Main card shadow", "Ambient depth below the hero card", AppPreferences.heroShadowState) {
-                        AppPreferences.setHeroShadowEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    // v208 — opt-in experiment: the Spin Categories/Filter
-                    // buttons (and their vertical variants) wear the floating
-                    // NAV-PILL look — capsule shape, calmed accent active
-                    // fill, elevated container — instead of the category
-                    // rounded-24 buttons. Default OFF.
-                    ExperimentSwitchRow("Nav-style buttons", "Categories, Filter and their vertical twins wear the floating nav-pill look", AppPreferences.navPillButtonsState) {
-                        AppPreferences.setNavPillButtonsEnabled(context, it)
-                    }
-                }
-                }
-            }
-            item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Top-lit deck cards", "Peek cards catch light at the top edge", AppPreferences.peekGradientState) {
-                        AppPreferences.setPeekGradientEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow("Tinted deck edges", "Category-tinted hairline on peek cards", AppPreferences.peekHairlineState) {
-                        AppPreferences.setPeekHairlineEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    // v24 — deck card shadows (weird look while the cards
-                    // animate) and tail-fade peek motion (didn't pass) were
-                    // both rejected; always OFF, so their toggles were removed.
-                    ExperimentSwitchRow("Roomier deck titles", "Two-line near-card titles", AppPreferences.peekTitlesState) {
-                        AppPreferences.setPeekTitlesEnabled(context, it)
-                    }
-                }
-                }
-            }
-            // v25 — the Deck & controls card is gone: the 3D shuffle button
-            // (always on) and Pastel crown depth (PASSED, always on) both had
-            // their toggles removed, leaving the card empty.
-            // v24 — the Layout & input section was removed: Smart Spin layout
-            // is gone for good (the deck always uses its natural size) and
-            // Smart density's control moved out; Voice-to-text still lives in
-            // Settings → Recording.
+            // v223 — the "Spin visuals" section is GONE: all five
+            // experiments (Main card shadow, Nav-style buttons, Top-lit deck
+            // cards, Tinted deck edges, Roomier deck titles) CONCLUDED with
+            // the new look ON — their toggles were removed and the reads in
+            // SpinScreen are hardcoded true. The v25 Deck & controls card was
+            // already gone (3D shuffle button always on, Pastel crown depth
+            // passed), and v24 removed the Layout & input section.
             // v27 — paper & header experiments, all OFF by default.
             item { CurioSectionLabel("Paper & headers") }
             item {
@@ -219,6 +172,25 @@ fun ExperimentsScreen(navController: NavController) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("3D star zoom", "Tap a constellation star for a perspective tilt + glow", AppPreferences.starZoom3dState) {
                         AppPreferences.setStarZoom3dEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Drawer constellation", "The star map at the top of the navigation drawer — off shows a small stat strip", AppPreferences.drawerConstellationState) {
+                        AppPreferences.setDrawerConstellationEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow(
+                        "Classic active indicator",
+                        "The nav bar's blob renders as fully transparent refracting glass instead of the solid white/black pill (needs Liquid glass)",
+                        AppPreferences.glassClassicIndicatorState
+                    ) {
+                        AppPreferences.setGlassClassicIndicatorEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    ExperimentSwitchRow("Glass parallax tilt", "The glass pills sway against the phone's tilt for a floating depth effect (needs Liquid glass pills)", AppPreferences.glassParallaxState) {
+                        AppPreferences.setGlassParallaxEnabled(context, it)
+                        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
+                            context, it && AppPreferences.liquidGlassPillsState
+                        )
                     }
                 }
                 }

@@ -23,6 +23,7 @@ import com.curio.app.data.UpdateChecker
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.curio.app.infrastructure.CurioCrashReporter
+import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
@@ -41,9 +42,35 @@ import com.curio.app.ui.theme.CurioTheme
  */
 class MainActivity : ComponentActivity() {
 
-    /** Auto-backup throttle — at most one background backup per day. */
     private companion object {
+        // Auto-backup fallback cadence — overridden per-launch by the
+        // user's chosen frequency (Settings → Backup & restore).
         const val AUTO_BACKUP_INTERVAL_MILLIS = 24L * 60 * 60 * 1000
+    }
+
+    /**
+     * v227c — run the auto backup when it's DUE: enabled + destination
+     * saved + the user-chosen frequency elapsed. Called from onCreate AND
+     * onResume so a long-lived process still backs up on schedule (the old
+     * onCreate-only hook could go days without firing while Android kept
+     * the process warm). The due-date gate makes repeat calls no-ops.
+     */
+    private fun runAutoBackupIfDue() {
+        if (!AppPreferences.isAutoBackupEnabled(this)) return
+        val autoUri = AppPreferences.getAutoBackupUri(this)
+        if (autoUri.isBlank()) return
+        val interval = AppPreferences.getAutoBackupFrequencyDays(this)
+            .coerceAtLeast(1) * AUTO_BACKUP_INTERVAL_MILLIS
+        val lastAuto = AppPreferences.getAutoBackupLastAtMillis(this)
+        if (lastAuto != 0L && System.currentTimeMillis() - lastAuto < interval) return
+        lifecycleScope.launch {
+            withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching {
+                    CurioBackupManager.export(this@MainActivity, Uri.parse(autoUri))
+                    AppPreferences.setAutoBackupLastAtMillis(this@MainActivity, System.currentTimeMillis())
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,27 +145,12 @@ class MainActivity : ComponentActivity() {
                 runCatching { UpdateChecker.notifyIfUpdateAvailable(this@MainActivity) }
             }
         }
-        // Auto backup: when enabled with a saved destination, write a backup
-        // there automatically — throttled to once per ~24h so a frequent
-        // launch never spams the drive. Runs in the background; failures are
-        // silent (the manual "Back up now" path remains authoritative).
-        if (AppPreferences.isAutoBackupEnabled(this)) {
-            val autoUri = AppPreferences.getAutoBackupUri(this)
-            if (autoUri.isNotBlank()) {
-                val lastAuto = AppPreferences.getAutoBackupLastAtMillis(this)
-                val due = System.currentTimeMillis() - lastAuto >= AUTO_BACKUP_INTERVAL_MILLIS
-                if (lastAuto == 0L || due) {
-                    lifecycleScope.launch {
-                        withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            runCatching {
-                                CurioBackupManager.export(this@MainActivity, Uri.parse(autoUri))
-                                AppPreferences.setAutoBackupLastAtMillis(this@MainActivity, System.currentTimeMillis())
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // Auto backup: when enabled with a saved destination, write a
+        // backup there automatically — throttled to the user's chosen
+        // frequency so a frequent launch never spams the drive. Runs in the
+        // background; failures are silent (the manual "Back up now" path
+        // remains authoritative).
+        runAutoBackupIfDue()
         // Load the persisted quests/levels state (XP, journey, daily quests,
         // achievements) before any screen reads it.
         CurioQuests.seed(this)
@@ -173,11 +185,39 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // v227c — warm starts re-check the auto-backup schedule too (a
+        // process kept alive by Android would otherwise skip its due date).
+        runAutoBackupIfDue()
         // v29 — re-seed progress on every resume: a killed-in-background
         // process could otherwise show stale progress until a full restart
         // (the vanish-then-reappear-after-restart symptom). The read is a
         // tiny prefs load and the in-memory state is always newer-or-equal.
         TopicProgressStore.seed(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // v226 — closing the app auto-pauses the running explore session so
+        // the timer stops counting while Curio is closed (the paused state
+        // is what makes it resumable from Home / the return prompt instead
+        // of silently burning minutes in a drawer). Configuration changes
+        // (rotation, fold, dark-mode flip) are excluded — isFinishing is
+        // false on a recents-swipe destroy too, so this also covers the
+        // swipe-the-app-away path.
+        if (!isChangingConfigurations) {
+            val session = ExploreSessionStore.getActiveSession(this)
+            if (session != null && !session.paused) {
+                ExploreSessionStore.pauseSession(this)
+                // Re-arm the service so the shade flips to its Paused
+                // readout instead of ticking a chronometer that the frozen
+                // session no longer agrees with.
+                ExploreSessionStore.getActiveSession(this)?.let { paused ->
+                    if (AppPreferences.exploreServiceShouldRun(this)) {
+                        ExploreSessionService.start(this, paused)
+                    }
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

@@ -556,12 +556,24 @@ fun heroLaneCategory(): CurioCategory? {
 fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): Color =
     heroLaneCategory()?.categoryBackgroundWash() ?: default
 
+/**
+ * v223 — whether the torn shared heroes wear the Material theme's
+ * primaryContainer ("Material hero tears" Appearance option). Needs the
+ * Material theme itself on — the Appearance row greys out otherwise.
+ */
+fun materialHeroTearsOn(): Boolean =
+    AppPreferences.materialThemeState && AppPreferences.materialHeroTearsState
+
 /** The settings hero's rose-wood fill — the SAME treatment as Home/Profile
  *  (the muted rose-wood base, its airy pastel twin in pastel mode) so
  *  Settings reads as part of the same torn-banner family. Shared (public)
  *  so the Cabinet's hero banner wears the identical rose. */
 @Composable
 fun settingsRoseAccent(): Color {
+    // v223 — "Material hero tears": when the Material theme AND this
+    // option are both on, the torn hero wears the scheme's
+    // primaryContainer instead of the app-default rose/azure (or a lane).
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.primaryContainer
     // v30 — "Hero follows Spin lane": the shared hero wears the Spin
     // lane's category accent (the Cabinet's filtered-hero language) instead
     // of the rose/azure.
@@ -597,6 +609,8 @@ fun settingsRoseAccent(): Color {
  *  helper, shared so the Cabinet hero uses the same ink). */
 @Composable
 fun settingsReadableInk(fill: Color): Color {
+    // v223 — Material hero tears: readable ink on primaryContainer.
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
     // Hero), the text must be accent-aware: white/cream on the deep accent
     // (never the fixed dark onSurface, which was invisible on a vivid

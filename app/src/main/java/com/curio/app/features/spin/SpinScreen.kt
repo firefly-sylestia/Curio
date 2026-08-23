@@ -2845,7 +2845,10 @@ private fun HeroTicketCard(
     val heroGradientOn = true
     // v27u — the ticket's gradient rim border (and its AMOLED edge-shine
     // rim light) were removed; the main card is border-free.
-    val heroShadowOn = AppPreferences.heroShadowState
+    // v223 — the Main card shadow experiment CONCLUDED ON: the One UI
+    // tinted shadow is the shipped default, the Experiments toggle is
+    // removed and the read is hardcoded here.
+    val heroShadowOn = true
     // v24 — the dual-accent hero gradient experiment was rejected (ugly
     // golden blend); always OFF, so the blend branch below is dead.
     val heroBlendOn = false
@@ -3448,9 +3451,12 @@ private fun PeekCard(
     // readable lines. Reads each reactive preference directly so flipping
     // any toggle recomposes the deck instantly; when a flag is OFF its
     // feature resolves to the classic look.
-    val gradientOn = AppPreferences.peekGradientState
-    val hairlineOn = AppPreferences.peekHairlineState
-    val titlesOn = AppPreferences.peekTitlesState
+    // v223 — the peek-deck experiments (top-lit gradient, tinted
+    // hairline, roomier titles) ALL CONCLUDED ON: the toggles were
+    // removed from Experiments and the reads are hardcoded true.
+    val gradientOn = true
+    val hairlineOn = true
+    val titlesOn = true
     // v24 — deck card shadows (weird look while the cards animate) and
     // tail-fade peek motion (didn't pass) were rejected; both stay OFF, so
     // their toggles were removed from Experiments.
@@ -3786,7 +3792,6 @@ private fun SpinButton(
                                 .size(72.dp)
                                 // Keep the animated die on the same optical
                                 // center as the resting casino glyph.
-                                .offset(y = (-1f).dp)
                         )
                     } else {
                         // Gentle idle breathe on the resting die — a slow,
@@ -3810,7 +3815,6 @@ private fun SpinButton(
                             // already centered; only the die's ink needs a
                             // tiny lift, including the idle Spin state.
                             modifier = Modifier
-                                .offset(y = (-1f).dp)
                                 .graphicsLayer {
                                     scaleX = 1f + breathe * 0.05f
                                     scaleY = 1f + breathe * 0.05f
@@ -4141,7 +4145,10 @@ private fun VerticalDeckButton(
     // the nav bar's CALMED accent fill when selected, the elevated floating
     // container when idle, Changa One label — instead of the category
     // rounded-24 button.
-    val navPill = AppPreferences.navPillButtonsState
+    // v223 — the Nav-style buttons experiment CONCLUDED ON: the button
+    // wears the floating NAV-PILL look as the shipped default (the
+    // Experiments toggle was removed).
+    val navPill = true
     val shape = if (navPill) RoundedCornerShape(50) else RoundedCornerShape(24.dp)
     val fill = if (navPill) {
         if (selected) curioActivePillFill(cat.themedAccent())
@@ -4223,7 +4230,10 @@ private fun DeckControlButton(
     // bar's CALMED accent fill when selected, the elevated floating
     // container when idle, Changa One label — instead of the category
     // rounded-24 button.
-    val navPill = AppPreferences.navPillButtonsState
+    // v223 — the Nav-style buttons experiment CONCLUDED ON: the button
+    // wears the floating NAV-PILL look as the shipped default (the
+    // Experiments toggle was removed).
+    val navPill = true
     val shape = if (navPill) RoundedCornerShape(50) else RoundedCornerShape(24.dp)
     val fill = if (navPill) {
         if (selected) curioActivePillFill(cat.themedAccent())

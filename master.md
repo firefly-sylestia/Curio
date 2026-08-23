@@ -108,7 +108,7 @@ layout, or compiled output — those still get pushed. See root
 
 ## DOX Tree Diagram
 
-See [`DOX_TREE.md`](DOX_TREE.md) for a visual Mermaid diagram and ASCII tree of the complete AGENTS.md hierarchy.
+See [`DOX_TREE.md`](docs/DOX_TREE.md) for a visual Mermaid diagram and ASCII tree of the complete AGENTS.md hierarchy.
 
 ## Child DOX Index
 
@@ -122,4 +122,4 @@ See [`DOX_TREE.md`](DOX_TREE.md) for a visual Mermaid diagram and ASCII tree of 
 
 ### Visualization
 
-A full interactive Mermaid diagram and ASCII tree is available in [`DOX_TREE.md`](DOX_TREE.md).
+A full interactive Mermaid diagram and ASCII tree is available in [`DOX_TREE.md`](docs/DOX_TREE.md).

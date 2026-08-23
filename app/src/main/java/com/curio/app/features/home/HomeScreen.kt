@@ -98,6 +98,7 @@ import com.curio.app.data.laneKnowledge
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioQuests
 import com.curio.app.data.PinnedTopic
 import com.curio.app.data.PromoMode
 import com.curio.app.data.TopicCatalog
@@ -121,6 +122,7 @@ import com.curio.app.data.formatSessionShort
 import com.curio.app.data.openSearchUrl
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.heroLaneCategory
+import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
@@ -138,9 +140,13 @@ import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.ProfileAvatarImage
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -359,6 +365,20 @@ fun HomeScreen(navController: NavController) {
                 .fillMaxSize()
                 .background(homeBg)
         ) {
+            // Hoisted scroll state — read by the sticky-bar block below
+            // (a sibling of the v241 capture wrapper).
+            val homeScroll = rememberScrollState()
+            // v241 — LOCAL GLASS CAPTURE: everything BEHIND the floating
+            // top-bar pills records into its own layer; pills are a SIBLING
+            // overlay outside this wrapper (the bottom-nav architecture —
+            // no self-capture cycle by construction).
+            val homeGlassBackdrop = rememberLayerBackdrop()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(homeBg)
+                    .layerBackdrop(homeGlassBackdrop)
+            ) {
             // ── Watermark backdrop — muted category glyphs behind all ──
             //    content (same treatment as the Spin page). The quest is
             //    always the wildcard Surprise now (no category chips), so
@@ -370,9 +390,10 @@ fun HomeScreen(navController: NavController) {
                     activeCat = CurioCategories.byId(CategoryId.WILDCARD)
                 )
             }
-            // Hoisted scroll state — the sticky top bar (menu + profile
-            // pills) reads it to pop out of the hero into frosted pills.
-            val homeScroll = rememberScrollState()
+            // v243 — the DUPLICATE declaration is gone: this used to shadow
+            // the hoisted `homeScroll` above, so the sticky bar read a state
+            // that never scrolled and the glass morph never started. The
+            // scroll Column now uses the hoisted state the bar also reads.
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -811,6 +832,9 @@ fun HomeScreen(navController: NavController) {
                         // Top-corner stop — quiet teardown, same as the
                         // notification's Cancel action (no write-it-down
                         // page, no done prompt on the next return).
+                        // v226 — stash first so the session is recoverable
+                        // from Home's cancelled-explore card.
+                        ExploreSessionStore.stashCancelledSession(context, activeSession)
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)
@@ -868,6 +892,31 @@ fun HomeScreen(navController: NavController) {
                         }
                     }
                 }
+                Spacer(Modifier.height(12.dp))
+            }
+
+            // ── 3b. Cancelled explore — recoverable until discarded ────
+            // v226 — cancelling no longer eats the session: the last
+        // cancelled one shows here as a resumable row (banked time
+            // continues where the cancel stopped it). Gated on NO active
+            // session — reviving replaces the slot.
+            val cancelledSession = ExploreSessionStore.cancelledSessionState
+            if (cancelledSession != null && activeSession == null) {
+                CancelledExploreRow(
+                    session = cancelledSession,
+                    onResume = {
+                        val revived = ExploreSessionStore.resumeCancelledSession(context)
+                        if (revived != null) {
+                            ExploreReminderScheduler.schedule(
+                                context, revived.startMillis, revived.durationMinutes
+                            )
+                            if (AppPreferences.exploreServiceShouldRun(context)) {
+                                ExploreSessionService.start(context, revived)
+                            }
+                        }
+                    },
+                    onDiscard = { ExploreSessionStore.clearCancelledSession(context) }
+                )
                 Spacer(Modifier.height(12.dp))
             }
 
@@ -1091,6 +1140,7 @@ fun HomeScreen(navController: NavController) {
             Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 32.dp else 100.dp))
             Spacer(Modifier.height(navInsets.calculateBottomPadding()))
             }
+            } // v241 — end of the local glass capture subtree
 
             // ── Sticky top bar — menu + profile pills ─────────────────
             // Pinned OUTSIDE the scroll content so they stay on screen.
@@ -1122,16 +1172,38 @@ fun HomeScreen(navController: NavController) {
             val frostRim = if (isCurioDarkTheme()) Color(0xFF3A3A3E) else Color(0xFFD9DEE6)
             val frostIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
                             else homeReadableInk(frostBg)
+            // v230 — LIQUID-GLASS MORPH ENDPOINT: when the experiment is on,
+            // the scrolled pills become real liquid-glass capsules instead of
+            // the flat frosted plate. At rest BOTH paths show the exact same
+            // SOLID hero fill, so the resting look never changes. The profile
+            // pill keeps the classic morph while an avatar photo is set (a
+            // photo can't sit on glass) — so menu and profile animate their
+            // fills independently.
+            // v241 — GLASS HANDOFF RESTORED through the SAFE architecture:
+            // the pills sample the LOCAL capture Box above (which contains
+            // only what sits BEHIND them — the pills are a sibling overlay,
+            // exactly the bottom-nav arrangement), so the old whole-page
+            // self-capture cycle is impossible by construction. Fully CLEAR
+            // glass (alwaysClear) with real refraction, per the request.
+            val glassOn = isInScreenGlassActive()
+            val profileAvatarPath = AppPreferences.getProfileAvatarPath(context)
+            val profileGlassOn = glassOn && profileAvatarPath.isNullOrBlank()
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
             // another geometric transition or ripple-like flash.
-            val targetPillBg = lerp(heroPillBg, frostBg, frostShift)
+            val targetMenuBg = lerp(heroPillBg, if (glassOn) Color.Transparent else frostBg, frostShift)
+            val targetProfileBg = lerp(heroPillBg, if (profileGlassOn) Color.Transparent else frostBg, frostShift)
             val targetPillRim = lerp(heroPillRim, frostRim, frostShift)
             val targetPillIcon = lerp(heroPillIcon, frostIcon, frostShift)
-            val pillBg by animateColorAsState(
-                targetValue = targetPillBg,
+            val menuPillBg by animateColorAsState(
+                targetValue = targetMenuBg,
                 animationSpec = tween(CurioMotion.Durations.Quick),
-                label = "homeStickyPillBackground"
+                label = "homeStickyMenuBackground"
+            )
+            val profilePillBg by animateColorAsState(
+                targetValue = targetProfileBg,
+                animationSpec = tween(CurioMotion.Durations.Quick),
+                label = "homeStickyProfileBackground"
             )
             val pillRim by animateColorAsState(
                 targetValue = targetPillRim,
@@ -1143,6 +1215,10 @@ fun HomeScreen(navController: NavController) {
                 animationSpec = tween(CurioMotion.Durations.Quick),
                 label = "homeStickyPillIcon"
             )
+            // v246 — one gesture stream per pill, shared by the click and
+            // the liquid-glass press feel (shrink + refraction bloom).
+            val menuPillInteraction = remember { MutableInteractionSource() }
+            val avatarPillInteraction = remember { MutableInteractionSource() }
             Row(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -1167,24 +1243,48 @@ fun HomeScreen(navController: NavController) {
                     glyph = CurioIcons.Menu,
                     contentDescription = "Open menu",
                     shape = RoundedCornerShape(50),
-                    bg = pillBg,
+                    bg = menuPillBg,
                     rim = pillRim,
                     iconTint = pillIcon,
-                    elevation = 6.dp * frostShift
+                    // v230 — glass draws its own soft shadow, so the Surface
+                    // elevation drops when the morph hands off to it.
+                    elevation = if (glassOn) 0.dp else 6.dp * frostShift,
+                    pillInteraction = menuPillInteraction,
+                    // v230 — liquid-glass capsule once the scroll morph has
+                    // started: solid hero fill → refracting blur pill.
+                    modifier = if (glassOn && frostShift > 0.01f)
+                        Modifier.liquidGlassCapsule(
+                            heroPillBg,
+                            washAlpha = 0.45f,
+                            backdrop = homeGlassBackdrop,
+                            alwaysClear = true,
+                            interactionSource = menuPillInteraction
+                        ) else Modifier
                 )
                 TopBarPill(
                     onClick = { navController.navigate(CurioRoutes.PROFILE) { launchSingleTop = true } },
                     glyph = CurioIcons.Person,
                     contentDescription = "Profile",
                     shape = CircleShape,
-                    bg = pillBg,
+                    bg = profilePillBg,
                     rim = pillRim,
                     iconTint = pillIcon,
-                    elevation = 6.dp * frostShift,
+                    elevation = if (profileGlassOn) 0.dp else 6.dp * frostShift,
+                    pillInteraction = avatarPillInteraction,
+                    // v230 — glass only while NO avatar photo is set; the
+                    // photo keeps the classic frosted morph underneath it.
+                    modifier = if (profileGlassOn && frostShift > 0.01f)
+                        Modifier.liquidGlassCapsule(
+                            heroPillBg,
+                            washAlpha = 0.45f,
+                            backdrop = homeGlassBackdrop,
+                            alwaysClear = true,
+                            interactionSource = avatarPillInteraction
+                        ) else Modifier,
                     // v118 — the profile pill wears the avatar photo when
                     // one is set (fresh pref read each composition, like the
                     // drawer) and falls back to the Person glyph otherwise.
-                    avatarPath = AppPreferences.getProfileAvatarPath(context)
+                    avatarPath = profileAvatarPath
                 )
             }
         }
@@ -1319,17 +1419,26 @@ private fun TopBarPill(
     rim: Color,
     iconTint: Color,
     elevation: Dp,
+    // v230 — optional outer modifier carrying the liquid-glass capsule
+    // (drawBackdrop) that replaces the flat frost once scrolled.
+    modifier: Modifier = Modifier,
     // v118 — when set, the avatar photo replaces the glyph; the pill's
     // animated rim still draws on top so the frosted scroll morph reads.
-    avatarPath: String? = null
+    avatarPath: String? = null,
+    // v246 — optional external gesture source: when the caller also wires
+    // liquid-glass press feel, both must read the SAME stream.
+    pillInteraction: MutableInteractionSource? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val fallbackInteraction = remember { MutableInteractionSource() }
+    val interactionSource = pillInteraction ?: fallbackInteraction
     Surface(
         shape = shape,
         color = bg,
         shadowElevation = elevation,
-        modifier = Modifier
-            .size(42.dp)
+        modifier = modifier
+            // v244 — 44dp (was 42): the glyph's line box centers reliably in
+            // the larger circle at every system font size.
+            .size(44.dp)
             // v28 — dark mode elevation visibility (glow + hairline).
             .curioDarkGlow(elevation, shape)
             // Material's default indication is a circular ripple. On these
@@ -1370,7 +1479,7 @@ private fun TopBarPill(
                     // reads a hair low inside the small 42dp pill — nudge it up
                     // (v115: deepened -0.5dp -> -1.5dp -> -2dp — the glyphs were
                     // still a touch low after the v114 centering fix).
-                    modifier = Modifier.offset(y = (-2f).dp)
+                    // v233 — proportional nudge: stays centered at every font scale.
                 )
             }
         }
@@ -1461,7 +1570,6 @@ private fun QuestShuffleCard(
                         // The shared icon renderer already applies the
                         // standard 1dp optical lift; this extra half-dp is
                         // only for the casino glyph's heavier visible base.
-                        modifier = Modifier.offset(y = (-0.5f).dp)
                     )
                 }
             }
@@ -1657,6 +1765,8 @@ private fun CurioEntry.capturedAtDaysAgoLabel(): String = when (val d = captured
  */
 @Composable
 private fun homeReadableInk(fill: Color): Color {
+    // v223 — Material hero tears: readable ink on primaryContainer.
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.onPrimaryContainer
     // v32 — when the shared hero wears the SPIN LANE's accent (Adaptive
     // Hero), the text must be accent-aware: white/cream on the deep accent
     // (never the fixed dark onSurface, which was invisible on a vivid lane
@@ -1671,6 +1781,10 @@ private fun homeReadableInk(fill: Color): Color {
 
 @Composable
 private fun homeRoseAccent(): Color {
+    // v223 — "Material hero tears": when the Material theme AND this
+    // option are both on, the torn hero wears the scheme's
+    // primaryContainer instead of the app-default rose/azure (or a lane).
+    if (materialHeroTearsOn()) return MaterialTheme.colorScheme.primaryContainer
     // v30 — "Hero follows Spin lane": Home's shared hero wears the Spin
     // lane's accent too (the drawer + hero share this resolver).
     heroLaneCategory()?.let { cat -> return cat.headerAccent() }
@@ -1767,7 +1881,6 @@ private fun FirstTimeEmpty(
                             size = 16.dp,
                             // Match the shared icon lift plus the casino
                             // glyph's half-dp extra correction.
-                            modifier = Modifier.offset(y = (-0.5f).dp)
                         )
                         Text(
                             "Surprise me",
@@ -1931,9 +2044,15 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                 // brain with the user's REAL stats orbiting it ("Your
                 // Curiosity Map").
                 item("curiosityMap") {
-                    // v174c — the map is the stats page's summary: tapping it
-                    // opens the full observatory stats screen.
-                    DrawerCuriosityMap(onClick = { onNavigate(CurioRoutes.STATS) })
+                    if (AppPreferences.drawerConstellationState) {
+                        // Experiment (Experiments → Constellation → "Drawer
+                        // constellation", default OFF) — the full curiosity-map
+                        // constellation: pattern only, no painted sky.
+                        DrawerCuriosityMap(onClick = { onNavigate(CurioRoutes.STATS) })
+                    } else {
+                        // Default — a small Material-style stat summary.
+                        DrawerMaterialStatStrip(onClick = { onNavigate(CurioRoutes.STATS) })
+                    }
                 }
                 item("quests") {
                     DrawerNavRow(
@@ -2344,6 +2463,112 @@ private fun drawerSkyColors(): Triple<Color, Color, Color> {
  *  to see that lane's real data (spins, reveals, explores, saves, last
  *  explored) straight from the passport. Inactive lanes are solid but
  *  smaller and muted; a few extra tiny stars fill the sky. */
+/** v223 — the drawer's DEFAULT top slot while the drawer-constellation
+ *  experiment is OFF: a small pure-Material stat summary — one tonal M3
+ *  card with three mini panes (day streak · level · saved) separated by
+ *  hairline dividers, under a tiny "Your curiosity" caption. Tapping it
+ *  opens the full stats page, exactly like the constellation map did. */
+@Composable
+private fun DrawerMaterialStatStrip(onClick: () -> Unit) {
+    val context = LocalContext.current
+    val streak = remember(context) { StreakTracker.getStreak(context) }
+    val level = CurioQuests.levelForXp(CurioQuests.xpState)
+    val saved by produceState(initialValue = 0) {
+        value = runCatching { CurioRepositoryHolder.repo.getAll() }.getOrNull()?.size ?: 0
+    }
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 1.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            // Tiny caption so the strip reads as a miniature stats screen.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = 14.dp
+                )
+                Text(
+                    "YOUR CURIOSITY",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.5.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                DrawerMaterialStatPane(
+                    glyph = CurioIcons.LocalFire,
+                    value = "$streak",
+                    label = "day streak",
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(modifier = Modifier.height(38.dp))
+                DrawerMaterialStatPane(
+                    glyph = CurioIcons.WorkspacePremium,
+                    value = "$level",
+                    label = "level",
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(modifier = Modifier.height(38.dp))
+                DrawerMaterialStatPane(
+                    glyph = CurioIcons.Inventory2,
+                    value = "$saved",
+                    label = "saved",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+/** One mini pane of [DrawerMaterialStatStrip]: accent glyph, big value,
+ *  quiet label — all pure Material roles (primary / onSurface / muted). */
+@Composable
+private fun DrawerMaterialStatPane(
+    glyph: String,
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        CurioIcon(
+            name = glyph,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            size = 18.dp
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 @Composable
 private fun DrawerCuriosityMap(onClick: () -> Unit) {
     val context = LocalContext.current
@@ -2387,9 +2612,14 @@ private fun DrawerCuriosityMap(onClick: () -> Unit) {
             recentCutoff = 0L,
             selected = selected,
             onSelect = { selected = it },
+            plainBackground = true,
+            // v224 — MATERIAL ink: theme-role lines/stars (visible in light
+            // mode at last), explored lanes in primary with glow, gentle
+            // twinkle + a pulse ring on the tapped star.
+            materialInk = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp),
+                .height(320.dp),
             popoverContent = { id ->
                 val cat = CurioCategories.byId(id)
                 val k = knowledge[id] ?: LaneKnowledge(0, 0, 0, 0, 0L)
@@ -2557,7 +2787,6 @@ private fun DrawerNavItem(
                         // v115 — drawer menu glyphs read a hair low in the
                         // 40dp chip (same optical-weight correction as the
                         // Home top-bar pills).
-                        modifier = Modifier.offset(y = (-1f).dp)
                     )
                 }
             }
@@ -2845,17 +3074,31 @@ private fun CurrentlyExploringCard(
                         ),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Done and write about it", style = MaterialTheme.typography.labelLarge)
+                        // v226 — "Express yourself": the reveal page's
+                        // write-it-down language, on every surface.
+                        Text("Express yourself", style = MaterialTheme.typography.labelLarge)
                     }
-                    OutlinedButton(
+                    // v226 — "Keep exploring" is a proper pill now: the
+                    // old borderless OutlinedButton read as a floating
+                    // label. Soft accent-tinted fill + play glyph — the
+                    // same language as the card's corner Stop button.
+                    Surface(
                         onClick = onKeepExploring,
                         shape = RoundedCornerShape(50),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
-                        border = BorderStroke(0.dp, Color.Transparent),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = exploreInk),
-                        modifier = Modifier.weight(1f)
+                        color = lerp(MaterialTheme.colorScheme.surfaceContainerLow, accent, 0.14f),
+                        shadowElevation = 2.dp,
+                        modifier = Modifier
+                            .weight(1f)
+                            .curioDarkGlow(2.dp, RoundedCornerShape(50))
                     ) {
-                        Text("Keep exploring", style = MaterialTheme.typography.labelLarge)
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                        ) {
+                            CurioIcon(CurioIcons.PlayArrow, null, tint = exploreInk, size = 16.dp)
+                            Text("Keep exploring", style = MaterialTheme.typography.labelLarge, color = exploreInk)
+                        }
                     }
                 }
             }
@@ -2911,6 +3154,60 @@ private fun QueuedExploreRow(
         ) {
             CurioIcon(
                 CurioIcons.Close, "Discard queued explore",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp,
+                modifier = Modifier.padding(5.dp)
+            )
+        }
+    }
+}
+
+/**
+ * v226 — the last CANCELLED explore session, offered back as a resumable
+ * row (same language as [QueuedExploreRow]): replay glyph, topic, banked
+ * elapsed readout, and a discard ✕. Tapping resumes the session with its
+ * banked time intact.
+ */
+@Composable
+private fun CancelledExploreRow(
+    session: ExploreSession,
+    onResume: () -> Unit,
+    onDiscard: () -> Unit
+) {
+    val ink = CurioCategories.byId(session.categoryId).categoryInk()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onResume)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CurioIcon(CurioIcons.Replay, null, tint = ink, size = 22.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                session.topicName,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                "Cancelled at ${formatElapsed(session.elapsedMillis())} · tap to resume",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Surface(
+            onClick = onDiscard,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            CurioIcon(
+                CurioIcons.Close, "Discard cancelled explore",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 16.dp,
                 modifier = Modifier.padding(5.dp)

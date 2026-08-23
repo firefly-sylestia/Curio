@@ -50,6 +50,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.curio.app.data.AppPreferences
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.curio.app.ui.components.CurioGlassPills
+import com.curio.app.ui.components.curioFauxGlassSheen
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
+import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -338,14 +345,115 @@ fun CurioFloatingNavBar(
             .navigationBarsPadding()
             .padding(bottom = 12.dp)
     ) {
+        // v227b — FULL liquid-glass mode: the vFlow-style bar replaces
+        // the whole pill row — equal-width tabs inside one refracting
+        // capsule, with a DRAGGABLE active pill (damped-drag physics,
+        // velocity squash/stretch, touch-following specular highlight).
+        val glassOn = isLiquidGlassPillsActive()
+        // v243 — old devices can't run the real glass tab bar (it needs
+        // backdrop layers), but they still get a simulated glass coat on
+        // the classic bar so the toggle never does nothing.
+        val glassWanted = isLiquidGlassRequested()
+        val glassBackdrop = if (glassOn) CurioGlassPills.backdrop else null
+        if (glassOn && glassBackdrop != null) {
+            val items = CurioBottomNavItems.all
+            // v243 — remember the LAST real tab: on pushed routes (entry
+            // detail, settings sub-pages…) neither selectedRoute nor
+            // routePrefix matches a tab, and the old coerceAtLeast(0)
+            // fallback snapped the blob back to HOME (it visibly flew home
+            // then collapsed while the new page opened). Hold the origin.
+            val lastTabIndex = androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) }
+            val matchedIndex = items.indexOfFirst { it.route == selectedRoute }
+                .takeIf { it >= 0 }
+                ?: items.indexOfFirst { it.route == routePrefix }
+            if (matchedIndex >= 0) lastTabIndex.intValue = matchedIndex
+            val glassIndex = if (matchedIndex >= 0) matchedIndex else lastTabIndex.intValue
+            CurioLiquidGlassTabBar(
+                backdrop = glassBackdrop,
+                tabsCount = items.size,
+                selectedIndex = glassIndex,
+                accentColor = pageAccent ?: MaterialTheme.colorScheme.primary,
+                onSelected = { index ->
+                    val destination = items.getOrNull(index) ?: return@CurioLiquidGlassTabBar
+                    if (selectedRoute != destination.route) {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        navController.navigateToTab(destination.route)
+                    }
+                },
+                modifier = Modifier
+            ) {
+                // v232 — the glass tabs now follow the CLASSIC pill language:
+                // inactive tabs are icon-only, the active one springs wider and
+                // slides its label out BESIDE the icon (not stacked under it),
+                // with the same accent fill-ink crossfade as FloatingNavPill.
+                // The draggable indicator tracks the real per-tab widths.
+                // v241 — pure ink over glass: no category or Material tint —
+                // plain BLACK in light mode (white in dark) so the active
+                // icon + label read at maximum contrast over clear glass.
+                val activeInk = if (isCurioDarkTheme()) Color.White else Color.Black
+                items.forEachIndexed { index, destination ->
+                    val selected = destination.route == selectedRoute ||
+                        destination.route == routePrefix
+                    val tabWidth by animateDpAsState(
+                        targetValue = if (selected) FloatingPillExpandedWidth else FloatingPillIconWidth,
+                        animationSpec = PillWidthSpring,
+                        label = "glassNavTabWidth"
+                    )
+                    CurioLiquidGlassTabBarItem(
+                        index = index,
+                        onClick = {
+                            if (!selected && selectedRoute != destination.route) {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                navController.navigateToTab(destination.route)
+                            }
+                        },
+                        modifier = Modifier.width(tabWidth)
+                    ) {
+                        CurioIcon(
+                            name = if (selected) destination.selectedIcon else destination.icon,
+                            contentDescription = destination.label,
+                            tint = if (selected) activeInk else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 26.dp
+                        )
+                        AnimatedVisibility(
+                            visible = selected,
+                            enter = expandHorizontally(PillExpandSpring, expandFrom = Alignment.Start) +
+                                fadeIn(PillMotionSpring),
+                            exit = shrinkHorizontally(PillExpandSpring, shrinkTowards = Alignment.Start) +
+                                fadeOut(PillMotionSpring)
+                        ) {
+                            Text(
+                                text = destination.label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = ChangaOneFontFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 15.sp
+                                ),
+                                color = activeInk,
+                                maxLines = 1,
+                                modifier = Modifier.padding(start = 6.dp, end = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+        val classicContainer = curioFloatingNavContainer(routePrefix)
         Surface(
             shape = RoundedCornerShape(50),
             // v149 — the container follows the page tint dynamically
             // (animated, theme-aware) while staying elevated.
             // v157 — the dark-mode hairline rim is GONE (the user asked):
             // the capsule stays defined by its elevated fill alone.
-            color = curioFloatingNavContainer(routePrefix),
-            shadowElevation = 6.dp
+            color = if (glassOn) Color.Transparent else classicContainer,
+            shadowElevation = if (glassOn) 0.dp else 6.dp,
+            modifier = when {
+                glassOn -> Modifier.liquidGlassCapsule(classicContainer)
+                // v243 — pre-Android-12: keep the solid dynamic bar but add
+                // the sheen + rim so it reads glassy too.
+                glassWanted -> Modifier.curioFauxGlassSheen()
+                else -> Modifier
+            }
         ) {
             Row(
                 // v184 — more breathing room: bar padding 7 → 8dp and pill
@@ -390,6 +498,7 @@ fun CurioFloatingNavBar(
                 }
             }
         }
+        }  // else — classic pill row (liquid glass off)
     }
 }
 

@@ -80,7 +80,6 @@ export const MenuDrawer: React.FC<{
 
   // Sky colors — match Android drawerSkyColors()
   const skyTop = isDark ? '#12313A' : '#C2E8DE';
-  const skyBottom = isDark ? '#1D4750' : '#E9F6F0';
   const skyInk = isDark ? '#F4F1E7' : '#2C5A53';
 
   // Bio fallback: if no 2nd/3rd name parts, show bio

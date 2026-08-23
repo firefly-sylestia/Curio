@@ -46,7 +46,14 @@ app/src/main/java/com/curio/app/
 │       ├── CurioHeroCard.kt        # ~40% vertical hero Spin card on Home
 │       └── CurioStreakPill.kt      # streak indicator pill + CurioSecondaryAction helper
 └── features/
-    ├── splash/SplashScreen.kt      # §13.1 splash — cosmic mark (ic_launcher_foreground) + "Curio" + 3-dot pulse, 800ms → HOME
+    ├── splash/SplashScreen.kt      # §13.1 splash — v224 SIMPLE/MODERN/MATERIAL redesign, v224b
+    │                               # sizing+warm-up pass: 88dp BREATHING logomark (slow scale pulse —
+    │                               # positional bobbing was rejected by the user), displaySmall Geom
+    │                               # wordmark, a DETERMINATE 180dp LinearProgressIndicator wired to the
+    │                               # real catalog warm-up (+1 per parsed lane, forced to 100% before handoff
+    │                               # so topics are READY when the splash exits), and four rotating
+    │                               # curiosity loading lines via AnimatedContent every ~1.1s. Warm-up logic
+    │                               # unchanged (800ms min, ~6s cap); all colors are plain theme roles.
     ├── home/HomeScreen.kt          # §3 home — top bar, greeting, streak, hero, chips, recently explored empty state
     └── PlaceholderScreens.kt       # ONE file containing 11 stubs: Spin, Cabinet, CategoryPicker, TopicReveal, SaveCapture, EntryDetail, Settings, Onboarding, ManageCategories, TopicHistory, Lightbox. Each uses a shared `PlaceholderScaffold` with back arrow + glyph + title + subtitle + "Design phase · logic comes later". Real implementations replace these one-by-one in later phases.
 ```
@@ -4827,6 +4834,194 @@ app/src/main/java/com/curio/app/
   (front ellipse 1.35×holeR, back arc inside, per-hole tilt). All three
   now visibly pass through the hole instead of decorating it.
 - **Single Support & diagnostics page (v24):** Support & diagnostics (`features/support/SupportScreen.kt`, route `SUPPORT`) is the ONE page for updates, feedback, replay intro, and the project link — the old Settings → About page (`SettingsPage.ABOUT`, `SETTINGS_ABOUT` route, `AboutSection`, `CurioUpdateCheckRow`) was removed. The page is reachable from Profile's "Support & diagnostics" row, Settings → Safety & support → "Support & diagnostics", and the Home drawer. **GitHub in-app updater (v25):** the Play Core in-app update (v24) was REMOVED for good — the app ships from GitHub, not Play. The update check in Support & diagnostics (`features/support/SupportScreen.kt`) is now GitHub-only: `UpdateChecker` (`data/UpdateChecker.kt`) parses the release's APK asset (`apkUrl` on `UpdateInfo`, from the GitHub API `assets` array) and `UpdateChecker.downloadApk(url, file, onProgress)` streams it into `cache/downloads/` with progress. "Update now" then hands the file to the system installer via `FileProvider` (`ACTION_VIEW` + `application/vnd.android.package-archive`, `cache-path apk_downloads` in `xml/file_paths.xml`) — the USER confirms the install (`REQUEST_INSTALL_PACKAGES` permission added). The card keeps a short "Open release" link as the browser fallback. **Kotlin gotcha (v25):** never write the literal `/*` sequence inside a block comment — Kotlin block comments NEST, so `release/*.apk` in a KDoc silently swallowed the rest of the file (the braces checker caught it; CI would have failed on an unterminated comment).
+- **v223 — drawer top slot: constellation experiment + Material stat
+  strip (default).** The drawer's first slot under the hero is now gated:
+  `AppPreferences.drawerConstellationState` (Experiments → Constellation →
+  "Drawer constellation", default OFF, seeded in initThemeMode) shows the
+  full `DrawerCuriosityMap` only when ON. When OFF (the default) a new
+  small pure-Material stat strip renders instead (`DrawerMaterialStatStrip`
+  + `DrawerMaterialStatPane` in HomeScreen.kt): one tonal M3 card
+  (`surfaceContainerLow`, 18dp corners, 1dp shadow) with a tiny "YOUR
+  CURIOSITY" caption and three divider-separated panes — day streak
+  (`StreakTracker`), level (`CurioQuests.levelForXp(xpState)`), saved count
+  (`repo.getAll()` via produceState) — all in plain M3 roles (primary /
+  onSurface / onSurfaceVariant); tapping either slot still opens STATS.
+  Both slots share `CurioConstellation.plainBackground: Boolean = false`
+  — the DRAWER passes `true` so the map paints ONLY the star pattern
+  (lines + stars, no opaque page fill, no nebulae/starfield sky); the
+  Stats page keeps the default false (full deep-space sky unchanged).
+- **v223 — Material hero tears + spin experiments concluded + reveal/cabinet/
+  progress fixes.** (1) NEW Appearance option **"Material hero tears"**
+  (`AppPreferences.materialHeroTearsState`, KEY_MATERIAL_HERO_TEARS, default
+  OFF, seeded in initThemeMode; row GREYS OUT while Material theme is off):
+  when ON together with `materialThemeState`, the shared torn heroes wear
+  `colorScheme.primaryContainer` (+ `onPrimaryContainer` ink) instead of the
+  rose/azure default or a lane. The gate lives in ONE shared helper
+  `materialHeroTearsOn()` (SettingsHubScreen.kt) checked FIRST in
+  `settingsRoseAccent()` / `homeRoseAccent()` / `profileRoseAccent()` and
+  their three readable-ink twins. (2) The five Spin-visuals experiments
+  CONCLUDED with the new look ON — Main card shadow, Nav-style buttons,
+  Top-lit deck cards, Tinted deck edges, Roomier deck titles: their
+  Experiments toggles (and the whole "Spin visuals" section) are REMOVED and
+  the SpinScreen reads are hardcoded `true`; the pref APIs stay dormant
+  (defaults flipped true). (3) Topic Reveal's floating bar: the category
+  pill's expanded width now FITS the name (TextMeasurer-measured label +
+  icon/padding slack) instead of a fixed 200dp, and the favorite pill plays
+  the SAME entry animation as the category pill (starts collapsed,
+  springs open via `favoriteRevealed`) so an already-favorited topic no
+  longer sits pre-expanded. (4) Cabinet publishes its REAL page background
+  to the nav chrome — `cabinetWash` falls back to
+  `heroLaneCategory()?.categoryBackgroundWash()` like the page's own
+  `.background()` — killing the plain-background strip behind the floating
+  nav pills on Cabinet-"All"+Adaptive Hero (Home never had it because it
+  publishes homeBg). (5) Progress editor corner control REDESIGNED: it now
+  shows and edits the TOTAL ("328 pages"), not the progress number (ring %
+  + steppers own progress); tap opens an inline numeric field with a hairline
+  border, and while editing the trailing button is a solid TICK
+  (`CurioIcons.Check`, contentColor fill / surface ink) that commits
+  (Enter too); the replay/reset-to-zero button is gone.
+- **v231 — nav-bar squish fix + glass parallax tilt + quote slip bounds + constellation centering**
+  - CurioLiquidGlassTabBar: dropped `width(IntrinsicSize.Min)` + `weight(1f)` (intrinsic-min collapsed tabs, cutting icons/labels); tabs are content-sized with a 64dp floor.
+  - New Experiments toggle "Glass parallax tilt": `CurioGlassParallax` gravity listener (TYPE_GRAVITY, low-pass, dead-zone) drives a counter-tilt sway in `liquidGlassCapsule`'s graphicsLayer; listener runs only while enabled.
+  - MoodBoard quote slips: default slot width 240→180px cap, resize ceiling 60%→42% of board, textScale hard-capped at 1.6× (degenerate baseW could stretch a slip over the full board height).
+  - Constellation tap-centering: targets now use the letterboxed 1400-viewBox mapping (`ox + x*s`) instead of `nx*w`, and pixel offsets are divided by density before animation (double-scale overshoot).
+
+
+- **v233 — scroll-crash fix (in-page glass off) + crash-log UI + classic-style glass tabs**
+  - Scroll native-crash class eliminated: Home menu/profile pills and detail back/more
+    pills sat INSIDE the capture subtree AND rebuilt drawBackdrop per scroll frame
+    (per-frame washAlpha). Glass handoff disabled there (`glassOn = false`, code kept);
+    classic solid-hero → frost morph restored. Live glass remains ONLY on the bottom-
+    nav overlay (sibling of the capture Box — never crashed).
+  - Native crashes surface end-to-end: checkNativeCrash → persistCrash → pending flag →
+    Splash routes to CRASH screen → log displayed (no extra wiring needed).
+  - Glass tabs follow the classic pill language: inactive icon-only, active springs to
+    FloatingPillExpandedWidth with side label (Changa One 15sp) + accent ink crossfade;
+    item API takes an index and reports measured width via LocalLiquidGlassTabMetrics.
+  - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
+    offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
+    specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v233 — clear-glass option + parallax edge glow + light-mode indicator ink + glyph centering**
+  - NEW PREF `glassClarityState` (`glass_clear_style`, Experiments → "Clear glass", OFF):
+    when ON the glass drops its frost — blur 8dp→2dp and the container wash cut to ~35%
+    in `liquidGlassCapsule` AND all three `CurioLiquidGlassTabBar` layers — so the bar
+    reads like the bright press-blob refraction instead of milky glass.
+  - PARALLAX v2: the v231 whole-capsule translation is GONE (imperceptible). Tilt now
+    drives an EDGE GLOW instead: `LiquidGlassPills.drawGlassTiltEdgeGlow()` draws a white
+    rim stroke with a radial gradient whose bright spot slides against
+    `CurioGlassParallax.tiltX/Y` — applied in `liquidGlassCapsule`'s capture-guard
+    drawWithContent and on the tab bar's main capsule + draggable active pill. Reads
+    snapshot tilt state inside draw → per-sensor-tick draw invalidation, zero recomposition.
+  - Light-mode active-indicator contrast: the constant 0.14 accent wash gave the active
+    ink nothing to read against; now theme-aware (light 0.30 / dark 0.16) via a hoisted
+    `isCurioDarkTheme()`.
+  - Glyph centering: fixed-dp optical nudges (`offset(y = (-2f).dp)` etc.) mis-centered on
+    fontScale ≠ 1 devices (CurioIcon shrinks the glyph below 1.0 but the nudge stayed).
+    New `Modifier.curioGlyphInkNudge(dp)` scales the nudge by `fontScale.coerceAtMost(1f)`;
+    replaced at all 9 call sites (Home menu/profile pill, Home casino/stat chips,
+    Profile rows ×2, Spin die/glyphs ×2, CurioTopBar).
+- **v232 — Pet Designer crash: glass off + native-crash reporter + self-heal**
+  - Pet Designer still SIGSEGV'd natively (RenderThread stack overflow, cyclic render
+    node) on some devices even with the v228 guard; Reveal's identical in-subtree pill
+    is fine. Root cause not yet reproducible from code alone.
+  - `PetDesignerScreen` studio bar: liquid-glass path disabled (solid elevated fill
+    always) pending a real tombstone. Reveal/Home/detail glass unchanged.
+  - `CurioCrashReporter.checkNativeCrash()` (called from `init`, API 30+): reconstructs
+    native deaths via `ActivityManager.getHistoricalProcessExitReasons` — SIGNALED and
+    unhandled CRASH exits land in the same history/pending/loop-window flow so the
+    crash screen finally shows them and repeated native deaths trip safe mode.
+  - Self-heal: if the liquid-glass experiment was ON at death, both glass toggles are
+    auto-disabled before the UI comes up (noted in the persisted log).
+- **v230 — liquid-glass scroll morph on the top-bar pills**
+  - Home menu/profile pills and EntryDetail back/more pills: resting look is unchanged SOLID hero fill; once scrolled past the threshold the flat frost endpoint is replaced by `liquidGlassCapsule` (refraction + blur), with `washAlpha` easing 0.92→0.45 so the handoff doesn't pop.
+  - Profile pill keeps the classic morph while an avatar photo is set; detail's classic path now also starts at the exact hero fill (lift applied through frostShift instead of baked into the rest color).
+- **v229 — Live Update promotion fix + notification permission checker**
+  - The v227 `ProgressStyle` alone never promoted: the service now calls `setRequestPromotedOngoing(true)` + `setStyledByProgress(true)` + `setShortCriticalText` (the exact LiveBridge recipe) so Android 16 can render the status-bar chip / lock-screen live activity.
+  - Topic Reveal explore flow: when POST_NOTIFICATIONS is permanently denied (no rationale after denial), an app-styled checker dialog offers Open settings (ON_RESUME continues the pending session) or Start anyway — previously the runtime prompt silently no-op'd and the session ran with no visible timer.
+- **v228 — liquid-glass self-capture crash fix**
+  - Root cause of the Pet Designer RenderThread SIGSEGV (stack overflow in `RenderNode.prepareTreeImpl`): `layerBackdrop` records the page subtree AFTER drawing it, so glass pills INSIDE the captured Box (Pet Designer studio bar, Topic Reveal bar) re-drew during the record pass and sampled their own GraphicsLayer — a cyclic render node.
+  - Fix: the NavHost's `rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })` sets `CurioGlassPills.isCapturingBackdrop` for the record pass; `liquidGlassCapsule` wraps its backdrop node with a `drawWithContent` guard that paints a plain translucent capsule while capturing. Bottom tab bar unaffected (sibling overlay).
+- **v227b/d — full liquid-glass nav port + update dialog**
+  - `ui/components/liquidglass/` — four files ADAPTED FROM vFlow
+    (github.com/ChaoMixian/vFlow, **GPL-2.0-or-later**; attribution headers
+    in every file — this makes those parts of Curio GPL-derived):
+    DragGestureInspector (raw non-consuming drags), DampedDragAnimation
+    (critically-damped value spring + lagging velocity spring for
+    squash/stretch + press-progress), InteractiveHighlight (API-33+
+    RuntimeShader specular sheen that follows the finger), and
+    CurioLiquidGlassTabBar (three stacked layers: visible refracting
+    capsule, invisible accent-tinted tab row recorded into a second
+    backdrop so the pill refracts COLORED icons, draggable active pill).
+  - CurioFloatingNavBar renders the full tab bar when the Experiments
+    toggle is ON (Android 12+; lens needs 33+ where it self-guards);
+    classic expanding-pill row otherwise. Reveal/pet-studio keep the
+    simpler frosted capsule.
+  - The corner update TOAST is fully removed (CurioInAppToast.kt
+    deleted): UpdateChecker now raises CurioUpdatePrompt.pending (global
+    state, once-per-version gate unchanged) and the NavHost renders a
+    themed AlertDialog — Open Updates / Later.
+- **v227c — auto-backup frequency + detail entrance delay fix**
+  - Auto backup: `AppPreferences.getAutoBackupFrequencyDays` (1/3/7, default 1) picked via chips in
+    BackupToolsScreen; `MainActivity.runAutoBackupIfDue()` honors the chosen interval and is called from
+    BOTH onCreate and onResume (the old onCreate-only hook never fired in warm processes). Due-date gate
+    keeps repeat calls as no-ops.
+  - `EntryDetailScreen.DetailContentEntrance`: the 200ms delay was paced to the removed Cabinet→Detail
+    shared morph (v8.38 replaced it with a center pop-up), so quick fact + body appeared late. Now
+    tween(260) with no delay.
+- **v241 — in-screen glass (experiment) + tilt light-arc fix.**
+  - New toggle: Settings → Experiments → "In-screen glass" (`AppPreferences.glassInScreenState`,
+    default OFF; needs Liquid glass pills). `isInScreenGlassActive()` in LiquidGlassPills.kt gates it.
+  - Architecture (the crash-safe one): each in-screen site captures a LOCAL LayerBackdrop that contains
+    ONLY what sits behind the pill — Home: capture Box around page content, pills are sibling overlay;
+    Entry Detail + Profile: `.layerBackdrop(...)` hung directly on the scroll Column / LazyColumn, sticky
+    pill Row is its sibling; Pet Designer: LazyColumn captures, `PetStudioBottomNav` sits below it.
+    The pill is never inside its own sampled subtree, so the v228 self-capture cycle is impossible by
+    construction (the global guard stays as belt-and-braces). Self-heal also disables this toggle.
+  - `liquidGlassCapsule` grew `backdrop: LayerBackdrop?` (null = NavHost global capture), `alwaysClear`
+    (force the clear recipe), and `shape: Shape` (default CircleShape; wide bars pass
+    RoundedCornerShape(50) so they don't ellipse-clip). In-screen floating pills use alwaysClear=true,
+    constant washAlpha=0.45f (no per-frame effects rebuilds).
+  - Parallax tilt cue redrawn: `drawGlassTiltEdgeGlow` strokes a ~110° TOP-RIM light arc that slides with
+    tiltX and fades in with tilt magnitude — the old full white circle (visible on any tilted phone) is gone.
+
+- **v227 — Android 16 Live Update + liquid-glass pills experiment + cabinet full-bleed grid**
+  - `ExploreSessionService.liveNotification`: RUNNING sessions on API 36+ post a genuine Live Update via
+    `NotificationCompat.ProgressStyle` (one accent-colored Segment of durationMinutes defines the max,
+    progress = elapsed minutes, tracker icon = ic_notification). Paused / pre-16 keep the BigTextStyle path.
+  - Liquid glass (experiment, OFF by default): new `ui/components/LiquidGlassPills.kt` —
+    `CurioGlassPills.backdrop` (NavHost-published LayerBackdrop via SideEffect, the CurioNavTint handoff
+    pattern) + `Modifier.liquidGlassCapsule(container)` (vibrancy + blur(8) + lens(24), Highlight.Default
+    rim, Shadow.Default, 40%-alpha container wash). Gate: `isLiquidGlassPillsActive()` = pref ON && API ≥ 31.
+    Dependency: `io.github.kyant0:backdrop:1.0.6` (Apache-2.0). NavHost marks ONLY the content-wrapper Box
+    with `.layerBackdrop(...)` so overlay pills never record themselves. Call sites: CurioFloatingNavBar,
+    RevealCategoryFavoriteBar, PetDesigner studio bar — each swaps its Surface to Transparent + 0 elevation
+    when active. Toggle: Settings → Experiments → "Liquid glass pills".
+  - Cabinet strip root cause: the grid Column reserved navigationBars + 84dp clearance, so the
+    LazyVerticalGrid CLIPPED every card at a hard horizontal line exactly at the capsule top ("the strip").
+    Fix: clearance moved into the grid's contentPadding bottom (24 + 84 + navBars) — entries scroll
+    full-bleed under the floating pill, only the last row lifts clear.
+- **v226 — explore sessions round-trip + Sans Flex voice**
+  - `MainActivity.onDestroy` auto-pauses the active explore session when the app truly closes (`!isChangingConfigurations`), re-arming the service so the shade flips to Paused. Rotation/fold skips it.
+  - Cancelled sessions are stashed (`ExploreSessionStore.stashCancelledSession` / `resumeCancelledSession`) and surface as a recovery row on Home (`CancelledExploreRow`, gated on no active session). The done-dialog confirm-cancel, Home stop button and the bubble's new Cancel all stash first.
+  - `ExploreBubbleContent` grew an `onCancel` param (Delete glyph in the expanded control row); only call site is the service, which mirrors the notification-Cancel teardown.
+  - Notification staleness: the live notif drops its collapsed content text while running — the shade chronometer is the timer. Bubble-only quiet notif dropped its elapsed line too. Paused keeps a frozen readout.
+  - Done prompt fires once per session (`dialogDismissedFor` keyed by startMillis). Home CTA renamed "Express yourself".
+- **v224 — drawer curiosity map: MATERIAL ink + centering fix.**
+  (1) `CurioConstellation` gained `materialInk: Boolean = false` (drawer
+  passes true; the Stats deep-space page keeps the SVG palette): theme-role
+  lines (`onSurfaceVariant` @ ~0.55, thicker 3.4-unit stroke), EXPLORED
+  lane stars in `primary` at 1.45× size with dim (0.40-alpha) unexplored
+  dots — the old near-white `0xFFeef5fa` stars were INVISIBLE on the cream
+  drawer surface in light mode. A 7s sine `twinklePhase` animates every
+  star's radius (±10%, phase-staggered) and the selected star wears an
+  expanding `selPulse` ring in primary. Drawer map height 280 → 320dp.
+  (2) TAP-CENTER FIX: the auto-zoom `LaunchedEffect` moved INSIDE
+  `BoxWithConstraints` (it now reads the real `wPx`/`hPx` instead of a
+  hardcoded ±80px guess) and cancels the 2× scale about the layer's center
+  pivot exactly: `offset = -2 * (star - center)`. (3) The selection popover
+  now applies the same layer transform (scale about center + translation)
+  to the star's position, so the card tracks the VISUAL star while the map
+  zooms instead of sitting at the un-zoomed spot.
 - All UI is 100% Jetpack Compose. No XML layouts for screens, ever.
 - `MainActivity` is the only entry point. It hosts `CurioNavHost` inside `CurioTheme`.
 - Edge-to-edge is enabled at the Activity level; the system bars are themed by `CurioTheme`'s `SideEffect` to match the current color scheme + light/dark mode.

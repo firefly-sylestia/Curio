@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +69,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CurioUpdatePrompt
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPet
@@ -121,10 +123,14 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioFloatingNavBar
+import com.curio.app.ui.components.CurioGlassPills
 import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
-import com.curio.app.ui.components.CurioInAppToastHost
+import com.curio.app.ui.components.curioGlassCaptureDraw
 import com.curio.app.ui.components.CurioNavigationRail
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
@@ -329,6 +335,11 @@ fun CurioNavHost(
     // Survives rotation so the startup prompt only fires on a truly fresh
     // process (an active session left behind by a killed app).
     var startupPromptDone by rememberSaveable { mutableStateOf(false) }
+    // v226 - the done prompt shows ONCE per session: after the user
+    // dismisses it (Keep exploring / back), returning to the foreground
+    // must not nag again for the SAME session (keyed by startMillis). A
+    // different session re-arms it naturally.
+    var dialogDismissedFor by rememberSaveable { mutableStateOf(0L) }
 
     // Ask "are you done exploring?" whenever the app returns to the
     // foreground while an explore session is active — mid-session, after
@@ -338,7 +349,9 @@ fun CurioNavHost(
             if (event == Lifecycle.Event.ON_RESUME) {
                 if (AppPreferences.isExploreSessionsEnabled(context)) {
                     val resumed = ExploreSessionStore.getActiveSession(context)
-                    showDoneDialog = resumed != null
+                    // v226 - once per session (see dialogDismissedFor).
+                    showDoneDialog = resumed != null &&
+                        dialogDismissedFor != resumed.startMillis
                     // A background/foreground cycle must not reopen the dialog
                     // already sitting in the cancel-confirm step.
                     confirmSessionCancel = false
@@ -372,7 +385,9 @@ fun CurioNavHost(
             startupPromptDone = true
             if (AppPreferences.isExploreSessionsEnabled(context)) {
                 val session = ExploreSessionStore.getActiveSession(context)
-                showDoneDialog = session != null
+                // v226 - once per session (see dialogDismissedFor).
+                showDoneDialog = session != null &&
+                    dialogDismissedFor != session.startMillis
                 confirmSessionCancel = false
                 if (session != null && AppPreferences.exploreServiceShouldRun(context)) {
                     ExploreSessionService.start(context, session)
@@ -430,6 +445,27 @@ fun CurioNavHost(
     // floating pill bar + the tour dock): it draws ABOVE the nav bar, which
     // stays composed underneath, so opening the drawer slides the sheet and
     // scrim over the bar instead of making it vanish and pop back.
+    // v227 — liquid-glass pills experiment: one LayerBackdrop records
+    // everything the page Row draws (marked below); the glass capsules
+    // refract that recording. Published via [CurioGlassPills] (the
+    // CurioNavTint handoff pattern) so all three pill sites read it.
+    // v228 — the capture onDraw flags the record pass (see
+    // [curioGlassCaptureDraw]) so glass pills INSIDE this subtree — the
+    // Reveal bar, the Pet Designer studio bar — paint a plain fallback
+    // during recording instead of sampling the layer into themselves
+    // (that cycle crashed HWUI with a RenderThread stack overflow).
+    val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
+    SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
+    // v231 — glass parallax tilt experiment: run the gravity listener only
+    // while the toggle is on (and the glass itself can render), so the
+    // sensor costs nothing otherwise.
+    LaunchedEffect(AppPreferences.glassParallaxState) {
+        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
+            context,
+            AppPreferences.glassParallaxState && isLiquidGlassPillsActive()
+        )
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -468,6 +504,11 @@ fun CurioNavHost(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    // v227 — the liquid-glass capture layer: pages only.
+                    // The floating bar / sentiment pill / tour dock
+                    // overlays are SIBLINGS of this Box, so they never
+                    // record themselves into their own blurred backdrop.
+                    .then(if (isLiquidGlassPillsActive()) Modifier.layerBackdrop(navGlassBackdrop) else Modifier)
                     .then(
                         if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
@@ -1047,6 +1088,7 @@ fun CurioNavHost(
             onDismissRequest = {
                 showDoneDialog = false
                 confirmSessionCancel = false
+                activeSession.let { dialogDismissedFor = it.startMillis }
             },
             title = {
                 Text(
@@ -1098,6 +1140,10 @@ fun CurioNavHost(
                     TextButton(onClick = {
                         showDoneDialog = false
                         confirmSessionCancel = false
+                        // v226 — stash the cancelled session so Home can
+                        // offer it back (recovery card) instead of the
+                        // banked time vanishing.
+                        ExploreSessionStore.stashCancelledSession(context, activeSession)
                         ExploreSessionStore.clearSession(context)
                         ExploreReminderScheduler.cancel(context)
                         ExploreSessionService.stop(context)
@@ -1137,7 +1183,7 @@ fun CurioNavHost(
                         ) { launchSingleTop = true }
                     },
                         colors = curioDialogActionButtonColors()
-                    ) { Text("Done and write about it") }
+                    ) { Text("Express yourself") }
                 }
             },
             dismissButton = {
@@ -1152,32 +1198,47 @@ fun CurioNavHost(
                         TextButton(onClick = { confirmSessionCancel = true }) {
                             Text("Cancel session", color = MaterialTheme.colorScheme.error)
                         }
-                        TextButton(onClick = { showDoneDialog = false }, colors = curioDialogActionButtonColors()) { Text("Keep exploring") }
+                        TextButton(onClick = {
+                            showDoneDialog = false
+                            activeSession.let { dialogDismissedFor = it.startMillis }
+                        }, colors = curioDialogActionButtonColors()) { Text("Keep exploring") }
                     }
                 }
             }
         )
     }
 
-    // v63 — the app's IN-APP toast (the update notice, etc.) floats above
-    // every screen. v112 — REMADE as a SMALL pill anchored to the TOP-RIGHT
-    // corner (below the status bar) instead of the old bottom-center pill.
-    // It lives in its own full-size Box at the NavHost root (after the
-    // Scaffold), so `align` resolves to a BoxScope regardless of the
-    // enclosing screen state. v63b — toasts with an action are tappable:
-    // the update toast's "support" action opens the Updates page.
-    Box(modifier = Modifier.fillMaxSize()) {
-        CurioInAppToastHost(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(top = 8.dp, end = 16.dp),
-            onAction = { actionId ->
-                if (actionId == "support") {
-                    navController.navigate(CurioRoutes.UPDATES) {
-                        launchSingleTop = true
-                    }
-                }
+    // v227d — the update notice is now a proper themed DIALOG (the old
+    // corner toast pill is fully removed). Rendered at the NavHost root so
+    // it floats above every screen; "Open Updates" navigates to the
+    // Updates page, "Later" just dismisses (the once-per-version gate in
+    // UpdateChecker means it never nags again for the same release).
+    CurioUpdatePrompt.pending?.let { pendingVersion ->
+        AlertDialog(
+            containerColor = curioDialogContainerColor(),
+            shape = CurioDialogShape,
+            onDismissRequest = { CurioUpdatePrompt.dismiss() },
+            title = { Text("Curio $pendingVersion is available") },
+            text = {
+                Text(
+                    "A newer version of Curio is ready. See what changed and install it from the Updates page.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        CurioUpdatePrompt.dismiss()
+                        navController.navigate(CurioRoutes.UPDATES) { launchSingleTop = true }
+                    },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Open Updates") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { CurioUpdatePrompt.dismiss() },
+                    colors = curioDialogActionButtonColors()
+                ) { Text("Later") }
             }
         )
     }
