@@ -1194,7 +1194,7 @@ object AppPreferences {
 
     // ── Liquid-glass navigation pills (experiment, default OFF) ──────
     fun isLiquidGlassPillsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LIQUID_GLASS_PILLS, true)
+        prefs(context).getBoolean(KEY_LIQUID_GLASS_PILLS, false)
 
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
@@ -1221,7 +1221,7 @@ object AppPreferences {
 
     // ── Clear-glass style (experiment, default OFF) ──────────────────
     fun isGlassClarityEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GLASS_CLARITY, true)
+        prefs(context).getBoolean(KEY_GLASS_CLARITY, false)
 
     fun setGlassClarityEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLARITY, enabled).apply()

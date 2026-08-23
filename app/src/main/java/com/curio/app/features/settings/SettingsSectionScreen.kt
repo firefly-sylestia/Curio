@@ -42,16 +42,15 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import com.curio.app.ui.components.liquidGlassCapsule
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.remember
@@ -896,7 +895,6 @@ private fun SettingsRowPulse(
     }
 }
 
-
 /**
  * v252 — LIQUID GLASS TUNING DIALOG. The three recipe sliders
  * (Reflection / Refraction / Blur) with a LIVE PREVIEW capsule above them:
@@ -911,15 +909,19 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
         CurioSettingsCard(shadowElevation = 0.dp) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CurioCardHeader(CurioIcons.Info, "Tune liquid glass", "Drag a slider — the capsule previews it live")
+                // v258 — REAL PREVIEW: an actual [liquidGlassCapsule] pill
+                // you can DRAG over a colorful collage. Every slider writes
+                // the same preference state the real capsules read, so the
+                // pill under your finger IS how the nav pills will render.
+                var previewOffset by remember { mutableStateOf(Offset.Zero) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(120.dp)
+                        .height(150.dp)
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Canvas(Modifier.matchParentSize()) {
-                        drawRect(
-                            brush = Brush.linearGradient(
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(
+                            Brush.linearGradient(
                                 listOf(
                                     Color(0xFF7E57C2),
                                     Color(0xFFEF9A9A),
@@ -928,14 +930,47 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                                 )
                             )
                         )
-                        drawGlassPreviewCapsule()
-                    }
-                    Box(
+                ) {
+                    // Collage content behind the glass — real text to bend.
+                    Text(
+                        text = "Aa Bb Cc\n123 456",
+                        style = MaterialTheme.typography.displayMedium,
+                        color = Color.Black.copy(alpha = 0.35f),
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    Text(
+                        text = "Curio",
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White.copy(alpha = 0.85f),
                         modifier = Modifier
-                            .matchParentSize(),
-                        contentAlignment = Alignment.Center
+                            .align(Alignment.TopStart)
+                            .padding(10.dp)
+                    )
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        shadowElevation = 0.dp,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .offset { IntOffset(previewOffset.x.roundToPx(), previewOffset.y.roundToPx()) }
+                            .size(width = 132.dp, height = 48.dp)
+                            .liquidGlassCapsule(MaterialTheme.colorScheme.surfaceVariant)
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, amount ->
+                                    change.consume()
+                                    previewOffset += amount
+                                }
+                            }
                     ) {
-                        Text("Aa")
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                "Preview",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
                     }
                 }
                 CompactSliderRow("Reflection", "Light sheen strength", AppPreferences.glassReflectionScaleState) {
@@ -951,31 +986,4 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
             }
         }
     }
-}
-
-/** The preview capsule: veil scales with Blur, sheen with Reflection, rim with Refraction. */
-private fun DrawScope.drawGlassPreviewCapsule() {
-    val blur = AppPreferences.glassBlurScaleState.coerceIn(0f, 2f)
-    val refl = AppPreferences.glassReflectionScaleState.coerceIn(0f, 2f)
-    val refr = AppPreferences.glassRefractionScaleState.coerceIn(0f, 2f)
-    val cx = size.width / 2f
-    val cy = size.height / 2f
-    val w = size.width * 0.46f
-    val h = size.height * 0.42f
-    val r = CornerRadius(minOf(w, h) / 2f)
-    val topLeft = Offset(cx - w / 2f, cy - h / 2f)
-    val sz = Size(w, h)
-    // Veil — the blur stand-in.
-    drawRoundRect(color = Color.White.copy(alpha = 0.18f * blur), topLeft = topLeft, size = sz, cornerRadius = r)
-    // Sheen — top light band.
-    drawRoundRect(
-        brush = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.55f * refl), Color.Transparent)),
-        topLeft = topLeft, size = sz.copy(height = h / 2f), cornerRadius = r
-    )
-    // Rim — brighter with refraction.
-    drawRoundRect(
-        color = Color.White.copy(alpha = 0.35f * refr),
-        topLeft = topLeft, size = sz, cornerRadius = r,
-        style = Stroke(width = 1.5.dp.toPx())
-    )
 }

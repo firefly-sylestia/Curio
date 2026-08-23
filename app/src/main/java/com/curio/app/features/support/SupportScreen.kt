@@ -280,16 +280,17 @@ fun SupportScreen(navController: NavController) {
                     }
                 }
             }
-        }
-        // v257 — sticky back pill once the scrolling hero moves up.
-        // Explicit Box: guarantees a BoxScope receiver for align() no matter
-        // which composable lambda this sits in.
-        Box(modifier = Modifier.fillMaxSize()) {
-            SettingsStickyBackPill(
-                onBack = { navController.popBackStack() },
-                visible = listState.isPastHero(),
-                modifier = Modifier.align(Alignment.TopStart)
-            )
+
+            // v257 — sticky back pill once the scrolling hero moves up.
+            // Explicit Box: guarantees a BoxScope receiver for align() inside
+            // the ScreenEntrance lambda.
+            Box(modifier = Modifier.fillMaxSize()) {
+                SettingsStickyBackPill(
+                    onBack = { navController.popBackStack() },
+                    visible = listState.isPastHero(),
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
+            }
         }
     }
 }

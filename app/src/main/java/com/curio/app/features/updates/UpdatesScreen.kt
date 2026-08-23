@@ -555,6 +555,17 @@ fun UpdatesScreen(navController: NavController) {
                     }
                 }
             }
+
+            // v257 — sticky back pill once the scrolling hero moves up.
+            // Explicit Box: guarantees a BoxScope receiver for align() inside
+            // the ScreenEntrance lambda.
+            Box(modifier = Modifier.fillMaxSize()) {
+                SettingsStickyBackPill(
+                    onBack = { navController.popBackStack() },
+                    visible = listState.isPastHero(),
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
+            }
         }
     }
 }
@@ -707,18 +718,7 @@ private fun ReleaseNotesBlock(notes: String, accent: Color) {
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
             }
-        }
-        // v257 — sticky back pill once the scrolling hero moves up.
-        // Explicit Box: guarantees a BoxScope receiver for align() no matter
-        // which composable lambda this sits in.
-        Box(modifier = Modifier.fillMaxSize()) {
-            SettingsStickyBackPill(
-                onBack = { navController.popBackStack() },
-                visible = listState.isPastHero(),
-                modifier = Modifier.align(Alignment.TopStart)
-            )
-        }
-    }
+        }    }
 }
 
 private enum class UpdateCheckUi { Idle, Checking, UpToDate, GithubAvailable, Failed }
