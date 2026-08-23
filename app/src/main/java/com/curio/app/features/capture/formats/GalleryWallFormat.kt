@@ -76,11 +76,6 @@ import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.NotePaperCard
 import com.curio.app.ui.components.moodBoardPainter
 import com.curio.app.ui.components.rememberMoodBoardZoomState
-
-/** v262 — mood-board QUOTES are hidden for now (user request). Flip to
- *  false to bring the Add-quote option back. Existing saved entries with
- *  quotes keep rendering them either way. */
-private const val MoodboardQuotesHidden = true
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -89,6 +84,11 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.pastelFillInk
 import kotlin.math.roundToInt
 import kotlin.random.Random
+
+/** v262 — mood-board QUOTES are hidden for now (user request). Flip to
+ *  false to bring the Add-quote option back. Existing saved entries with
+ *  quotes keep rendering them either way. */
+private const val MoodboardQuotesHidden = true
 
 // ── Mood board tile with pixel-based positioning ─────────────────────
 
