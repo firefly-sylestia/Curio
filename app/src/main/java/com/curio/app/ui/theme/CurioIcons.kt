@@ -7,12 +7,12 @@ import com.curio.app.data.MusicService
 import com.curio.app.data.SearchEngine
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.draw.offset
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
