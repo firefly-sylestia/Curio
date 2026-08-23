@@ -151,10 +151,9 @@ object CurioCrashReporter {
                 appendLine("Android: ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})")
                 if (AppPreferences.isLiquidGlassPillsEnabled(app)) {
                     appendLine()
-                    appendLine("Self-heal: Liquid glass pills + parallax tilt + in-screen glass were ON at death — auto-disabled to stop the crash loop. Re-enable in Settings → Experiments once the cause is fixed.")
+                    appendLine("Self-heal: Liquid glass pills + parallax tilt were ON at death — auto-disabled to stop the crash loop. Re-enable in Settings → Experiments once the cause is fixed.")
                     AppPreferences.setLiquidGlassPillsEnabled(app, false)
                     AppPreferences.setGlassParallaxEnabled(app, false)
-                    AppPreferences.setGlassInScreenEnabled(app, false)
                     Log.w(TAG, "Native crash with glass experiment ON — toggles auto-disabled (self-heal)")
                 }
             }

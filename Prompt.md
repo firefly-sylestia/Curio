@@ -1,32 +1,39 @@
 # Prompt.md — current request log
 
-## Request (complete): v240 — crisp touch spec re-roll + transparent idle indicator + Profile glass
+## Request (complete): FULL ROLLBACK to commit 7373012
 
-User: add the touch blob back to other screens but FIXED (it was blurry when
-touching/moving; commit 106da72's blob wasn't); idle indicator should be fully
-transparent ("you just reversed it"); active text still not readable → darker;
-extend floating-pill glass to the Profile page.
+User: "revert anything after this, i meant restore to this commit state and
+revert each commits that happened after this" (737301278d7d… = "fix: correct
+offset import package in CurioIcons", the state right after v233).
 
-### Root causes / changes
-1. **Blurry-while-moving**: my v239 `blur(7dp × pressProgress)` on the indicator
-   was the culprit — 106da72 had zero blur. REMOVED. (Pet Designer middle-tab
-   duplicates stay solved by the hidden row recording plain content only.)
-2. **Crisp helper re-added**: `curioGlassPressBlob` = spring scale 1.05× + a TIGHT
-   additive specular spot (radius ≈45% of pill, white .60→.20→0, BlendMode.Plus)
-   tracking the finger — a refraction glint, not v236's full-pill fog.
-   Wired on: Home menu/profile, detail back/more (CurioBackButton regained optional
-   interactionSource), Reveal favorite, tour dock glass + both buttons.
-3. **Idle indicator**: `onDrawSurface = null` — fully transparent glass, no accent,
-   no neutral shade.
-4. **Light-mode active ink**: pure BLACK (`Color.Black`), third darkening step.
-5. **Profile page** joins in-screen glass: local capture wrapper around watermark+
-   list; sticky back/search pills morph solid→real glass sampling the local capture
-   (fill fades to transparent at endpoint); crisp spec on both pills.
+### What was rolled back (8 commits)
+- 2569b76 v234 in-screen liquid glass (Pet Designer / Home / detail local
+  backdrops + "In-screen glass" toggle) — REMOVED
+- 6de2d5e detailScroll hoist — superseded by the revert
+- 2fbd82b v235 blob fixes + darker light-mode ink — REMOVED
+- b8d43c7 v236 press-blob everywhere + studio tab bar — REMOVED (was already
+  mostly reverted in v239)
+- 5975838 v237 smudge revert + size-capped lens + ink — REMOVED
+- c8d6e45 v238 tilt-glow top arc — REVERTED to the original v233 rim glow
+- 20171ef v239 neutral indicator — REMOVED
+- 55f9b68 v240 crisp spec + Profile glass + black text — REMOVED
 
-Files: LiquidGlassPills.kt, CurioLiquidGlassTabBar.kt, CurioBottomNav.kt,
-CurioTopBar.kt, CurioNavHost.kt, ProfileScreen.kt, TopicRevealScreen.kt,
-HomeScreen.kt, EntryDetailScreen.kt (+ docs). Balance OK ×8; CI validates.
+### Method
+`git checkout 7373012 -- <16 affected paths>` (all changes were modifications;
+no files were added or deleted after 7373012). Verified: staged diff of
+`app/src/main/java` vs 7373012 is EMPTY. `web/` untouched — including the
+pre-existing uncommitted `web/package-lock.json` change.
 
-Standing lessons: never blur the nav indicator sample; press feedback must be
-crisp+small (additive spot), never soft large gradients; idle indicator carries no
-fills of any kind.
+### State after rollback (= post-v233)
+- Liquid glass ONLY on the bottom nav bar (+ Reveal/PetStudio capsules via the
+  global capture + v228 guard); Experiments has Liquid glass pills, Clear glass,
+  Glass parallax tilt (original rim-ring glow).
+- Active indicator: accent wash + press-scaled lens (v232-era look); active ink:
+  classic `curioActivePillInk`.
+- No touch blob anywhere; no In-screen glass toggle; native-crash reporter back
+  to its v232 form.
+
+NOTE for future requests: the user chose this state knowingly — readability ink
+tweaks, indicator transparency, and Profile/in-screen glass are GONE. If asked to
+re-add any, the v234–v240 history contains the implementations (local-backdrop
+pattern is required for in-screen glass; never blur the indicator sample).

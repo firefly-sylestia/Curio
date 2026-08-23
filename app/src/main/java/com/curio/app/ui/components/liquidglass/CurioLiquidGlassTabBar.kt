@@ -58,6 +58,7 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
@@ -133,6 +134,10 @@ fun CurioLiquidGlassTabBar(
     val density = LocalDensity.current
     // v233 — CLEAR GLASS (experiment): less frost, more refraction.
     val clear = AppPreferences.glassClarityState
+    // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
+    // accent wash gave the active ink almost nothing to read against on a
+    // bright page; light mode now gets double the bed (dark keeps 16%).
+    val dark = isCurioDarkTheme()
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
 
@@ -290,11 +295,7 @@ fun CurioLiquidGlassTabBar(
                         if (isBlurEnabled) {
                             vibrancy()
                             blur((if (clear) 2.dp else 8.dp).toPx())
-                            // v239 — restored FIXED refraction heights (the v237
-                            // size-cap made every bar less refractive than when the
-                            // glass first shipped; the real circle bug was the tilt
-                            // glow ring, fixed separately in v238).
-                            lens((if (clear) 14.dp else 24.dp).toPx(), (if (clear) 18.dp else 24.dp).toPx())
+                            lens(24.dp.toPx(), 24.dp.toPx())
                         }
                     },
                     highlight = {
@@ -341,15 +342,27 @@ fun CurioLiquidGlassTabBar(
                     .alpha(0f)
                     .layerBackdrop(tabsBackdrop)
                     .graphicsLayer { translationX = panelOffset }
-                    // v235 — PLAIN TINTED COPY. This hidden row previously ran
-                    // its OWN full glass rendering (vibrancy + blur + lens +
-                    // surface wash) before being recorded into tabsBackdrop —
-                    // so the active pill refracted a duplicated GLASS RENDER,
-                    // whose refraction rings showed up as circular blobs inside
-                    // the indicator and mid-capsule once Clear glass removed the
-                    // frost that masked them. The recording now captures just
-                    // the accent-tinted tab content; the pill applies its own
-                    // optics on top.
+                    .drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { CircleShape },
+                        effects = {
+                            if (isBlurEnabled) {
+                                val progress = dampedDragAnimation.pressProgress
+                                vibrancy()
+                                blur((if (clear) 2.dp else 8.dp).toPx())
+                                lens(24.dp.toPx() * progress, 24.dp.toPx() * progress)
+                            }
+                        },
+                        highlight = {
+                            Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
+                        },
+                        shadow = { null },
+                        onDrawSurface = {
+                            // v233 — clear-glass cuts the frost wash to ~a third.
+                            drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.35f else 1f))
+                        }
+                    )
+                    .then(interactiveHighlight?.modifier ?: Modifier)
                     .height(56.dp)
                     .padding(horizontal = 4.dp)
                     .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
@@ -383,13 +396,7 @@ fun CurioLiquidGlassTabBar(
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
-                                // v240 — ALWAYS refracting, NEVER blurring: the drag
-                                // blur I added in v239 was what made the select blob
-                                // feel blurry while moving (commit 106da72 had none).
-                                // The Pet Designer middle-tab duplicates are avoided
-                                // by the hidden row recording PLAIN content only —
-                                // no extra blur needed.
-                                lens((6f + 6f * progress).dp.toPx(), (9f + 5f * progress).dp.toPx(), true)
+                                lens(10.dp.toPx() * progress, 14.dp.toPx() * progress, true)
                             }
                         },
                         highlight = {
@@ -415,11 +422,20 @@ fun CurioLiquidGlassTabBar(
                                 scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
                             }
                         },
-                        onDrawSurface = null
-                        // v240 — the idle indicator is FULLY TRANSPARENT glass (no
-                        // accent wash, no neutral shade — earlier revisions kept
-                        // flip-flopping fills). All press feedback comes from the
-                        // press-scaled lens/highlight/inner-shadow above.
+                        onDrawSurface = {
+                            val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                            // v232 — a constant faint ACCENT wash marks this pill
+                            // as the active-tab indicator even at rest (before,
+                            // it only read while pressed); press deepens it.
+                            // v233 — theme-aware: light mode doubles the bed so
+                            // the active ink actually reads against a bright page.
+                            drawRect(accentColor.copy(alpha = if (dark) 0.16f else 0.30f))
+                            drawRect(
+                                color = Color.Black.copy(alpha = 0.10f),
+                                alpha = 1f - progress
+                            )
+                            drawRect(Color.Black.copy(alpha = 0.03f * progress))
+                        }
                     )
                     .height(56.dp)
                     .width(with(density) {

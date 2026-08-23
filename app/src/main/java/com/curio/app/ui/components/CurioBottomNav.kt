@@ -373,17 +373,7 @@ fun CurioFloatingNavBar(
                 // slides its label out BESIDE the icon (not stacked under it),
                 // with the same accent fill-ink crossfade as FloatingNavPill.
                 // The draggable indicator tracks the real per-tab widths.
-                // v239 — LIGHT MODE USES PLAIN DARK TEXT (user: "use a dark
-                // text"): the indicator carries no accent fill anymore, so the
-                // theme's near-black onSurface is the readable choice; dark
-                // mode keeps the classic light ink.
-                val activeInk = if (!isCurioDarkTheme()) {
-                    // v240 — BLACK. onSurface still fought the glass sample;
-                    // the user asked twice for darker — give the darkest.
-                    Color.Black
-                } else {
-                    curioActivePillInk(pageAccent)
-                }
+                val activeInk = curioActivePillInk(pageAccent)
                 items.forEachIndexed { index, destination ->
                     val selected = destination.route == selectedRoute ||
                         destination.route == routePrefix

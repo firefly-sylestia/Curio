@@ -154,17 +154,12 @@ import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
-import com.curio.app.ui.components.curioGlassPressBlob
-import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.CurioDialogEntrance
 import com.curio.app.ui.components.TornStatPaperShape
 import com.curio.app.ui.components.paperStatCardColor
 import com.curio.app.ui.components.paperStatCardFill
 import com.curio.app.data.AppPreferences
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.data.OfflineTranscriber
 import com.curio.app.data.VoskModels
 import com.curio.app.ui.theme.CurioColors
@@ -306,24 +301,6 @@ fun EntryDetailScreen(
             .fillMaxSize()
             .background(wash)
     ) {
-        // Hoisted scroll state — the sticky top bar (back + more controls)
-        // reads it to pop out of the hero into frosted floating pills, the
-        // same scroll-linked clock Home uses for its menu / profile pills.
-        // Declared OUTSIDE the v234 capture wrapper so sibling overlays
-        // (sticky bar, progress pill) can read it.
-        val detailScroll = rememberScrollState()
-        // v234 — LOCAL GLASS CAPTURE: the page behind the sticky back/more
-        // pills records into its own layerBackdrop layer, pills OUTSIDE the
-        // wrapper (sibling overlay). Sampling a capture that excludes the
-        // pill removes the v228 self-capture cycle by construction — same
-        // architecture as the bottom nav. Global capture + guard stay active.
-        val detailGlassBackdrop = rememberLayerBackdrop()
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(wash)
-                .layerBackdrop(detailGlassBackdrop)
-        ) {
         // Muted category-glyph watermark behind the content — the same
         // backdrop language as Home / Spin / the mood boards, so a saved
         // entry reads as part of the app's paper-and-glyph world.
@@ -343,6 +320,10 @@ fun EntryDetailScreen(
                 modifier = Modifier.fillMaxSize()
             )
         }
+        // Hoisted scroll state — the sticky top bar (back + more controls)
+        // reads it to pop out of the hero into frosted floating pills, the
+        // same scroll-linked clock Home uses for its menu / profile pills.
+        val detailScroll = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -845,7 +826,6 @@ fun EntryDetailScreen(
 
         Spacer(Modifier.height(40.dp))
         }
-        } // v234 — end of the local glass capture subtree
 
         // Keep scroll-linked controls in their own recomposition scope. The
         // detail body contains paper Canvas textures, rich text, and image
@@ -853,7 +833,6 @@ fun EntryDetailScreen(
         // whole tree on every scroll pixel. The visual behavior stays the
         // same, but only this small overlay now follows the scroll clock.
         DetailStickyBar(
-            glassBackdrop = detailGlassBackdrop,
             detailScroll = detailScroll,
             heroControlsProgress = heroControlsProgress,
             heroCardInk = heroCardInk,
@@ -1095,8 +1074,6 @@ private fun Modifier.heroFrostPlate(
  */
 @Composable
 private fun BoxScope.DetailStickyBar(
-    // v234 — the screen's LOCAL backdrop capture (excludes these pills).
-    glassBackdrop: LayerBackdrop?,
     detailScroll: androidx.compose.foundation.ScrollState,
     heroControlsProgress: Float,
     heroCardInk: Color,
@@ -1136,11 +1113,7 @@ private fun BoxScope.DetailStickyBar(
     // frame — native RenderThread crash class on some devices. The classic
     // solid-hero → frost morph below runs again; live glass stays only on
     // the bottom nav overlay.
-    // v232 disabled this handoff after native RenderThread crashes.
-    // v234 — RESTORED behind the "In-screen glass" experiment: the pills
-    // refract the LOCAL capture passed in [glassBackdrop], which excludes
-    // them by construction (sibling overlay), so no self-capture cycle.
-    val glassOn = isInScreenGlassActive()
+    val glassOn = false
     val detailGlassActive = glassOn && frostShift > 0.01f
     val frostFill = if (isCurioDarkTheme())
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
@@ -1168,29 +1141,25 @@ private fun BoxScope.DetailStickyBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // v240 — crisp touch spec on the sticky pills.
-        val backSource = remember { MutableInteractionSource() }
         CurioBackButton(
             onClick = { navController.popBackStack() },
             containerColor = Color.Transparent,
             contentColor = heroCardInk,
             shadowElevation = 0.dp,
             disableRipple = true,
-            interactionSource = backSource,
             // v230 — scrolled endpoint: real liquid-glass (refraction + blur)
             // when the experiment is on; the classic frosted plate otherwise.
             modifier = if (detailGlassActive)
                 Modifier.liquidGlassCapsule(
                     heroFill,
-                    washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
-                    backdrop = glassBackdrop
+                    washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
                 )
                 else Modifier.heroFrostPlate(
                     heroCardInk,
                     RoundedCornerShape(50),
                     elevation = 6.dp * frostShift,
                     frostBrush = stickyFrostBrush
-                ).curioGlassPressBlob(backSource)
+                )
         )
         Box {
             val moreInteraction = remember { MutableInteractionSource() }
@@ -1201,8 +1170,7 @@ private fun BoxScope.DetailStickyBar(
                 modifier = (if (detailGlassActive)
                     Modifier.liquidGlassCapsule(
                         heroFill,
-                        washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
-                        backdrop = glassBackdrop
+                        washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
                     )
                 else Modifier.heroFrostPlate(
                     heroCardInk,
@@ -1214,7 +1182,6 @@ private fun BoxScope.DetailStickyBar(
                         interactionSource = moreInteraction,
                         indication = null
                     ) { menuExpanded = true }
-                    .curioGlassPressBlob(moreInteraction)
             ) {
                 CurioIcon(
                     name = CurioIcons.MoreVert,

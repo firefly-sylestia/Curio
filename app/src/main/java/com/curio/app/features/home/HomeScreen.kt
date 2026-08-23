@@ -140,13 +140,9 @@ import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.ProfileAvatarImage
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.components.SpinPickerRequest
-import com.curio.app.ui.components.curioGlassPressBlob
-import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.CurioPetHome
 import com.curio.app.ui.pet.PetLandmark
@@ -367,25 +363,6 @@ fun HomeScreen(navController: NavController) {
                 .fillMaxSize()
                 .background(homeBg)
         ) {
-            // Hoisted scroll state — the sticky top bar (menu + profile
-            // pills) reads it to pop out of the hero into frosted pills.
-            // Declared OUTSIDE the v234 capture wrapper so the sticky-bar
-            // block (a sibling of the wrapper) can read it.
-            val homeScroll = rememberScrollState()
-            // v234 — LOCAL GLASS CAPTURE. Everything BEHIND the floating
-            // top-bar pills (watermark + scrolling page) records into its own
-            // layerBackdrop layer, with the pills themselves OUTSIDE this
-            // wrapper (sibling overlay below). Sampling a capture that
-            // excludes the pill is structurally incapable of the v228 cyclic
-            // render-node crash — the bottom-nav architecture, now applied
-            // in-screen. The global NavHost capture + guard remain active.
-            val homeGlassBackdrop = rememberLayerBackdrop()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(homeBg)
-                    .layerBackdrop(homeGlassBackdrop)
-            ) {
             // ── Watermark backdrop — muted category glyphs behind all ──
             //    content (same treatment as the Spin page). The quest is
             //    always the wildcard Surprise now (no category chips), so
@@ -397,6 +374,9 @@ fun HomeScreen(navController: NavController) {
                     activeCat = CurioCategories.byId(CategoryId.WILDCARD)
                 )
             }
+            // Hoisted scroll state — the sticky top bar (menu + profile
+            // pills) reads it to pop out of the hero into frosted pills.
+            val homeScroll = rememberScrollState()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1143,7 +1123,6 @@ fun HomeScreen(navController: NavController) {
             Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 32.dp else 100.dp))
             Spacer(Modifier.height(navInsets.calculateBottomPadding()))
             }
-            } // v234 — end of the local glass capture subtree
 
             // ── Sticky top bar — menu + profile pills ─────────────────
             // Pinned OUTSIDE the scroll content so they stay on screen.
@@ -1182,13 +1161,16 @@ fun HomeScreen(navController: NavController) {
             // pill keeps the classic morph while an avatar photo is set (a
             // photo can't sit on glass) — so menu and profile animate their
             // fills independently.
-            // v232 disabled this handoff after native RenderThread crashes.
-            // v234 — RESTORED behind its own "In-screen glass" experiment:
-            // the pills now refract the LOCAL capture above (which excludes
-            // them — sibling overlay), so the self-capture cycle is gone by
-            // construction, not by a draw-pass guard. OFF keeps the classic
-            // solid-hero → frost morph exactly as v232 left it.
-            val glassOn = isInScreenGlassActive()
+            // v232 — GLASS HANDOFF DISABLED on these top-bar pills. They sit
+            // INSIDE the NavHost capture subtree AND rebuild the drawBackdrop
+            // node on every scroll frame (the per-frame washAlpha), a combo
+            // that natively SIGSEGVs RenderThread while flinging on some
+            // devices (same class as the Pet Designer studio-bar crash).
+            // The classic solid→frost morph below is fully restored; live
+            // liquid glass stays only on the bottom nav overlay (a SIBLING
+            // of the capture Box — the one configuration that has never
+            // crashed). Revisit once a tombstone pins the exact cycle.
+            val glassOn = false
             val profileAvatarPath = AppPreferences.getProfileAvatarPath(context)
             val profileGlassOn = glassOn && profileAvatarPath.isNullOrBlank()
             // Resolve solid target colors from scroll, then animate the paint
@@ -1255,8 +1237,7 @@ fun HomeScreen(navController: NavController) {
                             heroPillBg,
                             // Strong wash while the handoff is young so the
                             // swap from the solid fill doesn't pop.
-                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
-                            backdrop = homeGlassBackdrop
+                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
                         ) else Modifier
                 )
                 TopBarPill(
@@ -1273,8 +1254,7 @@ fun HomeScreen(navController: NavController) {
                     modifier = if (profileGlassOn && frostShift > 0.01f)
                         Modifier.liquidGlassCapsule(
                             heroPillBg,
-                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
-                            backdrop = homeGlassBackdrop
+                            washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift)
                         ) else Modifier,
                     // v118 — the profile pill wears the avatar photo when
                     // one is set (fresh pref read each composition, like the
@@ -1439,8 +1419,6 @@ private fun TopBarPill(
                 indication = null,
                 onClick = onClick
             )
-            // v240 — crisp touch spec (scale + tight specular spot).
-            .curioGlassPressBlob(interactionSource)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             if (!avatarPath.isNullOrBlank()) {

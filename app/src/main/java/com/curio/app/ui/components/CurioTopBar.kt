@@ -55,10 +55,7 @@ fun CurioBackButton(
     // detail screen passes true and the press is conveyed by the frost and
     // shadow alone (the same fix Home's sticky pills use — clickable with
     // indication = null). Every other screen keeps the standard ripple.
-    disableRipple: Boolean = false,
-    // v240 — optional external source so callers can attach the press spec
-    // to this button's presses (detail sticky back pill).
-    interactionSource: androidx.compose.foundation.interaction.MutableInteractionSource? = null
+    disableRipple: Boolean = false
 ) {
     val icon: @Composable () -> Unit = {
         CurioIcon(
@@ -77,8 +74,7 @@ fun CurioBackButton(
         )
     }
     if (disableRipple) {
-        val fallbackSource = remember { MutableInteractionSource() }
-        val interactionSource = interactionSource ?: fallbackSource
+        val interactionSource = remember { MutableInteractionSource() }
         Surface(
             shape = RoundedCornerShape(50),
             color = containerColor,
