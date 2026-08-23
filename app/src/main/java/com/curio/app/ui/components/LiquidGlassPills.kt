@@ -123,6 +123,7 @@ internal fun androidx.compose.ui.graphics.drawscope.ContentDrawScope.curioGlassC
  * top-down sheen and a bright rim over the capsule so the look still reads
  * "liquid glass" — just without live refraction of the content behind it.
  */
+@Composable
 fun Modifier.fauxGlassCapsule(container: Color): Modifier {
     val dark = isCurioDarkTheme()
     val veil = if (dark) Color.White.copy(alpha = 0.07f) else Color.White.copy(alpha = 0.55f)
@@ -154,6 +155,7 @@ fun Modifier.fauxGlassCapsule(container: Color): Modifier {
  * (the classic nav bar on old devices): sheen + rim only, no veil, so the
  * bar's dynamic container color still reads.
  */
+@Composable
 fun Modifier.curioFauxGlassSheen(): Modifier {
     val dark = isCurioDarkTheme()
     val sheen = if (dark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.40f)
