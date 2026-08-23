@@ -1,3 +1,25 @@
+## v252 batch
+
+1. BLOB: reverted v250's page-only sample back to COMBINED (user said it
+   flattened the capsule-inside-blob look while pressing/moving). Doubles are
+   instead solved by gating: crisp overlay renders ONLY in solid mode (classic
+   mode shows the sampled row through clear glass) and FADES OUT with press so
+   the refracted sample is the single image while touching.
+2. HOME: quest hero moved OUT of the scroll column into a pinned overlay Box
+   (inside the capture wrapper); list gets top padding = hero height - rows
+   slide under the ragged tear, Settings-style. Profile: ProfileHero item
+   removed from LazyColumn into an overlay Box; list contentPadding top =
+   ProfileHeroTotalHeight; pills' existing frost morph now reacts to content
+   scrolling under the tear.
+3. SEARCH: CurioSearchField restyled iOS - flat systemGray capsule (no
+   border/shadow/glow), 42dp, gray magnifier/placeholder, clear button, and
+   Cancel sliding in while focused (fade+expand), which clears query + drops
+   focus. Heroes passing custom ink/fill keep their tints minus the chrome.
+4. Back buttons on pinned-hero screens ride the pinned bars and keep their
+   existing glass-on-scroll morph; no further change needed there.
+
+Balance-checked all touched files; CI validates.
+
 ## v251: detail more-menu glass morph + moodboard quote card from m3-layout-sweep
 
 User: (1) detail page 3-dot should MORPH open into its dropdown with liquid

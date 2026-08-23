@@ -1,3 +1,6 @@
+ADD: Sticky hero tear on Home & Profile - content slides under the pinned tear like Settings.
+ADD: iOS-style search field - flat gray capsule, Cancel while focused.
+FIX: Blob doubles killed per mode; full-content refraction restored under the finger.
 ADD: Detail page more-menu morphs open from its pill as liquid glass (iOS-style bloom), scrim dismiss.
 FIX: Mood-board quote slips use the m3-layout-sweep sizing (editor + saved view).
 ADD: Classic active indicator experiment - transparent refracting blob style returns as an opt-in.

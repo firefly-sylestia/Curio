@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.DpOffset
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -440,15 +441,13 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        // v249 — sample ONLY the page again. The combined
-                        // sample (page + the hidden tab-row copy) made every
-                        // press show BLURRED GHOST icons/labels under the
-                        // crisp overlay copy — an ugly double image. Since
-                        // v247's crisp ink overlay keeps the labels visible on
-                        // top of the pill in every state, the sample only
-                        // needs the PAGE: refraction bends the page behind,
-                        // the ink stays single and sharp.
-                        backdrop = backdrop,
+                        // v251 — COMBINED sample restored (reverting v250):
+                        // page + the untinted tab-row copy, so the lens bends
+                        // the CONTENT under the finger — the full-capsule
+                        // refraction look the page-only sample had flattened.
+                        // Ghost doubles are solved by the overlay gating
+                        // below instead.
+                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                         shape = { CircleShape },
                         effects = {
                             // v247 — GENTLE press-gated glass again (as in
@@ -550,16 +549,21 @@ fun CurioLiquidGlassTabBar(
         // real tabs and the blob's drag handlers below), so the ink stays
         // perfectly sharp on top of the solid fill at rest and on top of
         // the press-glass while held.
-        CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
-            Row(
-                Modifier
-                    .clearAndSetSemantics {}
-                    .graphicsLayer { translationX = panelOffset }
-                    .height(64.dp)
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                content = measuringContent
-            )
+        if (!classicIndicator) {
+            CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
+                Row(
+                    Modifier
+                        .clearAndSetSemantics {}
+                        .graphicsLayer {
+                            translationX = panelOffset
+                            alpha = 1f - dampedDragAnimation.pressProgress
+                        }
+                        .height(64.dp)
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    content = measuringContent
+                )
+            }
         }
     }
 }
