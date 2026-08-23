@@ -493,7 +493,6 @@ fun ProfileScreen(navController: NavController) {
         // slide under the ragged tear. Inside the capture wrapper so the
         // sticky pills keep sampling it for their glass.
         Box {
-            item {
                 ProfileHero(
                     name = displayName,
                     avatarPath = avatarPath,
@@ -513,7 +512,6 @@ fun ProfileScreen(navController: NavController) {
                         showNameDialog = true
                     }
                 )
-            }
         }
 
         // Side scroll indicator — thin overlay knob, grows on touch.

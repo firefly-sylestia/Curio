@@ -1145,6 +1145,16 @@ private fun BoxScope.DetailStickyBar(
     // button's layout position, so a draw-time translate would leave the
     // menu hanging below the popped pill.
     val stickyLift = (DetailStickyBarRestTop - DetailStickyBarPoppedTop) * frostShift
+        // v250 — iOS-STYLE MORPH state lives at function scope: the pill
+        // below fades with it AND the floating glass panel appended after
+        // this Box reads the same progress.
+        val morph by animateFloatAsState(
+            targetValue = if (menuExpanded) 1f else 0f,
+            animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
+            label = "moreMenuMorph"
+        )
+        BackHandler(enabled = menuExpanded) { menuExpanded = false }
+
     Row(
         modifier = Modifier
             .align(Alignment.TopCenter)
@@ -1189,15 +1199,6 @@ private fun BoxScope.DetailStickyBar(
                     frostBrush = stickyFrostBrush
                 )
         )
-        // v250 — iOS-STYLE MORPH state lives at function scope: the pill
-        // below fades with it AND the floating glass panel appended after
-        // this Box reads the same progress.
-        val morph by animateFloatAsState(
-            targetValue = if (menuExpanded) 1f else 0f,
-            animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
-            label = "moreMenuMorph"
-        )
-        BackHandler(enabled = menuExpanded) { menuExpanded = false }
         Box {
             val moreInteraction = remember { MutableInteractionSource() }
 
@@ -1429,6 +1430,7 @@ private fun BoxScope.DetailStickyBar(
                 }
             }
         }
+
         // v149 — the share sheet (preview + Image/Text picker) opens from
         // the More menu; it lives here so it survives the sticky bar's
         // scroll-driven recompositions without re-arming.
