@@ -7,6 +7,8 @@ ADD
 - Liquid glass: the active pill no longer tints the tab icons and labels with the category color - your chosen ink shows true.
 
 FIX
+- Glass parallax tilt: the cue is now the capsules' OUTER glow - it shifts around the glass as you tilt the phone instead of the wrong painted-on arc inside the capsule. Nothing else about the glass changed.
+
 - Navigation: returning to Cabinet (or leaving the topic reveal) no longer replays the blob flying in from Home - the pill snaps to the live tab instead of animating from a stale one.
 - Liquid glass on pre-Android-12: the simulated glass is much clearer now (light veil, stronger sheen + rim) and the Blur slider shapes the veil too, so it reads like a clear pane instead of milk.
 

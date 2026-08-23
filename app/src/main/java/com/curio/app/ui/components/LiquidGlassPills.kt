@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -258,7 +259,9 @@ fun Modifier.liquidGlassCapsule(
                 highlight = { Highlight.Default.copy(alpha = reflScale) },
                 shadow = {
                     Shadow.Default.copy(
-                        color = Color.Black.copy(alpha = if (dark) 0.20f else 0.10f)
+                        color = Color.Black.copy(alpha = if (dark) 0.20f else 0.10f),
+                        // v245 — the outer glow shifts with the phone's tilt.
+                        offset = tiltGlowOffset()
                     )
                 },
                 // The translucent wash over the refracted backdrop — 40% like
@@ -283,34 +286,29 @@ fun Modifier.liquidGlassCapsule(
  * directly, so sensor updates invalidate just this draw — zero
  * recomposition.
  */
-internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGlassTiltEdgeGlow() {
-    if (!AppPreferences.glassParallaxState) return
+/**
+ * v245 — TILT-REACTIVE OUTER GLOW. The soft outer shadow every glass
+ * capsule already wears IS the glow the user means; its offset now shifts
+ * AGAINST the device tilt (the pane leans toward the light), so tilting
+ * moves the glow around the capsule. Reads the tilt snapshot state
+ * directly — draw-only invalidation, zero recomposition.
+ */
+internal fun tiltGlowOffset(): DpOffset {
+    val baseY = 4f.dp // Shadow.Default's resting offset (radius 24dp / 6)
+    if (!AppPreferences.glassParallaxState) return DpOffset(0f.dp, baseY)
     val tx = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX
     val ty = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY
-    // Strength tracks HOW MUCH the phone is tilted — level phone = no arc.
-    val strength = kotlin.math.sqrt(tx * tx + ty * ty).coerceIn(0f, 1f)
-    if (strength < 0.08f) return
-    val r = minOf(size.width, size.height) / 2f
-    if (r <= 0f) return
-    // Arc bright spot slides AGAINST horizontal tilt along the top rim.
-    val cx = size.width / 2f - tx * size.width * 0.30f
-    val cy = size.height * 0.10f - ty * r * 0.35f
-    drawArc(
-        brush = Brush.radialGradient(
-            colors = listOf(
-                Color.White.copy(alpha = 0.55f),
-                Color.White.copy(alpha = 0.12f),
-                Color.Transparent
-            ),
-            center = Offset(cx, cy),
-            radius = size.minDimension * 0.9f
-        ),
-        startAngle = -145f,
-        sweepAngle = 110f,
-        useCenter = false,
-        topLeft = Offset.Zero,
-        size = this.size,
-        style = Stroke(width = 1.5f.dp.toPx()),
-        alpha = 0.30f + 0.45f * strength
+    return DpOffset(
+        x = (-tx * 10f).dp,
+        y = baseY - ty * 8f.dp
     )
+}
+
+internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGlassTiltEdgeGlow() {
+    // v245 — RETIRED. The in-capsule light arc read as a wrong, painted-on
+    // effect. The tilt cue is now the capsule's OUTER GLOW: the soft outer
+    // shadow shifts against the device tilt via [tiltGlowOffset], so the
+    // pane visibly floats as you move the phone. Kept as a no-op so the
+    // call sites stay untouched.
+    return
 }

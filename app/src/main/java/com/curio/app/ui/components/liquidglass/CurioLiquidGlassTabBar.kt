@@ -58,6 +58,8 @@ import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
+import com.curio.app.ui.components.tiltGlowOffset
+import androidx.compose.ui.unit.DpOffset
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -324,7 +326,9 @@ fun CurioLiquidGlassTabBar(
                     },
                     shadow = {
                         Shadow.Default.copy(
-                            color = Color.Black.copy(alpha = 0.10f)
+                            color = Color.Black.copy(alpha = 0.10f),
+                            // v245 — outer glow shifts with tilt.
+                            offset = tiltGlowOffset()
                         )
                     },
                     onDrawSurface = {
@@ -435,6 +439,8 @@ fun CurioLiquidGlassTabBar(
                         },
                         shadow = {
                             Shadow(
+                                // v245 — outer glow shifts with tilt.
+                                offset = tiltGlowOffset(),
                                 alpha = (if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) *
                                     indShadowScale
                             )
