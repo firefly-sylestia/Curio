@@ -294,7 +294,7 @@ fun CurioLiquidGlassTabBar(
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur((if (clear) 2.dp else 8.dp).toPx())
+                            blur((if (clear) 1.dp else 8.dp).toPx())
                             lens(24.dp.toPx(), 24.dp.toPx())
                         }
                     },
@@ -308,7 +308,7 @@ fun CurioLiquidGlassTabBar(
                     },
                     onDrawSurface = {
                         // v233 — clear-glass cuts the frost wash to ~a third.
-                        drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.35f else 1f))
+                        drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.20f else 1f))
                     },
                     layerBlock = {
                         if (isBlurEnabled) {
@@ -349,7 +349,7 @@ fun CurioLiquidGlassTabBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur((if (clear) 2.dp else 8.dp).toPx())
+                                blur((if (clear) 1.dp else 8.dp).toPx())
                                 lens(24.dp.toPx() * progress, 24.dp.toPx() * progress)
                             }
                         },
@@ -359,7 +359,7 @@ fun CurioLiquidGlassTabBar(
                         shadow = { null },
                         onDrawSurface = {
                             // v233 — clear-glass cuts the frost wash to ~a third.
-                            drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.35f else 1f))
+                            drawRect(containerColor.copy(alpha = containerColor.alpha * if (clear) 0.20f else 1f))
                         }
                     )
                     .then(interactiveHighlight?.modifier ?: Modifier)

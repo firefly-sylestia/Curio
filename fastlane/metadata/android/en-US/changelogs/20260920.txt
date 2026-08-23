@@ -1,4 +1,7 @@
 ADD
+- Liquid glass: the clear style is clearer still - the frost blur and milky tint are cut further, so glass reads crisp instead of foggy.
+- Liquid glass nav: the active tab's icon and label are now pure black in light mode (white in dark) - no more category tint fighting the glass.
+
 - Liquid glass: a new "In-screen glass" experiment - the Home menu/profile pills, Profile's back/search pills, the detail page's back/more pills and the Pet Designer studio bar become real refracting, fully clear liquid glass once you scroll (each samples only what sits behind it, so the old crash is impossible by construction).
 - Liquid glass: the parallax tilt cue now draws a light arc hugging each capsule's TOP edge that slides as you tilt the phone - never a full circle, invisible when the phone is level.
 

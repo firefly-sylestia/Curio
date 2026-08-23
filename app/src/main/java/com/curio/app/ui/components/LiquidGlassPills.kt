@@ -164,7 +164,7 @@ fun Modifier.liquidGlassCapsule(
                 shape = { shape },
                 effects = {
                     vibrancy()
-                    blur((if (clear) 2.dp else 8.dp).toPx())
+                    blur((if (clear) 1.dp else 8.dp).toPx())
                     lens(24.dp.toPx(), 24.dp.toPx())
                 },
                 highlight = { Highlight.Default },
@@ -177,7 +177,7 @@ fun Modifier.liquidGlassCapsule(
                 // the reference glass bar, so the tint reads but content shows.
                 // Clear-glass cuts it to roughly a third.
                 onDrawSurface = {
-                    drawRect(container.copy(alpha = washAlpha * if (clear) 0.35f else 1f))
+                    drawRect(container.copy(alpha = washAlpha * if (clear) 0.20f else 1f))
                 }
             )
         )

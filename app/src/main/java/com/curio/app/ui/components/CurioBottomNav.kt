@@ -373,7 +373,10 @@ fun CurioFloatingNavBar(
                 // slides its label out BESIDE the icon (not stacked under it),
                 // with the same accent fill-ink crossfade as FloatingNavPill.
                 // The draggable indicator tracks the real per-tab widths.
-                val activeInk = curioActivePillInk(pageAccent)
+                // v241 — pure ink over glass: no category or Material tint —
+                // plain BLACK in light mode (white in dark) so the active
+                // icon + label read at maximum contrast over clear glass.
+                val activeInk = if (isCurioDarkTheme()) Color.White else Color.Black
                 items.forEachIndexed { index, destination ->
                     val selected = destination.route == selectedRoute ||
                         destination.route == routePrefix
