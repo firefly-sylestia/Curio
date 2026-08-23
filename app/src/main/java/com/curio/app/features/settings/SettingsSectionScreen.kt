@@ -51,7 +51,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import com.curio.app.ui.components.liquidGlassCapsule
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -954,7 +956,7 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                         shadowElevation = 0.dp,
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .offset { IntOffset(previewOffset.x.roundToPx(), previewOffset.y.roundToPx()) }
+                            .offset { IntOffset(previewOffset.x.roundToInt(), previewOffset.y.roundToInt()) }
                             .size(width = 132.dp, height = 48.dp)
                             .liquidGlassCapsule(MaterialTheme.colorScheme.surfaceVariant)
                             .pointerInput(Unit) {
