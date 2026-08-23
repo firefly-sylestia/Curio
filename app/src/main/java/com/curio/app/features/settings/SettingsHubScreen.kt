@@ -497,7 +497,7 @@ internal fun LazyListState.isPastHero(): Boolean {
 internal fun LazyGridState.isPastHero(): Boolean {
     if (firstVisibleItemIndex > 0) return true
     val hero = layoutInfo.visibleItemsInfo.firstOrNull() ?: return false
-    if (!hero.path.any { it == 0 } || hero.size.height <= 0) return false
+    if (hero.rowIndex != 0 || hero.size.height <= 0) return false
     val remaining = hero.size.height + hero.offset.y
     return remaining < hero.size.height * 0.45f
 }
