@@ -111,6 +111,11 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.curioGlassPressBlob
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.PaperTitleLines
 import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
@@ -386,6 +391,17 @@ fun ProfileScreen(navController: NavController) {
             // v30 — "Hero follows Spin lane": the page wears the lane wash.
             .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
     ) {
+        // v240 — LOCAL GLASS CAPTURE: the page behind the sticky back/search
+        // pills records into its own layerBackdrop layer, pills OUTSIDE the
+        // wrapper (sibling overlay) — the safe in-screen glass architecture.
+        val profileGlassBackdrop = rememberLayerBackdrop()
+        val profileGlassOn = isInScreenGlassActive()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(heroPageBackground(androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.background, settingsRoseAccent(), 0.10f)))
+                .layerBackdrop(profileGlassBackdrop)
+        ) {
         // ── Watermark backdrop — muted category glyphs behind the content
         // (the Home/Spin language). Full-page collage like Home: the glyphs
         // scatter across the WHOLE background, hiding behind the opaque hero
@@ -499,6 +515,7 @@ fun ProfileScreen(navController: NavController) {
             }
             item { Spacer(Modifier.navigationBarsPadding().height(4.dp)) }
         }
+        } // v240 — end of the local glass capture subtree
 
         // Side scroll indicator — thin overlay knob, grows on touch.
         CurioVerticalScrollIndicator(
@@ -540,7 +557,9 @@ fun ProfileScreen(navController: NavController) {
         val frostPillIcon = if (isCurioDarkTheme()) MaterialTheme.colorScheme.onBackground
                             else MaterialTheme.colorScheme.onSurfaceVariant
         // Resolve solid target colors from scroll, then animate the paint.
-        val targetPillBg = lerp(restPillBg, frostPillBg, frostShift)
+        // v240 — with in-screen glass on, the scrolled endpoint fades to
+        // TRANSPARENT so the refracting capsule isn't covered by a solid fill.
+        val targetPillBg = lerp(restPillBg, if (profileGlassOn) Color.Transparent else frostPillBg, frostShift)
         val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
         val targetPillIcon = lerp(heroInk, frostPillIcon, frostShift)
         val pillBg by animateColorAsState(
@@ -577,18 +596,36 @@ fun ProfileScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // v240 — liquid-glass handoff (same as Home): solid hero fill at
+            // rest, real refracting capsule once scrolled — sampling THIS
+            // screen's local capture. Plus the crisp touch press-spec.
+            val profileGlassActive = profileGlassOn && frostShift > 0.01f
             CurioBackButton(
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
-                shadowElevation = 6.dp * frostShift,
-                disableRipple = true
+                shadowElevation = if (profileGlassActive) 0.dp else 6.dp * frostShift,
+                disableRipple = true,
+                modifier = if (profileGlassActive)
+                    Modifier.liquidGlassCapsule(
+                        pillBg,
+                        washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
+                        backdrop = profileGlassBackdrop
+                    )
+                else Modifier
             )
             ProfileSearchPill(
                 onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
                 bg = pillBg,
                 iconTint = pillIcon,
-                elevation = 6.dp * frostShift
+                elevation = if (profileGlassActive) 0.dp else 6.dp * frostShift,
+                modifier = if (profileGlassActive)
+                    Modifier.liquidGlassCapsule(
+                        pillBg,
+                        washAlpha = androidx.compose.ui.util.lerp(0.92f, 0.45f, frostShift),
+                        backdrop = profileGlassBackdrop
+                    )
+                else Modifier
             )
         }
     }
@@ -603,20 +640,23 @@ private fun ProfileSearchPill(
     onClick: () -> Unit,
     bg: Color,
     iconTint: Color,
-    elevation: Dp
+    elevation: Dp,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
         shape = CircleShape,
         color = bg,
         shadowElevation = elevation,
-        modifier = Modifier
+        modifier = modifier
             .size(42.dp)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
+            // v240 — crisp touch spec while pressed.
+            .curioGlassPressBlob(interactionSource)
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             CurioIcon(

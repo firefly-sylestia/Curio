@@ -128,6 +128,8 @@ import com.curio.app.ui.components.FloatingNavCollapseHoldMillis
 import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.curioGlassCaptureDraw
 import com.curio.app.ui.components.CurioNavigationRail
+import com.curio.app.ui.components.curioGlassPressBlob
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -983,25 +985,32 @@ fun CurioNavHost(
         // buttons are content-sized capsules inside (Skip = soft secondary,
         // Next/Done = solid primary CTA). The full-screen tap-to-advance
         // layer below is untouched.
+        // v240 — dock joins the liquid-glass family (sibling overlay of the
+        // capture Box — safe architecture) and both buttons carry the crisp
+        // touch press-spec.
+        val tourContainer = curioFloatingNavContainer(routePrefix)
+        val tourGlass = isLiquidGlassPillsActive() && CurioGlassPills.backdrop != null
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 12.dp),
+                .padding(bottom = 12.dp)
+                .then(if (tourGlass) Modifier.liquidGlassCapsule(tourContainer) else Modifier),
             shape = RoundedCornerShape(50),
-            // v149 — same dynamic container as the floating nav bar: the
-            // pill follows the page tint while staying elevated.
-            // v160 — the dark-mode hairline rim is gone (see v157).
-            color = curioFloatingNavContainer(routePrefix),
-            shadowElevation = 6.dp
+            color = if (tourGlass) Color.Transparent else tourContainer,
+            shadowElevation = if (tourGlass) 0.dp else 6.dp
         ) {
             Row(
                 modifier = Modifier.padding(7.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                val skipSource = remember { MutableInteractionSource() }
                 Button(
                     onClick = { TourController.skip() },
-                    modifier = Modifier.height(52.dp),
+                    interactionSource = skipSource,
+                    modifier = Modifier
+                        .height(52.dp)
+                        .curioGlassPressBlob(skipSource),
                     // v114 — full capsule to match the app's pill language
                     // (the old 16dp boxy corners read stock M3 next to the
                     // custom pill/chip family).
@@ -1019,9 +1028,13 @@ fun CurioNavHost(
                 }
                 // The final stop labels the control "Done" — advancing past
                 // it properly closes the tour instead of silently stopping.
+                val nextSource = remember { MutableInteractionSource() }
                 Button(
                     onClick = { advanceTourAndNavigate() },
-                    modifier = Modifier.height(52.dp),
+                    interactionSource = nextSource,
+                    modifier = Modifier
+                        .height(52.dp)
+                        .curioGlassPressBlob(nextSource),
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(

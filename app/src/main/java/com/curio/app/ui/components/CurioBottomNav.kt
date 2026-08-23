@@ -378,7 +378,9 @@ fun CurioFloatingNavBar(
                 // theme's near-black onSurface is the readable choice; dark
                 // mode keeps the classic light ink.
                 val activeInk = if (!isCurioDarkTheme()) {
-                    MaterialTheme.colorScheme.onSurface
+                    // v240 — BLACK. onSurface still fought the glass sample;
+                    // the user asked twice for darker — give the darkest.
+                    Color.Black
                 } else {
                     curioActivePillInk(pageAccent)
                 }

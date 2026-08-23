@@ -383,15 +383,13 @@ fun CurioLiquidGlassTabBar(
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
-                                // v239 — ALWAYS refracting (a constant mild lens was
-                                // missing since the port: at rest the pill read as a
-                                // flat wash), growing with press…
+                                // v240 — ALWAYS refracting, NEVER blurring: the drag
+                                // blur I added in v239 was what made the select blob
+                                // feel blurry while moving (commit 106da72 had none).
+                                // The Pet Designer middle-tab duplicates are avoided
+                                // by the hidden row recording PLAIN content only —
+                                // no extra blur needed.
                                 lens((6f + 6f * progress).dp.toPx(), (9f + 5f * progress).dp.toPx(), true)
-                                // …and blurring ONLY while pressed/dragging: at rest
-                                // the sample is pixel-aligned under the real content
-                                // (invisible); mid-drag the misaligned neighbor copies
-                                // would show as duplicates without this.
-                                blur(7.dp.toPx() * progress)
                             }
                         },
                         highlight = {
@@ -417,17 +415,11 @@ fun CurioLiquidGlassTabBar(
                                 scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
                             }
                         },
-                        onDrawSurface = {
-                            val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            // v239 — NO accent fill on the indicator (user: "don't
-                            // give color to the active indicator") — just neutral
-                            // shading; readability comes from the DARK ACTIVE TEXT.
-                            drawRect(
-                                color = Color.Black.copy(alpha = 0.10f),
-                                alpha = 1f - progress
-                            )
-                            drawRect(Color.Black.copy(alpha = 0.03f * progress))
-                        }
+                        onDrawSurface = null
+                        // v240 — the idle indicator is FULLY TRANSPARENT glass (no
+                        // accent wash, no neutral shade — earlier revisions kept
+                        // flip-flopping fills). All press feedback comes from the
+                        // press-scaled lens/highlight/inner-shadow above.
                     )
                     .height(56.dp)
                     .width(with(density) {

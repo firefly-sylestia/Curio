@@ -1,6 +1,15 @@
 package com.curio.app.ui.components
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.remember
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -175,6 +184,67 @@ fun Modifier.liquidGlassCapsule(
                 }
             )
         )
+}
+
+/**
+ * v240 — TOUCH PRESS SPEC (the Apple-style select feel, CRISP edition).
+ * While pressed, the capsule springs up ~5% and a SMALL bright specular spot
+ * appears under the finger and tracks it — tight radius and additive
+ * blending so it reads as a sharp refraction glint (like the nav bar's
+ * RuntimeShader sheen), NOT the soft full-pill fog of v236 that users called
+ * "the blurry blob". Non-consuming pointer tracking; taps unaffected.
+ */
+@Composable
+fun Modifier.curioGlassPressBlob(
+    interactionSource: androidx.compose.foundation.interaction.InteractionSource,
+    maxScale: Float = 1.05f
+): Modifier {
+    val pressed by interactionSource.collectIsPressedAsState()
+    val progress by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.55f, stiffness = 500f),
+        label = "glassPressBlob"
+    )
+    var pressPoint by remember { mutableStateOf(Offset.Zero) }
+    return this
+        .graphicsLayer {
+            val s = 1f + (maxScale - 1f) * progress
+            scaleX = s
+            scaleY = s
+        }
+        .pointerInput(Unit) {
+            awaitEachGesture {
+                awaitFirstDown(requireUnconsumed = false)
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull() ?: break
+                    pressPoint = change.position
+                    if (!change.pressed) break
+                }
+            }
+        }
+        .clip(CircleShape)
+        .drawWithContent {
+            drawContent()
+            if (progress > 0.01f && size.minDimension > 0f) {
+                val r = size.minDimension * 0.45f
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.60f),
+                            Color.White.copy(alpha = 0.20f),
+                            Color.Transparent
+                        ),
+                        center = pressPoint,
+                        radius = r
+                    ),
+                    radius = r,
+                    center = pressPoint,
+                    alpha = progress,
+                    blendMode = androidx.compose.ui.graphics.BlendMode.Plus
+                )
+            }
+        }
 }
 
 /**

@@ -140,6 +140,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
+import com.curio.app.ui.components.curioGlassPressBlob
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.components.categoryEdgeShine
@@ -2559,16 +2560,20 @@ private fun RevealCategoryFavoriteBar(
                     }
                 }
                 // Favorite pill — icon-only when not favorited, expands when favorited.
+                // v240 — crisp touch spec while pressing the favorite pill.
+                val favSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                 Surface(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onFavorite()
                     },
+                    interactionSource = favSource,
                     shape = RoundedCornerShape(50),
                     color = favFill,
                     modifier = Modifier
                         .width(favWidth)
                         .height(RevealSentimentHeight)
+                        .curioGlassPressBlob(favSource)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxSize(),

@@ -4901,6 +4901,21 @@ app/src/main/java/com/curio/app/
   - Draggable indicator tracks REAL per-tab widths (tabWidthsPx + version counter,
     offsetOfFraction/widthAtFraction replace the even-split math incl. RTL + drag +
     specular highlight) and wears a constant faint accent wash so it reads at rest.
+- **v240 — crisp touch spec re-roll + transparent idle indicator + Profile glass**
+  - `curioGlassPressBlob` RE-ADDED with a CRISP specular: tight radial spot
+    (radius ≈ 45% of pill, additive BlendMode.Plus) + spring scale — modeled on
+    the nav sheen, NOT the v236 full-pill fog users called "the blurry blob".
+    Wired on: Home menu/profile pills, detail back/more (CurioBackButton regained
+    optional `interactionSource`), Reveal favorite, tour dock glass + buttons,
+    Profile back/search pills.
+  - Indicator: the v239 drag-blur REMOVED (it was what made the select blob
+    blurry while moving; commit 106da72 had none). Idle indicator now FULLY
+    TRANSPARENT glass (`onDrawSurface = null` — no accent, no neutral shade).
+  - Light-mode active ink: pure BLACK (`Color.Black`) — third darkening step.
+  - PROFILE PAGE joins in-screen glass: local `rememberLayerBackdrop` wrapper
+    around watermark+list; sticky back/search pills get the scroll-morph into
+    real glass sampling the local capture (pill fill fades to transparent at the
+    endpoint); needs the In-screen glass toggle like Home/detail.
 - **v239 — FULL REVERT of v236 (b8d43c7) + refraction/indicator corrections**
   - `git revert b8d43c7`: curioGlassPressBlob removed everywhere (Home menu/profile,
     detail back/more, Reveal favorite, tour dock — dock also back to solid
