@@ -299,7 +299,7 @@ fun CurioLiquidGlassTabBar(
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur((if (clear) 1f.dp else 8f.dp) * blurScale)
+                            blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                             lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                         }
                     },
@@ -354,7 +354,7 @@ fun CurioLiquidGlassTabBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur((if (clear) 1f.dp else 8f.dp) * blurScale)
+                                blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                                 lens(24f.dp.toPx() * refrScale * progress, 24f.dp.toPx() * refrScale * progress)
                             }
                         },

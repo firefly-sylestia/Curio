@@ -172,7 +172,7 @@ fun Modifier.liquidGlassCapsule(
                 shape = { shape },
                 effects = {
                     vibrancy()
-                    blur((if (clear) 1f.dp else 8f.dp) * blurScale)
+                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                     lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                 },
                 highlight = { Highlight.Default.copy(alpha = reflScale) },
