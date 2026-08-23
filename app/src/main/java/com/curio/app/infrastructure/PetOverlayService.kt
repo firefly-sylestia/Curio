@@ -337,7 +337,9 @@ class PetOverlayService : Service() {
                                 },
                                 onDragEnd = {
                                     dragged.value = false
-                                    snapToNearestEdge()
+                                    // v262 — stays exactly where dropped; only
+                                    // clamp back on-screen.
+                                    settleInBounds()
                                     savePosition()
                                     scheduleWander()
                                 }
@@ -404,14 +406,15 @@ class PetOverlayService : Service() {
         )
     }
 
-    /** Snaps the pet window to the nearest horizontal edge after a drag. */
-    private fun snapToNearestEdge() {
+    /** v262 — clamps the pet back on-screen WITHOUT moving it to an edge:
+     *  it stays wherever the user dropped it. */
+    private fun settleInBounds() {
         val view = petView ?: return
         val params = petParams ?: return
         val dm = resources.displayMetrics
         val margin = (8 * dm.density).toInt()
-        val snapLeft = params.x + view.width / 2 <= dm.widthPixels / 2
-        params.x = if (snapLeft) margin else dm.widthPixels - view.width - margin
+        params.x = params.x.coerceIn(margin, (dm.widthPixels - view.width - margin).coerceAtLeast(margin))
+        params.y = params.y.coerceIn(margin, (dm.heightPixels - view.height - margin).coerceAtLeast(margin))
         runCatching { windowManager.updateViewLayout(view, params) }
     }
 

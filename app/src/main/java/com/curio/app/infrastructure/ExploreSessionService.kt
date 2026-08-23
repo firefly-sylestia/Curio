@@ -856,26 +856,17 @@ class ExploreSessionService : Service() {
         overlayOwner = null
     }
 
-    /** Snaps the bubble to the nearest horizontal edge, clamped on-screen. */
+    /** v262 — NO edge snapping (user request): on release the bubble just
+     *  settles WHERE IT WAS DROPPED, only clamped so it stays on-screen. */
     private fun snapBubble() {
         val view = bubbleView ?: return
         val params = bubbleParams ?: return
         val bounds = windowBounds()
         val marginPx = (12 * resources.displayMetrics.density).toInt()
-        val snapLeft = params.x + view.width / 2 <= bounds.width() / 2
-        params.x = if (snapLeft) {
-            marginPx
-        } else {
-            (bounds.width() - view.width - marginPx).coerceAtLeast(marginPx)
-        }
-        params.y = params.y.coerceIn(
-            marginPx,
-            (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx)
-        )
+        params.x = params.x.coerceIn(marginPx, (bounds.width() - view.width - marginPx).coerceAtLeast(marginPx))
+        params.y = params.y.coerceIn(marginPx, (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx))
         runCatching { windowManager.updateViewLayout(view, params) }
-        // Tell the composition which edge it landed on so the pill can
-        // dock into it after idling (v253).
-        bubbleEdgeSnap.value = if (snapLeft) -1 else 1
+        bubbleEdgeSnap.value = 0
     }
 
     private fun windowBounds(): Rect =

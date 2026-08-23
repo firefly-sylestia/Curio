@@ -141,6 +141,12 @@ fun CurioLiquidGlassTabBar(
     accentColor: Color = MaterialTheme.colorScheme.primary,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.40f),
     isBlurEnabled: Boolean = true,
+    // v262 — ghost suppression scoped to the PET DESIGNER only: when true,
+    // the blob samples the PAGE ONLY (no hidden tab-row copy), so its glass
+    // never doubles the tab icon/label there. The HOME NAV keeps the full
+    // combined sample — the small refracted capsule of tab content inside
+    // the blob is the effect the user wants there.
+    ghostFreeTabs: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
     val tabsBackdrop = rememberLayerBackdrop()
@@ -299,6 +305,16 @@ fun CurioLiquidGlassTabBar(
         }
     }
 
+    // v262 — the crisp overlay's alpha: 1 at rest, drops to 0 within ~110ms
+    // of a blob press so the refracted tab copy shows alone while held.
+    val inkOverlayAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (!ghostFreeTabs &&
+            dampedDragAnimation.pressProgress > 0.04f
+        ) 0f else 1f,
+        animationSpec = androidx.compose.animation.core.tween(110),
+        label = "inkOverlay"
+    )
+
     // v232 — both copies of the tab row (visible + hidden accent-tinted)
     // run inside the metrics provider so every item reports its width.
     val measuringContent: @Composable RowScope.() -> Unit = {
@@ -455,10 +471,18 @@ fun CurioLiquidGlassTabBar(
                         // classic (transparent) experiment keeps the combined
                         // sample, since its whole point is bending the tab
                         // content under the finger.
-                        backdrop = if (classicIndicator) {
-                            rememberCombinedBackdrop(backdrop, tabsBackdrop)
-                        } else {
+                        // v262 — COMBINED SAMPLE RESTORED for the home nav:
+                        // page + hidden untinted tab-row copy, so the blob
+                        // visibly bends a small capsule of the tab content
+                        // under it. Only Pet Designer opts OUT (ghostFreeTabs)
+                        // because there the double-drew labels.
+                        // v262 — UNCONDITIONAL for ghostFreeTabs (even with
+                        // the classic-indicator experiment on): Pet Designer
+                        // always samples page-only, home nav always combines.
+                        backdrop = if (ghostFreeTabs) {
                             backdrop
+                        } else {
+                            rememberCombinedBackdrop(backdrop, tabsBackdrop)
                         },
                         shape = { CircleShape },
                         effects = {
@@ -574,7 +598,12 @@ fun CurioLiquidGlassTabBar(
                         .clearAndSetSemantics {}
                         .graphicsLayer {
                             translationX = panelOffset
-                            alpha = 1f - dampedDragAnimation.pressProgress
+                            // v262 — GHOST FIX done right: instead of fading
+                            // the overlay linearly with press progress (both
+                            // copies half-visible mid-press = double text),
+                            // it disappears QUICKLY (~110ms) once a press
+                            // starts, leaving ONLY the refraction showing.
+                            alpha = inkOverlayAlpha
                         }
                         .height(64.dp)
                         .padding(4.dp),

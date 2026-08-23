@@ -176,32 +176,8 @@ fun ExploreBubbleContent(
     // every touch, so any contact resets both timers.
     var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
-    // v253 — assistive-touch-style edge dock: after a few idle seconds at a
-    // snapped edge, the collapsed pill slides mostly off-screen leaving only
-    // a peek sliver; the next touch slides it back out.
-    var docked by remember { mutableStateOf(false) }
-    val dockOffset = remember { Animatable(0f) }
-    LaunchedEffect(docked, minimized) {
-        dockOffset.animateTo(
-            if (docked && minimized) 1f else 0f,
-            spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)
-        )
-    }
-    LaunchedEffect(minimized) {
-        if (!minimized) {
-            docked = false
-            return@LaunchedEffect
-        }
-        while (true) {
-            delay(400)
-            if (edgeSnap.value != 0 &&
-                System.currentTimeMillis() - lastInteraction >= EDGE_DOCK_IDLE_MS
-            ) {
-                docked = true
-                break
-            }
-        }
-    }
+    // v262 — EDGE DOCK REMOVED (user request): the pill stays exactly where
+    // it is dropped — no snapping to edges, no assistive-touch parking.
 
     // v253 — an untouched expanded panel folds back to the pill so it never
     // keeps covering what the user is watching. Typing (noteFocused) or any
@@ -257,17 +233,10 @@ fun ExploreBubbleContent(
                 val event = awaitPointerEvent()
                 if (event.changes.any { it.pressed }) {
                     lastInteraction = System.currentTimeMillis()
-                    if (docked) docked = false
                 }
             }
         }
     }
-
-    // v256 — BUBBLE LIQUID GLASS: an overlay window can't sample the apps
-    // behind it (the capture library only sees inside its own window), so
-    // the bubble wears the SIMULATED recipe — a translucent pane with the
-    // sheen + rim light-play — whenever Liquid glass is on.
-    val bubbleGlass = AppPreferences.liquidGlassPillsState
 
     // v27 → v253 — smooth morph instead of the instant swap: one shared
     // spring drives the container size (SizeTransform), while the outgoing
@@ -281,33 +250,15 @@ fun ExploreBubbleContent(
 
     Surface(
         shape = RoundedCornerShape(cornerRadius),
-        color = if (bubbleGlass) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.74f)
-                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        // v262 — NO glass here (user request): an overlay window can't
+        // sample what's behind it anyway, so the bubble wears its plain,
+        // opaque elevated surface.
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         // Overlay windows clip elevation shadows into a hard, boxy edge
         // around the pill, so the bubble stays flat — its definition
         // comes from the container step + accent glow, not a shadow.
         shadowElevation = 0.dp,
         modifier = modifier
-            // v260 — the sheen/rim follow the ANIMATED corner radius; the old
-            // fixed stadium radius painted a pill-shaped outline over the
-            // expanding rounded panel (the "weird rounded look").
-            .then(
-                if (bubbleGlass) Modifier.curioFauxGlassSheen(corner = cornerRadius)
-                else Modifier
-            )
-            // Edge dock FIRST in the chain, so every interaction modifier
-            // below lives inside the translated layer and the peek sliver
-            // is exactly what receives touches.
-            .graphicsLayer {
-                if (dockOffset.value > 0f && edgeSnap.value != 0) {
-                    val hideBy = (size.width * dockOffset.value) - EDGE_PEEK.toPx()
-                    translationX = (
-                        if (edgeSnap.value < 0) -hideBy else hideBy
-                        ).coerceAtLeast(0f)
-                } else {
-                    translationX = 0f
-                }
-            }
             .then(interactionModifier)
             .then(dragModifier)
             .onSizeChanged { size ->
@@ -825,7 +776,5 @@ private const val RESIZE_BURST_MS = 600L
 // back to the pill after this long (so it stops covering what you're
 // watching); a collapsed pill docks into its snapped edge after this long.
 private const val AUTO_COLLAPSE_MS = 12_000L
-private const val EDGE_DOCK_IDLE_MS = 4_000L
 
 // v253 — how much of the docked pill stays visible at the screen edge.
-private val EDGE_PEEK = 14.dp

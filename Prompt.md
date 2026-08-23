@@ -377,3 +377,11 @@ User's batched asks across the session:
 
 - The moodboard quote REMOVAL request was superseded by this fix per user.
 - `web/package-lock.json` user change untouched and uncommitted.
+
+
+## 2026-08-23 — Bubble/pet free placement + scoped ghost fix (v262)
+- Explore bubble: edge snapping/docking fully disabled — it stays wherever dropped; liquid glass removed from pill AND expanded panel (solid pane again).
+- Floating pet overlay: no more auto corner/edge parking — clamps in-bounds without repositioning; position stays where the user drops it.
+- Tab-bar ghost-text fix now SCOPED: new `ghostFreeTabs` param — only Pet Designer's studio bar opts out (page-only sample, crisp overlay). Home nav keeps its combined-sample blob effect (restored, per user).
+- Mood-board quotes hidden behind `MoodboardQuotesHidden` flag (from previous request).
+- Status: pushed. CI validates compilation.

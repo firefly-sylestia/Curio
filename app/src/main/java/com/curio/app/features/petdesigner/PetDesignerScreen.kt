@@ -1499,6 +1499,11 @@ private fun PetStudioBottomNav(
         val activeInk = if (isCurioDarkTheme()) Color.White else Color.Black
         CurioLiquidGlassTabBar(
             backdrop = glassBackdrop,
+            // v262 — Pet Designer is the ONLY screen that opts out of the
+            // ghost-tab refraction: its studio bar samples the page behind
+            // it, and the tab row's own labels were showing through twice.
+            // The home nav keeps the default (ghosting ON) — untouched.
+            ghostFreeTabs = true,
             tabsCount = pages.size,
             selectedIndex = page.ordinal,
             accentColor = MaterialTheme.colorScheme.primary,
