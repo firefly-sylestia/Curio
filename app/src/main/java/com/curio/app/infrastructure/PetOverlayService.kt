@@ -21,9 +21,17 @@ import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,7 +42,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
@@ -86,6 +93,20 @@ class PetOverlayService : Service() {
         getSystemService(WINDOW_SERVICE) as WindowManager
     }
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    // v261 — shared with the overlay composition so the WANDER loop can flip
+    // the pet's facing and the menu can render inside the same window.
+    private val facingState = androidx.compose.runtime.mutableStateOf(1f)
+    private val draggingState = androidx.compose.runtime.mutableStateOf(false)
+    private val wanderState = androidx.compose.runtime.mutableStateOf(true)
+    private val menuVisibleState = androidx.compose.runtime.mutableStateOf(false)
+
+    /** Persisted position — the pet STAYS where the user left it. */
+    private val overlayPrefs by lazy {
+        getSharedPreferences("curio_pet_overlay", MODE_PRIVATE)
+    }
+
+    private var wanderScheduled = false
 
     private var petView: View? = null
     private var petParams: WindowManager.LayoutParams? = null
@@ -170,16 +191,88 @@ class PetOverlayService : Service() {
         }
         petParams = params
         petView = view
-        // Initial placement: bottom-end, above the gesture area.
+        // v261 — restore the SAVED position; fall back to bottom-end only on
+        // first launch. The pet now stays wherever the user put it.
         view.doOnLayout {
             runCatching {
                 val dm = resources.displayMetrics
                 val margin = (16 * dm.density).toInt()
-                params.x = dm.widthPixels - view.width - margin
-                params.y = (dm.heightPixels - view.height - margin * 6).coerceAtLeast(margin)
+                val savedX = overlayPrefs.getInt(KEY_X, Int.MIN_VALUE)
+                val savedY = overlayPrefs.getInt(KEY_Y, Int.MIN_VALUE)
+                params.x = if (savedX != Int.MIN_VALUE) {
+                    savedX.coerceIn(margin, (dm.widthPixels - view.width - margin).coerceAtLeast(margin))
+                } else {
+                    dm.widthPixels - view.width - margin
+                }
+                params.y = if (savedY != Int.MIN_VALUE) {
+                    savedY.coerceIn(margin, (dm.heightPixels - view.height - margin).coerceAtLeast(margin))
+                } else {
+                    (dm.heightPixels - view.height - margin * 6).coerceAtLeast(margin)
+                }
                 windowManager.updateViewLayout(view, params)
+                scheduleWander()
             }
         }
+    }
+
+    private fun savePosition() {
+        val p = petParams ?: return
+        overlayPrefs.edit().putInt(KEY_X, p.x).putInt(KEY_Y, p.y).apply()
+    }
+
+    // ── Wander loop ───────────────────────────────────────────────────
+    // v261 — the pet ambles around ON ITS OWN while idle: every few seconds
+    // it strolls a short hop toward a nearby random point (clamped to the
+    // screen), flipping its facing with the direction. Dragging pauses it;
+    // long-press → menu can toggle wandering off.
+
+    fun toggleWander() {
+        wanderState.value = !wanderState.value
+        if (wanderState.value) scheduleWander()
+    }
+
+    private fun scheduleWander() {
+        if (wanderScheduled || !wanderState.value) return
+        wanderScheduled = true
+        mainHandler.postDelayed({
+            wanderScheduled = false
+            wanderStep()
+        }, (2_200L..4_400L).random())
+    }
+
+    private fun wanderStep() {
+        val view = petView ?: return
+        val params = petParams ?: return
+        if (draggingState.value) { scheduleWander(); return }
+        val dm = resources.displayMetrics
+        val density = dm.density
+        val margin = (12 * density).toInt()
+        val maxX = (dm.widthPixels - view.width - margin).coerceAtLeast(margin)
+        val maxY = (dm.heightPixels * 2 / 3).coerceAtLeast(margin) // keep off the nav area
+        val dx = ((50..170).random() * listOf(-1, 1).random()).toInt()
+        val dy = ((-110..110).random()).toInt()
+        val targetX = (params.x + dx).coerceIn(margin, maxX)
+        val targetY = (params.y + dy).coerceIn(margin, maxOf(maxY, params.y))
+        if (dx != 0) facingState.value = if (dx > 0f) 1f else -1f
+
+        // ~14-frame eased glide (~450ms).
+        val startX = params.x; val startY = params.y
+        var frame = 0; val frames = 14
+        val stepper = object : Runnable {
+            override fun run() {
+                val v = petView ?: return
+                val pp = petParams ?: return
+                frame++
+                val t = frame.toFloat() / frames
+                val ease = 1f - (1f - t) * (1f - t) // easeOutQuad
+                pp.x = (startX + (targetX - startX) * ease).toInt()
+                pp.y = (startY + (targetY - startY) * ease).toInt()
+                runCatching { windowManager.updateViewLayout(v, pp) }
+                if (frame < frames) mainHandler.postDelayed(this, 33) else savePosition()
+            }
+        }
+        mainHandler.postDelayed(stepper, 33)
+        scheduleWander()
     }
 
     /**
@@ -195,72 +288,120 @@ class PetOverlayService : Service() {
         ) {
             var squishKey by remember { mutableIntStateOf(0) }
             var celebrateKey by remember { mutableIntStateOf(0) }
-            var facing by remember { mutableStateOf(1f) }
-            var dragged by remember { mutableStateOf(false) }
+            // v261 — facing/dragging live on the SERVICE so the wander loop
+            // can drive them too; the menu renders inside this window.
+            var facing = facingState
+            var dragged = draggingState
+            val menuVisible = menuVisibleState
             val stage = remember { CurioPet.currentStage() }
             val mood = remember { CurioPet.mood(this@PetOverlayService, emptySet()) }
 
-            Box(
-                modifier = Modifier
-                    .size(PET_WINDOW_DP)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { dragged = true },
-                            onDragEnd = {
-                                dragged = false
-                                snapToNearestEdge()
-                            }
-                        ) { change, dragAmount ->
-                            change.consume()
-                            facing = if (dragAmount.x != 0f) {
-                                if (dragAmount.x > 0f) 1f else -1f
-                            } else facing
-                            val p = petParams ?: return@detectDragGestures
-                            p.x += dragAmount.x.toInt()
-                            p.y += dragAmount.y.toInt()
-                            petView?.let { v ->
-                                runCatching { windowManager.updateViewLayout(v, p) }
-                            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (menuVisible.value) {
+                    // v261 — LONG-PRESS MENU (was: a silent send-home with no
+                    // dialog). Two pill actions inside the overlay window:
+                    // Send home + Wandering toggle.
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        OverlayMenuPill("Send home", MaterialTheme.colorScheme.error) {
+                            menuVisible.value = false
+                            AppPreferences.setPetOutsideAppEnabled(
+                                this@PetOverlayService, false
+                            )
+                            stopSelf()
+                        }
+                        OverlayMenuPill(
+                            if (wanderState.value) "Wander ✓" else "Wander ✗",
+                            MaterialTheme.colorScheme.primary
+                        ) {
+                            toggleWander()
                         }
                     }
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                squishKey++
-                                celebrateKey++
-                            },
-                            onLongPress = {
-                                // Long-press sends the pet home (stops the service).
-                                AppPreferences.setPetOutsideAppEnabled(
-                                    this@PetOverlayService, false
-                                )
-                                stopSelf()
-                            }
-                        )
-                    },
-                contentAlignment = Alignment.Center
-            ) {
+                    Spacer(Modifier.height(6.dp))
+                }
                 Box(
                     modifier = Modifier
-                        .size(72.dp)
-                        .shadow(6.dp, CircleShape)
-                        .clip(CircleShape)
-                        .background(Color.Transparent),
+                        .size(PET_WINDOW_DP)
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                onDragStart = {
+                                    dragged.value = true
+                                    menuVisible.value = false
+                                },
+                                onDragEnd = {
+                                    dragged.value = false
+                                    snapToNearestEdge()
+                                    savePosition()
+                                    scheduleWander()
+                                }
+                            ) { change, dragAmount ->
+                                change.consume()
+                                if (dragAmount.x != 0f) {
+                                    facing.value = if (dragAmount.x > 0f) 1f else -1f
+                                }
+                                val p = petParams ?: return@detectDragGestures
+                                p.x += dragAmount.x.toInt()
+                                p.y += dragAmount.y.toInt()
+                                petView?.let { v ->
+                                    runCatching { windowManager.updateViewLayout(v, p) }
+                                }
+                            }
+                        }
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = {
+                                    if (menuVisible.value) {
+                                        menuVisible.value = false
+                                    } else {
+                                        squishKey++
+                                        celebrateKey++
+                                    }
+                                },
+                                onLongPress = {
+                                    // v261 — opens the in-window menu instead of
+                                    // instantly sending the pet home.
+                                    menuVisible.value = !menuVisible.value
+                                }
+                            )
+                        },
                     contentAlignment = Alignment.Center
                 ) {
+                    // v261 — the sprite renders directly (the old invisible
+                    // circle carried a shadow that drew a stray gray blob).
                     CurioPetSprite(
                         stage = stage,
                         mood = mood,
-                        spriteSize = 64.dp,
+                        spriteSize = 84.dp,
                         celebrateKey = celebrateKey,
                         squishKey = squishKey,
                         moving = false,
-                        dragged = dragged,
-                        facing = facing
+                        dragged = dragged.value,
+                        facing = facing.value
                     )
                 }
             }
         }
+    }
+
+    /** Small text pill used inside the overlay's long-press menu. */
+    @Composable
+    private fun OverlayMenuPill(label: String, tint: Color, onClick: () -> Unit) {
+        Text(
+            label,
+            color = tint,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .clickable(onClick = onClick)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
     }
 
     /** Snaps the pet window to the nearest horizontal edge after a drag. */
@@ -364,6 +505,8 @@ class PetOverlayService : Service() {
         private const val CHANNEL_ID = "pet_overlay"
         private const val NOTIFICATION_ID = 3001
         private const val MAX_RETRIES = 1
+        private const val KEY_X = "x"
+        private const val KEY_Y = "y"
         private const val RETRY_DELAY_MS = 2_000L
         private const val ACTION_STOP = "com.curio.app.pet_overlay.STOP"
         private val PET_WINDOW_DP = 96.dp
