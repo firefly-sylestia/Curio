@@ -91,7 +91,10 @@ import kotlin.math.roundToInt
  * it the lab shows a hint instead of glass shapes.
  */
 @Composable
-fun GlassWidgetLabScreen(navController: NavController) {
+// NonObservableLocale: the clock re-formats every second via its own
+    // ticker, so a locale change applies on the next tick by design.
+    @android.annotation.SuppressLint("NonObservableLocale")
+    fun GlassWidgetLabScreen(navController: NavController) {
     val context = LocalContext.current
 
     // v268 — MANUAL PICK: auto-detecting the system wallpaper fails on many
@@ -296,10 +299,15 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     now = System.currentTimeMillis()
                 }
             }
-            val clock = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
-                .format(java.util.Date(now))
-            val dateLine = java.text.SimpleDateFormat("EEE · MMM d", java.util.Locale.getDefault())
-                .format(java.util.Date(now))
+            // Locale read is deliberately non-observable: the ticker re-
+            // formats every second anyway, and a mid-session locale change
+            // just updates on the next tick.
+            @android.annotation.SuppressLint("NonObservableLocale")
+            fun fmt(pattern: String): String =
+                java.text.SimpleDateFormat(pattern, java.util.Locale.getDefault())
+                    .format(java.util.Date(now))
+            val clock = fmt("HH:mm")
+            val dateLine = fmt("EEE · MMM d")
             // Live explore session: "Exploring · Xm" while running, else Explored.
             val activeSession = remember { com.curio.app.data.ExploreSessionStore.getActiveSession(context) }
             val timerText = if (activeSession != null) {
