@@ -45,7 +45,9 @@ class GlassWidgetProvider : AppWidgetProvider() {
                 if (streak > 0) "$streak-day streak" else "start exploring"
             )
             views.setOnClickPendingIntent(
-                R.id.glass_widget_root,
+                // The layout root IS @android:id/background (required by the
+                // One UI wallpaper-blur spec) — so that's the clickable target.
+                android.R.id.background,
                 PendingIntent.getActivity(
                     context,
                     0,

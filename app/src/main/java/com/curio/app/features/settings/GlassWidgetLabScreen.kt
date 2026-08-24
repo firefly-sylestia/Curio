@@ -26,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ import com.kyant.backdrop.effects.vibrancy
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
@@ -86,6 +88,8 @@ fun GlassWidgetLabScreen(navController: NavController) {
     var wallpaper by remember { mutableStateOf<ImageBitmap?>(null) }
     // v271 — a one-line status after auto-detect attempts (success/failure).
     var detectStatus by remember { mutableStateOf<String?>(null) }
+    // v272 — auto-detect decodes off the main thread; this scope hosts it.
+    val autoDetectScope = rememberCoroutineScope()
 
     fun decodeUri(uri: android.net.Uri): ImageBitmap? = runCatching {
         context.contentResolver.openInputStream(uri)?.use { input ->
@@ -98,10 +102,16 @@ fun GlassWidgetLabScreen(navController: NavController) {
     // permission-gated (MANAGE_EXTERNAL_STORAGE per the WallpaperExport
     // project), so failure is EXPECTED there — the manual picker stays the
     // reliable path and the status line says so instead of failing silently.
+    // Same deliberate suppression as the entry load below:
+    // READ_WALLPAPER_INTERNAL is signature-only, so lint can't be
+    // satisfied — failures are caught and reported in the status.
+    @android.annotation.SuppressLint("MissingPermission")
     fun autoDetect() {
         wallpaper = null
-        val found = runCatching {
-            withContext(Dispatchers.IO) {
+        detectStatus = "Detecting device wallpaper…"
+        val scope = autoDetectScope
+        scope.launch(Dispatchers.IO) {
+            val found = runCatching {
                 val wm = WallpaperManager.getInstance(context)
                 // 1. Direct file descriptor (works on many OEM builds).
                 runCatching {
@@ -111,16 +121,18 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     }
                 }.getOrNull()
                     // 2/3. Classic drawables.
-                    ?: runCatching { wm.drawable as? BitmapDrawable }.getOrNull()?.bitmap?.asImageBitmap()
+                    ?: runCatching { wm.getDrawable() as? BitmapDrawable }.getOrNull()?.bitmap?.asImageBitmap()
                     ?: runCatching { wm.peekDrawable() as? BitmapDrawable }.getOrNull()?.bitmap?.asImageBitmap()
+            }.getOrNull()
+            withContext(Dispatchers.Main) {
+                if (found != null) {
+                    wallpaper = found
+                    AppPreferences.setGlassLabWallpaperUri(context, "auto")
+                    detectStatus = "Device wallpaper detected."
+                } else {
+                    detectStatus = "Auto-detect blocked by Android (13+ needs All-files access) — pick an image below."
+                }
             }
-        }.getOrNull()
-        if (found != null) {
-            wallpaper = found
-            AppPreferences.setGlassLabWallpaperUri(context, "auto")
-            detectStatus = "Device wallpaper detected."
-        } else {
-            detectStatus = "Auto-detect blocked by Android (13+ needs All-files access) — pick an image below."
         }
     }
 
