@@ -12,6 +12,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -216,11 +219,14 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             }
                         }
 
-                        // ── Pane style ──────────────────────────────────
+                        // ── Pane style (compact scrollable pill row) ───
                         Text("Pane style", fontWeight = FontWeight.Bold)
                         val selectedDefault = isDefault
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                        ) {
                             GlassWidgetPane.Preset.entries.forEach { presetChip ->
                                 StyleChip(
                                     label = presetChip.label,
@@ -394,37 +400,40 @@ class GlassWidgetConfigActivity : ComponentActivity() {
 
     /** Selectable swatch chip with a bold accent ring when picked. */
     @androidx.compose.runtime.Composable
+    /** v285 — COMPACT style chip: inline swatch + label in one small pill. */
+    @androidx.compose.runtime.Composable
     private fun StyleChip(
         label: String,
         selected: Boolean,
         onClick: () -> Unit,
         swatch: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.clickable(onClick = onClick)
+        androidx.compose.material3.Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(50),
+            color = if (selected)
+                MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant,
+            border = if (selected)
+                androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+            else null
         ) {
-            Canvas(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .size(48.dp)
-                    .border(
-                        width = if (selected) 3.dp else 1.dp,
-                        color = if (selected)
-                            MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(16.dp)
-                    ),
-                onDraw = swatch
-            )
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = if (selected)
-                    MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            androidx.compose.foundation.layout.Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 6.dp, end = 12.dp, top = 6.dp, bottom = 6.dp)
+            ) {
+                Canvas(modifier = Modifier.size(26.dp)) { swatch() }
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    maxLines = 1,
+                    color = if (selected)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

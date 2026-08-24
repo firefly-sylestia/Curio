@@ -90,27 +90,38 @@ class GlassLabWallpaperService : WallpaperService() {
         private val blurCache = HashMap<Int, Bitmap>()
 
         /**
-         * Smooth gaussian-style blur WITHOUT RenderScript: halve repeatedly
-         * down to the target size, then double back up — every step bilinear.
-         * A single small→full jump (the old approach) is what looked pixelated.
+         * v286 — TRUE GAUSSIAN FROST, the exact algorithm family the lab's
+         * Kyant backdrop runs (RenderEffect blur): ScriptIntrinsicBlur on a
+         * downscaled copy, scaled so the requested dp radius maps inside the
+         * kernel's 25px cap, then smooth progressive doubling back up.
+         * Cached per quantized level (one RS pass per distinct blur value).
          */
         private fun blurredFor(src: Bitmap, blurDp: Float): Bitmap? {
-            val factor = ((blurDp.coerceIn(2f, 20f)) * 6f).toInt().coerceAtLeast(8)
-            blurCache[factor]?.let { return it }
+            val density = this@GlassLabWallpaperService.resources.displayMetrics.density
+            val radiusPx = blurDp.coerceIn(2f, 20f) * density
+            val factor = (radiusPx / 25f).coerceIn(1f, 12f)
+            val key = (factor * 10f).toInt()
+            blurCache[key]?.let { return it }
             val result = runCatching {
-                val tw = (src.width / factor.toFloat()).coerceAtLeast(2f)
-                val th = (src.height / factor.toFloat()).coerceAtLeast(2f)
-                var cur = src
-                var cw = src.width.toFloat()
-                var ch = src.height.toFloat()
-                // ── down: successive halves until target reached ──
-                while (cw > tw && cw > 4f) {
-                    val nw = max(tw, cw / 2f).toInt()
-                    val nh = max(th, ch / 2f).toInt()
-                    cur = Bitmap.createScaledBitmap(cur, nw, nh, true)
-                    cw = nw.toFloat(); ch = nh.toFloat()
+                val sw = max(8, (src.width / factor).toInt())
+                val sh = max(8, (src.height / factor).toInt())
+                val input = Bitmap.createScaledBitmap(src, sw, sh, true)
+                val out = Bitmap.createBitmap(input)
+                val rs = android.renderscript.RenderScript.create(this@GlassLabWallpaperService)
+                try {
+                    val ain = android.renderscript.Allocation.createFromBitmap(rs, input)
+                    val aout = android.renderscript.Allocation.createFromBitmap(rs, out)
+                    val script = android.renderscript.ScriptIntrinsicBlur.create(
+                        rs, android.renderscript.Element.U8_4(rs)
+                    )
+                    script.setRadius(25f)
+                    script.setInput(ain)
+                    script.forEach(aout)
+                    aout.copyTo(out)
+                } finally {
+                    rs.destroy()
                 }
-                // ── up: successive doubles back toward full resolution ──
+                var cur = out
                 while (cur.width < src.width / 2) {
                     val nw = min(cur.width * 2, src.width)
                     val nh = (nw.toLong() * src.height / src.width).toInt()
@@ -118,7 +129,7 @@ class GlassLabWallpaperService : WallpaperService() {
                 }
                 cur
             }.getOrNull()
-            if (result != null) blurCache[factor] = result
+            if (result != null) blurCache[key] = result
             return result
         }
 
@@ -442,43 +453,40 @@ class GlassLabWallpaperService : WallpaperService() {
          * Backdrop resolution: the lab's picked image first; when the user
          * left it on auto, try the DEVICE wallpaper ladder
          * (getWallpaperFile -> getDrawable) before giving up to the gradient.
-         * Decoding is BOUNDED (~1600px max dim) — an oversized image failing
-         * to decode was silently swapping in the wrong wallpaper before.
+         *
+         * v286 BUGFIX: both sources are read into a byte array FIRST and
+         * decoded from that buffer. The previous version ran a bounds pass
+         * and a full pass over the SAME stream/file-descriptor — the first
+         * pass consumed it, the second decoded null, and the wallpaper
+         * silently vanished into the gradient fallback.
          */
         fun decodeBackdropBounded(context: Context, key: String?): Bitmap? = runCatching {
-            val opts = android.graphics.BitmapFactory.Options()
-            var sample = 1
-            fun sampleFor(dim: Int): Int {
-                var s = 1
-                var d = dim
-                while (d / 2 >= 1600) { s *= 2; d /= 2 }
-                return s
+            fun bytesToBmp(bytes: ByteArray?): Bitmap? {
+                if (bytes == null || bytes.isEmpty()) return null
+                val opts = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+                if (opts.outWidth <= 0) return null
+                var sample = 1
+                var dim = maxOf(opts.outWidth, opts.outHeight)
+                while (dim / 2 >= 1600) { sample *= 2; dim /= 2 }
+                return android.graphics.BitmapFactory.decodeByteArray(
+                    bytes, 0, bytes.size,
+                    opts.apply { inJustDecodeBounds = false; inSampleSize = sample }
+                )
             }
             if (key != null && key != "auto" && key.isNotBlank()) {
                 return runCatching {
-                    // Pass 1: bounds only (consumes its own stream).
-                    context.contentResolver.openInputStream(Uri.parse(key))?.use { input ->
-                        android.graphics.BitmapFactory.decodeStream(input, null, opts.apply { inJustDecodeBounds = true })
-                    }
-                    if (opts.outWidth <= 0) return@runCatching null
-                    // Pass 2: sampled decode on a FRESH stream.
-                    sample = sampleFor(maxOf(opts.outWidth, opts.outHeight))
-                    context.contentResolver.openInputStream(Uri.parse(key))?.use { input ->
-                        android.graphics.BitmapFactory.decodeStream(
-                            input, null, opts.apply { inJustDecodeBounds = false; inSampleSize = sample })
-                    }
+                    context.contentResolver.openInputStream(Uri.parse(key))
+                        ?.use { it.readBytes() }
+                        .let(::bytesToBmp)
                 }.getOrNull()
             }
             val wm = WallpaperManager.getInstance(context)
             runCatching {
                 wm.getWallpaperFile(WallpaperManager.FLAG_SYSTEM)?.use { pfd ->
-                    val fd = pfd.fileDescriptor
-                    android.graphics.BitmapFactory.decodeFileDescriptor(fd, null, opts.apply { inJustDecodeBounds = true })
-                    if (opts.outWidth > 0) {
-                        val s = sampleFor(maxOf(opts.outWidth, opts.outHeight))
-                        android.graphics.BitmapFactory.decodeFileDescriptor(
-                            fd, null, opts.apply { inJustDecodeBounds = false; inSampleSize = s })
-                    } else null
+                    java.io.FileInputStream(pfd.fileDescriptor).use { fis ->
+                        bytesToBmp(fis.readBytes())
+                    }
                 }
             }.getOrNull()
                 ?: runCatching {

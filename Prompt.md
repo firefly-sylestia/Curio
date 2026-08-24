@@ -1,3 +1,22 @@
+## Request: v286 — gaussian frost + decode fix + widget editor polish (COMPLETE)
+
+- WALLPAPER GONE BUG: previous two-pass bounds+full decode reused the same
+  stream/file-descriptor — first pass consumed it, second decoded null,
+  silent gradient fallback. Both sources now read to ByteArray once and
+  decode from the buffer (bounds + sampled passes on the bytes).
+- BLUR PARITY: bilinear pyramid replaced with ScriptIntrinsicBlur (same
+  gaussian family as lab's RenderEffect), downscale factor = radiusPx/25
+  so any dp maps inside kernel cap; progressive doubling up; cached per
+  quantized level. Vibrancy stays at draw time (saturation 1.25).
+- WIDGET EDITOR (carried from prior request): provider now READS saved
+  corner (was hardcoded 28dp); applyCornerShape() clips root outline
+  (API31+) + rounded tint buckets r12/20/28/36 for non-Samsung;
+  onAppWidgetOptionsChanged re-renders on resize (was fitXY stretching);
+  minWidth 180→120dp / targetCellWidth 3→2 so pill shrinks; StyleChip is
+  now a compact inline pill row with horizontal scroll.
+
+---
+
 ## Request: v285 — live wallpaper fidelity pass (COMPLETE, CI green)
 
 - FONT GLYPH FIX: bundled Material Symbols subset was MISSING battery_full.

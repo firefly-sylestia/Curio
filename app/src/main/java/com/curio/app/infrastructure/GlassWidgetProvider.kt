@@ -52,6 +52,20 @@ class GlassWidgetProvider : AppWidgetProvider() {
         ids.forEach { id -> updateAppWidget(context, manager, id) }
     }
 
+    /**
+     * v285 — RE-RENDER ON RESIZE. Without this the pane bitmap stayed at
+     * the placement-time size and the host stretched it (fitXY), which is
+     * what made an expanded pill's fill look square/wrong.
+     */
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        manager: AppWidgetManager,
+        id: Int,
+        newOptions: android.os.Bundle
+    ) {
+        updateAppWidget(context, manager, id)
+    }
+
     override fun onEnabled(context: Context) = pushAll(context)
 
     override fun onDisabled(context: Context) { /* nothing to clean up */ }
@@ -82,6 +96,11 @@ class GlassWidgetProvider : AppWidgetProvider() {
             val wDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 180)
             val hDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 56)
             val style = GlassWidgetPane.readStyle(context, id)
+            // v285 — the saved CORNER RADIUS drives both the pane bitmap and
+            // the widget outline. (It was hardcoded to 28dp here before, so
+            // the slider appeared to do nothing on-device.)
+            val cornerDp = GlassWidgetPane.readCorner(context, id)
+            applyCornerShape(views, cornerDp)
             if (style == GlassWidgetPane.STYLE_DEFAULT) {
                 // v275 - pure One UI look: launcher wallpaper blur + the root
                 // tint only. No pane bitmap in the way.
@@ -94,7 +113,7 @@ class GlassWidgetProvider : AppWidgetProvider() {
                     GlassWidgetPane.render(
                         widthPx = (wDp * density).toInt(),
                         heightPx = (hDp * density).toInt(),
-                        cornerPx = 28f * density,
+                        cornerPx = cornerDp * density,
                         top = top, bottom = bottom
                     )
                 )
@@ -120,6 +139,38 @@ class GlassWidgetProvider : AppWidgetProvider() {
                 )
             )
             manager.updateAppWidget(id, views)
+        }
+
+        /**
+         * v285 — round the WIDGET ITSELF, not just the pane bitmap.
+         * The root must keep its plain translucent color for One UI's blur
+         * detection, so on Samsung we clip the view to an outline of the
+         * chosen radius (API 31+, which every One UI 7 device is). On other
+         * launchers there is no blur to lose, so we additionally swap the
+         * square tint for a rounded drawable bucket — that's what fixes
+         * "the radius only changes the color fill, not the widget" there.
+         */
+        fun applyCornerShape(views: RemoteViews, cornerDp: Float) {
+            if (android.os.Build.VERSION.SDK_INT >= 31) {
+                views.setBoolean(
+                    android.R.id.background, "setClipToOutline", true
+                )
+                views.setViewOutlinePreferredRadius(
+                    android.R.id.background,
+                    cornerDp,
+                    android.util.TypedValue.COMPLEX_UNIT_DIP
+                )
+            }
+            val samsung = android.os.Build.MANUFACTURER.contains("samsung", true)
+            if (!samsung) {
+                val res = when {
+                    cornerDp <= 16f -> R.drawable.glass_widget_root_r12
+                    cornerDp <= 24f -> R.drawable.glass_widget_root_r20
+                    cornerDp <= 32f -> R.drawable.glass_widget_root_r28
+                    else -> R.drawable.glass_widget_root_r36
+                }
+                views.setInt(android.R.id.background, "setBackgroundResource", res)
+            }
         }
 
         /** Re-renders every placed glass widget (call after data changes). */
