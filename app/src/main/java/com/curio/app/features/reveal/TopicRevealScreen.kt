@@ -2515,7 +2515,16 @@ private fun RevealCategoryFavoriteBar(
             shape = RoundedCornerShape(50),
             color = if (glassOn) Color.Transparent else container,
             shadowElevation = if (glassOn) 0.dp else 6.dp,
-            modifier = if (glassOn) Modifier.liquidGlassCapsule(container) else Modifier
+            // v272 - RESTORE real refraction: this pill composes through
+            // [SentimentPillHost] as an overlay SIBLING of the NavHost's
+            // captured pages Box (same geometry as the bottom nav bar), so
+            // sampling the global capture can never self-record it. It
+            // never opted in after v260 defaulted no-backdrop callers to
+            // the faux recipe - hence "transparent, no blur".
+            modifier = if (glassOn) Modifier.liquidGlassCapsule(
+                container,
+                useGlobalCapture = true
+            ) else Modifier
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
