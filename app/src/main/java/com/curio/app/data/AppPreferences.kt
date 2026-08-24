@@ -437,6 +437,10 @@ object AppPreferences {
 
     // v280 — CUSTOM BLUR ENGINE (experiment, default OFF): when ON, the
     // glass widget provider and live wallpaper use Curio's own blur
+    // engine instead of the system / Samsung One UI blur path. Gives
+    // consistent blur quality on every launcher.
+    var customBlurEngineState by mutableStateOf(false)
+        private set
 
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
     // OFF): the three floating nav-style capsules (bottom tab bar, Topic
@@ -730,6 +734,7 @@ object AppPreferences {
         drawerConstellationState = isDrawerConstellationEnabled(context)
         displayNameState = getDisplayName(context)
         profileAvatarPathState = getProfileAvatarPath(context)
+        customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
@@ -1051,6 +1056,16 @@ object AppPreferences {
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
+    private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
+
+    // ── Custom blur engine (v280 experiment) ────────────────────────
+    fun isCustomBlurEngineEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CUSTOM_BLUR_ENGINE, false)
+
+    fun setCustomBlurEngineEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CUSTOM_BLUR_ENGINE, enabled).apply()
+        customBlurEngineState = enabled
+    }
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
