@@ -181,8 +181,10 @@ object AppPreferences {
     fun getDisplayName(context: Context): String =
         prefs(context).getString(KEY_DISPLAY_NAME, null) ?: "Curious Explorer"
 
-    fun setDisplayName(context: Context, name: String) =
+    fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
+        displayNameState = name
+    }
 
     // ── Custom streak tagline (v53) ──────────────────────────────────
     // The Profile hero tagline: a user-set line replaces the automatic
@@ -201,8 +203,10 @@ object AppPreferences {
     fun getProfileAvatarPath(context: Context): String =
         prefs(context).getString(KEY_PROFILE_AVATAR, "").orEmpty()
 
-    fun setProfileAvatarPath(context: Context, path: String) =
+    fun setProfileAvatarPath(context: Context, path: String) {
         prefs(context).edit().putString(KEY_PROFILE_AVATAR, path).apply()
+        profileAvatarPathState = path
+    }
 
     // ── Update-notification dedupe (v53) ─────────────────────────────
     // The version tag of the newest update that has ALREADY been announced
@@ -419,6 +423,24 @@ object AppPreferences {
     // pattern at the top of the navigation drawer is OPT-IN (default OFF);
     // the default drawer shows a small Material-style stat strip instead.
     var drawerConstellationState by mutableStateOf(false)
+        private set
+
+    // ── Reactive display name & avatar (v280) ──────────────────────
+    // Read via these states in Compose so the drawer/profile recompose
+    // when the user saves a new name or photo — the old getDisplayName()
+    // / getProfileAvatarPath() functions read SharedPreferences once and
+    // don't trigger recomposition.
+    var displayNameState by mutableStateOf("Curious Explorer")
+        internal set
+    var profileAvatarPathState by mutableStateOf("")
+        internal set
+
+    // v280 — CUSTOM BLUR ENGINE (experiment, default OFF): when ON, the
+    // glass widget provider and live wallpaper use Curio's own blur
+    // engine (AGSL gaussian on API 33+, CPU StackBlur fallback) instead
+    // of the system / Samsung One UI blur path. Gives consistent blur
+    // quality on every launcher.
+    var customBlurEngineState by mutableStateOf(false)
         private set
 
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
@@ -711,6 +733,9 @@ object AppPreferences {
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
+        displayNameState = getDisplayName(context)
+        profileAvatarPathState = getProfileAvatarPath(context)
+        customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
@@ -1032,6 +1057,16 @@ object AppPreferences {
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
+    private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
+
+    // ── Custom blur engine (v280 experiment) ────────────────────────
+    fun isCustomBlurEngineEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CUSTOM_BLUR_ENGINE, false)
+
+    fun setCustomBlurEngineEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CUSTOM_BLUR_ENGINE, enabled).apply()
+        customBlurEngineState = enabled
+    }
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =

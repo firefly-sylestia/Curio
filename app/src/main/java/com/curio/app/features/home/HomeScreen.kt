@@ -268,7 +268,7 @@ fun HomeScreen(navController: NavController) {
         // pill wears it (falls back to secondary on pages without one).
         CurioNavTint.publishHomeAccent(heroFill)
     }
-    val displayName = remember { AppPreferences.getDisplayName(context) }
+    val displayName = AppPreferences.displayNameState
     // Saved-shelf unsave confirmation — set when the user taps the remove
     // bookmark on a saved quote row; the dialog confirms before removal.
     var pendingUnsave by remember { mutableStateOf<SavedQuote?>(null) }
@@ -1186,7 +1186,7 @@ fun HomeScreen(navController: NavController) {
             // self-capture cycle is impossible by construction. Fully CLEAR
             // glass (alwaysClear) with real refraction, per the request.
             val glassOn = isInScreenGlassActive()
-            val profileAvatarPath = AppPreferences.getProfileAvatarPath(context)
+            val profileAvatarPath = AppPreferences.profileAvatarPathState
             val profileGlassOn = glassOn && profileAvatarPath.isNullOrBlank()
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
@@ -2001,7 +2001,7 @@ private const val HOME_DRAWER_TEAR_SEED = 0xD2A7E
 @Composable
 internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
     val context = LocalContext.current
-    val displayName = AppPreferences.getDisplayName(context)
+    val displayName = AppPreferences.displayNameState
     // v174 — the drawer hero becomes a dreamy pre-dawn sky instead of the
     // rose banner: pale seafoam gradient in light, deep twilight teal in
     // dark. heroFill/drawerInk keep the sky's base + readable ink so the
@@ -2285,7 +2285,7 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                                 .align(Alignment.BottomStart)
                                 .padding(start = 24.dp, end = 24.dp, bottom = 40.dp)
                         ) {
-                            val avatarPath = AppPreferences.getProfileAvatarPath(context)
+                            val avatarPath = AppPreferences.profileAvatarPathState
                             // v118 — the avatar grew 48 → 56dp and the
                             // greeting text stepped up (CURIO labelMedium,
                             // name headlineMedium, tagline bodyMedium) per
