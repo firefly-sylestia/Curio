@@ -1,3 +1,23 @@
+## Request: v266 — session screenshots + snappy bubble + nav glyph crossfade (COMPLETE)
+
+User correction: NO traveling blob on the classic nav — keep capsule
+grow/minimize visuals; only smooth the motion.
+
+1. SESSION SCREENSHOT WATCHER (SessionScreenshotWatcher.kt): ContentObserver
+   on MediaStore.Images; gates = bubble window attached (service
+   show/removeBubble) + READ_MEDIA_IMAGES/READ_EXTERNAL_STORAGE grant +
+   screenshot heuristics (RELATIVE_PATH/DATA or DISPLAY_NAME contains
+   "screenshot") + age < 20s + per-id dedupe. One copy via SessionShots.copyFrom
+   → active session's screenshotPaths, else pending write handoff. Manifest:
+   added both permissions. SettingsSectionScreen bubble toggle now also fires
+   RequestPermission for media read (denial = watcher inert).
+2. BUBBLE EXPAND SNAPPY (ExploreBubbleContent): corner spring 380→700
+   stiffness / 0.9 damping (~180ms settle); AnimatedContent fade 90/100ms,
+   scaleIn spring(0.8,700), scaleOut 0.94@100ms.
+3. NAV MOTION POLISH (CurioBottomNav FloatingNavPill): glyph Crossfade(160ms)
+   replaces the instant icon swap — the only hard-cut in an otherwise
+   lockstep transition. No layout/visual change; classic blob untouched.
+
 ## Request: v265 — widget lab + dark-morph fix + bubble depth (COMPLETE)
 
 1. GLASS WIDGET LAB (GlassWidgetLabScreen.kt, route GLASS_WIDGET_LAB,

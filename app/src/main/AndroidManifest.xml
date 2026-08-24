@@ -3,6 +3,12 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- v266 — session screenshot watcher: attach device screenshots taken
+         while the explore bubble floats to that topic's entry. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <!-- Update checker: queries the public GitHub API for the latest release (About → Check for updates). -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- v25 — in-app updater: lets the user install the downloaded release APK. -->

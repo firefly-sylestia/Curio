@@ -433,6 +433,23 @@ private fun PreferencesSection(highlightKey: String? = null) {
     val overlaySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { /* no-op — ON_RESUME is the source of truth */ }
+    // v266 — media-read grant for the session screenshot watcher (screenshots
+    // taken while the bubble floats attach to the topic's entry). Requested
+    // alongside the bubble toggle; denial just leaves the watcher inert.
+    val screenshotPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* granted or not — the watcher checks at start */ }
+    fun requestScreenshotPermissionIfNeeded() {
+        val perm = if (android.os.Build.VERSION.SDK_INT >= 33)
+            android.Manifest.permission.READ_MEDIA_IMAGES
+        else
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        if (context.checkSelfPermission(perm) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            runCatching { screenshotPermissionLauncher.launch(perm) }
+        }
+    }
     Column(modifier = Modifier.fillMaxWidth()) {
         // v19 — which search engine the "Explore in browser" button opens.
         // A row that opens the engine picker; the subtitle shows the choice.
@@ -494,6 +511,9 @@ private fun PreferencesSection(highlightKey: String? = null) {
                     // suppressing the prompt, open the system page, and let
                     // the ON_RESUME observer decide grant vs decline.
                     AppPreferences.setOverlayAskDeclined(context, false)
+                    // v266 — also line up the media-read grant for the
+                    // session screenshot watcher.
+                    requestScreenshotPermissionIfNeeded()
                     val launched = runCatching {
                         overlaySettingsOpened = true
                         overlaySettingsLauncher.launch(
@@ -507,6 +527,9 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 } else {
                     overlayEnabled = enabled
                     AppPreferences.setOverlayBubbleEnabled(context, enabled)
+                    // v266 — enabling with the overlay already granted: still
+                    // make sure the screenshot watcher's grant is in place.
+                    if (enabled) requestScreenshotPermissionIfNeeded()
                 }
             }
         }

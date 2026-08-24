@@ -1,3 +1,6 @@
+NEW: Session screenshots - while the floating explore bubble is up, any device screenshot you take attaches itself (one copy) to that topic's entry.
+IMPROVE: The explore bubble expands noticeably snappier - the open morph settles in ~150ms instead of drifting open.
+FIX: Nav tab switches animate cleanly now - the tab glyph crossfades instead of hard-swapping mid-shrink (no layout or look change).
 NEW: Glass widget lab - drag REAL refracting liquid-glass widget shapes (clock tile, timer pill, glyph tile) over your actual wallpaper to test future widget designs.
 FIX: The Home and Profile floating pills no longer show a dark muddy shade mid-scroll - the solid-to-glass morph now commits to clear glass fast instead of fading a dark fill across the whole scroll range.
 STYLE: The explore bubble reads as a raised 3D bubble now - painted drop shadow, domed light-to-shade fill, a broader category glow ring on the small pill, and a domed sheen + hairline rim on the expanded panel.

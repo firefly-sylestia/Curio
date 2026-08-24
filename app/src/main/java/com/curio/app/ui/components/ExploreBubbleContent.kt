@@ -273,7 +273,10 @@ fun ExploreBubbleContent(
     // pill visibly grows into the panel around its center.
     val cornerRadius by animateDpAsState(
         targetValue = if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS,
-        animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f),
+        // v266 — SNAPPY: the old 380-stiffness spring read slow/laggy on the
+        // open morph. Higher stiffness + near-critical damping settles in
+        // ~180ms with zero visible bounce.
+        animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
         label = "bubbleCorner"
     )
 
@@ -357,19 +360,16 @@ fun ExploreBubbleContent(
         AnimatedContent(
             targetState = minimized,
             transitionSpec = {
-                // v263 — one shared spring drives BOTH directions (no mixed
-                // tween/spring timing): the incoming state pops in with a
-                // slight overshoot while the outgoing settles back. The
-                // window still resizes in ONE deterministic step, so there is
-                // no geometry fight — this spring only shapes the content,
-                // matching the corner-radius spring's feel.
-                (fadeIn(tween(120)) +
+                // v266 — faster handoff to match the stiffer corner spring:
+                // the incoming state lands in ~150ms (was ~350ms of float).
+                // Still one spring family, still a one-step window resize.
+                (fadeIn(tween(90)) +
                     scaleIn(
-                        initialScale = 0.9f,
-                        animationSpec = spring(dampingRatio = 0.75f, stiffness = 380f)
+                        initialScale = 0.92f,
+                        animationSpec = spring(dampingRatio = 0.8f, stiffness = 700f)
                     )) togetherWith
-                    (fadeOut(tween(130)) +
-                        scaleOut(targetScale = 0.92f, animationSpec = tween(130)))
+                    (fadeOut(tween(100)) +
+                        scaleOut(targetScale = 0.94f, animationSpec = tween(100)))
             },
             label = "bubbleExpand"
         ) { m ->
