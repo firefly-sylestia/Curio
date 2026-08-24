@@ -4,6 +4,8 @@ IMPROVE: Turning Material theme on now auto-enables "Material hero tears" so the
 REMOVE: The "Glass parallax tilt" experiment is gone - the gravity sensor no longer runs for it (performance/heat win; the feature never worked well).
 REVERT: The session screenshot watcher is withdrawn (permission + plumbing removed).
 NEW: Glass widget - add a frosted liquid-glass tile to your home screen showing your live streak; tap it to open Curio (long-press your launcher > Widgets > Curio).
+NEW: Glass widget - REAL wallpaper frost on Samsung One UI 7+: the launcher now blurs your actual wallpaper behind the widget (other launchers keep the frosted tile).
+ADD: Glass widget lab - Auto-detect button tries every system wallpaper-reading strategy, and your picked image now persists between visits.
 FIX: The Glass widget lab now renders REAL refraction unconditionally on Android 12+ - the shapes use the raw nav-bar glass recipe directly instead of a toggle-gated path that could fall back to a flat pane.
 FIX: Real blur on older devices now detects blank readbacks and retries before falling back - no more pills that look transparent with no blur.
 FIX: The explore bubble no longer shifts after expanding and no longer flickers mid-morph (window stays anchored; animations can't overshoot anymore).

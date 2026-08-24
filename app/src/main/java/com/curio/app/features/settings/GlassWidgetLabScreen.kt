@@ -84,15 +84,80 @@ fun GlassWidgetLabScreen(navController: NavController) {
     // button using the photo picker — no permission needed, and the picked
     // image loads instantly over the gradient fallback.
     var wallpaper by remember { mutableStateOf<ImageBitmap?>(null) }
+    // v271 — a one-line status after auto-detect attempts (success/failure).
+    var detectStatus by remember { mutableStateOf<String?>(null) }
+
+    fun decodeUri(uri: android.net.Uri): ImageBitmap? = runCatching {
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
+        }
+    }.getOrNull()
+
+    // v271 — WallpaperExport-style AUTO-DETECT: try every strategy the OS
+    // allows, most-permissive first. On Android 13+ getDrawable is
+    // permission-gated (MANAGE_EXTERNAL_STORAGE per the WallpaperExport
+    // project), so failure is EXPECTED there — the manual picker stays the
+    // reliable path and the status line says so instead of failing silently.
+    fun autoDetect() {
+        wallpaper = null
+        val found = runCatching {
+            withContext(Dispatchers.IO) {
+                val wm = WallpaperManager.getInstance(context)
+                // 1. Direct file descriptor (works on many OEM builds).
+                runCatching {
+                    wm.getWallpaperFile(WallpaperManager.FLAG_SYSTEM)?.use { pfd ->
+                        android.graphics.BitmapFactory.decodeFileDescriptor(pfd.fileDescriptor)
+                            ?.asImageBitmap()
+                    }
+                }.getOrNull()
+                    // 2/3. Classic drawables.
+                    ?: runCatching { wm.drawable as? BitmapDrawable }.getOrNull()?.bitmap?.asImageBitmap()
+                    ?: runCatching { wm.peekDrawable() as? BitmapDrawable }.getOrNull()?.bitmap?.asImageBitmap()
+            }
+        }.getOrNull()
+        if (found != null) {
+            wallpaper = found
+            AppPreferences.setGlassLabWallpaperUri(context, "auto")
+            detectStatus = "Device wallpaper detected."
+        } else {
+            detectStatus = "Auto-detect blocked by Android (13+ needs All-files access) — pick an image below."
+        }
+    }
+
+    // Entry: reload the persisted pick (or re-run auto-detect if it was the
+    // last chosen source).
+    LaunchedEffect(Unit) {
+        val saved = AppPreferences.getGlassLabWallpaperUri(context)
+        when {
+            saved.startsWith("content:") -> {
+                runCatching {
+                    context.contentResolver.takePersistableUriPermission(
+                        android.net.Uri.parse(saved),
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
+                decodeUri(android.net.Uri.parse(saved))?.let {
+                    wallpaper = it
+                    return@LaunchedEffect
+                }
+                autoDetect()
+            }
+            saved == "auto" -> autoDetect()
+        }
+    }
     val pickWallpaper = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            wallpaper = runCatching {
-                context.contentResolver.openInputStream(uri)?.use { input ->
-                    android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
-                }
-            }.getOrNull() ?: wallpaper
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            AppPreferences.setGlassLabWallpaperUri(context, uri.toString())
+            decodeUri(uri)?.let { wallpaper = it }
+            detectStatus = "Wallpaper set from picked image."
         }
     }
 
@@ -246,27 +311,56 @@ fun GlassWidgetLabScreen(navController: NavController) {
             }
         }
 
-        // ── Wallpaper source pill — top-right, above everything ──────
-        Surface(
-            onClick = {
-                pickWallpaper.launch(
-                    androidx.activity.result.PickVisualMediaRequest(
-                        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
-                    )
-                )
-            },
-            shape = RoundedCornerShape(50),
-            color = Color.Black.copy(alpha = 0.45f),
+        // ── Wallpaper source pills — top-end row ─────────────────────
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .statusBarsPadding()
                 .padding(end = 16.dp, top = 8.dp)
                 .align(Alignment.TopEnd)
         ) {
+            Surface(
+                onClick = { detectStatus = null; autoDetect() },
+                shape = RoundedCornerShape(50),
+                color = Color.Black.copy(alpha = 0.45f)
+            ) {
+                Text(
+                    "Auto-detect",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+            }
+            Surface(
+                onClick = {
+                    pickWallpaper.launch(
+                        androidx.activity.result.PickVisualMediaRequest(
+                            androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
+                },
+                shape = RoundedCornerShape(50),
+                color = Color.Black.copy(alpha = 0.45f)
+            ) {
+                Text(
+                    "Set wallpaper image",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+            }
+        }
+        detectStatus?.let { msg ->
             Text(
-                "Set wallpaper image",
-                color = Color.White,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                msg,
+                color = Color.White.copy(alpha = 0.9f),
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(top = 56.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(50))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }
 

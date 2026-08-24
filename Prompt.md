@@ -1,3 +1,20 @@
+## Request: v271 — lab wallpaper auto-detect + One UI real widget blur (COMPLETE)
+
+1. LAB WALLPAPER: persisted via KEY_GLASS_LAB_WALLPAPER (uri string or
+   "auto"); entry reloads it (takePersistableUriPermission for picker uris).
+   Auto-detect button tries WallpaperExport-style ladder:
+   getWallpaperFile(FLAG_SYSTEM) → getDrawable → peekDrawable; on 13+ these
+   are MANAGE_EXTERNAL_STORAGE-gated (per cvzi/WallpaperExport) so failure
+   shows an honest status line pointing at the manual picker. Top-end Row:
+   Auto-detect + Set wallpaper image pills + status chip.
+2. REAL WIDGET GLASS (researched): RemoteViews can't sample wallpaper, BUT
+   Samsung One UI 7+ launchers natively blur wallpaper behind third-party
+   widgets when (a) root view id = @android:id/background with alpha 1..254
+   background, (b) provider declares app:widgetStyle="colorful" + a real
+   app:widgetSize (attrs.xml flags added). Implemented: layout rewritten with
+   #66FFFFFF root tint + content; provider xml updated. Non-Samsung keeps
+   translucent tile. Sources: thatjoshguy67/blur-widget-demo wiki.
+
 ## Request: v270 — parallax removed + material hero/pill family (COMPLETE)
 
 1. PARALLAX REMOVED (approved): GlassParallax.kt deleted; toggle row,

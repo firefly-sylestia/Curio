@@ -1025,6 +1025,7 @@ object AppPreferences {
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
+    private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -1214,6 +1215,14 @@ object AppPreferences {
     }
 
     // ── Classic active indicator (experiment, default OFF) ───────────
+    // ── Glass widget lab wallpaper (v271): persisted picked/auto image ──
+    fun getGlassLabWallpaperUri(context: Context): String =
+        prefs(context).getString(KEY_GLASS_LAB_WALLPAPER, "") ?: ""
+
+    fun setGlassLabWallpaperUri(context: Context, uri: String) {
+        prefs(context).edit().putString(KEY_GLASS_LAB_WALLPAPER, uri).apply()
+    }
+
     // Legacy glass blur (experiment, default OFF): an app-side blur engine
     // for pre-Android-12 devices (see the state field above).
     fun isLegacyGlassBlurEnabled(context: Context): Boolean =

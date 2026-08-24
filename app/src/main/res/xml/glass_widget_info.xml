@@ -3,6 +3,7 @@
      wallpaper; RemoteViews can't refract per-pixel, so the glass look is
      baked into the drawable layers). -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:minWidth="180dp"
     android:minHeight="56dp"
     android:targetCellWidth="3"
@@ -11,4 +12,6 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="10800000"
     android:widgetCategory="home_screen"
-    android:description="@string/glass_widget_desc" />
+    android:description="@string/glass_widget_desc"
+    app:widgetStyle="colorful"
+    app:widgetSize="small|wideSmall|medium|large" />
