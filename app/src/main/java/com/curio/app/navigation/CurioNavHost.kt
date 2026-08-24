@@ -534,8 +534,8 @@ fun CurioNavHost(
                     .then(
                         if (legacyBlurActive) {
                             Modifier
-                                .then(curioLegacyCapture(legacyCaptureLayer))
-                                .then(curioLegacyCaptureGeometry())
+                                .curioLegacyCapture(legacyCaptureLayer)
+                                .curioLegacyCaptureGeometry()
                         } else Modifier
                     )
                     .then(
