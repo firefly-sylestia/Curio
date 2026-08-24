@@ -1,3 +1,5 @@
+FIX: Custom widget color gets a real picker - a saturation/value square plus hue bar, with opacity as its own separate slider.
+FIX: The widget preview is now an accurate miniature - same gradient math, icon tile and text lines as the real widget.
 FIX: Glass widget style options are selectable again and the whole editor scrolls properly.
 ADD: Widget content is richer - a mode icon tile plus two-line text (title + detail) instead of one plain string.
 FIX: Glass widget styling is back - a live preview shows exactly how your pane will look as you pick Blur, a preset or a custom color.

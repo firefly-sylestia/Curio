@@ -76,15 +76,10 @@ object GlassWidgetPane {
         style: String
     ): Pair<Int, Int> {
         if (style == STYLE_CUSTOM) {
-            val base = readCustomColor(context, id) or 0xFF000000.toInt()
-            val alpha = (readCustomOpacity(context, id) * 255).toInt().coerceIn(8, 235)
-            val top = (alpha shl 24) or (base and 0x00FFFFFF.toInt())
-            // Bottom: same hue pulled ~30% toward black for depth.
-            val r = (Color.red(base) * 0.70f).toInt()
-            val g = (Color.green(base) * 0.70f).toInt()
-            val b = (Color.blue(base) * 0.70f).toInt()
-            val bottom = ((alpha * 0.85f).toInt() shl 24) or (r shl 16) or (g shl 8) or b
-            return Pair(top, bottom)
+            return gradientColors(
+                readCustomColor(context, id),
+                readCustomOpacity(context, id)
+            )
         }
         val preset = runCatching { Preset.valueOf(style) }.getOrDefault(Preset.LIGHT)
         return Pair(preset.top, preset.bottom)
@@ -114,6 +109,23 @@ object GlassWidgetPane {
         val baseline = sizePx / 2f - (fm.ascent + fm.descent) / 2f
         canvas.drawText(glyph, sizePx / 2f, baseline, paint)
         return bmp
+    }
+
+    /**
+     * v277 - SINGLE source of truth for custom-pane gradient stops: top =
+     * base at full opacity alpha; bottom = same hue darkened 30% with
+     * slightly lower alpha. The config preview calls this too, so what you
+     * see while picking is identical to the rendered widget.
+     */
+    fun gradientColors(baseRgb: Int, opacity: Float): Pair<Int, Int> {
+        val base = baseRgb or 0xFF000000.toInt()
+        val alpha = (opacity * 255).toInt().coerceIn(8, 235)
+        val top = (alpha shl 24) or (base and 0x00FFFFFF.toInt())
+        val r = (Color.red(base) * 0.70f).toInt()
+        val g = (Color.green(base) * 0.70f).toInt()
+        val b = (Color.blue(base) * 0.70f).toInt()
+        val bottom = ((alpha * 0.85f).toInt() shl 24) or (r shl 16) or (g shl 8) or b
+        return Pair(top, bottom)
     }
 
     /**

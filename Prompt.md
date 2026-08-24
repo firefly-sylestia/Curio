@@ -1,3 +1,18 @@
+## Request: v278 - real HSV picker + accurate preview (COMPLETE)
+
+- HSV PICKER: SV square (white->pureHue horizontal + transparent->black
+  vertical overlay) with dual-ring pointer; hue bar below; both custom-
+  drawn Canvas with tap+drag in SEPARATE pointerInput nodes (sequential
+  detect* calls deadlock - tap suspends forever). Opacity = independent
+  Material Slider, never touches color. State: hue/sat/val floats;
+  customRgb = HSVToColor persisted to customColor_$id.
+- SHARED MATH: GlassWidgetPane.gradientColors(baseRgb, opacity) is now the
+  single source for custom stops (top=alpha base, bottom=30% darker,
+  alpha*0.85); resolveColors CUSTOM branch delegates; config preview calls
+  the SAME function so preview == rendered widget.
+- ACCURATE PREVIEW: miniature widget (wallpaper bands, 20dp-corner pane or
+  bare tint in Default, icon circle w/ symbols-font glyph via TextMeasurer
+  drawText, mode label bold + sample info line).
 ## Request: v277 - chip selection fix + widget icons + Default card (COMPLETE)
 
 - ROOT BUG (unselectable chips): v276 rewrite's StyleChip had NO clickable

@@ -8,20 +8,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,25 +40,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipimport androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color as ComposeColor
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.ui.theme.MaterialSymbolsFontFamily
 
 /**
- * v272 — Glass widget CONFIGURATION. Launched by the launcher when the
- * widget is placed (android:configure) and on long-press → Edit
- * (widgetFeatures="reconfigurable"). Each placed widget gets its own
- * persisted mode + pane style.
+ * v272 — Glass widget CONFIGURATION (placement + long-press → Edit).
  *
- * v276 — Styling rebuilt around ONE live preview pane that always shows the
- * exact resulting look for the current selection (Blur / preset / custom
- * hue+opacity), so choosing a style is never guesswork.
+ * v277 — Custom pane gets a REAL HSV picker: a saturation/value square for
+ * the current hue plus a hue bar — opacity is its own separate slider and
+ * never bleeds into the color. The live preview renders an accurate
+ * miniature of the placed widget (wallpaper bands + pane + icon tile +
+ * two-line text) using the exact same [GlassWidgetPane.gradientColors] math
+ * the provider draws with.
  */
 class GlassWidgetConfigActivity : ComponentActivity() {
 
@@ -74,36 +82,33 @@ class GlassWidgetConfigActivity : ComponentActivity() {
 
         val initialMode = GlassWidgetProvider.readMode(this, appWidgetId)
         val initialStyle = GlassWidgetPane.readStyle(this, appWidgetId)
-        val initialColor = GlassWidgetPane.readCustomColor(this, appWidgetId)
+        val initialHsv = FloatArray(3)
+        Color.colorToHSV(
+            GlassWidgetPane.readCustomColor(this, appWidgetId) or 0xFF000000.toInt(),
+            initialHsv
+        )
         val initialOpacity = GlassWidgetPane.readCustomOpacity(this, appWidgetId)
 
         setContent {
             CurioTheme {
                 var mode by remember { mutableStateOf(initialMode) }
                 var style by remember { mutableStateOf(initialStyle) }
-                var customHue by remember { mutableFloatStateOf(colorHue(initialColor)) }
-                var customOpacity by remember { mutableFloatStateOf(initialOpacity) }
+                var hue by remember { mutableFloatStateOf(initialHsv[0]) }
+                var sat by remember { mutableFloatStateOf(initialHsv[1]) }
+                var `val` by remember { mutableFloatStateOf(initialHsv[2]) }
+                var opacity by remember { mutableFloatStateOf(initialOpacity) }
+                val textMeasurer = rememberTextMeasurer()
 
-                // The exact colors the current selection will render with.
-                val previewTop: ComposeColor
-                val previewBottom: ComposeColor
-                if (style == GlassWidgetPane.STYLE_CUSTOM) {
-                    val base = argbFromHue(customHue)
-                    val alpha = (customOpacity * 255).toInt().coerceIn(8, 235)
-                    val top = (alpha shl 24) or (base and 0x00FFFFFF)
-                    val r = (Color.red(base) * 0.70f).toInt()
-                    val g = (Color.green(base) * 0.70f).toInt()
-                    val b = (Color.blue(base) * 0.70f).toInt()
-                    val bottom = ((alpha * 0.85f).toInt() shl 24) or (r shl 16) or (g shl 8) or b
-                    previewTop = ComposeColor(top)
-                    previewBottom = ComposeColor(bottom)
-                } else {
-                    val preset = GlassWidgetPane.Preset.entries.firstOrNull {
-                        it.name == style
-                    } ?: GlassWidgetPane.Preset.LIGHT
-                    previewTop = ComposeColor(preset.top)
-                    previewBottom = ComposeColor(preset.bottom)
-                }
+                val customRgb = Color.HSVToColor(floatArrayOf(hue, sat, `val`))
+                // EXACT stops the widget will render — shared math.
+                val customStops = GlassWidgetPane.gradientColors(customRgb, opacity)
+                val preset = GlassWidgetPane.Preset.entries.firstOrNull { it.name == style }
+                val previewTop =
+                    if (style == GlassWidgetPane.STYLE_CUSTOM) ComposeColor(customStops.first)
+                    else ComposeColor(preset?.top ?: 0)
+                val previewBottom =
+                    if (style == GlassWidgetPane.STYLE_CUSTOM) ComposeColor(customStops.second)
+                    else ComposeColor(preset?.bottom ?: 0)
 
                 Scaffold { padding ->
                     Column(
@@ -155,51 +160,84 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             }
                         }
 
-                        // ── LIVE PREVIEW ────────────────────────────────
-                        // Exactly what the widget pane will render — over a
-                        // colorful stand-in wallpaper. Blur shows the pure
-                        // launcher-blur state (no pane).
+                        // ── ACCURATE WIDGET PREVIEW ─────────────────────
+                        // A miniature of the real thing: wallpaper bands, the
+                        // pane (or bare blur tint in Default), the icon tile
+                        // and the same two text lines the widget draws.
                         Canvas(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(84.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                        ) {
-                            // Stand-in wallpaper bands.
-                            drawRect(ComposeColor(0xFF7E57C2))
-                            drawRect(ComposeColor(0xEF9A9A), topLeft = Offset(size.width * 0.33f, 0f), size = size.copy(width = size.width * 0.34f))
-                            drawRect(ComposeColor(0x80DEEA), topLeft = Offset(size.width * 0.67f, 0f), size = size.copy(width = size.width * 0.33f))
-                            if (style != GlassWidgetPane.STYLE_DEFAULT) {
-                                drawRoundRect(
-                                    brush = Brush.verticalGradient(listOf(previewTop, previewBottom)),
-                                    cornerRadius = CornerRadius(20.dp.toPx())
+                                .height(76.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    shape = RoundedCornerShape(22.dp)
+                                ),
+                            onDraw = {
+                                val r = 20.dp.toPx()
+                                // Wallpaper stand-in bands.
+                                drawRect(ComposeColor(0xFF7E57C2))
+                                drawRect(
+                                    ComposeColor(0xFFEF9A9A),
+                                    topLeft = Offset(size.width * 0.34f, 0f),
+                                    size = this.size.copy(width = size.width * 0.33f)
                                 )
-                            } else {
-                                // Blur: soft white wash only (the tint).
+                                drawRect(
+                                    ComposeColor(0xFF80DEEA),
+                                    topLeft = Offset(size.width * 0.67f, 0f),
+                                    size = this.size.copy(width = size.width * 0.33f)
+                                )
+                                // Pane (Default = root tint only).
                                 drawRoundRect(
-                                    color = ComposeColor(0x66FFFFFF),
-                                    cornerRadius = CornerRadius(20.dp.toPx())
+                                    brush = if (style == GlassWidgetPane.STYLE_DEFAULT)
+                                        Brush.solidColor(ComposeColor(0x66FFFFFF))
+                                    else Brush.verticalGradient(
+                                        listOf(previewTop, previewBottom)
+                                    ),
+                                    cornerRadius = CornerRadius(r)
+                                )
+                                // Icon tile.
+                                val iconR = 18.dp.toPx()
+                                val iconC = Offset(14.dp.toPx() + iconR, size.height / 2f)
+                                drawCircle(ComposeColor(0x40FFFFFF), radius = iconR, center = iconC)
+                                drawText(
+                                    textMeasurer,
+                                    mode.glyph,
+                                    style = TextStyle(
+                                        fontFamily = MaterialSymbolsFontFamily,
+                                        fontSize = 22.sp,
+                                        color = ComposeColor.White
+                                    ),
+                                    topLeft = Offset(
+                                        iconC.x - 11.sp.toPx(),
+                                        iconC.y - 11.sp.toPx()
+                                    ),
+                                    maxLines = 1
+                                )
+                                // Title line.
+                                drawText(
+                                    textMeasurer,
+                                    mode.label,
+                                    style = TextStyle(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = ComposeColor.White
+                                    ),
+                                    topLeft = Offset(iconC.x + iconR + 10.dp.toPx(), size.height / 2f - 17.sp.toPx()),
+                                    maxLines = 1
+                                )
+                                // Info line.
+                                drawText(
+                                    textMeasurer,
+                                    sampleInfo(mode),
+                                    style = TextStyle(fontSize = 12.sp, color = ComposeColor(0xE6FFFFFF)),
+                                    topLeft = Offset(iconC.x + iconR + 10.dp.toPx(), size.height / 2f + 1.sp.toPx()),
+                                    maxLines = 1
                                 )
                             }
-                        }
-                        Text(
-                            when (style) {
-                                GlassWidgetPane.STYLE_DEFAULT -> "Preview · Samsung wallpaper blur, no pane"
-                                GlassWidgetPane.STYLE_CUSTOM -> "Preview · custom color"
-                                else -> "Preview · " + (
-                                    GlassWidgetPane.Preset.entries.firstOrNull {
-                                        it.name == style
-                                    }?.label ?: "pane"
-                                    )
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.fillMaxWidth()
                         )
 
-                        // v276 - DEFAULT as a proper card: pure One UI
-                        // wallpaper blur, customization OFF. Chips below opt
-                        // into a custom pane.
+                        // ── Default card ────────────────────────────────
                         val selectedDefault = style == GlassWidgetPane.STYLE_DEFAULT
                         Card(
                             onClick = { style = GlassWidgetPane.STYLE_DEFAULT },
@@ -216,9 +254,9 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             ) {
                                 RadioButton(selected = selectedDefault, onClick = { style = GlassWidgetPane.STYLE_DEFAULT })
                                 Column {
-                                    Text("Default \u00b7 Samsung blur", fontWeight = FontWeight.Bold)
+                                    Text("Default · Samsung blur", fontWeight = FontWeight.Bold)
                                     Text(
-                                        "Just the launcher's frosted blur - no pane customization",
+                                        "Just the launcher's frosted blur — no pane customization",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -226,26 +264,25 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             }
                         }
 
-                        // ── Pane style chips ────────────────────────────
+                        // ── Preset chips ────────────────────────────────
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            GlassWidgetPane.Preset.entries.forEach { preset ->
+                            GlassWidgetPane.Preset.entries.forEach { presetChip ->
                                 StyleChip(
-                                    label = preset.label,
-                                    selected = style == preset.name,
-                                    onClick = { style = preset.name }
+                                    label = presetChip.label,
+                                    selected = style == presetChip.name,
+                                    onClick = { style = presetChip.name }
                                 ) {
                                     drawRoundRect(
                                         brush = Brush.verticalGradient(
                                             listOf(
-                                                ComposeColor(preset.top),
-                                                ComposeColor(preset.bottom)
+                                                ComposeColor(presetChip.top),
+                                                ComposeColor(presetChip.bottom)
                                             )
                                         ),
                                         cornerRadius = CornerRadius(size.minDimension / 4f)
                                     )
                                 }
                             }
-                            // Custom chip: rainbow ring swatch.
                             StyleChip(
                                 label = "Custom",
                                 selected = style == GlassWidgetPane.STYLE_CUSTOM,
@@ -264,22 +301,82 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             }
                         }
 
-                        // ── Custom controls ─────────────────────────────
+                        // ── HSV picker (custom only) ────────────────────
                         if (style == GlassWidgetPane.STYLE_CUSTOM) {
-                            Column(modifier = Modifier.padding(horizontal = 4.dp)) {
-                                Text("Color", fontWeight = FontWeight.Bold)
-                                Slider(
-                                    value = customHue,
-                                    onValueChange = { customHue = it },
-                                    valueRange = 0f..360f
-                                )
-                                Text("Opacity · ${(customOpacity * 100).toInt()}%")
-                                Slider(
-                                    value = customOpacity,
-                                    onValueChange = { customOpacity = it },
-                                    valueRange = 0.05f..0.9f
-                                )
-                            }
+                            val padShape = RoundedCornerShape(14.dp)
+
+                            // Saturation/value square for the current hue.
+                            Canvas(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(150.dp)
+                                    .clip(padShape)
+                                    .pointerInput(Unit) {
+                                        detectTapGestures { pos ->
+                                            sat = (pos.x / size.width).coerceIn(0f, 1f)
+                                            `val` = 1f - (pos.y / size.height).coerceIn(0f, 1f)
+                                        }
+                                    }
+                                    .pointerInput(Unit) {
+                                        detectDragGestures { change, _ ->
+                                            change.consume()
+                                            sat = (change.position.x / size.width).coerceIn(0f, 1f)
+                                            `val` = 1f - (change.position.y / size.height).coerceIn(0f, 1f)
+                                        }
+                                    },
+                                onDraw = {
+                                    val pureHue = ComposeColor(Color.HSVToColor(floatArrayOf(hue, 1f, 1f)))
+                                    // White → pure hue, then transparent → black.
+                                    drawRect(Brush.horizontalGradient(listOf(ComposeColor.White, pureHue)))
+                                    drawRect(Brush.verticalGradient(listOf(ComposeColor.Transparent, ComposeColor.Black)))
+                                    // Pointer.
+                                    val p = Offset(sat * size.width, (1f - `val`) * size.height)
+                                    drawCircle(ComposeColor.White, radius = 9.dp.toPx(), center = p, style = Stroke(2.5.dp.toPx()))
+                                    drawCircle(ComposeColor.Black, radius = 11.dp.toPx(), center = p, style = Stroke(1.5.dp.toPx()))
+                                }
+                            )
+
+                            // Hue bar.
+                            Canvas(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(26.dp)
+                                    .clip(padShape)
+                                    .pointerInput(Unit) {
+                                        detectTapGestures { pos ->
+                                            hue = (pos.x / size.width).coerceIn(0f, 1f) * 360f
+                                        }
+                                    }
+                                    .pointerInput(Unit) {
+                                        detectDragGestures { change, _ ->
+                                            change.consume()
+                                            hue = (change.position.x / size.width).coerceIn(0f, 1f) * 360f
+                                        }
+                                    },
+                                onDraw = {
+                                    drawRect(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                ComposeColor.Red, ComposeColor.Yellow, ComposeColor.Green,
+                                                ComposeColor.Cyan, ComposeColor.Blue, ComposeColor.Magenta,
+                                                ComposeColor.Red
+                                            )
+                                        )
+                                    )
+                                    val x = (hue / 360f) * size.width
+                                    drawCircle(ComposeColor.White, radius = 10.dp.toPx(), center = Offset(x, size.height / 2f), style = Stroke(2.5.dp.toPx()))
+                                }
+                            )
+
+                            Spacer(Modifier.height(2.dp))
+
+                            // OPACITY — fully independent of the color above.
+                            Text("Opacity · ${(opacity * 100).toInt()}%")
+                            Slider(
+                                value = opacity,
+                                onValueChange = { opacity = it },
+                                valueRange = 0.05f..0.9f
+                            )
                         }
 
                         Row(
@@ -291,8 +388,8 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                                 val ctx = this@GlassWidgetConfigActivity
                                 GlassWidgetProvider.writeMode(ctx, appWidgetId, mode)
                                 GlassWidgetPane.writeStyle(ctx, appWidgetId, style)
-                                GlassWidgetPane.writeCustomColor(ctx, appWidgetId, argbFromHue(customHue))
-                                GlassWidgetPane.writeCustomOpacity(ctx, appWidgetId, customOpacity)
+                                GlassWidgetPane.writeCustomColor(ctx, appWidgetId, customRgb)
+                                GlassWidgetPane.writeCustomOpacity(ctx, appWidgetId, opacity)
                                 val manager = AppWidgetManager.getInstance(ctx)
                                 GlassWidgetProvider.updateAppWidget(ctx, manager, appWidgetId)
                                 setResult(
@@ -308,7 +405,14 @@ class GlassWidgetConfigActivity : ComponentActivity() {
         }
     }
 
-    /** Small selectable swatch chip with a bold accent ring when picked. */
+    private fun sampleInfo(mode: GlassWidgetMode): String = when (mode) {
+        GlassWidgetMode.STREAK -> "5-day explore streak"
+        GlassWidgetMode.QUESTS -> "Level 4 · 940 quest XP earned"
+        GlassWidgetMode.CABINET -> "3 saved discoveries"
+        GlassWidgetMode.SESSIONS -> "session live right now"
+    }
+
+    /** Selectable swatch chip with a bold accent ring when picked. */
     @androidx.compose.runtime.Composable
     private fun StyleChip(
         label: String,
@@ -342,16 +446,5 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                 else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-
-    private fun colorHue(argb: Int): Float {
-        val hsv = FloatArray(3)
-        Color.colorToHSV(argb or 0xFF000000.toInt(), hsv)
-        return hsv[0]
-    }
-
-    private fun argbFromHue(hue: Float): Int {
-        val hsv = floatArrayOf(hue, 0.55f, 1f)
-        return Color.HSVToColor(hsv)
     }
 }
