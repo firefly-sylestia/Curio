@@ -314,6 +314,7 @@ fun GlassWidgetLabScreen(navController: NavController) {
             }
 
             val clockState = remember { LabShapeState(IntOffset(40, 340)).apply { id = "clock" } }
+            val analogState = remember { LabShapeState(IntOffset(210, 210)).apply { id = "analog" } }
             val timerState = remember { LabShapeState(IntOffset(40, 470)).apply { id = "timer" } }
             val streakState = remember { LabShapeState(IntOffset(200, 480)).apply { id = "streak" } }
             val batteryState = remember { LabShapeState(IntOffset(210, 340)).apply { id = "battery" } }
@@ -339,6 +340,33 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     ) {
                         Text(clock, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = clockState.textColor)
                         Text(dateLine.substringBefore(" ·"), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = clockState.textColor.copy(alpha = 0.85f))
+                    }
+                }
+                // ── Analog clock — real ticking hands ──
+                LiquidLabShape(analogState, selectedId, wallLayer) {
+                    val cal = java.util.Calendar.getInstance().apply { timeInMillis = now }
+                    val hourAngle = ((cal.get(java.util.Calendar.HOUR_OF_DAY) % 12) + cal.get(java.util.Calendar.MINUTE) / 60f) * 30f
+                    val minuteAngle = (cal.get(java.util.Calendar.MINUTE) + cal.get(java.util.Calendar.SECOND) / 60f) * 6f
+                    Canvas(modifier = Modifier.fillMaxSize().padding(9.dp)) {
+                        val r = size.minDimension / 2f
+                        drawCircle(Color.White.copy(alpha = 0.25f), radius = r, style = Stroke(width = 3.dp.toPx()))
+                        // Hands rotate around center; drawn as rotated capsules.
+                        fun hand(angleDeg: Float, lenFrac: Float, widthPx: Float, color: Color) {
+                            val rad = Math.toRadians(angleDeg - 90.0)
+                            drawLine(
+                                color = color,
+                                start = center,
+                                end = Offset(
+                                    center.x + (lenFrac * r * kotlin.math.cos(rad)).toFloat(),
+                                    center.y + (lenFrac * r * kotlin.math.sin(rad)).toFloat()
+                                ),
+                                strokeWidth = widthPx,
+                                cap = androidx.compose.ui.graphics.StrokeCap.Round
+                            )
+                        }
+                        hand(hourAngle, 0.5f, 4.dp.toPx(), Color.White)
+                        hand(minuteAngle, 0.78f, 2.5.dp.toPx(), Color.White.copy(alpha = 0.9f))
+                        drawCircle(Color(0xFFFF8A3C), radius = 3.dp.toPx())
                     }
                 }
                 // ── Session pill — LIVE elapsed / Explored ──
@@ -521,7 +549,7 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     val h = context.resources.displayMetrics.heightPixels.toFloat()
                     com.curio.app.infrastructure.GlassLabComposition.save(
                         context,
-                        listOf(clockState, timerState, streakState, batteryState, dateState, glyphState)
+                        listOf(clockState, analogState, timerState, streakState, batteryState, dateState, glyphState)
                             .map { s ->
                                 com.curio.app.infrastructure.GlassLabComposition.Shape(
                                     id = s.id, xFrac = s.pos.x / w, yFrac = s.pos.y / h,

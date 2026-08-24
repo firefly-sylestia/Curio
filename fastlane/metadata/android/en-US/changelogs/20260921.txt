@@ -1,3 +1,5 @@
+ADD: Lock screen mode - only the clock shows while locked, everything else pops back with a soft fade when you unlock.
+ADD: New analog clock widget with live ticking hands in the glass widget lab.
 ADD: Glass Widget Lab overhaul - hide/show all floating widgets, tap any widget to select it and edit its size, liquid-blur strength and text color, plus real time, live explore-session timing, a streak ring with fire icon, battery and date widgets.
 ADD: Save your lab composition as a live wallpaper - your wallpaper with your frosted widget layout behind every page.
 FIX: Custom widget color gets a real picker - a saturation/value square plus hue bar, with opacity as its own separate slider.

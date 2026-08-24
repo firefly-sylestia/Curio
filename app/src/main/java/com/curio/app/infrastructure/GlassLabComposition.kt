@@ -64,6 +64,7 @@ object GlassLabComposition {
         "streak" -> "5"
         "battery" -> "80%"
         "date" -> "Wed · Aug 24"
+        // Analog draws real hands — no text.
         else -> ""
     }
 }

@@ -1,3 +1,13 @@
+## Request: v280 - lock-screen clocks + analog widget (COMPLETE)
+
+- CI FIX: GlassWidgetConfigActivity had two imports glued on one line
+  ("clipimport"); split + Brush.solidColor -> verticalGradient (unavailable).
+- ANALOG WIDGET: lab shape id "analog" - Canvas face, live hour/min hands
+  from the 1s ticker, orange pin; saved in composition; service draws real
+  hands each frame.
+- LOCK SCREEN MODE (service): KeyguardManager.isKeyguardLocked filters
+  composition to clock+analog only; on unlock nonClockAlpha animates 0->1
+  over 450ms via Handler frame loop ("pops back beautifully").
 ## Request: v279 — Glass Widget Lab overhaul + live wallpaper (COMPLETE)
 
 - SHAPE SYSTEM: LabShapeState (id/pos/scale/blurDp/textColor) per shape;

@@ -40,7 +40,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipimport androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color as ComposeColor
@@ -190,7 +191,7 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                                 // Pane (Default = root tint only).
                                 drawRoundRect(
                                     brush = if (style == GlassWidgetPane.STYLE_DEFAULT)
-                                        Brush.solidColor(ComposeColor(0x66FFFFFF))
+                                        Brush.verticalGradient(listOf(ComposeColor(0x66FFFFFF), ComposeColor(0x66FFFFFF)))
                                     else Brush.verticalGradient(
                                         listOf(previewTop, previewBottom)
                                     ),
