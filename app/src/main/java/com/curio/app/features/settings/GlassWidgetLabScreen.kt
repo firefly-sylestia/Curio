@@ -90,6 +90,22 @@ fun GlassWidgetLabScreen(navController: NavController) {
     var detectStatus by remember { mutableStateOf<String?>(null) }
     // v272 — auto-detect decodes off the main thread; this scope hosts it.
     val autoDetectScope = rememberCoroutineScope()
+    // v273 - when the user leaves to grant All-files access, re-run the
+    // detection ladder automatically on return.
+    var pendingDetectAfterGrant by remember { mutableStateOf(false) }
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME &&
+                pendingDetectAfterGrant
+            ) {
+                pendingDetectAfterGrant = false
+                autoDetect()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     fun decodeUri(uri: android.net.Uri): ImageBitmap? = runCatching {
         context.contentResolver.openInputStream(uri)?.use { input ->
@@ -130,7 +146,7 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     AppPreferences.setGlassLabWallpaperUri(context, "auto")
                     detectStatus = "Device wallpaper detected."
                 } else {
-                    detectStatus = "Auto-detect blocked by Android (13+ needs All-files access) — pick an image below."
+                    detectStatus = "Auto-detect blocked \u2014 tap Grant access to allow wallpaper reading." — pick an image below."
                 }
             }
         }
@@ -356,6 +372,37 @@ fun GlassWidgetLabScreen(navController: NavController) {
             ) {
                 Text(
                     "Set wallpaper image",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+            }
+
+            // v273 - Android 13+ gates wallpaper reading behind All-files
+            // access. Open the exact Settings page; auto-detect re-runs when
+            // the user comes back.
+            Surface(
+                onClick = {
+                    pendingDetectAfterGrant = true
+                    val intent = android.content.Intent(
+                        android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                        android.net.Uri.parse("package:" + context.packageName)
+                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(intent) }.onFailure {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(
+                                    android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                                ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(50),
+                color = Color.Black.copy(alpha = 0.45f)
+            ) {
+                Text(
+                    "Grant access",
                     color = Color.White,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)

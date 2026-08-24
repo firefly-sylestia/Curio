@@ -1,3 +1,26 @@
+## Request: v272/273 — widget customization + lab All-files access (COMPLETE)
+
+1. WIDGET CONFIG: GlassWidgetConfigActivity (APPWIDGET_CONFIGURE +
+   reconfigurable) opens on placement and long-press Edit. Per-widget prefs
+   ("glass_widget_config": mode_$id, dark_$id). Modes: STREAK / QUESTS /
+   CABINET / SESSIONS. Provider renders per mode from RAW prefs
+   (curio_quests xp; Room count via runBlocking on CurioDatabase;
+   curio_prefs active/queued session strings) so cold-process updates are
+   correct without hydrated singletons. Dark frost variant drawable
+   (glass_widget_bg_dark) swapped via setInt background resource.
+   onDeleted cleans up per-widget keys.
+2. SQUARE FIX: layout root now wears @drawable/glass_widget_bg (translucent,
+   rounded 28dp) instead of plain #66FFFFFF color - corners on all launchers.
+   RISK: One UI blur detection expects translucent root; all layers are
+   alpha<255 so it should still qualify - verify frosted blur still triggers.
+3. LAB PERMISSION: MANAGE_EXTERNAL_STORAGE in manifest (tools:ignore).
+   "Grant access" pill opens ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
+   (fallback ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION); ON_RESUME observer
+   re-runs autoDetect after return via pendingDetectAfterGrant flag.
+4. BLUR CUSTOMIZATION: not possible - One UI Home's widget-blur params are
+   launcher-internal, no system service exposes them even via Shizuku.
+   Customizable surface = frost tint (light/dark) + content mode.
+
 ## Request: v271 — lab wallpaper auto-detect + One UI real widget blur (COMPLETE)
 
 1. LAB WALLPAPER: persisted via KEY_GLASS_LAB_WALLPAPER (uri string or

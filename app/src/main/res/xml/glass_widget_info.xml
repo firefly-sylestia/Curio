@@ -13,5 +13,9 @@
     android:updatePeriodMillis="10800000"
     android:widgetCategory="home_screen"
     android:description="@string/glass_widget_desc"
+    <!-- v272 — per-widget customization: config opens on placement AND on
+         long-press → Edit (reconfigurable). -->
+    android:configure="com.curio.app.infrastructure.GlassWidgetConfigActivity"
+    android:widgetFeatures="reconfigurable"
     app:widgetStyle="colorful"
     app:widgetSize="small|wideSmall|medium|large" />

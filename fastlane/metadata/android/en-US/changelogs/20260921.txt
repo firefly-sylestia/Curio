@@ -1,3 +1,6 @@
+ADD: Glass widget customization - long-press the widget and tap Edit to choose what it shows: Streak, Quests, Cabinet or Sessions, with a light or dark frost pane.
+ADD: Glass widget lab auto-detect now offers All-files access so the real wallpaper can be read on Android 13+.
+FIX: The glass widget keeps its rounded corners on all launchers.
 FIX: Material theme now restyles the Spin filter + category picker heroes and their pills with the shared primaryContainer tear look instead of the category tear.
 FIX: The detail hero under Material hero tears wears the same airy container color as Home/Profile (was a dark saturated block), with matching ink.
 IMPROVE: Turning Material theme on now auto-enables "Material hero tears" so the whole banner family switches with it.

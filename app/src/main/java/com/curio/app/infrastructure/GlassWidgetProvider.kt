@@ -9,7 +9,10 @@ import android.content.Intent
 import android.widget.RemoteViews
 import com.curio.app.MainActivity
 import com.curio.app.R
+import com.curio.app.data.CurioDatabase
+import com.curio.app.data.CurioQuests
 import com.curio.app.data.StreakTracker
+import kotlinx.coroutines.runBlocking
 
 /**
  * v267 — THE LIQUID-GLASS HOME-SCREEN WIDGET. A frosted glass tile that
@@ -26,7 +29,23 @@ import com.curio.app.data.StreakTracker
  * provider receives APPWIDGET_UPDATE via the standard dispatch), and any
  * time [pushAll] is called after data changes.
  */
+/** v272 — what a glass widget shows. Persisted PER WIDGET ID. */
+enum class GlassWidgetMode(val label: String, val description: String) {
+    STREAK("Streak", "Your live explore streak."),
+    QUESTS("Quests", "Level and XP progress."),
+    CABINET("Cabinet", "How many discoveries you've saved."),
+    SESSIONS("Sessions", "Live or queued explore sessions.")
+}
+
 class GlassWidgetProvider : AppWidgetProvider() {
+
+    /** Clean up per-widget config when a widget is removed from the host. */
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        val prefs = context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+        appWidgetIds.forEach { id ->
+            prefs.edit().remove("mode_$id").remove("dark_$id").apply()
+        }
+    }
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         ids.forEach { id -> updateAppWidget(context, manager, id) }
@@ -37,13 +56,41 @@ class GlassWidgetProvider : AppWidgetProvider() {
     override fun onDisabled(context: Context) { /* nothing to clean up */ }
 
     companion object {
+        private const val CONFIG_PREFS = "glass_widget_config"
+
+        fun readMode(context: Context, id: Int): GlassWidgetMode =
+            runCatching {
+                GlassWidgetMode.valueOf(
+                    context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+                        .getString("mode_$id", null) ?: GlassWidgetMode.STREAK.name
+                )
+            }.getOrDefault(GlassWidgetMode.STREAK)
+
+        fun writeMode(context: Context, id: Int, mode: GlassWidgetMode) {
+            context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+                .edit().putString("mode_$id", mode.name).apply()
+        }
+
+        fun readDarkFrost(context: Context, id: Int): Boolean =
+            context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+                .getBoolean("dark_$id", false)
+
+        fun writeDarkFrost(context: Context, id: Int, dark: Boolean) {
+            context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+                .edit().putBoolean("dark_$id", dark).apply()
+        }
+
         fun updateAppWidget(context: Context, manager: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.glass_widget_layout)
-            val streak = runCatching { StreakTracker.getStreak(context) }.getOrDefault(0)
-            views.setTextViewText(
-                R.id.glass_widget_stats,
-                if (streak > 0) "$streak-day streak" else "start exploring"
+            // v272 — per-widget appearance: light or dark frost pane.
+            views.setInt(
+                android.R.id.background, "setBackgroundResource",
+                if (readDarkFrost(context, id)) R.drawable.glass_widget_bg_dark
+                else R.drawable.glass_widget_bg
             )
+            val (title, stats) = resolveContent(context, readMode(context, id))
+            views.setTextViewText(R.id.glass_widget_title, title)
+            views.setTextViewText(R.id.glass_widget_stats, stats)
             views.setOnClickPendingIntent(
                 // The layout root IS @android:id/background (required by the
                 // One UI wallpaper-blur spec) — so that's the clickable target.
@@ -66,5 +113,49 @@ class GlassWidgetProvider : AppWidgetProvider() {
             val ids = manager.getAppWidgetIds(ComponentName(context, GlassWidgetProvider::class.java))
             ids.forEach { id -> updateAppWidget(context, manager, id) }
         }
+
+        /**
+         * v272 — per-mode content. Reads raw prefs (NOT hydrated singletons)
+         * so values are correct even when the widget updates in a cold
+         * process where the app UI never ran.
+         */
+        private fun resolveContent(context: Context, mode: GlassWidgetMode): Pair<String, String> =
+            runCatching {
+                when (mode) {
+                    GlassWidgetMode.STREAK -> {
+                        val streak = StreakTracker.getStreak(context)
+                        "Curio" to if (streak > 0) "$streak-day streak" else "start exploring"
+                    }
+                    GlassWidgetMode.QUESTS -> {
+                        val xp = context.getSharedPreferences("curio_quests", Context.MODE_PRIVATE)
+                            .getInt("xp", 0)
+                        val level = CurioQuests.levelForXp(xp)
+                        "Quests" to "Lv $level \u00b7 $xp XP"
+                    }
+                    GlassWidgetMode.CABINET -> {
+                        // Room call off the main thread; widget updates are
+                        // broadcast-receiver work so a short blocking read is
+                        // the pragmatic pattern here (GoAsync overkill).
+                        val count = runBlocking {
+                            CurioDatabase.getInstance(context).captureDao().count()
+                        }
+                        "Cabinet" to "$count saved"
+                    }
+                    GlassWidgetMode.SESSIONS -> {
+                        val prefs = context.getSharedPreferences("curio_prefs", Context.MODE_PRIVATE)
+                        val active = prefs.getString("explore_active_session", null) != null
+                        val queued = prefs.getString("explore_queued_sessions", null)?.let { raw ->
+                            runCatching {
+                                org.json.JSONArray(raw).length()
+                            }.getOrDefault(0)
+                        } ?: 0
+                        "Explore" to when {
+                            active -> "session live"
+                            queued > 0 -> "$queued queued"
+                            else -> "no session"
+                        }
+                    }
+                }
+            }.getOrDefault("Curio" to "")
     }
 }
