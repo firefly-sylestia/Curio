@@ -291,6 +291,33 @@ import kotlin.math.roundToInt
             // ── v279: per-widget state — selection, size, blur, text color ──
             val selectedId = remember { mutableStateOf<String?>(null) }
             var widgetsVisible by remember { mutableStateOf(true) }
+            // v283 — the lab REMEMBERS: persisted settings restore on entry.
+            var restored by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                if (!restored) {
+                    restored = true
+                    val (cw, ch) = com.curio.app.infrastructure.GlassLabComposition.canvasSize(context)
+                    if (cw > 0 && ch > 0) {
+                        val dm = context.resources.displayMetrics
+                        com.curio.app.infrastructure.GlassLabComposition.load(context).forEach { sh ->
+                            val st = when (sh.id) {
+                                "clock" -> clockState; "analog" -> analogState
+                                "timer" -> timerState; "streak" -> streakState
+                                "battery" -> batteryState; "date" -> dateState
+                                else -> frostState
+                            }
+                            st.pos = IntOffset(
+                                (sh.xFrac * cw * (dm.widthPixels.toFloat() / cw)).roundToInt(),
+                                (sh.yFrac * ch * (dm.heightPixels.toFloat() / ch)).roundToInt()
+                            )
+                            st.scale = sh.scale
+                            st.blurDp = sh.blurDp
+                            st.textColor = Color(sh.textArgb)
+                            st.visible = sh.visible
+                        }
+                    }
+                }
+            }
             // 1-second ticker: real clock + live session elapsed.
             var now by remember { mutableStateOf(System.currentTimeMillis()) }
             LaunchedEffect(Unit) {
@@ -500,16 +527,19 @@ import kotlin.math.roundToInt
                 onClick = {
                     val w = context.resources.displayMetrics.widthPixels.toFloat()
                     val h = context.resources.displayMetrics.heightPixels.toFloat()
-                    com.curio.app.infrastructure.GlassLabComposition.save(
-                        context,
-                        listOf(clockState, analogState, timerState, streakState, batteryState, dateState)
-                            .map { s ->
-                                com.curio.app.infrastructure.GlassLabComposition.Shape(
-                                    id = s.id, xFrac = s.pos.x / w, yFrac = s.pos.y / h,
-                                    scale = s.scale, textArgb = s.textColor.toArgb()
-                                )
-                            }
+                    com.curio.app.infrastructure.GlassLabComposition.saveCanvasSize(
+                        context, w.toInt(), h.toInt()
                     )
+                    val shapes = listOf(clockState, analogState, timerState, streakState, batteryState, dateState)
+                        .filter { it.visible }
+                        .map { it ->
+                            com.curio.app.infrastructure.GlassLabComposition.Shape(
+                                id = it.id, xFrac = it.pos.x / w, yFrac = it.pos.y / h,
+                                scale = it.scale, textArgb = it.textColor.toArgb(),
+                                blurDp = it.blurDp, visible = true
+                            )
+                        }
+                    com.curio.app.infrastructure.GlassLabComposition.save(context, shapes)
                     context.startActivity(
                         android.content.Intent(android.app.WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
                             .putExtra(

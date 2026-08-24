@@ -1,3 +1,18 @@
+## Request: v283 — live wallpaper fidelity + lab persistence (COMPLETE)
+
+CI: corner-roundness push failure was the same NonObservableLocale lint,
+already fixed in 602360e (passed); latest runs green/in-progress.
+
+- BACKDROP: service loadBackdrop now - picked image URI first; "auto" tries
+  device wallpaper ladder (getWallpaperFile -> getDrawable) before gradient
+  fallback. Fixes "doesnt pick the wallpaper ive choosen".
+- LIVE DATA: engine liveTitle() computes per-frame real HH:mm / session
+  elapsed ("Exploring - Xm"/"Explored"), streak, battery %, date — baked
+  widgets match the app ones. Refraction stays impossible in wallpapers
+  (baked frost), but content is now live.
+- PERSISTENCE: GlassLabComposition.Shape gains blurDp+visible (JSON);
+  canvasSize saved at save-time; lab restores pos/scale/blur/text/visible
+  from prefs via LaunchedEffect(Unit) on entry ("page remembers").
 ## Request: v282 — config UI redesign + lab size/hide fixes (COMPLETE)
 
 CONFIG: mode cards -> 2x2 grid pills; preview = NEUTRAL wallpaper stand-in

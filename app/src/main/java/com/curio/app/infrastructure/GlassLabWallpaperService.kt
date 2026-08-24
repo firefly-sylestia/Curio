@@ -134,6 +134,29 @@ class GlassLabWallpaperService : WallpaperService() {
             }
         }
 
+        /** v283 — LIVE data so the baked widgets match the real ones. */
+        private var cachedSavedCount = -1
+
+        private fun liveTitle(context: Context, id: String): String = when (id) {
+            "clock" -> java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                .format(java.util.Date())
+            "timer" -> {
+                val active = com.curio.app.data.ExploreSessionStore.getActiveSession(context)
+                if (active != null) {
+                    val mins = active.elapsedMillis(System.currentTimeMillis()) / 60000L
+                    "Exploring · ${mins}m"
+                } else "Explored"
+            }
+            "streak" -> "${com.curio.app.data.StreakTracker.getStreak(context)}-day streak"
+            "battery" -> {
+                val bm = context.getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager
+                "${bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)?.takeIf { it > 0 } ?: 80}%"
+            }
+            "date" -> java.text.SimpleDateFormat("EEE · MMM d", java.util.Locale.getDefault())
+                .format(java.util.Date())
+            else -> ""
+        }
+
         private fun drawShape(
             canvas: Canvas,
             context: Context,
@@ -202,7 +225,7 @@ class GlassLabWallpaperService : WallpaperService() {
             textPaint.alpha = (alpha * 255).toInt()
             textPaint.color = shape.textArgb
             textPaint.textSize = ph * 0.30f
-            canvas.drawText(GlassLabComposition.titleFor(shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
+            canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
             if (shape.id == "streak" || shape.id == "battery") {
                 glyphPaint.alpha = (alpha * 255).toInt()
                 glyphPaint.color = shape.textArgb
@@ -218,13 +241,30 @@ class GlassLabWallpaperService : WallpaperService() {
     companion object {
         const val FADE_MS = 450L
 
-        /** Wallpaper bitmap via persisted lab URI; rich gradient fallback. */
+        /**
+         * v283 — backdrop resolution: the lab's picked image first; when the
+         * user left it on auto, try the DEVICE wallpaper ladder
+         * (getWallpaperFile -> getDrawable) before giving up to the gradient.
+         */
         fun loadBackdrop(context: Context): android.graphics.Bitmap? = runCatching {
             val uriStr = com.curio.app.data.AppPreferences.getGlassLabWallpaperUri(context)
-            if (uriStr == "auto" || uriStr.isBlank()) return null
-            context.contentResolver.openInputStream(Uri.parse(uriStr))?.use { input ->
-                android.graphics.BitmapFactory.decodeStream(input)
+            if (uriStr != "auto" && uriStr.isNotBlank()) {
+                return runCatching {
+                    context.contentResolver.openInputStream(Uri.parse(uriStr))?.use { input ->
+                        android.graphics.BitmapFactory.decodeStream(input)
+                    }
+                }.getOrNull()
             }
+            // Auto: device wallpaper (permission-gated on 13+, caught below).
+            val wm = WallpaperManager.getInstance(context)
+            runCatching {
+                wm.getWallpaperFile(WallpaperManager.FLAG_SYSTEM)?.use { pfd ->
+                    android.graphics.BitmapFactory.decodeFileDescriptor(pfd.fileDescriptor)
+                }
+            }.getOrNull()
+                ?: runCatching {
+                    (wm.getDrawable() as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                }.getOrNull()
         }.getOrNull()
     }
 }
