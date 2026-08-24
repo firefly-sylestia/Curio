@@ -96,8 +96,14 @@ class PetOverlayService : Service() {
 
     // v261 — shared with the overlay composition so the WANDER loop can flip
     // the pet's facing and the menu can render inside the same window.
+    // v263 — MOVING + RECOVERING complete the animation wiring: the walk bob
+    // / lean / tail wag play while the wander glide or a drag carries the
+    // pet, and the dizzy sway lingers briefly after a drop (same recovery
+    // beat as the in-app floating pet).
     private val facingState = androidx.compose.runtime.mutableStateOf(1f)
     private val draggingState = androidx.compose.runtime.mutableStateOf(false)
+    private val movingState = androidx.compose.runtime.mutableStateOf(false)
+    private val recoveringState = androidx.compose.runtime.mutableStateOf(false)
     private val wanderState = androidx.compose.runtime.mutableStateOf(true)
     private val menuVisibleState = androidx.compose.runtime.mutableStateOf(false)
 
@@ -254,6 +260,7 @@ class PetOverlayService : Service() {
         val targetX = (params.x + dx).coerceIn(margin, maxX)
         val targetY = (params.y + dy).coerceIn(margin, maxOf(maxY, params.y))
         if (dx != 0) facingState.value = if (dx > 0f) 1f else -1f
+        movingState.value = true
 
         // ~14-frame eased glide (~450ms).
         val startX = params.x; val startY = params.y
@@ -268,7 +275,12 @@ class PetOverlayService : Service() {
                 pp.x = (startX + (targetX - startX) * ease).toInt()
                 pp.y = (startY + (targetY - startY) * ease).toInt()
                 runCatching { windowManager.updateViewLayout(v, pp) }
-                if (frame < frames) mainHandler.postDelayed(this, 33) else savePosition()
+                if (frame < frames) {
+                    mainHandler.postDelayed(this, 33)
+                } else {
+                    movingState.value = false
+                    savePosition()
+                }
             }
         }
         mainHandler.postDelayed(stepper, 33)
@@ -334,9 +346,18 @@ class PetOverlayService : Service() {
                                 onDragStart = {
                                     dragged.value = true
                                     menuVisible.value = false
+                                    // A grab mid-glide cancels the walk pose.
+                                    movingState.value = false
                                 },
                                 onDragEnd = {
                                     dragged.value = false
+                                    // v263 — post-drop recovery beat: the dizzy
+                                    // sway keeps wobbling for a moment after the
+                                    // pet is put down (mirrors the in-app pet).
+                                    recoveringState.value = true
+                                    mainHandler.postDelayed({
+                                        recoveringState.value = false
+                                    }, PET_RECOVER_MS)
                                     // v262 — stays exactly where dropped; only
                                     // clamp back on-screen.
                                     settleInBounds()
@@ -383,8 +404,12 @@ class PetOverlayService : Service() {
                         spriteSize = 84.dp,
                         celebrateKey = celebrateKey,
                         squishKey = squishKey,
-                        moving = false,
+                        // v263 — full motion wiring: walk bob + lean + tail wag
+                        // while gliding, lifted startled pose while held, and a
+                        // short dizzy wobble right after being put down.
+                        moving = movingState.value,
                         dragged = dragged.value,
+                        dizzy = dragged.value || recoveringState.value,
                         facing = facing.value
                     )
                 }
@@ -512,6 +537,8 @@ class PetOverlayService : Service() {
         private const val KEY_Y = "y"
         private const val RETRY_DELAY_MS = 2_000L
         private const val ACTION_STOP = "com.curio.app.pet_overlay.STOP"
+        // v263 — how long the dizzy recovery sway lingers after a drop.
+        private const val PET_RECOVER_MS = 900L
         private val PET_WINDOW_DP = 96.dp
 
         /** Whether the overlay service is wanted by the preference + permission. */

@@ -650,14 +650,20 @@ class ExploreSessionService : Service() {
                             // Drag lives in Compose (the composed child of an
                             // overlay ComposeView consumes every View-level
                             // touch, so a View listener never fires). Each
-                            // delta moves the window; release snaps it to the
-                            // nearest horizontal edge.
+                            // delta moves the window; release settles where
+                            // dropped. Deltas are CLAMPED live against the
+                            // display bounds so a fast fling can never drag
+                            // the pill half off-screen mid-gesture (the old
+                            // release-only clamp read as a rubber-band snap).
                             onDragBy = { dx, dy ->
+                                val view = bubbleView ?: return@ExploreBubbleContent
+                                val bounds = windowBounds()
+                                val marginPx = (12 * resources.displayMetrics.density).toInt()
                                 params.x = (params.x + dx).toInt()
+                                    .coerceIn(marginPx, (bounds.width() - view.width - marginPx).coerceAtLeast(marginPx))
                                 params.y = (params.y + dy).toInt()
-                                bubbleView?.let { v ->
-                                    runCatching { windowManager.updateViewLayout(v, params) }
-                                }
+                                    .coerceIn(marginPx, (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx))
+                                runCatching { windowManager.updateViewLayout(view, params) }
                             },
                             onDragEnd = { snapBubble() },
                             // Center-anchored growth: as the bubble animates

@@ -1,3 +1,20 @@
+## Request: v263 — stable bubble drag + full pet overlay animations (COMPLETE)
+
+1. Bubble drag: service-side onDragBy clamps x/y against display bounds LIVE
+   (no off-screen drift, no release rubber-band). Expanded panel drag moved
+   to its header row only (panelHeaderDragModifier keyed on `minimized`);
+   whole-surface drag only while minimized — buttons/note field never fight
+   the move gesture.
+2. Bubble feel: raw press state tracked in interactionModifier →
+   pressedScale spring squish (0.94) on the pill; AnimatedContent expand now
+   one shared spring (dampingRatio 0.75/stiffness 380) + fades; corner
+   radius spring unchanged.
+3. Pet overlay: movingState set during wander glide frames + cleared at end;
+   dragged cancels walk pose; dizzy = dragged || recoveringState (900ms post-
+   drop beat, PET_RECOVER_MS). Sprite gets moving/dizzy wired — walk bob,
+   lean, tail wag, lifted pose and recovery wobble all play now.
+4. New changelog file 20260921.txt (versionCode bumped in 2d486d1).
+
 ## Request: v261 — hero geometry + floating pet (COMPLETE)
 
 1. CI fix: LazyGridItemInfo uses rowIndex/columnIndex (not `path`).

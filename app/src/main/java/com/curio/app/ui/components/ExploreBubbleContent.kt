@@ -10,6 +10,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -224,15 +225,36 @@ fun ExploreBubbleContent(
         }
     }
 
+    // v263 — the expanded panel does NOT carry a whole-surface drag detector:
+    // dragging from any pixel (including over the note field and buttons)
+    // fought the controls and read as glitchy. The pill drags anywhere; the
+    // panel drags ONLY from its header row (same gesture, shared callbacks).
+    // The key restarts the detector when minimized flips so a stale scope
+    // never eats touches after an expand/collapse.
+    val panelHeaderDragModifier = Modifier.pointerInput(minimized) {
+        if (!minimized) {
+            detectDragGestures(onDragEnd = { onDragEnd() }) { change, dragAmount ->
+                change.consume()
+                onDragBy(dragAmount.x, dragAmount.y)
+            }
+        }
+    }
+
     // v253 — observe-only pointer pass: pokes the interaction clock on every
-    // touch (resetting auto-collapse AND the dock timer) and undocks a
-    // docked pill the instant it's contacted.
+    // touch (resetting auto-collapse AND the dock timer), tracks raw press
+    // state for the pill's touch squish, and undocks a docked pill the
+    // instant it's contacted.
+    var pillPressed by remember { mutableStateOf(false) }
     val interactionModifier = Modifier.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
-                if (event.changes.any { it.pressed }) {
+                val anyPressed = event.changes.any { it.pressed }
+                if (anyPressed) {
                     lastInteraction = System.currentTimeMillis()
+                    if (!pillPressed) pillPressed = true
+                } else if (pillPressed) {
+                    pillPressed = false
                 }
             }
         }
@@ -248,6 +270,15 @@ fun ExploreBubbleContent(
         label = "bubbleCorner"
     )
 
+    // v263 — tactile press feedback on the pill: a gentle 0.94 squish while
+    // touched (driven by the raw press state from [interactionModifier]), so
+    // touching the bubble feels alive before any action fires.
+    val pressedScale by animateFloatAsState(
+        targetValue = if (pillPressed && minimized) 0.94f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 600f),
+        label = "bubblePress"
+    )
+
     Surface(
         shape = RoundedCornerShape(cornerRadius),
         // v262 — NO glass here (user request): an overlay window can't
@@ -260,11 +291,19 @@ fun ExploreBubbleContent(
         shadowElevation = 0.dp,
         modifier = modifier
             .then(interactionModifier)
-            .then(dragModifier)
+            // v263 — whole-surface drag only while MINIMIZED (the pill drags
+            // anywhere); expanded drags live on the panel's header row via
+            // [panelHeaderDragModifier], so buttons + the note field are
+            // never fighting a move gesture.
+            .then(if (minimized) dragModifier else Modifier)
             .onSizeChanged { size ->
                 // Only during the post-toggle burst — timer ticks change the
                 // pill width by a pixel and must not move the window.
                 if (resizeBurst) onSizeChanged(size.width, size.height)
+            }
+            .graphicsLayer {
+                scaleX = pressedScale
+                scaleY = pressedScale
             }
             // The minimized pill is tappable anywhere to expand; the expanded
             // bubble's buttons handle their own input. Applied conditionally
@@ -285,8 +324,19 @@ fun ExploreBubbleContent(
         AnimatedContent(
             targetState = minimized,
             transitionSpec = {
-                (fadeIn(tween(180)) + scaleIn(initialScale = 0.92f, animationSpec = tween(180))) togetherWith
-                    (fadeOut(tween(140)) + scaleOut(targetScale = 0.94f, animationSpec = tween(140)))
+                // v263 — one shared spring drives BOTH directions (no mixed
+                // tween/spring timing): the incoming state pops in with a
+                // slight overshoot while the outgoing settles back. The
+                // window still resizes in ONE deterministic step, so there is
+                // no geometry fight — this spring only shapes the content,
+                // matching the corner-radius spring's feel.
+                (fadeIn(tween(120)) +
+                    scaleIn(
+                        initialScale = 0.9f,
+                        animationSpec = spring(dampingRatio = 0.75f, stiffness = 380f)
+                    )) togetherWith
+                    (fadeOut(tween(130)) +
+                        scaleOut(targetScale = 0.92f, animationSpec = tween(130)))
             },
             label = "bubbleExpand"
         ) { m ->
@@ -306,6 +356,7 @@ fun ExploreBubbleContent(
                 ink = ink,
                 elapsed = elapsed,
                 noteDraft = noteDraft,
+                headerDrag = panelHeaderDragModifier,
                 onTogglePause = onTogglePause,
                 onHide = onHide,
                 onNoteChange = { note ->
@@ -383,6 +434,9 @@ private fun ExpandedPanel(
     ink: Color,
     elapsed: Long,
     noteDraft: String,
+    // v263 — the panel's drag gesture lives on its HEADER row only, so the
+    // note field and control buttons never fight the move gesture.
+    headerDrag: Modifier = Modifier,
     onTogglePause: () -> Unit,
     onHide: () -> Unit,
     onNoteChange: (String) -> Unit,
@@ -399,9 +453,11 @@ private fun ExpandedPanel(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // ── Header: glyph chip + topic + minimize ──────────────────
+        // This row is also the panel's drag handle (see [headerDrag]).
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = headerDrag
         ) {
             CategoryGlyphChip(category = category, accent = accent, ink = ink)
             MarqueeTopicText(
