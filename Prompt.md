@@ -1,3 +1,15 @@
+## Request: v275 - widget blur regression + white border fix (COMPLETE)
+
+ROOT CAUSE (device-verified): One UI's wallpaper-blur detection triggers on
+the widget ROOT background being a PLAIN TRANSLUCENT COLOR (#66FFFFFF).
+Swapping it to any drawable (frost layer-list OR near-invisible tint)
+silently disabled the blur. Root bg restored to #66FFFFFF; glass_widget_root
+drawable deleted. Layout comment documents this contract.
+WHITE BORDER: was the rim stroke baked into GlassWidgetPane.render() -
+removed entirely (fill-only gradient), resolveColors -> Pair(top,bottom).
+DEFAULT STYLE: STYLE_DEFAULT ("default") = no pane bitmap
+(setViewVisibility GONE) - pure One UI blur look; config gets a "Blur" chip
+first; any preset/custom draws translucent fill OVER the blur.
 ## Request: v274 - pane customization + lab frost tile (COMPLETE)
 
 1. PANE ENGINE: GlassWidgetPane.kt renders the widget pane programmatically

@@ -136,6 +136,46 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 8.dp)
                         )
+                        // v275 - DEFAULT chip first: pure One UI wallpaper
+                        // blur with no pane drawn over it. Customizing moves
+                        // off the default look.
+                        val selectedDefault = style == GlassWidgetPane.STYLE_DEFAULT
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Card(onClick = { style = GlassWidgetPane.STYLE_DEFAULT }) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(10.dp)
+                                ) {
+                                    Canvas(
+                                        modifier = Modifier
+                                            .size(46.dp)
+                                            .border(
+                                                width = if (selectedDefault) 3.dp else 1.dp,
+                                                color = if (selectedDefault)
+                                                    MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.outline,
+                                                shape = CircleShape
+                                            ),
+                                        onDraw = {
+                                            drawCircle(
+                                                brush = Brush.verticalGradient(
+                                                    listOf(
+                                                        ComposeColor(0x66FFFFFF),
+                                                        ComposeColor(0x26FFFFFF)
+                                                    )
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+                                Text(
+                                    "Blur",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (selectedDefault) FontWeight.Bold else FontWeight.Normal,
+                                    modifier = Modifier.padding(bottom = 10.dp)
+                                )
+                            }
+                        }
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             GlassWidgetPane.Preset.entries.forEach { preset ->
                                 val selected = style == preset.name

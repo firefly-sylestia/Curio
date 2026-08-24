@@ -82,16 +82,23 @@ class GlassWidgetProvider : AppWidgetProvider() {
             val wDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 180)
             val hDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 56)
             val style = GlassWidgetPane.readStyle(context, id)
-            val (top, bottom, rim) = GlassWidgetPane.resolveColors(context, id, style)
-            views.setImageViewBitmap(
-                R.id.glass_widget_pane,
-                GlassWidgetPane.render(
-                    widthPx = (wDp * density).toInt(),
-                    heightPx = (hDp * density * 0.9f).toInt(),
-                    cornerPx = 28f * density,
-                    top = top, bottom = bottom, rim = rim
+            if (style == GlassWidgetPane.STYLE_DEFAULT) {
+                // v275 - pure One UI look: launcher wallpaper blur + the root
+                // tint only. No pane bitmap in the way.
+                views.setViewVisibility(R.id.glass_widget_pane, android.view.View.GONE)
+            } else {
+                views.setViewVisibility(R.id.glass_widget_pane, android.view.View.VISIBLE)
+                val (top, bottom) = GlassWidgetPane.resolveColors(context, id, style)
+                views.setImageViewBitmap(
+                    R.id.glass_widget_pane,
+                    GlassWidgetPane.render(
+                        widthPx = (wDp * density).toInt(),
+                        heightPx = (hDp * density * 0.9f).toInt(),
+                        cornerPx = 28f * density,
+                        top = top, bottom = bottom
+                    )
                 )
-            )
+            }
             val (title, stats) = resolveContent(context, readMode(context, id))
             views.setTextViewText(R.id.glass_widget_title, title)
             views.setTextViewText(R.id.glass_widget_stats, stats)

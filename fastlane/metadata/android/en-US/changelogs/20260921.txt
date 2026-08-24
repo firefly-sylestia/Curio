@@ -1,3 +1,4 @@
+FIX: The Samsung wallpaper blur on the glass widget works again - and a new Blur option keeps that pure look; the harsh white border is gone.
 ADD: Glass widget pane styling - pick a preset (Light, Dark, Clear, Rose, Sky) or go fully custom with color and opacity sliders, per widget.
 ADD: Glass widget lab - new One UI frost tile to compare against the liquid-glass shapes.
 ADD: Glass widget customization - long-press the widget and tap Edit to choose what it shows: Streak, Quests, Cabinet or Sessions, with a light or dark frost pane.

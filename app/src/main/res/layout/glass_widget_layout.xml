@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v274 — REAL liquid-glass widget on Samsung One UI 7+ launchers:
-     the ROOT view is @android:id/background with a TRANSLUCENT background
-     (One UI Home then captures + blurs the wallpaper region behind the
-     widget). The visible pane is a per-widget-rendered bitmap
-     ([GlassWidgetPane] → glass_widget_pane ImageView), so presets and
-     custom colors/opacity apply without any new drawables. -->
+<!-- v275 — REAL liquid-glass widget on Samsung One UI 7+ launchers:
+     the ROOT view MUST keep a PLAIN TRANSLUCENT COLOR background — that is
+     exactly what One UI Home's wallpaper-blur detection triggers on (a
+     drawable or near-invisible tint silently disables the blur; device-
+     verified). The visible pane is a per-widget-rendered bitmap
+     ([GlassWidgetPane] → glass_widget_pane ImageView), hidden entirely in
+     the default style so the pure launcher-blur look is untouched. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/glass_widget_root">
+    android:background="#66FFFFFF">
 
     <ImageView
         android:id="@+id/glass_widget_pane"

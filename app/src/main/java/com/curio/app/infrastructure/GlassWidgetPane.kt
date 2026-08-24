@@ -34,9 +34,17 @@ object GlassWidgetPane {
 
     const val STYLE_CUSTOM = "custom"
 
+    /**
+     * v275 - DEFAULT: no pane bitmap at all. The widget shows only its
+     * translucent root tint over One UI's launcher-rendered wallpaper blur -
+     * the original device-verified look. Any preset/custom pane still lets
+     * the blur show through (all fills stay translucent).
+     */
+    const val STYLE_DEFAULT = "default"
+
     fun readStyle(context: Context, id: Int): String =
         context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
-            .getString("style_$id", null) ?: Preset.LIGHT.name
+            .getString("style_$id", null) ?: STYLE_DEFAULT
 
     fun writeStyle(context: Context, id: Int, style: String) {
         context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
@@ -61,12 +69,12 @@ object GlassWidgetPane {
             .edit().putFloat("customOpacity_$id", opacity).apply()
     }
 
-    /** Resolve (top, bottom, rim) colors for the current style. */
+    /** Resolve (top, bottom) gradient colors for the current style. */
     fun resolveColors(
         context: Context,
         id: Int,
         style: String
-    ): Triple<Int, Int, Int> {
+    ): Pair<Int, Int> {
         if (style == STYLE_CUSTOM) {
             val base = readCustomColor(context, id) or 0xFF000000.toInt()
             val alpha = (readCustomOpacity(context, id) * 255).toInt().coerceIn(8, 235)
@@ -76,10 +84,10 @@ object GlassWidgetPane {
             val g = (Color.green(base) * 0.70f).toInt()
             val b = (Color.blue(base) * 0.70f).toInt()
             val bottom = ((alpha * 0.85f).toInt() shl 24) or (r shl 16) or (g shl 8) or b
-            return Triple(top, bottom, 0x99FFFFFF.toInt())
+            return Pair(top, bottom)
         }
         val preset = runCatching { Preset.valueOf(style) }.getOrDefault(Preset.LIGHT)
-        return Triple(preset.top, preset.bottom, preset.rim)
+        return Pair(preset.top, preset.bottom)
     }
 
     /**
@@ -92,8 +100,7 @@ object GlassWidgetPane {
         heightPx: Int,
         cornerPx: Float,
         top: Int,
-        bottom: Int,
-        rim: Int
+        bottom: Int
     ): Bitmap {
         val w = widthPx.coerceIn(64, 1200)
         val h = heightPx.coerceIn(48, 600)
@@ -102,17 +109,10 @@ object GlassWidgetPane {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = LinearGradient(0f, 0f, 0f, h.toFloat(), top, bottom, Shader.TileMode.CLAMP)
         }
+        // v275 - NO rim stroke: the baked white border read as a harsh box
+        // edge on-device. The gradient fill alone reads as clean glass.
         val r = cornerPx.coerceAtMost(w / 2f).coerceAtMost(h / 2f)
         canvas.drawRoundRect(0f, 0f, w.toFloat(), h.toFloat(), r, r, paint)
-        // Bright rim — the light catch that defines the pane edge.
-        paint.shader = null
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = (1.5f * (w / 300f)).coerceIn(2f, 5f)
-        paint.color = rim
-        val inset = paint.strokeWidth / 2f
-        canvas.drawRoundRect(
-            inset, inset, w - inset, h - inset, r - inset, r - inset, paint
-        )
         return bmp
     }
 }
