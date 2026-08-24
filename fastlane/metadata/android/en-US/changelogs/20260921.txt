@@ -1,3 +1,4 @@
+FIX: Lab live wallpaper fidelity - smooth non-pixelated frost that matches the lab, per-widget blur strength, rim and text clipped inside each pane, real battery icon (no more leaked text), and fonts matching the lab exactly.
 FIX: The lab live wallpaper now uses your chosen wallpaper (or the device wallpaper on auto), keeps your exact widget placement, and the baked widgets show live data - real clock, session timer, streak, battery.
 ADD: The glass widget lab remembers your layout, sizes, blur and colors between visits.
 FIX: Glass widget settings redesigned - compact content pills, one accurate preview over a neutral backdrop, and a roomy custom color picker.

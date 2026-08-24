@@ -1,3 +1,23 @@
+## Request: v285 — live wallpaper fidelity pass (COMPLETE, CI green)
+
+- FONT GLYPH FIX: bundled Material Symbols subset was MISSING battery_full.
+  Re-subset from tools/fonts full font per CurioIcons contract (+0xE1A4/5);
+  HarfBuzz verifies ligatures incl. battery_full + local_fire_department.
+  Service now draws icons as CODEPOINTS (U+EF55 fire / U+E1A5 battery) —
+  legacy drawText doesn't reliably apply liga (was leaking literal text).
+- BLUR QUALITY: old ensureBlurred jumped small→full in 2 steps (/14 then
+  up) = pixelated. New blurredFor(): progressive bilinear halving down /
+  doubling up, cached PER quantized blur level (honors shape.blurDp).
+- BACKDROP: decodeBackdropBounded() two-pass bounds+sample (~1600px),
+  fresh stream per pass; engine caches decoded bitmap keyed by URI pref
+  (no per-frame decode = no jank, no OOM silent wrong-wallpaper fallback).
+- PANE PARITY: rim stroked INSIDE clip (inset rect); content re-clipped;
+  added lab's 12% surface veil; typefaces match lab (bold values, medium
+  pills, no shadow). Analog dial outline added; minute-hand precedence fix.
+- TICK: 1s handler tick while visible so baked clocks/dates stay live.
+
+---
+
 ## Request: v283 — live wallpaper fidelity + lab persistence (COMPLETE)
 
 CI: corner-roundness push failure was the same NonObservableLocale lint,

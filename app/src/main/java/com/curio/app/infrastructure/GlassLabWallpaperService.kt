@@ -14,6 +14,7 @@ import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -23,20 +24,27 @@ import android.view.SurfaceHolder
 import androidx.core.content.res.ResourcesCompat
 import com.curio.app.R
 import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 /**
  * GLASS LAB LIVE WALLPAPER. Draws the composition designed in the lab over
  * the chosen wallpaper.
  *
- * REAL BAKED LIQUID GLASS (v284): every pane samples the backdrop ALIGNED
- * UNDERNEATH IT — the region of wallpaper exactly behind the pane is drawn
- * back through a downscale/upscale gaussian-style blur with a saturation
- * boost (vibrancy) — then a top gloss gradient and a bright rim are layered
- * on top. This is the same pipeline (blur + vibrancy) the in-app Kyant
- * recipe runs; per-pixel lens refraction still has no wallpaper-space API,
- * but the frost now genuinely shows the blurred wallpaper behind each pane
- * instead of a flat translucent veil.
+ * v285 FIDELITY PASS — parity with the lab's Kyant-rendered shapes:
+ *  • PROGRESSIVE PYRAMID BLUR — repeated bilinear halving down / doubling up
+ *    (never one giant jump, which is what produced the old pixelated frost),
+ *    built PER SHAPE BLUR LEVEL from the lab's per-widget blur slider.
+ *  • BACKDROP CACHED & DECODED BOUNDED — the chosen image decodes once,
+ *    sampled to a sane size, keyed by its URI; a failed/OOM decode of a huge
+ *    image no longer silently falls back to the wrong wallpaper.
+ *  • RIM + CONTENT CLIPPED INSIDE THE CAPSULE — the old rim was stroked
+ *    half-outside the pane after unclip, and unclipped text leaked out.
+ *  • ICONS DRAWN AS CODEPOINTS — legacy Canvas.drawText does not reliably
+ *    apply the subset font's ligatures on every OEM, which drew literal
+ *    "battery_full" text; we now draw U+E1A5 / U+EF55 directly.
+ *  • TYPEFACES MATCH THE LAB — bold values, medium pills, no shadow.
  *
  * LOCK SCREEN MODE: while the keyguard is up ONLY the clock shapes render;
  * everything else pops back with a soft 450ms fade on unlock.
@@ -57,39 +65,61 @@ class GlassLabWallpaperService : WallpaperService() {
                 val elapsed = SystemClock.elapsedRealtime() - fadeStart
                 nonClockAlpha = (elapsed.toFloat() / FADE_MS).coerceIn(0f, 1f)
                 surfaceHolder?.let { drawFrame(it) }
-                if (nonClockAlpha < 1f) {
-                    handler.postDelayed(this, 16)
-                } else {
-                    fadeRunning = false
-                }
+                if (nonClockAlpha < 1f) handler.postDelayed(this, 16) else fadeRunning = false
             }
         }
         private var fadeStart = 0L
 
+        /** 1-second tick while visible so baked clocks/dates stay live. */
+        private var tickRunning = false
+        private val tickRunnable = object : Runnable {
+            override fun run() {
+                surfaceHolder?.let { drawFrame(it) }
+                if (tickRunning) handler.postDelayed(this, 1000)
+            }
+        }
+
         // ── Backdrop caches ────────────────────────────────────────────
+        private var backdropKey: String? = null      // uri string or "auto"
         private var sharpBackdrop: Bitmap? = null
-        private var blurredBackdrop: Bitmap? = null   // blurred + saturated
         private var drawScale = 1f                    // cover-fit scale
         private var drawOffX = 0f
         private var drawOffY = 0f
 
-        /** Downscale→upscale gaussian-ish blur, cached against the source. */
-        private fun ensureBlurred(src: Bitmap?) {
-            if (src == null) {
-                sharpBackdrop = null
-                blurredBackdrop = null
-                return
-            }
-            if (sharpBackdrop === src && blurredBackdrop != null) return
-            sharpBackdrop = src
-            blurredBackdrop = runCatching {
-                val smallW = (src.width / 14).coerceIn(8, 400)
-                val smallH = (src.height / 14).coerceIn(8, 800)
-                val small = Bitmap.createScaledBitmap(src, smallW, smallH, true)
-                // Two bilinear round-trips soften further without RenderScript.
-                val mid = Bitmap.createScaledBitmap(small, smallW / 2, smallH / 2, true)
-                Bitmap.createScaledBitmap(mid, src.width, src.height, true)
+        /** Progressive-pyramid blur results, one per quantized blur level. */
+        private val blurCache = HashMap<Int, Bitmap>()
+
+        /**
+         * Smooth gaussian-style blur WITHOUT RenderScript: halve repeatedly
+         * down to the target size, then double back up — every step bilinear.
+         * A single small→full jump (the old approach) is what looked pixelated.
+         */
+        private fun blurredFor(src: Bitmap, blurDp: Float): Bitmap? {
+            val factor = ((blurDp.coerceIn(2f, 20f)) * 6f).toInt().coerceAtLeast(8)
+            blurCache[factor]?.let { return it }
+            val result = runCatching {
+                val tw = (src.width / factor.toFloat()).coerceAtLeast(2f)
+                val th = (src.height / factor.toFloat()).coerceAtLeast(2f)
+                var cur = src
+                var cw = src.width.toFloat()
+                var ch = src.height.toFloat()
+                // ── down: successive halves until target reached ──
+                while (cw > tw && cw > 4f) {
+                    val nw = max(tw, cw / 2f).toInt()
+                    val nh = max(th, ch / 2f).toInt()
+                    cur = Bitmap.createScaledBitmap(cur, nw, nh, true)
+                    cw = nw.toFloat(); ch = nh.toFloat()
+                }
+                // ── up: successive doubles back toward full resolution ──
+                while (cur.width < src.width / 2) {
+                    val nw = min(cur.width * 2, src.width)
+                    val nh = (nw.toLong() * src.height / src.width).toInt()
+                    cur = Bitmap.createScaledBitmap(cur, nw, nh, true)
+                }
+                cur
             }.getOrNull()
+            if (result != null) blurCache[factor] = result
+            return result
         }
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
@@ -108,9 +138,17 @@ class GlassLabWallpaperService : WallpaperService() {
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
-            if (!visible) return
-            refreshLockState()
-            surfaceHolder?.let { drawFrame(it) }
+            if (visible) {
+                refreshLockState()
+                surfaceHolder?.let { drawFrame(it) }
+                if (!tickRunning) {
+                    tickRunning = true
+                    handler.postDelayed(tickRunnable, 1000)
+                }
+            } else {
+                tickRunning = false
+                handler.removeCallbacks(tickRunnable)
+            }
         }
 
         /** Updates [wasLocked]; on fresh unlock starts the pop-back fade. */
@@ -137,10 +175,15 @@ class GlassLabWallpaperService : WallpaperService() {
                 val h = canvas.height.toFloat()
 
                 val context = this@GlassLabWallpaperService
-                val bmp = loadBackdrop(context)
-                ensureBlurred(bmp)
+                val key = com.curio.app.data.AppPreferences.getGlassLabWallpaperUri(context)
+                if (key != backdropKey || sharpBackdrop == null) {
+                    backdropKey = key
+                    blurCache.clear()
+                    sharpBackdrop = decodeBackdropBounded(context, key)
+                }
+                val bmp = sharpBackdrop
                 if (bmp != null) {
-                    drawScale = maxOf(w / bmp.width, h / bmp.height)
+                    drawScale = max(w / bmp.width, h / bmp.height)
                     drawOffX = (w - bmp.width * drawScale) / 2f
                     drawOffY = (h - bmp.height * drawScale) / 2f
                     canvas.drawBitmap(bmp, drawOffX, drawOffY, null)
@@ -155,9 +198,15 @@ class GlassLabWallpaperService : WallpaperService() {
                     typeface = ResourcesCompat.getFont(context, R.font.material_symbols_outlined)
                     textAlign = Paint.Align.CENTER
                 }
-                val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                // Match the lab's Compose text styles exactly: bold values,
+                // medium pills, plain default family, NO shadow layer.
+                val boldText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     textAlign = Paint.Align.CENTER
-                    setShadowLayer(4f, 0f, 2f, 0x66000000)
+                    typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                }
+                val mediumText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    textAlign = Paint.Align.CENTER
+                    typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
                 }
 
                 val km = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
@@ -173,7 +222,7 @@ class GlassLabWallpaperService : WallpaperService() {
                         }
                         drawShape(
                             canvas, context, shape, w, h, alpha,
-                            paint, glyphPaint, textPaint, density
+                            paint, glyphPaint, boldText, mediumText, density
                         )
                     }
             } finally {
@@ -205,12 +254,11 @@ class GlassLabWallpaperService : WallpaperService() {
         /**
          * One baked liquid-glass pane:
          *  1. clip to the rounded capsule
-         *  2. re-draw the BLURRED + SATURATED backdrop aligned under the pane
-         *     (real frosted glass, not a flat tint)
-         *  3. top gloss + bottom depth gradients
-         *  4. bright rim stroke
-         *  5. content (hands / icon glyph / text) sized from the same dp
-         *     dims the lab uses.
+         *  2. re-draw the BLURRED backdrop aligned under the pane
+         *     (per-shape blur strength from the lab slider)
+         *  3. top gloss + bottom depth gradients + 12% surface veil
+         *  4. thin rim highlight INSIDE the clip (never outside the pane)
+         *  5. content (hands / icon glyph / text), still clipped.
          */
         private fun drawShape(
             canvas: Canvas,
@@ -221,7 +269,8 @@ class GlassLabWallpaperService : WallpaperService() {
             alpha: Float,
             paint: Paint,
             glyphPaint: Paint,
-            textPaint: Paint,
+            boldText: Paint,
+            mediumText: Paint,
             density: Float
         ) {
             // ── Geometry — EXACTLY the lab's fixed dp sizes ─────────────
@@ -238,19 +287,20 @@ class GlassLabWallpaperService : WallpaperService() {
             val radius = ph.coerceAtMost(pw) / 2f
             val rect = RectF(left, top, left + pw, top + ph)
 
-            // ── 1+2+3: clipped glass body ───────────────────────────────
             val clip = Path().apply { addRoundRect(rect, radius, radius, Path.Direction.CW) }
+
+            // Explicit receivers throughout: a bare `alpha` here would hit
+            // this function's Float parameter, not any Paint property.
+            val satPaint = Paint(Paint.FILTER_BITMAP_FLAG)
+            satPaint.colorFilter = ColorMatrixColorFilter(
+                ColorMatrix().apply { setSaturation(1.25f) }   // vibrancy()
+            )
+            satPaint.alpha = (alpha * 255).toInt()
+
             canvas.save()
             canvas.clipPath(clip)
 
-            // NOTE: explicit receivers — inside `apply { }` a bare `alpha`
-            // would resolve to drawShape's Float parameter, not Paint.alpha.
-            val satPaint = Paint(Paint.FILTER_BITMAP_FLAG)
-            satPaint.colorFilter = ColorMatrixColorFilter(
-                ColorMatrix().apply { setSaturation(1.25f) }
-            )
-            satPaint.alpha = (alpha * 255).toInt()
-            val blurBmp = blurredBackdrop
+            val blurBmp = sharpBackdrop?.let { blurredFor(it, shape.blurDp) }
             if (blurBmp != null) {
                 // Map the pane's screen rect back into backdrop coords so
                 // the blur lines up pixel-perfectly behind the pane.
@@ -277,12 +327,16 @@ class GlassLabWallpaperService : WallpaperService() {
                 paint.shader = null
             }
 
-            // Gloss (top → transparent) + depth (bottom darkening).
+            // 12% surface veil (the lab's onDrawSurface) + top gloss +
+            // bottom depth — same three layers the Kyant recipe stacks.
+            paint.color = Color.WHITE
+            paint.alpha = (alpha * 31).toInt()
+            canvas.drawRect(rect, paint)
             paint.shader = LinearGradient(
                 0f, top, 0f, top + ph * 0.55f,
-                0x38FFFFFF, 0x00FFFFFF, Shader.TileMode.CLAMP
+                0x30FFFFFF, 0x00FFFFFF, Shader.TileMode.CLAMP
             )
-            paint.alpha = (alpha * 255).toInt()
+            paint.alpha = 255
             canvas.drawRect(rect, paint)
             paint.shader = LinearGradient(
                 0f, top + ph * 0.6f, 0f, top + ph,
@@ -290,19 +344,28 @@ class GlassLabWallpaperService : WallpaperService() {
             )
             canvas.drawRect(rect, paint)
             paint.shader = null
+
+            // Rim highlight INSIDE the capsule — the old version stroked the
+            // rect edge after unclipping, putting half the stroke outside.
+            val rimW = density * 1.5f
+            val rimRect = RectF(
+                left + rimW / 2f, top + rimW / 2f,
+                left + pw - rimW / 2f, top + ph - rimW / 2f
+            )
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = rimW
+            paint.alpha = (alpha * 110).toInt()
+            paint.color = Color.WHITE
+            canvas.drawRoundRect(rimRect, radius - rimW / 2f, radius - rimW / 2f, paint)
+            paint.style = Paint.Style.FILL
             canvas.restore()
 
-            // ── 4: rim highlight ────────────────────────────────────────
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = density * 1.4f
-            paint.alpha = (alpha * 90).toInt()
-            paint.color = Color.WHITE
-            canvas.drawRoundRect(rect, radius, radius, paint)
-            paint.style = Paint.Style.FILL
-
-            // ── 5: content ──────────────────────────────────────────────
+            // ── Content — clipped again so nothing leaks past the pane ──
             val cx = left + pw / 2f
             val cy = top + ph / 2f
+
+            canvas.save()
+            canvas.clipPath(clip)
 
             if (shape.id == "analog") {
                 val cal = java.util.Calendar.getInstance()
@@ -311,10 +374,17 @@ class GlassLabWallpaperService : WallpaperService() {
                 val minuteAngle =
                     (cal.get(java.util.Calendar.MINUTE) + cal.get(java.util.Calendar.SECOND) / 60f) * 6f
                 val r = ph / 2f - ph * 0.08f
+                // Faint dial outline, like the lab's Canvas shape.
                 paint.strokeCap = Paint.Cap.ROUND
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = density * 2f
+                paint.color = shape.textArgb
+                paint.alpha = (alpha * 90).toInt()
+                canvas.drawCircle(cx, cy, r, paint)
+                paint.style = Paint.Style.FILL
+                paint.alpha = (alpha * 255).toInt()
                 fun hand(angleDeg: Float, lenFrac: Float, widthPx: Float) {
                     val rad = Math.toRadians((angleDeg - 90).toDouble())
-                    paint.color = shape.textArgb
                     paint.strokeWidth = widthPx
                     canvas.drawLine(
                         cx, cy,
@@ -328,32 +398,40 @@ class GlassLabWallpaperService : WallpaperService() {
                 paint.color = 0xFFFF8A3C.toInt()
                 canvas.drawCircle(cx, cy, density * 3.5f, paint)
                 paint.strokeCap = Paint.Cap.BUTT
+                canvas.restore()
                 return
             }
 
-            textPaint.alpha = (alpha * 255).toInt()
-            textPaint.color = shape.textArgb
+            boldText.alpha = (alpha * 255).toInt()
+            boldText.color = shape.textArgb
+            glyphPaint.alpha = (alpha * 255).toInt()
+            glyphPaint.color = shape.textArgb
+            mediumText.alpha = (alpha * 255).toInt()
+            mediumText.color = shape.textArgb
             when (shape.id) {
                 "clock" -> {
-                    textPaint.textSize = 26f * density * shape.scale
-                    canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
+                    boldText.textSize = 26f * density * shape.scale
+                    canvas.drawText(liveTitle(context, shape.id), cx, cy + boldText.textSize / 3f, boldText)
                 }
                 "streak", "battery" -> {
-                    // Glyph above the value, both centered like the lab Column.
-                    glyphPaint.alpha = (alpha * 255).toInt()
-                    glyphPaint.color = shape.textArgb
+                    // Real Material Symbols CODEPOINTS — legacy drawText does
+                    // not reliably apply ligatures, which leaked raw names.
+                    val glyphCp = if (shape.id == "streak") 0xEF55 /* local_fire_department */ else 0xE1A5 /* battery_full */
                     glyphPaint.textSize = 22f * density * shape.scale
-                    val glyph = if (shape.id == "streak") "local_fire_department" else "battery_full"
-                    canvas.drawText(glyph, cx, cy - ph * 0.06f, glyphPaint)
-                    textPaint.textSize = 16f * density * shape.scale
-                    canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize * 1.15f, textPaint)
+                    canvas.drawText(
+                        String(Character.toChars(glyphCp)),
+                        cx, cy - ph * 0.10f, glyphPaint
+                    )
+                    boldText.textSize = (if (shape.id == "streak") 17f else 15f) * density * shape.scale
+                    canvas.drawText(liveTitle(context, shape.id), cx, cy + ph * 0.20f, boldText)
                 }
                 else -> {
-                    // Pills (timer/date).
-                    textPaint.textSize = 14f * density * shape.scale
-                    canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
+                    // Pills (timer/date) — the lab renders these SemiBold.
+                    mediumText.textSize = 14f * density * shape.scale
+                    canvas.drawText(liveTitle(context, shape.id), cx, cy + mediumText.textSize / 3f, mediumText)
                 }
             }
+            canvas.restore()
         }
     }
 
@@ -364,20 +442,43 @@ class GlassLabWallpaperService : WallpaperService() {
          * Backdrop resolution: the lab's picked image first; when the user
          * left it on auto, try the DEVICE wallpaper ladder
          * (getWallpaperFile -> getDrawable) before giving up to the gradient.
+         * Decoding is BOUNDED (~1600px max dim) — an oversized image failing
+         * to decode was silently swapping in the wrong wallpaper before.
          */
-        fun loadBackdrop(context: Context): Bitmap? = runCatching {
-            val uriStr = com.curio.app.data.AppPreferences.getGlassLabWallpaperUri(context)
-            if (uriStr != "auto" && uriStr.isNotBlank()) {
+        fun decodeBackdropBounded(context: Context, key: String?): Bitmap? = runCatching {
+            val opts = android.graphics.BitmapFactory.Options()
+            var sample = 1
+            fun sampleFor(dim: Int): Int {
+                var s = 1
+                var d = dim
+                while (d / 2 >= 1600) { s *= 2; d /= 2 }
+                return s
+            }
+            if (key != null && key != "auto" && key.isNotBlank()) {
                 return runCatching {
-                    context.contentResolver.openInputStream(Uri.parse(uriStr))?.use { input ->
-                        android.graphics.BitmapFactory.decodeStream(input)
+                    // Pass 1: bounds only (consumes its own stream).
+                    context.contentResolver.openInputStream(Uri.parse(key))?.use { input ->
+                        android.graphics.BitmapFactory.decodeStream(input, null, opts.apply { inJustDecodeBounds = true })
+                    }
+                    if (opts.outWidth <= 0) return@runCatching null
+                    // Pass 2: sampled decode on a FRESH stream.
+                    sample = sampleFor(maxOf(opts.outWidth, opts.outHeight))
+                    context.contentResolver.openInputStream(Uri.parse(key))?.use { input ->
+                        android.graphics.BitmapFactory.decodeStream(
+                            input, null, opts.apply { inJustDecodeBounds = false; inSampleSize = sample })
                     }
                 }.getOrNull()
             }
             val wm = WallpaperManager.getInstance(context)
             runCatching {
                 wm.getWallpaperFile(WallpaperManager.FLAG_SYSTEM)?.use { pfd ->
-                    android.graphics.BitmapFactory.decodeFileDescriptor(pfd.fileDescriptor)
+                    val fd = pfd.fileDescriptor
+                    android.graphics.BitmapFactory.decodeFileDescriptor(fd, null, opts.apply { inJustDecodeBounds = true })
+                    if (opts.outWidth > 0) {
+                        val s = sampleFor(maxOf(opts.outWidth, opts.outHeight))
+                        android.graphics.BitmapFactory.decodeFileDescriptor(
+                            fd, null, opts.apply { inJustDecodeBounds = false; inSampleSize = s })
+                    } else null
                 }
             }.getOrNull()
                 ?: runCatching {
