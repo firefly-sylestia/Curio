@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v272 — REAL liquid-glass widget on Samsung One UI 7+ launchers:
+<!-- v274 — REAL liquid-glass widget on Samsung One UI 7+ launchers:
      the ROOT view is @android:id/background with a TRANSLUCENT background
-     drawable (all layers alpha < 255) — One UI Home then captures + blurs
-     the wallpaper region behind the widget. The rounded pane also fixes the
-     square look on launchers that don't clip RemoteViews corners. -->
+     (One UI Home then captures + blurs the wallpaper region behind the
+     widget). The visible pane is a per-widget-rendered bitmap
+     ([GlassWidgetPane] → glass_widget_pane ImageView), so presets and
+     custom colors/opacity apply without any new drawables. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/glass_widget_bg">
+    android:background="@drawable/glass_widget_root">
+
+    <ImageView
+        android:id="@+id/glass_widget_pane"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no" />
 
     <LinearLayout
         android:layout_width="match_parent"

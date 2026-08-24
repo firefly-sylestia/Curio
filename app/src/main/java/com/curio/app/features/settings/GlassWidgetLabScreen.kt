@@ -34,6 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -279,6 +283,10 @@ fun GlassWidgetLabScreen(navController: NavController) {
             var clockPos by remember { mutableStateOf(IntOffset(40, 340)) }
             var timerPos by remember { mutableStateOf(IntOffset(40, 470)) }
             var glyphPos by remember { mutableStateOf(IntOffset(190, 350)) }
+            // v274 - the One UI FROST comparison tile: exactly what the real
+            // home-screen widget looks like (launcher-side wallpaper blur +
+            // baked pane) - no in-app refraction, by design.
+            var frostPos by remember { mutableStateOf(IntOffset(40, 590)) }
 
             LabGlassShape(
                 position = clockPos,
@@ -336,6 +344,56 @@ fun GlassWidgetLabScreen(navController: NavController) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 24.dp, tint = Color.White)
                 }
+            }
+
+            // v274 - One UI FROST tile (the shipped widget's look): a baked
+            // gradient pane + rim over the launcher-blurred wallpaper. Drag it
+            // next to the liquid-glass shapes to compare what each can do.
+            Box(
+                modifier = Modifier
+                    .offset { frostPos }
+                    .size(196.dp, 58.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .drawBehind {
+                        drawRoundRect(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    Color(0x59FFFFFF),
+                                    Color(0x2E3A3A44)
+                                )
+                            ),
+                            cornerRadius = CornerRadius(28.dp.toPx())
+                        )
+                        drawRoundRect(
+                            color = Color(0xA6FFFFFF),
+                            style = Stroke(width = 1.5.dp.toPx()),
+                            cornerRadius = CornerRadius(28.dp.toPx())
+                        )
+                    }
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, amount ->
+                            change.consume()
+                            frostPos = IntOffset(
+                                (frostPos.x + amount.x).roundToInt().coerceAtLeast(8),
+                                (frostPos.y + amount.y).roundToInt().coerceAtLeast(60)
+                            )
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "Curio \u00b7 5-day streak",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        shadow = androidx.compose.ui.graphics.Shadow(
+                            color = Color(0x66000000),
+                            offset = Offset(0f, 1.5f),
+                            blurRadius = 3f
+                        )
+                    )
+                )
             }
         }
 

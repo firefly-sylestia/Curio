@@ -1,0 +1,116 @@
+package com.curio.app.infrastructure
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Shader
+
+/**
+ * v274 — USER-CUSTOMIZABLE widget pane. Replaces the two static drawables
+ * with ONE programmatic renderer so every visual knob lives in prefs:
+ *
+ *   "style_$id"         preset name or "custom"
+ *   "customColor_$id"   ARGB chosen by hue slider (custom mode)
+ *   "customOpacity_$id" 0..1 slider value    (custom mode)
+ *
+ * The pane bitmap is drawn into an ImageView inside the widget layout; the
+ * ROOT view keeps a near-invisible rounded tint purely to satisfy One UI's
+ * wallpaper-blur detection (root background alpha must be 1..254).
+ */
+object GlassWidgetPane {
+
+    enum class Preset(val label: String, val top: Int, val bottom: Int, val rim: Int) {
+        LIGHT("Light", 0x59FFFFFF, 0x2E3A3A44, 0xA6FFFFFF),
+        DARK("Dark", 0x73232430, 0x99101118, 0x8CFFFFFF),
+        CLEAR("Clear", 0x26FFFFFF, 0x1FFFFFFF, 0x66FFFFFF),
+        ROSE("Rose", 0x8CFF7BAF, 0x737C4D8C, 0xB3FFFFFF),
+        SKY("Sky", 0x8C81D4FA, 0x734A90D9, 0xB3FFFFFF)
+    }
+
+    const val STYLE_CUSTOM = "custom"
+
+    fun readStyle(context: Context, id: Int): String =
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .getString("style_$id", null) ?: Preset.LIGHT.name
+
+    fun writeStyle(context: Context, id: Int, style: String) {
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .edit().putString("style_$id", style).apply()
+    }
+
+    fun readCustomColor(context: Context, id: Int): Int =
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .getInt("customColor_$id", 0xFF7BAFFF.toInt())
+
+    fun writeCustomColor(context: Context, id: Int, argb: Int) {
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .edit().putInt("customColor_$id", argb).apply()
+    }
+
+    fun readCustomOpacity(context: Context, id: Int): Float =
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .getFloat("customOpacity_$id", 0.45f)
+
+    fun writeCustomOpacity(context: Context, id: Int, opacity: Float) {
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .edit().putFloat("customOpacity_$id", opacity).apply()
+    }
+
+    /** Resolve (top, bottom, rim) colors for the current style. */
+    fun resolveColors(
+        context: Context,
+        id: Int,
+        style: String
+    ): Triple<Int, Int, Int> {
+        if (style == STYLE_CUSTOM) {
+            val base = readCustomColor(context, id) or 0xFF000000.toInt()
+            val alpha = (readCustomOpacity(context, id) * 255).toInt().coerceIn(8, 235)
+            val top = (alpha shl 24) or (base and 0x00FFFFFF)
+            // Bottom: same hue pulled ~30% toward black for depth.
+            val r = (Color.red(base) * 0.70f).toInt()
+            val g = (Color.green(base) * 0.70f).toInt()
+            val b = (Color.blue(base) * 0.70f).toInt()
+            val bottom = ((alpha * 0.85f).toInt() shl 24) or (r shl 16) or (g shl 8) or b
+            return Triple(top, bottom, 0x99FFFFFF)
+        }
+        val preset = runCatching { Preset.valueOf(style) }.getOrDefault(Preset.LIGHT)
+        return Triple(preset.top, preset.bottom, preset.rim)
+    }
+
+    /**
+     * Renders the frosted pane. [cornerPx] follows the layout's 28dp recipe;
+     * [widthPx]/[heightPx] come from the launcher's widget options so the
+     * pane matches the placed size exactly.
+     */
+    fun render(
+        widthPx: Int,
+        heightPx: Int,
+        cornerPx: Float,
+        top: Int,
+        bottom: Int,
+        rim: Int
+    ): Bitmap {
+        val w = widthPx.coerceIn(64, 1200)
+        val h = heightPx.coerceIn(48, 600)
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = LinearGradient(0f, 0f, 0f, h.toFloat(), top, bottom, Shader.TileMode.CLAMP)
+        }
+        val r = cornerPx.coerceAtMost(w / 2f).coerceAtMost(h / 2f)
+        canvas.drawRoundRect(0f, 0f, w.toFloat(), h.toFloat(), r, r, paint)
+        // Bright rim — the light catch that defines the pane edge.
+        paint.shader = null
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = (1.5f * (w / 300f)).coerceIn(2f, 5f)
+        paint.color = rim
+        val inset = paint.strokeWidth / 2f
+        canvas.drawRoundRect(
+            inset, inset, w - inset, h - inset, r - inset, r - inset, paint
+        )
+        return bmp
+    }
+}

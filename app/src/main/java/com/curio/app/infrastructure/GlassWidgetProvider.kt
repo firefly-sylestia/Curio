@@ -43,7 +43,8 @@ class GlassWidgetProvider : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         val prefs = context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
         appWidgetIds.forEach { id ->
-            prefs.edit().remove("mode_$id").remove("dark_$id").apply()
+            prefs.edit().remove("mode_$id").remove("style_$id")
+                .remove("customColor_$id").remove("customOpacity_$id").apply()
         }
     }
 
@@ -56,7 +57,7 @@ class GlassWidgetProvider : AppWidgetProvider() {
     override fun onDisabled(context: Context) { /* nothing to clean up */ }
 
     companion object {
-        private const val CONFIG_PREFS = "glass_widget_config"
+        internal const val CONFIG_PREFS = "glass_widget_config"
 
         fun readMode(context: Context, id: Int): GlassWidgetMode =
             runCatching {
@@ -71,22 +72,25 @@ class GlassWidgetProvider : AppWidgetProvider() {
                 .edit().putString("mode_$id", mode.name).apply()
         }
 
-        fun readDarkFrost(context: Context, id: Int): Boolean =
-            context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
-                .getBoolean("dark_$id", false)
-
-        fun writeDarkFrost(context: Context, id: Int, dark: Boolean) {
-            context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
-                .edit().putBoolean("dark_$id", dark).apply()
-        }
-
         fun updateAppWidget(context: Context, manager: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.glass_widget_layout)
-            // v272 — per-widget appearance: light or dark frost pane.
-            views.setInt(
-                android.R.id.background, "setBackgroundResource",
-                if (readDarkFrost(context, id)) R.drawable.glass_widget_bg_dark
-                else R.drawable.glass_widget_bg
+            // v274 - per-widget CUSTOMIZABLE pane: rendered bitmap from the
+            // user's preset / custom color + opacity, sized to the placed
+            // widget via the launcher's options.
+            val opts = manager.getAppWidgetOptions(id)
+            val density = context.resources.displayMetrics.density
+            val wDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 180)
+            val hDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 56)
+            val style = GlassWidgetPane.readStyle(context, id)
+            val (top, bottom, rim) = GlassWidgetPane.resolveColors(context, id, style)
+            views.setImageViewBitmap(
+                R.id.glass_widget_pane,
+                GlassWidgetPane.render(
+                    widthPx = (wDp * density).toInt(),
+                    heightPx = (hDp * density * 0.9f).toInt(),
+                    cornerPx = 28f * density,
+                    top = top, bottom = bottom, rim = rim
+                )
             )
             val (title, stats) = resolveContent(context, readMode(context, id))
             views.setTextViewText(R.id.glass_widget_title, title)

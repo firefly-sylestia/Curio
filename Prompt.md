@@ -1,3 +1,23 @@
+## Request: v274 - pane customization + lab frost tile (COMPLETE)
+
+1. PANE ENGINE: GlassWidgetPane.kt renders the widget pane programmatically
+   (vertical gradient + rim stroke bitmap). Per-widget prefs in
+   glass_widget_config: style_$id (preset name | "custom"),
+   customColor_$id ARGB, customOpacity_$id 0..1. Presets: LIGHT / DARK /
+   CLEAR / ROSE / SKY; custom = hue slider (sat .55, val 1) + opacity
+   slider (.05-.9), bottom color darkened 30% for depth.
+2. LAYOUT: root bg -> @drawable/glass_widget_root (near-invisible #17FFFFFF
+   rounded tint, only satisfies One UI alpha detection); visible pane =
+   ImageView @id/glass_widget_pane fed setImageViewBitmap sized from
+   OPTION_APPWIDGET_MIN_WIDTH/HEIGHT * density. Old glass_widget_bg(.dark)
+   drawables deleted; readDarkFrost/writeDarkFrost removed.
+3. CONFIG UI: preset swatch row (real gradient previews) + custom surface
+   with hue sweep-gradient swatch and sliders.
+4. LAB: fourth draggable tile - One UI FROST replica (baked gradient +
+   rim, no refraction by design) to compare vs liquid-glass shapes.
+5. PIXEL BLUR: impossible - Pixel/stock launchers have no equivalent of
+   One UI's widgetStyle blur hook; nothing app-side can trigger it.
+
 ## Request: v272/273 — widget customization + lab All-files access (COMPLETE)
 
 1. WIDGET CONFIG: GlassWidgetConfigActivity (APPWIDGET_CONFIGURE +
