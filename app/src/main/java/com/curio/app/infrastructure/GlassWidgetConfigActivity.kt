@@ -398,8 +398,6 @@ class GlassWidgetConfigActivity : ComponentActivity() {
         GlassWidgetMode.SESSIONS -> "session live right now"
     }
 
-    /** Selectable swatch chip with a bold accent ring when picked. */
-    @androidx.compose.runtime.Composable
     /** v285 — COMPACT style chip: inline swatch + label in one small pill. */
     @androidx.compose.runtime.Composable
     private fun StyleChip(
