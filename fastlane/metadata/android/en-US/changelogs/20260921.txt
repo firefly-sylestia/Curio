@@ -1,3 +1,6 @@
+FIX: Glass widget settings redesigned - compact content pills, one accurate preview over a neutral backdrop, and a roomy custom color picker.
+FIX: Lab widgets are back to their proper sizes with correct text scale; the checkmark tile is gone.
+ADD: Per-widget hide in the lab - select a widget and tap Hide, or Hide/Show all at once.
 ADD: Corner roundness slider for the glass widget pane - from subtle 8dp to near-circle.
 ADD: Edit home screen widgets from inside the app - works even on launchers without long-press Edit support; Apply updates the home widget instantly.
 ADD: Lock screen mode - only the clock shows while locked, everything else pops back with a soft fade when you unlock.

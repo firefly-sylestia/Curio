@@ -1,3 +1,16 @@
+## Request: v282 — config UI redesign + lab size/hide fixes (COMPLETE)
+
+CONFIG: mode cards -> 2x2 grid pills; preview = NEUTRAL wallpaper stand-in
+(no rainbow bands) + accurate pane/icon/text at widget ratios, corner
+slider scales preview live; custom picker in roomy 18dp-padded Surface;
+Apply button label. File rewritten cleanly (v282).
+LAB ROOT CAUSE of "huge widgets": v279 rebuild dropped the fixed-size
+modifiers - shapes wrapped content unbounded. Restored: clock/analog 112dp,
+timer 196x58, streak/battery 92dp circles, date 170x58. Glyph (tick) tile
+REMOVED entirely (state/block/save/mapping). Selection ring -> drawBehind
+white stroke only while selected (no resting border). Per-widget visibility:
+LabShapeState.visible + if-gate per shape; editor sheet "Hide" button hides
+just that widget; top pill is now Hide all / Show all (resets individual).
 ## Request: v281 — corner editing + in-app widget editor (COMPLETE)
 
 - CORNER: GlassWidgetPane.read/writeCorner (corner_$id dp, default 28);

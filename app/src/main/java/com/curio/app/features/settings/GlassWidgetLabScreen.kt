@@ -329,7 +329,6 @@ import kotlin.math.roundToInt
             val streakState = remember { LabShapeState(IntOffset(200, 480)).apply { id = "streak" } }
             val batteryState = remember { LabShapeState(IntOffset(210, 340)).apply { id = "battery" } }
             val dateState = remember { LabShapeState(IntOffset(60, 620)).apply { id = "date" } }
-            val glyphState = remember { LabShapeState(IntOffset(190, 350)).apply { id = "glyph" } }
             // v274 - the One UI FROST comparison tile (baked pane, no refraction).
             val frostState = remember { LabShapeState(IntOffset(40, 720)).apply { id = "frost" } }
 
@@ -342,105 +341,34 @@ import kotlin.math.roundToInt
 
             if (widgetsVisible) {
                 // ── Clock — REAL time ──
-                LiquidLabShape(clockState, selectedId, wallLayer) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Text(clock, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = clockState.textColor)
-                        Text(dateLine.substringBefore(" ·"), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = clockState.textColor.copy(alpha = 0.85f))
-                    }
+                if (clockState.visible) {
+                    LiquidLabShape(clockState, selectedId, wallLayer, modifier = Modifier.size(112.dp)) {
+                }
                 }
                 // ── Analog clock — real ticking hands ──
-                LiquidLabShape(analogState, selectedId, wallLayer) {
-                    val cal = java.util.Calendar.getInstance().apply { timeInMillis = now }
-                    val hourAngle = ((cal.get(java.util.Calendar.HOUR_OF_DAY) % 12) + cal.get(java.util.Calendar.MINUTE) / 60f) * 30f
-                    val minuteAngle = (cal.get(java.util.Calendar.MINUTE) + cal.get(java.util.Calendar.SECOND) / 60f) * 6f
-                    Canvas(modifier = Modifier.fillMaxSize().padding(9.dp)) {
-                        val r = size.minDimension / 2f
-                        drawCircle(Color.White.copy(alpha = 0.25f), radius = r, style = Stroke(width = 3.dp.toPx()))
-                        // Hands rotate around center; drawn as rotated capsules.
-                        fun hand(angleDeg: Float, lenFrac: Float, widthPx: Float, color: Color) {
-                            val rad = Math.toRadians(angleDeg - 90.0)
-                            drawLine(
-                                color = color,
-                                start = center,
-                                end = Offset(
-                                    center.x + (lenFrac * r * kotlin.math.cos(rad)).toFloat(),
-                                    center.y + (lenFrac * r * kotlin.math.sin(rad)).toFloat()
-                                ),
-                                strokeWidth = widthPx,
-                                cap = androidx.compose.ui.graphics.StrokeCap.Round
-                            )
-                        }
-                        hand(hourAngle, 0.5f, 4.dp.toPx(), Color.White)
-                        hand(minuteAngle, 0.78f, 2.5.dp.toPx(), Color.White.copy(alpha = 0.9f))
-                        drawCircle(Color(0xFFFF8A3C), radius = 3.dp.toPx())
-                    }
+                if (analogState.visible) {
+                    LiquidLabShape(analogState, selectedId, wallLayer, modifier = Modifier.size(112.dp)) {
+                }
                 }
                 // ── Session pill — LIVE elapsed / Explored ──
-                LiquidLabShape(timerState, selectedId, wallLayer) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp)
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.PlayArrow, contentDescription = null,
-                            size = 22.dp, tint = timerState.textColor
-                        )
-                        Text(timerText, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = timerState.textColor)
-                    }
+                if (timerState.visible) {
+                    LiquidLabShape(timerState, selectedId, wallLayer, modifier = Modifier.width(196.dp).height(58.dp)) {
+                }
                 }
                 // ── Streak ring — fire icon + count in a progress circle ──
-                LiquidLabShape(streakState, selectedId, wallLayer) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Canvas(modifier = Modifier.fillMaxSize().padding(7.dp)) {
-                            val sweep = (streak.coerceAtMost(30) / 30f) * 360f
-                            drawArc(
-                                color = Color.White.copy(alpha = 0.25f), startAngle = -90f,
-                                sweepAngle = 360f, useCenter = false,
-                                style = Stroke(width = 5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                            )
-                            drawArc(
-                                color = Color(0xFFFF8A3C), startAngle = -90f,
-                                sweepAngle = sweep, useCenter = false,
-                                style = Stroke(width = 5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CurioIcon(name = CurioIcons.LocalFire, contentDescription = null, size = 18.dp, tint = Color(0xFFFF8A3C))
-                            Text("$streak", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = streakState.textColor)
-                        }
-                    }
+                if (streakState.visible) {
+                    LiquidLabShape(streakState, selectedId, wallLayer, modifier = Modifier.size(92.dp)) {
+                }
                 }
                 // ── Battery — real level ──
-                LiquidLabShape(batteryState, selectedId, wallLayer) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 20.dp, tint = Color(0xFF7DFF8A))
-                        Text("$batteryPct%", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = batteryState.textColor)
-                    }
+                if (batteryState.visible) {
+                    LiquidLabShape(batteryState, selectedId, wallLayer, modifier = Modifier.size(92.dp)) {
+                }
                 }
                 // ── Date pill ──
-                LiquidLabShape(dateState, selectedId, wallLayer) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Text(dateLine, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = dateState.textColor)
-                    }
+                if (dateState.visible) {
+                    LiquidLabShape(dateState, selectedId, wallLayer, modifier = Modifier.width(170.dp).height(58.dp)) {
                 }
-                // ── Glyph tile ──
-                LiquidLabShape(glyphState, selectedId, wallLayer) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 24.dp, tint = glyphState.textColor)
-                    }
                 }
                 // ── One UI frost tile (baked, non-refracting comparison) ──
                 Box(
@@ -488,7 +416,11 @@ import kotlin.math.roundToInt
 
             // ── Show/hide all floating widgets ──
             Surface(
-                onClick = { widgetsVisible = !widgetsVisible },
+                onClick = {
+                    widgetsVisible = !widgetsVisible
+                    listOf(clockState, analogState, timerState, streakState, batteryState, dateState, frostState)
+                        .forEach { it.visible = widgetsVisible }
+                },
                 shape = RoundedCornerShape(50),
                 color = Color.Black.copy(alpha = 0.45f),
                 modifier = Modifier
@@ -497,7 +429,7 @@ import kotlin.math.roundToInt
                     .padding(end = 16.dp, top = 56.dp)
             ) {
                 Text(
-                    if (widgetsVisible) "Hide widgets" else "Show widgets",
+                    if (widgetsVisible) "Hide all" else "Show all",
                     color = Color.White,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
@@ -507,9 +439,9 @@ import kotlin.math.roundToInt
             // ── Per-widget editor: size · blur · text color ──
             selectedId.value?.let { selId ->
                 val st: LabShapeState? = when (selId) {
-                    "clock" -> clockState; "timer" -> timerState
+                    "clock" -> clockState; "analog" -> analogState; "timer" -> timerState
                     "streak" -> streakState; "battery" -> batteryState
-                    "date" -> dateState; "glyph" -> glyphState; else -> frostState
+                    "date" -> dateState; else -> frostState
                 }
                 st?.let { sel ->
                     Surface(
@@ -525,6 +457,17 @@ import kotlin.math.roundToInt
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(selId.replaceFirstChar { it.uppercase() }, color = Color.White, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.weight(1f))
+                                // v282 - PER-WIDGET hide: removes just this one;
+                                // "Show all" brings everything back.
+                                Text("Hide",
+                                    color = Color(0xFFFF9B9B),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.clickable {
+                                        sel.visible = false
+                                        selectedId.value = null
+                                    }
+                                )
+                                Spacer(Modifier.width(16.dp))
                                 Text("Done", color = Color(0xFF9FBFFF), fontWeight = FontWeight.Bold,
                                     modifier = Modifier.clickable { selectedId.value = null })
                             }
@@ -559,7 +502,7 @@ import kotlin.math.roundToInt
                     val h = context.resources.displayMetrics.heightPixels.toFloat()
                     com.curio.app.infrastructure.GlassLabComposition.save(
                         context,
-                        listOf(clockState, analogState, timerState, streakState, batteryState, dateState, glyphState)
+                        listOf(clockState, analogState, timerState, streakState, batteryState, dateState)
                             .map { s ->
                                 com.curio.app.infrastructure.GlassLabComposition.Shape(
                                     id = s.id, xFrac = s.pos.x / w, yFrac = s.pos.y / h,
@@ -722,11 +665,12 @@ private fun LiquidLabShape(
     state: LabShapeState,
     selectedId: androidx.compose.runtime.MutableState<String?>,
     backdrop: com.kyant.backdrop.backdrops.LayerBackdrop,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     val selected = selectedId.value == state.id
     Box(
-        modifier = Modifier
+        modifier = modifier
             .offset { state.pos }
             .graphicsLayer {
                 scaleX = state.scale
@@ -753,11 +697,17 @@ private fun LiquidLabShape(
                 }
             }
             .clickable { selectedId.value = state.id }
-            .border(
-                width = if (selected) 2.dp else 0.dp,
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(50)
-            ),
+            // Selection = soft white ring ONLY while selected; resting shapes
+            // carry no border at all.
+            .drawBehind {
+                if (selected) {
+                    drawRoundRect(
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = Stroke(width = 2.5.dp.toPx()),
+                        cornerRadius = CornerRadius(size.minDimension / 2f)
+                    )
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         content()
@@ -768,6 +718,7 @@ private fun LiquidLabShape(
 private class LabShapeState(initialPos: IntOffset) {
     var id: String = ""
     var pos by mutableStateOf(initialPos)
+    var visible by mutableStateOf(true)
     var scale by mutableFloatStateOf(1f)
     var blurDp by mutableFloatStateOf(8f)
     var textColor by mutableStateOf(Color.White)
