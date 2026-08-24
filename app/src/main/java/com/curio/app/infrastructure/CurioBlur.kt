@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RuntimeShader
 import android.os.Build
+import androidx.annotation.RequiresApi
 import kotlin.math.exp
 import kotlin.math.min
 
@@ -40,6 +41,7 @@ object CurioBlur {
     // ── AGSL Gaussian (API 33+) ──────────────────────────────────────
 
     /** Two-pass separable gaussian via AGSL RuntimeShader. */
+    @RequiresApi(33)
     private fun agslBlur(src: Bitmap, radius: Float): Bitmap {
         val w = src.width
         val h = src.height
@@ -217,8 +219,11 @@ object CurioBlur {
     fun readDeviceWallpaper(context: android.content.Context): Bitmap? {
         return try {
             val wm = context.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager
-            val d = @Suppress("DEPRECATION") wm.defaultDisplay
+            @Suppress("DEPRECATION")
+            val d = wm.defaultDisplay
+            @Suppress("DEPRECATION")
             val w = d?.width ?: 1080
+            @Suppress("DEPRECATION")
             val h = d?.height ?: 1920
             android.app.WallpaperManager.getInstance(context).getDrawable()?.let { drawable ->
                 val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
