@@ -1,3 +1,6 @@
+FIX: Material theme now restyles the Spin filter + category picker heroes and their pills with the shared primaryContainer tear look instead of the category tear.
+FIX: The detail hero under Material hero tears wears the same airy container color as Home/Profile (was a dark saturated block), with matching ink.
+IMPROVE: Turning Material theme on now auto-enables "Material hero tears" so the whole banner family switches with it.
 REMOVE: The "Glass parallax tilt" experiment is gone - the gravity sensor no longer runs for it (performance/heat win; the feature never worked well).
 REVERT: The session screenshot watcher is withdrawn (permission + plumbing removed).
 NEW: Glass widget - add a frosted liquid-glass tile to your home screen showing your live streak; tap it to open Curio (long-press your launcher > Widgets > Curio).

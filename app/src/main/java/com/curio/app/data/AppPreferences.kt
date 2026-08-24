@@ -793,6 +793,14 @@ object AppPreferences {
     fun setMaterialThemeEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_MATERIAL_THEME, enabled).apply()
         materialThemeState = enabled
+        // v270 — first-time ON co-enables "Material hero tears": the theme
+        // is meant to be seen across the torn banners, and a fresh Material
+        // user shouldn't have to find the second toggle. Turning tears off
+        // afterwards still sticks (only flipping the THEME re-arms it).
+        if (enabled) {
+            prefs(context).edit().putBoolean(KEY_MATERIAL_HERO_TEARS, true).apply()
+            materialHeroTearsState = true
+        }
     }
 
     /** Whether the torn heroes follow the Material theme (v223, default off). */

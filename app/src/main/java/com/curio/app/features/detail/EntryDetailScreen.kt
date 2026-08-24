@@ -285,12 +285,17 @@ fun EntryDetailScreen(
     // White when pastel mode is off, preserving the exact pre-pastel look.
     // v28 — dark mode hero title text is always white/creamish (never the
     // tinted light twin) so the banner headline stays crisp light-on-deep.
-    val heroInk = cat.heroHeaderInk()
+    // v270 — Material tears pair the container fill with its own ink.
+    val heroInk = if (materialHeroTearsOn()) MaterialTheme.colorScheme.onPrimaryContainer
+        else cat.heroHeaderInk()
     // v81 — dark: the hero cards flip to light ink on a near-black sheet
     // (the exact light-mode reversal).
     val heroCardInk = if (isCurioDarkTheme()) Color(0xFFEDE7DC) else Color(0xFF232A35)
     val heroSheetColor = if (isCurioDarkTheme()) Color(0xFF121316) else Color(0xFFFDFCF9)
-    val heroStart = if (materialHeroTearsOn()) MaterialTheme.colorScheme.primary
+    // v270 — Material tears: wear primaryContainer, the SAME shared tear
+    // color Home/Profile/Settings use — the old `primary` read as a dark
+    // saturated block instead of the family's airy container tone.
+    val heroStart = if (materialHeroTearsOn()) MaterialTheme.colorScheme.primaryContainer
         else CurioGradients.categoryCardFill(cat.headerAccent())
     // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
     // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,

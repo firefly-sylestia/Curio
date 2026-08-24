@@ -1,3 +1,17 @@
+## Request: v270 — parallax removed + material hero/pill family (COMPLETE)
+
+1. PARALLAX REMOVED (approved): GlassParallax.kt deleted; toggle row,
+   prefs (state/seed/getter/setter/KEY), NavHost sensor LaunchedEffect,
+   CurioCrashReporter self-heal line all gone. tiltGlowOffset() kept as a
+   constant-offset stub so TabBar call sites stay untouched.
+2. SPIN heroes material look: filterHero + pickerHero fill/ink swap to
+   primaryContainer/onPrimaryContainer when materialThemeOn — pills derived
+   from hero ink follow automatically. Apply button → primary/onPrimary.
+3. DETAIL hero under Material tears: primaryContainer (+ onPrimaryContainer
+   ink), the shared Home/Profile family color — was `primary` (dark block).
+4. setMaterialThemeEnabled(true) now co-enables materialHeroTears (first-run
+   discoverability); explicit tears-off still sticks.
+
 ## Request: v269 — legacy blur diagnosis + 4 fixes (COMPLETE)
 
 1. LEGACY BLUR not working on device: symptom pattern (nav solid+faux sheen,
