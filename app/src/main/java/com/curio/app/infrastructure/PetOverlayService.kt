@@ -106,6 +106,12 @@ class PetOverlayService : Service() {
     private val recoveringState = androidx.compose.runtime.mutableStateOf(false)
     private val wanderState = androidx.compose.runtime.mutableStateOf(true)
     private val menuVisibleState = androidx.compose.runtime.mutableStateOf(false)
+    // v268 — RICHER LIFE: a periodic idle PLAY-BOW hop (the sprite's playKey
+    // one-shot) so the pet feels alive even when wandering is off, and a
+    // double-tap SPIN for a playful touch reaction.
+    private val idlePlayKey = androidx.compose.runtime.mutableIntStateOf(0)
+    private val spinKeyState = androidx.compose.runtime.mutableIntStateOf(0)
+    private var idleLoopRunning = false
 
     /** Persisted position — the pet STAYS where the user left it. */
     private val overlayPrefs by lazy {
@@ -219,6 +225,22 @@ class PetOverlayService : Service() {
                 scheduleWander()
             }
         }
+        startIdleLoop()
+    }
+
+    /** v268 — every 6–14s of quiet, the pet does a little play-bow hop. */
+    private fun startIdleLoop() {
+        if (idleLoopRunning) return
+        idleLoopRunning = true
+        mainHandler.postDelayed(object : Runnable {
+            override fun run() {
+                if (petView == null) { idleLoopRunning = false; return }
+                if (!draggingState.value && !menuVisibleState.value) {
+                    idlePlayKey.value++
+                }
+                mainHandler.postDelayed(this, (6_000L..14_000L).random())
+            }
+        }, 5_000L)
     }
 
     private fun savePosition() {
@@ -387,6 +409,8 @@ class PetOverlayService : Service() {
                                         celebrateKey++
                                     }
                                 },
+                                // v268 — double-tap: the playful 360° twirl.
+                                onDoubleTap = { spinKeyState.value++ },
                                 onLongPress = {
                                     // v261 — opens the in-window menu instead of
                                     // instantly sending the pet home.
@@ -404,6 +428,8 @@ class PetOverlayService : Service() {
                         spriteSize = 84.dp,
                         celebrateKey = celebrateKey,
                         squishKey = squishKey,
+                        playKey = idlePlayKey.value,
+                        spinKey = spinKeyState.value,
                         // v263 — full motion wiring: walk bob + lean + tail wag
                         // while gliding, lifted startled pose while held, and a
                         // short dizzy wobble right after being put down.

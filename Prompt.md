@@ -1,3 +1,23 @@
+## Request: v269 — legacy blur diagnosis + 4 fixes (COMPLETE)
+
+1. LEGACY BLUR not working on device: symptom pattern (nav solid+faux sheen,
+   reveal transparent-no-blur) proves snapshot never published — toImageBitmap
+   "succeeds" but replays NOTHING on some pre-12 software paths, publishing a
+   BLANK image which the capsule drew as empty glass. Fix: blank-snapshot
+   guard (alpha scan; blank = failure) + retry budget (4 failures before
+   readbackBroken latch). If a device can't produce pixels it now falls back
+   to faux cleanly instead of half-glass.
+2. LAB wallpaper: added "Set wallpaper image" button (PickVisualMedia, no
+   permission) since WallpaperManager.getDrawable is permission-gated and
+   fails silently on many devices.
+3. BUBBLE expand glitch+shift: removed the window re-centering entirely
+   (view.post lagged one frame behind the resize = visible shift); window is
+   TOP|START anchored so growth reads stable. Scale animations now tween-only
+   (spring overshot past 1.0 → content clipped at window edge = flicker);
+   corner spring critically damped.
+4. PET overlay richer: idle play-bow hop every 6–14s (playKey), double-tap
+   spin (spinKey), wired through service states.
+
 ## Request: v268 — watcher reverted; lab fixed + real widget (COMPLETE)
 
 1. Screenshot watcher REVERTED per user: SessionScreenshotWatcher.kt deleted;

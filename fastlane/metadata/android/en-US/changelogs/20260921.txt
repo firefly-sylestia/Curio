@@ -1,6 +1,10 @@
 REVERT: The session screenshot watcher is withdrawn (permission + plumbing removed).
 NEW: Glass widget - add a frosted liquid-glass tile to your home screen showing your live streak; tap it to open Curio (long-press your launcher > Widgets > Curio).
 FIX: The Glass widget lab now renders REAL refraction unconditionally on Android 12+ - the shapes use the raw nav-bar glass recipe directly instead of a toggle-gated path that could fall back to a flat pane.
+FIX: Real blur on older devices now detects blank readbacks and retries before falling back - no more pills that look transparent with no blur.
+FIX: The explore bubble no longer shifts after expanding and no longer flickers mid-morph (window stays anchored; animations can't overshoot anymore).
+ADD: Glass widget lab - a "Set wallpaper image" picker, since auto-detecting the system wallpaper fails on many devices.
+ADD: The floating pet got richer life outside the app - periodic play-bow hops when idle and a double-tap spin.
 IMPROVE: The explore bubble expands noticeably snappier - the open morph settles in ~150ms instead of drifting open.
 IMPROVE: Home & Profile floating pills are now liquid glass from rest when Liquid glass is on - no more solid hero shade, so the dark mid-scroll state is gone for good.
 REVERT: The nav tab glyph crossfade is undone - the icon swap is instant again, exactly as before.

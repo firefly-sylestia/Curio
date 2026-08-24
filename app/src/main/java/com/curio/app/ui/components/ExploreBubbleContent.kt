@@ -273,10 +273,11 @@ fun ExploreBubbleContent(
     // pill visibly grows into the panel around its center.
     val cornerRadius by animateDpAsState(
         targetValue = if (minimized) PILL_CORNER_RADIUS else PANEL_CORNER_RADIUS,
-        // v266 — SNAPPY: the old 380-stiffness spring read slow/laggy on the
-        // open morph. Higher stiffness + near-critical damping settles in
-        // ~180ms with zero visible bounce.
-        animationSpec = spring(dampingRatio = 0.9f, stiffness = 700f),
+        // v268 — CRITICAL damping: an underdamped corner radius overshoots
+        // past the window's rounded clip mid-morph (a flicker at the corners
+        // — part of the "glitchy" report). Critically damped = fast, zero
+        // overshoot.
+        animationSpec = spring(dampingRatio = 1f, stiffness = 600f),
         label = "bubbleCorner"
     )
 
@@ -360,16 +361,13 @@ fun ExploreBubbleContent(
         AnimatedContent(
             targetState = minimized,
             transitionSpec = {
-                // v266 — faster handoff to match the stiffer corner spring:
-                // the incoming state lands in ~150ms (was ~350ms of float).
-                // Still one spring family, still a one-step window resize.
-                (fadeIn(tween(90)) +
-                    scaleIn(
-                        initialScale = 0.92f,
-                        animationSpec = spring(dampingRatio = 0.8f, stiffness = 700f)
-                    )) togetherWith
-                    (fadeOut(tween(100)) +
-                        scaleOut(targetScale = 0.94f, animationSpec = tween(100)))
+                // v268 — TWEEN-ONLY scale: the springy scale-in overshot past
+                // 1.0 while the overlay WINDOW was already full-size, so the
+                // content clipped at the window edge for a frame (the flicker
+                // half of the glitch). Pure tweens never exceed their target,
+                // and the one-step window resize stays deterministic.
+                (fadeIn(tween(90)) + scaleIn(initialScale = 0.94f, animationSpec = tween(150))) togetherWith
+                    (fadeOut(tween(110)) + scaleOut(targetScale = 0.96f, animationSpec = tween(110)))
             },
             label = "bubbleExpand"
         ) { m ->

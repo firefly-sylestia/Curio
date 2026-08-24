@@ -79,8 +79,23 @@ import kotlin.math.roundToInt
 fun GlassWidgetLabScreen(navController: NavController) {
     val context = LocalContext.current
 
-    // ── The user's current wallpaper ──────────────────────────────────
+    // v268 — MANUAL PICK: auto-detecting the system wallpaper fails on many
+    // devices (permission-gated), so the lab has an explicit "Set wallpaper"
+    // button using the photo picker — no permission needed, and the picked
+    // image loads instantly over the gradient fallback.
     var wallpaper by remember { mutableStateOf<ImageBitmap?>(null) }
+    val pickWallpaper = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            wallpaper = runCatching {
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    android.graphics.BitmapFactory.decodeStream(input)?.asImageBitmap()
+                }
+            }.getOrNull() ?: wallpaper
+        }
+    }
+
     // READ_WALLPAPER_INTERNAL is signature-only and MANAGE_EXTERNAL_STORAGE
     // is far too broad to request — but getDrawable() works for the caller's
     // own preview on real devices (and everything here is wrapped in
@@ -229,6 +244,30 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 24.dp, tint = Color.White)
                 }
             }
+        }
+
+        // ── Wallpaper source pill — top-right, above everything ──────
+        Surface(
+            onClick = {
+                pickWallpaper.launch(
+                    androidx.activity.result.PickVisualMediaRequest(
+                        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly
+                    )
+                )
+            },
+            shape = RoundedCornerShape(50),
+            color = Color.Black.copy(alpha = 0.45f),
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(end = 16.dp, top = 8.dp)
+                .align(Alignment.TopEnd)
+        ) {
+            Text(
+                "Set wallpaper image",
+                color = Color.White,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            )
         }
 
         // ── Back pill — floats over everything, wears the glass too ────

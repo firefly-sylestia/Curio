@@ -75,8 +75,11 @@ object CurioLegacyBlur {
     var captureOrigin by mutableStateOf(IntOffset.Zero)
         internal set
 
-    /** Set once if pixel readback fails on this device — stop trying. */
+    /** Set once pixel readback has failed repeatedly — stop trying. */
     internal var readbackBroken = false
+
+    /** v268 — how many consecutive failures before latching off. */
+    internal var failureCount = 0
 
     /** Whether the engine can run at all right now (toggles + API + health). */
     fun isActive(): Boolean =
@@ -142,12 +145,29 @@ fun CurioLegacyBlurSnapshotter(layer: GraphicsLayer) {
                     android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG)
                 )
                 stackBlur(small, BLUR_RADIUS_PX)
+                // v268 — BLANK-SNAPSHOT GUARD: a readback that "succeeds" but
+                // produces a fully-transparent image (some pre-12 software
+                // paths replay nothing) used to be published as-is — the
+                // pills then drew NOTHING behind them ("transparent but no
+                // blur"). Treat blank output as a failure instead.
+                val px = IntArray(sw * sh)
+                small.getPixels(px, 0, sw, 0, 0, sw, sh)
+                var anyOpaque = false
+                for (p in px) {
+                    if ((p ushr 24) > 8) { anyOpaque = true; break }
+                }
+                if (!anyOpaque) throw IllegalStateException("blank legacy readback")
+                CurioLegacyBlur.failureCount = 0
                 CurioLegacyBlur.snapshot = small.asImageBitmap()
             }.onFailure {
-                // Readback unsupported on this device — latch off; every
-                // capsule falls back to the simulated veil from now on.
-                CurioLegacyBlur.readbackBroken = true
-                CurioLegacyBlur.snapshot = null
+                // v268 — RETRY BUDGET: give the readback a few chances (an
+                // early tick can race the layer's first record) before
+                // latching off to the simulated veil for the session.
+                CurioLegacyBlur.failureCount++
+                if (CurioLegacyBlur.failureCount >= READBACK_MAX_FAILURES) {
+                    CurioLegacyBlur.readbackBroken = true
+                    CurioLegacyBlur.snapshot = null
+                }
             }
         }
     }
@@ -282,3 +302,4 @@ private const val SNAPSHOT_INTERVAL_MS = 125L
 private const val SNAPSHOT_MAX_DIM = 160
 private const val BLUR_RADIUS_PX = 6
 private const val BLUR_ROUNDS = 2
+private const val READBACK_MAX_FAILURES = 4
