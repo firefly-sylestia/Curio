@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -91,7 +92,7 @@ fun GlassWidgetLabScreen(navController: NavController) {
 
     // Fallback wallpaper: a rich multi-stop gradient so the lab still works
     // when no bitmap wallpaper is set (live wallpapers return nothing).
-    val fallbackBrush = androidx.compose.foundation.Brush.linearGradient(
+    val fallbackBrush = Brush.linearGradient(
         listOf(
             Color(0xFF7E57C2),
             Color(0xFFEF9A9A),

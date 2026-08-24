@@ -425,6 +425,11 @@ private fun MinimizedPill(
     onExpand: () -> Unit
 ) {
     val baseFill = MaterialTheme.colorScheme.surfaceContainerHigh
+    // v264 — dome geometry in composition px (fixed 46dp pill).
+    val domeCenterPx = with(LocalDensity.current) {
+        Offset((46.dp * 0.34f).toPx(), (46.dp * 0.28f).toPx())
+    }
+    val domeRadiusPx = with(LocalDensity.current) { (46.dp * 0.95f).toPx() }
     Box(
         modifier = Modifier
             .padding(4.dp)
@@ -447,14 +452,17 @@ private fun MinimizedPill(
             }
             .clip(CircleShape)
             .background(
+                // v264 — the pill is a FIXED 46dp circle, so the dome's
+                // geometry is computed in composition px (DrawScope.size
+                // doesn't exist here — that was the compile error).
                 Brush.radialGradient(
                     colors = listOf(
                         lerp(baseFill, Color.White, 0.22f),
                         baseFill,
                         lerp(baseFill, Color.Black, 0.16f)
                     ),
-                    center = Offset(size.width * 0.34f, size.height * 0.28f),
-                    radius = size.minDimension * 0.95f
+                    center = domeCenterPx,
+                    radius = domeRadiusPx
                 )
             )
             .border(
