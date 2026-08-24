@@ -93,8 +93,8 @@ class GlassLabWallpaperService : WallpaperService() {
         private val blurCache = HashMap<Int, Bitmap>()
 
         /**
-         * v290 — GAUSSIAN FROST via CPU box blur (3-pass ≈ gaussian).
-         * Cached per quantized blur level.
+         * v290 — GAUSSIAN FROST via CurioBlur (custom blur engine toggle)
+         * or CPU box blur (3-pass ≈ gaussian). Cached per quantized blur level.
          */
         private fun blurredFor(src: Bitmap, blurDp: Float): Bitmap? {
             val density = this@GlassLabWallpaperService.resources.displayMetrics.density
@@ -106,7 +106,14 @@ class GlassLabWallpaperService : WallpaperService() {
             val sw = max(8, (src.width / factor).toInt())
             val sh = max(8, (src.height / factor).toInt())
             val small = Bitmap.createScaledBitmap(src, sw, sh, true)
-            val blurred = boxBlur(small, 25)
+            val blurred = if (com.curio.app.data.AppPreferences.customBlurEngineState) {
+                CurioBlur.blur(small, 25f) ?: run {
+                    small.recycle()
+                    return null
+                }
+            } else {
+                boxBlur(small, 25)
+            }
             if (blurred !== small) small.recycle()
             // Progressive upscale to original resolution
             var cur = blurred
