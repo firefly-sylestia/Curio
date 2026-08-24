@@ -123,7 +123,7 @@ object CurioBlur {
         var stackPointer: Int
         var stackStart: Int
         var rSum: Int; var gSum: Int; var bSum: Int; var aSum: Int
-        var rOutSum: Int; var gOutSum: Int; bOutSum: Int; aOutSum: Int
+        var rOutSum: Int; var gOutSum: Int; var bOutSum: Int; var aOutSum: Int
         var rInSum: Int; var gInSum: Int; var bInSum: Int; var aInSum: Int
 
         // ── Horizontal pass ──
