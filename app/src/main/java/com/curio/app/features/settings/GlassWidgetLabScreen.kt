@@ -79,6 +79,12 @@ fun GlassWidgetLabScreen(navController: NavController) {
 
     // ── The user's current wallpaper ──────────────────────────────────
     var wallpaper by remember { mutableStateOf<ImageBitmap?>(null) }
+    // READ_WALLPAPER_INTERNAL is signature-only and MANAGE_EXTERNAL_STORAGE
+    // is far too broad to request — but getDrawable() works for the caller's
+    // own preview on real devices (and everything here is wrapped in
+    // runCatching with a gradient fallback), so lint's hard requirement is
+    // suppressed deliberately.
+    @android.annotation.SuppressLint("MissingPermission")
     LaunchedEffect(Unit) {
         wallpaper = withContext(Dispatchers.IO) {
             runCatching {
