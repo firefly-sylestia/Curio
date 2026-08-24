@@ -86,37 +86,77 @@ class GlassWidgetProvider : AppWidgetProvider() {
                 .edit().putString("mode_$id", mode.name).apply()
         }
 
+        /** Cached device wallpaper — decoded once, reused across all widget updates. */
+        private var wallpaperCache: android.graphics.Bitmap? = null
+        private var wallpaperCacheKey: String? = null
+
+        private fun getWallpaper(context: Context): android.graphics.Bitmap? {
+            val key = "device_wallpaper"
+            if (wallpaperCache != null && wallpaperCacheKey == key) return wallpaperCache
+            wallpaperCache = CurioBlur.readDeviceWallpaper(context)
+            wallpaperCacheKey = key
+            return wallpaperCache
+        }
+
         fun updateAppWidget(context: Context, manager: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.glass_widget_layout)
-            // v274 - per-widget CUSTOMIZABLE pane: rendered bitmap from the
-            // user's preset / custom color + opacity, sized to the placed
-            // widget via the launcher's options.
             val opts = manager.getAppWidgetOptions(id)
             val density = context.resources.displayMetrics.density
             val wDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 180)
             val hDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 56)
+            val wPx = (wDp * density).toInt()
+            val hPx = (hDp * density).toInt()
             val style = GlassWidgetPane.readStyle(context, id)
-            // v285 — the saved CORNER RADIUS drives both the pane bitmap and
-            // the widget outline. (It was hardcoded to 28dp here before, so
-            // the slider appeared to do nothing on-device.)
             val cornerDp = GlassWidgetPane.readCorner(context, id)
             applyCornerShape(views, cornerDp)
-            if (style == GlassWidgetPane.STYLE_DEFAULT) {
-                // v275 - pure One UI look: launcher wallpaper blur + the root
-                // tint only. No pane bitmap in the way.
-                views.setViewVisibility(R.id.glass_widget_pane, android.view.View.GONE)
-            } else {
-                views.setViewVisibility(R.id.glass_widget_pane, android.view.View.VISIBLE)
-                val (top, bottom) = GlassWidgetPane.resolveColors(context, id, style)
-                views.setImageViewBitmap(
-                    R.id.glass_widget_pane,
-                    GlassWidgetPane.render(
-                        widthPx = (wDp * density).toInt(),
-                        heightPx = (hDp * density).toInt(),
-                        cornerPx = cornerDp * density,
-                        top = top, bottom = bottom
+
+            // ── Self-contained wallpaper blur (works on EVERY launcher) ──
+            // On Samsung, the launcher does real-time blur natively — skip
+            // our bitmap blur and let it shine. On every other launcher,
+            // CurioBlur reads the wallpaper, extracts the region behind
+            // this widget, blurs it, and sets it as the pane ImageView
+            // background (behind the gradient pane).
+            val samsung = android.os.Build.MANUFACTURER.contains("samsung", true)
+            views.setViewVisibility(R.id.glass_widget_pane, android.view.View.VISIBLE)
+
+            val (top, bottom) = GlassWidgetPane.resolveColors(context, id, style)
+            val paneBmp = GlassWidgetPane.render(
+                widthPx = wPx, heightPx = hPx,
+                cornerPx = cornerDp * density,
+                top = top, bottom = bottom
+            )
+
+            if (!samsung) {
+                // Non-Samsung: draw self-contained wallpaper blur behind the pane
+                val wp = getWallpaper(context)
+                if (wp != null) {
+                    val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+                    val screenW = @Suppress("DEPRECATION") wm.defaultDisplay?.width ?: wp.width
+                    val screenH = @Suppress("DEPRECATION") wm.defaultDisplay?.height ?: wp.height
+                    val blurredBg = CurioBlur.blurWallpaperRegion(
+                        wallpaper = wp,
+                        widgetLeft = 0, widgetTop = 0,
+                        widgetRight = wPx, widgetBottom = hPx,
+                        screenW = screenW, screenH = screenH,
+                        blurRadius = 14f, density = density
                     )
-                )
+                    if (blurredBg != null) {
+                        // Composite: blurred wallpaper → pane gradient on top
+                        val composited = Bitmap.createBitmap(wPx, hPx, Bitmap.Config.ARGB_8888)
+                        val c = Canvas(composited)
+                        c.drawBitmap(blurredBg, 0f, 0f, null)
+                        blurredBg.recycle()
+                        c.drawBitmap(paneBmp, 0f, 0f, null)
+                        views.setImageViewBitmap(R.id.glass_widget_pane, composited)
+                    } else {
+                        views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
+                    }
+                } else {
+                    views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
+                }
+            } else {
+                // Samsung: pure launcher blur + gradient pane
+                views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
             }
             val (glyph, title, stats) = resolveContent(context, readMode(context, id))
             views.setImageViewBitmap(

@@ -93,11 +93,8 @@ class GlassLabWallpaperService : WallpaperService() {
         private val blurCache = HashMap<Int, Bitmap>()
 
         /**
-         * v286 — TRUE GAUSSIAN FROST, the exact algorithm family the lab's
-         * Kyant backdrop runs (RenderEffect blur): ScriptIntrinsicBlur on a
-         * downscaled copy, scaled so the requested dp radius maps inside the
-         * kernel's 25px cap, then smooth progressive doubling back up.
-         * Cached per quantized level (one RS pass per distinct blur value).
+         * v290 — GAUSSIAN FROST via CurioBlur (AGSL GPU on API 33+,
+         * CPU StackBlur fallback). Cached per quantized blur level.
          */
         private fun blurredFor(src: Bitmap, blurDp: Float): Bitmap? {
             val density = this@GlassLabWallpaperService.resources.displayMetrics.density
@@ -105,35 +102,26 @@ class GlassLabWallpaperService : WallpaperService() {
             val factor = (radiusPx / 25f).coerceIn(1f, 12f)
             val key = (factor * 10f).toInt()
             blurCache[key]?.let { return it }
-            val result = runCatching {
-                val sw = max(8, (src.width / factor).toInt())
-                val sh = max(8, (src.height / factor).toInt())
-                val input = Bitmap.createScaledBitmap(src, sw, sh, true)
-                val out = Bitmap.createBitmap(input)
-                val rs = android.renderscript.RenderScript.create(this@GlassLabWallpaperService)
-                try {
-                    val ain = android.renderscript.Allocation.createFromBitmap(rs, input)
-                    val aout = android.renderscript.Allocation.createFromBitmap(rs, out)
-                    val script = android.renderscript.ScriptIntrinsicBlur.create(
-                        rs, android.renderscript.Element.U8_4(rs)
-                    )
-                    script.setRadius(25f)
-                    script.setInput(ain)
-                    script.forEach(aout)
-                    aout.copyTo(out)
-                } finally {
-                    rs.destroy()
-                }
-                var cur = out
-                while (cur.width < src.width / 2) {
-                    val nw = min(cur.width * 2, src.width)
-                    val nh = (nw.toLong() * src.height / src.width).toInt()
-                    cur = Bitmap.createScaledBitmap(cur, nw, nh, true)
-                }
-                cur
-            }.getOrNull()
-            if (result != null) blurCache[key] = result
-            return result
+            // Downscale for blur perf, then progressive doubling back up
+            val sw = max(8, (src.width / factor).toInt())
+            val sh = max(8, (src.height / factor).toInt())
+            val small = Bitmap.createScaledBitmap(src, sw, sh, true)
+            val blurred = CurioBlur.blur(small, 25f) ?: run {
+                small.recycle()
+                return null
+            }
+            small.recycle()
+            // Progressive upscale to original resolution
+            var cur = blurred
+            while (cur.width < src.width / 2) {
+                val nw = min(cur.width * 2, src.width)
+                val nh = (nw.toLong() * src.height / src.width).toInt()
+                val up = Bitmap.createScaledBitmap(cur, nw, nh, true)
+                if (up !== cur) cur.recycle()
+                cur = up
+            }
+            blurCache[key] = cur
+            return cur
         }
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
