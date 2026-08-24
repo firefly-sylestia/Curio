@@ -552,18 +552,15 @@ fun ProfileScreen(navController: NavController) {
         // rest both paths show the exact same SOLID hero fill.
         val glassOn = isInScreenGlassActive()
         // Resolve solid target colors from scroll, then animate the paint.
-        // v264 — FAST GLASS HANDOFF (same fix as Home): with glass on, the
-        // solid hero fill commits to fully-clear glass by ~40% of the scroll
-        // instead of fading across the whole range — the mid-morph never
-        // shows a semi-transparent dark fill sitting on the blurred backdrop.
-        val fastGlassShift = FastOutSlowInEasing.transform((stickyProgress * 2.5f).coerceIn(0f, 1f))
-        val targetPillBg = lerp(
-            restPillBg,
-            if (glassOn) Color.Transparent else frostPillBg,
-            if (glassOn) fastGlassShift else frostShift
-        )
-        val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
-        val targetPillIcon = lerp(heroInk, frostPillIcon, frostShift)
+        // v267 — ALWAYS GLASS (user request, same as Home): with liquid glass
+        // on there is NO hero-fill phase — the pills are clear refracting
+        // glass from rest, so no dark mid-scroll state can exist. Ink + rim
+        // sit at their scrolled values from the start. The non-glass path
+        // keeps its classic hero-fill → frost morph unchanged.
+        val targetPillBg = if (glassOn) Color.Transparent
+            else lerp(restPillBg, frostPillBg, frostShift)
+        val targetPillRim = if (glassOn) frostPillRim else lerp(restPillRim, frostPillRim, frostShift)
+        val targetPillIcon = if (glassOn) frostPillIcon else lerp(heroInk, frostPillIcon, frostShift)
         val pillBg by animateColorAsState(
             targetValue = targetPillBg,
             animationSpec = tween(CurioMotion.Durations.Quick),
@@ -606,11 +603,12 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
-                shadowElevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                shadowElevation = if (glassOn) 0.dp else 6.dp * frostShift,
                 disableRipple = true,
                 pillInteraction = backPillInteraction,
                 // v241 — clear refracting glass once the morph begins.
-                modifier = if (glassOn && frostShift > 0.01f)
+                // v267 — always glass from rest.
+                modifier = if (glassOn)
                     Modifier.liquidGlassCapsule(
                         restPillBg,
                         washAlpha = 0.45f,
@@ -623,9 +621,10 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
                 bg = pillBg,
                 iconTint = pillIcon,
-                elevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                elevation = if (glassOn) 0.dp else 6.dp * frostShift,
                 pillInteraction = searchPillInteraction,
-                modifier = if (glassOn && frostShift > 0.01f)
+                // v267 — always glass from rest.
+                modifier = if (glassOn)
                     Modifier.liquidGlassCapsule(
                         restPillBg,
                         washAlpha = 0.45f,

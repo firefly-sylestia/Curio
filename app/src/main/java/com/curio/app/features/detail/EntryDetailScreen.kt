@@ -1137,7 +1137,10 @@ private fun BoxScope.DetailStickyBar(
     // siblings of it — nothing they sample contains them). Fully CLEAR
     // refracting glass, per the request.
     val glassOn = isInScreenGlassActive()
-    val detailGlassActive = glassOn && frostShift > 0.01f
+    // v267 — ALWAYS GLASS (user request, same as Home/Profile): no scroll
+    // threshold — the back + more pills are refracting glass from rest, so
+    // there is no solid hero-shade phase that could ever read dark mid-scroll.
+    val detailGlassActive = glassOn
     val frostFill = if (isCurioDarkTheme())
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
         else lerp(heroFill, lerp(heroFill, curioPillTintLift(), 0.38f), frostShift)

@@ -1,3 +1,15 @@
+## Request: v267 — revert glyph crossfade + always-glass pills (COMPLETE)
+
+1. REVERTED the v266 nav glyph Crossfade (CurioBottomNav) — instant swap is
+   back; import removed.
+2. ALWAYS GLASS (dark mid-scroll killed at the root, user's proposal):
+   HomeScreen menu/profile, ProfileScreen back/search — when glass on, pill
+   bg = Transparent from rest (no hero-fill lerp), rim/ink pinned to scrolled
+   values, glass modifier applied unconditionally (no frostShift gate).
+   EntryDetailScreen detailGlassActive = glassOn (no scroll threshold) so
+   back/more pills + glass more-menu are live from rest. Non-glass paths
+   untouched (classic hero-fill → frost morph preserved everywhere).
+
 ## Request: v266 — session screenshots + snappy bubble + nav glyph crossfade (COMPLETE)
 
 User correction: NO traveling blob on the classic nav — keep capsule

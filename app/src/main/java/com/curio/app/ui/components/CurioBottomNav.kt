@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -593,22 +592,14 @@ private fun FloatingNavPill(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            // v266 — the glyph CROSSFADES now instead of hard-swapping at the
-            // exact midpoint of the width spring (the one visible "pop" in an
-            // otherwise lockstep transition). Same slot, same 26dp — pure
-            // motion polish, zero layout or look change.
-            Crossfade(
-                targetState = selected,
-                animationSpec = tween(160),
-                label = "navGlyphCrossfade"
-            ) { sel ->
-                CurioIcon(
-                    name = if (sel) destination.selectedIcon else destination.icon,
-                    contentDescription = destination.label,
-                    tint = iconTint,
-                    size = 26.dp
-                )
-            }
+            // v267 — glyph crossfade REVERTED (user request): the instant swap
+            // is back, exactly as before v266.
+            CurioIcon(
+                name = if (selected) destination.selectedIcon else destination.icon,
+                contentDescription = destination.label,
+                tint = iconTint,
+                size = 26.dp
+            )
             // v162 — the label's expand/shrink + fade run the SAME spring
             // as the pill width (AnimatedVisibility's own tweens used to
             // finish 3x early, so the label was fully in/out while the pill

@@ -1191,22 +1191,20 @@ fun HomeScreen(navController: NavController) {
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
             // another geometric transition or ripple-like flash.
-            // v264 — FAST GLASS HANDOFF (fixes the mid-morph DARK SHADE): with
-            // glass active, the solid hero fill used to fade out across the
-            // WHOLE scroll range — so for most of the morph the pill was a
-            // semi-transparent DARK fill sitting on top of the blurred
-            // backdrop, which read as a darker muddy pill. Now the glass path
-            // commits to fully-clear glass by ~40% of the scroll (an eased,
-            // scrubable sprint), so the dark fill is gone almost immediately
-            // and the pills read as pure liquid glass while you scroll. The
-            // non-glass frosted morph keeps its original full-range timing.
-            val fastGlassShift = FastOutSlowInEasing.transform((stickyProgress * 2.5f).coerceIn(0f, 1f))
-            val menuMorphShift = if (glassOn) fastGlassShift else frostShift
-            val profileMorphShift = if (profileGlassOn) fastGlassShift else frostShift
-            val targetMenuBg = lerp(heroPillBg, if (glassOn) Color.Transparent else frostBg, menuMorphShift)
-            val targetProfileBg = lerp(heroPillBg, if (profileGlassOn) Color.Transparent else frostBg, profileMorphShift)
-            val targetPillRim = lerp(heroPillRim, frostRim, frostShift)
-            val targetPillIcon = lerp(heroPillIcon, frostIcon, frostShift)
+            // v267 — ALWAYS GLASS (user request): with liquid glass on, the
+            // pills wear NO hero fill at all — they are clear refracting
+            // glass from rest, not a solid hero shade that morphs away. The
+            // dark mid-scroll state is gone because there is no solid phase
+            // left to hand off from. The non-glass path keeps its classic
+            // hero-fill → frost morph unchanged.
+            val targetMenuBg = if (glassOn) Color.Transparent
+                else lerp(heroPillBg, frostBg, frostShift)
+            val targetProfileBg = if (profileGlassOn) Color.Transparent
+                else lerp(heroPillBg, frostBg, frostShift)
+            // v267 — always-glass: ink + rim sit at their scrolled values
+            // from rest (readable black/white over clear glass), no morph.
+            val targetPillRim = if (glassOn) frostRim else lerp(heroPillRim, frostRim, frostShift)
+            val targetPillIcon = if (glassOn) frostIcon else lerp(heroPillIcon, frostIcon, frostShift)
             val menuPillBg by animateColorAsState(
                 targetValue = targetMenuBg,
                 animationSpec = tween(CurioMotion.Durations.Quick),
@@ -1262,9 +1260,9 @@ fun HomeScreen(navController: NavController) {
                     // elevation drops when the morph hands off to it.
                     elevation = if (glassOn) 0.dp else 6.dp * frostShift,
                     pillInteraction = menuPillInteraction,
-                    // v230 — liquid-glass capsule once the scroll morph has
-                    // started: solid hero fill → refracting blur pill.
-                    modifier = if (glassOn && frostShift > 0.01f)
+                    // v267 — ALWAYS liquid glass (no solid phase to hand off
+                    // from — see the always-glass note above).
+                    modifier = if (glassOn)
                         Modifier.liquidGlassCapsule(
                             heroPillBg,
                             washAlpha = 0.45f,
@@ -1283,9 +1281,9 @@ fun HomeScreen(navController: NavController) {
                     iconTint = pillIcon,
                     elevation = if (profileGlassOn) 0.dp else 6.dp * frostShift,
                     pillInteraction = avatarPillInteraction,
-                    // v230 — glass only while NO avatar photo is set; the
+                    // v267 — always glass while NO avatar photo is set; the
                     // photo keeps the classic frosted morph underneath it.
-                    modifier = if (profileGlassOn && frostShift > 0.01f)
+                    modifier = if (profileGlassOn)
                         Modifier.liquidGlassCapsule(
                             heroPillBg,
                             washAlpha = 0.45f,
