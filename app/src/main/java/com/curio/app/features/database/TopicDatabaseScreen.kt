@@ -819,7 +819,8 @@ private fun DatabaseFilterChip(
                             else MaterialTheme.colorScheme.surfaceContainerLow,
                 washAlpha = if (selected) 0.60f else 0.45f,
                 backdrop = glassBackdrop,
-                alwaysClear = true
+                alwaysClear = true,
+                compact = true
             ) else Modifier
     ) {
         Text(
