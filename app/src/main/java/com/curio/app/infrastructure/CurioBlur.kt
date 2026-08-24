@@ -2,8 +2,6 @@ package com.curio.app.infrastructure
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
-import kotlin.math.exp
 import kotlin.math.min
 
 /**
@@ -17,148 +15,90 @@ import kotlin.math.min
  * Usage:
  *   val blurred = CurioBlur.blur(wallpaperBitmap, 16f)
  *
- * API tier:
- * - All API levels: CPU StackBlur — O(n) gaussian approximation, ~50ms for 1080p.
- *   (AGSL RuntimeShader was considered but requires a hardware-accelerated
- *    canvas, which bitmap-level blur can't provide.)
+ * Implementation: two-pass separable box blur, 3 iterations ≈ gaussian.
+ * ~80ms for a 1080×1920 bitmap on a modern CPU.
  */
 object CurioBlur {
 
     /**
      * Blur a bitmap with a gaussian-like kernel of the given [radius] (in pixels).
-     * Radius is clamped to 25 (the RenderScript / AGSL practical max).
-     * Returns a new [Bitmap]; the source is untouched.
+     * Radius is clamped to 30. Returns a new [Bitmap]; the source is untouched.
      */
     fun blur(src: Bitmap, radius: Float): Bitmap {
-        val r = min(radius, 25f)
-        if (r <= 0f) return src.copy(src.config ?: Bitmap.Config.ARGB_8888, true)
-        // AGSL RuntimeShader requires a hardware-accelerated canvas, but
-        // bitmap blur always uses Canvas(bitmap) which is software-rendered.
-        // CPU StackBlur is fast (~50ms for 1080p) and works everywhere.
-        return stackBlur(src, r)
+        val r = radius.toInt().coerceIn(1, 30)
+        if (r <= 0) return src.copy(src.config ?: Bitmap.Config.ARGB_8888, true)
+        return boxBlur(src, r)
     }
 
-
-    // ── CPU StackBlur (any API) ──────────────────────────────────────
+    // ── Two-pass separable box blur (3× ≈ gaussian) ──────────────────
 
     /**
-     * StackBlur — a fast O(n) approximation of gaussian blur.
-     * Produces visually identical results to gaussian at radius ≥ 3.
-     * ~50ms for a 1080×1920 bitmap on a modern CPU.
+     * Separable box blur: horizontal pass then vertical pass, repeated 3×.
+     * The sliding-window approach avoids recomputing the sum per pixel.
+     * Each edge pixel is clamped to the nearest valid coordinate (mirrors
+     * the behavior of CLAMP tile mode).
      */
-    private fun stackBlur(src: Bitmap, radius: Float): Bitmap {
-        val r = radius.toInt()
+    private fun boxBlur(src: Bitmap, radius: Int): Bitmap {
         val w = src.width
         val h = src.height
-        val pixels = IntArray(w * h)
-        src.getPixels(pixels, 0, w, 0, 0, w, h)
-
+        if (w <= 0 || h <= 0) return src
         val wm = w - 1
         val hm = h - 1
-        val div = r + r + 1
-        val divSum = (div * div + 1) shr 1
-        val dv = IntArray(256 * divSum)
-        for (i in dv.indices) dv[i] = i / divSum
+        val div = radius * 2 + 1
 
-        val vMin = IntArray(maxOf(w, h))
-        val vMax = IntArray(maxOf(w, h))
+        val a = IntArray(w * h)
+        src.getPixels(a, 0, w, 0, 0, w, h)
+        val b = IntArray(w * h)
 
-        val pix = IntArray(w * h)
-        System.arraycopy(pixels, 0, pix, 0, w * h)
-
-        // Stack arrays for the sliding window
-        val stackSize = div
-        val stack = Array(stackSize) { IntArray(3) }
-
-        for (y in 0 until h) {
-            var rSum = 0; var gSum = 0; var bSum = 0
-            var rOutSum = 0; var gOutSum = 0; var bOutSum = 0
-            var rInSum = 0; var gInSum = 0; var bInSum = 0
-
-            for (i in -r..r) {
-                val p = pix[minOf(y * w + minOf(wm, maxOf(i + 0, 0)), w * h - 1)]
-                val stackP = stack[i + r]
-                stackP[0] = (p shr 16) and 0xff
-                stackP[1] = (p shr 8) and 0xff
-                stackP[2] = p and 0xff
-                val bs = minOf(r + 1, maxOf(0, r - i + 1))
-                rSum += stackP[0] * bs; gSum += stackP[1] * bs; bSum += stackP[2] * bs
-                if (i > 0) { rInSum += stackP[0]; gInSum += stackP[1]; bInSum += stackP[2] }
-                if (i < wm) { rOutSum += stackP[0]; gOutSum += stackP[1]; bOutSum += stackP[2] }
-            }
-            var stackPointer = r
-            for (x in 0 until w) {
-                pix[y * w + x] = (0xff000000.toInt()) or
-                    (dv[rSum] shl 16) or (dv[gSum] shl 8) or dv[bSum]
-
-                rSum -= rOutSum; gSum -= gOutSum; bSum -= bOutSum
-                val stackP = stack[(stackPointer - r + stackSize) % stackSize]
-                rOutSum -= stackP[0]; gOutSum -= stackP[1]; bOutSum -= stackP[2]
-
-                if (y == 0) { vMin[x] = minOf(x + r + 1, wm); vMax[x] = maxOf(x - r, 0) }
-                val p = pix[minOf(vMax[x] + y * w, w * h - 1)]
-                stackP[0] = (p shr 16) and 0xff
-                stackP[1] = (p shr 8) and 0xff
-                stackP[2] = p and 0xff
-
-                rInSum += stackP[0]; gInSum += stackP[1]; bInSum += stackP[2]
-                rSum += rInSum; gSum += gInSum; bSum += bInSum
-
-                stackPointer = (stackPointer + 1) % stackSize
-                val stackP2 = stack[stackPointer]
-                rOutSum += stackP2[0]; gOutSum += stackP2[1]; bOutSum += stackP2[2]
-                rInSum -= stackP2[0]; gInSum -= stackP2[1]; bInSum -= stackP2[2]
-            }
-        }
-
-        // Vertical pass
-        for (x in 0 until w) {
-            var rSum = 0; var gSum = 0; var bSum = 0
-            var rOutSum = 0; var gOutSum = 0; var bOutSum = 0
-            var rInSum = 0; var gInSum = 0; var bInSum = 0
-
-            for (i in -r..r) {
-                val yy = minOf(hm, maxOf(0, i))
-                val p = pix[yy * w + x]
-                val stackP = stack[i + r]
-                stackP[0] = (p shr 16) and 0xff
-                stackP[1] = (p shr 8) and 0xff
-                stackP[2] = p and 0xff
-                val bs = minOf(r + 1, maxOf(0, r - i + 1))
-                rSum += stackP[0] * bs; gSum += stackP[1] * bs; bSum += stackP[2] * bs
-                if (i > 0) { rInSum += stackP[0]; gInSum += stackP[1]; bInSum += stackP[2] }
-                if (i < hm) { rOutSum += stackP[0]; gOutSum += stackP[1]; bOutSum += stackP[2] }
-            }
-            var yp = x
-            var stackPointer = r
+        repeat(3) {
+            // ── Horizontal: a → b ──
             for (y in 0 until h) {
-                pix[yp] = (0xff000000.toInt()) or
-                    (dv[rSum] shl 16) or (dv[gSum] shl 8) or dv[bSum]
-
-                rSum -= rOutSum; gSum -= gOutSum; bSum -= bOutSum
-                val stackP = stack[(stackPointer - r + stackSize) % stackSize]
-                rOutSum -= stackP[0]; gOutSum -= stackP[1]; bOutSum -= stackP[2]
-
-                if (x == 0) { vMin[y] = minOf(y + r + 1, hm); vMax[y] = maxOf(y - r, 0) }
-                val p = pix[minOf(x + vMax[y] * w, w * h - 1)]
-                stackP[0] = (p shr 16) and 0xff
-                stackP[1] = (p shr 8) and 0xff
-                stackP[2] = p and 0xff
-
-                rInSum += stackP[0]; gInSum += stackP[1]; bInSum += stackP[2]
-                rSum += rInSum; gSum += gInSum; bSum += bInSum
-
-                stackPointer = (stackPointer + 1) % stackSize
-                val stackP2 = stack[stackPointer]
-                rOutSum += stackP2[0]; gOutSum += stackP2[1]; bOutSum += stackP2[2]
-                rInSum -= stackP2[0]; gInSum -= stackP2[1]; bInSum -= stackP2[2]
-
-                yp += w
+                var aS = 0; var rS = 0; var gS = 0; var bS = 0
+                // Seed window for x = 0
+                for (k in -radius..radius) {
+                    val p = a[y * w + k.coerceIn(0, wm)]
+                    aS += (p shr 24) and 0xff
+                    rS += (p shr 16) and 0xff
+                    gS += (p shr 8) and 0xff
+                    bS += p and 0xff
+                }
+                for (x in 0 until w) {
+                    b[y * w + x] = ((aS / div) shl 24) or
+                        ((rS / div) shl 16) or ((gS / div) shl 8) or (bS / div)
+                    // Slide window: drop leftmost, add rightmost
+                    val drop = a[y * w + (x - radius).coerceIn(0, wm)]
+                    val add = a[y * w + (x + radius + 1).coerceIn(0, wm)]
+                    aS += ((add shr 24) and 0xff) - ((drop shr 24) and 0xff)
+                    rS += ((add shr 16) and 0xff) - ((drop shr 16) and 0xff)
+                    gS += ((add shr 8) and 0xff) - ((drop shr 8) and 0xff)
+                    bS += (add and 0xff) - (drop and 0xff)
+                }
+            }
+            // ── Vertical: b → a ──
+            for (x in 0 until w) {
+                var aS = 0; var rS = 0; var gS = 0; var bS = 0
+                for (k in -radius..radius) {
+                    val p = b[k.coerceIn(0, hm) * w + x]
+                    aS += (p shr 24) and 0xff
+                    rS += (p shr 16) and 0xff
+                    gS += (p shr 8) and 0xff
+                    bS += p and 0xff
+                }
+                for (y in 0 until h) {
+                    a[y * w + x] = ((aS / div) shl 24) or
+                        ((rS / div) shl 16) or ((gS / div) shl 8) or (bS / div)
+                    val drop = b[(y - radius).coerceIn(0, hm) * w + x]
+                    val add = b[(y + radius + 1).coerceIn(0, hm) * w + x]
+                    aS += ((add shr 24) and 0xff) - ((drop shr 24) and 0xff)
+                    rS += ((add shr 16) and 0xff) - ((drop shr 16) and 0xff)
+                    gS += ((add shr 8) and 0xff) - ((drop shr 8) and 0xff)
+                    bS += (add and 0xff) - (drop and 0xff)
+                }
             }
         }
 
         val result = Bitmap.createBitmap(w, h, src.config ?: Bitmap.Config.ARGB_8888)
-        result.setPixels(pix, 0, w, 0, 0, w, h)
+        result.setPixels(a, 0, w, 0, 0, w, h)
         return result
     }
 
@@ -174,7 +114,7 @@ object CurioBlur {
             val w = d?.width ?: 1080
             @Suppress("DEPRECATION")
             val h = d?.height ?: 1920
-            android.app.WallpaperManager.getInstance(context).getDrawable()?.let { drawable ->
+            android.app.WallpaperManager.getInstance(context).drawable?.let { drawable ->
                 val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                 val c = Canvas(bmp)
                 drawable.setBounds(0, 0, w, h)
@@ -197,7 +137,6 @@ object CurioBlur {
         density: Float
     ): Bitmap? {
         try {
-            // Map widget coords to wallpaper coords (cover-fit)
             val wpScale = maxOf(screenW.toFloat() / wallpaper.width, screenH.toFloat() / wallpaper.height)
             val scaledW = (wallpaper.width * wpScale).toInt()
             val scaledH = (wallpaper.height * wpScale).toInt()
@@ -214,5 +153,4 @@ object CurioBlur {
             return blurred
         } catch (_: Exception) { return null }
     }
-
 }
