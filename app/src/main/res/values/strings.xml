@@ -51,4 +51,8 @@
     <!-- Empty states (universal skeleton) -->
     <string name="empty_no_results">Nothing matches</string>
     <string name="empty_no_results_subtext">Try a different word, or clear the filter.</string>
+
+    <!-- v267 — glass home-screen widget -->
+    <string name="glass_widget_title">Curio</string>
+    <string name="glass_widget_desc">Frosted glass tile with your streak</string>
 </resources>

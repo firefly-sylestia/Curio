@@ -114,9 +114,6 @@ class ExploreSessionService : Service() {
     // device-level rejection can never turn into a restart loop. Reset on
     // every explicit start (see onStartCommand).
     private var bubbleRetryCount = 0
-    // v266 — device-screenshot watcher: runs ONLY while the bubble window is
-    // attached; each new screenshot joins the session's topic entry (one copy).
-    private val screenshotWatcher by lazy { SessionScreenshotWatcher(this) }
     // v253 — which horizontal edge the window last snapped to: -1 left,
     // 1 right, 0 unknown. Read inside the bubble's composition to drive the
     // assistive-touch-style edge dock (the pill slides mostly off-screen,
@@ -751,9 +748,6 @@ class ExploreSessionService : Service() {
         // Publish the host before the posted composition can run, so a
         // composition failure can remove the actual attached overlay root.
         bubbleView = view
-        // v266 — bubble is up: watch for device screenshots to attach to the
-        // session's topic entry (inert when the media-read grant is missing).
-        if (SessionScreenshotWatcher.hasPermission(this)) screenshotWatcher.start()
         // Initial placement: bottom-center, clear of the nav-bar area.
         view.doOnLayout {
             runCatching {
@@ -848,8 +842,6 @@ class ExploreSessionService : Service() {
 
     /** Removes the bubble window (no-op when it isn't showing). */
     private fun removeBubble() {
-        // v266 — bubble gone: stop watching for screenshots.
-        screenshotWatcher.stop()
         bubbleView?.let { v ->
             runCatching { windowManager.removeView(v) }
         }

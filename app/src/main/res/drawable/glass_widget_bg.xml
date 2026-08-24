@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v267 — the glass tile's look: a frosted translucent pane (light catches
+     the top via a vertical gradient), a bright rim, and deep rounded corners.
+     Layered under the text so it reads as one pane of glass on any wallpaper. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Drop shadow / depth base -->
+    <item android:top="2dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <solid android:color="#22000000" />
+        </shape>
+    </item>
+    <!-- Frost body: light top → deeper bottom, like a lit pane -->
+    <item android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <gradient
+                android:angle="270"
+                android:startColor="#59FFFFFF"
+                android:centerColor="#40FFFFFF"
+                android:endColor="#2E3A3A44" />
+            <stroke
+                android:width="1.5dp"
+                android:color="#A6FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

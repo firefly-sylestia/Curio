@@ -47,9 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
-import com.curio.app.ui.components.isLiquidGlassRequested
-import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioIcon
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
 import kotlinx.coroutines.Dispatchers
@@ -94,7 +96,13 @@ fun GlassWidgetLabScreen(navController: NavController) {
         }
     }
 
-    val glassOn = isLiquidGlassRequested() && Build.VERSION.SDK_INT >= 31
+    // v267 — the lab runs the RAW Kyant recipe (drawBackdrop + vibrancy +
+    // blur + lens) DIRECTLY, decoupled from the global Liquid-glass toggle —
+    // this is a test bed, so real refraction is unconditional on Android 12+
+    // regardless of any Appearance setting. (The old build gated everything
+    // behind the toggle AND routed through liquidGlassCapsule, whose fallback
+    // paths could serve a non-refracting pane — that's why it looked flat.)
+    val glassOn = Build.VERSION.SDK_INT >= 31
 
     // Fallback wallpaper: a rich multi-stop gradient so the lab still works
     // when no bitmap wallpaper is set (live wallpapers return nothing).
@@ -149,7 +157,7 @@ fun GlassWidgetLabScreen(navController: NavController) {
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
-                        "Turn on Liquid glass in Appearance (Android 12+) to drag real refracting widget shapes over your wallpaper.",
+                        "The lab needs Android 12+ to render real refracting glass over your wallpaper.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -233,12 +241,16 @@ fun GlassWidgetLabScreen(navController: NavController) {
                 .statusBarsPadding()
                 .padding(start = 16.dp, top = 8.dp)
                 .then(
-                    if (glassOn) Modifier.liquidGlassCapsule(
-                        Color.White,
-                        washAlpha = 0.25f,
+                    // v267 — raw recipe here too (see LabGlassShape).
+                    if (glassOn) Modifier.drawBackdrop(
                         backdrop = wallLayer,
-                        alwaysClear = true,
-                        shape = CircleShape
+                        shape = { CircleShape },
+                        effects = {
+                            vibrancy()
+                            blur(6.dp.toPx())
+                            lens(18.dp.toPx(), 18.dp.toPx())
+                        },
+                        onDrawSurface = { drawRect(Color.White.copy(alpha = 0.12f)) }
                     ) else Modifier
                 )
         ) {
@@ -253,7 +265,12 @@ fun GlassWidgetLabScreen(navController: NavController) {
     }
 }
 
-/** One draggable liquid-glass widget shape sampling [backdrop]. */
+/**
+ * One draggable liquid-glass widget shape sampling [backdrop]. v267 — uses
+ * the RAW drawBackdrop recipe (vibrancy + blur + lens), the exact nav-bar
+ * effects, with NO toggle gating and NO clip in front of it — guaranteed
+ * real refraction of the wallpaper on Android 12+.
+ */
 @Composable
 private fun LabGlassShape(
     position: IntOffset,
@@ -265,13 +282,15 @@ private fun LabGlassShape(
     Box(
         modifier = modifier
             .offset { position }
-            .clip(RoundedCornerShape(50))
-            .liquidGlassCapsule(
-                Color.White,
-                washAlpha = 0.25f,
+            .drawBackdrop(
                 backdrop = backdrop,
-                alwaysClear = true,
-                shape = RoundedCornerShape(50)
+                shape = { RoundedCornerShape(50) },
+                effects = {
+                    vibrancy()
+                    blur(8.dp.toPx())
+                    lens(24.dp.toPx(), 24.dp.toPx())
+                },
+                onDrawSurface = { drawRect(Color.White.copy(alpha = 0.12f)) }
             )
             .pointerInput(Unit) {
                 detectDragGestures { change, amount ->

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v267 — the liquid-glass widget tile: frosted pane + streak readout.
+     RemoteViews limits us to static layers, so the glass look is baked into
+     the background drawable; the text carries the live data. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/glass_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/glass_widget_bg"
+        android:gravity="center_vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp">
+
+        <TextView
+            android:id="@+id/glass_widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/glass_widget_title"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:shadowColor="#66000000"
+            android:shadowDy="1.5"
+            android:shadowRadius="3" />
+
+        <TextView
+            android:id="@+id/glass_widget_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#F2FFFFFF"
+            android:textSize="13sp"
+            android:shadowColor="#66000000"
+            android:shadowDy="1.5"
+            android:shadowRadius="3" />
+    </LinearLayout>
+</FrameLayout>
