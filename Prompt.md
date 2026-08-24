@@ -1,3 +1,16 @@
+## Request: v276 - config UI rebuilt with live preview (COMPLETE)
+
+- LIVE PREVIEW canvas (stand-in wallpaper bands + exact resulting pane
+  gradient; Blur state = tint-only wash) updates with selection/sliders.
+  Caption states current mode. Fixes "can't see which color".
+- Style chips: single row - Blur / presets / Custom (rainbow swatch),
+  52dp rounded swatches, bold primary ring + label when selected;
+  custom sliders appear ONLY in custom mode.
+- Save always writes customColor/Opacity (not gated on style), so slider
+  tweaks persist even if user re-taps a chip after sliding.
+- Removed "Long-press ... Edit to change it later" sentence (redundant).
+- Provider pane bitmap height: full hDp*density (was *0.9 leaving a bare
+  root-tint strip at the bottom).
 ## Request: v275 - widget blur regression + white border fix (COMPLETE)
 
 ROOT CAUSE (device-verified): One UI's wallpaper-blur detection triggers on

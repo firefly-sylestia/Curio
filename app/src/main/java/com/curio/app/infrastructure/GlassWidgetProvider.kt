@@ -93,7 +93,7 @@ class GlassWidgetProvider : AppWidgetProvider() {
                     R.id.glass_widget_pane,
                     GlassWidgetPane.render(
                         widthPx = (wDp * density).toInt(),
-                        heightPx = (hDp * density * 0.9f).toInt(),
+                        heightPx = (hDp * density).toInt(),
                         cornerPx = 28f * density,
                         top = top, bottom = bottom
                     )
