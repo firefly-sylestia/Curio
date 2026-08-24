@@ -1,3 +1,5 @@
+FIX: Lab live wallpaper - the base wallpaper stays full-resolution and sharp (no more whole-screen blur), with true gaussian frost behind each pane.
+FIX: Liquid glass credit now points to Kyant's AndroidLiquidGlass.
 FIX: Lab live wallpaper now uses true gaussian frost (the same blur algorithm as the in-app lab), and a decode bug that made your chosen wallpaper vanish into a gradient is fixed.
 FIX: Widget corner radius now rounds the whole widget on every launcher, resizing re-renders the fill correctly, and the pill can shrink to 2 cells.
 FIX: Lab live wallpaper fidelity - smooth non-pixelated frost that matches the lab, per-widget blur strength, rim and text clipped inside each pane, real battery icon (no more leaked text), and fonts matching the lab exactly.

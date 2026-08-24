@@ -1,3 +1,21 @@
+## Request: v287 — sharp backdrop, Kyant credit, liquid-wallpaper research (COMPLETE)
+
+- WHOLE-WALLPAPER BLUR FIX: decode cap 1600→2560px max-dim (upscaled softness
+  was visible fullscreen) + sharp backdrop now drawn with FILTER_BITMAP|DITHER
+  paint (null paint = unfiltered scaling).
+- CREDIT: Support screen row "Liquid glass by vFlow" → "Liquid glass by
+  Kyant" (github.com/Kyant0/AndroidLiquidGlass). App depends on
+  io.github.kyant0:backdrop 1.0.6 — factually correct. NOTE: tab bar file
+  header still says adapted-from-vFlow (GPL) — kept for license hygiene.
+- RESEARCH VERDICT (user asked): real per-pixel liquid glass in a live
+  wallpaper IS possible on API 33+ via lockHardwareCanvas + AGSL
+  RuntimeShader (PrismalAGSL approach; Prismal's GLES GLSurfaceView is
+  View-bound and can't run in WallpaperService; Kyant lib is Compose-only).
+  Proposed next step, not yet built: AGSL lens-refraction pipeline in the
+  wallpaper engine, baked-frost fallback below API 33.
+
+---
+
 ## Request: v286 — gaussian frost + decode fix + widget editor polish (COMPLETE)
 
 - WALLPAPER GONE BUG: previous two-pass bounds+full decode reused the same

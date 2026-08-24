@@ -86,7 +86,10 @@ class GlassLabWallpaperService : WallpaperService() {
         private var drawOffX = 0f
         private var drawOffY = 0f
 
-        /** Progressive-pyramid blur results, one per quantized blur level. */
+        /** Bilinear-filtered paint so the SHARP backdrop never renders blocky. */
+        private val backdropPaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
+
+        /** Gaussian frost results (RS blur), one per quantized blur level. */
         private val blurCache = HashMap<Int, Bitmap>()
 
         /**
@@ -197,7 +200,7 @@ class GlassLabWallpaperService : WallpaperService() {
                     drawScale = max(w / bmp.width, h / bmp.height)
                     drawOffX = (w - bmp.width * drawScale) / 2f
                     drawOffY = (h - bmp.height * drawScale) / 2f
-                    canvas.drawBitmap(bmp, drawOffX, drawOffY, null)
+                    canvas.drawBitmap(bmp, drawOffX, drawOffY, backdropPaint)
                 } else {
                     drawScale = 1f; drawOffX = 0f; drawOffY = 0f
                     drawGradientFallback(canvas, w, h)
@@ -468,7 +471,10 @@ class GlassLabWallpaperService : WallpaperService() {
                 if (opts.outWidth <= 0) return null
                 var sample = 1
                 var dim = maxOf(opts.outWidth, opts.outHeight)
-                while (dim / 2 >= 1600) { sample *= 2; dim /= 2 }
+                // Cap at 2560px max-dim — high enough that a fullscreen
+                // wallpaper never visibly upscales (the old 1600px cap made
+                // the ENTIRE background read as blurry).
+                while (dim / 2 >= 2560) { sample *= 2; dim /= 2 }
                 return android.graphics.BitmapFactory.decodeByteArray(
                     bytes, 0, bytes.size,
                     opts.apply { inJustDecodeBounds = false; inSampleSize = sample }

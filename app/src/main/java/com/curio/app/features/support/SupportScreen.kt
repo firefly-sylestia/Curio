@@ -184,18 +184,19 @@ fun SupportScreen(navController: NavController) {
                             }
                         }
                         CurioSettingsDivider()
-                        // v252 — open-source credit: the liquid-glass tab bar
-                        // is adapted from the vFlow project (GPL-2.0-or-later).
+                        // v286 — open-source credit: the liquid-glass
+                        // pipeline runs on Kyant0's backdrop library
+                        // (drawBackdrop + vibrancy + blur + lens recipe).
                         CurioSettingsRow(
                             CurioIcons.Info,
-                            "Liquid glass by vFlow",
-                            "github.com/ChaoMixian/vFlow (GPL-2.0)"
+                            "Liquid glass by Kyant",
+                            "github.com/Kyant0/AndroidLiquidGlass"
                         ) {
                             runCatching {
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://github.com/ChaoMixian/vFlow")
+                                        Uri.parse("https://github.com/Kyant0/AndroidLiquidGlass")
                                     )
                                 )
                             }
