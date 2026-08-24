@@ -1,3 +1,24 @@
+## Request: v291 — optimization pass: remove custom blur, speed up splash, reduce lag (COMPLETE)
+
+- REMOVED CUSTOM BLUR ENGINE: deleted CurioBlur.kt (CPU box blur), removed
+  the custom blur engine toggle from AppPreferences + ExperimentsScreen.
+  Widget provider restores original Samsung system blur path (pane GONE
+  for default style; custom/non-default styles still show the gradient pane).
+  GlassLabWallpaperService now has its own private boxBlur() function.
+- PARALLEL SPLASH PREWARM: splash screen category loading changed from
+  sequential forEach to parallel launch (all lanes load at once, TopicJsonLoader's
+  parseGate throttles disk I/O to 2 concurrent). Minimum splash delay
+  reduced 800ms → 400ms, timeout cap 6s → 4s.
+- CABINET CHIPS: added stable key(cat.id.name) to category LazyRow items
+  to prevent unnecessary recompositions.
+- LIQUID GLASS FPS: Kyant backdrop library is GPU-accelerated — FPS drops
+  are inherent to the per-frame backdrop capture + effects pipeline and
+  cannot be reduced without modifying the rendering (user requested no
+  rendering changes).
+- Status: pushed, CI green.
+
+---
+
 ## Request: v287 — sharp backdrop, Kyant credit, liquid-wallpaper research (COMPLETE)
 
 - WHOLE-WALLPAPER BLUR FIX: decode cap 1600→2560px max-dim (upscaled softness
