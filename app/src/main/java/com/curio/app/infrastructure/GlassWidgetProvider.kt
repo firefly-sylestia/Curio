@@ -119,6 +119,29 @@ class GlassWidgetProvider : AppWidgetProvider() {
             // this widget, blurs it, and sets it as the pane ImageView
             // background (behind the gradient pane).
             val samsung = android.os.Build.MANUFACTURER.contains("samsung", true)
+
+            // Default style = pure One UI look: launcher blur + root tint only.
+            // No pane bitmap — the native blur shines through.
+            if (style == GlassWidgetPane.STYLE_DEFAULT && !com.curio.app.data.AppPreferences.customBlurEngineState) {
+                views.setViewVisibility(R.id.glass_widget_pane, android.view.View.GONE)
+                // Still apply corner rounding so the widget outline matches
+                applyCornerShape(views, cornerDp)
+                val (glyph, title, stats) = resolveContent(context, readMode(context, id))
+                views.setImageViewBitmap(R.id.glass_widget_icon, GlassWidgetPane.renderIcon(context, glyph))
+                views.setTextViewText(R.id.glass_widget_title, title)
+                views.setTextViewText(R.id.glass_widget_stats, stats)
+                views.setOnClickPendingIntent(
+                    android.R.id.background,
+                    PendingIntent.getActivity(context, 0,
+                        Intent(context, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        },
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                )
+                manager.updateAppWidget(id, views)
+                return
+            }
+
             views.setViewVisibility(R.id.glass_widget_pane, android.view.View.VISIBLE)
 
             val (top, bottom) = GlassWidgetPane.resolveColors(context, id, style)

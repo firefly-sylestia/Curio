@@ -65,7 +65,7 @@ object CurioBlur {
         // Horizontal pass
         val temp = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888)
         val canvasT = Canvas(temp)
-        shaderH.setInputShader("input", android.graphics.BitmapShader(
+        shaderH.setInputShader("src", android.graphics.BitmapShader(
             scaled, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP
         ))
         val paintH = Paint().apply { shader = shaderH }
@@ -74,7 +74,7 @@ object CurioBlur {
         // Vertical pass
         val out = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888)
         val canvasO = Canvas(out)
-        shaderV.setInputShader("input", android.graphics.BitmapShader(
+        shaderV.setInputShader("src", android.graphics.BitmapShader(
             temp, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP
         ))
         val paintV = Paint().apply { shader = shaderV }
@@ -269,20 +269,17 @@ object CurioBlur {
     // ── AGSL Gaussian shader sources (separable two-pass) ────────────
 
     private const val HORIZONTAL_GAUSSIAN_SRC = """
-        uniform shader input;
+        uniform shader src;
         uniform float2 iResolution;
         uniform float sigma;
 
         half4 main(float2 fragCoord) {
             float4 sum = half4(0.0);
             float norm = 0.0;
-            // 9-tap kernel covers ~2σ on each side — more than enough
-            // for the downscale factor we apply; bilinear upscale
-            // stretches the remainder smoothly.
             for (float i = -4.0; i <= 4.0; i += 1.0) {
                 float2 offset = float2(i * (sigma / 3.0), 0.0);
                 float weight = exp(-0.5 * (i * i) / (sigma * sigma / 9.0));
-                sum += input.eval(fragCoord + offset) * weight;
+                sum += src.eval(fragCoord + offset) * weight;
                 norm += weight;
             }
             return sum / norm;
@@ -290,7 +287,7 @@ object CurioBlur {
     """
 
     private const val VERTICAL_GAUSSIAN_SRC = """
-        uniform shader input;
+        uniform shader src;
         uniform float2 iResolution;
         uniform float sigma;
 
@@ -300,7 +297,7 @@ object CurioBlur {
             for (float i = -4.0; i <= 4.0; i += 1.0) {
                 float2 offset = float2(0.0, i * (sigma / 3.0));
                 float weight = exp(-0.5 * (i * i) / (sigma * sigma / 9.0));
-                sum += input.eval(fragCoord + offset) * weight;
+                sum += src.eval(fragCoord + offset) * weight;
                 norm += weight;
             }
             return sum / norm;
