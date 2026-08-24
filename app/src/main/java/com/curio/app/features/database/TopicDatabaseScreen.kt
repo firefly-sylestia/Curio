@@ -499,7 +499,11 @@ fun TopicDatabaseScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize().layerBackdrop(chipGlassBackdrop),
+                // v291 — only capture when chip bar is visible.
+                modifier = Modifier.fillMaxSize()
+                    .then(if (chipsVisible && isLiquidGlassPillsActive())
+                        Modifier.layerBackdrop(chipGlassBackdrop)
+                    else Modifier),
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),

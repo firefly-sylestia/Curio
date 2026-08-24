@@ -474,9 +474,14 @@ fun CabinetScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     // v245 — the grid records into the chip bar's LOCAL glass
                     // capture while keeping its entrance-animated modifier.
+                    // v291 — only capture when chips are visible: the backdrop
+                    // re-records the full grid every frame, which is expensive
+                    // when the chip bar is closed.
                     modifier = m
                         .fillMaxSize()
-                        .layerBackdrop(chipGlassBackdrop)
+                        .then(if (chipsVisible && isLiquidGlassPillsActive())
+                            Modifier.layerBackdrop(chipGlassBackdrop)
+                        else Modifier)
                 ) {
                     items(visibleEntries, key = { it.id }) { entry ->
                         // v8.38 — the Cabinet→Detail morph is gone: the detail
