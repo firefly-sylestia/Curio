@@ -1,3 +1,18 @@
+## Request: v268 — watcher reverted; lab fixed + real widget (COMPLETE)
+
+1. Screenshot watcher REVERTED per user: SessionScreenshotWatcher.kt deleted;
+   service wiring, manifest permissions, Settings permission request removed.
+2. Glass widget lab KEPT + refraction FIXED: glassOn now SDK>=31 only
+   (decoupled from Liquid-glass toggle); LabGlassShape + back pill use RAW
+   drawBackdrop (vibrancy+blur(8dp)+lens) directly — no liquidGlassCapsule
+   fallback path, no clip in front. Hint text updated.
+3. REAL HOME-SCREEN WIDGET (RemoteViews; no per-pixel refraction possible in
+   launcher process): glass_widget_info.xml (3x1 resizable),
+   drawable/glass_widget_bg.xml (frost gradient + rim + shadow base,
+   28dp corners), layout/glass_widget_layout.xml (title + streak),
+   GlassWidgetProvider (streak via StreakTracker.getStreak, tap → MainActivity,
+   pushAll helper), manifest receiver, strings added.
+
 ## Request: v267 — revert glyph crossfade + always-glass pills (COMPLETE)
 
 1. REVERTED the v266 nav glyph Crossfade (CurioBottomNav) — instant swap is
