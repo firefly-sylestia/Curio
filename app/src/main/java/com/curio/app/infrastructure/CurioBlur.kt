@@ -3,9 +3,6 @@ package com.curio.app.infrastructure
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.RuntimeShader
-import android.os.Build
-import androidx.annotation.RequiresApi
 import kotlin.math.exp
 import kotlin.math.min
 
@@ -20,10 +17,10 @@ import kotlin.math.min
  * Usage:
  *   val blurred = CurioBlur.blur(wallpaperBitmap, 16f)
  *
- * API tiers:
- * - API 33+: AGSL RuntimeShader — true GPU gaussian, two-pass separable
- * - API 31+: RenderScript IntrinsicBlur — fast gaussian (deprecated but functional)
- * - API 26+: CPU StackBlur — O(n) approximation, ~50ms for 1080p
+ * API tier:
+ * - All API levels: CPU StackBlur — O(n) gaussian approximation, ~50ms for 1080p.
+ *   (AGSL RuntimeShader was considered but requires a hardware-accelerated
+ *    canvas, which bitmap-level blur can't provide.)
  */
 object CurioBlur {
 
@@ -35,60 +32,12 @@ object CurioBlur {
     fun blur(src: Bitmap, radius: Float): Bitmap {
         val r = min(radius, 25f)
         if (r <= 0f) return src.copy(src.config ?: Bitmap.Config.ARGB_8888, true)
-        return if (Build.VERSION.SDK_INT >= 33) agslBlur(src, r) else stackBlur(src, r)
+        // AGSL RuntimeShader requires a hardware-accelerated canvas, but
+        // bitmap blur always uses Canvas(bitmap) which is software-rendered.
+        // CPU StackBlur is fast (~50ms for 1080p) and works everywhere.
+        return stackBlur(src, r)
     }
 
-    // ── AGSL Gaussian (API 33+) ──────────────────────────────────────
-
-    /** Two-pass separable gaussian via AGSL RuntimeShader. */
-    @RequiresApi(33)
-    private fun agslBlur(src: Bitmap, radius: Float): Bitmap {
-        val w = src.width
-        val h = src.height
-        if (w <= 0 || h <= 0) return src
-
-        // Downscale for performance: blur at reduced resolution, then upscale.
-        val scale = if (radius > 12f) 0.25f else if (radius > 6f) 0.5f else 0.75f
-        val sw = maxOf((w * scale).toInt(), 1)
-        val sh = maxOf((h * scale).toInt(), 1)
-        val scaled = Bitmap.createScaledBitmap(src, sw, sh, true)
-
-        val sigma = radius * scale / 2f
-        val shaderH = RuntimeShader(HORIZONTAL_GAUSSIAN_SRC)
-        shaderH.setFloatUniform("sigma", sigma)
-        shaderH.setFloatUniform("iResolution", sw.toFloat(), sh.toFloat())
-
-        val shaderV = RuntimeShader(VERTICAL_GAUSSIAN_SRC)
-        shaderV.setFloatUniform("sigma", sigma)
-        shaderV.setFloatUniform("iResolution", sw.toFloat(), sh.toFloat())
-
-        // Horizontal pass
-        val temp = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888)
-        val canvasT = Canvas(temp)
-        shaderH.setInputShader("src", android.graphics.BitmapShader(
-            scaled, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP
-        ))
-        val paintH = Paint().apply { shader = shaderH }
-        canvasT.drawRect(0f, 0f, sw.toFloat(), sh.toFloat(), paintH)
-
-        // Vertical pass
-        val out = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888)
-        val canvasO = Canvas(out)
-        shaderV.setInputShader("src", android.graphics.BitmapShader(
-            temp, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP
-        ))
-        val paintV = Paint().apply { shader = shaderV }
-        canvasO.drawRect(0f, 0f, sw.toFloat(), sh.toFloat(), paintV)
-
-        // Recycle intermediates
-        temp.recycle()
-        scaled.recycle()
-
-        // Upscale back to original size
-        val result = Bitmap.createScaledBitmap(out, w, h, true)
-        out.recycle()
-        return result
-    }
 
     // ── CPU StackBlur (any API) ──────────────────────────────────────
 
@@ -266,41 +215,4 @@ object CurioBlur {
         } catch (_: Exception) { return null }
     }
 
-    // ── AGSL Gaussian shader sources (separable two-pass) ────────────
-
-    private const val HORIZONTAL_GAUSSIAN_SRC = """
-        uniform shader src;
-        uniform float2 iResolution;
-        uniform float sigma;
-
-        half4 main(float2 fragCoord) {
-            float4 sum = half4(0.0);
-            float norm = 0.0;
-            for (float i = -4.0; i <= 4.0; i += 1.0) {
-                float2 offset = float2(i * (sigma / 3.0), 0.0);
-                float weight = exp(-0.5 * (i * i) / (sigma * sigma / 9.0));
-                sum += src.eval(fragCoord + offset) * weight;
-                norm += weight;
-            }
-            return sum / norm;
-        }
-    """
-
-    private const val VERTICAL_GAUSSIAN_SRC = """
-        uniform shader src;
-        uniform float2 iResolution;
-        uniform float sigma;
-
-        half4 main(float2 fragCoord) {
-            float4 sum = half4(0.0);
-            float norm = 0.0;
-            for (float i = -4.0; i <= 4.0; i += 1.0) {
-                float2 offset = float2(0.0, i * (sigma / 3.0));
-                float weight = exp(-0.5 * (i * i) / (sigma * sigma / 9.0));
-                sum += src.eval(fragCoord + offset) * weight;
-                norm += weight;
-            }
-            return sum / norm;
-        }
-    """
 }
