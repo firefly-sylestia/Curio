@@ -30,11 +30,11 @@ import kotlinx.coroutines.runBlocking
  * time [pushAll] is called after data changes.
  */
 /** v272 — what a glass widget shows. Persisted PER WIDGET ID. */
-enum class GlassWidgetMode(val label: String, val description: String) {
-    STREAK("Streak", "Your live explore streak."),
-    QUESTS("Quests", "Level and XP progress."),
-    CABINET("Cabinet", "How many discoveries you've saved."),
-    SESSIONS("Sessions", "Live or queued explore sessions.")
+enum class GlassWidgetMode(val label: String, val description: String, val glyph: String) {
+    STREAK("Streak", "Your live explore streak.", "local_fire_department"),
+    QUESTS("Quests", "Level and XP progress.", "emoji_events"),
+    CABINET("Cabinet", "How many discoveries you've saved.", "auto_stories"),
+    SESSIONS("Sessions", "Live or queued explore sessions.", "explore")
 }
 
 class GlassWidgetProvider : AppWidgetProvider() {
@@ -99,7 +99,11 @@ class GlassWidgetProvider : AppWidgetProvider() {
                     )
                 )
             }
-            val (title, stats) = resolveContent(context, readMode(context, id))
+            val (glyph, title, stats) = resolveContent(context, readMode(context, id))
+            views.setImageViewBitmap(
+                R.id.glass_widget_icon,
+                GlassWidgetPane.renderIcon(context, glyph)
+            )
             views.setTextViewText(R.id.glass_widget_title, title)
             views.setTextViewText(R.id.glass_widget_stats, stats)
             views.setOnClickPendingIntent(
@@ -130,18 +134,21 @@ class GlassWidgetProvider : AppWidgetProvider() {
          * so values are correct even when the widget updates in a cold
          * process where the app UI never ran.
          */
-        private fun resolveContent(context: Context, mode: GlassWidgetMode): Pair<String, String> =
+        private fun resolveContent(
+            context: Context,
+            mode: GlassWidgetMode
+        ): Triple<String, String, String> =
             runCatching {
                 when (mode) {
                     GlassWidgetMode.STREAK -> {
                         val streak = StreakTracker.getStreak(context)
-                        "Curio" to if (streak > 0) "$streak-day streak" else "start exploring"
+                        Triple(mode.glyph, "Curio", if (streak > 0) "$streak-day explore streak" else "start exploring today")
                     }
                     GlassWidgetMode.QUESTS -> {
                         val xp = context.getSharedPreferences("curio_quests", Context.MODE_PRIVATE)
                             .getInt("xp", 0)
                         val level = CurioQuests.levelForXp(xp)
-                        "Quests" to "Lv $level \u00b7 $xp XP"
+                        Triple(mode.glyph, "Level $level", "$xp quest XP earned")
                     }
                     GlassWidgetMode.CABINET -> {
                         // Room call off the main thread; widget updates are
@@ -150,7 +157,7 @@ class GlassWidgetProvider : AppWidgetProvider() {
                         val count = runBlocking {
                             CurioDatabase.getInstance(context).captureDao().count()
                         }
-                        "Cabinet" to "$count saved"
+                        Triple(mode.glyph, "Cabinet", if (count > 0) "$count saved discoveries" else "nothing saved yet")
                     }
                     GlassWidgetMode.SESSIONS -> {
                         val prefs = context.getSharedPreferences("curio_prefs", Context.MODE_PRIVATE)
@@ -160,13 +167,13 @@ class GlassWidgetProvider : AppWidgetProvider() {
                                 org.json.JSONArray(raw).length()
                             }.getOrDefault(0)
                         } ?: 0
-                        "Explore" to when {
-                            active -> "session live"
-                            queued > 0 -> "$queued queued"
-                            else -> "no session"
-                        }
+                        Triple(mode.glyph, "Explore", when {
+                            active -> "session live right now"
+                            queued > 0 -> "$queued queued sessions"
+                            else -> "no sessions yet"
+                        })
                     }
                 }
-            }.getOrDefault("Curio" to "")
+            }.getOrDefault(Triple("local_fire_department", "Curio", ""))
     }
 }

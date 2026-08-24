@@ -1,3 +1,5 @@
+FIX: Glass widget style options are selectable again and the whole editor scrolls properly.
+ADD: Widget content is richer - a mode icon tile plus two-line text (title + detail) instead of one plain string.
 FIX: Glass widget styling is back - a live preview shows exactly how your pane will look as you pick Blur, a preset or a custom color.
 FIX: The Samsung wallpaper blur on the glass widget works again - and a new Blur option keeps that pure look; the harsh white border is gone.
 ADD: Glass widget pane styling - pick a preset (Light, Dark, Clear, Rose, Sky) or go fully custom with color and opacity sliders, per widget.

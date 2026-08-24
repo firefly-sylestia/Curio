@@ -9,6 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -106,6 +109,7 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
                             .padding(padding)
                             .padding(horizontal = 20.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -193,19 +197,37 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             modifier = Modifier.fillMaxWidth()
                         )
 
+                        // v276 - DEFAULT as a proper card: pure One UI
+                        // wallpaper blur, customization OFF. Chips below opt
+                        // into a custom pane.
+                        val selectedDefault = style == GlassWidgetPane.STYLE_DEFAULT
+                        Card(
+                            onClick = { style = GlassWidgetPane.STYLE_DEFAULT },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (selectedDefault)
+                                    MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                RadioButton(selected = selectedDefault, onClick = { style = GlassWidgetPane.STYLE_DEFAULT })
+                                Column {
+                                    Text("Default \u00b7 Samsung blur", fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "Just the launcher's frosted blur - no pane customization",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
                         // ── Pane style chips ────────────────────────────
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            // Blur chip first.
-                            StyleChip(
-                                label = "Blur",
-                                selected = style == GlassWidgetPane.STYLE_DEFAULT,
-                                onClick = { style = GlassWidgetPane.STYLE_DEFAULT }
-                            ) {
-                                drawRoundRect(
-                                    color = ComposeColor(0x66FFFFFF),
-                                    cornerRadius = CornerRadius(size.minDimension / 4f)
-                                )
-                            }
                             GlassWidgetPane.Preset.entries.forEach { preset ->
                                 StyleChip(
                                     label = preset.label,
@@ -294,7 +316,10 @@ class GlassWidgetConfigActivity : ComponentActivity() {
         onClick: () -> Unit,
         swatch: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable(onClick = onClick)
+        ) {
             Canvas(
                 modifier = Modifier
                     .padding(2.dp)

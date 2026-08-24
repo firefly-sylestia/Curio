@@ -1,3 +1,19 @@
+## Request: v277 - chip selection fix + widget icons + Default card (COMPLETE)
+
+- ROOT BUG (unselectable chips): v276 rewrite's StyleChip had NO clickable
+  modifier - Canvas+Text Column was inert. Fixed with clickable(onClick).
+  Same root cause covered "preview custom color not selectable".
+- SCROLL: root Column now verticalScroll(rememberScrollState()) - fixes
+  misplaced/unreachable custom section on short screens.
+- DEFAULT: full-width "Default - Samsung blur" radio card above the preset
+  chips (= STYLE_DEFAULT, pane GONE, pure One UI blur).
+- WIDGET CONTENT: GlassWidgetMode gains glyph (local_fire_department /
+  emoji_events / auto_stories / explore); resolveContent -> Triple(glyph,
+  title, info) with fuller lines ("5-day explore streak", "Level 4 -
+  940 XP quest XP", "3 saved discoveries", "session live right now");
+  GlassWidgetPane.renderIcon draws circle tile + white glyph from
+  material_symbols_outlined.ttf via ResourcesCompat; layout adds
+  glass_widget_icon ImageView + two-line vertical text column.
 ## Request: v276 - config UI rebuilt with live preview (COMPLETE)
 
 - LIVE PREVIEW canvas (stand-in wallpaper bands + exact resulting pane

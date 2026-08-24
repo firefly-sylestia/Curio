@@ -91,6 +91,32 @@ object GlassWidgetPane {
     }
 
     /**
+     * v276 - renders a MODE ICON tile: translucent circle + a white Material
+     * Symbols glyph (ligature drawn straight from the bundled symbols font),
+     * so the widget carries a visual anchor next to its text.
+     */
+    fun renderIcon(context: Context, glyph: String, sizePx: Int = 160): android.graphics.Bitmap {
+        val bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        // Translucent circle backing.
+        paint.color = 0x40FFFFFF
+        canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - sizePx * 0.04f, paint)
+        // Glyph, centered.
+        val typeface = androidx.core.content.res.ResourcesCompat.getFont(
+            context, com.curio.app.R.font.material_symbols_outlined
+        )
+        paint.color = Color.WHITE
+        paint.typeface = typeface
+        paint.textSize = sizePx * 0.52f
+        paint.textAlign = Paint.Align.CENTER
+        val fm = paint.fontMetrics
+        val baseline = sizePx / 2f - (fm.ascent + fm.descent) / 2f
+        canvas.drawText(glyph, sizePx / 2f, baseline, paint)
+        return bmp
+    }
+
+    /**
      * Renders the frosted pane. [cornerPx] follows the layout's 28dp recipe;
      * [widthPx]/[heightPx] come from the launcher's widget options so the
      * pane matches the placed size exactly.
