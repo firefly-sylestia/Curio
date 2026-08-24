@@ -1,3 +1,4 @@
+ADD: Real blur on older devices - an opt-in Experiments toggle brings REAL frosted glass to pre-Android-12 phones for the first time: an app-side blur engine draws the actual content scrolling behind the nav bar and Topic Reveal pills (no static fake veil).
 IMPROVE: Explore bubble drag is rock solid - the pill clamps against the screen edges live while dragging (no more rubber-band snap on release), and the expanded panel moves only from its header row so buttons and the note field never fight the gesture.
 IMPROVE: Explore bubble expand feels springy and tactile - one shared spring shapes the panel pop-in, plus a gentle press squish on the pill while touched.
 FIX: Floating pet now plays its full animation set outside the app - walk bob + lean + tail wag while it wanders or rides your drag, a lifted startled pose while held, and a dizzy recovery wobble right after you put it down.

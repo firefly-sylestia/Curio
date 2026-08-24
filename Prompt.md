@@ -1,3 +1,24 @@
+## Request: v264 — legacy glass blur (pre-Android-12 real frosted glass) (COMPLETE)
+
+User decisions: opt-in Experiments toggle; scope = bottom nav + Topic Reveal only.
+
+1. AppPreferences: legacyGlassBlurState (+KEY_LEGACY_GLASS_BLUR, seed, setter).
+   NOTE: str_replace buffer went stale on this file mid-edit — scripted insert
+   used for the setter block; duplicate KEY line removed.
+2. LegacyGlassBlur.kt: CurioLegacyBlur singleton (snapshot/captureSize/
+   captureOrigin/readbackBroken latch), curioLegacyCapture (records pages Box
+   into our own GraphicsLayer), geometry tracker, CurioLegacyBlurSnapshotter
+   (125ms throttle, downscale ≤160px, pure-Kotlin stack blur ×2 rounds),
+   curioLegacyGlassCapsule (maps blurred snapshot through root coords,
+   clips stadium, shared veil/sheen/rim finish). Readback failure → latch off
+   → faux fallback, never crash.
+3. liquidGlassCapsule <31 branch: serves legacy capsule when engine active+
+   snapshot ready; faux otherwise. Scope automatic — in-screen pills gated to
+   12+ by isInScreenGlassActive(), so only bottom nav + Topic Reveal hit it.
+4. CurioNavHost: rememberGraphicsLayer + capture/geometry modifiers on the
+   same pages-only Box as the Kyant layer; snapshotter composed when active.
+5. ExperimentsScreen: "Real blur (older devices)" row after parallax tilt.
+
 ## Request: v263 — stable bubble drag + full pet overlay animations (COMPLETE)
 
 1. Bubble drag: service-side onDragBy clamps x/y against display bounds LIVE

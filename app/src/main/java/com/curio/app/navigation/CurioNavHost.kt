@@ -129,6 +129,10 @@ import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.curioGlassCaptureDraw
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidglass.CurioLegacyBlur
+import com.curio.app.ui.components.liquidglass.CurioLegacyBlurSnapshotter
+import com.curio.app.ui.components.liquidglass.curioLegacyCapture
+import com.curio.app.ui.components.liquidglass.curioLegacyCaptureGeometry
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -460,6 +464,20 @@ fun CurioNavHost(
     // (that cycle crashed HWUI with a RenderThread stack overflow).
     val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
     SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
+    // v264 — LEGACY GLASS BLUR: on pre-Android-12 devices with the opt-in
+    // experiment on, the same pages-only Box is ALSO recorded into our own
+    // Compose GraphicsLayer; a throttled software snapshotter reads it back,
+    // downscales and stack-blurs it, and the nav/reveal pills draw that as a
+    // REAL frosted backdrop (no RenderEffect needed). Same sibling
+    // architecture — the pills never record themselves.
+    val legacyBlurActive = AppPreferences.legacyGlassBlurState &&
+        !CurioLegacyBlur.readbackBroken &&
+        android.os.Build.VERSION.SDK_INT in 26 until 31 &&
+        AppPreferences.liquidGlassPillsState
+    val legacyCaptureLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
+    if (legacyBlurActive) {
+        CurioLegacyBlurSnapshotter(legacyCaptureLayer)
+    }
     // v231 — glass parallax tilt experiment: run the gravity listener only
     // while the toggle is on (and the glass itself can render), so the
     // sensor costs nothing otherwise.
@@ -513,6 +531,13 @@ fun CurioNavHost(
                     // overlays are SIBLINGS of this Box, so they never
                     // record themselves into their own blurred backdrop.
                     .then(if (isLiquidGlassPillsActive()) Modifier.layerBackdrop(navGlassBackdrop) else Modifier)
+                    .then(
+                        if (legacyBlurActive) {
+                            Modifier
+                                .then(curioLegacyCapture(legacyCaptureLayer))
+                                .then(curioLegacyCaptureGeometry())
+                        } else Modifier
+                    )
                     .then(
                         if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)

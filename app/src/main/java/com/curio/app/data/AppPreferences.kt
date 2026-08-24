@@ -437,6 +437,16 @@ object AppPreferences {
     var glassParallaxState by mutableStateOf(false)
         private set
 
+    // v264 — LEGACY GLASS BLUR (experiment, default OFF): below Android 12
+    // there is no RenderEffect, so the real glass recipe can't run. When
+    // this is on, an APP-SIDE blur engine takes over for the bottom nav +
+    // Topic Reveal pills: the page layer is snapshotted in software,
+    // downscaled and stack-blurred (~8 updates/s), and the blurred pixels
+    // are drawn as the pills' real backdrop under the usual sheen/rim —
+    // frosted glass that actually shows the content scrolling behind it.
+    var legacyGlassBlurState by mutableStateOf(false)
+        private set
+
     // v248 — CLASSIC ACTIVE INDICATOR (experiment, default OFF): the nav
     // bar's draggable blob renders as fully TRANSPARENT refracting glass
     // (the pre-v247 style) instead of the solid white/black pill. Needs
@@ -709,6 +719,7 @@ object AppPreferences {
         drawerConstellationState = isDrawerConstellationEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         glassParallaxState = isGlassParallaxEnabled(context)
+        legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassBlurScaleState = getGlassBlurScale(context)
@@ -1013,6 +1024,7 @@ object AppPreferences {
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
+    private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
@@ -1211,6 +1223,16 @@ object AppPreferences {
     }
 
     // ── Classic active indicator (experiment, default OFF) ───────────
+    // Legacy glass blur (experiment, default OFF): an app-side blur engine
+    // for pre-Android-12 devices (see the state field above).
+    fun isLegacyGlassBlurEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LEGACY_GLASS_BLUR, false)
+
+    fun setLegacyGlassBlurEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LEGACY_GLASS_BLUR, enabled).apply()
+        legacyGlassBlurState = enabled
+    }
+
     fun isGlassClassicIndicatorEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_GLASS_CLASSIC_INDICATOR, false)
 

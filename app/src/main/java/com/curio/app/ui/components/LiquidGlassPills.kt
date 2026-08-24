@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
+import com.curio.app.ui.components.liquidglass.CurioLegacyBlur
+import com.curio.app.ui.components.liquidglass.curioLegacyGlassCapsule
 import com.curio.app.ui.theme.isCurioDarkTheme
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -238,7 +240,18 @@ fun Modifier.liquidGlassCapsule(
     if (!isLiquidGlassRequested()) return this
     // v243 — pre-Android-12: no RenderEffect → serve the simulated glass
     // recipe so those users get the look instead of nothing.
-    if (android.os.Build.VERSION.SDK_INT < 31) return this.fauxGlassCapsule(container)
+    // v264 — LEGACY GLASS BLUR (opt-in experiment): when the app-side blur
+    // engine has a snapshot, serve REAL frosted glass (the blurred page
+    // content) instead of the static veil. Only the bottom nav + Topic
+    // Reveal reach this branch on old devices (in-screen pills are gated to
+    // 12+ by [isInScreenGlassActive]), which is exactly the agreed scope.
+    if (android.os.Build.VERSION.SDK_INT < 31) {
+        return if (CurioLegacyBlur.isActive() && CurioLegacyBlur.snapshot != null) {
+            this.curioLegacyGlassCapsule(container)
+        } else {
+            this.fauxGlassCapsule(container)
+        }
+    }
     val effectiveBackdrop = backdrop
         ?: (if (useGlobalCapture) CurioGlassPills.backdrop else null)
         ?: return this.fauxGlassCapsule(container)
