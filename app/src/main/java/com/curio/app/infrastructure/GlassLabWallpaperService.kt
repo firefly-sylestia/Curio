@@ -11,6 +11,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
 import android.net.Uri
@@ -242,23 +243,27 @@ class GlassLabWallpaperService : WallpaperService() {
             canvas.save()
             canvas.clipPath(clip)
 
-            val satPaint = Paint(Paint.FILTER_BITMAP_FLAG).apply {
-                alpha = (alpha * 255).toInt()
-                colorFilter = ColorMatrixColorFilter(
-                    ColorMatrix().apply { setSaturation(1.25f) }
-                )
-            }
+            // NOTE: explicit receivers — inside `apply { }` a bare `alpha`
+            // would resolve to drawShape's Float parameter, not Paint.alpha.
+            val satPaint = Paint(Paint.FILTER_BITMAP_FLAG)
+            satPaint.colorFilter = ColorMatrixColorFilter(
+                ColorMatrix().apply { setSaturation(1.25f) }
+            )
+            satPaint.alpha = (alpha * 255).toInt()
             val blurBmp = blurredBackdrop
             if (blurBmp != null) {
                 // Map the pane's screen rect back into backdrop coords so
                 // the blur lines up pixel-perfectly behind the pane.
                 val sx = (left - drawOffX) / drawScale
                 val sy = (top - drawOffY) / drawScale
-                val sRect = RectF(
-                    sx.coerceAtLeast(0f),
-                    sy.coerceAtLeast(0f),
-                    (sx + pw / drawScale).coerceAtMost(blurBmp.width.toFloat()),
-                    (sy + ph / drawScale).coerceAtMost(blurBmp.height.toFloat())
+                // drawBitmap's SRC arg must be an integer Rect (or null).
+                val sRect = Rect(
+                    sx.coerceAtLeast(0f).toInt(),
+                    sy.coerceAtLeast(0f).toInt(),
+                    ((sx + pw / drawScale).coerceAtMost(blurBmp.width.toFloat())
+                        .toInt().coerceAtLeast(1)).coerceAtMost(blurBmp.width),
+                    ((sy + ph / drawScale).coerceAtMost(blurBmp.height.toFloat())
+                        .toInt().coerceAtLeast(1)).coerceAtMost(blurBmp.height)
                 )
                 canvas.drawBitmap(blurBmp, sRect, rect, satPaint)
             } else {
