@@ -44,6 +44,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.toArgb
@@ -71,7 +72,9 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * v264 — GLASS WIDGET LAB. A test bed for future home-screen WIDGET designs:
@@ -372,35 +375,111 @@ import kotlin.math.roundToInt
                 // ── Clock — REAL time ──
                 if (clockState.visible) {
                     LiquidLabShape(clockState, selectedId, wallLayer, modifier = Modifier.size(112.dp)) {
-                }
+                        Text(
+                            clock,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 26.sp,
+                            color = clockState.textColor
+                        )
+                    }
                 }
                 // ── Analog clock — real ticking hands ──
                 if (analogState.visible) {
                     LiquidLabShape(analogState, selectedId, wallLayer, modifier = Modifier.size(112.dp)) {
-                }
+                        Canvas(modifier = Modifier.size(96.dp)) {
+                            val r = size.minDimension / 2f
+                            val c = center
+                            val cal = java.util.Calendar.getInstance()
+                            fun hand(angleDeg: Float, lenFrac: Float, widthPx: Float) {
+                                val rad = Math.toRadians((angleDeg - 90).toDouble())
+                                drawLine(
+                                    color = analogState.textColor,
+                                    start = c,
+                                    end = Offset(
+                                        c.x + (lenFrac * r * cos(rad)).toFloat(),
+                                        c.y + (lenFrac * r * sin(rad)).toFloat()
+                                    ),
+                                    strokeWidth = widthPx,
+                                    cap = StrokeCap.Round
+                                )
+                            }
+                            drawCircle(
+                                color = analogState.textColor.copy(alpha = 0.35f),
+                                radius = r,
+                                style = Stroke(width = 2.dp.toPx())
+                            )
+                            val hourAngle =
+                                ((cal.get(java.util.Calendar.HOUR_OF_DAY) % 12) + cal.get(java.util.Calendar.MINUTE) / 60f) * 30f
+                            val minuteAngle =
+                                cal.get(java.util.Calendar.MINUTE) * 6f
+                            hand(hourAngle, 0.52f, 4.dp.toPx())
+                            hand(minuteAngle, 0.78f, 2.5.dp.toPx())
+                            drawCircle(color = Color(0xFFFF8A3C), radius = 3.5.dp.toPx())
+                        }
+                    }
                 }
                 // ── Session pill — LIVE elapsed / Explored ──
                 if (timerState.visible) {
                     LiquidLabShape(timerState, selectedId, wallLayer, modifier = Modifier.width(196.dp).height(58.dp)) {
+                        Text(
+                            timerText,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = timerState.textColor
+                        )
+                    }
                 }
-                }
-                // ── Streak ring — fire icon + count in a progress circle ──
+                // ── Streak ring — fire icon + count ──
                 if (streakState.visible) {
                     LiquidLabShape(streakState, selectedId, wallLayer, modifier = Modifier.size(92.dp)) {
-                }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CurioIcon(
+                                name = CurioIcons.LocalFire,
+                                contentDescription = null,
+                                tint = streakState.textColor,
+                                size = 22.dp
+                            )
+                            Text(
+                                "$streak",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp,
+                                color = streakState.textColor
+                            )
+                        }
+                    }
                 }
                 // ── Battery — real level ──
                 if (batteryState.visible) {
                     LiquidLabShape(batteryState, selectedId, wallLayer, modifier = Modifier.size(92.dp)) {
-                }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CurioIcon(
+                                name = "battery_full",
+                                contentDescription = null,
+                                tint = batteryState.textColor,
+                                size = 22.dp
+                            )
+                            Text(
+                                "$batteryPct%",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = batteryState.textColor
+                            )
+                        }
+                    }
                 }
                 // ── Date pill ──
                 if (dateState.visible) {
                     LiquidLabShape(dateState, selectedId, wallLayer, modifier = Modifier.width(170.dp).height(58.dp)) {
-                }
+                        Text(
+                            dateLine,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = dateState.textColor
+                        )
+                    }
                 }
                 // ── One UI frost tile (baked, non-refracting comparison) ──
-                Box(
+                if (frostState.visible) Box(
                     modifier = Modifier
                         .offset { frostState.pos }
                         .clickable { selectedId.value = "frost" }

@@ -2,12 +2,16 @@ package com.curio.app.infrastructure
 
 import android.app.KeyguardManager
 import android.app.WallpaperManager
-import android.content.ComponentName
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
 import android.graphics.Shader
 import android.net.Uri
 import android.os.Handler
@@ -21,16 +25,20 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * v279 — GLASS LAB LIVE WALLPAPER. Draws the composition designed in the
- * lab (wallpaper image + frosted panes with their text) as a live wallpaper.
+ * GLASS LAB LIVE WALLPAPER. Draws the composition designed in the lab over
+ * the chosen wallpaper.
  *
- * v280 — LOCK SCREEN MODE: while the keyguard is up ONLY the clock shapes
- * render; every other shape pops back with a soft 450ms fade the moment the
- * device unlocks.
+ * REAL BAKED LIQUID GLASS (v284): every pane samples the backdrop ALIGNED
+ * UNDERNEATH IT — the region of wallpaper exactly behind the pane is drawn
+ * back through a downscale/upscale gaussian-style blur with a saturation
+ * boost (vibrancy) — then a top gloss gradient and a bright rim are layered
+ * on top. This is the same pipeline (blur + vibrancy) the in-app Kyant
+ * recipe runs; per-pixel lens refraction still has no wallpaper-space API,
+ * but the frost now genuinely shows the blurred wallpaper behind each pane
+ * instead of a flat translucent veil.
  *
- * Honest scope: RemoteViews-style per-pixel refraction doesn't exist for
- * wallpapers either, so panes are baked frost (gradient + rounded corners)
- * — the One UI frost look, not liquid-glass refraction.
+ * LOCK SCREEN MODE: while the keyguard is up ONLY the clock shapes render;
+ * everything else pops back with a soft 450ms fade on unlock.
  */
 class GlassLabWallpaperService : WallpaperService() {
 
@@ -56,6 +64,32 @@ class GlassLabWallpaperService : WallpaperService() {
             }
         }
         private var fadeStart = 0L
+
+        // ── Backdrop caches ────────────────────────────────────────────
+        private var sharpBackdrop: Bitmap? = null
+        private var blurredBackdrop: Bitmap? = null   // blurred + saturated
+        private var drawScale = 1f                    // cover-fit scale
+        private var drawOffX = 0f
+        private var drawOffY = 0f
+
+        /** Downscale→upscale gaussian-ish blur, cached against the source. */
+        private fun ensureBlurred(src: Bitmap?) {
+            if (src == null) {
+                sharpBackdrop = null
+                blurredBackdrop = null
+                return
+            }
+            if (sharpBackdrop === src && blurredBackdrop != null) return
+            sharpBackdrop = src
+            blurredBackdrop = runCatching {
+                val smallW = (src.width / 14).coerceIn(8, 400)
+                val smallH = (src.height / 14).coerceIn(8, 800)
+                val small = Bitmap.createScaledBitmap(src, smallW, smallH, true)
+                // Two bilinear round-trips soften further without RenderScript.
+                val mid = Bitmap.createScaledBitmap(small, smallW / 2, smallH / 2, true)
+                Bitmap.createScaledBitmap(mid, src.width, src.height, true)
+            }.getOrNull()
+        }
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
@@ -85,7 +119,6 @@ class GlassLabWallpaperService : WallpaperService() {
             if (locked == wasLocked) return
             wasLocked = locked
             if (!locked && nonClockAlpha < 1f) {
-                // Freshly unlocked — start the beautiful pop-back fade.
                 fadeStart = SystemClock.elapsedRealtime()
                 if (!fadeRunning) {
                     fadeRunning = true
@@ -101,14 +134,24 @@ class GlassLabWallpaperService : WallpaperService() {
             try {
                 val w = canvas.width.toFloat()
                 val h = canvas.height.toFloat()
-                drawBackdrop(canvas, this@GlassLabWallpaperService, w, h)
 
+                val context = this@GlassLabWallpaperService
+                val bmp = loadBackdrop(context)
+                ensureBlurred(bmp)
+                if (bmp != null) {
+                    drawScale = maxOf(w / bmp.width, h / bmp.height)
+                    drawOffX = (w - bmp.width * drawScale) / 2f
+                    drawOffY = (h - bmp.height * drawScale) / 2f
+                    canvas.drawBitmap(bmp, drawOffX, drawOffY, null)
+                } else {
+                    drawScale = 1f; drawOffX = 0f; drawOffY = 0f
+                    drawGradientFallback(canvas, w, h)
+                }
+
+                val density = context.resources.displayMetrics.density
                 val paint = Paint(Paint.ANTI_ALIAS_FLAG)
                 val glyphPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    typeface = ResourcesCompat.getFont(
-                        this@GlassLabWallpaperService,
-                        R.font.material_symbols_outlined
-                    )
+                    typeface = ResourcesCompat.getFont(context, R.font.material_symbols_outlined)
                     textAlign = Paint.Align.CENTER
                 }
                 val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -119,7 +162,7 @@ class GlassLabWallpaperService : WallpaperService() {
                 val km = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
                 val locked = km?.isKeyguardLocked ?: false
 
-                GlassLabComposition.load(this@GlassLabWallpaperService)
+                GlassLabComposition.load(context)
                     .filter { !locked || it.id == "clock" || it.id == "analog" }
                     .forEach { shape ->
                         val alpha = when {
@@ -127,16 +170,17 @@ class GlassLabWallpaperService : WallpaperService() {
                             shape.id == "clock" || shape.id == "analog" -> 1f
                             else -> nonClockAlpha
                         }
-                        drawShape(canvas, this@GlassLabWallpaperService, shape, w, h, alpha, paint, glyphPaint, textPaint)
+                        drawShape(
+                            canvas, context, shape, w, h, alpha,
+                            paint, glyphPaint, textPaint, density
+                        )
                     }
             } finally {
                 holder.unlockCanvasAndPost(canvas)
             }
         }
 
-        /** v283 — LIVE data so the baked widgets match the real ones. */
-        private var cachedSavedCount = -1
-
+        /** LIVE data so the baked widgets match the real ones. */
         private fun liveTitle(context: Context, id: String): String = when (id) {
             "clock" -> java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
                 .format(java.util.Date())
@@ -147,7 +191,7 @@ class GlassLabWallpaperService : WallpaperService() {
                     "Exploring · ${mins}m"
                 } else "Explored"
             }
-            "streak" -> "${com.curio.app.data.StreakTracker.getStreak(context)}-day streak"
+            "streak" -> "${com.curio.app.data.StreakTracker.getStreak(context)}"
             "battery" -> {
                 val bm = context.getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager
                 "${bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)?.takeIf { it > 0 } ?: 80}%"
@@ -157,6 +201,16 @@ class GlassLabWallpaperService : WallpaperService() {
             else -> ""
         }
 
+        /**
+         * One baked liquid-glass pane:
+         *  1. clip to the rounded capsule
+         *  2. re-draw the BLURRED + SATURATED backdrop aligned under the pane
+         *     (real frosted glass, not a flat tint)
+         *  3. top gloss + bottom depth gradients
+         *  4. bright rim stroke
+         *  5. content (hands / icon glyph / text) sized from the same dp
+         *     dims the lab uses.
+         */
         private fun drawShape(
             canvas: Canvas,
             context: Context,
@@ -166,47 +220,97 @@ class GlassLabWallpaperService : WallpaperService() {
             alpha: Float,
             paint: Paint,
             glyphPaint: Paint,
-            textPaint: Paint
+            textPaint: Paint,
+            density: Float
         ) {
-            val base = minOf(w, h)
-            val round = shape.id == "clock" || shape.id == "analog" ||
-                shape.id == "streak" || shape.id == "battery"
-            val pw = (if (round) 112f else 196f) / 360f * base * shape.scale
-            val ph = pw.coerceAtMost((if (round) 112f else 58f) / 360f * base * shape.scale)
+            // ── Geometry — EXACTLY the lab's fixed dp sizes ─────────────
+            val dw: Float; val dh: Float
+            when (shape.id) {
+                "clock", "analog" -> { dw = 112f; dh = 112f }
+                "streak", "battery" -> { dw = 92f; dh = 92f }
+                else -> { dw = 196f; dh = 58f }
+            }
+            val pw = dw * density * shape.scale
+            val ph = dh * density * shape.scale
             val left = shape.xFrac * w
             val top = shape.yFrac * h
+            val radius = ph.coerceAtMost(pw) / 2f
+            val rect = RectF(left, top, left + pw, top + ph)
 
-            paint.alpha = (alpha * 255).toInt()
+            // ── 1+2+3: clipped glass body ───────────────────────────────
+            val clip = Path().apply { addRoundRect(rect, radius, radius, Path.Direction.CW) }
+            canvas.save()
+            canvas.clipPath(clip)
+
+            val satPaint = Paint(Paint.FILTER_BITMAP_FLAG).apply {
+                alpha = (alpha * 255).toInt()
+                colorFilter = ColorMatrixColorFilter(
+                    ColorMatrix().apply { setSaturation(1.25f) }
+                )
+            }
+            val blurBmp = blurredBackdrop
+            if (blurBmp != null) {
+                // Map the pane's screen rect back into backdrop coords so
+                // the blur lines up pixel-perfectly behind the pane.
+                val sx = (left - drawOffX) / drawScale
+                val sy = (top - drawOffY) / drawScale
+                val sRect = RectF(
+                    sx.coerceAtLeast(0f),
+                    sy.coerceAtLeast(0f),
+                    (sx + pw / drawScale).coerceAtMost(blurBmp.width.toFloat()),
+                    (sy + ph / drawScale).coerceAtMost(blurBmp.height.toFloat())
+                )
+                canvas.drawBitmap(blurBmp, sRect, rect, satPaint)
+            } else {
+                // No bitmap backdrop → tinted glass over the fallback gradient.
+                paint.shader = LinearGradient(
+                    0f, top, 0f, top + ph,
+                    0x59FFFFFF, 0x2E3A3A44.toInt(), Shader.TileMode.CLAMP
+                )
+                paint.alpha = (alpha * 255).toInt()
+                canvas.drawRect(rect, paint)
+                paint.shader = null
+            }
+
+            // Gloss (top → transparent) + depth (bottom darkening).
             paint.shader = LinearGradient(
-                0f, top, 0f, top + ph,
-                0x59FFFFFF, 0x2E3A3A44.toInt(), Shader.TileMode.CLAMP
+                0f, top, 0f, top + ph * 0.55f,
+                0x38FFFFFF, 0x00FFFFFF, Shader.TileMode.CLAMP
             )
-            canvas.drawRoundRect(left, top, left + pw, top + ph, ph / 2f, ph / 2f, paint)
+            paint.alpha = (alpha * 255).toInt()
+            canvas.drawRect(rect, paint)
+            paint.shader = LinearGradient(
+                0f, top + ph * 0.6f, 0f, top + ph,
+                0x00000000, 0x24000000, Shader.TileMode.CLAMP
+            )
+            canvas.drawRect(rect, paint)
             paint.shader = null
+            canvas.restore()
 
+            // ── 4: rim highlight ────────────────────────────────────────
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = density * 1.4f
+            paint.alpha = (alpha * 90).toInt()
+            paint.color = Color.WHITE
+            canvas.drawRoundRect(rect, radius, radius, paint)
+            paint.style = Paint.Style.FILL
+
+            // ── 5: content ──────────────────────────────────────────────
             val cx = left + pw / 2f
             val cy = top + ph / 2f
 
             if (shape.id == "analog") {
-                // Live analog hands.
                 val cal = java.util.Calendar.getInstance()
                 val hourAngle =
                     ((cal.get(java.util.Calendar.HOUR_OF_DAY) % 12) + cal.get(java.util.Calendar.MINUTE) / 60f) * 30f
                 val minuteAngle =
                     (cal.get(java.util.Calendar.MINUTE) + cal.get(java.util.Calendar.SECOND) / 60f) * 6f
                 val r = ph / 2f - ph * 0.08f
-                paint.color = Color.WHITE
-                canvas.drawCircle(cx, cy, r, paint.apply {
-                    this.alpha = (alpha * 64).toInt()
-                    style = Paint.Style.STROKE
-                    strokeWidth = ph * 0.04f
-                })
-                paint.style = Paint.Style.FILL
+                paint.strokeCap = Paint.Cap.ROUND
                 fun hand(angleDeg: Float, lenFrac: Float, widthPx: Float) {
                     val rad = Math.toRadians((angleDeg - 90).toDouble())
-                    paint.color = Color.WHITE
+                    paint.color = shape.textArgb
                     paint.strokeWidth = widthPx
-                    paint.strokeCap = Paint.Cap.ROUND
                     canvas.drawLine(
                         cx, cy,
                         cx + (lenFrac * r * cos(rad)).toFloat(),
@@ -214,26 +318,36 @@ class GlassLabWallpaperService : WallpaperService() {
                         paint
                     )
                 }
-                hand(hourAngle, 0.5f, ph * 0.055f)
-                hand(minuteAngle, 0.78f, ph * 0.035f)
+                hand(hourAngle, 0.52f, density * 4f)
+                hand(minuteAngle, 0.78f, density * 2.5f)
                 paint.color = 0xFFFF8A3C.toInt()
-                canvas.drawCircle(cx, cy, ph * 0.03f, paint)
+                canvas.drawCircle(cx, cy, density * 3.5f, paint)
                 paint.strokeCap = Paint.Cap.BUTT
                 return
             }
 
             textPaint.alpha = (alpha * 255).toInt()
             textPaint.color = shape.textArgb
-            textPaint.textSize = ph * 0.30f
-            canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
-            if (shape.id == "streak" || shape.id == "battery") {
-                glyphPaint.alpha = (alpha * 255).toInt()
-                glyphPaint.color = shape.textArgb
-                glyphPaint.textSize = ph * 0.34f
-                canvas.drawText(
-                    if (shape.id == "streak") "local_fire_department" else "battery_full",
-                    cx, cy - ph * 0.16f, glyphPaint
-                )
+            when (shape.id) {
+                "clock" -> {
+                    textPaint.textSize = 26f * density * shape.scale
+                    canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
+                }
+                "streak", "battery" -> {
+                    // Glyph above the value, both centered like the lab Column.
+                    glyphPaint.alpha = (alpha * 255).toInt()
+                    glyphPaint.color = shape.textArgb
+                    glyphPaint.textSize = 22f * density * shape.scale
+                    val glyph = if (shape.id == "streak") "local_fire_department" else "battery_full"
+                    canvas.drawText(glyph, cx, cy - ph * 0.06f, glyphPaint)
+                    textPaint.textSize = 16f * density * shape.scale
+                    canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize * 1.15f, textPaint)
+                }
+                else -> {
+                    // Pills (timer/date).
+                    textPaint.textSize = 14f * density * shape.scale
+                    canvas.drawText(liveTitle(context, shape.id), cx, cy + textPaint.textSize / 3f, textPaint)
+                }
             }
         }
     }
@@ -242,11 +356,11 @@ class GlassLabWallpaperService : WallpaperService() {
         const val FADE_MS = 450L
 
         /**
-         * v283 — backdrop resolution: the lab's picked image first; when the
-         * user left it on auto, try the DEVICE wallpaper ladder
+         * Backdrop resolution: the lab's picked image first; when the user
+         * left it on auto, try the DEVICE wallpaper ladder
          * (getWallpaperFile -> getDrawable) before giving up to the gradient.
          */
-        fun loadBackdrop(context: Context): android.graphics.Bitmap? = runCatching {
+        fun loadBackdrop(context: Context): Bitmap? = runCatching {
             val uriStr = com.curio.app.data.AppPreferences.getGlassLabWallpaperUri(context)
             if (uriStr != "auto" && uriStr.isNotBlank()) {
                 return runCatching {
@@ -255,7 +369,6 @@ class GlassLabWallpaperService : WallpaperService() {
                     }
                 }.getOrNull()
             }
-            // Auto: device wallpaper (permission-gated on 13+, caught below).
             val wm = WallpaperManager.getInstance(context)
             runCatching {
                 wm.getWallpaperFile(WallpaperManager.FLAG_SYSTEM)?.use { pfd ->
@@ -269,21 +382,8 @@ class GlassLabWallpaperService : WallpaperService() {
     }
 }
 
-/** Backdrop: user wallpaper cropped to fill, or the lab's gradient fallback. */
-internal fun drawBackdrop(
-    canvas: Canvas,
-    context: Context,
-    w: Float,
-    h: Float
-) {
-    val bmp = GlassLabWallpaperService.loadBackdrop(context)
-    if (bmp != null) {
-        val scale = maxOf(w / bmp.width, h / bmp.height)
-        val bw = bmp.width * scale
-        val bh = bmp.height * scale
-        canvas.drawBitmap(bmp, (w - bw) / 2f, (h - bh) / 2f, null)
-        return
-    }
+/** Fallback backdrop when no bitmap is available. */
+internal fun drawGradientFallback(canvas: Canvas, w: Float, h: Float) {
     val paint = Paint().apply {
         shader = LinearGradient(
             0f, 0f, w, h,

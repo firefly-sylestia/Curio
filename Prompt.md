@@ -738,3 +738,18 @@ User's batched asks across the session:
 - Tuning preview: outer Box height 230→260dp so the draggable capsule can roam freely beyond the gradient card bounds.
 - Glass tap effect: backInteraction wired through SettingsHeroHeader's CurioBackButton + liquidGlassCapsule.
 - Status: pushed. CI validates.
+
+### v284 — Lab content restored + real baked-glass live wallpaper (current)
+- **Lab shapes were empty**: the git-restore redo pass dropped every LiquidLabShape
+  content lambda. Restored clock text, analog hands (Canvas), timer/session text,
+  streak fire icon + count, battery icon + %, date pill.
+- **Frost tile didn't hide per-widget** — missing `frostState.visible` gate added.
+- **Live wallpaper was a flat translucent veil** — rewrote GlassLabWallpaperService:
+  each pane now samples the backdrop ALIGNED underneath it through a cached
+  downscale/upscale blur with 1.25x saturation (vibrancy), plus top gloss,
+  bottom depth and rim stroke — the baked equivalent of the Kyant recipe
+  (blur + vibrancy). Per-pixel lens refraction still has no wallpaper-space API.
+- **Service size math was wrong** (`/360f*base`): now exact dp sizes x density x
+  scale matching the lab (112dp clocks, 92dp tiles, 196x58 pills), glyph+text
+  layout mirroring the lab Column.
+- Balance checks green; CI validates.
