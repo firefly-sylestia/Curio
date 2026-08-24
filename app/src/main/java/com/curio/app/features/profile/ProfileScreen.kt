@@ -552,7 +552,16 @@ fun ProfileScreen(navController: NavController) {
         // rest both paths show the exact same SOLID hero fill.
         val glassOn = isInScreenGlassActive()
         // Resolve solid target colors from scroll, then animate the paint.
-        val targetPillBg = lerp(restPillBg, if (glassOn) Color.Transparent else frostPillBg, frostShift)
+        // v264 — FAST GLASS HANDOFF (same fix as Home): with glass on, the
+        // solid hero fill commits to fully-clear glass by ~40% of the scroll
+        // instead of fading across the whole range — the mid-morph never
+        // shows a semi-transparent dark fill sitting on the blurred backdrop.
+        val fastGlassShift = FastOutSlowInEasing.transform((stickyProgress * 2.5f).coerceIn(0f, 1f))
+        val targetPillBg = lerp(
+            restPillBg,
+            if (glassOn) Color.Transparent else frostPillBg,
+            if (glassOn) fastGlassShift else frostShift
+        )
         val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
         val targetPillIcon = lerp(heroInk, frostPillIcon, frostShift)
         val pillBg by animateColorAsState(

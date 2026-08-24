@@ -15,6 +15,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -44,9 +45,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -278,6 +285,9 @@ fun ExploreBubbleContent(
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 600f),
         label = "bubblePress"
     )
+    // v264 — the expanded panel's hairline rim color (hoisted: the draw
+    // lambda below isn't a composable context).
+    val panelRim = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
 
     Surface(
         shape = RoundedCornerShape(cornerRadius),
@@ -304,6 +314,29 @@ fun ExploreBubbleContent(
             .graphicsLayer {
                 scaleX = pressedScale
                 scaleY = pressedScale
+            }
+            // v264 — EXPANDED PANEL DEPTH: a domed sheen (light catching the
+            // top, shade pooling at the bottom) plus a hairline rim, so the
+            // card reads as raised glass-like depth instead of a flat sheet.
+            .drawWithContent {
+                drawContent()
+                val r = CornerRadius(cornerRadius.toPx())
+                drawRoundRect(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.10f),
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.12f)
+                        )
+                    ),
+                    cornerRadius = r
+                )
+                drawRoundRect(
+                    color = panelRim,
+                    cornerRadius = r,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                )
             }
             // The minimized pill is tappable anywhere to expand; the expanded
             // bubble's buttons handle their own input. Applied conditionally
@@ -341,13 +374,13 @@ fun ExploreBubbleContent(
             label = "bubbleExpand"
         ) { m ->
             if (m) {
-                MinimizedPill(
-                    category = category,
-                    accent = accent,
-                    ink = ink,
-                    paused = session.paused,
-                    onExpand = { minimized = false }
-                )
+        MinimizedPill(
+            category = category,
+            accent = accent,
+            ink = ink,
+            paused = session.paused,
+            onExpand = { minimized = false }
+        )
             } else {
                 ExpandedPanel(
                 session = session,
@@ -391,16 +424,50 @@ private fun MinimizedPill(
     paused: Boolean,
     onExpand: () -> Unit
 ) {
+    val baseFill = MaterialTheme.colorScheme.surfaceContainerHigh
     Box(
         modifier = Modifier
             .padding(4.dp)
             .size(46.dp)
+            // v264 — 3D DEPTH + BROAD GLOW RING. Overlay windows clip real
+            // elevation into a hard boxy edge, so the depth is painted:
+            // a soft drop shadow (offset down), the category glow as a WIDE
+            // halo disc behind the pill, and a domed radial fill (light
+            // top-start → base) with a bottom inner shade — the pill reads
+            // as a raised, lit bubble instead of a flat circle.
+            .drawBehind {
+                val r = size.minDimension / 2f
+                drawCircle(
+                    Color.Black.copy(alpha = 0.30f),
+                    radius = r + 1.5f.dp.toPx(),
+                    center = center + Offset(0f, 2.5f.dp.toPx())
+                )
+                drawCircle(accent.copy(alpha = 0.22f), radius = r + 5f.dp.toPx())
+                drawCircle(accent.copy(alpha = 0.12f), radius = r + 9f.dp.toPx())
+            }
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        lerp(baseFill, Color.White, 0.22f),
+                        baseFill,
+                        lerp(baseFill, Color.Black, 0.16f)
+                    ),
+                    center = Offset(size.width * 0.34f, size.height * 0.28f),
+                    radius = size.minDimension * 0.95f
+                )
+            )
             .border(
-                width = 2.dp,
-                color = if (paused) MaterialTheme.colorScheme.outlineVariant
-                        else accent.copy(alpha = 0.55f),
+                width = 3.dp,
+                brush = if (paused) Brush.sweepGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.outlineVariant,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+                        MaterialTheme.colorScheme.outlineVariant
+                    )
+                ) else Brush.sweepGradient(
+                    listOf(accent, accent.copy(alpha = 0.45f), Color.White.copy(alpha = 0.65f), accent)
+                ),
                 shape = CircleShape
             ),
         contentAlignment = Alignment.Center

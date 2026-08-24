@@ -1,3 +1,24 @@
+## Request: v265 — widget lab + dark-morph fix + bubble depth (COMPLETE)
+
+1. GLASS WIDGET LAB (GlassWidgetLabScreen.kt, route GLASS_WIDGET_LAB,
+   entry row in Experiments): loads current wallpaper via WallpaperManager
+   (gradient fallback), records it into a LayerBackdrop, three draggable
+   REAL liquid-glass shapes (112dp clock / 196×58 timer pill / 64dp glyph,
+   white ink) + a glass back pill. Hint card when glass off/<12. Told user:
+   real RemoteViews widgets CANNOT sample wallpaper per-pixel — lab is the
+   design test bed; winning design ships as closest static treatment.
+2. DARK MID-MORPH FIX (HomeScreen + ProfileScreen): with glass on, the
+   solid hero fill now commits to fully-clear glass by ~40% of scroll
+   (fastGlassShift = eased stickyProgress*2.5) instead of fading across the
+   whole range — no more semi-transparent dark fill stacked on the blurred
+   backdrop mid-scroll. Non-glass frost morph timing unchanged.
+3. BUBBLE 3D DEPTH (ExploreBubbleContent): MinimizedPill = painted drop
+   shadow + broad category glow halo (2 discs, +5dp/+9dp), domed radial fill
+   (light 34%/28% → base → shade), 3dp sweep-gradient border (accent→white);
+   paused keeps outlineVariant ring. Expanded panel = vertical sheen overlay
+   (white10%→transparent→black12%) + hairline panelRim via drawWithContent.
+   All painted (overlay windows clip real elevation).
+
 ## Request: v264 — legacy glass blur (pre-Android-12 real frosted glass) (COMPLETE)
 
 User decisions: opt-in Experiments toggle; scope = bottom nav + Topic Reveal only.

@@ -212,6 +212,20 @@ fun ExperimentsScreen(navController: NavController) {
             }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
+                    // v264 — the glass widget lab: drag REAL refracting widget
+                    // shapes over your actual wallpaper (test bed for a future
+                    // home-screen widget design).
+                    com.curio.app.ui.components.CurioSettingsRow(
+                        CurioIcons.AutoAwesome,
+                        "Glass widget lab",
+                        "Drag real liquid-glass widget shapes over your wallpaper"
+                    ) {
+                        navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_LAB) { launchSingleTop = true }
+                    }
+                }
+            }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
                     CurioSettingsInfoRow(CurioIcons.Info, "About experiments", "These controls are temporary and may change")
                 }
             }

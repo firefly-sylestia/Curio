@@ -1,3 +1,6 @@
+NEW: Glass widget lab - drag REAL refracting liquid-glass widget shapes (clock tile, timer pill, glyph tile) over your actual wallpaper to test future widget designs.
+FIX: The Home and Profile floating pills no longer show a dark muddy shade mid-scroll - the solid-to-glass morph now commits to clear glass fast instead of fading a dark fill across the whole scroll range.
+STYLE: The explore bubble reads as a raised 3D bubble now - painted drop shadow, domed light-to-shade fill, a broader category glow ring on the small pill, and a domed sheen + hairline rim on the expanded panel.
 ADD: Real blur on older devices - an opt-in Experiments toggle brings REAL frosted glass to pre-Android-12 phones for the first time: an app-side blur engine draws the actual content scrolling behind the nav bar and Topic Reveal pills (no static fake veil).
 IMPROVE: Explore bubble drag is rock solid - the pill clamps against the screen edges live while dragging (no more rubber-band snap on release), and the expanded panel moves only from its header row so buttons and the note field never fight the gesture.
 IMPROVE: Explore bubble expand feels springy and tactile - one shared spring shapes the panel pop-in, plus a gentle press squish on the pill while touched.

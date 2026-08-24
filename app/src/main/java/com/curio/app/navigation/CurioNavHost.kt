@@ -880,6 +880,9 @@ fun CurioNavHost(
             composable(CurioRoutes.EXPERIMENTS) {
                 ExperimentsScreen(navController = navController)
             }
+            composable(CurioRoutes.GLASS_WIDGET_LAB) {
+                com.curio.app.features.settings.GlassWidgetLabScreen(navController = navController)
+            }
             composable(CurioRoutes.MANAGE_CATEGORIES) {
                 ManageCategoriesScreen(navController = navController)
             }

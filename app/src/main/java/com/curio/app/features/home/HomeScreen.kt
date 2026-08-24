@@ -1191,8 +1191,20 @@ fun HomeScreen(navController: NavController) {
             // Resolve solid target colors from scroll, then animate the paint
             // itself. The short tween gives a true color fade without adding
             // another geometric transition or ripple-like flash.
-            val targetMenuBg = lerp(heroPillBg, if (glassOn) Color.Transparent else frostBg, frostShift)
-            val targetProfileBg = lerp(heroPillBg, if (profileGlassOn) Color.Transparent else frostBg, frostShift)
+            // v264 — FAST GLASS HANDOFF (fixes the mid-morph DARK SHADE): with
+            // glass active, the solid hero fill used to fade out across the
+            // WHOLE scroll range — so for most of the morph the pill was a
+            // semi-transparent DARK fill sitting on top of the blurred
+            // backdrop, which read as a darker muddy pill. Now the glass path
+            // commits to fully-clear glass by ~40% of the scroll (an eased,
+            // scrubable sprint), so the dark fill is gone almost immediately
+            // and the pills read as pure liquid glass while you scroll. The
+            // non-glass frosted morph keeps its original full-range timing.
+            val fastGlassShift = FastOutSlowInEasing.transform((stickyProgress * 2.5f).coerceIn(0f, 1f))
+            val menuMorphShift = if (glassOn) fastGlassShift else frostShift
+            val profileMorphShift = if (profileGlassOn) fastGlassShift else frostShift
+            val targetMenuBg = lerp(heroPillBg, if (glassOn) Color.Transparent else frostBg, menuMorphShift)
+            val targetProfileBg = lerp(heroPillBg, if (profileGlassOn) Color.Transparent else frostBg, profileMorphShift)
             val targetPillRim = lerp(heroPillRim, frostRim, frostShift)
             val targetPillIcon = lerp(heroPillIcon, frostIcon, frostShift)
             val menuPillBg by animateColorAsState(
