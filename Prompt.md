@@ -1,3 +1,16 @@
+## Request: v281 — corner editing + in-app widget editor (COMPLETE)
+
+- CORNER: GlassWidgetPane.read/writeCorner (corner_$id dp, default 28);
+  provider passes corner*density to render; config gets "Corner roundness"
+  slider (8-32dp) shown for any non-default style; preview scales its
+  corner ratio live. onDeleted cleans corner key.
+- IN-APP EDITOR: WidgetEditorScreen (route GLASS_WIDGET_EDITOR, Experiments
+  row under lab) lists placed Curio glass widgets via
+  AppWidgetManager.getAppWidgetIds(ComponentName(GlassWidgetProvider)),
+  shows mode + style per id, refreshes on ON_RESUME; tap opens
+  GlassWidgetConfigActivity directly with EXTRA_APPWIDGET_ID - bypasses
+  launcher reconfigurable support entirely. Save/Apply re-renders the
+  widget's RemoteViews immediately.
 ## Request: v280 - lock-screen clocks + analog widget (COMPLETE)
 
 - CI FIX: GlassWidgetConfigActivity had two imports glued on one line

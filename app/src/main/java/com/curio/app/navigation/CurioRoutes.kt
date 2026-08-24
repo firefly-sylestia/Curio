@@ -201,6 +201,7 @@ object CurioRoutes {
     const val EXPERIMENTS = "experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).
     const val GLASS_WIDGET_LAB = "glass_widget_lab"
+    const val GLASS_WIDGET_EDITOR = "glass_widget_editor"
     const val MANAGE_CATEGORIES = "manage-categories"
     const val TOPIC_HISTORY = "topic-history"
     const val RECENTS_ALL = "recents"

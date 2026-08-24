@@ -43,7 +43,7 @@ class GlassWidgetProvider : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         val prefs = context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
         appWidgetIds.forEach { id ->
-            prefs.edit().remove("mode_$id").remove("style_$id")
+            prefs.edit().remove("mode_$id").remove("style_$id").remove("corner_$id")
                 .remove("customColor_$id").remove("customOpacity_$id").apply()
         }
     }

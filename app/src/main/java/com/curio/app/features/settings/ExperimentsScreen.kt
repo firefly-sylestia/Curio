@@ -215,6 +215,15 @@ fun ExperimentsScreen(navController: NavController) {
                     ) {
                         navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_LAB) { launchSingleTop = true }
                     }
+                    // v281 - in-app editor: works even on launchers without
+                    // the long-press Edit flow for reconfigurable widgets.
+                    com.curio.app.ui.components.CurioSettingsRow(
+                        CurioIcons.Settings,
+                        "Edit home screen widgets",
+                        "Change mode, pane and corners of placed widgets in-app"
+                    ) {
+                        navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_EDITOR) { launchSingleTop = true }
+                    }
                 }
             }
             item {

@@ -89,6 +89,7 @@ class GlassWidgetConfigActivity : ComponentActivity() {
             initialHsv
         )
         val initialOpacity = GlassWidgetPane.readCustomOpacity(this, appWidgetId)
+        val initialCorner = GlassWidgetPane.readCorner(this, appWidgetId)
 
         setContent {
             CurioTheme {
@@ -98,6 +99,9 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                 var sat by remember { mutableFloatStateOf(initialHsv[1]) }
                 var `val` by remember { mutableFloatStateOf(initialHsv[2]) }
                 var opacity by remember { mutableFloatStateOf(initialOpacity) }
+                var corner by remember { mutableFloatStateOf(initialCorner) }
+                // Preview corners track the roundness slider (28dp baseline).
+                val previewCornerRatio = (corner / 28f).coerceIn(0.15f, 1.2f)
                 val textMeasurer = rememberTextMeasurer()
 
                 val customRgb = Color.HSVToColor(floatArrayOf(hue, sat, `val`))
@@ -195,7 +199,7 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                                     else Brush.verticalGradient(
                                         listOf(previewTop, previewBottom)
                                     ),
-                                    cornerRadius = CornerRadius(r)
+                                    cornerRadius = CornerRadius(r * previewCornerRatio)
                                 )
                                 // Icon tile.
                                 val iconR = 18.dp.toPx()
@@ -302,6 +306,16 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             }
                         }
 
+                        // ── Corner roundness (any pane style) ──────────
+                        if (style != GlassWidgetPane.STYLE_DEFAULT) {
+                            Text("Corner roundness · ${corner.toInt()}dp")
+                            Slider(
+                                value = corner,
+                                onValueChange = { corner = it },
+                                valueRange = 8f..32f
+                            )
+                        }
+
                         // ── HSV picker (custom only) ────────────────────
                         if (style == GlassWidgetPane.STYLE_CUSTOM) {
                             val padShape = RoundedCornerShape(14.dp)
@@ -391,6 +405,7 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                                 GlassWidgetPane.writeStyle(ctx, appWidgetId, style)
                                 GlassWidgetPane.writeCustomColor(ctx, appWidgetId, customRgb)
                                 GlassWidgetPane.writeCustomOpacity(ctx, appWidgetId, opacity)
+                                GlassWidgetPane.writeCorner(ctx, appWidgetId, corner)
                                 val manager = AppWidgetManager.getInstance(ctx)
                                 GlassWidgetProvider.updateAppWidget(ctx, manager, appWidgetId)
                                 setResult(

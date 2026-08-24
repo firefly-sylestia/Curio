@@ -60,6 +60,15 @@ object GlassWidgetPane {
             .edit().putInt("customColor_$id", argb).apply()
     }
 
+    fun readCorner(context: Context, id: Int): Float =
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .getFloat("corner_$id", 28f)
+
+    fun writeCorner(context: Context, id: Int, cornerDp: Float) {
+        context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
+            .edit().putFloat("corner_$id", cornerDp).apply()
+    }
+
     fun readCustomOpacity(context: Context, id: Int): Float =
         context.getSharedPreferences(CONFIG_PREFS, Context.MODE_PRIVATE)
             .getFloat("customOpacity_$id", 0.45f)

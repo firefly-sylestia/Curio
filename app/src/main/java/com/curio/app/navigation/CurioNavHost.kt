@@ -875,6 +875,9 @@ fun CurioNavHost(
             composable(CurioRoutes.GLASS_WIDGET_LAB) {
                 com.curio.app.features.settings.GlassWidgetLabScreen(navController = navController)
             }
+            composable(CurioRoutes.GLASS_WIDGET_EDITOR) {
+                com.curio.app.features.settings.WidgetEditorScreen(navController = navController)
+            }
             composable(CurioRoutes.MANAGE_CATEGORIES) {
                 ManageCategoriesScreen(navController = navController)
             }
