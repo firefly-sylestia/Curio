@@ -478,15 +478,7 @@ fun CurioNavHost(
     if (legacyBlurActive) {
         CurioLegacyBlurSnapshotter(legacyCaptureLayer)
     }
-    // v231 — glass parallax tilt experiment: run the gravity listener only
-    // while the toggle is on (and the glass itself can render), so the
-    // sensor costs nothing otherwise.
-    LaunchedEffect(AppPreferences.glassParallaxState) {
-        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
-            context,
-            AppPreferences.glassParallaxState && isLiquidGlassPillsActive()
-        )
-    }
+    // v270 — glass parallax tilt experiment REMOVED (sensor + toggle gone).
 
     ModalNavigationDrawer(
         drawerState = drawerState,

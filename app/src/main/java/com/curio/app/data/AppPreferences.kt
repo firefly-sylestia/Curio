@@ -431,12 +431,6 @@ object AppPreferences {
     var liquidGlassPillsState by mutableStateOf(false)
         private set
 
-    // Glass parallax tilt experiment (v231) — OPT-IN (default OFF): when the
-    // liquid-glass pills are showing, the device's gravity sensor makes them
-    // sway subtly AGAINST the phone's tilt — the iOS liquid-glass depth cue.
-    var glassParallaxState by mutableStateOf(false)
-        private set
-
     // v264 — LEGACY GLASS BLUR (experiment, default OFF): below Android 12
     // there is no RenderEffect, so the real glass recipe can't run. When
     // this is on, an APP-SIDE blur engine takes over for the bottom nav +
@@ -718,7 +712,6 @@ object AppPreferences {
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
-        glassParallaxState = isGlassParallaxEnabled(context)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         glassClarityState = isGlassClarityEnabled(context)
@@ -1023,7 +1016,6 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
-    private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
@@ -1211,15 +1203,6 @@ object AppPreferences {
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
         liquidGlassPillsState = enabled
-    }
-
-    // ── Glass parallax tilt (experiment, default OFF) ────────────────
-    fun isGlassParallaxEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GLASS_PARALLAX, false)
-
-    fun setGlassParallaxEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_GLASS_PARALLAX, enabled).apply()
-        glassParallaxState = enabled
     }
 
     // ── Classic active indicator (experiment, default OFF) ───────────

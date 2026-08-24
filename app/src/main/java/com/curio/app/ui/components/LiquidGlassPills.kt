@@ -373,14 +373,9 @@ fun Modifier.liquidGlassCapsule(
  * directly — draw-only invalidation, zero recomposition.
  */
 internal fun tiltGlowOffset(): DpOffset {
-    val baseY = 4f.dp // Shadow.Default's resting offset (radius 24dp / 6)
-    if (!AppPreferences.glassParallaxState) return DpOffset(0f.dp, baseY)
-    val tx = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltX
-    val ty = com.curio.app.ui.components.liquidglass.CurioGlassParallax.tiltY
-    return DpOffset(
-        x = (-tx * 10f).dp,
-        y = baseY - (ty * 8f).dp
-    )
+    // v270 — glass parallax tilt REMOVED (user call: useless / not working).
+    // The sensor listener is gone; the glow rests at its default offset.
+    return DpOffset(0f.dp, 4f.dp)
 }
 
 internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawGlassTiltEdgeGlow() {

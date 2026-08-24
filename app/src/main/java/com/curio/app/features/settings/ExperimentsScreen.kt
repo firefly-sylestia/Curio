@@ -193,13 +193,6 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setGlassClassicIndicatorEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Glass parallax tilt", "The glass pills sway against the phone's tilt for a floating depth effect (needs Liquid glass pills)", AppPreferences.glassParallaxState) {
-                        AppPreferences.setGlassParallaxEnabled(context, it)
-                        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
-                            context, it && AppPreferences.liquidGlassPillsState
-                        )
-                    }
-                    CurioSettingsDivider()
                     ExperimentSwitchRow(
                         "Real blur (older devices)",
                         "Below Android 12: an app-side blur engine draws the REAL content behind the nav bar and Topic Reveal pills as frosted glass instead of a static veil (needs Liquid glass pills)",

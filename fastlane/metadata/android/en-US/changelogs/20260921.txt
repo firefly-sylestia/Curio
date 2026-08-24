@@ -1,3 +1,4 @@
+REMOVE: The "Glass parallax tilt" experiment is gone - the gravity sensor no longer runs for it (performance/heat win; the feature never worked well).
 REVERT: The session screenshot watcher is withdrawn (permission + plumbing removed).
 NEW: Glass widget - add a frosted liquid-glass tile to your home screen showing your live streak; tap it to open Curio (long-press your launcher > Widgets > Curio).
 FIX: The Glass widget lab now renders REAL refraction unconditionally on Android 12+ - the shapes use the raw nav-bar glass recipe directly instead of a toggle-gated path that could fall back to a flat pane.
