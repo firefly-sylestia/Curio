@@ -22,12 +22,14 @@ import android.graphics.Shader
  */
 object GlassWidgetPane {
 
+    private const val CONFIG_PREFS = "glass_widget_config"
+
     enum class Preset(val label: String, val top: Int, val bottom: Int, val rim: Int) {
-        LIGHT("Light", 0x59FFFFFF, 0x2E3A3A44, 0xA6FFFFFF),
-        DARK("Dark", 0x73232430, 0x99101118, 0x8CFFFFFF),
-        CLEAR("Clear", 0x26FFFFFF, 0x1FFFFFFF, 0x66FFFFFF),
-        ROSE("Rose", 0x8CFF7BAF, 0x737C4D8C, 0xB3FFFFFF),
-        SKY("Sky", 0x8C81D4FA, 0x734A90D9, 0xB3FFFFFF)
+        LIGHT("Light", 0x59FFFFFF.toInt(), 0x2E3A3A44.toInt(), 0xA6FFFFFF.toInt()),
+        DARK("Dark", 0x73232430.toInt(), 0x99101118.toInt(), 0x8CFFFFFF.toInt()),
+        CLEAR("Clear", 0x26FFFFFF.toInt(), 0x1FFFFFFF.toInt(), 0x66FFFFFF.toInt()),
+        ROSE("Rose", 0x8CFF7BAF.toInt(), 0x737C4D8C.toInt(), 0xB3FFFFFF.toInt()),
+        SKY("Sky", 0x8C81D4FA.toInt(), 0x734A90D9.toInt(), 0xB3FFFFFF.toInt())
     }
 
     const val STYLE_CUSTOM = "custom"
@@ -68,13 +70,13 @@ object GlassWidgetPane {
         if (style == STYLE_CUSTOM) {
             val base = readCustomColor(context, id) or 0xFF000000.toInt()
             val alpha = (readCustomOpacity(context, id) * 255).toInt().coerceIn(8, 235)
-            val top = (alpha shl 24) or (base and 0x00FFFFFF)
+            val top = (alpha shl 24) or (base and 0x00FFFFFF.toInt())
             // Bottom: same hue pulled ~30% toward black for depth.
             val r = (Color.red(base) * 0.70f).toInt()
             val g = (Color.green(base) * 0.70f).toInt()
             val b = (Color.blue(base) * 0.70f).toInt()
             val bottom = ((alpha * 0.85f).toInt() shl 24) or (r shl 16) or (g shl 8) or b
-            return Triple(top, bottom, 0x99FFFFFF)
+            return Triple(top, bottom, 0x99FFFFFF.toInt())
         }
         val preset = runCatching { Preset.valueOf(style) }.getOrDefault(Preset.LIGHT)
         return Triple(preset.top, preset.bottom, preset.rim)

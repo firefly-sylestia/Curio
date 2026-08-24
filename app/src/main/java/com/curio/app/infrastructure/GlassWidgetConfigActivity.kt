@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.ui.theme.CurioTheme
@@ -153,14 +154,14 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                                         drawRoundRect(
                                             brush = Brush.verticalGradient(
                                                 listOf(
-                                                    Color(preset.top),
-                                                    Color(preset.bottom)
+                                                    ComposeColor(preset.top),
+                                                    ComposeColor(preset.bottom)
                                                 )
                                             ),
                                             cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension / 2f)
                                         )
                                         drawCircle(
-                                            color = Color(preset.rim),
+                                            color = ComposeColor(preset.rim),
                                             radius = size.minDimension / 2f - 2.dp.toPx(),
                                             style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx())
                                         )
@@ -196,8 +197,8 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                                             drawCircle(
                                                 brush = Brush.sweepGradient(
                                                     listOf(
-                                                        Color.Red, Color.Yellow, Color.Green,
-                                                        Color.Cyan, Color.Blue, Color.Magenta, Color.Red
+                                                        ComposeColor.Red, ComposeColor.Yellow, ComposeColor.Green,
+                                                        ComposeColor.Cyan, ComposeColor.Blue, ComposeColor.Magenta, ComposeColor.Red
                                                     )
                                                 )
                                             )

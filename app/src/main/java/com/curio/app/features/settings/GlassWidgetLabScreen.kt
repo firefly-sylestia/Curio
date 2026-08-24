@@ -94,22 +94,6 @@ fun GlassWidgetLabScreen(navController: NavController) {
     var detectStatus by remember { mutableStateOf<String?>(null) }
     // v272 — auto-detect decodes off the main thread; this scope hosts it.
     val autoDetectScope = rememberCoroutineScope()
-    // v273 - when the user leaves to grant All-files access, re-run the
-    // detection ladder automatically on return.
-    var pendingDetectAfterGrant by remember { mutableStateOf(false) }
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME &&
-                pendingDetectAfterGrant
-            ) {
-                pendingDetectAfterGrant = false
-                autoDetect()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
 
     fun decodeUri(uri: android.net.Uri): ImageBitmap? = runCatching {
         context.contentResolver.openInputStream(uri)?.use { input ->
@@ -150,10 +134,26 @@ fun GlassWidgetLabScreen(navController: NavController) {
                     AppPreferences.setGlassLabWallpaperUri(context, "auto")
                     detectStatus = "Device wallpaper detected."
                 } else {
-                    detectStatus = "Auto-detect blocked \u2014 tap Grant access to allow wallpaper reading." — pick an image below."
+                    detectStatus = "Auto-detect blocked \u2014 tap Grant access to allow wallpaper reading."
                 }
             }
         }
+    }
+    // v273 - when the user leaves to grant All-files access, re-run the
+    // detection ladder automatically on return.
+    var pendingDetectAfterGrant by remember { mutableStateOf(false) }
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME &&
+                pendingDetectAfterGrant
+            ) {
+                pendingDetectAfterGrant = false
+                autoDetect()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     // Entry: reload the persisted pick (or re-run auto-detect if it was the
