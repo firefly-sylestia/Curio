@@ -55,4 +55,5 @@
     <!-- v267 — glass home-screen widget -->
     <string name="glass_widget_title">Curio</string>
     <string name="glass_widget_desc">Frosted glass tile with your streak</string>
+    <string name="glass_lab_wallpaper_desc">Your Glass Widget Lab composition over your wallpaper</string>
 </resources>

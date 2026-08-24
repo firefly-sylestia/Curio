@@ -1,3 +1,23 @@
+## Request: v279 — Glass Widget Lab overhaul + live wallpaper (COMPLETE)
+
+- SHAPE SYSTEM: LabShapeState (id/pos/scale/blurDp/textColor) per shape;
+  LiquidLabShape(state, selectedId: MutableState<String?>, backdrop) draws
+  selection ring, graphicsLayer scale (top-start origin), per-shape
+  blur(state.blurDp). Tap = select (clickable), drag unchanged.
+  SHAPES: clock(real HH:mm ticker), session pill (ExploreSessionStore active
+  -> "Exploring - Xm" live; else "Explored"), NEW streak ring
+  (arc=streak/30, fire glyph LocalFire, count), NEW battery tile (real
+  BATTERY_PROPERTY_CAPACITY), NEW date pill, glyph tile, frost tile.
+- SHOW/HIDE: "Hide widgets"/"Show widgets" pill top-end.
+- EDITOR SHEET: bottom panel for selected shape - Size slider (0.6-1.8),
+  Liquid blur (2-20dp, frost exempt), text-hue slider.
+- LIVE WALLPAPER: GlassLabComposition.save/load (JSON prefs glass_lab);
+  lab "Set as live wallpaper" persists visible shapes as screen-fraction
+  coords then opens ACTION_CHANGE_LIVE_WALLPAPER targeted at our component.
+  GlassLabWallpaperService (BIND_WALLPAPER, xml/glass_lab_wallpaper)
+  draws persisted wallpaper URI (AppPreferences.getGlassLabWallpaperUri,
+  gradient fallback) + baked frost panes + text/glyph via symbols font.
+  Static scene by design - honest note: no refraction in wallpapers.
 ## Request: v278 - real HSV picker + accurate preview (COMPLETE)
 
 - HSV PICKER: SV square (white->pureHue horizontal + transparent->black

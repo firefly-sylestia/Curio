@@ -7,9 +7,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,26 +26,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -276,123 +283,274 @@ fun GlassWidgetLabScreen(navController: NavController) {
                 }
             }
         } else {
-            // ── The draggable glass widget shapes ─────────────────────
-            // Positions are free (top-start anchored); every capsule is a
-            // sibling of the captured wallpaper Box, so none of them sample
-            // themselves.
-            var clockPos by remember { mutableStateOf(IntOffset(40, 340)) }
-            var timerPos by remember { mutableStateOf(IntOffset(40, 470)) }
-            var glyphPos by remember { mutableStateOf(IntOffset(190, 350)) }
-            // v274 - the One UI FROST comparison tile: exactly what the real
-            // home-screen widget looks like (launcher-side wallpaper blur +
-            // baked pane) - no in-app refraction, by design.
-            var frostPos by remember { mutableStateOf(IntOffset(40, 590)) }
-
-            LabGlassShape(
-                position = clockPos,
-                onDrag = { dx, dy ->
-                    clockPos = IntOffset(
-                        (clockPos.x + dx).roundToInt().coerceAtLeast(8),
-                        (clockPos.y + dy).roundToInt().coerceAtLeast(60)
-                    )
-                },
-                backdrop = wallLayer,
-                modifier = Modifier.size(112.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text("12:34", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                    Text("Wed 12", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.White.copy(alpha = 0.85f))
+            // ── v279: per-widget state — selection, size, blur, text color ──
+            val selectedId = remember { mutableStateOf<String?>(null) }
+            var widgetsVisible by remember { mutableStateOf(true) }
+            // 1-second ticker: real clock + live session elapsed.
+            var now by remember { mutableStateOf(System.currentTimeMillis()) }
+            LaunchedEffect(Unit) {
+                while (true) {
+                    kotlinx.coroutines.delay(1000)
+                    now = System.currentTimeMillis()
                 }
             }
-
-            LabGlassShape(
-                position = timerPos,
-                onDrag = { dx, dy ->
-                    timerPos = IntOffset(
-                        (timerPos.x + dx).roundToInt().coerceAtLeast(8),
-                        (timerPos.y + dy).roundToInt().coerceAtLeast(60)
-                    )
-                },
-                backdrop = wallLayer,
-                modifier = Modifier.width(196.dp).height(58.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp)
-                ) {
-                    CurioIcon(name = CurioIcons.PlayArrow, contentDescription = null, size = 22.dp, tint = Color.White)
-                    Text("Exploring · 12m", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
-                }
+            val clock = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                .format(java.util.Date(now))
+            val dateLine = java.text.SimpleDateFormat("EEE · MMM d", java.util.Locale.getDefault())
+                .format(java.util.Date(now))
+            // Live explore session: "Exploring · Xm" while running, else Explored.
+            val activeSession = remember { com.curio.app.data.ExploreSessionStore.getActiveSession(context) }
+            val timerText = if (activeSession != null) {
+                val mins = (activeSession.elapsedMillis(now) / 60000L).coerceAtLeast(0)
+                "Exploring · ${mins}m"
+            } else {
+                "Explored"
+            }
+            val streak = remember { com.curio.app.data.StreakTracker.getStreak(context) }
+            val batteryPct = remember {
+                val bm = context.getSystemService(android.content.Context.BATTERY_SERVICE)
+                    as? android.os.BatteryManager
+                bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)?.takeIf { it > 0 } ?: 80
             }
 
-            LabGlassShape(
-                position = glyphPos,
-                onDrag = { dx, dy ->
-                    glyphPos = IntOffset(
-                        (glyphPos.x + dx).roundToInt().coerceAtLeast(130),
-                        (glyphPos.y + dy).roundToInt().coerceAtLeast(200)
-                    )
-                },
-                backdrop = wallLayer,
-                modifier = Modifier.size(64.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 24.dp, tint = Color.White)
-                }
+            val clockState = remember { LabShapeState(IntOffset(40, 340)).apply { id = "clock" } }
+            val timerState = remember { LabShapeState(IntOffset(40, 470)).apply { id = "timer" } }
+            val streakState = remember { LabShapeState(IntOffset(200, 480)).apply { id = "streak" } }
+            val batteryState = remember { LabShapeState(IntOffset(210, 340)).apply { id = "battery" } }
+            val dateState = remember { LabShapeState(IntOffset(60, 620)).apply { id = "date" } }
+            val glyphState = remember { LabShapeState(IntOffset(190, 350)).apply { id = "glyph" } }
+            // v274 - the One UI FROST comparison tile (baked pane, no refraction).
+            val frostState = remember { LabShapeState(IntOffset(40, 720)).apply { id = "frost" } }
+
+            fun dragTo(state: LabShapeState, dx: Float, dy: Float) {
+                state.pos = IntOffset(
+                    (state.pos.x + dx).roundToInt().coerceAtLeast(8),
+                    (state.pos.y + dy).roundToInt().coerceAtLeast(60)
+                )
             }
 
-            // v274 - One UI FROST tile (the shipped widget's look): a baked
-            // gradient pane + rim over the launcher-blurred wallpaper. Drag it
-            // next to the liquid-glass shapes to compare what each can do.
-            Box(
-                modifier = Modifier
-                    .offset { frostPos }
-                    .size(196.dp, 58.dp)
-                    .clip(RoundedCornerShape(28.dp))
-                    .drawBehind {
-                        drawRoundRect(
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    Color(0x59FFFFFF),
-                                    Color(0x2E3A3A44)
-                                )
-                            ),
-                            cornerRadius = CornerRadius(28.dp.toPx())
-                        )
-                        drawRoundRect(
-                            color = Color(0xA6FFFFFF),
-                            style = Stroke(width = 1.5.dp.toPx()),
-                            cornerRadius = CornerRadius(28.dp.toPx())
-                        )
+            if (widgetsVisible) {
+                // ── Clock — REAL time ──
+                LiquidLabShape(clockState, selectedId, wallLayer) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(clock, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = clockState.textColor)
+                        Text(dateLine.substringBefore(" ·"), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = clockState.textColor.copy(alpha = 0.85f))
                     }
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, amount ->
-                            change.consume()
-                            frostPos = IntOffset(
-                                (frostPos.x + amount.x).roundToInt().coerceAtLeast(8),
-                                (frostPos.y + amount.y).roundToInt().coerceAtLeast(60)
+                }
+                // ── Session pill — LIVE elapsed / Explored ──
+                LiquidLabShape(timerState, selectedId, wallLayer) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.PlayArrow, contentDescription = null,
+                            size = 22.dp, tint = timerState.textColor
+                        )
+                        Text(timerText, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = timerState.textColor)
+                    }
+                }
+                // ── Streak ring — fire icon + count in a progress circle ──
+                LiquidLabShape(streakState, selectedId, wallLayer) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Canvas(modifier = Modifier.fillMaxSize().padding(7.dp)) {
+                            val sweep = (streak.coerceAtMost(30) / 30f) * 360f
+                            drawArc(
+                                color = Color.White.copy(alpha = 0.25f), startAngle = -90f,
+                                sweepAngle = 360f, useCenter = false,
+                                style = Stroke(width = 5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                            )
+                            drawArc(
+                                color = Color(0xFFFF8A3C), startAngle = -90f,
+                                sweepAngle = sweep, useCenter = false,
+                                style = Stroke(width = 5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                             )
                         }
-                    },
-                contentAlignment = Alignment.Center
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CurioIcon(name = CurioIcons.LocalFire, contentDescription = null, size = 18.dp, tint = Color(0xFFFF8A3C))
+                            Text("$streak", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = streakState.textColor)
+                        }
+                    }
+                }
+                // ── Battery — real level ──
+                LiquidLabShape(batteryState, selectedId, wallLayer) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 20.dp, tint = Color(0xFF7DFF8A))
+                        Text("$batteryPct%", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = batteryState.textColor)
+                    }
+                }
+                // ── Date pill ──
+                LiquidLabShape(dateState, selectedId, wallLayer) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(dateLine, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = dateState.textColor)
+                    }
+                }
+                // ── Glyph tile ──
+                LiquidLabShape(glyphState, selectedId, wallLayer) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        CurioIcon(name = CurioIcons.Check, contentDescription = null, size = 24.dp, tint = glyphState.textColor)
+                    }
+                }
+                // ── One UI frost tile (baked, non-refracting comparison) ──
+                Box(
+                    modifier = Modifier
+                        .offset { frostState.pos }
+                        .clickable { selectedId.value = "frost" }
+                        .border(
+                            width = if (selectedId.value == "frost") 2.dp else 0.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(28.dp)
+                        )
+                        .size((196 * frostState.scale).dp, (58 * frostState.scale).dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .drawBehind {
+                            drawRoundRect(
+                                brush = Brush.verticalGradient(listOf(Color(0x59FFFFFF), Color(0x2E3A3A44))),
+                                cornerRadius = CornerRadius(28.dp.toPx())
+                            )
+                        }
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, amount ->
+                                change.consume()
+                                dragTo(frostState, amount.x, amount.y)
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Curio · $streak-day streak",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = frostState.textColor
+                    )
+                }
+            } else {
+                Text(
+                    "Widgets hidden",
+                    color = Color.White.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 20.dp, bottom = 120.dp)
+                )
+            }
+
+            // ── Show/hide all floating widgets ──
+            Surface(
+                onClick = { widgetsVisible = !widgetsVisible },
+                shape = RoundedCornerShape(50),
+                color = Color.Black.copy(alpha = 0.45f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(end = 16.dp, top = 56.dp)
             ) {
                 Text(
-                    "Curio \u00b7 5-day streak",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    if (widgetsVisible) "Hide widgets" else "Show widgets",
                     color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        shadow = androidx.compose.ui.graphics.Shadow(
-                            color = Color(0x66000000),
-                            offset = Offset(0f, 1.5f),
-                            blurRadius = 3f
-                        )
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+            }
+
+            // ── Per-widget editor: size · blur · text color ──
+            selectedId.value?.let { selId ->
+                val st: LabShapeState? = when (selId) {
+                    "clock" -> clockState; "timer" -> timerState
+                    "streak" -> streakState; "battery" -> batteryState
+                    "date" -> dateState; "glyph" -> glyphState; else -> frostState
+                }
+                st?.let { sel ->
+                    Surface(
+                        color = Color.Black.copy(alpha = 0.55f),
+                        shape = RoundedCornerShape(18.dp),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(bottom = 96.dp, start = 16.dp, end = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(selId.replaceFirstChar { it.uppercase() }, color = Color.White, fontWeight = FontWeight.Bold)
+                                Spacer(Modifier.weight(1f))
+                                Text("Done", color = Color(0xFF9FBFFF), fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.clickable { selectedId.value = null })
+                            }
+                            Text("Size · ${(sel.scale * 100).toInt()}%", color = Color.White, fontSize = 11.sp)
+                            Slider(value = sel.scale, onValueChange = { sel.scale = it }, valueRange = 0.6f..1.8f)
+                            if (selId != "frost") {
+                                Text("Liquid blur · ${sel.blurDp.toInt()}dp", color = Color.White, fontSize = 11.sp)
+                                Slider(value = sel.blurDp, onValueChange = { sel.blurDp = it }, valueRange = 2f..20f)
+                            }
+                            Text("Text hue", color = Color.White, fontSize = 11.sp)
+                            val hsv = remember(selId) {
+                                FloatArray(3).also { android.graphics.Color.colorToHSV(sel.textColor.toArgb() or 0xFF000000.toInt(), it) }
+                            }
+                            var textHue by remember(selId) { mutableFloatStateOf(hsv[0]) }
+                            Slider(
+                                value = textHue, onValueChange = {
+                                    textHue = it
+                                    val a = sel.textColor.alpha
+                                    sel.textColor = Color(android.graphics.Color.HSVToColor(floatArrayOf(it, 0.25f, 1f))).copy(alpha = a)
+                                },
+                                valueRange = 0f..360f
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ── Save as live wallpaper ──
+            Surface(
+                onClick = {
+                    val w = context.resources.displayMetrics.widthPixels.toFloat()
+                    val h = context.resources.displayMetrics.heightPixels.toFloat()
+                    com.curio.app.infrastructure.GlassLabComposition.save(
+                        context,
+                        listOf(clockState, timerState, streakState, batteryState, dateState, glyphState)
+                            .map { s ->
+                                com.curio.app.infrastructure.GlassLabComposition.Shape(
+                                    id = s.id, xFrac = s.pos.x / w, yFrac = s.pos.y / h,
+                                    scale = s.scale, textArgb = s.textColor.toArgb()
+                                )
+                            }
                     )
+                    context.startActivity(
+                        android.content.Intent(android.app.WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
+                            .putExtra(
+                                android.app.WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                                android.content.ComponentName(context, com.curio.app.infrastructure.GlassLabWallpaperService::class.java)
+                            )
+                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                },
+                shape = RoundedCornerShape(50),
+                color = Color.Black.copy(alpha = 0.45f),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 48.dp)
+            ) {
+                Text(
+                    "Set as live wallpaper",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                 )
             }
         }
@@ -522,22 +680,27 @@ fun GlassWidgetLabScreen(navController: NavController) {
  * real refraction of the wallpaper on Android 12+.
  */
 @Composable
-private fun LabGlassShape(
-    position: IntOffset,
-    onDrag: (dx: Float, dy: Float) -> Unit,
+private fun LiquidLabShape(
+    state: LabShapeState,
+    selectedId: androidx.compose.runtime.MutableState<String?>,
     backdrop: com.kyant.backdrop.backdrops.LayerBackdrop,
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val selected = selectedId.value == state.id
     Box(
-        modifier = modifier
-            .offset { position }
+        modifier = Modifier
+            .offset { state.pos }
+            .graphicsLayer {
+                scaleX = state.scale
+                scaleY = state.scale
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
+            }
             .drawBackdrop(
                 backdrop = backdrop,
                 shape = { RoundedCornerShape(50) },
                 effects = {
                     vibrancy()
-                    blur(8.dp.toPx())
+                    blur(state.blurDp.dp.toPx())
                     lens(24.dp.toPx(), 24.dp.toPx())
                 },
                 onDrawSurface = { drawRect(Color.White.copy(alpha = 0.12f)) }
@@ -545,11 +708,29 @@ private fun LabGlassShape(
             .pointerInput(Unit) {
                 detectDragGestures { change, amount ->
                     change.consume()
-                    onDrag(amount.x, amount.y)
+                    state.pos = IntOffset(
+                        (state.pos.x + amount.x).roundToInt().coerceAtLeast(8),
+                        (state.pos.y + amount.y).roundToInt().coerceAtLeast(60)
+                    )
                 }
-            },
+            }
+            .clickable { selectedId.value = state.id }
+            .border(
+                width = if (selected) 2.dp else 0.dp,
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(50)
+            ),
         contentAlignment = Alignment.Center
     ) {
         content()
     }
+}
+
+/** v279 - per-shape lab state (position, size, blur strength, text color). */
+private class LabShapeState(initialPos: IntOffset) {
+    var id: String = ""
+    var pos by mutableStateOf(initialPos)
+    var scale by mutableFloatStateOf(1f)
+    var blurDp by mutableFloatStateOf(8f)
+    var textColor by mutableStateOf(Color.White)
 }

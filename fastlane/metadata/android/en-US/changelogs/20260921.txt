@@ -1,3 +1,5 @@
+ADD: Glass Widget Lab overhaul - hide/show all floating widgets, tap any widget to select it and edit its size, liquid-blur strength and text color, plus real time, live explore-session timing, a streak ring with fire icon, battery and date widgets.
+ADD: Save your lab composition as a live wallpaper - your wallpaper with your frosted widget layout behind every page.
 FIX: Custom widget color gets a real picker - a saturation/value square plus hue bar, with opacity as its own separate slider.
 FIX: The widget preview is now an accurate miniature - same gradient math, icon tile and text lines as the real widget.
 FIX: Glass widget style options are selectable again and the whole editor scrolls properly.
