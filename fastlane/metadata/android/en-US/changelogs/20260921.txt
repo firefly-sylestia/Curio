@@ -1,3 +1,4 @@
+ADD: 150+ new real topics across Mythology, Series and Anime - deeper catalogs with curated teasers and explore actions.
 FIX: Lab live wallpaper - the base wallpaper stays full-resolution and sharp (no more whole-screen blur), with true gaussian frost behind each pane.
 FIX: Liquid glass credit now points to Kyant's AndroidLiquidGlass.
 FIX: Lab live wallpaper now uses true gaussian frost (the same blur algorithm as the in-app lab), and a decode bug that made your chosen wallpaper vanish into a gradient is fixed.
