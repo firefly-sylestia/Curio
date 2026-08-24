@@ -7,7 +7,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.widget.RemoteViews
 import com.curio.app.MainActivity
 import com.curio.app.R
@@ -88,17 +87,6 @@ class GlassWidgetProvider : AppWidgetProvider() {
                 .edit().putString("mode_$id", mode.name).apply()
         }
 
-        /** Cached device wallpaper — decoded once, reused across all widget updates. */
-        private var wallpaperCache: android.graphics.Bitmap? = null
-        private var wallpaperCacheKey: String? = null
-
-        private fun getWallpaper(context: Context): android.graphics.Bitmap? {
-            val key = "device_wallpaper"
-            if (wallpaperCache != null && wallpaperCacheKey == key) return wallpaperCache
-            wallpaperCache = CurioBlur.readDeviceWallpaper(context)
-            wallpaperCacheKey = key
-            return wallpaperCache
-        }
 
         fun updateAppWidget(context: Context, manager: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.glass_widget_layout)
@@ -112,17 +100,9 @@ class GlassWidgetProvider : AppWidgetProvider() {
             val cornerDp = GlassWidgetPane.readCorner(context, id)
             applyCornerShape(views, cornerDp)
 
-            // ── Self-contained wallpaper blur (works on EVERY launcher) ──
-            // On Samsung, the launcher does real-time blur natively — skip
-            // our bitmap blur and let it shine. On every other launcher,
-            // CurioBlur reads the wallpaper, extracts the region behind
-            // this widget, blurs it, and sets it as the pane ImageView
-            // background (behind the gradient pane).
-            val samsung = android.os.Build.MANUFACTURER.contains("samsung", true)
-
             // Default style = pure One UI look: launcher blur + root tint only.
             // No pane bitmap — the native blur shines through.
-            if (style == GlassWidgetPane.STYLE_DEFAULT && !com.curio.app.data.AppPreferences.customBlurEngineState) {
+            if (style == GlassWidgetPane.STYLE_DEFAULT) {
                 views.setViewVisibility(R.id.glass_widget_pane, android.view.View.GONE)
                 // Still apply corner rounding so the widget outline matches
                 applyCornerShape(views, cornerDp)
@@ -151,43 +131,8 @@ class GlassWidgetProvider : AppWidgetProvider() {
                 top = top, bottom = bottom
             )
 
-            val useCustomBlur = com.curio.app.data.AppPreferences.customBlurEngineState
-            if (useCustomBlur) {
-                // Custom blur engine: draw self-contained wallpaper blur behind the pane
-                // on ALL launchers (Samsung included).
-                val wp = getWallpaper(context)
-                if (wp != null) {
-                    val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
-                    val screenW = @Suppress("DEPRECATION") wm.defaultDisplay?.width ?: wp.width
-                    val screenH = @Suppress("DEPRECATION") wm.defaultDisplay?.height ?: wp.height
-                    val blurredBg = CurioBlur.blurWallpaperRegion(
-                        wallpaper = wp,
-                        widgetLeft = 0, widgetTop = 0,
-                        widgetRight = wPx, widgetBottom = hPx,
-                        screenW = screenW, screenH = screenH,
-                        blurRadius = 14f, density = density
-                    )
-                    if (blurredBg != null) {
-                        // Composite: blurred wallpaper → pane gradient on top
-                        val composited = Bitmap.createBitmap(wPx, hPx, Bitmap.Config.ARGB_8888)
-                        val c = Canvas(composited)
-                        c.drawBitmap(blurredBg, 0f, 0f, null)
-                        blurredBg.recycle()
-                        c.drawBitmap(paneBmp, 0f, 0f, null)
-                        views.setImageViewBitmap(R.id.glass_widget_pane, composited)
-                    } else {
-                        views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
-                    }
-                } else {
-                    views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
-                }
-            } else if (samsung) {
-                // Samsung WITHOUT custom blur: let the launcher blur natively
-                views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
-            } else {
-                // Non-Samsung without custom blur: static gradient pane (no blur)
-                views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
-            }
+            views.setImageViewBitmap(R.id.glass_widget_pane, paneBmp)
+
             val (glyph, title, stats) = resolveContent(context, readMode(context, id))
             views.setImageViewBitmap(
                 R.id.glass_widget_icon,

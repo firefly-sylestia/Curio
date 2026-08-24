@@ -1038,7 +1038,7 @@ private fun BoxScope.CabinetStickyChipBar(
                 )
             }
         }
-        itemsIndexed(CurioCategories.visible) { i, cat ->
+        itemsIndexed(CurioCategories.visible, key = { _, cat -> cat.id.name }) { i, cat ->
             val restSurface = cat.categoryChipSurface(MaterialTheme.colorScheme.surfaceVariant)
             CabinetChipPop(
                 index = i + 1,

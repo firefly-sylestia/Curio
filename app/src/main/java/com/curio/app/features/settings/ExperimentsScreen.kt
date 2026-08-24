@@ -200,17 +200,6 @@ fun ExperimentsScreen(navController: NavController) {
                     ) {
                         AppPreferences.setLegacyGlassBlurEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    // v280 — custom blur engine: replaces Samsung One UI / system
-                    // blur paths with Curio's own AGSL gaussian (API 33+) or
-                    // CPU StackBlur (older) for the glass widget and live wallpaper.
-                    ExperimentSwitchRow(
-                        "Custom blur engine",
-                        "Replace Samsung/system blur with Curio's own blur in glass widgets and live wallpaper (every launcher gets real blur)",
-                        AppPreferences.customBlurEngineState
-                    ) {
-                        AppPreferences.setCustomBlurEngineEnabled(context, it)
-                    }
                 }
                 }
             }

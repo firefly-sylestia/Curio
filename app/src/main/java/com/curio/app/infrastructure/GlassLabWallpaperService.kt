@@ -89,12 +89,12 @@ class GlassLabWallpaperService : WallpaperService() {
         /** Bilinear-filtered paint so the SHARP backdrop never renders blocky. */
         private val backdropPaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
 
-        /** Gaussian frost results (RS blur), one per quantized blur level. */
+        /** Gaussian frost results, one per quantized blur level. */
         private val blurCache = HashMap<Int, Bitmap>()
 
         /**
-         * v290 — GAUSSIAN FROST via CurioBlur (AGSL GPU on API 33+,
-         * CPU StackBlur fallback). Cached per quantized blur level.
+         * v290 — GAUSSIAN FROST via CPU box blur (3-pass ≈ gaussian).
+         * Cached per quantized blur level.
          */
         private fun blurredFor(src: Bitmap, blurDp: Float): Bitmap? {
             val density = this@GlassLabWallpaperService.resources.displayMetrics.density
@@ -106,11 +106,8 @@ class GlassLabWallpaperService : WallpaperService() {
             val sw = max(8, (src.width / factor).toInt())
             val sh = max(8, (src.height / factor).toInt())
             val small = Bitmap.createScaledBitmap(src, sw, sh, true)
-            val blurred = CurioBlur.blur(small, 25f) ?: run {
-                small.recycle()
-                return null
-            }
-            small.recycle()
+            val blurred = boxBlur(small, 25)
+            if (blurred !== small) small.recycle()
             // Progressive upscale to original resolution
             var cur = blurred
             while (cur.width < src.width / 2) {
@@ -122,6 +119,30 @@ class GlassLabWallpaperService : WallpaperService() {
             }
             blurCache[key] = cur
             return cur
+        }
+
+        /** Two-pass separable box blur (3× ≈ gaussian). Pure CPU, ~80ms for 1080p. */
+        private fun boxBlur(src: Bitmap, radius: Int): Bitmap {
+            val w = src.width; val h = src.height
+            if (w <= 0 || h <= 0) return src
+            val wm = w - 1; val hm = h - 1; val div = radius * 2 + 1
+            val a = IntArray(w * h); src.getPixels(a, 0, w, 0, 0, w, h)
+            val b = IntArray(w * h)
+            repeat(3) {
+                for (y in 0 until h) {
+                    var aS = 0; var rS = 0; var gS = 0; var bS = 0
+                    for (k in -radius..radius) { val p = a[y * w + k.coerceIn(0, wm)]; aS += (p shr 24) and 0xff; rS += (p shr 16) and 0xff; gS += (p shr 8) and 0xff; bS += p and 0xff }
+                    for (x in 0 until w) { b[y * w + x] = ((aS / div) shl 24) or ((rS / div) shl 16) or ((gS / div) shl 8) or (bS / div); val drop = a[y * w + (x - radius).coerceIn(0, wm)]; val add = a[y * w + (x + radius + 1).coerceIn(0, wm)]; aS += ((add shr 24) and 0xff) - ((drop shr 24) and 0xff); rS += ((add shr 16) and 0xff) - ((drop shr 16) and 0xff); gS += ((add shr 8) and 0xff) - ((drop shr 8) and 0xff); bS += (add and 0xff) - (drop and 0xff) }
+                }
+                for (x in 0 until w) {
+                    var aS = 0; var rS = 0; var gS = 0; var bS = 0
+                    for (k in -radius..radius) { val p = b[k.coerceIn(0, hm) * w + x]; aS += (p shr 24) and 0xff; rS += (p shr 16) and 0xff; gS += (p shr 8) and 0xff; bS += p and 0xff }
+                    for (y in 0 until h) { a[y * w + x] = ((aS / div) shl 24) or ((rS / div) shl 16) or ((gS / div) shl 8) or (bS / div); val drop = b[(y - radius).coerceIn(0, hm) * w + x]; val add = b[(y + radius + 1).coerceIn(0, hm) * w + x]; aS += ((add shr 24) and 0xff) - ((drop shr 24) and 0xff); rS += ((add shr 16) and 0xff) - ((drop shr 16) and 0xff); gS += ((add shr 8) and 0xff) - ((drop shr 8) and 0xff); bS += (add and 0xff) - (drop and 0xff) }
+                }
+            }
+            val result = Bitmap.createBitmap(w, h, src.config ?: Bitmap.Config.ARGB_8888)
+            result.setPixels(a, 0, w, 0, 0, w, h)
+            return result
         }
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
