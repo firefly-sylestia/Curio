@@ -97,11 +97,12 @@ class GlassLabWallpaperService : WallpaperService() {
          * or CPU box blur (3-pass ≈ gaussian). Cached per quantized blur level.
          */
         private fun blurredFor(src: Bitmap, blurDp: Float): Bitmap? {
+            if (src.isRecycled) return null
             val density = this@GlassLabWallpaperService.resources.displayMetrics.density
             val radiusPx = blurDp.coerceIn(2f, 20f) * density
             val factor = (radiusPx / 25f).coerceIn(1f, 12f)
             val key = (factor * 10f).toInt()
-            blurCache[key]?.let { return it }
+            blurCache[key]?.let { if (!it.isRecycled) return it; blurCache.remove(key) }
             // Downscale for blur perf, then progressive doubling back up
             val sw = max(8, (src.width / factor).toInt())
             val sh = max(8, (src.height / factor).toInt())
@@ -154,8 +155,24 @@ class GlassLabWallpaperService : WallpaperService() {
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
+            // v291 — on engine recreate, force reload (the old backdrop may
+            // have been recycled by the system when the previous engine died).
+            backdropKey = null
+            sharpBackdrop = null
+            blurCache.clear()
             refreshLockState()
             surfaceHolder?.let { drawFrame(it) }
+        }
+
+        override fun onDestroy() {
+            super.onDestroy()
+            handler.removeCallbacksAndMessages(null)
+            tickRunning = false
+            fadeRunning = false
+            blurCache.values.forEach { bmp -> if (!bmp.isRecycled) bmp.recycle() }
+            blurCache.clear()
+            sharpBackdrop?.let { if (!it.isRecycled) it.recycle() }
+            sharpBackdrop = null
         }
 
         override fun onSurfaceChanged(
@@ -211,7 +228,7 @@ class GlassLabWallpaperService : WallpaperService() {
                     blurCache.clear()
                     sharpBackdrop = decodeBackdropBounded(context, key)
                 }
-                val bmp = sharpBackdrop
+                val bmp = sharpBackdrop?.takeIf { !it.isRecycled }
                 if (bmp != null) {
                     drawScale = max(w / bmp.width, h / bmp.height)
                     drawOffX = (w - bmp.width * drawScale) / 2f
