@@ -810,9 +810,12 @@ private fun CompactSliderRow(
     title: String,
     subtitle: String,
     value: Float,
-    onValueChange: (Float) -> Unit,
+    // v292b FIX — maxValue/steps must sit BEFORE onValueChange: a trailing
+    // lambda only binds to the LAST parameter, so any default-valued params
+    // after the callback break every existing `row(...) { }` call site.
     maxValue: Float = 2f,
-    steps: Int = 7
+    steps: Int = 7,
+    onValueChange: (Float) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
