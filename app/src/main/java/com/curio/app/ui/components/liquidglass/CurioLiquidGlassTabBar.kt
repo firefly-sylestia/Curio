@@ -508,17 +508,14 @@ fun CurioLiquidGlassTabBar(
                                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                                     lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                                 } else {
-                                    // v292 — FROST AT REST (user call): the idle
-                                    // pill is FROSTED glass — vibrancy + blur + a
-                                    // soft lens over the sampled backdrop. While
-                                    // the blob is held/moving the frost eases OFF
-                                    // so the travelling pill reads clean and
-                                    // solid instead of smearing liquid glass.
-                                    val rest = 1f - progress
-                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * rest)
+                                    // v292b — REVERTED frost-at-rest (user call:
+                                    // the frosted idle blob looked bad). Back to
+                                    // v247's press-gated glass: idle is a solid
+                                    // pill, vibrancy/blur/lens bloom in while held.
+                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
                                     lens(
-                                        10f.dp.toPx() * refrScale * rest,
-                                        14f.dp.toPx() * refrScale * rest,
+                                        10f.dp.toPx() * refrScale * progress,
+                                        14f.dp.toPx() * refrScale * progress,
                                         true
                                     )
                                 }
@@ -575,16 +572,14 @@ fun CurioLiquidGlassTabBar(
                                 // (the pre-v247 refracting-glass look).
                                 drawRect(Color.Black.copy(alpha = 0.03f * progress))
                             } else {
-                                // v292 — FROSTY AT REST: the idle pill wears
-                                // the Appearance-selected indicator fill as a
-                                // translucent frosted wash (~55%) so the blurred
-                                // backdrop glows through it. Holding/moving the
-                                // blob eases it to FULLY SOLID — no frost while
-                                // it travels. Ink contrast is handled by the
-                                // paired ink from [curioGlassIndicatorColors].
+                                // v292b — SOLID at rest again (no frost), but
+                                // wearing the Appearance-selected indicator fill
+                                // (auto theme / white / black). Holding the blob
+                                // eases the fill away so the press-glass effect
+                                // shows through again — the v247 behaviour.
                                 drawRect(
                                     color = indicatorFill,
-                                    alpha = lerp(0.55f, 1f, progress)
+                                    alpha = 1f - progress
                                 )
                             }
                         }

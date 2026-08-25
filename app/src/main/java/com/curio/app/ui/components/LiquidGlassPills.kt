@@ -338,7 +338,10 @@ fun Modifier.liquidGlassCapsule(
                     // frost blur went back UP to 3dp so small capsules get
                     // the same milky-frosted depth as the big panes.
                     if (compact) {
-                        blur(3f.dp.toPx() * blurScale)
+                        // v292b — user call: chips STILL not frosty enough
+                        // after the v292 bump — blur 3 → 4dp for a milkier
+                        // sampled backdrop.
+                        blur(4f.dp.toPx() * blurScale)
                     } else {
                         blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                         // v246 — refraction blooms under the finger: the lens
@@ -362,8 +365,15 @@ fun Modifier.liquidGlassCapsule(
                 // surfaces take a ~35% STRONGER wash so the small chips read
                 // properly frosty instead of clear-plastic.
                 onDrawSurface = {
-                    val base = if (compact) (washAlpha * 1.35f).coerceAtMost(0.85f) else washAlpha
-                    drawRect(container.copy(alpha = base * if (clear) 0.20f else 1f))
+                    // v292b — the real culprit: chips pass alwaysClear=true,
+                    // and clear-glass cut the wash to ~20% — that's why they
+                    // read as clear plastic no matter the compact boost.
+                    // Compact surfaces now keep ~55% of their wash even in
+                    // clear mode, plus a stronger base multiplier, so cabinet
+                    // + database chips finally read properly frosted.
+                    val base = if (compact) (washAlpha * 1.6f).coerceAtMost(0.9f) else washAlpha
+                    val clearFactor = if (compact) 0.55f else 0.20f
+                    drawRect(container.copy(alpha = base * if (clear) clearFactor else 1f))
                 }
             )
         )

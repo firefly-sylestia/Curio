@@ -852,3 +852,15 @@ User's batched asks across the session:
   scale matching the lab (112dp clocks, 92dp tiles, 196x58 pills), glyph+text
   layout mirroring the lab Column.
 - Balance checks green; CI validates.
+
+### v292b — CI fix + nav blob/chip frost revert (current)
+- **CI failure on 3c64da5** — TopicShareCard.kt: (1) `drawRect(cornerRadius=)` isn't a valid
+  DrawScope API → `drawRoundRect`; (2) missing `import androidx.compose.ui.graphics.drawscope.rotate`;
+  (3) `shareComposableCard` trailing lambda couldn't bind (`card` is not the last parameter) → named
+  `card = { ... }` argument.
+- **Nav active blob reverted** (user call): v292's frost-at-rest removed. Resting pill is SOLID again,
+  still wearing the Appearance indicator fill (auto theme / white / black); press eases the fill away so
+  the touch-glass effect shows through (v247 behaviour). Blur/lens re-gated by press progress.
+- **Chips frostier**: cabinet + topic-database chips read clear-plastic because `alwaysClear` cut the
+  wash to ~20%. Compact surfaces now keep ~55% wash in clear mode, base ×1.6, blur 4dp.
+- Changelog updated. Pushing; watching CI.

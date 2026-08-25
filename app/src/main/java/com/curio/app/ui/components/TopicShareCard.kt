@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -104,7 +105,7 @@ fun TopicShareCard(
             .fillMaxSize()
             .clip(RoundedCornerShape(32.dp))
             .drawBehind {
-                drawRect(
+                drawRoundRect(
                     brush = Brush.verticalGradient(listOf(deep, accent)),
                     cornerRadius = androidx.compose.ui.geometry.CornerRadius(32.dp.toPx())
                 )
@@ -410,8 +411,8 @@ fun TopicShareSheet(
                     shareComposableCard(
                         context = context,
                         cardSize = DpSize(aspect.widthDp.dp, aspect.heightDp.dp),
-                        authority = authority
-                    ) {
+                        authority = authority,
+                        card = {
                         TopicShareCard(
                             topicName = topicName,
                             categoryName = categoryName,
