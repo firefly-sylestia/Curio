@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v292 — round analog clock widget (Glass Widget Lab analog shape).
+     updatePeriodMillis 0: the <AnalogClock> remote view ticks itself in
+     the launcher's process, no periodic updates needed. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="240dp"
+    android:maxResizeHeight="240dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:description="@string/glass_analog_clock_desc" />

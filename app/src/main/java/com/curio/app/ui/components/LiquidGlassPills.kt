@@ -332,11 +332,13 @@ fun Modifier.liquidGlassCapsule(
                 shape = { shape },
                 effects = {
                     vibrancy()
-                    // v291 — compact mode: minimal blur, no lens. The lens
-                    // refraction is invisible on small chip capsules (~40dp)
-                    // but each call adds a per-pixel distortion pass.
+                    // v291 — compact mode: no lens (invisible on <50dp
+                    // capsules but each call adds a per-pixel distortion
+                    // pass). v292 — user call: chips read too flat — the
+                    // frost blur went back UP to 3dp so small capsules get
+                    // the same milky-frosted depth as the big panes.
                     if (compact) {
-                        blur(0.5f.dp.toPx() * blurScale)
+                        blur(3f.dp.toPx() * blurScale)
                     } else {
                         blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                         // v246 — refraction blooms under the finger: the lens
@@ -346,7 +348,7 @@ fun Modifier.liquidGlassCapsule(
                         lens(lensR, lensR)
                     }
                 },
-                highlight = { Highlight.Default.copy(alpha = reflScale) },
+                highlight = { Highlight.Default.copy(alpha = reflScale * if (compact) 1.2f else 1f) },
                 shadow = {
                     Shadow.Default.copy(
                         color = Color.Black.copy(alpha = if (dark) 0.20f else 0.10f),
@@ -356,9 +358,12 @@ fun Modifier.liquidGlassCapsule(
                 },
                 // The translucent wash over the refracted backdrop — 40% like
                 // the reference glass bar, so the tint reads but content shows.
-                // Clear-glass cuts it to roughly a third.
+                // Clear-glass cuts it to roughly a third. v292 — compact
+                // surfaces take a ~35% STRONGER wash so the small chips read
+                // properly frosty instead of clear-plastic.
                 onDrawSurface = {
-                    drawRect(container.copy(alpha = washAlpha * if (clear) 0.20f else 1f))
+                    val base = if (compact) (washAlpha * 1.35f).coerceAtMost(0.85f) else washAlpha
+                    drawRect(container.copy(alpha = base * if (clear) 0.20f else 1f))
                 }
             )
         )

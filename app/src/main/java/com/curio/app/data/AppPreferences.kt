@@ -469,6 +469,16 @@ object AppPreferences {
     var glassClassicIndicatorState by mutableStateOf(false)
         private set
 
+    // v292 — NAV INDICATOR COLOR: what the liquid-glass tab bar's resting
+    // active pill wears. "auto" follows the theme (Material → scheme
+    // primary, azure hero → azure, rose → rose); "white" and "black" are
+    // the fixed options.
+    const val NAV_INDICATOR_AUTO = "auto"
+    const val NAV_INDICATOR_WHITE = "white"
+    const val NAV_INDICATOR_BLACK = "black"
+    var navIndicatorColorState by mutableStateOf(NAV_INDICATOR_AUTO)
+        private set
+
     // v233 — Clear-glass style (experiment, default OFF): when the liquid-
     // glass pills are showing, drop the heavy frost (blur 8dp → 2dp, wash
     // cut to a third) so the capsule reads CLEAR and refractive — like the
@@ -738,6 +748,7 @@ object AppPreferences {
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
+        navIndicatorColorState = getNavIndicatorColor(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -1051,6 +1062,7 @@ object AppPreferences {
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
+    private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
@@ -1287,6 +1299,16 @@ object AppPreferences {
     // ── Liquid glass tuning (Appearance; stored as percent ints) ──────
     private fun readScale(context: Context, key: String, defaultPercent: Int = 100): Float =
         (prefs(context).getInt(key, defaultPercent) / 100f).coerceIn(0f, 2f)
+
+    // ── Nav indicator color (Appearance; v292) ──────────────────────
+    fun getNavIndicatorColor(context: Context): String =
+        prefs(context).getString(KEY_NAV_INDICATOR_COLOR, NAV_INDICATOR_AUTO)
+            ?: NAV_INDICATOR_AUTO
+
+    fun setNavIndicatorColor(context: Context, value: String) {
+        prefs(context).edit().putString(KEY_NAV_INDICATOR_COLOR, value).apply()
+        navIndicatorColorState = value
+    }
 
     fun getGlassBlurScale(context: Context): Float = readScale(context, KEY_GLASS_BLUR_SCALE, defaultPercent = 25)
     fun setGlassBlurScale(context: Context, value: Float) {

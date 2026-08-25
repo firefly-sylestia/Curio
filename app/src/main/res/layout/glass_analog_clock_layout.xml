@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v292 — round analog clock home widget: the ROOT keeps a plain
+     translucent color background (One UI's wallpaper-blur detection
+     contract — see glass_widget_layout.xml) and the provider clips it to
+     a circle via outline radius. The <AnalogClock> remote view ticks in
+     the launcher's process, no per-minute updates needed. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66FFFFFF">
+
+    <AnalogClock
+        android:id="@+id/glass_analog_clock_face"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:dial="@drawable/glass_analog_dial"
+        android:hand_hour="@drawable/glass_analog_hand_hour"
+        android:hand_minute="@drawable/glass_analog_hand_minute"
+        android:importantForAccessibility="no" />
+</FrameLayout>

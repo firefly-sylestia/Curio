@@ -1,4 +1,9 @@
 
+ADD: Two new home-screen widgets from the Glass Widget Lab - a round frost analog clock with live ticking hands and a fire streak tile (launcher > Widgets > Curio).
+ADD: Nav indicator colour option - Auto follows your theme (Material, azure or rose), with White and Black as fixed picks.
+FIX: Nav active pill is now frosted glass at rest and turns clean and solid only while you drag it; tab taps land iOS-fast instead of gliding sideways.
+FIX: Category and topic-database chips are properly frosted again - deeper frost blur and a stronger glass wash on small pills.
+REMOVE: The "Set as live wallpaper" button is gone from the Glass Widget Lab.
 ADD: 150+ new real topics across Mythology, Series and Anime - deeper catalogs with curated teasers and explore actions.
 FIX: Lab live wallpaper - the base wallpaper stays full-resolution and sharp (no more whole-screen blur), with true gaussian frost behind each pane.
 FIX: Liquid glass credit now points to Kyant's AndroidLiquidGlass.

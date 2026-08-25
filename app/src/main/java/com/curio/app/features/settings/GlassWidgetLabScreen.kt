@@ -603,48 +603,6 @@ import kotlin.math.sin
                 }
             }
 
-            // ── Save as live wallpaper ──
-            Surface(
-                onClick = {
-                    val w = context.resources.displayMetrics.widthPixels.toFloat()
-                    val h = context.resources.displayMetrics.heightPixels.toFloat()
-                    com.curio.app.infrastructure.GlassLabComposition.saveCanvasSize(
-                        context, w.toInt(), h.toInt()
-                    )
-                    val shapes = listOf(clockState, analogState, timerState, streakState, batteryState, dateState)
-                        .filter { it.visible }
-                        .map { it ->
-                            com.curio.app.infrastructure.GlassLabComposition.Shape(
-                                id = it.id, xFrac = it.pos.x / w, yFrac = it.pos.y / h,
-                                scale = it.scale, textArgb = it.textColor.toArgb(),
-                                blurDp = it.blurDp, visible = true
-                            )
-                        }
-                    com.curio.app.infrastructure.GlassLabComposition.save(context, shapes)
-                    context.startActivity(
-                        android.content.Intent(android.app.WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
-                            .putExtra(
-                                android.app.WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                                android.content.ComponentName(context, com.curio.app.infrastructure.GlassLabWallpaperService::class.java)
-                            )
-                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    )
-                },
-                shape = RoundedCornerShape(50),
-                color = Color.Black.copy(alpha = 0.45f),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 48.dp)
-            ) {
-                Text(
-                    "Set as live wallpaper",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                )
-            }
         }
 
         // ── Wallpaper source pills — top-end row ─────────────────────

@@ -58,6 +58,7 @@ import com.curio.app.ui.components.isLiquidGlassRequested
 import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
 import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
 import com.curio.app.ui.theme.ChangaOneFontFamily
+import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.fromHsl
@@ -232,6 +233,35 @@ object CurioBottomNavItems {
 // shorter; the 26dp icon still breathes inside.
 // v184 — the user asked for the pill "a little wide" and "a little
 // higher": icon pills 60 → 64dp, expanded 128 → 136dp, height 48 → 52dp.
+/**
+ * v292 — the liquid-glass nav's ACTIVE INDICATOR COLORS, per the
+ * Appearance option:
+ *  - Auto: Material theme → scheme primary; azure hero → azure;
+ *    otherwise the brand rose.
+ *  - White / Black: the fixed options (white + black ink, black + white).
+ * Returns (fill, ink) — the ink always pairs readably with the fill.
+ */
+@Composable
+internal fun curioGlassIndicatorColors(): Pair<Color, Color> {
+    val dark = isCurioDarkTheme()
+    return when (AppPreferences.navIndicatorColorState) {
+        AppPreferences.NAV_INDICATOR_WHITE -> Color.White to Color.Black
+        AppPreferences.NAV_INDICATOR_BLACK -> Color.Black to Color.White
+        else -> when {
+            materialThemeOn ->
+                MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+            AppPreferences.heroBlueState -> {
+                val fill = if (dark) CurioColors.HomeAzureDark else CurioColors.HomeAzure
+                fill to (if (dark) Color.White else pastelFillInk(fill))
+            }
+            else -> {
+                val fill = if (dark) CurioColors.HomeRosewoodDark else CurioColors.HomeRosewood
+                fill to (if (dark) Color.White else pastelFillInk(fill))
+            }
+        }
+    }
+}
+
 private val FloatingPillIconWidth = 64.dp
 private val FloatingPillExpandedWidth = 136.dp
 // v201 — the leave-hold collapse pulls the pill TIGHTER than its resting
@@ -340,6 +370,10 @@ fun CurioFloatingNavBar(
     // v149 — the ACTIVE pill wears the current page's category color
     // (published via [CurioNavTint]); null on plain pages → secondary.
     val pageAccent = if (materialHeroTearsOn()) MaterialTheme.colorScheme.primary else curioNavActiveAccent(selectedRoute)
+    // v292 — the liquid-glass bar's resting indicator fill + its paired
+    // ink, resolved once here so both the tab bar call and the tab content
+    // lambda can read them.
+    val (glassIndicatorFill, glassIndicatorInk) = curioGlassIndicatorColors()
 
     Box(
         modifier = modifier
@@ -374,6 +408,7 @@ fun CurioFloatingNavBar(
                 tabsCount = items.size,
                 selectedIndex = glassIndex,
                 accentColor = pageAccent ?: MaterialTheme.colorScheme.primary,
+                indicatorFill = glassIndicatorFill,
                 onSelected = { index ->
                     val destination = items.getOrNull(index) ?: return@CurioLiquidGlassTabBar
                     if (selectedRoute != destination.route) {
@@ -388,10 +423,9 @@ fun CurioFloatingNavBar(
                 // slides its label out BESIDE the icon (not stacked under it),
                 // with the same accent fill-ink crossfade as FloatingNavPill.
                 // The draggable indicator tracks the real per-tab widths.
-                // v241 — pure ink over glass: no category or Material tint —
-                // plain BLACK in light mode (white in dark) so the active
-                // icon + label read at maximum contrast over clear glass.
-                val activeInk = if (isCurioDarkTheme()) Color.White else Color.Black
+                // v292 — the ink pairs with the Appearance-selected
+                // indicator color (auto theme / white / black).
+                val activeInk = glassIndicatorInk
                 items.forEachIndexed { index, destination ->
                     val selected = destination.route == selectedRoute ||
                         destination.route == routePrefix

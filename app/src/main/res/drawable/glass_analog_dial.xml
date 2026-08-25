@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v292 — analog clock dial: a faint frost fill + a crisp white ring.
+     Transparent-ish center so the Samsung wallpaper blur shows through. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#1AFFFFFF" />
+    <stroke
+        android:width="2dp"
+        android:color="#B3FFFFFF" />
+</shape>

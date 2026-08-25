@@ -997,6 +997,44 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                 CompactSliderRow("Reflection", "Light sheen strength", AppPreferences.glassReflectionScaleState) {
                     AppPreferences.setGlassReflectionScale(context, it)
                 }
+                // v292 — ACTIVE INDICATOR COLOUR: what the nav bar's resting
+                // active pill wears. Auto follows the theme (Material →
+                // scheme primary, azure hero → azure, rose → rose); White
+                // and Black are fixed picks.
+                Text(
+                    "Indicator colour",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf(
+                        "Auto" to AppPreferences.NAV_INDICATOR_AUTO,
+                        "White" to AppPreferences.NAV_INDICATOR_WHITE,
+                        "Black" to AppPreferences.NAV_INDICATOR_BLACK
+                    ).forEach { (label, value) ->
+                        val selected = AppPreferences.navIndicatorColorState == value
+                        Surface(
+                            onClick = { AppPreferences.setNavIndicatorColor(context, value) },
+                            shape = RoundedCornerShape(50),
+                            color = if (selected) MaterialTheme.colorScheme.secondaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp)
+                            )
+                        }
+                    }
+                }
                 CompactSliderRow("Refraction", "Edge bending strength", AppPreferences.glassRefractionScaleState) {
                     AppPreferences.setGlassRefractionScale(context, it)
                 }

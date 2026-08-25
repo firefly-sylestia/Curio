@@ -59,7 +59,6 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.components.tiltGlowOffset
 import androidx.compose.ui.unit.DpOffset
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
@@ -139,6 +138,10 @@ fun CurioLiquidGlassTabBar(
     backdrop: Backdrop,
     tabsCount: Int,
     accentColor: Color = MaterialTheme.colorScheme.primary,
+    // v292 — the resting active pill's FILL (Appearance → Indicator
+    // colour): auto theme / white / black. The ink that sits on it comes
+    // from [curioGlassIndicatorColors] in CurioBottomNav.
+    indicatorFill: Color = Color.White,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.40f),
     isBlurEnabled: Boolean = true,
     // v262 — ghost suppression scoped to the PET DESIGNER only: when true,
@@ -164,10 +167,6 @@ fun CurioLiquidGlassTabBar(
     // blob as fully TRANSPARENT refracting glass (the pre-v247 style);
     // OFF (default) is the solid white/black pill.
     val classicIndicator = AppPreferences.glassClassicIndicatorState
-    // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
-    // accent wash gave the active ink almost nothing to read against on a
-    // bright page; light mode now gets double the bed (dark keeps 16%).
-    val dark = isCurioDarkTheme()
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
 
@@ -204,7 +203,12 @@ fun CurioLiquidGlassTabBar(
     // tab, drag release) used the class's default critically-damped 1000-
     // stiffness spring, which snaps between tabs almost instantly. This
     // softer spring glides the blob across (~350ms) with a gentle settle.
+    // v292 — user call: the sideways liquid GLIDE on tap looks bad — iOS
+    // style instead, where the blob shows up under the new tab FAST even
+    // on quick switches. Tap switches now use a very stiff ~90ms spring;
+    // drag release keeps the soft glide (the finger led it there).
     val tabGlideSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 380f)
+    val tabTapSpec = spring<Float>(dampingRatio = 0.9f, stiffness = 2600f)
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
         derivedStateOf {
@@ -284,7 +288,9 @@ fun CurioLiquidGlassTabBar(
             pendingFirstSnap = false
             dampedDragAnimation.updateValue(selectedIndex.toFloat())
         } else {
-            dampedDragAnimation.animateToValue(selectedIndex.toFloat(), tabGlideSpec)
+            // v292 — TAP = fast appearance under the new tab, not a
+            // sideways glide across the bar (iOS segmented-control feel).
+            dampedDragAnimation.animateToValue(selectedIndex.toFloat(), tabTapSpec)
         }
     }
 
@@ -502,10 +508,17 @@ fun CurioLiquidGlassTabBar(
                                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                                     lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                                 } else {
-                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
+                                    // v292 — FROST AT REST (user call): the idle
+                                    // pill is FROSTED glass — vibrancy + blur + a
+                                    // soft lens over the sampled backdrop. While
+                                    // the blob is held/moving the frost eases OFF
+                                    // so the travelling pill reads clean and
+                                    // solid instead of smearing liquid glass.
+                                    val rest = 1f - progress
+                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * rest)
                                     lens(
-                                        10f.dp.toPx() * refrScale * progress,
-                                        14f.dp.toPx() * refrScale * progress,
+                                        10f.dp.toPx() * refrScale * rest,
+                                        14f.dp.toPx() * refrScale * rest,
                                         true
                                     )
                                 }
@@ -562,14 +575,16 @@ fun CurioLiquidGlassTabBar(
                                 // (the pre-v247 refracting-glass look).
                                 drawRect(Color.Black.copy(alpha = 0.03f * progress))
                             } else {
-                                // v247 — SOLID idle pill: pure WHITE in light
-                                // mode, pure BLACK in dark, so the theme ink
-                                // (black/white) always sits on maximum contrast.
-                                // Holding the pill eases the fill away and lets
-                                // the press-glass take over.
+                                // v292 — FROSTY AT REST: the idle pill wears
+                                // the Appearance-selected indicator fill as a
+                                // translucent frosted wash (~55%) so the blurred
+                                // backdrop glows through it. Holding/moving the
+                                // blob eases it to FULLY SOLID — no frost while
+                                // it travels. Ink contrast is handled by the
+                                // paired ink from [curioGlassIndicatorColors].
                                 drawRect(
-                                    color = if (dark) Color.Black else Color.White,
-                                    alpha = 1f - progress
+                                    color = indicatorFill,
+                                    alpha = lerp(0.55f, 1f, progress)
                                 )
                             }
                         }
