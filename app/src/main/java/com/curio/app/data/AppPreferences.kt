@@ -479,6 +479,14 @@ object AppPreferences {
     var navIndicatorColorState by mutableStateOf(NAV_INDICATOR_AUTO)
         private set
 
+    // v292b — INDICATOR OPACITY: how transparent the resting active pill's
+    // frosted wash is (0 = clear glass, 1 = fully solid). The touch blob —
+    // the small capsule that appears under your finger while pressed — is
+    // NOT affected: it always fades the fill away so the press-glass shows.
+    const val NAV_INDICATOR_OPACITY_DEFAULT = 0.55f
+    var navIndicatorOpacityState by mutableStateOf(NAV_INDICATOR_OPACITY_DEFAULT)
+        private set
+
     // v233 — Clear-glass style (experiment, default OFF): when the liquid-
     // glass pills are showing, drop the heavy frost (blur 8dp → 2dp, wash
     // cut to a third) so the capsule reads CLEAR and refractive — like the
@@ -749,6 +757,7 @@ object AppPreferences {
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
+        navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -1063,6 +1072,7 @@ object AppPreferences {
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
+    private const val KEY_NAV_INDICATOR_OPACITY = "nav_indicator_opacity"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
@@ -1308,6 +1318,15 @@ object AppPreferences {
     fun setNavIndicatorColor(context: Context, value: String) {
         prefs(context).edit().putString(KEY_NAV_INDICATOR_COLOR, value).apply()
         navIndicatorColorState = value
+    }
+
+    fun getNavIndicatorOpacity(context: Context): Float =
+        prefs(context).getFloat(KEY_NAV_INDICATOR_OPACITY, NAV_INDICATOR_OPACITY_DEFAULT)
+            .coerceIn(0f, 1f)
+
+    fun setNavIndicatorOpacity(context: Context, value: Float) {
+        prefs(context).edit().putFloat(KEY_NAV_INDICATOR_OPACITY, value.coerceIn(0f, 1f)).apply()
+        navIndicatorOpacityState = value.coerceIn(0f, 1f)
     }
 
     fun getGlassBlurScale(context: Context): Float = readScale(context, KEY_GLASS_BLUR_SCALE, defaultPercent = 25)

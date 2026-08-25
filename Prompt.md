@@ -864,3 +864,15 @@ User's batched asks across the session:
 - **Chips frostier**: cabinet + topic-database chips read clear-plastic because `alwaysClear` cut the
   wash to ~20%. Compact surfaces now keep ~55% wash in clear mode, base ×1.6, blur 4dp.
 - Changelog updated. Pushing; watching CI.
+
+### v292c — Indicator frost back + opacity customization (current)
+- **CI failure on 334031b** — the `card = {` fix omitted the closing `)` for
+  `shareComposableCard(...)`; syntax restored.
+- **Indicator frost-at-rest RESTORED** (user reverted my revert): idle active pill is frosted
+  (vibrancy + blur + soft lens over backdrop) again; on press, frost + fill ease OFF so the
+  touch blob's small press capsule shows exactly as before — untouched.
+- **NEW: Indicator opacity slider** (Appearance glass-tuning dialog): 0–100% transparency of
+  the resting pill's frosted wash, default 55% (v292 value). `AppPreferences.navIndicatorOpacityState`
+  + get/set persisted; `CompactSliderRow` gained `maxValue`/`steps` params (opacity uses 0..1,
+  steps=4 → 0/25/50/75/100).
+- Pushing; watching CI.

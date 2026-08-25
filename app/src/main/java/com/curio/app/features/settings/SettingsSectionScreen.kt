@@ -802,13 +802,17 @@ private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, 
 }
 
 /** v242 — compact settings slider: label + live value, used by the Liquid
- *  glass tuning rows in Appearance. `value` is 0f..2f (1f = default). */
+ *  glass tuning rows in Appearance. `value` is 0f..2f (1f = default).
+ *  v292b — `maxValue`/`steps` overridable so bounded values (like indicator
+ *  opacity, 0f..1f) get a correct range instead of the 200% scale. */
 @Composable
 private fun CompactSliderRow(
     title: String,
     subtitle: String,
     value: Float,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    maxValue: Float = 2f,
+    steps: Int = 7
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -823,10 +827,10 @@ private fun CompactSliderRow(
             )
         }
         Slider(
-            value = value.coerceIn(0f, 2f),
+            value = value.coerceIn(0f, maxValue),
             onValueChange = onValueChange,
-            valueRange = 0f..2f,
-            steps = 7 // 25% increments — 0, 25, 50, 75, 100, 125, 150, 175, 200
+            valueRange = 0f..maxValue,
+            steps = steps
         )
     }
 }
@@ -1034,6 +1038,18 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
                             )
                         }
                     }
+                }
+                // v292b — INDICATOR OPACITY: how transparent the resting
+                // active pill's frosted wash is. The touch blob is unaffected —
+                // pressing always fades the fill away for the glass effect.
+                CompactSliderRow(
+                    "Indicator opacity",
+                    "Frosted pill transparency",
+                    AppPreferences.navIndicatorOpacityState,
+                    maxValue = 1f,
+                    steps = 4 // 0 / 25 / 50 / 75 / 100%
+                ) {
+                    AppPreferences.setNavIndicatorOpacity(context, it)
                 }
                 CompactSliderRow("Refraction", "Edge bending strength", AppPreferences.glassRefractionScaleState) {
                     AppPreferences.setGlassRefractionScale(context, it)

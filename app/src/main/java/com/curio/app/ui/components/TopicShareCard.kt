@@ -413,16 +413,17 @@ fun TopicShareSheet(
                         cardSize = DpSize(aspect.widthDp.dp, aspect.heightDp.dp),
                         authority = authority,
                         card = {
-                        TopicShareCard(
-                            topicName = topicName,
-                            categoryName = categoryName,
-                            categoryGlyph = categoryGlyph,
-                            accent = accent,
-                            factText = factText,
-                            sharerName = sharer,
-                            aspect = aspect
-                        )
-                    }
+                            TopicShareCard(
+                                topicName = topicName,
+                                categoryName = categoryName,
+                                categoryGlyph = categoryGlyph,
+                                accent = accent,
+                                factText = factText,
+                                sharerName = sharer,
+                                aspect = aspect
+                            )
+                        }
+                    )
                     onDismiss()
                 },
                 shape = RoundedCornerShape(50),

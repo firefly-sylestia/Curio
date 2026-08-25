@@ -3,7 +3,8 @@ ADD: Topic share cards - tap the new Share pill on Topic Reveal to send a beauti
 REMOVE: The lab live wallpaper service is fully removed from the app - no more dead code behind the gone "Set as live wallpaper" button.
 ADD: Two new home-screen widgets from the Glass Widget Lab - a round frost analog clock with live ticking hands and a fire streak tile (launcher > Widgets > Curio).
 ADD: Nav indicator colour option - Auto follows your theme (Material, azure or rose), with White and Black as fixed picks.
-FIX: Nav active pill wears your indicator colour solid at rest again, the touch glass effect is back when you press it, and tab taps still land iOS-fast.
+ADD: Indicator opacity slider - the frosted active nav pill's transparency is now customizable (Appearance), while the touch glass effect stays untouched.
+FIX: Nav active pill is frosted glass at rest again wearing your indicator colour, with the touch capsule effect when pressed and iOS-fast tab taps.
 FIX: Category and topic-database chips are extra frosty - deeper frost blur and a much stronger milk wash on small pills.
 REMOVE: The "Set as live wallpaper" button is gone from the Glass Widget Lab.
 ADD: 150+ new real topics across Mythology, Series and Anime - deeper catalogs with curated teasers and explore actions.

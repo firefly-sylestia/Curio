@@ -508,14 +508,17 @@ fun CurioLiquidGlassTabBar(
                                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                                     lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                                 } else {
-                                    // v292b — REVERTED frost-at-rest (user call:
-                                    // the frosted idle blob looked bad). Back to
-                                    // v247's press-gated glass: idle is a solid
-                                    // pill, vibrancy/blur/lens bloom in while held.
-                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
+                                    // v292c — FROST AT REST is BACK for the
+                                    // indicator (user call): the idle active pill
+                                    // samples the backdrop with vibrancy + blur + a
+                                    // soft lens. While held (the touch blob), frost
+                                    // eases OFF so the small press capsule reads
+                                    // clean — the touch view itself is unchanged.
+                                    val rest = 1f - progress
+                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * rest)
                                     lens(
-                                        10f.dp.toPx() * refrScale * progress,
-                                        14f.dp.toPx() * refrScale * progress,
+                                        10f.dp.toPx() * refrScale * rest,
+                                        14f.dp.toPx() * refrScale * rest,
                                         true
                                     )
                                 }
@@ -572,14 +575,19 @@ fun CurioLiquidGlassTabBar(
                                 // (the pre-v247 refracting-glass look).
                                 drawRect(Color.Black.copy(alpha = 0.03f * progress))
                             } else {
-                                // v292b — SOLID at rest again (no frost), but
-                                // wearing the Appearance-selected indicator fill
-                                // (auto theme / white / black). Holding the blob
-                                // eases the fill away so the press-glass effect
-                                // shows through again — the v247 behaviour.
+                                // v292c — FROSTY at rest again: the idle pill
+                                // wears the Appearance-selected indicator fill as
+                                // a translucent wash whose OPACITY IS CUSTOMIZABLE
+                                // (Appearance → Indicator opacity, default 55%).
+                                // Pressing still fades the fill fully away so the
+                                // touch blob's press-glass effect shows unchanged.
                                 drawRect(
                                     color = indicatorFill,
-                                    alpha = 1f - progress
+                                    alpha = lerp(
+                                        AppPreferences.navIndicatorOpacityState.coerceIn(0f, 1f),
+                                        0f,
+                                        progress
+                                    )
                                 )
                             }
                         }
