@@ -1,4 +1,6 @@
 
+ADD: Topic share cards - tap the new Share pill on Topic Reveal to send a beautiful frosted card of any discovery: 9:16 story or 3:4 classic layout, with the quick fact, your own custom fact or your review.
+REMOVE: The lab live wallpaper service is fully removed from the app - no more dead code behind the gone "Set as live wallpaper" button.
 ADD: Two new home-screen widgets from the Glass Widget Lab - a round frost analog clock with live ticking hands and a fire streak tile (launcher > Widgets > Curio).
 ADD: Nav indicator colour option - Auto follows your theme (Material, azure or rose), with White and Black as fixed picks.
 FIX: Nav active pill is now frosted glass at rest and turns clean and solid only while you drag it; tab taps land iOS-fast instead of gliding sideways.

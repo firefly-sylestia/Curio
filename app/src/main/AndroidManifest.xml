@@ -135,18 +135,6 @@
             </intent-filter>
         </activity>
 
-        <!-- v279 — Glass Widget Lab live wallpaper -->
-        <service
-            android:name=".infrastructure.GlassLabWallpaperService"
-            android:exported="true"
-            android:permission="android.permission.BIND_WALLPAPER">
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/glass_lab_wallpaper" />
-        </service>
 
         <!-- v267 — the liquid-glass home-screen widget -->
         <receiver

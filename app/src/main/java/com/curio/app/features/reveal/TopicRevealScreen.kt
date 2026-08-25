@@ -866,6 +866,9 @@ fun TopicRevealScreen(
         // left (expands on favorite), favorite star on the right. Slides
         // away on scroll-down, back on scroll-up. Hidden in Browse-Topics.
         if (!browseMode && resolved != null) {
+            // v292 — TOPIC SHARE: tapping the Share pill in the floating
+            // bar opens the customizable topic share card sheet.
+            var showShareSheet by remember { mutableStateOf(false) }
             SideEffect {
                 SentimentPillHost.content = {
                     AnimatedVisibility(
@@ -883,6 +886,7 @@ fun TopicRevealScreen(
                             accent = cat.themedAccent(),
                             ink = cat.onAccent(),
                             container = curioFloatingNavContainerFor(cat.categoryBackgroundWash()),
+                            onShare = { showShareSheet = true },
                             onFavorite = {
                                 AppPreferences.setTopicSentiment(
                                     context, cat.id, resolved.id,
@@ -897,6 +901,18 @@ fun TopicRevealScreen(
             }
             DisposableEffect(Unit) {
                 onDispose { SentimentPillHost.content = null }
+            }
+            if (showShareSheet) {
+                com.curio.app.ui.components.TopicShareSheet(
+                    topicName = resolved.name,
+                    categoryName = cat.displayName,
+                    categoryGlyph = cat.iconGlyph,
+                    accent = cat.themedAccent(),
+                    quickFact = resolved.teaser,
+                    authority = "${context.packageName}.fileprovider",
+                    context = context,
+                    onDismiss = { showShareSheet = false }
+                )
             }
         }
     }
@@ -2433,6 +2449,8 @@ private fun RevealCategoryFavoriteBar(
     accent: Color,
     ink: Color,
     container: Color,
+    // v292 - opens the topic share-card sheet.
+    onShare: () -> Unit = {},
     onFavorite: () -> Unit
 ) {
     val haptics = LocalHapticFeedback.current
@@ -2567,6 +2585,32 @@ private fun RevealCategoryFavoriteBar(
                                 modifier = Modifier.padding(start = 6.dp, end = 2.dp)
                             )
                         }
+                    }
+                }
+                // v292 - Share pill: icon-only; tapping opens the topic
+                // share-card sheet (frost card / aspect / fact source).
+                Surface(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onShare()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = Color.Transparent,
+                    modifier = Modifier
+                        .width(RevealSentimentIconWidth)
+                        .height(RevealSentimentHeight)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Share,
+                            contentDescription = "Share",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 26.dp
+                        )
                     }
                 }
                 // Favorite pill — icon-only when not favorited, expands when favorited.

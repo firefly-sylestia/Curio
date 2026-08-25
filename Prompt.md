@@ -1,3 +1,24 @@
+## Request: v292 — topic share card + wallpaper dead-code removal (COMPLETE)
+
+- TOPIC SHARE CARD (`TopicShareCard.kt`): off-screen-capturable composable
+  (software-Canvas safe: simulated frost washes + rim, seeded ✦ watermark
+  pattern, torn-paper footer, "via Curio ✦" + display name). `TopicShareSheet`
+  gives live preview + aspect picker (9:16 story / 3:4 classic) + fact source
+  (Quick fact / Custom fact / Review with editable text), then exports the
+  exact card via the shared `shareComposableCard` pipeline.
+- WIRED into Topic Reveal's floating sentiment/favorite bar: new icon-only
+  Share pill (`RevealCategoryFavoriteBar(onShare=…)`) opens the sheet with
+  the resolved topic's name/teaser and category accent/glyph.
+- WALLPAPER DEAD CODE GONE (user asked to confirm): GlassLabWallpaperService,
+  GlassLabComposition, glass_lab_wallpaper.xml, manifest service entry and
+  its strings removed. Lab preview still reads the wallpaper-image pref for
+  its own backdrop (kept). Remaining AppPreferences glass_lab keys are lab
+  composition persistence, unrelated to the service.
+- web/package-lock.json user change untouched and NOT committed.
+- Status: committed & pushed; CI validates compilation.
+
+---
+
 ## Request: v291 — optimization pass: remove custom blur, speed up splash, reduce lag (COMPLETE)
 
 - REMOVED CUSTOM BLUR ENGINE: deleted CurioBlur.kt (CPU box blur), removed

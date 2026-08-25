@@ -336,34 +336,6 @@ import kotlin.math.sin
             // v274 - the One UI FROST comparison tile (baked pane, no refraction).
             val frostState = remember { LabShapeState(IntOffset(40, 720)).apply { id = "frost" } }
 
-            // v283 — the lab REMEMBERS: persisted settings restore on entry.
-            var restored by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                if (!restored) {
-                    restored = true
-                    val (cw, ch) = com.curio.app.infrastructure.GlassLabComposition.canvasSize(context)
-                    if (cw > 0 && ch > 0) {
-                        val dm = context.resources.displayMetrics
-                        com.curio.app.infrastructure.GlassLabComposition.load(context).forEach { sh ->
-                            val st = when (sh.id) {
-                                "clock" -> clockState; "analog" -> analogState
-                                "timer" -> timerState; "streak" -> streakState
-                                "battery" -> batteryState; "date" -> dateState
-                                else -> frostState
-                            }
-                            st.pos = IntOffset(
-                                (sh.xFrac * cw * (dm.widthPixels.toFloat() / cw)).roundToInt(),
-                                (sh.yFrac * ch * (dm.heightPixels.toFloat() / ch)).roundToInt()
-                            )
-                            st.scale = sh.scale
-                            st.blurDp = sh.blurDp
-                            st.textColor = Color(sh.textArgb)
-                            st.visible = sh.visible
-                        }
-                    }
-                }
-            }
-
             fun dragTo(state: LabShapeState, dx: Float, dy: Float) {
                 state.pos = IntOffset(
                     (state.pos.x + dx).roundToInt().coerceAtLeast(8),
