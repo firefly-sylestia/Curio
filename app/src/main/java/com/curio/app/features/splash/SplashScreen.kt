@@ -60,10 +60,10 @@ import kotlinx.coroutines.withTimeoutOrNull
  *  slow parse. The splash holds navigation until the canonical lanes are
  *  cached so counts/loading states never read a half-warm catalog, but a
  *  pathological parse must not block the app past this. */
-private const val CATALOG_WARM_TIMEOUT_MS = 4_000L
+private const val CATALOG_WARM_TIMEOUT_MS = 2_500L
 
 /** How long each loading line stays before the next fades in. */
-private const val LOADING_LINE_SWAP_MS = 1_100L
+private const val LOADING_LINE_SWAP_MS = 800L
 
 /**
  * Splash screen — SIMPLE / MODERN / MATERIAL.
@@ -90,7 +90,7 @@ fun SplashScreen(navController: NavHostController) {
     // ── Entrance trigger ───────────────────────────────────────────────────
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        delay(60)
+        delay(30)
         entered = true
     }
     val entranceScale by animateFloatAsState(
@@ -174,8 +174,8 @@ fun SplashScreen(navController: NavHostController) {
             }
             jobs.forEach { it.join() }
         }
-        delay(400)
-        // Cap the total warm-up at ~4s (parallel prewarm is ~2-3x faster).
+        delay(250)
+        // Cap the total warm-up at ~2.5s.
         withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
         warmedLanes = totalLanes
         // Check for pending crash from previous session — also route to the

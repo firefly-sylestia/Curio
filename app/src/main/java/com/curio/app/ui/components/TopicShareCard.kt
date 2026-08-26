@@ -39,9 +39,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -286,11 +284,10 @@ private fun GlyphWatermark(glyph: String, tint: Color, seed: Int) {
  * passed via [savedSources] (quote / note / review with its star rating),
  * or your own custom fact line — edit inline, then share the rendered PNG.
  *
- * v292e PREVIEW ACCURACY: the preview renders the card at its FULL export
- * dp size ([ShareCardAspect.widthDp] × [heightDp]) and scales it down with
- * graphicsLayer — identical layout math to the off-screen capture, so text
- * wrapping and placement match the exported image exactly (the old preview
- * re-laid-out at ~250dp wide, where fixed-sp text wraps differently).
+ * v292f PREVIEW ACCURACY: the preview renders the card at [previewWidth] dp
+ * (the same width the export captures at), centered in the sheet. The
+ * exported image uses the SAME dp → px math as the preview, so text
+ * wrapping and placement match exactly — no scaling mismatch.
  */
 @Composable
 fun TopicShareSheet(
@@ -389,38 +386,26 @@ fun ShareHubBody(
     onCustomTextChange: (String) -> Unit,
     onShared: () -> Unit
 ) {
-    // ── Live preview — rendered at FULL export dp, scaled down ──────
-    BoxWithConstraints(
+    // v292f — preview renders at EXACTLY the same dp width the export
+    // captures at, centered in the sheet. No graphicsLayer scaling.
+    val previewWidth = 280.dp
+    Box(
         modifier = Modifier
-            .width(if (aspect == ShareCardAspect.PORTRAIT) 236.dp else 280.dp)
+            .width(previewWidth)
             .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
             .shadow(8.dp, RoundedCornerShape(28.dp))
             .clip(RoundedCornerShape(28.dp))
     ) {
-        // Scale factor: preview width ÷ export-card width (both in dp).
-        val fitScale = maxWidth.value / aspect.widthDp
-        Box(
-            modifier = Modifier
-                .size(aspect.widthDp.dp, aspect.heightDp.dp)
-                .graphicsLayer {
-                    // Scale the full-size card into this preview box from
-                    // its top-left corner — same dp layout as the export.
-                    scaleX = fitScale
-                    scaleY = fitScale
-                    transformOrigin = TransformOrigin(0f, 0f)
-                }
-        ) {
-            TopicShareCard(
-                topicName = topicName,
-                categoryName = categoryName,
-                categoryGlyph = categoryGlyph,
-                accent = accent,
-                factText = activeSource.text,
-                sharerName = sharerName,
-                aspect = aspect,
-                ratingStars = activeSource.rating
-            )
-        }
+        TopicShareCard(
+            topicName = topicName,
+            categoryName = categoryName,
+            categoryGlyph = categoryGlyph,
+            accent = accent,
+            factText = activeSource.text,
+            sharerName = sharerName,
+            aspect = aspect,
+            ratingStars = activeSource.rating
+        )
     }
 
     // ── Aspect picker ──
@@ -463,12 +448,17 @@ fun ShareHubBody(
         )
     }
 
+    // v292f — export at the EXACT dp size the preview renders at, so
+    // the saved PNG is pixel-perfect match of what you saw.
+    val exportCardHeight = previewWidth * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
+
     // ── Share action ──
     Button(
         onClick = {
             shareComposableCard(
                 context = context,
-                cardSize = androidx.compose.ui.unit.DpSize(aspect.widthDp.dp, aspect.heightDp.dp),
+                cardSize = androidx.compose.ui.unit.DpSize(previewWidth, exportCardHeight),
+                exportDensity = 4f,
                 authority = authority,
                 card = {
                     TopicShareCard(

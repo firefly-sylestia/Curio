@@ -821,10 +821,10 @@ private fun DatabaseFilterChip(
             Modifier.liquidGlassCapsule(
                 container = if (selected) accent
                             else MaterialTheme.colorScheme.surfaceContainerLow,
-                washAlpha = if (selected) 0.60f else 0.45f,
-                backdrop = glassBackdrop,
-                alwaysClear = true,
-                compact = true
+                // v292f — Samsung frosted look: stronger wash for opaque
+                // frost over blurred content (was 0.45 clear).
+                washAlpha = if (selected) 0.68f else 0.55f,
+                backdrop = glassBackdrop
             ) else Modifier
     ) {
         Text(

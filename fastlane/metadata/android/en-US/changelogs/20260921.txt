@@ -1,4 +1,7 @@
 
+FIX: Share card preview is now centered and full-size - the exported image matches the preview exactly, no more scaling mismatch.
+IMPROVE: Splash screen is faster - shorter delays, quicker catalog warm-up, so the app opens faster.
+IMPROVE: Category chips in Cabinet and Topic Database now have full Samsung frosted glass - stronger frost wash over blurred backdrop.
 ADD: Entry detail shares join the same share hub as Topic Reveal - your saved Quote, Review (with its star rating) and Note appear as options based on how you captured it.
 FIX: The shared card image now saves exactly what you see in the preview - same layout math, text sizes and placement.
 IMPROVE: Share cards redesigned - your category's own icon tiles the watermark, a cleaner gradient backdrop, a softer frost pane and a "via Curio" footer that never clips.

@@ -1,5 +1,21 @@
 # Prompt.md — current request log
 
+## Request: v292f — share preview/export sync, splash speed, chip frost (IN PROGRESS)
+
+- SHARE PREVIEW: preview renders the card at a FIXED 280dp width (matching
+  the export width exactly), centered in the sheet. No more graphicsLayer
+  scaling down from the full 405/450 dp card size. Export captures at the
+  SAME dp dimensions via shareComposableCard with exportDensity=4x for a
+  sharp PNG — preview and export are pixel-perfect.
+- SPLASH: minimum delay reduced 400ms→250ms, warm-up timeout 4s→2.5s,
+  entrance animation delay 60ms→30ms, loading line swap 1.1s→800ms.
+- CHIPS FROST: Cabinet + Topic Database chips switched from alwaysClear
+  (clear glass, compact blur) to full liquid glass with stronger wash
+  (0.55-0.68) — opaque Samsung frosted look over blurred backdrop.
+- Status: testing.
+
+---
+
 ## Request: v292e — unified share hub + accurate export (COMPLETE)
 
 - ONE SHARE HUB: `ShareHubBody` in TopicShareCard.kt is shared by the topic
