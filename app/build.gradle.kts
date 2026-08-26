@@ -376,3 +376,19 @@ if (hasTopicFiles) {
         dependsOn("validateTopics")
     }
 }
+
+// v294 — Build pre-populated Room database from JSON assets.
+// Run: ./gradlew :app:buildTopicDatabase
+// Output: app/src/main/assets/topics.db (shipped with APK).
+tasks.register("buildTopicDatabase") {
+    group = "curio"
+    description = "Creates a pre-populated topics.db from assets/topics/*.json"
+    doLast {
+        if (!topicsDir.exists()) {
+            logger.warn("topics/ directory — nothing to build.")
+            return@doLast
+        }
+        val outputDb = File(topicsDir, "../topics.db").canonicalFile
+        com.curio.app.data.tools.BuildTopicDb.build(topicsDir, outputDb)
+    }
+}

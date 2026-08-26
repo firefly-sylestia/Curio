@@ -155,29 +155,35 @@ fun SplashScreen(navController: NavHostController) {
         // "Loading topics…". Each lane is failure-guarded individually, so
         // one broken asset never blocks the rest — and the safety timeout
         // below keeps a pathological parse from stranding the splash.
-        val warmCatalog = launch(Dispatchers.Default) {
-            // v291 — PARALLEL prewarm: launch ALL lanes at once instead of
-            // sequentially. TopicJsonLoader's parseGate (max 2 concurrent)
-            // throttles real disk I/O, but the coroutine dispatch overhead
-            // per lane is eliminated — cold start is ~2-3x faster.
-            val lanes = CurioCategories.visible
-                .filter { it.id != CategoryId.WILDCARD }
-            val jobs = lanes.map { category ->
-                launch(Dispatchers.Default) {
-                    try {
-                        TopicJsonLoader.load(category.id)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (_: Throwable) { }
-                    warmedLanes++
+        // v294 — If Room is already populated, skip JSON warm-up entirely.
+        // Topics are served from Room (instant indexed queries).
+        if (com.curio.app.data.TopicRepository.isInitialized()) {
+            warmedLanes = totalLanes
+        } else {
+            val warmCatalog = launch(Dispatchers.Default) {
+                // v291 — PARALLEL prewarm: launch ALL lanes at once instead of
+                // sequentially. TopicJsonLoader's parseGate (max 2 concurrent)
+                // throttles real disk I/O, but the coroutine dispatch overhead
+                // per lane is eliminated — cold start is ~2-3x faster.
+                val lanes = CurioCategories.visible
+                    .filter { it.id != CategoryId.WILDCARD }
+                val jobs = lanes.map { category ->
+                    launch(Dispatchers.Default) {
+                        try {
+                            TopicJsonLoader.load(category.id)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Throwable) { }
+                        warmedLanes++
+                    }
                 }
+                jobs.forEach { it.join() }
             }
-            jobs.forEach { it.join() }
+            delay(250)
+            // Cap the total warm-up at ~1s (Room makes this instant).
+            withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
+            warmedLanes = totalLanes
         }
-        delay(250)
-        // Cap the total warm-up at ~2.5s.
-        withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
-        warmedLanes = totalLanes
         // Check for pending crash from previous session — also route to the
         // crash screen when the crash-loop guard flipped on safe mode, so the
         // user always gets the log + safe restart instead of an endless loop.

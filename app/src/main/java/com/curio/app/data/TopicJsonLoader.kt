@@ -127,6 +127,19 @@ object TopicJsonLoader {
     suspend fun load(id: CategoryId): List<CurioTopic> {
         // Fast path: already resident.
         cache[id]?.let { return it }
+        // v294 — Room fast path: if topics are in Room, use them (instant).
+        try {
+            val ctx = assets?.let { null } // check if we have context
+            // TopicRepository provides Room-backed instant access.
+            // On first launch Room is empty → falls through to JSON parse.
+            if (com.curio.app.data.TopicRepository.isInitialized) {
+                val roomTopics = com.curio.app.data.TopicRepository.loadFromRoom(id)
+                if (roomTopics.isNotEmpty()) {
+                    synchronized(cacheWriteLock) { cache[id] = roomTopics }
+                    return roomTopics
+                }
+            }
+        } catch (_: Exception) { /* Room not ready yet, fall through to JSON */ }
         // Fast path: a cold-start prewarm (or another screen) is already
         // parsing this lane — share their parse instead of double-parsing
         // the asset.
@@ -192,6 +205,17 @@ object TopicJsonLoader {
         synchronized(cacheWriteLock) {
             if (cacheGeneration == generation) cache[id] = parsed
         }
+        // v294 — Also populate Room database for fast subsequent access.
+        try {
+            if (com.curio.app.data.TopicRepository.isInitialized() && parsed.isNotEmpty()) {
+                val ctx = android.app.ActivityThread.currentApplication()
+                if (ctx != null) {
+                    val db = com.curio.app.data.CurioDatabase.getInstance(ctx)
+                    val entities = parsed.map { com.curio.app.data.TopicEntity.fromCurioTopic(it) }
+                    db.topicDao().insertAll(entities)
+                }
+            }
+        } catch (_: Exception) { /* Room population is best-effort */ }
         return parsed
     }
 
