@@ -76,6 +76,13 @@ object CurioGlassPills {
      */
     @Volatile
     var isCapturingBackdrop: Boolean = false
+
+    // v292h — CRASH RECOVERY: set to true when the backdrop is ready and
+    // glass rendering begins. On next startup, if this flag is still true,
+    // the previous session was killed (SIGKILL/SIGSEGV) — increment the
+    // crash counter. Cleared immediately after the check.
+    @Volatile
+    var glassActiveSession: Boolean = false
 }
 
 /**

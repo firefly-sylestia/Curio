@@ -1079,6 +1079,12 @@ object AppPreferences {
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
     private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
+    // v292h — CRASH RECOVERY: tracks consecutive native crashes that
+    // occurred while liquid glass was active. After CRASH_THRESHOLD
+    // consecutive kills, glass is auto-disabled to protect budget devices
+    // (e.g. Infinix X6870 / Samsung A35 on Android 16) whose GPU drivers
+    // cannot handle the backdrop library's real-time blur+vibrancy+lens.
+    private const val KEY_GLASS_CRASH_COUNT = "glass_crash_count"
 
     // ── Custom blur engine (v280 experiment) ────────────────────────
     fun isCustomBlurEngineEnabled(context: Context): Boolean =
@@ -1268,7 +1274,23 @@ object AppPreferences {
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
         liquidGlassPillsState = enabled
+        // v292h — reset crash count when user manually re-enables glass
+        if (enabled) setGlassCrashCount(context, 0)
     }
+
+    // v292h — CRASH RECOVERY (see KEY_GLASS_CRASH_COUNT above).
+    var glassCrashCount by mutableIntStateOf(0)
+
+    fun getGlassCrashCount(context: Context): Int =
+        prefs(context).getInt(KEY_GLASS_CRASH_COUNT, 0)
+
+    fun setGlassCrashCount(context: Context, count: Int) {
+        prefs(context).edit().putInt(KEY_GLASS_CRASH_COUNT, count).apply()
+        glassCrashCount = count
+    }
+
+    /** Threshold of consecutive crashes before glass is auto-disabled. */
+    const val GLASS_CRASH_THRESHOLD = 3
 
     // ── Classic active indicator (experiment, default OFF) ───────────
     // ── Glass widget lab wallpaper (v271): persisted picked/auto image ──

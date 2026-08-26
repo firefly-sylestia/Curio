@@ -463,7 +463,44 @@ fun CurioNavHost(
     // during recording instead of sampling the layer into themselves
     // (that cycle crashed HWUI with a RenderThread stack overflow).
     val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
-    SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
+    SideEffect {
+        CurioGlassPills.backdrop = navGlassBackdrop
+        // v292h — mark session as active for crash recovery detection.
+        if (isLiquidGlassPillsActive()) {
+            CurioGlassPills.glassActiveSession = true
+        }
+    }
+    // v292h — CRASH RECOVERY: detect consecutive native crashes when
+    // liquid glass was active (budget devices like Infinix X6870 / Samsung
+    // A35 on Android 16 can SIGKILL the RenderThread from GPU overload).
+    // Flow: glassActiveSession is SET when backdrop is ready → if the app
+    // is killed, the flag stays true → next startup sees it and bumps the
+    // crash counter → after GLASS_CRASH_THRESHOLD kills, glass auto-
+    // disables. A normal exit clears the flag in onDispose.
+    val crashCheckDone = remember { androidx.compose.runtime.mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!crashCheckDone.value) {
+            crashCheckDone.value = true
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            if (CurioGlassPills.glassActiveSession) {
+                // Previous session was killed while glass was active.
+                CurioGlassPills.glassActiveSession = false
+                val count = AppPreferences.getGlassCrashCount(ctx)
+                val newCount = count + 1
+                AppPreferences.setGlassCrashCount(ctx, newCount)
+                if (newCount >= AppPreferences.GLASS_CRASH_THRESHOLD) {
+                    AppPreferences.setLiquidGlassPillsEnabled(ctx, false)
+                }
+            }
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            // Normal exit: clear the crash flag so next startup doesn't
+            // false-positive a crash that never happened.
+            CurioGlassPills.glassActiveSession = false
+        }
+    }
     // v264 — LEGACY GLASS BLUR: on pre-Android-12 devices with the opt-in
     // experiment on, the same pages-only Box is ALSO recorded into our own
     // Compose GraphicsLayer; a throttled software snapshotter reads it back,
