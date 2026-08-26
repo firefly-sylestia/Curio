@@ -1,4 +1,9 @@
 
+FIX: Detail page back/more bar aligned to match other screens' hero controls - no longer floats below the expanded menu.
+FIX: Pet Designer nav bar duplicate text on hold is gone - the crisp ink overlay is hidden in ghost-free mode.
+FIX: Category chips restored to clear liquid glass - milky frost boost reverted so cabinet and topic-database chips refract properly.
+IMPROVE: Fire widget icon enlarged (26dp -> 36dp) and streak count text larger for better visibility on the home screen.
+IMPROVE: Clock widget margin reduced (8dp -> 4dp) so the analog face fills more of the tile.
 ADD: Topic share cards - tap the new Share pill on Topic Reveal to send a beautiful frosted card of any discovery: 9:16 story or 3:4 classic layout, with the quick fact, your own custom fact or your review.
 REMOVE: The lab live wallpaper service is fully removed from the app - no more dead code behind the gone "Set as live wallpaper" button.
 ADD: Two new home-screen widgets from the Glass Widget Lab - a round frost analog clock with live ticking hands and a fire streak tile (launcher > Widgets > Curio).

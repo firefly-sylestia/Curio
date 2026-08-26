@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="8dp"
+        android:layout_margin="4dp"
         android:dial="@drawable/glass_analog_dial"
         android:hand_hour="@drawable/glass_analog_hand_hour"
         android:hand_minute="@drawable/glass_analog_hand_minute"

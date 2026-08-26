@@ -975,9 +975,13 @@ private val EntryDetailHeroClearance = EntryDetailHeroHeight + 30.dp
 /** Scroll distance (dp) before the back / more pills fully pin as frosted
  *  floating pills — mirrors Home's sticky menu/profile bar threshold. */
 private val DetailStickyBarThreshold = 90.dp
-/** The controls' resting top offset below the status bar — level with the
- *  hero's glyph band, where they were anchored inside the hero. */
-private val DetailStickyBarRestTop = 72.dp
+/** v292b — The controls' resting top offset below the status bar. Was 72dp
+ *  ("level with the hero's glyph band"), which made the detail page's back /
+ *  more pills sit FAR lower than every other screen's hero controls (those
+ *  pin at statusBarsPadding + 10dp) and put them BELOW the expanded glass
+ *  menu panel (which anchors at ~12dp). Now matched to the shared hero
+ *  control row so all screens line up. */
+private val DetailStickyBarRestTop = 10.dp
 /** The controls' fully-popped top offset below the status bar — the pills
  *  ride up here as the hero scrolls away (Home pins its pills at 12dp). */
 private val DetailStickyBarPoppedTop = 12.dp
@@ -1170,7 +1174,9 @@ private fun BoxScope.DetailStickyBar(
             .align(Alignment.TopCenter)
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(start = 16.dp, end = 16.dp, top = DetailStickyBarRestTop)
+            // v292b — 20dp side padding matches SettingsHeroHeader's control
+            // row (was 16dp here only).
+            .padding(start = 20.dp, end = 20.dp, top = DetailStickyBarRestTop)
             .offset(y = -stickyLift)
             .graphicsLayer {
                 val eased = heroControlsProgress
@@ -1357,7 +1363,9 @@ private fun BoxScope.DetailStickyBar(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .statusBarsPadding()
-                    .padding(top = 12.dp, end = 16.dp)
+                    // v292b — anchors level with the pills' row (top 10dp,
+                    // end 20dp) instead of floating above/below them.
+                    .padding(top = DetailStickyBarRestTop, end = 20.dp)
                     .graphicsLayer {
                         alpha = morph
                         val sc = lerp(0.55f, 1f, morph)

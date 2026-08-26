@@ -876,3 +876,21 @@ User's batched asks across the session:
   + get/set persisted; `CompactSliderRow` gained `maxValue`/`steps` params (opacity uses 0..1,
   steps=4 → 0/25/50/75/100).
 - Pushing; watching CI.
+
+### v292d — CI fix + category chips + pet designer duplicate text + widget icons
+
+**Changes (uncommitted, in working tree):**
+
+1. **CompactSliderRow CI fix** (commit `879d358`): Reordered params so `onValueChange` is last — fixes trailing-lambda binding at all call sites.
+
+2. **Detail page bar alignment** (`EntryDetailScreen.kt`): Changed `DetailStickyBarRestTop` from `72dp` to `10dp` and side padding from `16dp` to `20dp`. The expanded glass menu panel now anchors level with the pills — back and 3-dot line up on every screen.
+
+3. **Category chips liquid glass** (`LiquidGlassPills.kt`): Reverted v292b frost boost. Compact blur back to `0.5dp`, highlight back to `reflScale` (not `reflScale * 1.2f`), wash back to standard `0.20f` clear factor. Chips read as clear liquid glass again, not milky plastic.
+
+4. **Pet Designer duplicate text** (`CurioLiquidGlassTabBar.kt`): Ink overlay now skips entirely when `ghostFreeTabs = true` (Pet Designer). The overlay's `inkOverlayAlpha` also targets 0 for ghostFreeTabs. Eliminates the double-text when holding the blob.
+
+5. **Widget icon sizes** (XML layouts): Fire widget icon 26dp → 36dp, count text 16sp → 18sp. Clock widget margin 8dp → 4dp.
+
+**Remaining:**
+- Liquid glass 120fps: the per-chip drawBackdrop calls scale linearly with visible chip count. Current compact mode (no lens, 0.5dp blur) is already optimal per-chip. Full 120fps with many visible chips requires architectural batching (render all chips as one backdrop region).
+- Pushing; watching CI.
