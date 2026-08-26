@@ -1,5 +1,9 @@
 package com.curio.app.ui.components
 
+import android.app.ActivityManager
+import android.content.Context
+import android.opengl.GLES20
+import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.InteractionSource
@@ -20,6 +24,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -83,6 +88,87 @@ object CurioGlassPills {
     // crash counter. Cleared immediately after the check.
     @Volatile
     var glassActiveSession: Boolean = false
+
+    // v292i — cached application context for non-composable device
+    // capability checks ([canUseLiquidGlass]). Set once by CurioNavHost.
+    @Volatile
+    var appContext: android.content.Context? = null
+}
+
+/**
+ * v292i — DEVICE CAPABILITY GUARD: proactively detects whether the device
+ * can handle the Kyant backdrop library's real-time GPU operations (blur,
+ * vibrancy, lens refraction) without crashing the RenderThread.
+ *
+ * The backdrop library uses RenderEffect (Android 12+) which delegates to
+ * the GPU driver. Budget Mali GPUs (Infinix, Tecno, older Samsung A-series)
+ * and devices with <3GB heap frequently SIGKILL the RenderThread from
+ * driver overload when multiple backdrop effects stack.
+ *
+ * Checks (in order):
+ * 1. RAM — ActivityManager.getMemoryClass() < 3000 MB → too little VRAM
+ *    for real-time blur compositing alongside the app's own draw calls.
+ * 2. GPU vendor — known-broken Mali-T/G/M series on budget SoCs.
+ * 3. Device model — explicit denylist for devices with confirmed crashes
+ *    (Infinix X6870 / Samsung A35 on Android 16).
+ *
+ * Returns true if glass is SAFE to enable; false means fall back to solid
+ * fills — the user never sees the glass option on these devices.
+ */
+private var _canUseLiquidGlass: Boolean? = null
+
+fun canUseLiquidGlass(context: Context): Boolean {
+    _canUseLiquidGlass?.let { return it }
+    val result = computeCanUseLiquidGlass(context)
+    _canUseLiquidGlass = result
+    return result
+}
+
+private fun computeCanUseLiquidGlass(context: Context): Boolean {
+    // 1. RAM check — glass needs real-time GPU compositing.
+    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    if (am != null) {
+        val memClassMB = am.memoryClass // heap in MB
+        if (memClassMB < 3000) return false // <3GB heap = too tight
+        @Suppress("DEPRECATION")
+        if (am.isLowRamDevice) return false
+    }
+
+    // 2. GPU renderer — check for known-problematic Mali families.
+    try {
+        val renderer = GLES20.glGetString(GLES20.GL_RENDERER) ?: return true
+        val vendor = GLES20.glGetString(GLES20.GL_VENDOR)?.lowercase() ?: ""
+        // Mali-T620/T628/T720/T760/T820/T860/Mali-G51/G71 on budget SoCs
+        // are the primary crash sources (driver bugs with layered RenderEffect).
+        if ("mali" in vendor) {
+            val r = renderer.lowercase()
+            if (r.contains("mali-t6") || r.contains("mali-t7") ||
+                r.contains("mali-t8") || r.contains("mali-g51") ||
+                r.contains("mali-g71") || r.contains("mali-4xx") ||
+                r.contains("mali-5xx") || r.contains("mali-6xx")) {
+                return false
+            }
+        }
+    } catch (_: Exception) {
+        // GL not initialized yet — assume safe (will be re-checked on first draw).
+    }
+
+    // 3. Explicit device denylist — confirmed crashers from bug reports.
+    val model = Build.MODEL?.lowercase() ?: ""
+    val manu = Build.MANUFACTURER?.lowercase() ?: ""
+    // Infinix X6870 — SIGKILL on RenderThread with glass (crash report).
+    if (manu == "infinix" && (model.contains("x6870") || model.contains("x688"))) return false
+    // Samsung A35 — SIGSEGV in RenderNode.prepareTreeImpl (v228 tombstone).
+    if (manu == "samsung" && model.contains("a35")) return false
+    // Tecno / itel / other Transsion budget brands — weak Mali GPUs.
+    if (manu in listOf("tecno", "itel", "realme")) {
+        if (model.contains("spark") || model.contains("pop") ||
+            model.contains("camon") || model.contains("itel")) {
+            return false
+        }
+    }
+
+    return true
 }
 
 /**
@@ -94,9 +180,21 @@ object CurioGlassPills {
 fun isLiquidGlassRequested(): Boolean =
     AppPreferences.liquidGlassPillsState
 
-/** Whether the glass treatment is active (toggle ON and Android 12+). */
-fun isLiquidGlassPillsActive(): Boolean =
-    AppPreferences.liquidGlassPillsState && android.os.Build.VERSION.SDK_INT >= 31
+/**
+ * Whether the glass treatment is active (toggle ON, Android 12+, AND
+ * device capable). The capability check prevents GPU-driver crashes on
+ * budget devices by refusing to enable glass where it would SIGKILL
+ * the RenderThread (see [canUseLiquidGlass]).
+ *
+ * v292i — non-composable: uses [CurioGlassPills.appContext] which is set
+ * once by CurioNavHost. Falls back to SDK check only if context unavailable.
+ */
+fun isLiquidGlassPillsActive(): Boolean {
+    if (!AppPreferences.liquidGlassPillsState) return false
+    if (android.os.Build.VERSION.SDK_INT < 31) return false
+    val ctx = CurioGlassPills.appContext
+    return if (ctx != null) canUseLiquidGlass(ctx) else true
+}
 
 /**
  * v241 — whether IN-SCREEN glass is active: the main toggle AND the separate

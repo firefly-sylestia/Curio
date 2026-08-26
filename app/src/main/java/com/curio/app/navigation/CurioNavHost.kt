@@ -465,6 +465,8 @@ fun CurioNavHost(
     val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
     SideEffect {
         CurioGlassPills.backdrop = navGlassBackdrop
+        // v292i — cache context for non-composable capability checks.
+        CurioGlassPills.appContext = context
         // v292h — mark session as active for crash recovery detection.
         if (isLiquidGlassPillsActive()) {
             CurioGlassPills.glassActiveSession = true
@@ -478,19 +480,17 @@ fun CurioNavHost(
     // crash counter → after GLASS_CRASH_THRESHOLD kills, glass auto-
     // disables. A normal exit clears the flag in onDispose.
     val crashCheckDone = remember { androidx.compose.runtime.mutableStateOf(false) }
-    val crashCtx = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(Unit) {
         if (!crashCheckDone.value) {
             crashCheckDone.value = true
-            val ctx = crashCtx
             if (CurioGlassPills.glassActiveSession) {
                 // Previous session was killed while glass was active.
                 CurioGlassPills.glassActiveSession = false
-                val count = AppPreferences.getGlassCrashCount(ctx)
+                val count = AppPreferences.getGlassCrashCount(context)
                 val newCount = count + 1
-                AppPreferences.setGlassCrashCount(ctx, newCount)
+                AppPreferences.setGlassCrashCount(context, newCount)
                 if (newCount >= AppPreferences.GLASS_CRASH_THRESHOLD) {
-                    AppPreferences.setLiquidGlassPillsEnabled(ctx, false)
+                    AppPreferences.setLiquidGlassPillsEnabled(context, false)
                 }
             }
         }
