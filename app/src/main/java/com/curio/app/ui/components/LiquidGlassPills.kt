@@ -85,49 +85,6 @@ object CurioGlassPills {
     @Volatile
     var appContext: android.content.Context? = null
 
-    // v293 — CRASH RECOVERY: tracks whether glass was active in the
-    // previous session. If the app was killed (SIGKILL/SIGSEGV) while
-    // glass was on, the next startup detects this and auto-disables glass.
-    private const val KEY_GLASS_ACTIVE_BEFORE_CRASH = "glass_active_before_crash"
-
-    fun markGlassActive(context: Context) {
-        context.getSharedPreferences("curio_glass_recovery", 0)
-            .edit().putBoolean(KEY_GLASS_ACTIVE_BEFORE_CRASH, true).apply()
-    }
-
-    fun clearGlassActiveFlag(context: Context) {
-        context.getSharedPreferences("curio_glass_recovery", 0)
-            .edit().putBoolean(KEY_GLASS_ACTIVE_BEFORE_CRASH, false).apply()
-    }
-
-    fun wasGlassActiveBeforeCrash(context: Context): Boolean {
-        return context.getSharedPreferences("curio_glass_recovery", 0)
-            .getBoolean(KEY_GLASS_ACTIVE_BEFORE_CRASH, false)
-    }
-
-    /**
-     * v293 — Install a crash detector. Call once from Application.onCreate.
-     * If the previous session was killed while glass was active, auto-disable
-     * glass to protect the device. The user can re-enable it from Settings.
-     */
-    fun installCrashRecovery(context: Context) {
-        val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            // If glass was active when the crash happened, mark it for
-            // the next startup to auto-disable.
-            if (AppPreferences.liquidGlassPillsState) {
-                markGlassActive(context)
-            }
-            // Delegate to the original handler (system crash dialog, etc.)
-            prevHandler?.uncaughtException(thread, throwable)
-        }
-        // Check if previous session crashed with glass active.
-        if (wasGlassActiveBeforeCrash(context)) {
-            clearGlassActiveFlag(context)
-            // Auto-disable glass — user can re-enable from Settings.
-            AppPreferences.setLiquidGlassPillsEnabled(context, false)
-        }
-    }
 }
 
 /**

@@ -12,6 +12,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
@@ -420,9 +421,10 @@ fun TopicDatabaseScreen(navController: NavController) {
         }
     }
 
-    // ── v292g — PAGINATION (100 per page) ─────────────────────────────
+    // ── v293 — PAGINATION (100 per page) ─────────────────────────────
     // The topic rows are paginated so only a manageable slice renders per
-    // page. A liquid-glass floating nav bar at the bottom controls paging.
+    // page. A floating nav bar at the bottom controls paging.
+    // Persistence: page number survives navigation via rememberSaveable.
     var currentPage by rememberSaveable { mutableIntStateOf(0) }
     // Topic-only rows (skip section headers for counting purposes).
     val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }
@@ -439,8 +441,8 @@ fun TopicDatabaseScreen(navController: NavController) {
         // Keep all section headers + the topic rows for this page.
         rows.filter { it.section != null || it.key in pageTopicKeys }
     }
-    // Reset to page 0 when filter/search changes.
-    LaunchedEffect(effectiveCat, needle) {
+    // Only reset to page 0 when CATEGORY filter changes (not search).
+    LaunchedEffect(effectiveCat) {
         currentPage = 0
     }
     // Page nav visibility: hide when scrolling, show when stopped.
@@ -452,6 +454,8 @@ fun TopicDatabaseScreen(navController: NavController) {
                 else kotlinx.coroutines.delay(400); pageNavVisible = true
             }
     }
+    // Hold-to-jump: show page picker when user long-presses the page pill.
+    var showPagePicker by remember { mutableStateOf(false) }
 
     // ── Scroll restore + persist ─────────────────────────────────────
     // The catalog loads asynchronously (produceState), so the first frames
@@ -731,7 +735,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             )
         }
 
-        // ── v293 — FLOATING PAGE NAV: individual liquid glass pills ────
+        // ── v293 — FLOATING PAGE NAV: circular prev/next + capsule page ──
         if (totalPages > 1) {
             val navAlpha by animateFloatAsState(
                 targetValue = if (pageNavVisible) 1f else 0f,
@@ -743,10 +747,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 28.dp)
                     .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f },
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Previous button — liquid glass pill
+                // Previous button — circular pill (drawer-menu style)
                 AnimatedVisibility(
                     visible = currentPage > 0,
                     enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
@@ -754,11 +758,11 @@ fun TopicDatabaseScreen(navController: NavController) {
                 ) {
                     Surface(
                         onClick = { currentPage = (currentPage - 1).coerceAtLeast(0) },
-                        shape = RoundedCornerShape(26.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shadowElevation = 4.dp,
                         modifier = Modifier
-                            .height(52.dp)
-                            .defaultMinSize(minWidth = 52.dp)
+                            .size(48.dp)
                             .then(
                                 if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
                                     Modifier.liquidGlassCapsule(
@@ -768,22 +772,27 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 } else Modifier
                             )
                     ) {
-                        Box(
-                            modifier = Modifier.padding(horizontal = 14.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(contentAlignment = Alignment.Center) {
                             CurioIcon(CurioIcons.ChevronLeft, null,
                                 tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
                         }
                     }
                 }
-                // Page number pill — liquid glass with primary color
+                // Page number capsule — hold to jump
+                val pageInteraction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                 Surface(
-                    shape = RoundedCornerShape(26.dp),
+                    shape = RoundedCornerShape(24.dp),
                     color = MaterialTheme.colorScheme.primary,
+                    shadowElevation = 4.dp,
                     modifier = Modifier
-                        .height(52.dp)
-                        .defaultMinSize(minWidth = 80.dp)
+                        .height(48.dp)
+                        .defaultMinSize(minWidth = 90.dp)
+                        .combinedClickable(
+                            interactionSource = pageInteraction,
+                            indication = null,
+                            onClick = { /* tap — no-op, use arrows */ },
+                            onLongClick = { showPagePicker = true }
+                        )
                         .then(
                             if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
                                 Modifier.liquidGlassCapsule(
@@ -806,16 +815,16 @@ fun TopicDatabaseScreen(navController: NavController) {
                         )
                     }
                 }
-                // Next button — liquid glass pill
+                // Next button — circular pill (drawer-menu style)
                 Surface(
                     onClick = { currentPage = (currentPage + 1).coerceAtMost(totalPages - 1) },
-                    shape = RoundedCornerShape(26.dp),
-                    color = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f)
+                    shape = CircleShape,
+                    color = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.surfaceContainerHigh
                     else Color.Transparent,
                     enabled = currentPage < totalPages - 1,
+                    shadowElevation = if (currentPage < totalPages - 1) 4.dp else 0.dp,
                     modifier = Modifier
-                        .height(52.dp)
-                        .defaultMinSize(minWidth = 52.dp)
+                        .size(48.dp)
                         .then(
                             if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
                                 Modifier.liquidGlassCapsule(
@@ -825,15 +834,64 @@ fun TopicDatabaseScreen(navController: NavController) {
                             } else Modifier
                         )
                 ) {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 14.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(contentAlignment = Alignment.Center) {
                         CurioIcon(CurioIcons.ChevronRight, null,
                             tint = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.onSurface
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                             size = 22.dp)
                     }
+                }
+            }
+        }
+        // Page picker bottom sheet — hold page pill to jump
+        if (showPagePicker) {
+            androidx.compose.material3.ModalBottomSheet(
+                onDismissRequest = { showPagePicker = false },
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Jump to page", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Spacer(Modifier.height(4.dp))
+                    val cols = 5
+                    val rows_count = (totalPages + cols - 1) / cols
+                    for (row in 0 until rows_count) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            for (col in 0 until cols) {
+                                val pageNum = row * cols + col
+                                if (pageNum < totalPages) {
+                                    val isActive = pageNum == currentPage
+                                    Surface(
+                                        onClick = {
+                                            currentPage = pageNum
+                                            showPagePicker = false
+                                        },
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = if (isActive) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = "${pageNum + 1}",
+                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                            color = if (isActive) MaterialTheme.colorScheme.onPrimary
+                                            else MaterialTheme.colorScheme.onSurface,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            modifier = Modifier.padding(vertical = 10.dp)
+                                        )
+                                    }
+                                } else {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
                 }
             }
         }

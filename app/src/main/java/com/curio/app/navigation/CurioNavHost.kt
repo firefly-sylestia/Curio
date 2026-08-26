@@ -468,22 +468,7 @@ fun CurioNavHost(
         // v292i — cache context for non-composable capability checks.
         CurioGlassPills.appContext = context
     }
-    // v293 — CRASH RECOVERY: install once, mark glass active during session.
-    LaunchedEffect(Unit) {
-        CurioGlassPills.installCrashRecovery(context)
-    }
-    SideEffect {
-        if (isLiquidGlassPillsActive()) {
-            CurioGlassPills.markGlassActive(context)
-        }
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            // Normal exit: clear crash flag so next startup doesn't
-            // false-positive a crash that never happened.
-            CurioGlassPills.clearGlassActiveFlag(context)
-        }
-    }
+
     // v264 — LEGACY GLASS BLUR: on pre-Android-12 devices with the opt-in
     // experiment on, the same pages-only Box is ALSO recorded into our own
     // Compose GraphicsLayer; a throttled software snapshotter reads it back,

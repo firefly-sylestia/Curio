@@ -111,6 +111,10 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                     if (AppPreferences.liquidGlassPillsState) {
                         CurioSettingsDivider()
+                        ExperimentSwitchRow("Force glass", "Bypass device capability checks — always enable glass", AppPreferences.forceGlassEnabled) {
+                            AppPreferences.setForceGlassEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
                         ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
                             AppPreferences.setGlassClarityEnabled(context, it)
                         }
@@ -364,8 +368,8 @@ fun ExperimentsScreen(navController: NavController) {
         // Drawn on TOP of the scroll content — rows slide under the ragged
         // tear as they scroll up. Its back pill refracts the captured rows.
         SettingsHeroHeader(
-            title = "Experiments",
-            subtitle = "Try ideas before they ship",
+            title = "Dev page",
+            subtitle = "Experimental features and developer options",
             onBack = { navController.popBackStack() },
             glassBackdrop = glassBackdrop
         )

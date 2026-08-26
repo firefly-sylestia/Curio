@@ -237,7 +237,7 @@ fun SupportScreen(navController: NavController) {
                                     if (versionTaps >= 5) {
                                         versionTaps = 0
                                         // v24 — the five-tap opens the
-                                        // Experiments screen (and keeps it
+                                        // Dev page (and keeps it
                                         // open); it no longer toggles promo
                                         // mode (promo lives in Experiments).
                                         navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
@@ -257,7 +257,7 @@ fun SupportScreen(navController: NavController) {
                                 Text(
                                     text = when {
                                         versionTaps in 1..4 ->
-                                            "Tap ${5 - versionTaps} more to open Experiments"
+                                            "Tap ${5 - versionTaps} more to open Dev page"
                                         else ->
                                             "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
                                     },

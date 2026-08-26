@@ -1224,7 +1224,7 @@ private val SettingsSections = listOf(
                     // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
                     SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
-                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try ideas before they ship", CurioRoutes.EXPERIMENTS)
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "Dev page", "Experimental features and developer options", CurioRoutes.EXPERIMENTS)
                 )
             )
         )
