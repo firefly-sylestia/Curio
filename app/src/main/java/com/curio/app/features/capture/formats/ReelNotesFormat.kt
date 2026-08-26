@@ -157,9 +157,17 @@ fun ReelNotesFormat(
                 accent = accent
             )
             // Subtle helper line — guides first-time raters, quiet enough
-            // to ignore once the rating is set.
+            // to ignore once the rating is set. Once stars are set, it names
+            // the chosen rating instead of the generic prompt.
             Text(
-                text = "Rate quality",
+                text = when (rating) {
+                    1 -> "Not for me"
+                    2 -> "It was okay"
+                    3 -> "Pretty good"
+                    4 -> "Really liked it"
+                    5 -> "Loved it"
+                    else -> "Rate quality"
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
             )

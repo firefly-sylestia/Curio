@@ -1,4 +1,8 @@
 
+ADD: Entry detail shares join the same share hub as Topic Reveal - your saved Quote, Review (with its star rating) and Note appear as options based on how you captured it.
+FIX: The shared card image now saves exactly what you see in the preview - same layout math, text sizes and placement.
+IMPROVE: Share cards redesigned - your category's own icon tiles the watermark, a cleaner gradient backdrop, a softer frost pane and a "via Curio" footer that never clips.
+IMPROVE: Review rating helper names your stars - "Not for me" through "Loved it" - instead of the generic "Rate quality" prompt.
 FIX: Detail page back/more bar aligned to match other screens' hero controls - no longer floats below the expanded menu.
 FIX: Pet Designer nav bar duplicate text on hold is gone - the crisp ink overlay is hidden in ghost-free mode.
 FIX: Category chips restored to clear liquid glass - milky frost boost reverted so cabinet and topic-database chips refract properly.

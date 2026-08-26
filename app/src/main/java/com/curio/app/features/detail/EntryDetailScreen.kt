@@ -4503,12 +4503,19 @@ private fun CurioShareCard(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * v149 — the NEW share UI for saved entries: a bottom sheet that shows a
- * live PREVIEW of the exact card that gets shared, an Image card / Text
- * format picker, and one Share action. Image renders the 400×400 category
- * card PNG via [shareComposableCard] (same output as before); Text sends a
- * plain-text summary. Opened from the entry's More menu (the old flow fired
- * the chooser straight from the menu with no preview).
+ * v292e — THE ENTRY SHARE HUB: the SAME customizable share hub as the topic
+ * sheet ([com.curio.app.ui.components.TopicShareSheet]), fed with what THIS
+ * entry actually saved. The content-source pills are built from the entry's
+ * capture format:
+ *  - Reel Notes → Quote (if any), Review with its star rating (the rating
+ *    rides on the card as a star row), Note;
+ *  - Marginalia / SoundBite → Quote (if any), Note;
+ *  - every format → the session Note when one exists.
+ * Quick fact and Custom fact are always offered too.
+ *
+ * The old square category card is replaced by this hub's gradient card so
+ * detail-view shares look exactly like reveal shares; "Share as text" stays
+ * below as a quiet secondary action.
  */
 @Composable
 private fun EntryShareSheet(
@@ -4519,7 +4526,53 @@ private fun EntryShareSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var shareAsImage by rememberSaveable { mutableStateOf(true) }
+    var aspect by rememberSaveable { mutableStateOf(
+        com.curio.app.ui.components.ShareCardAspect.CLASSIC
+    ) }
+    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var customText by rememberSaveable { mutableStateOf("") }
+
+    // Build the SAVED sources from this entry's capture data — only what
+    // actually exists gets a pill.
+    val data = entry.captureData
+    val firstQuote = when (data) {
+        is com.curio.app.data.CaptureData.ReelNotes -> data.quotes.firstOrNull { it.isNotBlank() }
+        is com.curio.app.data.CaptureData.Marginalia -> data.quotes.firstOrNull { it.isNotBlank() }
+        is com.curio.app.data.CaptureData.SoundBite -> data.quotes.firstOrNull { it.isNotBlank() }
+        else -> null
+    }
+    val reviewInfo = (data as? com.curio.app.data.CaptureData.ReelNotes)
+        ?.takeIf { it.reviewText.isNotBlank() }
+        ?.let { it.reviewText.trim() to it.rating }
+    val noteText = entry.sessionNote?.trim().orEmpty()
+
+    val savedSources = buildList {
+        if (!firstQuote.isNullOrBlank()) {
+            add(com.curio.app.ui.components.ShareCardContent("quote", "Quote", firstQuote))
+        }
+        if (reviewInfo != null) {
+            add(com.curio.app.ui.components.ShareCardContent(
+                "review", "Review", reviewInfo.first, rating = reviewInfo.second
+            ))
+        }
+        if (noteText.isNotEmpty()) {
+            add(com.curio.app.ui.components.ShareCardContent("note", "Note", noteText))
+        }
+    }
+
+    val quickFact = entry.topic.teaser
+    val quick = com.curio.app.ui.components.ShareCardContent(
+        com.curio.app.ui.components.QUICK_FACT_ID, "Quick fact", quickFact
+    )
+    val custom = com.curio.app.ui.components.ShareCardContent(
+        com.curio.app.ui.components.CUSTOM_FACT_ID, "Custom fact", ""
+    )
+    val activeId = selectedId ?: quick.id
+    val activeSource = when (activeId) {
+        com.curio.app.ui.components.CUSTOM_FACT_ID ->
+            custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
+        else -> savedSources.firstOrNull { it.id == activeId } ?: quick
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -4534,7 +4587,7 @@ private fun EntryShareSheet(
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
                 text = "Share this entry",
@@ -4542,68 +4595,40 @@ private fun EntryShareSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // ── Preview — the exact card that gets shared, on a soft stage ──
-            // v170 — 3:4 portrait to match the exported card (was square).
-            Box(
-                modifier = Modifier
-                    .width(280.dp)
-                    .aspectRatio(3f / 4f)
-                    .shadow(8.dp, RoundedCornerShape(28.dp))
-                    .clip(RoundedCornerShape(28.dp))
-            ) {
-                CurioShareCard(entry = entry, category = category)
-            }
+            // ── The shared hub: accurate preview + aspect/source pickers ──
+            com.curio.app.ui.components.ShareHubBody(
+                topicName = entry.topic.name,
+                categoryName = category.displayName,
+                categoryGlyph = category.iconGlyph,
+                accent = category.themedAccent(),
+                sharerName = AppPreferences.getDisplayName(context).ifBlank { "" },
+                authority = authority,
+                context = context,
+                aspect = aspect,
+                onAspectChange = { aspect = it },
+                sources = listOf(quick) + savedSources + listOf(custom),
+                activeSource = activeSource,
+                onSelectSource = { selectedId = it },
+                customEditing = activeId == com.curio.app.ui.components.CUSTOM_FACT_ID,
+                customText = customText,
+                onCustomTextChange = { customText = it },
+                onShared = onDismiss
+            )
 
-            // ── Image / Text format picker ──
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                ShareFormatPill(
-                    label = "Image card",
-                    icon = CurioIcons.Image,
-                    selected = shareAsImage
-                ) { shareAsImage = true }
-                ShareFormatPill(
-                    label = "Text",
-                    icon = CurioIcons.FormatText,
-                    selected = !shareAsImage
-                ) { shareAsImage = false }
-            }
-
-            // ── Share action ──
-            Button(
-                onClick = {
-                    if (shareAsImage) {
-                        shareComposableCard(
-                            context = context,
-                            // v170 — 3:4 portrait (was 400×400 square).
-                            cardSize = DpSize(450.dp, 600.dp),
-                            authority = authority,
-                            card = { CurioShareCard(entry = entry, category = category) }
-                        )
-                    } else {
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
-                            putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
-                        }
-                        context.startActivity(Intent.createChooser(intent, "Share entry"))
-                    }
-                    onDismiss()
-                },
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
+            // Quiet secondary: plain-text share (unchanged payload).
+            TextButton(onClick = {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
+                    putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
+                }
+                context.startActivity(Intent.createChooser(intent, "Share entry"))
+                onDismiss()
+            }) {
                 Text(
-                    text = if (shareAsImage) "Share image card" else "Share as text",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                    text = "Share as text instead",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

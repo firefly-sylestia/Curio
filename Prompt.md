@@ -1,3 +1,34 @@
+# Prompt.md — current request log
+
+## Request: v292e — unified share hub + accurate export (COMPLETE)
+
+- ONE SHARE HUB: `ShareHubBody` in TopicShareCard.kt is shared by the topic
+  sheet AND the detail-entry sheet. EntryShareSheet now builds content pills
+  from what the entry actually saved — Quote / Review (carries its star
+  rating, rendered as a gold star row on the card) / Note from sessionNote,
+  per capture format; Quick fact + Custom fact always offered; "Share as text
+  instead" stays as a quiet TextButton (unchanged payload).
+- CARD REDESIGN: torn-paper footer REMOVED (gradient only); watermark now
+  tiles the CATEGORY GLYPH itself (GlyphWatermark via BoxWithConstraints +
+  CurioIcon cells, seeded wobble) instead of the generic ✦; frost pane is a
+  soft wash + hairline rim; footer is sparkle + single-line ellipsized
+  "$name · via Curio" (cut-proof).
+- PREVIEW ACCURACY: preview renders the card at FULL export dp
+  (ShareCardAspect.widthDp × heightDp) scaled down with graphicsLayer
+  TransformOrigin(0,0) — identical layout math to shareComposableCard's
+  off-screen capture, so wrapping/placement match exactly.
+- REVIEW LABEL: ReelNotesFormat helper line updates with stars — Not for me /
+  It was okay / Pretty good / Really liked it / Loved it (0 stars = "Rate
+  quality").
+- TopicRevealScreen call site verified against the new TopicShareSheet
+  signature (savedSources defaults empty). Balance-checked all touched files.
+- NOTE: old private CurioShareCard in EntryDetailScreen is now unused (kept;
+  removal pending user OK per delete-confirmation rule).
+- web/package-lock.json user change untouched and NOT committed.
+- Status: committed & pushed; CI validates compilation.
+
+---
+
 ## Request: v292 — topic share card + wallpaper dead-code removal (COMPLETE)
 
 - TOPIC SHARE CARD (`TopicShareCard.kt`): off-screen-capturable composable

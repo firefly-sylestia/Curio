@@ -1,9 +1,9 @@
 package com.curio.app.ui.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
@@ -32,27 +34,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.drawText
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curio.app.data.AppPreferences
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.fromHsl
 import com.curio.app.ui.theme.toHsl
-import kotlin.math.sin
 
 /** v292 — share-card aspect options. */
 enum class ShareCardAspect(val label: String, val widthDp: Int, val heightDp: Int) {
@@ -60,26 +59,31 @@ enum class ShareCardAspect(val label: String, val widthDp: Int, val heightDp: In
     CLASSIC("3:4", 450, 600)
 }
 
-/** v292 — what the card's frosted pane shows. */
-enum class ShareFactSource(val label: String) {
-    QUICK_FACT("Quick fact"),
-    CUSTOM_FACT("Custom fact"),
-    REVIEW("Review")
-}
+/**
+ * v292e — ONE content source for the share hub's frosted pane. The sheet
+ * always offers Quick fact + Custom fact; saved-entry callers pass their
+ * own [ShareCardContent]s in between (Quote / Note / Review — whatever the
+ * entry's capture format actually produced). A review source carries its
+ * star [rating], which the card renders as a star row.
+ */
+data class ShareCardContent(
+    val id: String,
+    val label: String,
+    val text: String,
+    val rating: Int? = null
+)
 
 /**
- * v292 — THE TOPIC SHARE CARD. A self-contained composable designed for
- * off-screen bitmap capture via [shareComposableCard] (single-frame draw,
- * so everything here is synchronous: no async painters, no backdrop APIs).
- *
- * Look, top to bottom:
- *  - full-bleed deep→light category gradient,
- *  - a seeded WATERMARK PATTERN of the category glyph tiled across the
- *    card (the app's page-watermark language, baked into the bitmap),
- *  - the topic name in the big Changa One display face,
- *  - a FROSTED glass pane (simulated frost — layered white washes + rim +
- *    soft shadow, the fauxGlass recipe) holding the fact text,
- *  - a TORN-PAPER footer strip with "via Curio ✦" branding.
+ * v292e — THE TOPIC SHARE CARD, redesigned:
+ *  - full-bleed deep→light category GRADIENT only (the torn-paper footer is
+ *    gone — user call: keep it clean);
+ *  - the WATERMARK now tiles the CATEGORY GLYPH itself (the same icon the
+ *    reveal hero and every page watermark wear) instead of the generic ✦
+ *    character that didn't match the app;
+ *  - a cleaner simulated-frost pane (soft wash + hairline rim, no heavy
+ *    offset shadow) holding the chosen content;
+ *  - an optional STAR RATING row for review shares;
+ *  - a cut-proof "via Curio" footer (single line, ellipsized name).
  *
  * Frost is simulated on purpose: the capture draws through a software
  * Canvas where RenderEffect blur is unavailable.
@@ -93,7 +97,8 @@ fun TopicShareCard(
     factText: String,
     sharerName: String,
     aspect: ShareCardAspect,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    ratingStars: Int? = null
 ) {
     val base = toHsl(accent)
     val deep = fromHsl(base.h, base.s, (base.l * 0.55f).coerceIn(0f, 0.5f))
@@ -104,15 +109,13 @@ fun TopicShareCard(
         modifier = modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(32.dp))
-            .drawBehind {
-                drawRoundRect(
-                    brush = Brush.verticalGradient(listOf(deep, accent)),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(32.dp.toPx())
-                )
-            }
+            .background(
+                Brush.verticalGradient(listOf(deep, accent)),
+                RoundedCornerShape(32.dp)
+            )
     ) {
-        // ── Watermark glyph pattern (seeded tile) ─────────────────────
-        WatermarkPattern(glyph = categoryGlyph, tint = ink.copy(alpha = 0.06f), seed = topicName.hashCode())
+        // ── Category-glyph watermark tile ───────────────────────────────
+        GlyphWatermark(glyph = categoryGlyph, tint = ink.copy(alpha = 0.07f), seed = topicName.hashCode())
 
         // ── Content ────────────────────────────────────────────────────
         Column(
@@ -149,8 +152,8 @@ fun TopicShareCard(
                 )
             }
 
-            // Middle: topic name + frosted fact pane.
-            Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            // Middle: topic name + frosted content pane (+ optional stars).
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
                     text = display,
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -162,26 +165,41 @@ fun TopicShareCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-                // Frosted glass pane holding the chosen fact.
+                if (ratingStars != null && ratingStars > 0) {
+                    // Review share: the star row rides above the pane so the
+                    // rating reads instantly, matching the Reel Notes editor.
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        repeat(5) { i ->
+                            CurioIcon(
+                                name = if (i < ratingStars) CurioIcons.Star else CurioIcons.StarOutline,
+                                contentDescription = null,
+                                tint = if (i < ratingStars) Color(0xFFFFC94D) else ink.copy(alpha = 0.35f),
+                                size = 26.dp
+                            )
+                        }
+                    }
+                }
+                // Simulated-frost pane holding the chosen content.
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .drawBehind {
-                            // Simulated frost: soft drop shadow + layered
-                            // translucent washes + hairline rim.
+                            // Soft grounded shadow directly under the pane…
                             drawRoundRect(
-                                color = Color.Black.copy(alpha = 0.18f),
+                                color = Color.Black.copy(alpha = 0.12f),
                                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
-                                topLeft = Offset(0f, 8.dp.toPx())
+                                topLeft = Offset(0f, 4.dp.toPx())
                             )
+                            // …a gentle top-lit glass wash…
                             drawRoundRect(
                                 brush = Brush.verticalGradient(
-                                    listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.12f))
+                                    listOf(Color.White.copy(alpha = 0.24f), Color.White.copy(alpha = 0.10f))
                                 ),
                                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx())
                             )
+                            // …and one crisp hairline rim (the glass edge).
                             drawRoundRect(
-                                color = Color.White.copy(alpha = 0.35f),
+                                color = Color.White.copy(alpha = 0.30f),
                                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
                                 style = Stroke(width = 1.dp.toPx())
                             )
@@ -193,7 +211,7 @@ fun TopicShareCard(
                         style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 21.sp),
                         color = ink,
                         maxLines = when (aspect) {
-                            ShareCardAspect.PORTRAIT -> 7
+                            ShareCardAspect.PORTRAIT -> 8
                             ShareCardAspect.CLASSIC -> 6
                         },
                         overflow = TextOverflow.Ellipsis
@@ -201,44 +219,58 @@ fun TopicShareCard(
                 }
             }
 
-            // Footer: torn-paper strip with branding.
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                TornFooterStrip(tint = ink.copy(alpha = 0.10f), seed = topicName.hashCode() + 31)
-                Spacer(Modifier.height(10.dp))
+            // Footer: sparkle + branding — single line, never clipped.
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CurioIcon(
+                    name = CurioIcons.AutoAwesome,
+                    contentDescription = null,
+                    tint = ink.copy(alpha = 0.45f),
+                    size = 18.dp
+                )
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    text = if (sharerName.isNotBlank()) "$sharerName · via Curio ✦" else "via Curio ✦",
+                    text = if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = ink.copy(alpha = 0.85f)
+                    color = ink.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
     }
 }
 
-/** Seeded tiled watermark of the category glyph across the whole card. */
+/**
+ * v292e — seeded TILE of the category's own glyph across the card. Same
+ * language as the app's page watermarks (CurioWatermarkBackdrop): the real
+ * category icon, softly rotated per cell by a deterministic wobble.
+ */
 @Composable
-private fun WatermarkPattern(glyph: String, tint: Color, seed: Int) {
-    val measurer = rememberTextMeasurer()
-    val glyphStyle = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold)
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val layout = measurer.measure(AnnotatedString("\u2726"), style = glyphStyle)
-        val cell = size.width / 4.2f
+private fun GlyphWatermark(glyph: String, tint: Color, seed: Int) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val cell = 118.dp
+        val iconSize = 54.dp
         var row = 0
-        var y = -cell / 2f
-        while (y < size.height + cell) {
+        var y = -cell / 2
+        while (y.value < maxHeight.value + cell.value) {
+            val xOff = if (row % 2 == 0) 0f else cell.value / 2f
             var col = 0
-            val xOff = if (row % 2 == 0) 0f else cell / 2f
-            var x = -cell / 2f + xOff
-            while (x < size.width + cell) {
-                val wobble = sin((seed + row * 13 + col * 7).toFloat()).toFloat()
-                rotate(wobble * 12f, pivot = Offset(x + cell / 2f, y + cell / 2f)) {
-                    drawText(
-                        textLayoutResult = layout,
-                        color = tint,
-                        topLeft = Offset(x, y)
-                    )
-                }
-                x += cell
+            var x = -cell.value / 2f + xOff
+            while (x < maxWidth.value + cell.value) {
+                val wobble = kotlin.math.sin((seed + row * 13 + col * 7).toFloat()) * 12f
+                CurioIcon(
+                    name = glyph,
+                    contentDescription = null,
+                    tint = tint,
+                    size = iconSize,
+                    modifier = Modifier
+                        .offset(x = x.dp, y = y)
+                        .rotate(wobble)
+                )
+                x += cell.value
                 col++
             }
             y += cell
@@ -248,52 +280,17 @@ private fun WatermarkPattern(glyph: String, tint: Color, seed: Int) {
 }
 
 /**
- * A broad, soft torn-paper edge drawn as a filled band along its top —
- * the same visual language as the note editors' torn cards, simplified
- * for one-pass bitmap capture.
- */
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.tornPath(
-    tint: Color,
-    seed: Int,
-    bandHeightPx: Float
-): Path {
-    val path = Path()
-    path.moveTo(0f, size.height)
-    path.lineTo(0f, size.height - bandHeightPx)
-    var x = 0f
-    var i = 0
-    while (x < size.width) {
-        val step = size.width / 14f
-        val t = (x + step).coerceAtMost(size.width)
-        val jag = (if ((seed + i) % 2 == 0) 1 else -1) * bandHeightPx * 0.22f *
-            (0.6f + ((seed * (i + 3)) % 7) / 10f)
-        path.quadraticBezierTo(
-            x + step / 2f,
-            size.height - bandHeightPx + jag,
-            t,
-            size.height - bandHeightPx + (if (i % 2 == 0) bandHeightPx * 0.08f else -bandHeightPx * 0.08f)
-        )
-        x += step
-        i++
-    }
-    path.lineTo(size.width, size.height)
-    path.close()
-    return path
-}
-
-@Composable
-private fun TornFooterStrip(tint: Color, seed: Int) {
-    Canvas(modifier = Modifier.fillMaxWidth().height(26.dp)) {
-        drawPath(tornPath(tint, seed, 22.dp.toPx()), tint)
-    }
-}
-
-/**
- * v292 — the TOPIC SHARE SHEET: live preview + customization before
- * sharing. Pick the aspect (9:16 story / 3:4 classic), what the frosted
- * pane shows (the topic's quick fact / your own custom fact line / a
- * review), edit the text inline, then share the rendered PNG card.
- * Mirrors EntryDetailScreen's share-sheet structure.
+ * v292e — THE TOPIC SHARE SHEET (the single share hub). Live preview +
+ * customization before sharing: pick the aspect (9:16 story / 3:4 classic),
+ * what the frosted pane shows — the topic's quick fact, any SAVED content
+ * passed via [savedSources] (quote / note / review with its star rating),
+ * or your own custom fact line — edit inline, then share the rendered PNG.
+ *
+ * v292e PREVIEW ACCURACY: the preview renders the card at its FULL export
+ * dp size ([ShareCardAspect.widthDp] × [heightDp]) and scales it down with
+ * graphicsLayer — identical layout math to the off-screen capture, so text
+ * wrapping and placement match the exported image exactly (the old preview
+ * re-laid-out at ~250dp wide, where fixed-sp text wraps differently).
  */
 @Composable
 fun TopicShareSheet(
@@ -304,20 +301,22 @@ fun TopicShareSheet(
     quickFact: String,
     authority: String,
     context: android.content.Context,
-    initialReview: String = "",
+    savedSources: List<ShareCardContent> = emptyList(),
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var aspect by rememberSaveable { mutableStateOf(ShareCardAspect.PORTRAIT) }
-    var source by rememberSaveable { mutableStateOf(ShareFactSource.QUICK_FACT.name) }
+    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
-    var reviewText by rememberSaveable { mutableStateOf(initialReview) }
-    val sharer = com.curio.app.data.AppPreferences.getDisplayName(context).ifBlank { "" }
+    val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
 
-    val factText = when (source) {
-        ShareFactSource.CUSTOM_FACT.name -> customText.ifBlank { "Add your own fact about this discovery…" }
-        ShareFactSource.REVIEW.name -> reviewText.ifBlank { "Write your review of this discovery…" }
-        else -> quickFact
+    // Source order: Quick fact → saved content (quote/note/review…) → Custom.
+    val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
+    val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
+    val activeId = selectedId ?: quick.id
+    val activeSource = when (activeId) {
+        CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
+        else -> (savedSources.firstOrNull { it.id == activeId } ?: quick)
     }
 
     ModalBottomSheet(
@@ -340,111 +339,169 @@ fun TopicShareSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // ── Live preview — the exact exported card ──
-            Box(
-                modifier = Modifier
-                    .width(if (aspect == ShareCardAspect.PORTRAIT) 250.dp else 280.dp)
-                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-                    .shadow(8.dp, RoundedCornerShape(32.dp))
-                    .clip(RoundedCornerShape(32.dp))
-            ) {
-                TopicShareCard(
-                    topicName = topicName,
-                    categoryName = categoryName,
-                    categoryGlyph = categoryGlyph,
-                    accent = accent,
-                    factText = factText,
-                    sharerName = sharer,
-                    aspect = aspect
-                )
-            }
-
-            // ── Aspect picker ──
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ShareOptionPill(
-                    label = ShareCardAspect.PORTRAIT.label,
-                    icon = CurioIcons.Image,
-                    selected = aspect == ShareCardAspect.PORTRAIT
-                ) { aspect = ShareCardAspect.PORTRAIT }
-                ShareOptionPill(
-                    label = ShareCardAspect.CLASSIC.label,
-                    icon = CurioIcons.Image,
-                    selected = aspect == ShareCardAspect.CLASSIC
-                ) { aspect = ShareCardAspect.CLASSIC }
-            }
-
-            // ── Fact source picker ──
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ShareFactSource.entries.forEach { option ->
-                    ShareOptionPill(
-                        label = option.label,
-                        icon = CurioIcons.FormatText,
-                        selected = source == option.name
-                    ) { source = option.name }
-                }
-            }
-
-            // ── Editable text for Custom fact / Review ──
-            if (source == ShareFactSource.CUSTOM_FACT.name || source == ShareFactSource.REVIEW.name) {
-                val value = if (source == ShareFactSource.CUSTOM_FACT.name) customText else reviewText
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = { v ->
-                        if (source == ShareFactSource.CUSTOM_FACT.name) customText = v else reviewText = v
-                    },
-                    placeholder = {
-                        Text(
-                            if (source == ShareFactSource.CUSTOM_FACT.name) "Your custom fact"
-                            else "Your review",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    minLines = 2,
-                    maxLines = 4,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            // ── Share action ──
-            Button(
-                onClick = {
-                    shareComposableCard(
-                        context = context,
-                        cardSize = DpSize(aspect.widthDp.dp, aspect.heightDp.dp),
-                        authority = authority,
-                        card = {
-                            TopicShareCard(
-                                topicName = topicName,
-                                categoryName = categoryName,
-                                categoryGlyph = categoryGlyph,
-                                accent = accent,
-                                factText = factText,
-                                sharerName = sharer,
-                                aspect = aspect
-                            )
-                        }
-                    )
-                    onDismiss()
-                },
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
-                Text(
-                    text = "Share image card",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                )
-            }
+            ShareHubBody(
+                topicName = topicName,
+                categoryName = categoryName,
+                categoryGlyph = categoryGlyph,
+                accent = accent,
+                sharerName = sharer,
+                authority = authority,
+                context = context,
+                aspect = aspect,
+                onAspectChange = { aspect = it },
+                sources = listOf(quick) + savedSources + listOf(custom),
+                activeSource = activeSource,
+                onSelectSource = { selectedId = it },
+                customEditing = activeId == CUSTOM_FACT_ID,
+                customText = customText,
+                onCustomTextChange = { customText = it },
+                onShared = onDismiss
+            )
         }
     }
 }
 
-/** One option pill in the topic share sheet. */
+/** Shared ids for the always-present sources. */
+const val QUICK_FACT_ID = "quick_fact"
+const val CUSTOM_FACT_ID = "custom_fact"
+
+/**
+ * v292e — the hub body shared by the topic sheet AND the detail-entry
+ * sheet: preview (accurate full-size-scaled render) + aspect pills +
+ * content-source pills + optional custom editor + share button.
+ */
+@Composable
+fun ShareHubBody(
+    topicName: String,
+    categoryName: String,
+    categoryGlyph: String,
+    accent: Color,
+    sharerName: String,
+    authority: String,
+    context: android.content.Context,
+    aspect: ShareCardAspect,
+    onAspectChange: (ShareCardAspect) -> Unit,
+    sources: List<ShareCardContent>,
+    activeSource: ShareCardContent,
+    onSelectSource: (String) -> Unit,
+    customEditing: Boolean,
+    customText: String,
+    onCustomTextChange: (String) -> Unit,
+    onShared: () -> Unit
+) {
+    // ── Live preview — rendered at FULL export dp, scaled down ──────
+    BoxWithConstraints(
+        modifier = Modifier
+            .width(if (aspect == ShareCardAspect.PORTRAIT) 236.dp else 280.dp)
+            .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+            .shadow(8.dp, RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(28.dp))
+    ) {
+        // Scale factor: preview width ÷ export-card width (both in dp).
+        val fitScale = maxWidth.value / aspect.widthDp
+        Box(
+            modifier = Modifier
+                .size(aspect.widthDp.dp, aspect.heightDp.dp)
+                .graphicsLayer {
+                    // Scale the full-size card into this preview box from
+                    // its top-left corner — same dp layout as the export.
+                    scaleX = fitScale
+                    scaleY = fitScale
+                    transformOrigin = TransformOrigin(0f, 0f)
+                }
+        ) {
+            TopicShareCard(
+                topicName = topicName,
+                categoryName = categoryName,
+                categoryGlyph = categoryGlyph,
+                accent = accent,
+                factText = activeSource.text,
+                sharerName = sharerName,
+                aspect = aspect,
+                ratingStars = activeSource.rating
+            )
+        }
+    }
+
+    // ── Aspect picker ──
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        ShareOptionPill(
+            label = ShareCardAspect.PORTRAIT.label,
+            icon = CurioIcons.Image,
+            selected = aspect == ShareCardAspect.PORTRAIT
+        ) { onAspectChange(ShareCardAspect.PORTRAIT) }
+        ShareOptionPill(
+            label = ShareCardAspect.CLASSIC.label,
+            icon = CurioIcons.Image,
+            selected = aspect == ShareCardAspect.CLASSIC
+        ) { onAspectChange(ShareCardAspect.CLASSIC) }
+    }
+
+    // ── Content source picker ──
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        sources.forEach { option ->
+            ShareOptionPill(
+                label = option.label + (option.rating?.takeIf { it > 0 }
+                    ?.let { r -> " · " + "★".repeat(r) } ?: ""),
+                icon = CurioIcons.FormatText,
+                selected = option.id == activeSource.id
+            ) { onSelectSource(option.id) }
+        }
+    }
+
+    // ── Editable text for Custom fact ──
+    if (customEditing) {
+        OutlinedTextField(
+            value = customText,
+            onValueChange = onCustomTextChange,
+            placeholder = {
+                Text("Your custom fact", style = MaterialTheme.typography.bodyMedium)
+            },
+            minLines = 2,
+            maxLines = 4,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    // ── Share action ──
+    Button(
+        onClick = {
+            shareComposableCard(
+                context = context,
+                cardSize = androidx.compose.ui.unit.DpSize(aspect.widthDp.dp, aspect.heightDp.dp),
+                authority = authority,
+                card = {
+                    TopicShareCard(
+                        topicName = topicName,
+                        categoryName = categoryName,
+                        categoryGlyph = categoryGlyph,
+                        accent = accent,
+                        factText = activeSource.text,
+                        sharerName = sharerName,
+                        aspect = aspect,
+                        ratingStars = activeSource.rating
+                    )
+                }
+            )
+            onShared()
+        },
+        shape = RoundedCornerShape(50),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+    ) {
+        Text(
+            text = "Share image card",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+        )
+    }
+}
+
+/** One option pill in the share hub. */
 @Composable
 private fun ShareOptionPill(
     label: String,
