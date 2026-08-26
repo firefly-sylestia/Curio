@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
@@ -771,7 +772,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     modifier = Modifier.height(36.dp)
                 ) {
                     Box(
-                        contentPadding = PaddingValues(horizontal = 14.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
