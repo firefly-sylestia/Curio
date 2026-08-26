@@ -855,6 +855,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             searchFocus = searchFocus,
             searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
             titleAtTop = true,
+            glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
             // v42 — the Category pill lives INSIDE the hero beside the
             // title, directly under the Sort/Search pills.
             titleTrailing = { ink ->

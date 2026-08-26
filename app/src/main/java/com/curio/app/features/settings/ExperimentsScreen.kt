@@ -100,6 +100,124 @@ fun ExperimentsScreen(navController: NavController) {
             // SpinScreen are hardcoded true. The v25 Deck & controls card was
             // already gone (3D shuffle button always on, Pastel crown depth
             // passed), and v24 removed the Layout & input section.
+
+            // v293 — LIQUID GLASS + PILL GLOW moved here from Appearance.
+            item { CurioSectionLabel("Liquid glass") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
+                        AppPreferences.setLiquidGlassPillsEnabled(context, it)
+                    }
+                    if (AppPreferences.liquidGlassPillsState) {
+                        CurioSettingsDivider()
+                        ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
+                            AppPreferences.setGlassClarityEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
+                        var showGlassTuning by remember { mutableStateOf(false) }
+                        CurioSettingsRow(
+                            CurioIcons.Tune,
+                            "Tune glass",
+                            "Reflection, refraction and blur — with a live preview"
+                        ) { showGlassTuning = true }
+                        if (showGlassTuning) {
+                            GlassTuningDialog(onDismiss = { showGlassTuning = false })
+                        }
+                    }
+                }
+                }
+            }
+            item { CurioSectionLabel("Appearance experiments") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
+                        AppPreferences.setPillGlowSubtleEnabled(context, it)
+                    }
+                }
+                }
+            }
+            // v293 — Pet behavior + explore options moved here from Preferences/Recording.
+            item { CurioSectionLabel("Pet & explore") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Voice-to-text
+                    ExperimentSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
+                        AppPreferences.setVoiceToTextEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // Live explore
+                    ExperimentSwitchRow("Live explore notification", "Ongoing timer with pause and stop", AppPreferences.liveNotificationsEnabledState) {
+                        AppPreferences.setLiveNotificationsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // Pet outside app
+                    ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps — long-press to bring it home", AppPreferences.petOutsideAppState) { wanted ->
+                        if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent(
+                                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        android.net.Uri.parse("package:" + context.packageName)
+                                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                )
+                            }
+                        } else {
+                            AppPreferences.setPetOutsideAppEnabled(context, wanted)
+                            com.curio.app.infrastructure.PetOverlayService.sync(context)
+                        }
+                    }
+                    CurioSettingsDivider()
+                    // Pet chatter segmented row
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Pet chatter", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                                Text("How chatty Curie is", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            listOf("Quiet", "Cozy", "Talkative").forEachIndexed { index, label ->
+                                val selected = when (AppPreferences.petChatterState) { "quiet" -> 0; "talkative" -> 2; else -> 1 } == index
+                                Surface(
+                                    onClick = { AppPreferences.setPetChatter(context, when (index) { 0 -> "quiet"; 2 -> "talkative"; else -> "cozy" }) },
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+                                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                }
+                            }
+                        }
+                    }
+                    CurioSettingsDivider()
+                    // Pet games segmented row
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Pet games", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                                Text("How often Curie starts games", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            listOf("Relaxed", "Normal", "Eager").forEachIndexed { index, label ->
+                                val selected = when (AppPreferences.petGameFrequencyState) { "relaxed" -> 0; "eager" -> 2; else -> 1 } == index
+                                Surface(
+                                    onClick = { AppPreferences.setPetGameFrequency(context, when (index) { 0 -> "relaxed"; 2 -> "eager"; else -> "normal" }) },
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+                                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+            }
             // v27 — paper & header experiments, all OFF by default.
             item { CurioSectionLabel("Paper & headers") }
             item {

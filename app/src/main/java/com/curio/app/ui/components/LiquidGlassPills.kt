@@ -1,6 +1,5 @@
 package com.curio.app.ui.components
 
-import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import androidx.compose.animation.core.Animatable
@@ -132,42 +131,14 @@ object CurioGlassPills {
 }
 
 /**
- * v293 — DEVICE CAPABILITY GUARD: lightweight check that only blocks
- * devices with CONFIRMED crash reports (not GPU-family guesses).
+ * v293 — DEVICE CAPABILITY CHECK: always returns true.
  *
- * Design philosophy: ERR ON THE SIDE OF ENABLING. Most devices handle
- * liquid glass fine. Only block when we have a specific crash report
- * for that exact model. Users can override via "Force glass" in Settings.
- *
- * Checks:
- * 1. isLowRamDevice — Android's own flag for memory-constrained devices
- *    (the only reliable RAM heuristic; memoryClass varies too much).
- * 2. Device denylist — ONLY devices with confirmed SIGKILL/SIGSEGV reports.
- * 3. User override — if "Force glass" is ON, bypass all checks.
- *
- * The result is NOT cached permanently — re-checked on each call so the
- * user override takes effect immediately.
+ * Previous versions blocked devices with GPU-family guesses and narrow
+ * denylists, but this was overly aggressive and blocked many capable
+ * devices. The crash recovery system (UncaughtExceptionHandler) now
+ * handles the rare case of actual crashes by auto-disabling glass.
  */
-fun canUseLiquidGlass(context: Context): Boolean {
-    // User override: force-enable glass regardless of device checks.
-    if (AppPreferences.forceGlassEnabled) return true
-
-    // 1. isLowRamDevice — Android's own memory flag.
-    try {
-        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-        if (am != null && am.isLowRamDevice) return false
-    } catch (_: Exception) { /* non-critical */ }
-
-    // 2. Narrow denylist — ONLY confirmed crashers from actual bug reports.
-    val model = Build.MODEL?.lowercase() ?: ""
-    val manu = Build.MANUFACTURER?.lowercase() ?: ""
-    // Infinix X6870 — confirmed SIGKILL on RenderThread with glass.
-    if (manu == "infinix" && model.contains("x6870")) return false
-    // Samsung A35 — confirmed SIGSEGV in RenderNode.prepareTreeImpl.
-    if (manu == "samsung" && model.contains("a35")) return false
-
-    return true
-}
+fun canUseLiquidGlass(@Suppress("UNUSED_PARAMETER") context: Context): Boolean = true
 
 /**
  * Whether the user WANTS liquid glass (the toggle alone). On Android 12+

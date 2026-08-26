@@ -1274,7 +1274,7 @@ object AppPreferences {
     }
 
     // v293 — Force-override: bypass device capability checks for liquid glass.
-    var forceGlassEnabled by mutableStateOf(false)
+    var forceGlassEnabled by mutableStateOf(true)
 
     fun initForceGlass(context: Context) {
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)

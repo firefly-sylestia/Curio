@@ -1106,6 +1106,7 @@ private fun sectionPageFor(route: String): SettingsPage? = when (route) {
     CurioRoutes.SETTINGS_PREFERENCES -> SettingsPage.PREFERENCES
     CurioRoutes.SETTINGS_RECORDING -> SettingsPage.RECORDING
     CurioRoutes.SETTINGS_DATA -> SettingsPage.DATA
+    CurioRoutes.EXPERIMENTS -> null // standalone screen, not a section page
     else -> null
 }
 
@@ -1222,7 +1223,8 @@ private val SettingsSections = listOf(
                     // in here from the old Explore section so they stay one
                     // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
-                    SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY)
+                    SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try ideas before they ship", CurioRoutes.EXPERIMENTS)
                 )
             )
         )

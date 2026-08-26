@@ -1042,98 +1042,92 @@ fun PetDesignerScreen(navController: NavController) {
             }
 
             // ── Outside the app (Settings page, v256) — the overlay pet ──
-            item {
-                if (page == PetDesignerPage.SETTINGS) SectionCard(
-                    "Outside the app",
-                    "Let your pet tag along over other apps — drag it anywhere, tap it for a hop, long-press to send it home"
-                ) {
-                    val context = LocalContext.current
-                    val outsideOn = AppPreferences.petOutsideAppState
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Pet outside the app",
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                if (outsideOn) "Floating over other apps — long-press the pet to bring it home"
-                                else "Off — needs the \"Display over other apps\" permission",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = outsideOn,
-                            onCheckedChange = { wanted ->
-                                if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
-                                    // Send the user to the system overlay
-                                    // permission page for Curio.
-                                    runCatching {
-                                        context.startActivity(
-                                            android.content.Intent(
-                                                android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                                android.net.Uri.parse("package:" + context.packageName)
-                                            ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        )
-                                    }
-                                } else {
-                                    AppPreferences.setPetOutsideAppEnabled(context, wanted)
-                                    com.curio.app.infrastructure.PetOverlayService.sync(context)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
+
 
             // ── Pet size (Settings page, v71) — whole-pet scale ─────
             item {
-                if (page == PetDesignerPage.SETTINGS) SectionCard(
-                    "Pet size",
-                    "Grow the whole pet — the preset multiplies its size everywhere it appears"
-                ) {
-                    PetSizeControls(
-                        design = design,
-                        onPetScale = { scale ->
-                            pushUndo()
-                            design = design.copy(petScale = scale)
-                        },
-                        onReset = {
-                            pushUndo()
-                            design = design.copy(petScale = 1)
+                if (page == PetDesignerPage.SETTINGS) {
+                    var sizeExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        tonalElevation = 3.dp,
+                        shadowElevation = 0.dp,
+                        onClick = { sizeExpanded = !sizeExpanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Pet size", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                                    Spacer(Modifier.height(4.dp))
+                                    Text("Grow the whole pet — tap to expand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                CurioIcon(if (sizeExpanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown, null, size = 24.dp)
+                            }
+                            if (sizeExpanded) {
+                                Spacer(Modifier.height(12.dp))
+                                PetSizeControls(
+                                    design = design,
+                                    onPetScale = { scale ->
+                                        pushUndo()
+                                        design = design.copy(petScale = scale)
+                                    },
+                                    onReset = {
+                                        pushUndo()
+                                        design = design.copy(petScale = 1)
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                 }
             }
 
             // ── Eyes (Settings page, v64) — size presets + placement ─
             item {
-                if (page == PetDesignerPage.SETTINGS) SectionCard(
-                    "Eyes",
-                    "Pick an eye size preset, then nudge the placement — the pet bobs live so you can see the look in motion"
-                ) {
-                    EyeControls(
-                        design = design,
-                        onEyeScale = { scale ->
-                            pushUndo()
-                            design = design.copy(eyeScale = scale)
-                        },
-                        onNudge = { dx, dy ->
-                            pushUndo()
-                            design = design.copy(
-                                eyeOffsetX = (design.eyeOffsetX + dx).coerceIn(-6, 6),
-                                eyeOffsetY = (design.eyeOffsetY + dy).coerceIn(-6, 6)
-                            )
-                        },
-                        onReset = {
-                            pushUndo()
-                            design = design.copy(eyeScale = 1, eyeOffsetX = 0, eyeOffsetY = 0)
+                if (page == PetDesignerPage.SETTINGS) {
+                    var eyesExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        tonalElevation = 3.dp,
+                        shadowElevation = 0.dp,
+                        onClick = { eyesExpanded = !eyesExpanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Eyes", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                                    Spacer(Modifier.height(4.dp))
+                                    Text("Eye size and placement — tap to expand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                CurioIcon(if (eyesExpanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown, null, size = 24.dp)
+                            }
+                            if (eyesExpanded) {
+                                Spacer(Modifier.height(12.dp))
+                                EyeControls(
+                                    design = design,
+                                    onEyeScale = { scale ->
+                                        pushUndo()
+                                        design = design.copy(eyeScale = scale)
+                                    },
+                                    onNudge = { dx, dy ->
+                                        pushUndo()
+                                        design = design.copy(
+                                            eyeOffsetX = (design.eyeOffsetX + dx).coerceIn(-6, 6),
+                                            eyeOffsetY = (design.eyeOffsetY + dy).coerceIn(-6, 6)
+                                        )
+                                    },
+                                    onReset = {
+                                        pushUndo()
+                                        design = design.copy(eyeScale = 1, eyeOffsetX = 0, eyeOffsetY = 0)
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                 }
             }
 

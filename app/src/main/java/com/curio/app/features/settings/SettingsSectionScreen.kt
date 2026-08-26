@@ -276,49 +276,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        // v101 — the dark-mode pill glow is the subtle top-only version by
-        // default; the toggle restores the fuller glow for comparison.
-        SettingsRowPulse(highlightKey == "appearance-pill-glow") {
-            CompactSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
-                AppPreferences.setPillGlowSubtleEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        // v242 — LIQUID GLASS moved here from Experiments and MERGED with the
-        // former separate "In-screen glass" toggle (one switch now drives the
-        // nav bar AND every in-screen pill — they all share the same crash-
-        // safe local-capture architecture). Clear glass shows inline only
-        // while liquid glass is on; the tuning sliders shape the recipe live.
-        SettingsRowPulse(highlightKey == "appearance-liquid-glass") {
-            CompactSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
-                AppPreferences.setLiquidGlassPillsEnabled(context, it)
-            }
-        }
-        if (AppPreferences.liquidGlassPillsState) {
-            CurioSettingsDivider()
-            // v293 — Force-override for devices where the capability check is too aggressive.
-            CompactSwitchRow("Force glass", "Bypass device capability checks — enable glass even on flagged devices", AppPreferences.forceGlassEnabled) {
-                AppPreferences.setForceGlassEnabled(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
-                AppPreferences.setGlassClarityEnabled(context, it)
-            }
-            CurioSettingsDivider()
-            // v252 — the tuning sliders live in a DIALOG whose header is a
-            // live glass preview: dragging updates every capsule instantly.
-            // (The old Indicator-shadow slider is gone.)
-            var showGlassTuning by remember { mutableStateOf(false) }
-            CurioSettingsRow(
-                CurioIcons.Tune,
-                "Tune glass",
-                "Reflection, refraction and blur — with a live preview"
-            ) { showGlassTuning = true }
-            if (showGlassTuning) {
-                GlassTuningDialog(onDismiss = { showGlassTuning = false })
-            }
-        }
-        CurioSettingsDivider()
         // v42 — the hero picker is a two-option control (Rose hero / Azure
         // hero), both fully selectable — azure is back and now the DEFAULT.
         // The whole control greys out while Adaptive Hero (below) is active,
@@ -469,18 +426,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 AppPreferences.setExploreSessionsEnabled(context, it)
             }
         }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "pref-live") {
-            CompactSwitchRow("Live explore notification", "Ongoing timer with pause and stop", liveNotificationsEnabled) { enabled ->
-                if (enabled) enableNotifications {
-                    liveNotificationsEnabled = true
-                    AppPreferences.setLiveNotificationsEnabled(context, true)
-                } else {
-                    liveNotificationsEnabled = false
-                    AppPreferences.setLiveNotificationsEnabled(context, false)
-                }
-            }
-        }
+
         CurioSettingsDivider()
         // v30 — the floating bubble and the overlay permission are ONE
         // option (the bubble IS the overlay). Enabling without the permission
@@ -542,52 +488,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
-        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
-        // the bubble more often, Quiet says less. Moved from Appearance (v26).
-        SettingsRowPulse(highlightKey == "pref-pet-chatter") {
-            CompactSegmentedRow(
-                "Pet chatter",
-                listOf("Quiet", "Cozy", "Talkative"),
-                when (AppPreferences.petChatterState) {
-                    "quiet" -> 0
-                    "talkative" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetChatter(
-                    context,
-                    when (index) {
-                        0 -> "quiet"
-                        2 -> "talkative"
-                        else -> "cozy"
-                    }
-                )
-            }
-        }
-        CurioSettingsDivider()
-        // v16 — how often the pet starts its games on its own: Relaxed,
-        // Normal (default), or Eager. Moved from Appearance (v26).
-        SettingsRowPulse(highlightKey == "pref-pet-games") {
-            CompactSegmentedRow(
-                "Pet games",
-                listOf("Relaxed", "Normal", "Eager"),
-                when (AppPreferences.petGameFrequencyState) {
-                    "relaxed" -> 0
-                    "eager" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetGameFrequency(
-                    context,
-                    when (index) {
-                        0 -> "relaxed"
-                        2 -> "eager"
-                        else -> "normal"
-                    }
-                )
-            }
-        }
+
         CurioSettingsDivider()
         // v27 — the daily shuffle reminder + its hour chips moved in from the
         // removed Notifications section: Preferences is now the one home for
@@ -700,12 +601,6 @@ private fun RecordingSection(highlightKey: String? = null) {
         SettingsRowPulse(highlightKey == "recording-quality") {
             CurioSettingsRow(CurioIcons.Mic, "Audio quality", quality.label) {
                 showQualityDialog = true
-            }
-        }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "recording-voice") {
-            CompactSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
-                AppPreferences.setVoiceToTextEnabled(context, it)
             }
         }
         CurioSettingsDivider()
