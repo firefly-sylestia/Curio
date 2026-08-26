@@ -106,10 +106,10 @@ fun TopicShareCard(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(32.dp))
+            .clip(RoundedCornerShape(4.dp))
             .background(
                 Brush.verticalGradient(listOf(deep, accent)),
-                RoundedCornerShape(32.dp)
+                RoundedCornerShape(4.dp)
             )
     ) {
         // ── Category-glyph watermark tile ───────────────────────────────
@@ -393,8 +393,8 @@ fun ShareHubBody(
         modifier = Modifier
             .width(previewWidth)
             .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-            .shadow(8.dp, RoundedCornerShape(28.dp))
-            .clip(RoundedCornerShape(28.dp))
+            .shadow(2.dp, RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(6.dp))
     ) {
         TopicShareCard(
             topicName = topicName,

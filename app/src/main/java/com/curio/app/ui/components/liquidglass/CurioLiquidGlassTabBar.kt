@@ -313,13 +313,12 @@ fun CurioLiquidGlassTabBar(
 
     // v292d — the crisp overlay's alpha: 1 at rest, drops to 0 within ~110ms
     // of a blob press so the refracted tab copy shows alone while held.
-    // v292d — when ghostFreeTabs (Pet Designer), the overlay is ALWAYS
-    // hidden: the blob already samples page-only content, so the overlay
-    // would show a duplicate copy of the tab labels next to the blob.
+    // v292g — ghostFreeTabs (Pet Designer) hides during press/move but
+    // shows at rest — the blob samples page-only so the overlay is the
+    // ONLY source of tab labels (no duplication like Home's combined
+    // sample).
     val inkOverlayAlpha by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (ghostFreeTabs ||
-            dampedDragAnimation.pressProgress > 0.04f
-        ) 0f else 1f,
+        targetValue = if (dampedDragAnimation.pressProgress > 0.04f) 0f else 1f,
         animationSpec = androidx.compose.animation.core.tween(110),
         label = "inkOverlay"
     )
@@ -612,10 +611,10 @@ fun CurioLiquidGlassTabBar(
         // real tabs and the blob's drag handlers below), so the ink stays
         // perfectly sharp on top of the solid fill at rest and on top of
         // the press-glass while held.
-        // v292d — ghostFreeTabs (Pet Designer) skips the overlay entirely:
-        // there's no tab-row backdrop captured, so the overlay would only
-        // duplicate the labels the blob itself refracts from the page.
-        if (!classicIndicator && !ghostFreeTabs) {
+        // v292g — the overlay is the only source of tab labels for
+        // ghostFreeTabs (Pet Designer); at rest it shows crisp labels,
+        // during press it fades to reveal the page-only refraction.
+        if (!classicIndicator) {
             CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
                 Row(
                     Modifier

@@ -110,8 +110,9 @@ fun shareComposableCard(
         try {
             val bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
             val canvas = android.graphics.Canvas(bitmap)
-            // Fill white background so transparent areas don't show as black.
-            canvas.drawColor(android.graphics.Color.WHITE)
+            // v292g — no white fill: the card's gradient fills the entire
+            // canvas so no transparent area leaks. Removing the white
+            // ensures the exported PNG has no white corners or border.
             composeView.draw(canvas)
 
             // Save PNG to share cache.

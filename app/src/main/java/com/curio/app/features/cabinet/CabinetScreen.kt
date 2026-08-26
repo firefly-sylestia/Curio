@@ -1329,10 +1329,11 @@ private fun FilterChipLite(
                     Modifier.liquidGlassCapsule(
                         container = if (selected) accent
                                     else MaterialTheme.colorScheme.surfaceContainerLow,
-                        // v292f — Samsung frosted look: stronger wash for opaque
-                        // frost over blurred content (was 0.45 clear).
+                        // v292g — Samsung frosted look: forceFrost overrides
+                        // the Clear-glass toggle so chips always frost.
                         washAlpha = if (selected) 0.68f else 0.55f,
-                        backdrop = glassBackdrop
+                        backdrop = glassBackdrop,
+                        forceFrost = true
                     ) else Modifier
             )
             .curioDarkGlow(if (glass) 0.dp else 2.dp, RoundedCornerShape(50))

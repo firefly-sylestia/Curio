@@ -239,7 +239,10 @@ fun Modifier.liquidGlassCapsule(
     // v291 — COMPACT glass for small surfaces (chip bars, small pills):
     // skips lens refraction (invisible on <50dp capsules) and reduces
     // blur to a minimum, cutting drawBackdrop cost by ~60% per chip.
-    compact: Boolean = false
+    compact: Boolean = false,
+    // v292g — force FROST regardless of the Clear-glass toggle: chips
+    // should always read as frosted glass even when glassClarity is ON.
+    forceFrost: Boolean = false
 ): Modifier {
     if (!isLiquidGlassRequested()) return this
     // v243 — pre-Android-12: no RenderEffect → serve the simulated glass
@@ -265,7 +268,8 @@ fun Modifier.liquidGlassCapsule(
     // v233 — CLEAR GLASS (experiment): drop the heavy frost so the capsule
     // reads like the bright refraction blob under a finger press rather
     // than milky frosted glass.
-    val clear = AppPreferences.glassClarityState || alwaysClear
+    // v292g — forceFrost overrides glassClarity so chips always frost.
+    val clear = (AppPreferences.glassClarityState || alwaysClear) && !forceFrost
     // v242 — user tuning (Appearance → Liquid glass): multipliers around
     // the tuned defaults. Hoisted here; the draw lambdas are plain scopes.
     val blurScale = AppPreferences.glassBlurScaleState

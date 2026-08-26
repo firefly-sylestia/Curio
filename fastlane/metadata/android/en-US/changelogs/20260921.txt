@@ -1,4 +1,7 @@
 
+FIX: Share card export no longer has white background or rounded corners - the image now matches the gradient card exactly.
+FIX: Pet Designer nav bar active indicator now shows tab labels at rest again.
+FIX: Category chips in Cabinet and Topic Database always show frosted glass even when Clear Glass is enabled.
 FIX: Share card preview is now centered and full-size - the exported image matches the preview exactly, no more scaling mismatch.
 IMPROVE: Splash screen is faster - shorter delays, quicker catalog warm-up, so the app opens faster.
 IMPROVE: Category chips in Cabinet and Topic Database now have full Samsung frosted glass - stronger frost wash over blurred backdrop.
