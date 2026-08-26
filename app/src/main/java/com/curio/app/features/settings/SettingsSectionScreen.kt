@@ -296,6 +296,11 @@ private fun AppearanceSection(highlightKey: String? = null) {
         }
         if (AppPreferences.liquidGlassPillsState) {
             CurioSettingsDivider()
+            // v293 — Force-override for devices where the capability check is too aggressive.
+            CompactSwitchRow("Force glass", "Bypass device capability checks — enable glass even on flagged devices", AppPreferences.forceGlassEnabled) {
+                AppPreferences.setForceGlassEnabled(context, it)
+            }
+            CurioSettingsDivider()
             CompactSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
                 AppPreferences.setGlassClarityEnabled(context, it)
             }

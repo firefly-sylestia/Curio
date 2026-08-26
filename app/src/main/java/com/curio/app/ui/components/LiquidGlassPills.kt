@@ -2,7 +2,6 @@ package com.curio.app.ui.components
 
 import android.app.ActivityManager
 import android.content.Context
-import android.opengl.GLES20
 import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
@@ -82,91 +81,90 @@ object CurioGlassPills {
     @Volatile
     var isCapturingBackdrop: Boolean = false
 
-    // v292h — CRASH RECOVERY: set to true when the backdrop is ready and
-    // glass rendering begins. On next startup, if this flag is still true,
-    // the previous session was killed (SIGKILL/SIGSEGV) — increment the
-    // crash counter. Cleared immediately after the check.
-    @Volatile
-    var glassActiveSession: Boolean = false
-
     // v292i — cached application context for non-composable device
     // capability checks ([canUseLiquidGlass]). Set once by CurioNavHost.
     @Volatile
     var appContext: android.content.Context? = null
+
+    // v293 — CRASH RECOVERY: tracks whether glass was active in the
+    // previous session. If the app was killed (SIGKILL/SIGSEGV) while
+    // glass was on, the next startup detects this and auto-disables glass.
+    private const val KEY_GLASS_ACTIVE_BEFORE_CRASH = "glass_active_before_crash"
+
+    fun markGlassActive(context: Context) {
+        context.getSharedPreferences("curio_glass_recovery", 0)
+            .edit().putBoolean(KEY_GLASS_ACTIVE_BEFORE_CRASH, true).apply()
+    }
+
+    fun clearGlassActiveFlag(context: Context) {
+        context.getSharedPreferences("curio_glass_recovery", 0)
+            .edit().putBoolean(KEY_GLASS_ACTIVE_BEFORE_CRASH, false).apply()
+    }
+
+    fun wasGlassActiveBeforeCrash(context: Context): Boolean {
+        return context.getSharedPreferences("curio_glass_recovery", 0)
+            .getBoolean(KEY_GLASS_ACTIVE_BEFORE_CRASH, false)
+    }
+
+    /**
+     * v293 — Install a crash detector. Call once from Application.onCreate.
+     * If the previous session was killed while glass was active, auto-disable
+     * glass to protect the device. The user can re-enable it from Settings.
+     */
+    fun installCrashRecovery(context: Context) {
+        val prevHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            // If glass was active when the crash happened, mark it for
+            // the next startup to auto-disable.
+            if (AppPreferences.liquidGlassPillsState) {
+                markGlassActive(context)
+            }
+            // Delegate to the original handler (system crash dialog, etc.)
+            prevHandler?.uncaughtException(thread, throwable)
+        }
+        // Check if previous session crashed with glass active.
+        if (wasGlassActiveBeforeCrash(context)) {
+            clearGlassActiveFlag(context)
+            // Auto-disable glass — user can re-enable from Settings.
+            AppPreferences.setLiquidGlassPillsEnabled(context, false)
+        }
+    }
 }
 
 /**
- * v292i — DEVICE CAPABILITY GUARD: proactively detects whether the device
- * can handle the Kyant backdrop library's real-time GPU operations (blur,
- * vibrancy, lens refraction) without crashing the RenderThread.
+ * v293 — DEVICE CAPABILITY GUARD: lightweight check that only blocks
+ * devices with CONFIRMED crash reports (not GPU-family guesses).
  *
- * The backdrop library uses RenderEffect (Android 12+) which delegates to
- * the GPU driver. Budget Mali GPUs (Infinix, Tecno, older Samsung A-series)
- * and devices with <3GB heap frequently SIGKILL the RenderThread from
- * driver overload when multiple backdrop effects stack.
+ * Design philosophy: ERR ON THE SIDE OF ENABLING. Most devices handle
+ * liquid glass fine. Only block when we have a specific crash report
+ * for that exact model. Users can override via "Force glass" in Settings.
  *
- * Checks (in order):
- * 1. RAM — ActivityManager.getMemoryClass() < 3000 MB → too little VRAM
- *    for real-time blur compositing alongside the app's own draw calls.
- * 2. GPU vendor — known-broken Mali-T/G/M series on budget SoCs.
- * 3. Device model — explicit denylist for devices with confirmed crashes
- *    (Infinix X6870 / Samsung A35 on Android 16).
+ * Checks:
+ * 1. isLowRamDevice — Android's own flag for memory-constrained devices
+ *    (the only reliable RAM heuristic; memoryClass varies too much).
+ * 2. Device denylist — ONLY devices with confirmed SIGKILL/SIGSEGV reports.
+ * 3. User override — if "Force glass" is ON, bypass all checks.
  *
- * Returns true if glass is SAFE to enable; false means fall back to solid
- * fills — the user never sees the glass option on these devices.
+ * The result is NOT cached permanently — re-checked on each call so the
+ * user override takes effect immediately.
  */
-private var _canUseLiquidGlass: Boolean? = null
-
 fun canUseLiquidGlass(context: Context): Boolean {
-    _canUseLiquidGlass?.let { return it }
-    val result = computeCanUseLiquidGlass(context)
-    _canUseLiquidGlass = result
-    return result
-}
+    // User override: force-enable glass regardless of device checks.
+    if (AppPreferences.forceGlassEnabled) return true
 
-private fun computeCanUseLiquidGlass(context: Context): Boolean {
-    // 1. RAM check — glass needs real-time GPU compositing.
-    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-    if (am != null) {
-        val memClassMB = am.memoryClass // heap in MB
-        if (memClassMB < 3000) return false // <3GB heap = too tight
-        @Suppress("DEPRECATION")
-        if (am.isLowRamDevice) return false
-    }
-
-    // 2. GPU renderer — check for known-problematic Mali families.
+    // 1. isLowRamDevice — Android's own memory flag.
     try {
-        val renderer = GLES20.glGetString(GLES20.GL_RENDERER) ?: return true
-        val vendor = GLES20.glGetString(GLES20.GL_VENDOR)?.lowercase() ?: ""
-        // Mali-T620/T628/T720/T760/T820/T860/Mali-G51/G71 on budget SoCs
-        // are the primary crash sources (driver bugs with layered RenderEffect).
-        if ("mali" in vendor) {
-            val r = renderer.lowercase()
-            if (r.contains("mali-t6") || r.contains("mali-t7") ||
-                r.contains("mali-t8") || r.contains("mali-g51") ||
-                r.contains("mali-g71") || r.contains("mali-4xx") ||
-                r.contains("mali-5xx") || r.contains("mali-6xx")) {
-                return false
-            }
-        }
-    } catch (_: Exception) {
-        // GL not initialized yet — assume safe (will be re-checked on first draw).
-    }
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        if (am != null && am.isLowRamDevice) return false
+    } catch (_: Exception) { /* non-critical */ }
 
-    // 3. Explicit device denylist — confirmed crashers from bug reports.
+    // 2. Narrow denylist — ONLY confirmed crashers from actual bug reports.
     val model = Build.MODEL?.lowercase() ?: ""
     val manu = Build.MANUFACTURER?.lowercase() ?: ""
-    // Infinix X6870 — SIGKILL on RenderThread with glass (crash report).
-    if (manu == "infinix" && (model.contains("x6870") || model.contains("x688"))) return false
-    // Samsung A35 — SIGSEGV in RenderNode.prepareTreeImpl (v228 tombstone).
+    // Infinix X6870 — confirmed SIGKILL on RenderThread with glass.
+    if (manu == "infinix" && model.contains("x6870")) return false
+    // Samsung A35 — confirmed SIGSEGV in RenderNode.prepareTreeImpl.
     if (manu == "samsung" && model.contains("a35")) return false
-    // Tecno / itel / other Transsion budget brands — weak Mali GPUs.
-    if (manu in listOf("tecno", "itel", "realme")) {
-        if (model.contains("spark") || model.contains("pop") ||
-            model.contains("camon") || model.contains("itel")) {
-            return false
-        }
-    }
 
     return true
 }

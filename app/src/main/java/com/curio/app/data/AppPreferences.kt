@@ -754,6 +754,7 @@ object AppPreferences {
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
+        forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
@@ -1068,6 +1069,7 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
+    private const val KEY_FORCE_GLASS = "force_glass_override"
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
@@ -1080,11 +1082,6 @@ object AppPreferences {
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
     private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
     // v292h — CRASH RECOVERY: tracks consecutive native crashes that
-    // occurred while liquid glass was active. After CRASH_THRESHOLD
-    // consecutive kills, glass is auto-disabled to protect budget devices
-    // (e.g. Infinix X6870 / Samsung A35 on Android 16) whose GPU drivers
-    // cannot handle the backdrop library's real-time blur+vibrancy+lens.
-    private const val KEY_GLASS_CRASH_COUNT = "glass_crash_count"
 
     // ── Custom blur engine (v280 experiment) ────────────────────────
     fun isCustomBlurEngineEnabled(context: Context): Boolean =
@@ -1274,23 +1271,19 @@ object AppPreferences {
     fun setLiquidGlassPillsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LIQUID_GLASS_PILLS, enabled).apply()
         liquidGlassPillsState = enabled
-        // v292h — reset crash count when user manually re-enables glass
-        if (enabled) setGlassCrashCount(context, 0)
     }
 
-    // v292h — CRASH RECOVERY (see KEY_GLASS_CRASH_COUNT above).
-    var glassCrashCount by mutableIntStateOf(0)
+    // v293 — Force-override: bypass device capability checks for liquid glass.
+    var forceGlassEnabled by mutableStateOf(false)
 
-    fun getGlassCrashCount(context: Context): Int =
-        prefs(context).getInt(KEY_GLASS_CRASH_COUNT, 0)
-
-    fun setGlassCrashCount(context: Context, count: Int) {
-        prefs(context).edit().putInt(KEY_GLASS_CRASH_COUNT, count).apply()
-        glassCrashCount = count
+    fun initForceGlass(context: Context) {
+        forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
     }
 
-    /** Threshold of consecutive crashes before glass is auto-disabled. */
-    const val GLASS_CRASH_THRESHOLD = 3
+    fun setForceGlassEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_FORCE_GLASS, enabled).apply()
+        forceGlassEnabled = enabled
+    }
 
     // ── Classic active indicator (experiment, default OFF) ───────────
     // ── Glass widget lab wallpaper (v271): persisted picked/auto image ──

@@ -467,39 +467,21 @@ fun CurioNavHost(
         CurioGlassPills.backdrop = navGlassBackdrop
         // v292i — cache context for non-composable capability checks.
         CurioGlassPills.appContext = context
-        // v292h — mark session as active for crash recovery detection.
-        if (isLiquidGlassPillsActive()) {
-            CurioGlassPills.glassActiveSession = true
-        }
     }
-    // v292h — CRASH RECOVERY: detect consecutive native crashes when
-    // liquid glass was active (budget devices like Infinix X6870 / Samsung
-    // A35 on Android 16 can SIGKILL the RenderThread from GPU overload).
-    // Flow: glassActiveSession is SET when backdrop is ready → if the app
-    // is killed, the flag stays true → next startup sees it and bumps the
-    // crash counter → after GLASS_CRASH_THRESHOLD kills, glass auto-
-    // disables. A normal exit clears the flag in onDispose.
-    val crashCheckDone = remember { androidx.compose.runtime.mutableStateOf(false) }
+    // v293 — CRASH RECOVERY: install once, mark glass active during session.
     LaunchedEffect(Unit) {
-        if (!crashCheckDone.value) {
-            crashCheckDone.value = true
-            if (CurioGlassPills.glassActiveSession) {
-                // Previous session was killed while glass was active.
-                CurioGlassPills.glassActiveSession = false
-                val count = AppPreferences.getGlassCrashCount(context)
-                val newCount = count + 1
-                AppPreferences.setGlassCrashCount(context, newCount)
-                if (newCount >= AppPreferences.GLASS_CRASH_THRESHOLD) {
-                    AppPreferences.setLiquidGlassPillsEnabled(context, false)
-                }
-            }
+        CurioGlassPills.installCrashRecovery(context)
+    }
+    SideEffect {
+        if (isLiquidGlassPillsActive()) {
+            CurioGlassPills.markGlassActive(context)
         }
     }
     DisposableEffect(Unit) {
         onDispose {
-            // Normal exit: clear the crash flag so next startup doesn't
+            // Normal exit: clear crash flag so next startup doesn't
             // false-positive a crash that never happened.
-            CurioGlassPills.glassActiveSession = false
+            CurioGlassPills.clearGlassActiveFlag(context)
         }
     }
     // v264 — LEGACY GLASS BLUR: on pre-Android-12 devices with the opt-in
