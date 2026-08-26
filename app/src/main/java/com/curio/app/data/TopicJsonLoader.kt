@@ -297,7 +297,7 @@ object TopicJsonLoader {
                 am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
                     JSONArray(it.readText()).length()
                 }
-            }.getOrDefault(0)
+            }.getOrDefault(0) // returns 0 if JSON not in APK
         }
         countsCache[id] = count
         count
@@ -461,13 +461,15 @@ object TopicJsonLoader {
     private fun parseAsset(path: String, id: CategoryId): List<CurioTopic> {
         val am = assets
             ?: throw TopicLoadException(path, id, "TopicJsonLoader.install(context) not called")
-        // v55 — the whole read+parse runs under the bounded gate: at most
-        // two files parse at once across prewarm, merges and screens.
+        // v294 — JSON files may not be in the APK (they live in data/topics/
+        // for CI builds). Return empty list instead of throwing so Room can
+        // serve topics as the primary data source.
         return gated {
             val raw = try {
                 am.open(path).bufferedReader().use { it.readText() }
-            } catch (t: Throwable) {
-                throw TopicLoadException(path, id, "open/read failed: ${t.message}", t)
+            } catch (_: Throwable) {
+                // JSON not in APK — Room is the primary source
+                return@gated emptyList()
             }
             try {
                 val array = JSONArray(raw)

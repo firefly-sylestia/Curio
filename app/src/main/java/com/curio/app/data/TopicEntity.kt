@@ -61,7 +61,7 @@ data class TopicEntity(
             ),
             tags = try {
                 if (tags.isBlank()) emptyList()
-                else kotlinx.serialization.json.Json.decodeFromString<List<String>>(tags)
+                else Gson().fromJson(tags, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type)
             } catch (_: Exception) { emptyList() },
             tier = tier,
             byline = byline,
@@ -83,7 +83,7 @@ data class TopicEntity(
                 teaser = topic.teaser,
                 imageUrl = topic.imageUrl,
                 byline = topic.byline,
-                tags = try { kotlinx.serialization.json.Json.encodeToString(topic.tags) } catch (_: Exception) { "[]" },
+                tags = try { Gson().toJson(topic.tags) } catch (_: Exception) { "[]" },
                 tier = topic.tier,
                 exploreVerb = topic.exploreAction.verb,
                 exploreTargetName = topic.exploreAction.targetName,

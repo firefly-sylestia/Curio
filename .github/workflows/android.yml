@@ -65,7 +65,9 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
+        run: |
+          ./gradlew buildTopicDatabase
+          ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
 
       - name: Verify release APKs and signatures
         if: steps.keystore.outputs.decoded == 'true'

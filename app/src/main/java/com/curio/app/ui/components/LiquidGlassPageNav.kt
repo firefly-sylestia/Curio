@@ -41,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
 /**
@@ -200,7 +202,7 @@ fun LiquidGlassPageNav(
                 Spacer(Modifier.height(12.dp))
                 val cols = 5
                 LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.Fixed(cols),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(cols),
                     modifier = Modifier.heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
