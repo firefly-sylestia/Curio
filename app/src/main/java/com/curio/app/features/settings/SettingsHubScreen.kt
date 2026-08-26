@@ -337,15 +337,7 @@ fun SettingsHeroHeader(
                             pillInteraction = backInteraction
                         )
                         if (searchActive) {
-                            // Search is open — the trailing pills are swapped
-                            // for a single Cancel pill (Cabinet's contract).
-                            SettingsHeroActionPill(
-                                onClick = onCloseSearch,
-                                label = "Cancel",
-                                glyph = CurioIcons.Close,
-                                contentDescription = "Close search",
-                                ink = ink
-                            )
+                            // v294 — Cancel pill removed; back button handles closing search.
                         } else if (trailing != null) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1107,6 +1099,7 @@ private fun sectionPageFor(route: String): SettingsPage? = when (route) {
     CurioRoutes.SETTINGS_RECORDING -> SettingsPage.RECORDING
     CurioRoutes.SETTINGS_DATA -> SettingsPage.DATA
     CurioRoutes.EXPERIMENTS -> null // standalone screen, not a section page
+    CurioRoutes.USER_EXPERIMENTS -> null // standalone screen
     else -> null
 }
 
@@ -1224,6 +1217,7 @@ private val SettingsSections = listOf(
                     // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
                     SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try features before they ship", CurioRoutes.USER_EXPERIMENTS),
                     SettingsRowEntry(CurioIcons.AutoAwesome, "Dev page", "Experimental features and developer options", CurioRoutes.EXPERIMENTS)
                 )
             )
