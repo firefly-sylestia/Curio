@@ -1,10 +1,10 @@
 package com.curio.app.data
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
  */
 object TopicRepository {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val initializationMutex = Mutex()
     @Volatile private var initialized = false
 
     /** Check if repository has been initialized (Room populated). */
@@ -42,17 +42,28 @@ object TopicRepository {
      */
     suspend fun init(context: Context) {
         if (initialized) return
-        initialized = true
-        appContext = context.applicationContext
 
-        val db = CurioDatabase.getInstance(context)
-        val dao = db.topicDao()
+        initializationMutex.withLock {
+            if (initialized) return
 
-        // Check if topics table is empty (first launch)
-        val count = dao.getTotalCount()
-        if (count == 0) {
-            // Populate from JSON in background
-            populateFromJson(context, dao)
+            appContext = context.applicationContext
+            val db = CurioDatabase.getInstance(context)
+            val dao = db.topicDao()
+            val count = dao.getTotalCount()
+
+            // Populate before marking the repository ready. The previous code
+            // set initialized=true first, allowing the splash/home screen to
+            // query an empty Room table while the import was still running.
+            if (count == 0) {
+                populateFromJson(context, dao)
+            }
+
+            val importedCount = dao.getTotalCount()
+            if (importedCount > 0) {
+                initialized = true
+            } else {
+                Log.e("TopicRepository", "Topic import completed with zero rows; will retry next launch")
+            }
         }
     }
 
