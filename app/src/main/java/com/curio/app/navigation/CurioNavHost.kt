@@ -478,10 +478,11 @@ fun CurioNavHost(
     // crash counter → after GLASS_CRASH_THRESHOLD kills, glass auto-
     // disables. A normal exit clears the flag in onDispose.
     val crashCheckDone = remember { androidx.compose.runtime.mutableStateOf(false) }
+    val crashCtx = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(Unit) {
         if (!crashCheckDone.value) {
             crashCheckDone.value = true
-            val ctx = androidx.compose.ui.platform.LocalContext.current
+            val ctx = crashCtx
             if (CurioGlassPills.glassActiveSession) {
                 // Previous session was killed while glass was active.
                 CurioGlassPills.glassActiveSession = false

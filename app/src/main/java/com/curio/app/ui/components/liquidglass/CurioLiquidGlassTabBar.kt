@@ -207,6 +207,7 @@ fun CurioLiquidGlassTabBar(
     // style instead, where the blob shows up under the new tab FAST even
     // on quick switches. Tap switches now use a very stiff ~90ms spring;
     // drag release keeps the soft glide (the finger led it there).
+    val tabGlideSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 380f)
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
         derivedStateOf {
@@ -249,10 +250,8 @@ fun CurioLiquidGlassTabBar(
             },
             onDragStarted = {},
             onDragStopped = {
-                // v292h — snap to final position (no re-press animation).
-                // Use value (current position) not targetValue for index.
-                val targetIndex = value.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
-                snapToValue(targetIndex.toFloat())
+                val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
+                animateToValue(targetIndex.toFloat(), tabGlideSpec)
                 animationScope.launch {
                     offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
                 }
@@ -265,13 +264,9 @@ fun CurioLiquidGlassTabBar(
                     // a NARROW (collapsed) tab sat — visibly erratic on the
                     // right side of Cabinet. A fixed per-tab stride keeps the
                     // feel identical across the whole bar in both directions.
-                    // v292h — INSTANT DRAG TRACKING: use setDragValue (snap)
-                    // instead of updateValue (spring) so the blob follows
-                    // the finger without spring lag. Also use VALUE (current
-                    // position) not targetValue (spring target) for the base.
                     val tabStride = maxOf(totalWidthPx / tabsCount, 1f)
-                    setDragValue(
-                        (value + dragAmount.x / tabStride * if (isLtr) 1f else -1f)
+                    updateValue(
+                        (targetValue + dragAmount.x / tabStride * if (isLtr) 1f else -1f)
                             .fastCoerceIn(0f, (tabsCount - 1).toFloat())
                     )
                     animationScope.launch {
