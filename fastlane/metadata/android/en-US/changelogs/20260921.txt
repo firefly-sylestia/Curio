@@ -1,3 +1,5 @@
+FIX: Room topic migration crash - repairs the topics table defaults and removes undeclared legacy indexes while preserving existing topic data.
+
 FIX: Liquid glass crash recovery - auto-disables glass after 3 consecutive native crashes on budget devices (Infinix/Samsung on Android 16) to prevent SIGKILL on RenderThread.
 
 FIX: Tab switch animation now snaps instantly to the new tab on tap - no more sideways glide that looked glitchy especially on Cabinet.

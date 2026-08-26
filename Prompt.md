@@ -454,6 +454,12 @@ User decisions: opt-in Experiments toggle; scope = bottom nav + Topic Reveal onl
    same pages-only Box as the Kyant layer; snapshotter composed when active.
 5. ExperimentsScreen: "Real blur (older devices)" row after parallax tilt.
 
+## Request: v264 — Room topic migration crash fix (COMPLETE)
+
+1. Room schema bumped from 8 to 9.
+2. Topic table defaults now match TopicEntity exactly; undeclared legacy indexes are removed.
+3. Migration 8→9 rebuilds topics without deleting rows and preserves existing topic data.
+
 ## Request: v263 — stable bubble drag + full pet overlay animations (COMPLETE)
 
 1. Bubble drag: service-side onDragBy clamps x/y against display bounds LIVE

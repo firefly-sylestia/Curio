@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CaptureEntity::class, TopicEntity::class],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -108,7 +108,7 @@ abstract class CurioDatabase : RoomDatabase() {
                         teaser TEXT NOT NULL,
                         imageUrl TEXT NOT NULL DEFAULT '',
                         byline TEXT NOT NULL DEFAULT '',
-                        tags TEXT NOT NULL DEFAULT '[]',
+                        tags TEXT NOT NULL DEFAULT '',
                         tier INTEGER NOT NULL DEFAULT 1,
                         exploreVerb TEXT NOT NULL DEFAULT '',
                         exploreTargetName TEXT NOT NULL DEFAULT '',
@@ -120,8 +120,47 @@ abstract class CurioDatabase : RoomDatabase() {
                         altPageCount INTEGER
                     )
                 """)
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_topics_categoryId ON topics(categoryId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_topics_name ON topics(name)")
+            }
+        }
+
+        /** v8 → v9: repair topic defaults and remove undeclared legacy indexes. */
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE topics_new (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        categoryId TEXT NOT NULL,
+                        subtype TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        teaser TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL DEFAULT '',
+                        byline TEXT NOT NULL DEFAULT '',
+                        tags TEXT NOT NULL DEFAULT '',
+                        tier INTEGER NOT NULL DEFAULT 1,
+                        exploreVerb TEXT NOT NULL DEFAULT '',
+                        exploreTargetName TEXT NOT NULL DEFAULT '',
+                        exploreDurationMinutes INTEGER NOT NULL DEFAULT 0,
+                        exploreInstruction TEXT NOT NULL DEFAULT '',
+                        pageCount INTEGER DEFAULT 0,
+                        episodeCount INTEGER DEFAULT 0,
+                        altPageLabel TEXT NOT NULL DEFAULT '',
+                        altPageCount INTEGER DEFAULT 0
+                    )
+                """)
+                db.execSQL("""
+                    INSERT INTO topics_new (
+                        id, categoryId, subtype, name, teaser, imageUrl, byline, tags,
+                        tier, exploreVerb, exploreTargetName, exploreDurationMinutes,
+                        exploreInstruction, pageCount, episodeCount, altPageLabel, altPageCount
+                    )
+                    SELECT id, categoryId, subtype, name, teaser, imageUrl, byline,
+                        tags,
+                        tier, exploreVerb, exploreTargetName, exploreDurationMinutes,
+                        exploreInstruction, pageCount, episodeCount, altPageLabel, altPageCount
+                    FROM topics
+                """)
+                db.execSQL("DROP TABLE topics")
+                db.execSQL("ALTER TABLE topics_new RENAME TO topics")
             }
         }
 
@@ -139,7 +178,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }
