@@ -392,7 +392,9 @@ tasks.register("buildTopicDatabase") {
         }
         val outputDb = file("src/main/assets/topics.db")
         outputDb.parentFile.mkdirs()
-        val runtimeFiles = configurations.getByName("runtimeClasspath").files
+        // Android application modules expose variant-scoped runtime classpaths;
+        // the generic Java `runtimeClasspath` configuration does not exist here.
+        val runtimeFiles = configurations.getByName("debugRuntimeClasspath").files
         val compiledClasses = file("build/intermediates/javac/debug/classes")
         val kotlinClasses = file("build/tmp/kotlin-classes/debug")
         val classpathStr = (listOf(compiledClasses, kotlinClasses) + runtimeFiles.toList())
