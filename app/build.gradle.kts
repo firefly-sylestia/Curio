@@ -383,6 +383,7 @@ if (hasTopicFiles) {
 tasks.register("buildTopicDatabase") {
     group = "curio"
     description = "Creates a pre-populated topics.db from data/topics/*.json"
+    dependsOn("compileDebugKotlin")
     doLast {
         val jsonDir = rootProject.file("data/topics")
         if (!jsonDir.exists()) {
@@ -391,22 +392,19 @@ tasks.register("buildTopicDatabase") {
         }
         val outputDb = file("src/main/assets/topics.db")
         outputDb.parentFile.mkdirs()
-        // Build classpath: Gson + SQLite JDBC from project dependencies
-        val cp = configurations.getByName("runtimeClasspath").files
-        val cpStr = cp.joinToString(File.pathSeparator) { it.absolutePath }
-        // Run BuildTopicDb as a separate JVM process
-        val proc = ProcessBuilder(
-            "java", "-cp", cpStr,
-            "com.curio.app.data.tools.BuildTopicDb",
-            jsonDir.absolutePath,
-            outputDb.absolutePath
-        ).directory(rootProject.projectDir).redirectErrorStream(true).start()
-        val output = proc.inputStream.bufferedReader().readText()
-        proc.waitFor()
-        if (proc.exitValue() != 0) {
-            logger.error("buildTopicDatabase failed:\n$output")
-            throw GradleException("buildTopicDatabase failed")
+        // Run BuildTopicDb with the full runtime classpath
+        javaexec {
+            // Collect compiled classes + dependencies after compileDebugKotlin
+            classpath = files(
+                // Compiled Kotlin classes
+                file("build/intermediates/javac/debug/classes"),
+                file("build/tmp/kotlin-classes/debug"),
+                // Project dependencies from the app's runtime config
+                *configurations.runtimeClasspath.get().files.toTypedArray()
+            )
+            mainClass.set("com.curio.app.data.tools.BuildTopicDb")
+            args(jsonDir.absolutePath, outputDb.absolutePath)
         }
-        logger.lifecycle(output)
+        logger.lifecycle("✓ topics.db built → ${outputDb.absolutePath}")
     }
 }
