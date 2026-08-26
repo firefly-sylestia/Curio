@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v292 — circular translucent root tint for NON-Samsung launchers (no
+     One UI blur to preserve there). Samsung keeps the plain color
+     background its wallpaper-blur detection requires and gets the circle
+     from an outline clip instead — see AnalogClockWidgetProvider. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#66FFFFFF" />
+</shape>

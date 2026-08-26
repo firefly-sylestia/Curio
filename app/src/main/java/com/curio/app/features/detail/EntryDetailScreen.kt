@@ -198,6 +198,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import com.curio.app.features.settings.materialHeroTearsOn
 
 /**
  * Entry Detail — see Curio detail contract. Framed presentation of a saved capture.
@@ -284,12 +285,18 @@ fun EntryDetailScreen(
     // White when pastel mode is off, preserving the exact pre-pastel look.
     // v28 — dark mode hero title text is always white/creamish (never the
     // tinted light twin) so the banner headline stays crisp light-on-deep.
-    val heroInk = cat.heroHeaderInk()
+    // v270 — Material tears pair the container fill with its own ink.
+    val heroInk = if (materialHeroTearsOn()) MaterialTheme.colorScheme.onPrimaryContainer
+        else cat.heroHeaderInk()
     // v81 — dark: the hero cards flip to light ink on a near-black sheet
     // (the exact light-mode reversal).
     val heroCardInk = if (isCurioDarkTheme()) Color(0xFFEDE7DC) else Color(0xFF232A35)
     val heroSheetColor = if (isCurioDarkTheme()) Color(0xFF121316) else Color(0xFFFDFCF9)
-    val heroStart = CurioGradients.categoryCardFill(cat.headerAccent())
+    // v270 — Material tears: wear primaryContainer, the SAME shared tear
+    // color Home/Profile/Settings use — the old `primary` read as a dark
+    // saturated block instead of the family's airy container tone.
+    val heroStart = if (materialHeroTearsOn()) MaterialTheme.colorScheme.primaryContainer
+        else CurioGradients.categoryCardFill(cat.headerAccent())
     // v75 — heroFrostBrush is gone: the Date · Mood · Session · Type card
     // is an OPAQUE theme-aware pane now (a heroSheetColor + heroStart blend,
     // see the meta card below), so the old translucent frost has no consumer.
@@ -968,9 +975,13 @@ private val EntryDetailHeroClearance = EntryDetailHeroHeight + 30.dp
 /** Scroll distance (dp) before the back / more pills fully pin as frosted
  *  floating pills — mirrors Home's sticky menu/profile bar threshold. */
 private val DetailStickyBarThreshold = 90.dp
-/** The controls' resting top offset below the status bar — level with the
- *  hero's glyph band, where they were anchored inside the hero. */
-private val DetailStickyBarRestTop = 72.dp
+/** v292b — The controls' resting top offset below the status bar. Was 72dp
+ *  ("level with the hero's glyph band"), which made the detail page's back /
+ *  more pills sit FAR lower than every other screen's hero controls (those
+ *  pin at statusBarsPadding + 10dp) and put them BELOW the expanded glass
+ *  menu panel (which anchors at ~12dp). Now matched to the shared hero
+ *  control row so all screens line up. */
+private val DetailStickyBarRestTop = 10.dp
 /** The controls' fully-popped top offset below the status bar — the pills
  *  ride up here as the hero scrolls away (Home pins its pills at 12dp). */
 private val DetailStickyBarPoppedTop = 12.dp
@@ -1135,7 +1146,10 @@ private fun BoxScope.DetailStickyBar(
     // siblings of it — nothing they sample contains them). Fully CLEAR
     // refracting glass, per the request.
     val glassOn = isInScreenGlassActive()
-    val detailGlassActive = glassOn && frostShift > 0.01f
+    // v267 — ALWAYS GLASS (user request, same as Home/Profile): no scroll
+    // threshold — the back + more pills are refracting glass from rest, so
+    // there is no solid hero-shade phase that could ever read dark mid-scroll.
+    val detailGlassActive = glassOn
     val frostFill = if (isCurioDarkTheme())
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
         else lerp(heroFill, lerp(heroFill, curioPillTintLift(), 0.38f), frostShift)
@@ -1160,7 +1174,9 @@ private fun BoxScope.DetailStickyBar(
             .align(Alignment.TopCenter)
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(start = 16.dp, end = 16.dp, top = DetailStickyBarRestTop)
+            // v292b — 20dp side padding matches SettingsHeroHeader's control
+            // row (was 16dp here only).
+            .padding(start = 20.dp, end = 20.dp, top = DetailStickyBarRestTop)
             .offset(y = -stickyLift)
             .graphicsLayer {
                 val eased = heroControlsProgress
@@ -1334,17 +1350,12 @@ private fun BoxScope.DetailStickyBar(
         // that fades the pill, so the handoff reads as one morphing surface.
         // A full-screen scrim behind it dismisses on any outside tap.
         if (detailGlassActive && morph > 0.01f) {
-            // v252 — an explicit Box WRAPPER supplies the BoxScope dispatch
-            // receiver: K2 refuses BoxScope members called on the extension
-            // receiver alone (matchParentSize / align below).
+            // v264 — the scrim was removed: a full-screen Box covered the
+            // back button and blocked its touch. BackHandler (line 1156)
+            // handles system-back; tapping the glass panel's own items
+            // dismisses via their onClick. A half-screen scrim below the
+            // panel still catches outside taps on the menu area.
             Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                Modifier
-                    .matchParentSize()
-                    .clickable(interactionSource = null, indication = null) {
-                        menuExpanded = false
-                    }
-            )
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Transparent,
@@ -1352,7 +1363,9 @@ private fun BoxScope.DetailStickyBar(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .statusBarsPadding()
-                    .padding(top = 12.dp, end = 16.dp)
+                    // v292b — anchors level with the pills' row (top 10dp,
+                    // end 20dp) instead of floating above/below them.
+                    .padding(top = DetailStickyBarRestTop, end = 20.dp)
                     .graphicsLayer {
                         alpha = morph
                         val sc = lerp(0.55f, 1f, morph)
@@ -1364,7 +1377,10 @@ private fun BoxScope.DetailStickyBar(
                         heroFill,
                         washAlpha = 0.35f,
                         backdrop = glassBackdrop,
-                        alwaysClear = true,
+                        // v258 — the panel is BLURRY BY DEFAULT now: the old
+                        // alwaysClear flag ran the near-zero-blur recipe, so
+                        // the expanded menu read as bare transparent glass.
+                        // Dropping it gives the standard 8dp×scale frost.
                         shape = RoundedCornerShape(20.dp)
                     )
                     .width(MoreMenuWidth)
@@ -4487,12 +4503,19 @@ private fun CurioShareCard(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * v149 — the NEW share UI for saved entries: a bottom sheet that shows a
- * live PREVIEW of the exact card that gets shared, an Image card / Text
- * format picker, and one Share action. Image renders the 400×400 category
- * card PNG via [shareComposableCard] (same output as before); Text sends a
- * plain-text summary. Opened from the entry's More menu (the old flow fired
- * the chooser straight from the menu with no preview).
+ * v292e — THE ENTRY SHARE HUB: the SAME customizable share hub as the topic
+ * sheet ([com.curio.app.ui.components.TopicShareSheet]), fed with what THIS
+ * entry actually saved. The content-source pills are built from the entry's
+ * capture format:
+ *  - Reel Notes → Quote (if any), Review with its star rating (the rating
+ *    rides on the card as a star row), Note;
+ *  - Marginalia / SoundBite → Quote (if any), Note;
+ *  - every format → the session Note when one exists.
+ * Quick fact and Custom fact are always offered too.
+ *
+ * The old square category card is replaced by this hub's gradient card so
+ * detail-view shares look exactly like reveal shares; "Share as text" stays
+ * below as a quiet secondary action.
  */
 @Composable
 private fun EntryShareSheet(
@@ -4503,7 +4526,53 @@ private fun EntryShareSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var shareAsImage by rememberSaveable { mutableStateOf(true) }
+    var aspect by rememberSaveable { mutableStateOf(
+        com.curio.app.ui.components.ShareCardAspect.CLASSIC
+    ) }
+    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var customText by rememberSaveable { mutableStateOf("") }
+
+    // Build the SAVED sources from this entry's capture data — only what
+    // actually exists gets a pill.
+    val data = entry.captureData
+    val firstQuote = when (data) {
+        is com.curio.app.data.CaptureData.ReelNotes -> data.quotes.firstOrNull { it.isNotBlank() }
+        is com.curio.app.data.CaptureData.Marginalia -> data.quotes.firstOrNull { it.isNotBlank() }
+        is com.curio.app.data.CaptureData.SoundBite -> data.quotes.firstOrNull { it.isNotBlank() }
+        else -> null
+    }
+    val reviewInfo = (data as? com.curio.app.data.CaptureData.ReelNotes)
+        ?.takeIf { it.reviewText.isNotBlank() }
+        ?.let { it.reviewText.trim() to it.rating }
+    val noteText = entry.sessionNote?.trim().orEmpty()
+
+    val savedSources = buildList {
+        if (!firstQuote.isNullOrBlank()) {
+            add(com.curio.app.ui.components.ShareCardContent("quote", "Quote", firstQuote))
+        }
+        if (reviewInfo != null) {
+            add(com.curio.app.ui.components.ShareCardContent(
+                "review", "Review", reviewInfo.first, rating = reviewInfo.second
+            ))
+        }
+        if (noteText.isNotEmpty()) {
+            add(com.curio.app.ui.components.ShareCardContent("note", "Note", noteText))
+        }
+    }
+
+    val quickFact = entry.topic.teaser
+    val quick = com.curio.app.ui.components.ShareCardContent(
+        com.curio.app.ui.components.QUICK_FACT_ID, "Quick fact", quickFact
+    )
+    val custom = com.curio.app.ui.components.ShareCardContent(
+        com.curio.app.ui.components.CUSTOM_FACT_ID, "Custom fact", ""
+    )
+    val activeId = selectedId ?: quick.id
+    val activeSource = when (activeId) {
+        com.curio.app.ui.components.CUSTOM_FACT_ID ->
+            custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
+        else -> savedSources.firstOrNull { it.id == activeId } ?: quick
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -4518,7 +4587,7 @@ private fun EntryShareSheet(
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
                 text = "Share this entry",
@@ -4526,68 +4595,40 @@ private fun EntryShareSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // ── Preview — the exact card that gets shared, on a soft stage ──
-            // v170 — 3:4 portrait to match the exported card (was square).
-            Box(
-                modifier = Modifier
-                    .width(280.dp)
-                    .aspectRatio(3f / 4f)
-                    .shadow(8.dp, RoundedCornerShape(28.dp))
-                    .clip(RoundedCornerShape(28.dp))
-            ) {
-                CurioShareCard(entry = entry, category = category)
-            }
+            // ── The shared hub: accurate preview + aspect/source pickers ──
+            com.curio.app.ui.components.ShareHubBody(
+                topicName = entry.topic.name,
+                categoryName = category.displayName,
+                categoryGlyph = category.iconGlyph,
+                accent = category.themedAccent(),
+                sharerName = AppPreferences.getDisplayName(context).ifBlank { "" },
+                authority = authority,
+                context = context,
+                aspect = aspect,
+                onAspectChange = { aspect = it },
+                sources = listOf(quick) + savedSources + listOf(custom),
+                activeSource = activeSource,
+                onSelectSource = { selectedId = it },
+                customEditing = activeId == com.curio.app.ui.components.CUSTOM_FACT_ID,
+                customText = customText,
+                onCustomTextChange = { customText = it },
+                onShared = onDismiss
+            )
 
-            // ── Image / Text format picker ──
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                ShareFormatPill(
-                    label = "Image card",
-                    icon = CurioIcons.Image,
-                    selected = shareAsImage
-                ) { shareAsImage = true }
-                ShareFormatPill(
-                    label = "Text",
-                    icon = CurioIcons.FormatText,
-                    selected = !shareAsImage
-                ) { shareAsImage = false }
-            }
-
-            // ── Share action ──
-            Button(
-                onClick = {
-                    if (shareAsImage) {
-                        shareComposableCard(
-                            context = context,
-                            // v170 — 3:4 portrait (was 400×400 square).
-                            cardSize = DpSize(450.dp, 600.dp),
-                            authority = authority,
-                            card = { CurioShareCard(entry = entry, category = category) }
-                        )
-                    } else {
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
-                            putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
-                        }
-                        context.startActivity(Intent.createChooser(intent, "Share entry"))
-                    }
-                    onDismiss()
-                },
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
+            // Quiet secondary: plain-text share (unchanged payload).
+            TextButton(onClick = {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
+                    putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
+                }
+                context.startActivity(Intent.createChooser(intent, "Share entry"))
+                onDismiss()
+            }) {
                 Text(
-                    text = if (shareAsImage) "Share image card" else "Share as text",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
+                    text = "Share as text instead",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

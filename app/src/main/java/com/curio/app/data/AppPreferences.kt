@@ -139,6 +139,9 @@ object AppPreferences {
     // companion design is decided).
     private const val KEY_PET_ENABLED = "pet_enabled"
     private const val KEY_FLOATING_PET_ENABLED = "floating_pet_enabled"
+    // v256 — the pet companion OUTSIDE the app: a system-overlay window
+    // (PetOverlayService) that keeps the sprite floating over other apps.
+    private const val KEY_PET_OUTSIDE_APP = "pet_outside_app_enabled"
     // v8.43 — the pet's local LEARNING model (CurioPetBrain): the pet
     // observes real activity and grows its own personality + catchphrases.
     // Default ON per the user; off falls back to the classic rule-based
@@ -178,8 +181,10 @@ object AppPreferences {
     fun getDisplayName(context: Context): String =
         prefs(context).getString(KEY_DISPLAY_NAME, null) ?: "Curious Explorer"
 
-    fun setDisplayName(context: Context, name: String) =
+    fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
+        displayNameState = name
+    }
 
     // ── Custom streak tagline (v53) ──────────────────────────────────
     // The Profile hero tagline: a user-set line replaces the automatic
@@ -198,8 +203,10 @@ object AppPreferences {
     fun getProfileAvatarPath(context: Context): String =
         prefs(context).getString(KEY_PROFILE_AVATAR, "").orEmpty()
 
-    fun setProfileAvatarPath(context: Context, path: String) =
+    fun setProfileAvatarPath(context: Context, path: String) {
         prefs(context).edit().putString(KEY_PROFILE_AVATAR, path).apply()
+        profileAvatarPathState = path
+    }
 
     // ── Update-notification dedupe (v53) ─────────────────────────────
     // The version tag of the newest update that has ALREADY been announced
@@ -418,6 +425,23 @@ object AppPreferences {
     var drawerConstellationState by mutableStateOf(false)
         private set
 
+    // ── Reactive display name & avatar (v280) ──────────────────────
+    // Read via these states in Compose so the drawer/profile recompose
+    // when the user saves a new name or photo — the old getDisplayName()
+    // / getProfileAvatarPath() functions read SharedPreferences once and
+    // don't trigger recomposition.
+    var displayNameState by mutableStateOf("Curious Explorer")
+        internal set
+    var profileAvatarPathState by mutableStateOf("")
+        internal set
+
+    // v280 — CUSTOM BLUR ENGINE (experiment, default OFF): when ON, the
+    // glass widget provider and live wallpaper use Curio's own blur
+    // engine instead of the system / Samsung One UI blur path. Gives
+    // consistent blur quality on every launcher.
+    var customBlurEngineState by mutableStateOf(false)
+        private set
+
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
     // OFF): the three floating nav-style capsules (bottom tab bar, Topic
     // Reveal category/favorite bar, Pet Designer studio bar) render a
@@ -428,10 +452,14 @@ object AppPreferences {
     var liquidGlassPillsState by mutableStateOf(false)
         private set
 
-    // Glass parallax tilt experiment (v231) — OPT-IN (default OFF): when the
-    // liquid-glass pills are showing, the device's gravity sensor makes them
-    // sway subtly AGAINST the phone's tilt — the iOS liquid-glass depth cue.
-    var glassParallaxState by mutableStateOf(false)
+    // v264 — LEGACY GLASS BLUR (experiment, default OFF): below Android 12
+    // there is no RenderEffect, so the real glass recipe can't run. When
+    // this is on, an APP-SIDE blur engine takes over for the bottom nav +
+    // Topic Reveal pills: the page layer is snapshotted in software,
+    // downscaled and stack-blurred (~8 updates/s), and the blurred pixels
+    // are drawn as the pills' real backdrop under the usual sheen/rim —
+    // frosted glass that actually shows the content scrolling behind it.
+    var legacyGlassBlurState by mutableStateOf(false)
         private set
 
     // v248 — CLASSIC ACTIVE INDICATOR (experiment, default OFF): the nav
@@ -439,6 +467,24 @@ object AppPreferences {
     // (the pre-v247 style) instead of the solid white/black pill. Needs
     // Liquid glass pills on.
     var glassClassicIndicatorState by mutableStateOf(false)
+        private set
+
+    // v292 — NAV INDICATOR COLOR: what the liquid-glass tab bar's resting
+    // active pill wears. "auto" follows the theme (Material → scheme
+    // primary, azure hero → azure, rose → rose); "white" and "black" are
+    // the fixed options.
+    const val NAV_INDICATOR_AUTO = "auto"
+    const val NAV_INDICATOR_WHITE = "white"
+    const val NAV_INDICATOR_BLACK = "black"
+    var navIndicatorColorState by mutableStateOf(NAV_INDICATOR_AUTO)
+        private set
+
+    // v292b — INDICATOR OPACITY: how transparent the resting active pill's
+    // frosted wash is (0 = clear glass, 1 = fully solid). The touch blob —
+    // the small capsule that appears under your finger while pressed — is
+    // NOT affected: it always fades the fill away so the press-glass shows.
+    const val NAV_INDICATOR_OPACITY_DEFAULT = 0.55f
+    var navIndicatorOpacityState by mutableStateOf(NAV_INDICATOR_OPACITY_DEFAULT)
         private set
 
     // v233 — Clear-glass style (experiment, default OFF): when the liquid-
@@ -569,6 +615,9 @@ object AppPreferences {
     // wanders). Independent of [petEnabledState]: the pet layer can be on
     // while the floating companion is off (the pet then stays in its bed).
     var floatingPetEnabledState by mutableStateOf(true)
+        private set
+    // v256 — whether the pet also floats OUTSIDE the app (overlay window).
+    var petOutsideAppState by mutableStateOf(false)
         private set
     // v8.43 — whether the pet's learning brain is on (default ON): the pet
     // builds a personality from the user's real activity and develops its
@@ -701,9 +750,15 @@ object AppPreferences {
         threeDButtonState = is3DButtonGradientEnabled(context)
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
+        displayNameState = getDisplayName(context)
+        profileAvatarPathState = getProfileAvatarPath(context)
+        customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
-        glassParallaxState = isGlassParallaxEnabled(context)
+        forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
+        legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
+        navIndicatorColorState = getNavIndicatorColor(context)
+        navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -725,6 +780,7 @@ object AppPreferences {
         offlineModelIdState = getOfflineModelId(context)
         petEnabledState = isPetEnabled(context)
         floatingPetEnabledState = isFloatingPetEnabled(context)
+        petOutsideAppState = isPetOutsideAppEnabled(context)
         petBrainEnabledState = isPetBrainEnabled(context)
         petChatterState = getPetChatter(context)
         petGameFrequencyState = getPetGameFrequency(context)
@@ -782,6 +838,14 @@ object AppPreferences {
     fun setMaterialThemeEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_MATERIAL_THEME, enabled).apply()
         materialThemeState = enabled
+        // v270 — first-time ON co-enables "Material hero tears": the theme
+        // is meant to be seen across the torn banners, and a fresh Material
+        // user shouldn't have to find the second toggle. Turning tears off
+        // afterwards still sticks (only flipping the THEME re-arms it).
+        if (enabled) {
+            prefs(context).edit().putBoolean(KEY_MATERIAL_HERO_TEARS, true).apply()
+            materialHeroTearsState = true
+        }
     }
 
     /** Whether the torn heroes follow the Material theme (v223, default off). */
@@ -1005,13 +1069,28 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
-    private const val KEY_GLASS_PARALLAX = "glass_parallax_tilt"
+    private const val KEY_FORCE_GLASS = "force_glass_override"
+    private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
+    private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
+    private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
+    private const val KEY_NAV_INDICATOR_OPACITY = "nav_indicator_opacity"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
     private const val KEY_GLASS_BLUR_SCALE = "glass_blur_scale"
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
+    private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
+    // v292h — CRASH RECOVERY: tracks consecutive native crashes that
+
+    // ── Custom blur engine (v280 experiment) ────────────────────────
+    fun isCustomBlurEngineEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CUSTOM_BLUR_ENGINE, false)
+
+    fun setCustomBlurEngineEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CUSTOM_BLUR_ENGINE, enabled).apply()
+        customBlurEngineState = enabled
+    }
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -1194,16 +1273,37 @@ object AppPreferences {
         liquidGlassPillsState = enabled
     }
 
-    // ── Glass parallax tilt (experiment, default OFF) ────────────────
-    fun isGlassParallaxEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_GLASS_PARALLAX, false)
+    // v293 — Force-override: bypass device capability checks for liquid glass.
+    var forceGlassEnabled by mutableStateOf(true)
 
-    fun setGlassParallaxEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_GLASS_PARALLAX, enabled).apply()
-        glassParallaxState = enabled
+    fun initForceGlass(context: Context) {
+        forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
+    }
+
+    fun setForceGlassEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_FORCE_GLASS, enabled).apply()
+        forceGlassEnabled = enabled
     }
 
     // ── Classic active indicator (experiment, default OFF) ───────────
+    // ── Glass widget lab wallpaper (v271): persisted picked/auto image ──
+    fun getGlassLabWallpaperUri(context: Context): String =
+        prefs(context).getString(KEY_GLASS_LAB_WALLPAPER, "") ?: ""
+
+    fun setGlassLabWallpaperUri(context: Context, uri: String) {
+        prefs(context).edit().putString(KEY_GLASS_LAB_WALLPAPER, uri).apply()
+    }
+
+    // Legacy glass blur (experiment, default OFF): an app-side blur engine
+    // for pre-Android-12 devices (see the state field above).
+    fun isLegacyGlassBlurEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LEGACY_GLASS_BLUR, false)
+
+    fun setLegacyGlassBlurEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LEGACY_GLASS_BLUR, enabled).apply()
+        legacyGlassBlurState = enabled
+    }
+
     fun isGlassClassicIndicatorEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_GLASS_CLASSIC_INDICATOR, false)
 
@@ -1224,6 +1324,25 @@ object AppPreferences {
     // ── Liquid glass tuning (Appearance; stored as percent ints) ──────
     private fun readScale(context: Context, key: String, defaultPercent: Int = 100): Float =
         (prefs(context).getInt(key, defaultPercent) / 100f).coerceIn(0f, 2f)
+
+    // ── Nav indicator color (Appearance; v292) ──────────────────────
+    fun getNavIndicatorColor(context: Context): String =
+        prefs(context).getString(KEY_NAV_INDICATOR_COLOR, NAV_INDICATOR_AUTO)
+            ?: NAV_INDICATOR_AUTO
+
+    fun setNavIndicatorColor(context: Context, value: String) {
+        prefs(context).edit().putString(KEY_NAV_INDICATOR_COLOR, value).apply()
+        navIndicatorColorState = value
+    }
+
+    fun getNavIndicatorOpacity(context: Context): Float =
+        prefs(context).getFloat(KEY_NAV_INDICATOR_OPACITY, NAV_INDICATOR_OPACITY_DEFAULT)
+            .coerceIn(0f, 1f)
+
+    fun setNavIndicatorOpacity(context: Context, value: Float) {
+        prefs(context).edit().putFloat(KEY_NAV_INDICATOR_OPACITY, value.coerceIn(0f, 1f)).apply()
+        navIndicatorOpacityState = value.coerceIn(0f, 1f)
+    }
 
     fun getGlassBlurScale(context: Context): Float = readScale(context, KEY_GLASS_BLUR_SCALE, defaultPercent = 25)
     fun setGlassBlurScale(context: Context, value: Float) {
@@ -1760,6 +1879,17 @@ object AppPreferences {
     fun setFloatingPetEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_FLOATING_PET_ENABLED, enabled).apply()
         floatingPetEnabledState = enabled
+    }
+
+    // v256 — the outside-the-app companion toggle (default OFF: it needs
+    // the system "Display over other apps" permission, so it's an explicit
+    // opt-in from the Pet Designer's Settings page).
+    fun isPetOutsideAppEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PET_OUTSIDE_APP, false)
+
+    fun setPetOutsideAppEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PET_OUTSIDE_APP, enabled).apply()
+        petOutsideAppState = enabled
     }
 
     // v8.43 — the pet's learning brain toggle (default ON; Appearance).

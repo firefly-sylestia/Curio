@@ -99,6 +99,7 @@ import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
 import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.ExperimentsScreen
+import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
@@ -129,6 +130,10 @@ import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.curioGlassCaptureDraw
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidglass.CurioLegacyBlur
+import com.curio.app.ui.components.liquidglass.CurioLegacyBlurSnapshotter
+import com.curio.app.ui.components.liquidglass.curioLegacyCapture
+import com.curio.app.ui.components.liquidglass.curioLegacyCaptureGeometry
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -324,7 +329,11 @@ fun CurioNavHost(
     // from the NavHost (the reveal's old 80dp band was removed in v132;
     // Manage Categories gets the same edge-to-edge treatment).
     val fullBleedBottomRoutePrefixes = setOf(
-        CurioRoutes.MANAGE_CATEGORIES.substringBefore("/")
+        CurioRoutes.MANAGE_CATEGORIES.substringBefore("/"),
+        // v256 — the Pet Designer paints to the bottom edge too; the old
+        // reserved nav-bar inset showed as a bare background STRIP behind
+        // the floating studio capsule.
+        CurioRoutes.PET_DESIGNER.substringBefore("/")
     )
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -455,16 +464,27 @@ fun CurioNavHost(
     // during recording instead of sampling the layer into themselves
     // (that cycle crashed HWUI with a RenderThread stack overflow).
     val navGlassBackdrop = rememberLayerBackdrop(onDraw = { curioGlassCaptureDraw() })
-    SideEffect { CurioGlassPills.backdrop = navGlassBackdrop }
-    // v231 — glass parallax tilt experiment: run the gravity listener only
-    // while the toggle is on (and the glass itself can render), so the
-    // sensor costs nothing otherwise.
-    LaunchedEffect(AppPreferences.glassParallaxState) {
-        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
-            context,
-            AppPreferences.glassParallaxState && isLiquidGlassPillsActive()
-        )
+    SideEffect {
+        CurioGlassPills.backdrop = navGlassBackdrop
+        // v292i — cache context for non-composable capability checks.
+        CurioGlassPills.appContext = context
     }
+
+    // v264 — LEGACY GLASS BLUR: on pre-Android-12 devices with the opt-in
+    // experiment on, the same pages-only Box is ALSO recorded into our own
+    // Compose GraphicsLayer; a throttled software snapshotter reads it back,
+    // downscales and stack-blurs it, and the nav/reveal pills draw that as a
+    // REAL frosted backdrop (no RenderEffect needed). Same sibling
+    // architecture — the pills never record themselves.
+    val legacyBlurActive = AppPreferences.legacyGlassBlurState &&
+        !CurioLegacyBlur.readbackBroken &&
+        android.os.Build.VERSION.SDK_INT in 26 until 31 &&
+        AppPreferences.liquidGlassPillsState
+    val legacyCaptureLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
+    if (legacyBlurActive) {
+        CurioLegacyBlurSnapshotter(legacyCaptureLayer)
+    }
+    // v270 — glass parallax tilt experiment REMOVED (sensor + toggle gone).
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -509,6 +529,13 @@ fun CurioNavHost(
                     // overlays are SIBLINGS of this Box, so they never
                     // record themselves into their own blurred backdrop.
                     .then(if (isLiquidGlassPillsActive()) Modifier.layerBackdrop(navGlassBackdrop) else Modifier)
+                    .then(
+                        if (legacyBlurActive) {
+                            Modifier
+                                .curioLegacyCapture(legacyCaptureLayer)
+                                .curioLegacyCaptureGeometry()
+                        } else Modifier
+                    )
                     .then(
                         if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
@@ -850,6 +877,15 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.EXPERIMENTS) {
                 ExperimentsScreen(navController = navController)
+            }
+            composable(CurioRoutes.USER_EXPERIMENTS) {
+                UserExperimentsScreen(navController = navController)
+            }
+            composable(CurioRoutes.GLASS_WIDGET_LAB) {
+                com.curio.app.features.settings.GlassWidgetLabScreen(navController = navController)
+            }
+            composable(CurioRoutes.GLASS_WIDGET_EDITOR) {
+                com.curio.app.features.settings.WidgetEditorScreen(navController = navController)
             }
             composable(CurioRoutes.MANAGE_CATEGORIES) {
                 ManageCategoriesScreen(navController = navController)

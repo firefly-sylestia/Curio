@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -36,14 +37,27 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import com.curio.app.ui.components.liquidGlassCapsule
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +67,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -77,9 +90,12 @@ import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioSettingsInfoRow
 import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** Settings destination selected from the compact hub. */
 enum class SettingsPage(val title: String, val subtitle: String) {
@@ -130,8 +146,11 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         SettingsHighlightTarget.rowKey = null
     }
     val listState = rememberLazyListState()
+val glassBackdrop = rememberLayerBackdrop()
+    // v255 — the hero is now item 0 of the list; the highlight target is
+    // the page-content item that follows the section label.
     LaunchedEffect(highlightKey) {
-        if (highlightKey != null) listState.scrollToItem(1)
+        if (highlightKey != null) listState.scrollToItem(2)
     }
     Box(
         modifier = Modifier
@@ -162,11 +181,13 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
         // at a straight line.
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+            // v255 — SCROLLING HERO (the Home/Profile construction): the
+            // banner lives INSIDE the list and scrolls away with the page.
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item { CurioSectionLabel(page.title) }
+                        item { CurioSectionLabel(page.title) }
             item {
                 SettingsPageContent(page, navController, highlightKey)
             }
@@ -178,11 +199,13 @@ fun SettingsSectionScreen(navController: NavController, page: SettingsPage) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = SettingsHeroTotalHeight + 8.dp, bottom = 16.dp)
+                .padding(top = 8.dp, bottom = 16.dp)
         )
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() })
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = page.title, subtitle = page.subtitle, onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 }
 
@@ -250,47 +273,6 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 enabled = AppPreferences.materialThemeState
             ) {
                 AppPreferences.setMaterialHeroTearsEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        // v101 — the dark-mode pill glow is the subtle top-only version by
-        // default; the toggle restores the fuller glow for comparison.
-        SettingsRowPulse(highlightKey == "appearance-pill-glow") {
-            CompactSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
-                AppPreferences.setPillGlowSubtleEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
-        // v242 — LIQUID GLASS moved here from Experiments and MERGED with the
-        // former separate "In-screen glass" toggle (one switch now drives the
-        // nav bar AND every in-screen pill — they all share the same crash-
-        // safe local-capture architecture). Clear glass shows inline only
-        // while liquid glass is on; the tuning sliders shape the recipe live.
-        SettingsRowPulse(highlightKey == "appearance-liquid-glass") {
-            CompactSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
-                AppPreferences.setLiquidGlassPillsEnabled(context, it)
-            }
-        }
-        if (AppPreferences.liquidGlassPillsState) {
-            CurioSettingsDivider()
-            CompactSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
-                AppPreferences.setGlassClarityEnabled(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Reflection", "Strength of the light sheen on the glass", AppPreferences.glassReflectionScaleState) {
-                AppPreferences.setGlassReflectionScale(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Refraction", "How strongly the glass bends the content behind it", AppPreferences.glassRefractionScaleState) {
-                AppPreferences.setGlassRefractionScale(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Blur", "Frostiness of the glass — lower for clearer, higher for frostier", AppPreferences.glassBlurScaleState) {
-                AppPreferences.setGlassBlurScale(context, it)
-            }
-            CurioSettingsDivider()
-            CompactSliderRow("Indicator shadow", "Strength of the draggable active pill's shadow", AppPreferences.glassIndicatorShadowScaleState) {
-                AppPreferences.setGlassIndicatorShadowScale(context, it)
             }
         }
         CurioSettingsDivider()
@@ -444,18 +426,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 AppPreferences.setExploreSessionsEnabled(context, it)
             }
         }
-        CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "pref-live") {
-            CompactSwitchRow("Live explore notification", "Ongoing timer with pause and stop", liveNotificationsEnabled) { enabled ->
-                if (enabled) enableNotifications {
-                    liveNotificationsEnabled = true
-                    AppPreferences.setLiveNotificationsEnabled(context, true)
-                } else {
-                    liveNotificationsEnabled = false
-                    AppPreferences.setLiveNotificationsEnabled(context, false)
-                }
-            }
-        }
+
         CurioSettingsDivider()
         // v30 — the floating bubble and the overlay permission are ONE
         // option (the bubble IS the overlay). Enabling without the permission
@@ -517,52 +488,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
-        // v16 — how chatty the pet is. Cozy is the default; Talkative opens
-        // the bubble more often, Quiet says less. Moved from Appearance (v26).
-        SettingsRowPulse(highlightKey == "pref-pet-chatter") {
-            CompactSegmentedRow(
-                "Pet chatter",
-                listOf("Quiet", "Cozy", "Talkative"),
-                when (AppPreferences.petChatterState) {
-                    "quiet" -> 0
-                    "talkative" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetChatter(
-                    context,
-                    when (index) {
-                        0 -> "quiet"
-                        2 -> "talkative"
-                        else -> "cozy"
-                    }
-                )
-            }
-        }
-        CurioSettingsDivider()
-        // v16 — how often the pet starts its games on its own: Relaxed,
-        // Normal (default), or Eager. Moved from Appearance (v26).
-        SettingsRowPulse(highlightKey == "pref-pet-games") {
-            CompactSegmentedRow(
-                "Pet games",
-                listOf("Relaxed", "Normal", "Eager"),
-                when (AppPreferences.petGameFrequencyState) {
-                    "relaxed" -> 0
-                    "eager" -> 2
-                    else -> 1
-                }
-            ) { index ->
-                AppPreferences.setPetGameFrequency(
-                    context,
-                    when (index) {
-                        0 -> "relaxed"
-                        2 -> "eager"
-                        else -> "normal"
-                    }
-                )
-            }
-        }
+
         CurioSettingsDivider()
         // v27 — the daily shuffle reminder + its hour chips moved in from the
         // removed Notifications section: Preferences is now the one home for
@@ -678,12 +604,6 @@ private fun RecordingSection(highlightKey: String? = null) {
             }
         }
         CurioSettingsDivider()
-        SettingsRowPulse(highlightKey == "recording-voice") {
-            CompactSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
-                AppPreferences.setVoiceToTextEnabled(context, it)
-            }
-        }
-        CurioSettingsDivider()
         SettingsRowPulse(highlightKey == "recording-offline-model") {
             CurioSettingsRow(CurioIcons.Download, "Offline model", offlineModelSubtitle) {
                 showModelDialog = true
@@ -782,12 +702,19 @@ private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, 
 }
 
 /** v242 — compact settings slider: label + live value, used by the Liquid
- *  glass tuning rows in Appearance. `value` is 0f..2f (1f = default). */
+ *  glass tuning rows in Appearance. `value` is 0f..2f (1f = default).
+ *  v292b — `maxValue`/`steps` overridable so bounded values (like indicator
+ *  opacity, 0f..1f) get a correct range instead of the 200% scale. */
 @Composable
 private fun CompactSliderRow(
     title: String,
     subtitle: String,
     value: Float,
+    // v292b FIX — maxValue/steps must sit BEFORE onValueChange: a trailing
+    // lambda only binds to the LAST parameter, so any default-valued params
+    // after the callback break every existing `row(...) { }` call site.
+    maxValue: Float = 2f,
+    steps: Int = 7,
     onValueChange: (Float) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
@@ -803,10 +730,10 @@ private fun CompactSliderRow(
             )
         }
         Slider(
-            value = value.coerceIn(0f, 2f),
+            value = value.coerceIn(0f, maxValue),
             onValueChange = onValueChange,
-            valueRange = 0f..2f,
-            steps = 7 // 25% increments — 0, 25, 50, 75, 100, 125, 150, 175, 200
+            valueRange = 0f..maxValue,
+            steps = steps
         )
     }
 }
@@ -871,5 +798,170 @@ private fun SettingsRowPulse(
             .padding(horizontal = 2.dp)
     ) {
         content()
+    }
+}
+
+/**
+ * v252 — LIQUID GLASS TUNING DIALOG. The three recipe sliders
+ * (Reflection / Refraction / Blur) with a LIVE PREVIEW capsule above them:
+ * the preview draws over a colorful collage and re-renders on every slider
+ * tick using the exact same preference values the real capsules read, so
+ * what you see is what the nav pill will do.
+ */
+@Composable
+fun GlassTuningDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    Dialog(onDismissRequest = onDismiss) {
+        CurioSettingsCard(shadowElevation = 0.dp) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                CurioCardHeader(CurioIcons.Info, "Tune liquid glass", "Drag a slider — the capsule previews it live")
+                // v258 — REAL PREVIEW: an actual [liquidGlassCapsule] pill
+                // you can DRAG over a colorful collage. Every slider writes
+                // the same preference state the real capsules read, so the
+                // pill under your finger IS how the nav pills will render.
+                // v263 — REAL PREVIEW FIXED: the gradient card records into a
+                // LOCAL backdrop; the draggable capsule sits as a SIBLING
+                // OUTSIDE that capture (no self-sample cycle) and refracts
+                // the colorful collage behind it — exactly how real in-app
+                // pills behave. Removing .clip() lets the pill float beyond
+                // the card bounds.
+                var previewOffset by remember { mutableStateOf(Offset.Zero) }
+                val dialogBackdrop = rememberLayerBackdrop()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)                       // tall enough for the pill to roam freely
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    // ── Gradient card — the content the pill refracts ──
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .layerBackdrop(dialogBackdrop)     // records into this layer
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFF7E57C2),
+                                        Color(0xFFEF9A9A),
+                                        Color(0xFF80DEEA),
+                                        Color(0xFFFFD54F)
+                                    )
+                                ),
+                                RoundedCornerShape(18.dp)       // clip background only, not children
+                            )
+                    ) {
+                        Text(
+                            text = "Aa Bb Cc\n123 456",
+                            style = MaterialTheme.typography.displayMedium,
+                            color = Color.Black.copy(alpha = 0.35f),
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                        Text(
+                            text = "Curio",
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(10.dp)
+                        )
+                    }
+                    // ── Draggable capsule — sibling overlay, NOT clipped ──
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        shadowElevation = 0.dp,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .offset { IntOffset(previewOffset.x.roundToInt(), previewOffset.y.roundToInt()) }
+                            .size(width = 132.dp, height = 48.dp)
+                            // v263 — PROPER glass: real refraction over the
+                            // captured gradient + text content behind it.
+                            .liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                washAlpha = 0.45f,
+                                backdrop = dialogBackdrop,
+                                alwaysClear = true
+                            )
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, amount ->
+                                    change.consume()
+                                    previewOffset += amount
+                                }
+                            }
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                "Preview",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+                }
+                CompactSliderRow("Reflection", "Light sheen strength", AppPreferences.glassReflectionScaleState) {
+                    AppPreferences.setGlassReflectionScale(context, it)
+                }
+                // v292 — ACTIVE INDICATOR COLOUR: what the nav bar's resting
+                // active pill wears. Auto follows the theme (Material →
+                // scheme primary, azure hero → azure, rose → rose); White
+                // and Black are fixed picks.
+                Text(
+                    "Indicator colour",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf(
+                        "Auto" to AppPreferences.NAV_INDICATOR_AUTO,
+                        "White" to AppPreferences.NAV_INDICATOR_WHITE,
+                        "Black" to AppPreferences.NAV_INDICATOR_BLACK
+                    ).forEach { (label, value) ->
+                        val selected = AppPreferences.navIndicatorColorState == value
+                        Surface(
+                            onClick = { AppPreferences.setNavIndicatorColor(context, value) },
+                            shape = RoundedCornerShape(50),
+                            color = if (selected) MaterialTheme.colorScheme.secondaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                label,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp)
+                            )
+                        }
+                    }
+                }
+                // v292b — INDICATOR OPACITY: how transparent the resting
+                // active pill's frosted wash is. The touch blob is unaffected —
+                // pressing always fades the fill away for the glass effect.
+                CompactSliderRow(
+                    "Indicator opacity",
+                    "Frosted pill transparency",
+                    AppPreferences.navIndicatorOpacityState,
+                    maxValue = 1f,
+                    steps = 4 // 0 / 25 / 50 / 75 / 100%
+                ) {
+                    AppPreferences.setNavIndicatorOpacity(context, it)
+                }
+                CompactSliderRow("Refraction", "Edge bending strength", AppPreferences.glassRefractionScaleState) {
+                    AppPreferences.setGlassRefractionScale(context, it)
+                }
+                CompactSliderRow("Blur", "Frostiness", AppPreferences.glassBlurScaleState) {
+                    AppPreferences.setGlassBlurScale(context, it)
+                }
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Done") }
+            }
+        }
     }
 }

@@ -413,11 +413,30 @@ fun ProfileScreen(navController: NavController) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().layerBackdrop(profileGlassBackdrop),
-            // v251 — STICKY TEAR (the Settings construction): the list starts
-             // below the pinned hero and slides UNDER the ragged tear.
-             contentPadding = PaddingValues(top = ProfileHeroTotalHeight, bottom = 24.dp),
+            contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item {
+                ProfileHero(
+                    name = displayName,
+                    avatarPath = avatarPath,
+                    tagline = heroTagline,
+                    displayStreak = displayStreak,
+                    level = level,
+                    saved = displaySaved,
+                    lanes = if (categoryCounts.isEmpty()) CurioCategories.visible.size else categoryCounts.size,
+                    family = heroFamily,
+                    fill = heroFill,
+                    ink = heroInk,
+                    onEditName = {
+                        nameInput = displayName
+                        // v97 — the tagline field rides the same Edit profile
+                        // dialog now (no separate tagline dialog).
+                        taglineInput = AppPreferences.getCustomStreakTagline(context)
+                        showNameDialog = true
+                    }
+                )
+            }
             // Breathing room below the torn seam (≈ Home's quest-block gap).
             item { Spacer(Modifier.height(6.dp)) }
             item {
@@ -488,32 +507,6 @@ fun ProfileScreen(navController: NavController) {
             item { Spacer(Modifier.navigationBarsPadding().height(4.dp)) }
         }
 
-        // v251 — PINNED HERO: the profile banner no longer scrolls —
-        // it lives ON TOP of the list (the Settings construction), so rows
-        // slide under the ragged tear. Inside the capture wrapper so the
-        // sticky pills keep sampling it for their glass.
-        Box {
-                ProfileHero(
-                    name = displayName,
-                    avatarPath = avatarPath,
-                    tagline = heroTagline,
-                    displayStreak = displayStreak,
-                    level = level,
-                    saved = displaySaved,
-                    lanes = if (categoryCounts.isEmpty()) CurioCategories.visible.size else categoryCounts.size,
-                    family = heroFamily,
-                    fill = heroFill,
-                    ink = heroInk,
-                    onEditName = {
-                        nameInput = displayName
-                        // v97 — the tagline field rides the same Edit profile
-                        // dialog now (no separate tagline dialog).
-                        taglineInput = AppPreferences.getCustomStreakTagline(context)
-                        showNameDialog = true
-                    }
-                )
-        }
-
         // Side scroll indicator — thin overlay knob, grows on touch.
         CurioVerticalScrollIndicator(
             state = listState.scrollIndicatorState,
@@ -559,9 +552,15 @@ fun ProfileScreen(navController: NavController) {
         // rest both paths show the exact same SOLID hero fill.
         val glassOn = isInScreenGlassActive()
         // Resolve solid target colors from scroll, then animate the paint.
-        val targetPillBg = lerp(restPillBg, if (glassOn) Color.Transparent else frostPillBg, frostShift)
-        val targetPillRim = lerp(restPillRim, frostPillRim, frostShift)
-        val targetPillIcon = lerp(heroInk, frostPillIcon, frostShift)
+        // v267 — ALWAYS GLASS (user request, same as Home): with liquid glass
+        // on there is NO hero-fill phase — the pills are clear refracting
+        // glass from rest, so no dark mid-scroll state can exist. Ink + rim
+        // sit at their scrolled values from the start. The non-glass path
+        // keeps its classic hero-fill → frost morph unchanged.
+        val targetPillBg = if (glassOn) Color.Transparent
+            else lerp(restPillBg, frostPillBg, frostShift)
+        val targetPillRim = if (glassOn) frostPillRim else lerp(restPillRim, frostPillRim, frostShift)
+        val targetPillIcon = if (glassOn) frostPillIcon else lerp(heroInk, frostPillIcon, frostShift)
         val pillBg by animateColorAsState(
             targetValue = targetPillBg,
             animationSpec = tween(CurioMotion.Durations.Quick),
@@ -604,11 +603,12 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.popBackStack() },
                 containerColor = pillBg,
                 contentColor = pillIcon,
-                shadowElevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                shadowElevation = if (glassOn) 0.dp else 6.dp * frostShift,
                 disableRipple = true,
                 pillInteraction = backPillInteraction,
                 // v241 — clear refracting glass once the morph begins.
-                modifier = if (glassOn && frostShift > 0.01f)
+                // v267 — always glass from rest.
+                modifier = if (glassOn)
                     Modifier.liquidGlassCapsule(
                         restPillBg,
                         washAlpha = 0.45f,
@@ -621,9 +621,10 @@ fun ProfileScreen(navController: NavController) {
                 onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
                 bg = pillBg,
                 iconTint = pillIcon,
-                elevation = if (glassOn && frostShift > 0.01f) 0.dp else 6.dp * frostShift,
+                elevation = if (glassOn) 0.dp else 6.dp * frostShift,
                 pillInteraction = searchPillInteraction,
-                modifier = if (glassOn && frostShift > 0.01f)
+                // v267 — always glass from rest.
+                modifier = if (glassOn)
                     Modifier.liquidGlassCapsule(
                         restPillBg,
                         washAlpha = 0.45f,

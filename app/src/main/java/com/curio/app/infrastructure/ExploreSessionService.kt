@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.view.WindowManager
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -113,6 +114,11 @@ class ExploreSessionService : Service() {
     // device-level rejection can never turn into a restart loop. Reset on
     // every explicit start (see onStartCommand).
     private var bubbleRetryCount = 0
+    // v253 — which horizontal edge the window last snapped to: -1 left,
+    // 1 right, 0 unknown. Read inside the bubble's composition to drive the
+    // assistive-touch-style edge dock (the pill slides mostly off-screen,
+    // leaving a peek sliver, after a few idle seconds at the edge).
+    private val bubbleEdgeSnap = mutableStateOf(0)
 
     // ── Periodic live-notification refresh ─────────────────────────────
     // The shade chronometer ticks live, but the progress bar and expanded
@@ -579,6 +585,7 @@ class ExploreSessionService : Service() {
                     ) {
                         ExploreBubbleContent(
                             session = session,
+                            edgeSnap = bubbleEdgeSnap,
                             onTogglePause = {
                                 val current = ExploreSessionStore.getActiveSession(this@ExploreSessionService)
                                     ?: return@ExploreBubbleContent
@@ -643,52 +650,31 @@ class ExploreSessionService : Service() {
                             // Drag lives in Compose (the composed child of an
                             // overlay ComposeView consumes every View-level
                             // touch, so a View listener never fires). Each
-                            // delta moves the window; release snaps it to the
-                            // nearest horizontal edge.
+                            // delta moves the window; release settles where
+                            // dropped. Deltas are CLAMPED live against the
+                            // display bounds so a fast fling can never drag
+                            // the pill half off-screen mid-gesture (the old
+                            // release-only clamp read as a rubber-band snap).
                             onDragBy = { dx, dy ->
-                                params.x = (params.x + dx).toInt()
-                                params.y = (params.y + dy).toInt()
-                                bubbleView?.let { v ->
-                                    runCatching { windowManager.updateViewLayout(v, params) }
-                                }
-                            },
-                            onDragEnd = { snapBubble() },
-                            // Center-anchored growth: as the bubble animates
-                            // between the pill and the panel, keep its visual
-                            // center pinned (grow around the middle) instead
-                            // of anchored to the window's top-left, and clamp
-                            // so the larger panel never leaves the screen.
-                            // Compose only forwards this while an expand /
-                            // collapse transition runs, so the per-second
-                            // timer tick (a 1-2px width change) can't drift
-                            // the bubble.
-                            onSizeChanged = { w, h ->
                                 val view = bubbleView ?: return@ExploreBubbleContent
-                                val p = bubbleParams ?: return@ExploreBubbleContent
-                                if (bubbleLastW == 0 || bubbleLastH == 0) {
-                                    bubbleLastW = view.width
-                                    bubbleLastH = view.height
-                                }
-                                val deltaX = (w - bubbleLastW) / 2
-                                val deltaY = (h - bubbleLastH) / 2
-                                if (deltaX == 0 && deltaY == 0) return@ExploreBubbleContent
-                                bubbleLastW = w
-                                bubbleLastH = h
                                 val bounds = windowBounds()
                                 val marginPx = (12 * resources.displayMetrics.density).toInt()
-                                val minX = marginPx
-                                val maxX = (bounds.width() - w - marginPx).coerceAtLeast(minX)
-                                val minY = marginPx
-                                val maxY = (bounds.height() - h - marginPx).coerceAtLeast(minY)
-                                val newX = (p.x - deltaX).coerceIn(minX, maxX)
-                                val newY = (p.y - deltaY).coerceIn(minY, maxY)
-                                if (newX == p.x && newY == p.y) return@ExploreBubbleContent
-                                p.x = newX
-                                p.y = newY
-                                view.post {
-                                    runCatching { windowManager.updateViewLayout(view, p) }
-                                }
-                            }
+                                params.x = (params.x + dx).toInt()
+                                    .coerceIn(marginPx, (bounds.width() - view.width - marginPx).coerceAtLeast(marginPx))
+                                params.y = (params.y + dy).toInt()
+                                    .coerceIn(marginPx, (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx))
+                                runCatching { windowManager.updateViewLayout(view, params) }
+                            },
+                            onDragEnd = { snapBubble() },
+                            // v268 — NO size-compensation at all: the old
+                            // re-centering moved the WINDOW one layout pass
+                            // behind the content's resize (view.post), which
+                            // read as the panel visibly SHIFTING after every
+                            // expand/collapse. The window is TOP|START
+                            // anchored, so growing toward bottom-right with
+                            // the origin pinned reads stable; snapBubble's
+                            // clamp keeps everything on-screen.
+                            onSizeChanged = { _, _ -> }
                         )
                     }
                 }
@@ -849,23 +835,17 @@ class ExploreSessionService : Service() {
         overlayOwner = null
     }
 
-    /** Snaps the bubble to the nearest horizontal edge, clamped on-screen. */
+    /** v262 — NO edge snapping (user request): on release the bubble just
+     *  settles WHERE IT WAS DROPPED, only clamped so it stays on-screen. */
     private fun snapBubble() {
         val view = bubbleView ?: return
         val params = bubbleParams ?: return
         val bounds = windowBounds()
         val marginPx = (12 * resources.displayMetrics.density).toInt()
-        val snapLeft = params.x + view.width / 2 <= bounds.width() / 2
-        params.x = if (snapLeft) {
-            marginPx
-        } else {
-            (bounds.width() - view.width - marginPx).coerceAtLeast(marginPx)
-        }
-        params.y = params.y.coerceIn(
-            marginPx,
-            (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx)
-        )
+        params.x = params.x.coerceIn(marginPx, (bounds.width() - view.width - marginPx).coerceAtLeast(marginPx))
+        params.y = params.y.coerceIn(marginPx, (bounds.height() - view.height - marginPx).coerceAtLeast(marginPx))
         runCatching { windowManager.updateViewLayout(view, params) }
+        bubbleEdgeSnap.value = 0
     }
 
     private fun windowBounds(): Rect =

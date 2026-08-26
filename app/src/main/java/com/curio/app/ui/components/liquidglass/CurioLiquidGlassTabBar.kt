@@ -59,7 +59,6 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.ui.components.drawGlassTiltEdgeGlow
 import com.curio.app.ui.components.tiltGlowOffset
 import androidx.compose.ui.unit.DpOffset
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
@@ -139,8 +138,18 @@ fun CurioLiquidGlassTabBar(
     backdrop: Backdrop,
     tabsCount: Int,
     accentColor: Color = MaterialTheme.colorScheme.primary,
+    // v292 — the resting active pill's FILL (Appearance → Indicator
+    // colour): auto theme / white / black. The ink that sits on it comes
+    // from [curioGlassIndicatorColors] in CurioBottomNav.
+    indicatorFill: Color = Color.White,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.40f),
     isBlurEnabled: Boolean = true,
+    // v262 — ghost suppression scoped to the PET DESIGNER only: when true,
+    // the blob samples the PAGE ONLY (no hidden tab-row copy), so its glass
+    // never doubles the tab icon/label there. The HOME NAV keeps the full
+    // combined sample — the small refracted capsule of tab content inside
+    // the blob is the effect the user wants there.
+    ghostFreeTabs: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
     val tabsBackdrop = rememberLayerBackdrop()
@@ -158,10 +167,6 @@ fun CurioLiquidGlassTabBar(
     // blob as fully TRANSPARENT refracting glass (the pre-v247 style);
     // OFF (default) is the solid white/black pill.
     val classicIndicator = AppPreferences.glassClassicIndicatorState
-    // v233 — light-mode ACTIVE-INDICATOR contrast: the old constant 14%
-    // accent wash gave the active ink almost nothing to read against on a
-    // bright page; light mode now gets double the bed (dark keeps 16%).
-    val dark = isCurioDarkTheme()
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
 
@@ -198,6 +203,10 @@ fun CurioLiquidGlassTabBar(
     // tab, drag release) used the class's default critically-damped 1000-
     // stiffness spring, which snaps between tabs almost instantly. This
     // softer spring glides the blob across (~350ms) with a gentle settle.
+    // v292 — user call: the sideways liquid GLIDE on tap looks bad — iOS
+    // style instead, where the blob shows up under the new tab FAST even
+    // on quick switches. Tap switches now use a very stiff ~90ms spring;
+    // drag release keeps the soft glide (the finger led it there).
     val tabGlideSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 380f)
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
@@ -268,18 +277,12 @@ fun CurioLiquidGlassTabBar(
         ).also { holder.instance = it }
     }
 
-    // v245 — SNAP to the selected tab on the bar's FIRST composition after
-    // (re-)entering it; only SUBSEQUENT changes animate. Re-entering Cabinet
-    // from an entry used to replay the fly-in because the fresh animation
-    // started from its initial value instead of the live selection.
-    var pendingFirstSnap = remember { true }
-    LaunchedEffect(selectedIndex, dampedDragAnimation) {
-        if (pendingFirstSnap) {
-            pendingFirstSnap = false
-            dampedDragAnimation.updateValue(selectedIndex.toFloat())
-        } else {
-            dampedDragAnimation.animateToValue(selectedIndex.toFloat(), tabGlideSpec)
-        }
+    // v292h — TAB SWITCH: SNAP instantly to the new tab on tap or
+    // programmatic navigation. No sideways glide, no spring — the blob
+    // appears under the new tab in one frame. Drag-release animations
+    // are handled in onDragStopped only.
+    LaunchedEffect(selectedIndex) {
+        dampedDragAnimation.snapToValue(selectedIndex.toFloat())
     }
 
     val interactiveHighlight = remember(animationScope, totalWidthPx) {
@@ -298,6 +301,18 @@ fun CurioLiquidGlassTabBar(
             null
         }
     }
+
+    // v292d — the crisp overlay's alpha: 1 at rest, drops to 0 within ~110ms
+    // of a blob press so the refracted tab copy shows alone while held.
+    // v292g — ghostFreeTabs (Pet Designer) hides during press/move but
+    // shows at rest — the blob samples page-only so the overlay is the
+    // ONLY source of tab labels (no duplication like Home's combined
+    // sample).
+    val inkOverlayAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (dampedDragAnimation.pressProgress > 0.04f) 0f else 1f,
+        animationSpec = androidx.compose.animation.core.tween(110),
+        label = "inkOverlay"
+    )
 
     // v232 — both copies of the tab row (visible + hidden accent-tinted)
     // run inside the metrics provider so every item reports its width.
@@ -343,7 +358,12 @@ fun CurioLiquidGlassTabBar(
                         }
                     },
                     highlight = {
-                        Highlight.Default.copy(alpha = (if (isBlurEnabled) 1f else 0f) * reflScale)
+                        // v260 — GLOW TONE-DOWN: this rim highlight ran at
+                        // FULL reflection scale, reading as a harsh white
+                        // bloom on bright pages. Capped at 55%.
+                        Highlight.Default.copy(
+                            alpha = (if (isBlurEnabled) 1f else 0f) * 0.55f * minOf(reflScale, 1f)
+                        )
                     },
                     shadow = {
                         Shadow.Default.copy(
@@ -441,13 +461,28 @@ fun CurioLiquidGlassTabBar(
                         drawGlassTiltEdgeGlow()
                     }
                     .drawBackdrop(
-                        // v251 — COMBINED sample restored (reverting v250):
-                        // page + the untinted tab-row copy, so the lens bends
-                        // the CONTENT under the finger — the full-capsule
-                        // refraction look the page-only sample had flattened.
-                        // Ghost doubles are solved by the overlay gating
-                        // below instead.
-                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
+                        // v260 — DUPLICATE-TEXT FIX: the default (solid idle
+                        // pill) style now samples the PAGE ONLY. The v251
+                        // combined sample (page + the hidden tab-row copy)
+                        // made the active tab's icon/label appear TWICE while
+                        // pressed — once refracted inside the blob, once in
+                        // the crisp overlay that hasn't fully faded yet. The
+                        // classic (transparent) experiment keeps the combined
+                        // sample, since its whole point is bending the tab
+                        // content under the finger.
+                        // v262 — COMBINED SAMPLE RESTORED for the home nav:
+                        // page + hidden untinted tab-row copy, so the blob
+                        // visibly bends a small capsule of the tab content
+                        // under it. Only Pet Designer opts OUT (ghostFreeTabs)
+                        // because there the double-drew labels.
+                        // v262 — UNCONDITIONAL for ghostFreeTabs (even with
+                        // the classic-indicator experiment on): Pet Designer
+                        // always samples page-only, home nav always combines.
+                        backdrop = if (ghostFreeTabs) {
+                            backdrop
+                        } else {
+                            rememberCombinedBackdrop(backdrop, tabsBackdrop)
+                        },
                         shape = { CircleShape },
                         effects = {
                             // v247 — GENTLE press-gated glass again (as in
@@ -466,10 +501,17 @@ fun CurioLiquidGlassTabBar(
                                     blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
                                     lens(24f.dp.toPx() * refrScale, 24f.dp.toPx() * refrScale)
                                 } else {
-                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * progress)
+                                    // v292c — FROST AT REST is BACK for the
+                                    // indicator (user call): the idle active pill
+                                    // samples the backdrop with vibrancy + blur + a
+                                    // soft lens. While held (the touch blob), frost
+                                    // eases OFF so the small press capsule reads
+                                    // clean — the touch view itself is unchanged.
+                                    val rest = 1f - progress
+                                    blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * rest)
                                     lens(
-                                        10f.dp.toPx() * refrScale * progress,
-                                        14f.dp.toPx() * refrScale * progress,
+                                        10f.dp.toPx() * refrScale * rest,
+                                        14f.dp.toPx() * refrScale * rest,
                                         true
                                     )
                                 }
@@ -478,9 +520,13 @@ fun CurioLiquidGlassTabBar(
                         highlight = {
                             Highlight.Default.copy(
                                 alpha = (if (isBlurEnabled) {
-                                    if (classicIndicator) 1f
-                                    else dampedDragAnimation.pressProgress
-                                } else 0f) * reflScale
+                                    // v260 — GLOW TONE-DOWN: the highlight was
+                                    // peaking at full reflection scale, reading
+                                    // as a harsh white bloom on bright pages.
+                                    // Capped at 55% and softened on press.
+                                    if (classicIndicator) 0.55f
+                                    else 0.35f * dampedDragAnimation.pressProgress
+                                } else 0f) * minOf(reflScale, 1f)
                             )
                         },
                         shadow = {
@@ -491,9 +537,11 @@ fun CurioLiquidGlassTabBar(
                                 // solid idle pill off the page; press deepens it.
                                 // v248 — classic style keeps the old fully
                                 // press-gated shadow instead.
+                                // v260 — resting glow 0.22 → 0.12 (too bright
+                                // on light pages).
                                 alpha = (if (isBlurEnabled) {
                                     if (classicIndicator) dampedDragAnimation.pressProgress
-                                    else 0.22f + 0.78f * dampedDragAnimation.pressProgress
+                                    else 0.12f + 0.68f * dampedDragAnimation.pressProgress
                                 } else 0f) * indShadowScale
                             )
                         },
@@ -520,14 +568,19 @@ fun CurioLiquidGlassTabBar(
                                 // (the pre-v247 refracting-glass look).
                                 drawRect(Color.Black.copy(alpha = 0.03f * progress))
                             } else {
-                                // v247 — SOLID idle pill: pure WHITE in light
-                                // mode, pure BLACK in dark, so the theme ink
-                                // (black/white) always sits on maximum contrast.
-                                // Holding the pill eases the fill away and lets
-                                // the press-glass take over.
+                                // v292c — FROSTY at rest again: the idle pill
+                                // wears the Appearance-selected indicator fill as
+                                // a translucent wash whose OPACITY IS CUSTOMIZABLE
+                                // (Appearance → Indicator opacity, default 55%).
+                                // Pressing still fades the fill fully away so the
+                                // touch blob's press-glass effect shows unchanged.
                                 drawRect(
-                                    color = if (dark) Color.Black else Color.White,
-                                    alpha = 1f - progress
+                                    color = indicatorFill,
+                                    alpha = lerp(
+                                        AppPreferences.navIndicatorOpacityState.coerceIn(0f, 1f),
+                                        0f,
+                                        progress
+                                    )
                                 )
                             }
                         }
@@ -549,14 +602,25 @@ fun CurioLiquidGlassTabBar(
         // real tabs and the blob's drag handlers below), so the ink stays
         // perfectly sharp on top of the solid fill at rest and on top of
         // the press-glass while held.
-        if (!classicIndicator) {
+        // v292g — the overlay is the only source of tab labels for
+        // ghostFreeTabs (Pet Designer); at rest it shows crisp labels,
+        // during press it fades to reveal the page-only refraction.
+        // v292h — always render overlay for ghostFreeTabs (Pet Designer)
+        // because the blob samples page-only so the overlay is the ONLY
+        // source of tab labels at rest.
+        if (!classicIndicator || ghostFreeTabs) {
             CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
                 Row(
                     Modifier
                         .clearAndSetSemantics {}
                         .graphicsLayer {
                             translationX = panelOffset
-                            alpha = 1f - dampedDragAnimation.pressProgress
+                            // v262 — GHOST FIX done right: instead of fading
+                            // the overlay linearly with press progress (both
+                            // copies half-visible mid-press = double text),
+                            // it disappears QUICKLY (~110ms) once a press
+                            // starts, leaving ONLY the refraction showing.
+                            alpha = inkOverlayAlpha
                         }
                         .height(64.dp)
                         .padding(4.dp),

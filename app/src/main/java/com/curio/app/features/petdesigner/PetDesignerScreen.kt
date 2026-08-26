@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -150,6 +150,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /** One editable color in the palette — its grid key, name and hex. */
 private data class PaletteSlot(val key: Char, val name: String)
@@ -650,40 +651,11 @@ fun PetDesignerScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = edgePad,
                 end = edgePad,
+                top = SettingsHeroTotalHeight,
                 bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // ── The torn rose banner (v156) — the FIRST scrollable item:
-            //    the tear is part of the page's background itself, and it
-            //    scrolls away with the content. The floating action capsule
-            //    (save / undo / redo / share) is a fixed overlay pinned to
-            //    the top of the screen, so it stays while the banner rides
-            //    away under it.
-            item {
-                // v181 — full-bleed banner WITHOUT negative padding (Compose
-                // forbids it: the v179 `padding(horizontal = -edgePad)`
-                // crashed with "Padding must be non-negative"). The item is
-                // measured with the PADDED width, so measure it, offset the
-                // hero left by the edge padding and force its width to the
-                // full viewport — the tear reaches both screen edges.
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val viewportWidth = maxWidth + edgePad * 2
-                    Box(
-                        modifier = Modifier
-                            .offset(x = -edgePad)
-                            .requiredWidth(viewportWidth)
-                    ) {
-                        SettingsHeroHeader(
-                            title = "Pet designer",
-                            subtitle = "Draw your own Curie",
-                            onBack = { navController.popBackStack() },
-                            compact = wide
-                        )
-                    }
-                }
-            }
-
             // ── Editor page: picker trigger / Editing header (v8.56) ──
             //    The editor is the center of the screen — one dialog is the
             //    only chooser, and after that ONLY the chosen editor renders.
@@ -1069,50 +1041,93 @@ fun PetDesignerScreen(navController: NavController) {
                 }
             }
 
+            // ── Outside the app (Settings page, v256) — the overlay pet ──
+
+
             // ── Pet size (Settings page, v71) — whole-pet scale ─────
             item {
-                if (page == PetDesignerPage.SETTINGS) SectionCard(
-                    "Pet size",
-                    "Grow the whole pet — the preset multiplies its size everywhere it appears"
-                ) {
-                    PetSizeControls(
-                        design = design,
-                        onPetScale = { scale ->
-                            pushUndo()
-                            design = design.copy(petScale = scale)
-                        },
-                        onReset = {
-                            pushUndo()
-                            design = design.copy(petScale = 1)
+                if (page == PetDesignerPage.SETTINGS) {
+                    var sizeExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        tonalElevation = 3.dp,
+                        shadowElevation = 0.dp,
+                        onClick = { sizeExpanded = !sizeExpanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Pet size", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                                    Spacer(Modifier.height(4.dp))
+                                    Text("Grow the whole pet — tap to expand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                CurioIcon(if (sizeExpanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown, null, size = 24.dp)
+                            }
+                            if (sizeExpanded) {
+                                Spacer(Modifier.height(12.dp))
+                                PetSizeControls(
+                                    design = design,
+                                    onPetScale = { scale ->
+                                        pushUndo()
+                                        design = design.copy(petScale = scale)
+                                    },
+                                    onReset = {
+                                        pushUndo()
+                                        design = design.copy(petScale = 1)
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                 }
             }
 
             // ── Eyes (Settings page, v64) — size presets + placement ─
             item {
-                if (page == PetDesignerPage.SETTINGS) SectionCard(
-                    "Eyes",
-                    "Pick an eye size preset, then nudge the placement — the pet bobs live so you can see the look in motion"
-                ) {
-                    EyeControls(
-                        design = design,
-                        onEyeScale = { scale ->
-                            pushUndo()
-                            design = design.copy(eyeScale = scale)
-                        },
-                        onNudge = { dx, dy ->
-                            pushUndo()
-                            design = design.copy(
-                                eyeOffsetX = (design.eyeOffsetX + dx).coerceIn(-6, 6),
-                                eyeOffsetY = (design.eyeOffsetY + dy).coerceIn(-6, 6)
-                            )
-                        },
-                        onReset = {
-                            pushUndo()
-                            design = design.copy(eyeScale = 1, eyeOffsetX = 0, eyeOffsetY = 0)
+                if (page == PetDesignerPage.SETTINGS) {
+                    var eyesExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        tonalElevation = 3.dp,
+                        shadowElevation = 0.dp,
+                        onClick = { eyesExpanded = !eyesExpanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Eyes", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                                    Spacer(Modifier.height(4.dp))
+                                    Text("Eye size and placement — tap to expand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                CurioIcon(if (eyesExpanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown, null, size = 24.dp)
+                            }
+                            if (eyesExpanded) {
+                                Spacer(Modifier.height(12.dp))
+                                EyeControls(
+                                    design = design,
+                                    onEyeScale = { scale ->
+                                        pushUndo()
+                                        design = design.copy(eyeScale = scale)
+                                    },
+                                    onNudge = { dx, dy ->
+                                        pushUndo()
+                                        design = design.copy(
+                                            eyeOffsetX = (design.eyeOffsetX + dx).coerceIn(-6, 6),
+                                            eyeOffsetY = (design.eyeOffsetY + dy).coerceIn(-6, 6)
+                                        )
+                                    },
+                                    onReset = {
+                                        pushUndo()
+                                        design = design.copy(eyeScale = 1, eyeOffsetX = 0, eyeOffsetY = 0)
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
                 }
             }
 
@@ -1168,6 +1183,17 @@ fun PetDesignerScreen(navController: NavController) {
             glassOn = isInScreenGlassActive()
         )
         }
+
+        // RESTORED (user request) — STICKY HERO: pinned on top while the
+        // editor list scrolls behind the tear. Glass back pill refracts
+        // the captured content.
+        SettingsHeroHeader(
+            title = "Pet designer",
+            subtitle = "Draw your own Curie",
+            onBack = { navController.popBackStack() },
+            compact = wide,
+            glassBackdrop = petGlassBackdrop
+        )
 
         // v156 — the floating action capsule pinned to the TOP of the
         // screen: save / undo / redo / reset / share / import. At rest it
@@ -1430,6 +1456,10 @@ private fun PetStudioBottomNav(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            // v256 — the route is now full-bleed to the bottom (no reserved
+            // NavHost inset strip), so the bar clears the gesture area
+            // itself.
+            .navigationBarsPadding()
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -1455,6 +1485,11 @@ private fun PetStudioBottomNav(
         val activeInk = if (isCurioDarkTheme()) Color.White else Color.Black
         CurioLiquidGlassTabBar(
             backdrop = glassBackdrop,
+            // v262 — Pet Designer is the ONLY screen that opts out of the
+            // ghost-tab refraction: its studio bar samples the page behind
+            // it, and the tab row's own labels were showing through twice.
+            // The home nav keeps the default (ghosting ON) — untouched.
+            ghostFreeTabs = true,
             tabsCount = pages.size,
             selectedIndex = page.ordinal,
             accentColor = MaterialTheme.colorScheme.primary,

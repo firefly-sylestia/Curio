@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v276 — REAL liquid-glass widget on Samsung One UI 7+ launchers:
+     the ROOT view MUST keep a PLAIN TRANSLUCENT COLOR background — that is
+     exactly what One UI Home's wallpaper-blur detection triggers on (a
+     drawable or near-invisible tint silently disables the blur; device-
+     verified). The visible pane is a per-widget-rendered bitmap
+     ([GlassWidgetPane] → glass_widget_pane ImageView), hidden entirely in
+     the default style so the pure launcher-blur look is untouched.
+     Content: mode icon tile + two-line text (title / info). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66FFFFFF">
+
+    <ImageView
+        android:id="@+id/glass_widget_pane"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:id="@+id/glass_widget_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:importantForAccessibility="no" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/glass_widget_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/glass_widget_title"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:shadowColor="#66000000"
+                android:shadowDy="1.5"
+                android:shadowRadius="3" />
+
+            <TextView
+                android:id="@+id/glass_widget_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E6FFFFFF"
+                android:textSize="13sp"
+                android:maxLines="1"
+                android:shadowColor="#66000000"
+                android:shadowDy="1.5"
+                android:shadowRadius="3" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

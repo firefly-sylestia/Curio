@@ -1,11 +1,18 @@
 package com.curio.app.features.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.BorderStroke
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
@@ -31,6 +38,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -91,6 +101,8 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.components.isInScreenGlassActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.curioRoseInk
@@ -102,6 +114,14 @@ import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.readableLightInk
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.toHsl
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import androidx.compose.ui.platform.LocalDensity
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** Fixed tear seed — every settings header tears in the SAME bold pattern
  *  (Settings's own pattern; Profile wears 0xC0FEE). Never re-rolls. */
@@ -168,7 +188,12 @@ fun SettingsHeroHeader(
     // v42 — an optional control that rides INSIDE the banner beside the
     // title (directly under the trailing pills): the Topic Database's
     // Category pill. Screens that don't pass it render the plain title.
-    titleTrailing: (@Composable (ink: Color) -> Unit)? = null
+    titleTrailing: (@Composable (ink: Color) -> Unit)? = null,
+    // v263 — RESTORED sticky-hero architecture: the scroll content records
+    // into this LOCAL capture; the hero sits OUTSIDE it (drawn on top), so
+    // its back pill can refract the rows scrolling behind it with REAL
+    // liquid glass — no self-sample cycle. Null → classic opaque pill.
+    glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
@@ -268,8 +293,29 @@ fun SettingsHeroHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        val backInteraction = remember { MutableInteractionSource() }
                         CurioBackButton(
                             onClick = onBack,
+                            modifier = Modifier.then(
+                                // v263 — GLASSY BACK BUTTON: when a local
+                                // capture is provided and Liquid glass is
+                                // active, the pill becomes refraction over
+                                // the scrolling rows behind the tear.
+                                // v292g — alwaysClear removed to match other
+                                // UI liquid-glass pills (same frosted look).
+                                if (glassBackdrop != null && isInScreenGlassActive())
+                                    Modifier.liquidGlassCapsule(
+                                        if (isCurioDarkTheme()) {
+                                            lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+                                        } else {
+                                            lerp(fill, curioPillTintLift(), 0.38f)
+                                        },
+                                        washAlpha = 0.45f,
+                                        backdrop = glassBackdrop,
+                                        interactionSource = backInteraction
+                                    )
+                                else Modifier
+                            ),
                             // v76 — OPAQUE theme-aware pill, the same fill the
                             // hero action pills wear ([SettingsHeroActionPill]'s
                             // v27n opaque conversion): the old 18% ink glass
@@ -287,18 +333,11 @@ fun SettingsHeroHeader(
                             },
                             contentColor = symbolTint,
                             shadowElevation = 3.dp,
-                            disableRipple = true
+                            disableRipple = true,
+                            pillInteraction = backInteraction
                         )
                         if (searchActive) {
-                            // Search is open — the trailing pills are swapped
-                            // for a single Cancel pill (Cabinet's contract).
-                            SettingsHeroActionPill(
-                                onClick = onCloseSearch,
-                                label = "Cancel",
-                                glyph = CurioIcons.Close,
-                                contentDescription = "Close search",
-                                ink = ink
-                            )
+                            // v294 — Cancel pill removed; back button handles closing search.
                         } else if (trailing != null) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -399,6 +438,47 @@ fun SettingsHeroHeader(
         }
     }
 }
+
+/**
+ * v257 — full-bleed wrapper for the settings-family heroes that now live
+ * INSIDE their scrolling lists: the list's edge padding would inset the
+ * banner from both sides ("cut from the sides"). This measures the padded
+ * width, offsets left by the edge padding and forces the viewport width —
+ * the tear reaches both screen edges again (the Pet Designer v179 trick,
+ * now shared).
+ */
+@Composable
+internal fun FullBleedHeroItem(edgePad: Dp, hero: @Composable () -> Unit) {
+    // v261 — MEASURED full bleed: instead of guessing the inset arithmetic
+    // (offset -edgePad + requiredWidth(maxWidth + 2·edgePad)), read the
+    // slot's REAL distance from the window's left edge and the window's
+    // real width, then shift/resize by exactly those values. Pixel-perfect
+    // under any nesting (list content padding, wide-window centering,
+    // future outer paddings) — fixes the tear sitting left-shifted with a
+    // gap on the right.
+    var shiftLeftPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var viewportWidthDp by remember { androidx.compose.runtime.mutableStateOf(Dp.Unspecified) }
+    val density = LocalDensity.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coords ->
+                val root = coords.findRootCoordinates()
+                val leftInset = coords.positionInRoot().x - root.positionInRoot().x
+                shiftLeftPx = leftInset
+                viewportWidthDp = with(density) { root.size.width.toFloat().toDp() }
+            }
+    ) {
+        if (viewportWidthDp != Dp.Unspecified) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(-shiftLeftPx.roundToInt(), 0) }
+                    .requiredWidth(viewportWidthDp)
+            ) { hero() }
+        }
+    }
+}
+
 
 /** One ink-glass action pill on the hero — the banner's readable ink at a
  *  soft alpha (the Cabinet hero pill language), so hero action pills like
@@ -639,10 +719,7 @@ fun settingsCardAccentInk(): Color {
     // with those styles).
     heroLaneCategory()?.let { return it.categoryInk() }
     if (AppPreferences.heroBlueState) {
-        // v81 — dark: the light azure twin reads directly on the dark card.
         if (isCurioDarkTheme()) return CurioColors.HomeAzure
-        // Light: a deep azure twin of the airy pastel azure so the glyphs
-        // read on the cream card.
         return readableLightInk(CurioColors.HomeAzure)
     }
     return curioRoseInk()
@@ -731,10 +808,12 @@ fun SettingsHubScreen(navController: NavController) {
         // the familiar single column. Search, section labels and the empty
         // state always span the full width.
         val wide = windowWidthSizeClass().isWide
-        // Compact hero on tablets/landscape — 140dp instead of 180dp so
-        // the torn banner doesn't dominate the short vertical space.
-        val heroTotal = if (wide) 140.dp + SettingsHeroSheetExtent else SettingsHeroTotalHeight
         val gridState = rememberLazyGridState()
+        // RESTORED (user request) — STICKY HERO: the grid records into a
+        // local capture; the hero is pinned ON TOP of it after the grid,
+        // so rows scroll UP BEHIND the ragged tear and the hero's back
+        // pill refracts them with REAL liquid glass.
+        val glassBackdrop = rememberLayerBackdrop()
         // v27t — wide windows (tablet / landscape) render the two-pane
         // master-detail layout ([SettingsTwoPaneHub]): the full settings nav
         // list stays on the left while the selected page's options show on
@@ -744,8 +823,8 @@ fun SettingsHubScreen(navController: NavController) {
             LazyVerticalGrid(
                 state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = heroTotal + 10.dp, bottom = 24.dp),
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -830,15 +909,16 @@ fun SettingsHubScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = heroTotal + 10.dp, bottom = 16.dp)
+                .padding(top = 10.dp, bottom = 16.dp)
         )
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
+        // Pinned hero, drawn on TOP of the grid — cards slide under the
+        // ragged tear as they scroll up.
         SettingsHeroHeader(
             title = "Settings",
             subtitle = "Tune Curio your way",
             onBack = { navController.popBackStack() },
-            compact = wide
+            compact = wide,
+            glassBackdrop = glassBackdrop
         )
         } else {
             SettingsTwoPaneHub(
@@ -1018,6 +1098,8 @@ private fun sectionPageFor(route: String): SettingsPage? = when (route) {
     CurioRoutes.SETTINGS_PREFERENCES -> SettingsPage.PREFERENCES
     CurioRoutes.SETTINGS_RECORDING -> SettingsPage.RECORDING
     CurioRoutes.SETTINGS_DATA -> SettingsPage.DATA
+    CurioRoutes.EXPERIMENTS -> null // standalone screen, not a section page
+    CurioRoutes.USER_EXPERIMENTS -> null // standalone screen
     else -> null
 }
 
@@ -1134,7 +1216,9 @@ private val SettingsSections = listOf(
                     // in here from the old Explore section so they stay one
                     // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
-                    SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY)
+                    SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try features before they ship", CurioRoutes.USER_EXPERIMENTS),
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "Dev page", "Experimental features and developer options", CurioRoutes.EXPERIMENTS)
                 )
             )
         )

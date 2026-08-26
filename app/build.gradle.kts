@@ -60,8 +60,8 @@ android {
         // v113 — 1.1.0: new cosmic launcher icon + the accumulated feature
         // releases (Updates page, auto backup, dark mode, …). versionCode is
         // date-based; 20260920 is the +1 bump over the previous 20260919.
-        versionCode = 20260920
-        versionName = envReleaseVersion ?: "1.1.0"
+        versionCode = 20260921
+        versionName = envReleaseVersion ?: "1.1.1"
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.

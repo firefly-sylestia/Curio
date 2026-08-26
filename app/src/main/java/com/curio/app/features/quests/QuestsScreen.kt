@@ -81,7 +81,6 @@ import com.curio.app.data.PromoMode
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -121,6 +120,9 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Quests & levels — Curio's gamification home (v8.0).
@@ -204,6 +206,7 @@ fun QuestsScreen(navController: NavController) {
         navController.navigateToQuestRoute(route)
     }
     val listState = rememberLazyListState()
+val glassBackdrop = rememberLayerBackdrop()
 
     Box(
         modifier = Modifier
@@ -221,18 +224,17 @@ fun QuestsScreen(navController: NavController) {
                 activeCat = CurioCategories.byId(CategoryId.WILDCARD)
             )
         }
-        // The hero is drawn LAST (on top of the scroll content): the quest
-        // cards scroll UP and disappear behind the ragged tear instead of
-        // clipping at a straight line — the same overlay construction as
-        // every settings screen.
+        // v255 — SCROLLING HERO (the Home/Profile construction): the banner
+        // lives INSIDE the list as the first item and scrolls away with the
+        // page.
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 10.dp, bottom = 20.dp),
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // v8.5 — Pet hero: the level card is replaced by the pet
+                                // v8.5 — Pet hero: the level card is replaced by the pet
                 // companion (level + XP ring + growth line + speech bubble)
                 // when the pet is enabled; the classic level card returns
                 // when the toggle is off.
@@ -344,15 +346,13 @@ fun QuestsScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+                .padding(top = 10.dp, bottom = 16.dp)
         )
-        // Drawn on top of the scroll content — cards slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Quests & levels",
-            subtitle = "Grow your curiosity, one chain at a time",
-            onBack = { navController.popBackStack() }
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Quests & levels", subtitle = "Grow your curiosity, one chain at a time", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
         // v8.6 — non-blocking level-up celebration (spec §9.1): tap to
         // dismiss; also auto-dismisses after ~2.5s. The pet hops with the
         // claim and wears its proud mood.

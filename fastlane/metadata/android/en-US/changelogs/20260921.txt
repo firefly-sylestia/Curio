@@ -1,0 +1,84 @@
+FIX: Liquid glass crash recovery - auto-disables glass after 3 consecutive native crashes on budget devices (Infinix/Samsung on Android 16) to prevent SIGKILL on RenderThread.
+
+FIX: Tab switch animation now snaps instantly to the new tab on tap - no more sideways glide that looked glitchy especially on Cabinet.
+FIX: Pet Designer nav blob hold-and-drag now tracks the finger without spring lag - the page switches correctly when releasing on a different tab.
+FIX: Nav indicator text in Material light mode uses pastel fill ink instead of white-on-white.
+
+FIX: Share card export no longer has white background or rounded corners - the image now matches the gradient card exactly.
+FIX: Pet Designer nav bar active indicator now shows tab labels at rest again.
+FIX: Category chips in Cabinet and Topic Database always show frosted glass even when Clear Glass is enabled.
+FIX: Share card preview is now centered and full-size - the exported image matches the preview exactly, no more scaling mismatch.
+IMPROVE: Splash screen is faster - shorter delays, quicker catalog warm-up, so the app opens faster.
+IMPROVE: Category chips in Cabinet and Topic Database now have full Samsung frosted glass - stronger frost wash over blurred backdrop.
+ADD: Entry detail shares join the same share hub as Topic Reveal - your saved Quote, Review (with its star rating) and Note appear as options based on how you captured it.
+FIX: The shared card image now saves exactly what you see in the preview - same layout math, text sizes and placement.
+IMPROVE: Share cards redesigned - your category's own icon tiles the watermark, a cleaner gradient backdrop, a softer frost pane and a "via Curio" footer that never clips.
+IMPROVE: Review rating helper names your stars - "Not for me" through "Loved it" - instead of the generic "Rate quality" prompt.
+FIX: Detail page back/more bar aligned to match other screens' hero controls - no longer floats below the expanded menu.
+FIX: Pet Designer nav bar duplicate text on hold is gone - the crisp ink overlay is hidden in ghost-free mode.
+FIX: Category chips restored to clear liquid glass - milky frost boost reverted so cabinet and topic-database chips refract properly.
+IMPROVE: Fire widget icon enlarged (26dp -> 36dp) and streak count text larger for better visibility on the home screen.
+IMPROVE: Clock widget margin reduced (8dp -> 4dp) so the analog face fills more of the tile.
+ADD: Topic share cards - tap the new Share pill on Topic Reveal to send a beautiful frosted card of any discovery: 9:16 story or 3:4 classic layout, with the quick fact, your own custom fact or your review.
+REMOVE: The lab live wallpaper service is fully removed from the app - no more dead code behind the gone "Set as live wallpaper" button.
+ADD: Two new home-screen widgets from the Glass Widget Lab - a round frost analog clock with live ticking hands and a fire streak tile (launcher > Widgets > Curio).
+ADD: Nav indicator colour option - Auto follows your theme (Material, azure or rose), with White and Black as fixed picks.
+ADD: Indicator opacity slider - the frosted active nav pill's transparency is now customizable (Appearance), while the touch glass effect stays untouched.
+FIX: Nav active pill is frosted glass at rest again wearing your indicator colour, with the touch capsule effect when pressed and iOS-fast tab taps.
+FIX: Category and topic-database chips are extra frosty - deeper frost blur and a much stronger milk wash on small pills.
+REMOVE: The "Set as live wallpaper" button is gone from the Glass Widget Lab.
+ADD: 150+ new real topics across Mythology, Series and Anime - deeper catalogs with curated teasers and explore actions.
+FIX: Lab live wallpaper - the base wallpaper stays full-resolution and sharp (no more whole-screen blur), with true gaussian frost behind each pane.
+FIX: Liquid glass credit now points to Kyant's AndroidLiquidGlass.
+FIX: Lab live wallpaper now uses true gaussian frost (the same blur algorithm as the in-app lab), and a decode bug that made your chosen wallpaper vanish into a gradient is fixed.
+FIX: Widget corner radius now rounds the whole widget on every launcher, resizing re-renders the fill correctly, and the pill can shrink to 2 cells.
+FIX: Lab live wallpaper fidelity - smooth non-pixelated frost that matches the lab, per-widget blur strength, rim and text clipped inside each pane, real battery icon (no more leaked text), and fonts matching the lab exactly.
+FIX: The lab live wallpaper now uses your chosen wallpaper (or the device wallpaper on auto), keeps your exact widget placement, and the baked widgets show live data - real clock, session timer, streak, battery.
+ADD: The glass widget lab remembers your layout, sizes, blur and colors between visits.
+FIX: Glass widget settings redesigned - compact content pills, one accurate preview over a neutral backdrop, and a roomy custom color picker.
+FIX: Lab widgets are back to their proper sizes with correct text scale; the checkmark tile is gone.
+ADD: Per-widget hide in the lab - select a widget and tap Hide, or Hide/Show all at once.
+ADD: Corner roundness slider for the glass widget pane - from subtle 8dp to near-circle.
+ADD: Edit home screen widgets from inside the app - works even on launchers without long-press Edit support; Apply updates the home widget instantly.
+ADD: Lock screen mode - only the clock shows while locked, everything else pops back with a soft fade when you unlock.
+ADD: New analog clock widget with live ticking hands in the glass widget lab.
+ADD: Glass Widget Lab overhaul - hide/show all floating widgets, tap any widget to select it and edit its size, liquid-blur strength and text color, plus real time, live explore-session timing, a streak ring with fire icon, battery and date widgets.
+ADD: Save your lab composition as a live wallpaper - your wallpaper with your frosted widget layout behind every page.
+FIX: Custom widget color gets a real picker - a saturation/value square plus hue bar, with opacity as its own separate slider.
+FIX: The widget preview is now an accurate miniature - same gradient math, icon tile and text lines as the real widget.
+FIX: Glass widget style options are selectable again and the whole editor scrolls properly.
+ADD: Widget content is richer - a mode icon tile plus two-line text (title + detail) instead of one plain string.
+FIX: Glass widget styling is back - a live preview shows exactly how your pane will look as you pick Blur, a preset or a custom color.
+FIX: The Samsung wallpaper blur on the glass widget works again - and a new Blur option keeps that pure look; the harsh white border is gone.
+ADD: Glass widget pane styling - pick a preset (Light, Dark, Clear, Rose, Sky) or go fully custom with color and opacity sliders, per widget.
+ADD: Glass widget lab - new One UI frost tile to compare against the liquid-glass shapes.
+ADD: Glass widget customization - long-press the widget and tap Edit to choose what it shows: Streak, Quests, Cabinet or Sessions, with a light or dark frost pane.
+ADD: Glass widget lab auto-detect now offers All-files access so the real wallpaper can be read on Android 13+.
+FIX: The glass widget keeps its rounded corners on all launchers.
+FIX: Material theme now restyles the Spin filter + category picker heroes and their pills with the shared primaryContainer tear look instead of the category tear.
+FIX: The detail hero under Material hero tears wears the same airy container color as Home/Profile (was a dark saturated block), with matching ink.
+IMPROVE: Turning Material theme on now auto-enables "Material hero tears" so the whole banner family switches with it.
+REMOVE: The "Glass parallax tilt" experiment is gone - the gravity sensor no longer runs for it (performance/heat win; the feature never worked well).
+REVERT: The session screenshot watcher is withdrawn (permission + plumbing removed).
+NEW: Glass widget - add a frosted liquid-glass tile to your home screen showing your live streak; tap it to open Curio (long-press your launcher > Widgets > Curio).
+NEW: Glass widget - REAL wallpaper frost on Samsung One UI 7+: the launcher now blurs your actual wallpaper behind the widget (other launchers keep the frosted tile).
+ADD: Glass widget lab - Auto-detect button tries every system wallpaper-reading strategy, and your picked image now persists between visits.
+FIX: The Glass widget lab now renders REAL refraction unconditionally on Android 12+ - the shapes use the raw nav-bar glass recipe directly instead of a toggle-gated path that could fall back to a flat pane.
+FIX: Real blur on older devices now detects blank readbacks and retries before falling back - no more pills that look transparent with no blur.
+FIX: The explore bubble no longer shifts after expanding and no longer flickers mid-morph (window stays anchored; animations can't overshoot anymore).
+ADD: Glass widget lab - a "Set wallpaper image" picker, since auto-detecting the system wallpaper fails on many devices.
+ADD: The floating pet got richer life outside the app - periodic play-bow hops when idle and a double-tap spin.
+IMPROVE: The explore bubble expands noticeably snappier - the open morph settles in ~150ms instead of drifting open.
+IMPROVE: Home & Profile floating pills are now liquid glass from rest when Liquid glass is on - no more solid hero shade, so the dark mid-scroll state is gone for good.
+REVERT: The nav tab glyph crossfade is undone - the icon swap is instant again, exactly as before.
+NEW: Glass widget lab - drag REAL refracting liquid-glass widget shapes (clock tile, timer pill, glyph tile) over your actual wallpaper to test future widget designs.
+FIX: The Home and Profile floating pills no longer show a dark muddy shade mid-scroll - the solid-to-glass morph now commits to clear glass fast instead of fading a dark fill across the whole scroll range.
+STYLE: The explore bubble reads as a raised 3D bubble now - painted drop shadow, domed light-to-shade fill, a broader category glow ring on the small pill, and a domed sheen + hairline rim on the expanded panel.
+ADD: Real blur on older devices - an opt-in Experiments toggle brings REAL frosted glass to pre-Android-12 phones for the first time: an app-side blur engine draws the actual content scrolling behind the nav bar and Topic Reveal pills (no static fake veil).
+IMPROVE: Explore bubble drag is rock solid - the pill clamps against the screen edges live while dragging (no more rubber-band snap on release), and the expanded panel moves only from its header row so buttons and the note field never fight the gesture.
+IMPROVE: Explore bubble expand feels springy and tactile - one shared spring shapes the panel pop-in, plus a gentle press squish on the pill while touched.
+FIX: Floating pet now plays its full animation set outside the app - walk bob + lean + tail wag while it wanders or rides your drag, a lifted startled pose while held, and a dizzy recovery wobble right after you put it down.
+- Glass Lab: widgets show real icons/text again (clock, analog hands, streak fire, battery, date)
+- Glass Lab: frost tile now hides with per-widget Hide
+- Live wallpaper: panes render real baked glass - aligned blur + vibrancy of the wallpaper behind each pane, gloss + rim
+- Live wallpaper: text/icon sizes fixed to match lab dp sizes exactly

@@ -42,7 +42,6 @@ import com.curio.app.data.UnexploredTopic
 import com.curio.app.data.formatSessionShort
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -58,6 +57,9 @@ import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /** A single unified item for the Home preview and the full Recents page. */
 internal sealed interface RecentFeedItem {
@@ -134,6 +136,7 @@ fun RecentScreen(navController: NavController) {
         buildRecentFeed(entries, explored, unexplored)
     }
     val listState = rememberLazyListState()
+val glassBackdrop = rememberLayerBackdrop()
 
     Box(
         modifier = Modifier
@@ -155,27 +158,37 @@ fun RecentScreen(navController: NavController) {
         // feed scrolls up and disappears under the ragged tear instead of a
         // plain back-button + title row.
         ScreenEntrance {
+            // v255 — SCROLLING HERO (the Home/Profile construction): the
+            // banner leads the page — as the empty state's top block or the
+            // list's first item — and scrolls away with it.
             if (feed.isEmpty()) {
-                CurioEmptyState(
-                    glyph = CurioIcons.History,
-                    headline = "No discoveries yet",
-                    subtext = "Explore a topic or save a capture. Your recent finds will show up here.",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-                    modifier = Modifier.padding(top = SettingsHeroTotalHeight)
-                )
+                Column {
+                    SettingsHeroHeader(
+                        title = "Recents",
+                        subtitle = "Your latest discoveries, all in one place",
+                        onBack = { navController.popBackStack() }
+                    )
+                    CurioEmptyState(
+                        glyph = CurioIcons.History,
+                        headline = "No discoveries yet",
+                        subtext = "Explore a topic or save a capture. Your recent finds will show up here.",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = SettingsHeroTotalHeight + 10.dp,
+                        top = SettingsHeroTotalHeight,
                         bottom = 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(feed, key = { it.key }) { item ->
+                                        items(feed, key = { it.key }) { item ->
                         RecentFeedRow(item = item, navController = navController)
                     }
                     item { Spacer(Modifier.size(12.dp)) }
@@ -191,16 +204,14 @@ fun RecentScreen(navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+                    .padding(top = 10.dp, bottom = 16.dp)
             )
         }
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Recents", subtitle = "Your latest discoveries, all in one place", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
 
-        // ── Torn rose hero on top — rows disappear under the tear. ──
-        SettingsHeroHeader(
-            title = "Recents",
-            subtitle = "Your latest discoveries, all in one place",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
 

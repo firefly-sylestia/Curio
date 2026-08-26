@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -55,7 +56,6 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -76,6 +76,9 @@ import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
 import kotlinx.coroutines.launch
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Updates — the dedicated sub-page for the in-app updater (v112). Own UI
@@ -252,12 +255,17 @@ fun UpdatesScreen(navController: NavController) {
         }
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
+            val listState = rememberLazyListState()
+            val glassBackdrop = rememberLayerBackdrop()
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                // v255 — SCROLLING HERO: the banner is the list's first item
+                // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = SettingsHeroTotalHeight,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -538,13 +546,17 @@ fun UpdatesScreen(navController: NavController) {
                     }
                 }
             }
+
+            // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+            // content: rows slide under the ragged tear as they scroll up, and
+            // the back pill refracts them through REAL liquid glass.
+            SettingsHeroHeader(
+                title = "Updates",
+                        subtitle = "Your build and what's new",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
         }
-        // ── Torn rose hero on top — rows disappear under the tear.
-        SettingsHeroHeader(
-            title = "Updates",
-            subtitle = "Your build and what's new",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
 
@@ -696,8 +708,7 @@ private fun ReleaseNotesBlock(notes: String, accent: Color) {
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
             }
-        }
-    }
+        }    }
 }
 
 private enum class UpdateCheckUi { Idle, Checking, UpToDate, GithubAvailable, Failed }

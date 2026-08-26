@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v271 — Samsung One UI widget-blur attributes (undocumented launcher
+     feature): One UI Home 7+ captures and blurs the wallpaper region behind
+     any widget whose provider declares widgetStyle="colorful" + a real
+     widgetSize, and whose root view carries @android:id/background with a
+     1..254-alpha background. See glass_widget_layout / glass_widget_info. -->
+<resources>
+    <attr name="widgetStyle" format="integer">
+        <flag name="colorful" value="0x1" />
+        <flag name="monotone" value="0x2" />
+    </attr>
+    <attr name="widgetSize" format="integer">
+        <flag name="tiny" value="0x1" />
+        <flag name="small" value="0x2" />
+        <flag name="wideSmall" value="0x4" />
+        <flag name="medium" value="0x8" />
+        <flag name="large" value="0x10" />
+        <flag name="extraLarge" value="0x20" />
+        <flag name="extraLargeLong" value="0x40" />
+    </attr>
+</resources>

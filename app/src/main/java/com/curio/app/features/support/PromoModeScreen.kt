@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +50,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -66,6 +66,9 @@ import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.curioSageInk
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Promo mode — the hidden, share-ready promo page. v24: reached from the
@@ -116,12 +119,17 @@ fun PromoModeScreen(navController: NavController) {
         }
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
+            val listState = rememberLazyListState()
+            val glassBackdrop = rememberLayerBackdrop()
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                // v255 — SCROLLING HERO: the banner is the list's first item
+                // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = SettingsHeroTotalHeight,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -224,15 +232,19 @@ fun PromoModeScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
             }
+
+            // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+            // content: rows slide under the ragged tear as they scroll up, and
+            // the back pill refracts them through REAL liquid glass.
+            SettingsHeroHeader(
+                title = "Promo mode",
+                            subtitle = if (promoOn) "Demo content on · share-ready" else "Store-ready promo art",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
         }
-        // ── Torn rose hero on top — rows disappear under the tear (the
-        // settings overlay pattern).
-        SettingsHeroHeader(
-            title = "Promo mode",
-            subtitle = if (promoOn) "Demo content on · share-ready" else "Store-ready promo art",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
 
@@ -1047,6 +1059,5 @@ private fun PhoneMockup(
                     }
                 }
             }
-        }
-    }
+        }    }
 }

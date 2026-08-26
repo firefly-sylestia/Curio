@@ -1,6 +1,7 @@
 package com.curio.app.features.database
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -11,15 +12,19 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -50,6 +55,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
@@ -68,8 +75,9 @@ import com.curio.app.data.publicationYear
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
-import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.components.LiquidGlassPageNav
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -98,6 +106,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.layout.heightIn
 
 /**
  * Browse Topics — the whole Curio database in one place.
@@ -219,7 +229,12 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v27l — the filter pills + browse sections run alphabetically by
     // display name (Wildcard naturally sits near the end), so lanes are
     // easy to find instead of following the deck's default order.
-    val visibleCategories = (CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD)))
+    // v294 — "All" (WILDCARD) only shows when searching; default view is per-category.
+    val visibleCategories = if (searchActive) {
+        CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD))
+    } else {
+        CurioCategories.visible
+    }
         .distinctBy { it.id }
         .sortedBy { it.displayName.lowercase() }
     // The merged wildcard pool duplicates every canonical topic, so the
@@ -376,6 +391,15 @@ fun TopicDatabaseScreen(navController: NavController) {
             indexed.teaserKey.contains(needle) ||
             indexed.tagKeys.any { it.contains(needle) }
     }
+    // Title-first sort: exact title matches rank highest, then startsWith, then contains
+    val titleComparator = compareBy<IndexedTopic> { t ->
+        when {
+            t.nameKey == needle -> 0 // exact match
+            t.nameKey.startsWith(needle) -> 1 // starts with
+            t.nameKey.contains(needle) -> 2 // contains in title
+            else -> 3 // matched in other fields
+        }
+    }
     // Filtering and sorting happen on Dispatchers.Default. `remember` only
     // caches work; it still performs the entire sort on the UI thread.
     val rows by produceState<List<DatabaseRow>>(
@@ -396,7 +420,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     if (effectiveCat != null && effectiveCat != cat.id) return@forEach
                     val shown = topics.mapNotNull { indexById[it.id] }
                         .filter(matches)
-                        .sortedBy { it.nameKey }
+                        .sortedWith(titleComparator)
                     if (shown.isEmpty()) return@forEach
                     if (effectiveCat == null) {
                         add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
@@ -414,6 +438,41 @@ fun TopicDatabaseScreen(navController: NavController) {
             }
         }
     }
+
+    // ── v293 — PAGINATION (100 per page) ─────────────────────────────
+    // The topic rows are paginated so only a manageable slice renders per
+    // page. A floating nav bar at the bottom controls paging.
+    // Persistence: page number survives navigation via rememberSaveable.
+    var currentPage by rememberSaveable { mutableIntStateOf(0) }
+    // Topic-only rows (skip section headers for counting purposes).
+    val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }
+    val totalPages = ((topicOnlyRows.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
+    currentPage = currentPage.coerceIn(0, totalPages - 1)
+    // Slice the full rows list to only show the current page's topics,
+    // but keep section headers that belong to this page's range.
+    val topicStart = currentPage * PAGE_SIZE
+    val topicEnd = (topicStart + PAGE_SIZE).coerceAtMost(topicOnlyRows.size)
+    val pageTopicKeys = remember(topicOnlyRows, topicStart, topicEnd) {
+        topicOnlyRows.subList(topicStart, topicEnd).map { it.key }.toSet()
+    }
+    val paginatedRows = remember(rows, pageTopicKeys) {
+        // Keep all section headers + the topic rows for this page.
+        rows.filter { it.section != null || it.key in pageTopicKeys }
+    }
+    // Only reset to page 0 when CATEGORY filter changes (not search).
+    LaunchedEffect(effectiveCat) {
+        currentPage = 0
+    }
+    // Page nav visibility: hide when scrolling, show when stopped.
+    var pageNavVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling) pageNavVisible = false
+                else kotlinx.coroutines.delay(400); pageNavVisible = true
+            }
+    }
+
 
     // ── Scroll restore + persist ─────────────────────────────────────
     // The catalog loads asynchronously (produceState), so the first frames
@@ -499,7 +558,11 @@ fun TopicDatabaseScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                modifier = Modifier.fillMaxSize().layerBackdrop(chipGlassBackdrop),
+                // v291 — only capture when chip bar is visible.
+                modifier = Modifier.fillMaxSize()
+                    .then(if (chipsVisible && isLiquidGlassPillsActive())
+                        Modifier.layerBackdrop(chipGlassBackdrop)
+                    else Modifier),
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
@@ -554,7 +617,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     }
                 } else {
                     items(
-                        rows,
+                        paginatedRows,
                         key = { it.key },
                         // v49 — section headers and topic rows reuse their own
                         // LazyColumn slots instead of being treated as one
@@ -679,7 +742,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             ) + fadeOut(animationSpec = tween(220))
         ) {
             DatabaseStickyChipBar(
-                glassBackdrop = if (isLiquidGlassRequested()) chipGlassBackdrop else null,
+                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
                 listState = listState,
                 catalog = catalog,
                 totalTopics = totalTopics,
@@ -689,7 +752,23 @@ fun TopicDatabaseScreen(navController: NavController) {
             )
         }
 
-        // ── Torn rose hero on top — rows disappear under the tear. v36 —
+        // ── v294 — FLOATING PAGE NAV: reusable liquid glass component ──
+        if (totalPages > 1) {
+            LiquidGlassPageNav(
+                currentPage = currentPage,
+                totalPages = totalPages,
+                onPageChange = { currentPage = it },
+                visible = pageNavVisible,
+                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 28.dp)
+            )
+        }
+        // Hold-to-jump state
+        var showPagePicker by remember { mutableStateOf(false) }
+
+// ── Torn rose hero on top — rows disappear under the tear. v36 —
         // the Sort dropdown + Search pill ride the hero's top row again
         // (they briefly sat in a below-hero row in v33; the user wanted
         // them back on the banner), the title stays at the TOP
@@ -706,6 +785,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             searchFocus = searchFocus,
             searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
             titleAtTop = true,
+            glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
             // v42 — the Category pill lives INSIDE the hero beside the
             // title, directly under the Sort/Search pills.
             titleTrailing = { ink ->
@@ -714,9 +794,17 @@ fun TopicDatabaseScreen(navController: NavController) {
                     glyph = CurioIcons.Tune,
                     label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
                     ink = ink,
+                    // v292h — liquid glass category pill
+                    modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                        Modifier.liquidGlassCapsule(
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            backdrop = chipGlassBackdrop
+                        )
+                    else Modifier,
                     // v30 — chevron flips with the chips: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
-                        else CurioIcons.KeyboardArrowDown,
+                    trailingGlyph = if (categoryFilterOpen)
+                        CurioIcons.KeyboardArrowUp
+                    else CurioIcons.KeyboardArrowDown,
                     trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
                         else "Show category chips",
                     emphasized = categoryFilterOpen
@@ -740,7 +828,16 @@ fun TopicDatabaseScreen(navController: NavController) {
                         glyph = CurioIcons.Search,
                         contentDescription = "Search topics",
                         ink = ink,
-                        modifier = lm,
+                        modifier = lm.then(
+                            // v292h — liquid glass search pill matching the
+                            // back button and page nav pills.
+                            if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                                Modifier.liquidGlassCapsule(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                    backdrop = chipGlassBackdrop
+                                )
+                            else Modifier
+                        ),
                         // v85 — emphasized hero fill (the hero action-pill
                         // language).
                         emphasized = true
@@ -817,9 +914,11 @@ private fun DatabaseFilterChip(
             Modifier.liquidGlassCapsule(
                 container = if (selected) accent
                             else MaterialTheme.colorScheme.surfaceContainerLow,
-                washAlpha = if (selected) 0.60f else 0.45f,
+                // v292g — Samsung frosted look: forceFrost overrides
+                // the Clear-glass toggle so chips always frost.
+                washAlpha = if (selected) 0.68f else 0.55f,
                 backdrop = glassBackdrop,
-                alwaysClear = true
+                forceFrost = true
             ) else Modifier
     ) {
         Text(
@@ -848,6 +947,11 @@ private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + 2.dp
 private val DatabaseChipStickyThreshold = 56.dp
 /** The chip bar's layout height — scroll content starts below it. */
 private val DatabaseChipBarHeight = 52.dp
+/** Rows scrolled before the floating back-to-top arrow appears (≈ one
+ *  full screen — each row is roughly 70dp tall). */
+/** v292g — page size for Topic Database pagination. */
+private const val PAGE_SIZE = 100
+
 /** Rows scrolled before the floating back-to-top arrow appears (≈ one
  *  full screen — each row is roughly 70dp tall). */
 private const val BackToTopRowThreshold = 10

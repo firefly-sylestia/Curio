@@ -1379,5 +1379,1391 @@
       "2000s"
     ],
     "tier": 1
+  },
+  {
+    "id": "anime-code-geass",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Code Geass (2006)",
+    "teaser": "An exiled prince gains mind-control via eye contact — every chess-like battle was plotted on physical boards by writers who admitted losing track mid-season.",
+    "imageUrl": "",
+    "byline": "Sunrise",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Code Geass (2006) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Code Geass (2006) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Mech",
+      "Strategy",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 50
+  },
+  {
+    "id": "anime-samurai-champloo",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Samurai Champloo (2004)",
+    "teaser": "Hip-hop beats meet Edo-period swordplay — the breakdance-inspired swordfighting was choreographed by an animator who studied street battles footage.",
+    "imageUrl": "",
+    "byline": "Manglobe",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Samurai Champloo (2004) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Samurai Champloo (2004) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Samurai",
+      "Hip-hop",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 26
+  },
+  {
+    "id": "anime-trigun",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Trigun (1998)",
+    "teaser": "A pacifist gunslinger with a $$60 billion bounty — the 'love and peace' persona hides a backstory the anime only hints at until the final act.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Trigun (1998) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Trigun (1998) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Western",
+      "Sci-fi",
+      "1990s"
+    ],
+    "tier": 2,
+    "episodeCount": 26
+  },
+  {
+    "id": "anime-ghost-in-the-shell-stand-alone-complex",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Ghost in the Shell: Stand Alone Complex (2002)",
+    "teaser": "Cyber-brain detectives chasing a ghost hacker — its 'Stand Alone Complex' term entered academic papers on memetics and copycat crime.",
+    "imageUrl": "",
+    "byline": "Production I.G",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ghost in the Shell: Stand Alone Complex (2002) episodes 1–3",
+      "durationMinutes": 25,
+      "instruction": "Watch the first three episodes of Ghost in the Shell: Stand Alone Complex (2002) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Cyberpunk",
+      "Sci-fi",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 52
+  },
+  {
+    "id": "anime-ergo-proxy",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Ergo Proxy (2006)",
+    "teaser": "Dome-city androids gaining self-awareness in a wasteland — its Latin-heavy episode titles were chosen to mirror the philosophical texts each episode riffs on.",
+    "imageUrl": "",
+    "byline": "Manglobe",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ergo Proxy (2006) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Ergo Proxy (2006) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Cyberpunk",
+      "Philosophical",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 23
+  },
+  {
+    "id": "anime-konosuba",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "KonoSuba (2016)",
+    "teaser": "Isekai parody where the party is functionally useless — the writer framed it as punishment for choosing a goddess who mocks him constantly.",
+    "imageUrl": "",
+    "byline": "Studio Deen",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "KonoSuba (2016) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of KonoSuba (2016) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Isekai",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 10
+  },
+  {
+    "id": "anime-overlord",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Overlord (2015)",
+    "teaser": "A gamer stuck in his MMO villain avatar commits to evil convincingly — the show asks what happens when role-play stops feeling like pretend.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Overlord (2015) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Overlord (2015) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Isekai",
+      "Dark Fantasy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-sword-art-online",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Sword Art Online (2012)",
+    "teaser": "Ten thousand players trapped in a death-game MMO — the 'SAO incident' became shorthand in tech journalism for VR safety debates.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sword Art Online (2012) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Sword Art Online (2012) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Isekai",
+      "VR",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 25
+  },
+  {
+    "id": "anime-log-horizon",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Log Horizon (2013)",
+    "teaser": "Trapped gamers build law, economy, and cuisine — its food-cooking scenes used real chef consultation, spawning cookable recipe guides.",
+    "imageUrl": "",
+    "byline": "Satelight",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Log Horizon (2013) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Log Horizon (2013) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Isekai",
+      "Strategy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 25
+  },
+  {
+    "id": "anime-no-game-no-life",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "No Game No Life (2014)",
+    "teaser": "Step-siblings conquer a world where everything resolves via games — its rainbow palette is a deliberate rejection of standard isekai color grading.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "No Game No Life (2014) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of No Game No Life (2014) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Isekai",
+      "Games",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-clannad-after-story",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Clannad: After Story (2008)",
+    "teaser": "High-school romance continues into marriage and parenthood — its Ushio arc is frequently cited as the saddest television sequence in anime history.",
+    "imageUrl": "",
+    "byline": "Kyoto Animation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Clannad: After Story (2008) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Clannad: After Story (2008) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Drama",
+      "Romance",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 24
+  },
+  {
+    "id": "anime-angel-beats",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Angel Beats! (2010)",
+    "teaser": "Dead teens wage war against God in a purgatory high school — the girl-band insert songs charted commercially in Japan.",
+    "imageUrl": "",
+    "byline": "P.A. Works",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Angel Beats! (2010) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Angel Beats! (2010) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Supernatural",
+      "Drama",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-anohana",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Anohana (2011)",
+    "teaser": "Childhood friends reunite to grant a dead girl's wish — the ghost's visible-only-to-one conceit doubles as a grief metaphor the show never explains.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Anohana (2011) episodes 1–3",
+      "durationMinutes": 22,
+      "instruction": "Watch the first three episodes of Anohana (2011) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Drama",
+      "Supernatural",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 11
+  },
+  {
+    "id": "anime-the-melancholy-of-haruhi-suzumiya",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "The Melancholy of Haruhi Suzumiya (2006)",
+    "teaser": "A godlike girl unknowingly reshapes reality from boredom — its Endless Eight arc repeated the same episode eight times, testing viewer loyalty as art.",
+    "imageUrl": "",
+    "byline": "Kyoto Animation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Melancholy of Haruhi Suzumiya (2006) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of The Melancholy of Haruhi Suzumiya (2006) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Sci-fi",
+      "Slice of life",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 28
+  },
+  {
+    "id": "anime-toradora",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Toradora! (2008)",
+    "teaser": "A gentle delinquent and a tiny tsundere ally to woo each other's best friends — the Christmas chapter is a perennial Japanese rewatch tradition.",
+    "imageUrl": "",
+    "byline": "J.C. Staff",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Toradora! (2008) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Toradora! (2008) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Romance",
+      "Comedy",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 25
+  },
+  {
+    "id": "anime-haikyu",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Haikyu!! (2014)",
+    "teaser": "A short volleyball player refusing to stay benched — the animation team filmed real national-level matches and traced momentum arcs for rallies.",
+    "imageUrl": "",
+    "byline": "Production I.G",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Haikyu!! (2014) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Haikyu!! (2014) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Sports",
+      "Shonen",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 85
+  },
+  {
+    "id": "anime-yuri-on-ice",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Yuri!!! on Ice (2016)",
+    "teaser": "Figure skaters, anxiety, and a coaching bond that went global — its routines were choreographed by real Olympic program designer Kenji Miyamoto.",
+    "imageUrl": "",
+    "byline": "MAPPA",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Yuri!!! on Ice (2016) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Yuri!!! on Ice (2016) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Sports",
+      "Romance",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-megalo-box",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Megalo Box (2018)",
+    "teaser": "Boxing in a retro-future slum — produced as a 50th-anniversary homage to Ashita no Joe with intentionally gritty digital grain.",
+    "imageUrl": "",
+    "byline": "TMS Entertainment",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Megalo Box (2018) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Megalo Box (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Boxing",
+      "Sci-fi",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-soul-eater",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Soul Eater (2008)",
+    "teaser": "Weapons are people partnered with wielders at a academy — its gothic Bauhaus backgrounds were painted to look like a Tim Burton musical stage.",
+    "imageUrl": "",
+    "byline": "Bones",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Soul Eater (2008) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Soul Eater (2008) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Shonen",
+      "Fantasy",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 51
+  },
+  {
+    "id": "anime-blue-exorcist",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Blue Exorcist (2011)",
+    "teaser": "Satan's twin sons attend an exorcism academy — Kazue Katō designed Rin's blue flame to look warm rather than menacing, on purpose.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Blue Exorcist (2011) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Blue Exorcist (2011) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Supernatural",
+      "Shonen",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 25
+  },
+  {
+    "id": "anime-bungo-stray-dogs",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Bungo Stray Dogs (2016)",
+    "teaser": "Literary legends reborn as superpowered detectives — every ability references its namesake author's actual bibliography.",
+    "imageUrl": "",
+    "byline": "Bones",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bungo Stray Dogs (2016) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Bungo Stray Dogs (2016) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Supernatural",
+      "Mystery",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 61
+  },
+  {
+    "id": "anime-banana-fish",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Banana Fish (2018)",
+    "teaser": "A NYC gang leader and a Japanese photographer unravel a CIA experiment — the Vietnam-era conspiracy manga was updated carefully to modern Manhattan.",
+    "imageUrl": "",
+    "byline": "MAPPA",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Banana Fish (2018) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Banana Fish (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Crime",
+      "Drama",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 24
+  },
+  {
+    "id": "anime-grand-blue",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Grand Blue (2018)",
+    "teaser": "College diving club fueled by drinking games — its drunk-face animation style shifts deliberately into photorealistic comedy close-ups.",
+    "imageUrl": "",
+    "byline": "Zero-G",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Grand Blue (2018) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Grand Blue (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Comedy",
+      "College",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-nichijou",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Nichijou (2011)",
+    "teaser": "Absurd everyday life escalated to operatic scale — its 'daiku' wooden-sandal kick gag took months of storyboarding for three seconds.",
+    "imageUrl": "",
+    "byline": "Kyoto Animation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nichijou (2011) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Nichijou (2011) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Comedy",
+      "Surreal",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 26
+  },
+  {
+    "id": "anime-great-teacher-onizuka",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Great Teacher Onizuka (1999)",
+    "teaser": "An ex-biker becomes a homeroom teacher by chaos — the manga sold 50 million copies and changed how Japanese TV portrayed teachers.",
+    "imageUrl": "",
+    "byline": "Studio Pierrot",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Great Teacher Onizuka (1999) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Great Teacher Onizuka (1999) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "School",
+      "Comedy",
+      "1990s"
+    ],
+    "tier": 2,
+    "episodeCount": 43
+  },
+  {
+    "id": "anime-assassination-classroom",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Assassination Classroom (2015)",
+    "teaser": "Students must assassinate their tentacle teacher who is also the best educator alive — the premise doubles as a satire of exam culture.",
+    "imageUrl": "",
+    "byline": "Lerche",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Assassination Classroom (2015) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Assassination Classroom (2015) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "School",
+      "Action",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 22
+  },
+  {
+    "id": "anime-black-clover",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Black Clover (2017)",
+    "teaser": "A magic-less boy aims for wizard king through grit alone — its opening arc was widely criticized, then the show earned a reputation as a slow-burn comeback.",
+    "imageUrl": "",
+    "byline": "Pierrot",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Black Clover (2017) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Black Clover (2017) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Shonen",
+      "Fantasy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 170
+  },
+  {
+    "id": "anime-seven-deadly-sins",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Seven Deadly Sins (2014)",
+    "teaser": "Knights branded traitors reunite as bar owners — Suzuki Nakaba's giant-vs-human scale battles forced the animators to rethink perspective shots.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Seven Deadly Sins (2014) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Seven Deadly Sins (2014) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Shonen",
+      "Fantasy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 100
+  },
+  {
+    "id": "anime-magi",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Magi (2012)",
+    "teaser": "Alibaba and Aladdin adventure through dungeon economies — Ohtaka's worldbuilding mixes One Thousand and One Nights geography with trade-route politics.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Magi (2012) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Magi (2012) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Fantasy",
+      "Adventure",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 50
+  },
+  {
+    "id": "anime-future-diary",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Future Diary (2011)",
+    "teaser": "Twelve diary holders battle to become god — Yuno Gasai's yandere portrait defined an archetype so hard it's now a psychology-paper citation.",
+    "imageUrl": "",
+    "byline": "Asread",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Future Diary (2011) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Future Diary (2011) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Thriller",
+      "Psychological",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 26
+  },
+  {
+    "id": "anime-another",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Another (2012)",
+    "teaser": "A cursed classroom where classmates die mysteriously — the umbrella staircase scene is studied as a masterclass in dread pacing.",
+    "imageUrl": "",
+    "byline": "P.A. Works",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Another (2012) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Another (2012) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Horror",
+      "Mystery",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-higurashi-when-they-cry",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Higurashi: When They Cry (2006)",
+    "teaser": "A village festival repeats a massacre across timelines — the sound of cicadas was engineered to induce unease, becoming the show's signature.",
+    "imageUrl": "",
+    "byline": "Studio Deen",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Higurashi: When They Cry (2006) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Higurashi: When They Cry (2006) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Horror",
+      "Mystery",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 26
+  },
+  {
+    "id": "anime-elfen-lied",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Elfen Lied (2004)",
+    "teaser": "A mutant girl escapes a lab wearing only a helmet — its extreme violence vs innocence contrast divided critics and defined 2000s edgy anime.",
+    "imageUrl": "",
+    "byline": "ARMS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Elfen Lied (2004) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Elfen Lied (2004) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Horror",
+      "Supernatural",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-parasyte-the-maxim",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Parasyte: The Maxim (2014)",
+    "teaser": "Aliens possess human hands and heads — the manga's ecological warning was updated with modern antibiotic-resistance parallels.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Parasyte: The Maxim (2014) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Parasyte: The Maxim (2014) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Sci-fi",
+      "Horror",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 24
+  },
+  {
+    "id": "anime-baccano",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Baccano! (2007)",
+    "teaser": "Immortal mafia aboard a 1930s transcontinental train — its non-linear timeline jumps across decades, resolved like a magic trick in episode 14.",
+    "imageUrl": "",
+    "byline": "Brain's Base",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Baccano! (2007) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Baccano! (2007) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Mafia",
+      "Supernatural",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 16
+  },
+  {
+    "id": "anime-durarara",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Durarara!! (2010)",
+    "teaser": "Ikebukuro's gangs narrated by an anonymous chatroom — the headless rider Celty delivers packages, and her helmet became a cosplay icon.",
+    "imageUrl": "",
+    "byline": "Brain's Base",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Durarara!! (2010) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Durarara!! (2010) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Urban fantasy",
+      "Supernatural",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 36
+  },
+  {
+    "id": "anime-spice-and-wolf",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Spice and Wolf (2008)",
+    "teaser": "A traveling merchant partners with a wheat goddess — its medieval economics were accurate enough to be cited in currency-history blogs.",
+    "imageUrl": "",
+    "byline": "Imagin",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Spice and Wolf (2008) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Spice and Wolf (2008) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Fantasy",
+      "Romance",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 24
+  },
+  {
+    "id": "anime-cardcaptor-sakura",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Cardcaptor Sakura (1998)",
+    "teaser": "A girl captures sentient Clow cards — CLAMP designed outfits for every capture, and the costume changes became the series' signature.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cardcaptor Sakura (1998) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Cardcaptor Sakura (1998) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Magical girl",
+      "Fantasy",
+      "1990s"
+    ],
+    "tier": 2,
+    "episodeCount": 70
+  },
+  {
+    "id": "anime-sailor-moon",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Sailor Moon (1992)",
+    "teaser": "Middle-school girls transform into planetary guardians — Takeuchi's sailor uniforms were inspired by her school's own uniform regulations.",
+    "imageUrl": "",
+    "byline": "Toei Animation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sailor Moon (1992) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Sailor Moon (1992) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Magical girl",
+      "Romance",
+      "1990s"
+    ],
+    "tier": 2,
+    "episodeCount": 200
+  },
+  {
+    "id": "anime-yu-yu-hakusho",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Yu Yu Hakusho (1992)",
+    "teaser": "A delinquent dies saving a kid and becomes spirit detective — Togashi wrote the Dark Tournament arc while hospitalized, dictating notes from bed.",
+    "imageUrl": "",
+    "byline": "Studio Pierrot",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Yu Yu Hakusho (1992) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Yu Yu Hakusho (1992) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Shonen",
+      "Supernatural",
+      "1990s"
+    ],
+    "tier": 2,
+    "episodeCount": 112
+  },
+  {
+    "id": "anime-inuyasha",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Inuyasha (2000)",
+    "teaser": "A schoolgirl falls through a well into warring-states Japan — Rumiko Takahashi mixed genuine Sengoku history with yokai folklore.",
+    "imageUrl": "",
+    "byline": "Sunrise",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Inuyasha (2000) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Inuyasha (2000) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Fantasy",
+      "Romance",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 167
+  },
+  {
+    "id": "anime-ranma",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Ranma ½ (1989)",
+    "teaser": "A martial artist cursed to switch gender with cold water — Takahashi's gender-flip comedy broke ground for mainstream trans themes on TV.",
+    "imageUrl": "",
+    "byline": "Studio Deen",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ranma ½ (1989) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Ranma ½ (1989) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Comedy",
+      "Martial arts",
+      "1980s"
+    ],
+    "tier": 2,
+    "episodeCount": 161
+  },
+  {
+    "id": "anime-detective-conan",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Detective Conan (1996)",
+    "teaser": "A high-school detective poisoned into a child's body solves murders — Gosho Aoyama maintains a spreadsheet tracking every case's legal aftermath.",
+    "imageUrl": "",
+    "byline": "TMS Animation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Detective Conan (1996) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Detective Conan (1996) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Detective",
+      "Mystery",
+      "1990s"
+    ],
+    "tier": 2,
+    "episodeCount": 1100
+  },
+  {
+    "id": "anime-cells-at-work",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Cells at Work! (2018)",
+    "teaser": "Your body as an office of anthropomorphized cells — medical consultants verified each pathogen raid, and real immunology classes adopted clips.",
+    "imageUrl": "",
+    "byline": "David Production",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cells at Work! (2018) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Cells at Work! (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Educational",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-silver-spoon",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Silver Spoon (2013)",
+    "teaser": "A city genius enrolls in agricultural high school — Hiromu Arakawa drew from her own dairy-farm childhood, including calf-birth details.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Silver Spoon (2013) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Silver Spoon (2013) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Slice of life",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 22
+  },
+  {
+    "id": "anime-barakamon",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Barakamon (2014)",
+    "teaser": "A calligrapher exiled to an island learns looseness from village kids — Satsuki Yoshino based Handa's breakdown on her own critique trauma.",
+    "imageUrl": "",
+    "byline": "Kinema Citrus",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Barakamon (2014) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Barakamon (2014) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Slice of life",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-flying-witch",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Flying Witch (2016)",
+    "teaser": "A witch moves in with relatives and does nothing dramatic — its 'iyashikei' pacing treats grocery shopping as gently as spellcasting.",
+    "imageUrl": "",
+    "byline": "J.C. Staff",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Flying Witch (2016) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Flying Witch (2016) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Slice of life",
+      "Supernatural",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-mushishi",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Mushishi (2005)",
+    "teaser": "A wanderer treats ailments caused by primitive lifeforms — each episode is a standalone folk tale, and the green palette was tuned to feel like humidity.",
+    "imageUrl": "",
+    "byline": "Artland",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mushishi (2005) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Mushishi (2005) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Supernatural",
+      "Folklore",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 46
+  },
+  {
+    "id": "anime-natsume-s-book-of-friends",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Natsume's Book of Friends (2008)",
+    "teaser": "A boy inherits a book of yokai contracts and returns names — its melancholy warmth made it a comfort-watch staple across three decades of fans.",
+    "imageUrl": "",
+    "byline": "Brain's Base",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Natsume's Book of Friends (2008) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Natsume's Book of Friends (2008) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Supernatural",
+      "Slice of life",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 74
+  },
+  {
+    "id": "anime-kino-s-journey",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Kino's Journey (2003)",
+    "teaser": "A traveler spends three days per country, no more — each nation is a thought experiment about laws, freedom, or technology.",
+    "imageUrl": "",
+    "byline": "A.C.G.T",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kino's Journey (2003) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Kino's Journey (2003) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Travel",
+      "Philosophical",
+      "2000s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-girls-last-tour",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Girls' Last Tour (2017)",
+    "teaser": "Two girls drift through a dead megastructure city — the manga artist wrote it after a depression diagnosis, and the show preserves that quietness.",
+    "imageUrl": "",
+    "byline": "White Fox",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Girls' Last Tour (2017) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Girls' Last Tour (2017) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Post-apocalyptic",
+      "Slice of life",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-a-place-further-than-the-universe",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "A Place Further Than the Universe (2018)",
+    "teaser": "High-school girls join a civilian Antarctic expedition — the production consulted Japan's actual Antarctic program for ship and gear accuracy.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "A Place Further Than the Universe (2018) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of A Place Further Than the Universe (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Adventure",
+      "Drama",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-non-non-biyori",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Non Non Biyori (2013)",
+    "teaser": "Five students share one rural schoolhouse — its cicada-and-grass ambience was recorded in real Japanese countryside for authentic silence.",
+    "imageUrl": "",
+    "byline": "Silver Link",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Non Non Biyori (2013) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Non Non Biyori (2013) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Slice of life",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 36
+  },
+  {
+    "id": "anime-hinamatsuri",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Hinamatsuri (2018)",
+    "teaser": "A yakuza adopts a psychic girl who crash-lands in his apartment — its homelessness subplot is unexpectedly one of anime's most empathetic portrayals.",
+    "imageUrl": "",
+    "byline": "feel.",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hinamatsuri (2018) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Hinamatsuri (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Comedy",
+      "Sci-fi",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-chihayafuru",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Chihayafuru (2011)",
+    "teaser": "Karuta card-snatching as a competitive sport — the poetry memorization sparked real-world karuta club surges in Japanese high schools.",
+    "imageUrl": "",
+    "byline": "Madhouse",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Chihayafuru (2011) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Chihayafuru (2011) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Sports",
+      "Romance",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 75
+  },
+  {
+    "id": "anime-run-with-the-wind",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Run with the Wind (2018)",
+    "teaser": "Ten university students train for the Hakone Ekiden relay — the real marathon's course maps appear on screen accurately, kilometer by kilometer.",
+    "imageUrl": "",
+    "byline": "Production I.G",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Run with the Wind (2018) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Run with the Wind (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Sports",
+      "Drama",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 23
+  },
+  {
+    "id": "anime-golden-kamuy",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Golden Kamuy (2018)",
+    "teaser": "Post-Russo-Japanese-war treasure hunt through Hokkaido — every Ainu recipe shown is documented, and fans cook them from screenshots.",
+    "imageUrl": "",
+    "byline": "Geno Studio",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Golden Kamuy (2018) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Golden Kamuy (2018) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Historical",
+      "Adventure",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 49
+  },
+  {
+    "id": "anime-mob-psycho-100-ii",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Mob Psycho 100 II (2019)",
+    "teaser": "The sequel that turned sakuga into mainstream vocabulary — its 'confession' episode is analyzed in animation-storyboard courses.",
+    "imageUrl": "",
+    "byline": "Bones",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mob Psycho 100 II (2019) episodes 1–3",
+      "durationMinutes": 24,
+      "instruction": "Watch the first three episodes of Mob Psycho 100 II (2019) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Supernatural",
+      "Drama",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-erased",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Erased (2016)",
+    "teaser": "A mangaker travels back to childhood to stop kidnappings — its Satoru Kayo arc sparked debates on time-travel rules that still fill forums.",
+    "imageUrl": "",
+    "byline": "A-1 Pictures",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Erased (2016) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Erased (2016) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Mystery",
+      "Thriller",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 12
+  },
+  {
+    "id": "anime-beastars",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Beastars (2019)",
+    "teaser": "Carnivore-herbivore tensions at a boarding school — Orange blended CG fur physics with 2D faces, a technique the studio refined specifically here.",
+    "imageUrl": "",
+    "byline": "Orange",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Beastars (2019) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Beastars (2019) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Drama",
+      "Fantasy",
+      "2010s"
+    ],
+    "tier": 2,
+    "episodeCount": 24
+  },
+  {
+    "id": "anime-demon-slayer-mugen-train-arc",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Demon Slayer: Mugen Train Arc (2021)",
+    "teaser": "The film re-cut as seven TV episodes with a new first episode — it holds records as both a movie and a series launch.",
+    "imageUrl": "",
+    "byline": "ufotable",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Demon Slayer: Mugen Train Arc (2021) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Demon Slayer: Mugen Train Arc (2021) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Shonen",
+      "Supernatural",
+      "2020s"
+    ],
+    "tier": 2,
+    "episodeCount": 7
+  },
+  {
+    "id": "anime-odd-taxi",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Odd Taxi (2021)",
+    "teaser": "A walrus taxi driver connects missing-person threads in urban Japan — its hip-hop outro won awards, and the mystery's logic puzzle rewards rewatching.",
+    "imageUrl": "",
+    "byline": "OLM",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Odd Taxi (2021) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Odd Taxi (2021) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Mystery",
+      "Drama",
+      "2020s"
+    ],
+    "tier": 2,
+    "episodeCount": 13
+  },
+  {
+    "id": "anime-ranking-of-kings",
+    "categoryId": "ANIME",
+    "subtype": "Anime",
+    "name": "Ranking of Kings (2021)",
+    "teaser": "A deaf prince and a shadow assassin befriend across kingdoms — the fairytale art style hides one of anime's sharpest betrayal-redemption plots.",
+    "imageUrl": "",
+    "byline": "Wit Studio",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ranking of Kings (2021) episodes 1–3",
+      "durationMinutes": 23,
+      "instruction": "Watch the first three episodes of Ranking of Kings (2021) back to back — pay attention to how the opening frames the show's central promise, then check whether episode three starts paying it off or quietly renegotiating it."
+    },
+    "tags": [
+      "Fantasy",
+      "Drama",
+      "2020s"
+    ],
+    "tier": 2,
+    "episodeCount": 23
   }
 ]

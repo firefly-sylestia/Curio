@@ -112,6 +112,29 @@ class DampedDragAnimation(
         }
     }
 
+    // v292h — INSTANT SNAP: used by the tab-switch LaunchedEffect so the
+    // blob appears under the new tab immediately (no sideways glide).
+    // Unlike animateToValue this does NOT press/release — it only
+    // repositions the value and resets velocity.
+    fun snapToValue(value: Float) {
+        val clamped = value.coerceIn(valueRange)
+        animationScope.launch {
+            launch { valueAnimation.snapTo(clamped) }
+            launch { velocityAnimation.snapTo(0f) }
+        }
+    }
+
+    // v292h — DIRECT DRAG: snaps the value instantly during a drag
+    // gesture (no spring lag). The blob tracks the finger without
+    // the animation delay that updateValue's spring introduces.
+    fun setDragValue(value: Float) {
+        val clamped = value.coerceIn(valueRange)
+        animationScope.launch {
+            valueAnimation.snapTo(clamped)
+            updateVelocity()
+        }
+    }
+
     fun animateToValue(value: Float, spec: AnimationSpec<Float>? = null) {
         animationScope.launch {
             mutatorMutex.mutate {

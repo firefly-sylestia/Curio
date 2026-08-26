@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +46,8 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * Experimental controls live here instead of inside Appearance. Each switch
@@ -76,14 +80,17 @@ fun ExperimentsScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
-        // The hero banner runs up BEHIND the status bar (the header applies
-        // its own status-bar inset for the back pill) — Profile/Home style.
-        // The hero is drawn LAST (on top of the scroll content): the rows
-        // scroll UP and disappear behind the ragged tear instead of clipping
-        // at a straight line.
+        // RESTORED (user request) — STICKY HERO: the banner is pinned on top
+        // of the page and rows scroll UP BEHIND the ragged tear. The list
+        // records into a local capture so the hero's back pill can wear REAL
+        // liquid glass (rows bending through it) — the pill itself lives
+        // OUTSIDE this capture, so no self-sample cycle.
+        val listState = rememberLazyListState()
+        val glassBackdrop = rememberLayerBackdrop()
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            state = listState,
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // v223 — the "Spin visuals" section is GONE: all five
@@ -93,6 +100,128 @@ fun ExperimentsScreen(navController: NavController) {
             // SpinScreen are hardcoded true. The v25 Deck & controls card was
             // already gone (3D shuffle button always on, Pastel crown depth
             // passed), and v24 removed the Layout & input section.
+
+            // v293 — LIQUID GLASS + PILL GLOW moved here from Appearance.
+            item { CurioSectionLabel("Liquid glass") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
+                        AppPreferences.setLiquidGlassPillsEnabled(context, it)
+                    }
+                    if (AppPreferences.liquidGlassPillsState) {
+                        CurioSettingsDivider()
+                        ExperimentSwitchRow("Force glass", "Bypass device capability checks — always enable glass", AppPreferences.forceGlassEnabled) {
+                            AppPreferences.setForceGlassEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
+                        ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
+                            AppPreferences.setGlassClarityEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
+                        var showGlassTuning by remember { mutableStateOf(false) }
+                        CurioSettingsRow(
+                            CurioIcons.Tune,
+                            "Tune glass",
+                            "Reflection, refraction and blur — with a live preview"
+                        ) { showGlassTuning = true }
+                        if (showGlassTuning) {
+                            GlassTuningDialog(onDismiss = { showGlassTuning = false })
+                        }
+                    }
+                }
+                }
+            }
+            item { CurioSectionLabel("Appearance experiments") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
+                        AppPreferences.setPillGlowSubtleEnabled(context, it)
+                    }
+                }
+                }
+            }
+            // v293 — Pet behavior + explore options moved here from Preferences/Recording.
+            item { CurioSectionLabel("Pet & explore") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Voice-to-text
+                    ExperimentSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
+                        AppPreferences.setVoiceToTextEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // Live explore
+                    ExperimentSwitchRow("Live explore notification", "Ongoing timer with pause and stop", AppPreferences.liveNotificationsEnabledState) {
+                        AppPreferences.setLiveNotificationsEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // Pet outside app
+                    ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps — long-press to bring it home", AppPreferences.petOutsideAppState) { wanted ->
+                        if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent(
+                                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                        android.net.Uri.parse("package:" + context.packageName)
+                                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                )
+                            }
+                        } else {
+                            AppPreferences.setPetOutsideAppEnabled(context, wanted)
+                            com.curio.app.infrastructure.PetOverlayService.sync(context)
+                        }
+                    }
+                    CurioSettingsDivider()
+                    // Pet chatter segmented row
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Pet chatter", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                                Text("How chatty Curie is", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            listOf("Quiet", "Cozy", "Talkative").forEachIndexed { index, label ->
+                                val selected = when (AppPreferences.petChatterState) { "quiet" -> 0; "talkative" -> 2; else -> 1 } == index
+                                Surface(
+                                    onClick = { AppPreferences.setPetChatter(context, when (index) { 0 -> "quiet"; 2 -> "talkative"; else -> "cozy" }) },
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+                                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                }
+                            }
+                        }
+                    }
+                    CurioSettingsDivider()
+                    // Pet games segmented row
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Pet games", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                                Text("How often Curie starts games", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            listOf("Relaxed", "Normal", "Eager").forEachIndexed { index, label ->
+                                val selected = when (AppPreferences.petGameFrequencyState) { "relaxed" -> 0; "eager" -> 2; else -> 1 } == index
+                                Surface(
+                                    onClick = { AppPreferences.setPetGameFrequency(context, when (index) { 0 -> "relaxed"; 2 -> "eager"; else -> "normal" }) },
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+                                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+            }
             // v27 — paper & header experiments, all OFF by default.
             item { CurioSectionLabel("Paper & headers") }
             item {
@@ -186,13 +315,48 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setGlassClassicIndicatorEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Glass parallax tilt", "The glass pills sway against the phone's tilt for a floating depth effect (needs Liquid glass pills)", AppPreferences.glassParallaxState) {
-                        AppPreferences.setGlassParallaxEnabled(context, it)
-                        com.curio.app.ui.components.liquidglass.CurioGlassParallax.setEnabled(
-                            context, it && AppPreferences.liquidGlassPillsState
-                        )
+                    ExperimentSwitchRow(
+                        "Real blur (older devices)",
+                        "Below Android 12: an app-side blur engine draws the REAL content behind the nav bar and Topic Reveal pills as frosted glass instead of a static veil (needs Liquid glass pills)",
+                        AppPreferences.legacyGlassBlurState
+                    ) {
+                        AppPreferences.setLegacyGlassBlurEnabled(context, it)
+                    }
+                    CurioSettingsDivider()
+                    // v280 — custom blur engine: replaces Samsung One UI / system
+                    // blur paths with Curio's own CPU box blur for the glass widget
+                    // and live wallpaper (every launcher gets real blur).
+                    ExperimentSwitchRow(
+                        "Custom blur engine",
+                        "Replace Samsung/system blur with Curio's own blur in glass widgets and live wallpaper (every launcher gets real blur)",
+                        AppPreferences.customBlurEngineState
+                    ) {
+                        AppPreferences.setCustomBlurEngineEnabled(context, it)
                     }
                 }
+                }
+            }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                    // v264 — the glass widget lab: drag REAL refracting widget
+                    // shapes over your actual wallpaper (test bed for a future
+                    // home-screen widget design).
+                    com.curio.app.ui.components.CurioSettingsRow(
+                        CurioIcons.AutoAwesome,
+                        "Glass widget lab",
+                        "Drag real liquid-glass widget shapes over your wallpaper"
+                    ) {
+                        navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_LAB) { launchSingleTop = true }
+                    }
+                    // v281 - in-app editor: works even on launchers without
+                    // the long-press Edit flow for reconfigurable widgets.
+                    com.curio.app.ui.components.CurioSettingsRow(
+                        CurioIcons.Settings,
+                        "Edit home screen widgets",
+                        "Change mode, pane and corners of placed widgets in-app"
+                    ) {
+                        navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_EDITOR) { launchSingleTop = true }
+                    }
                 }
             }
             item {
@@ -201,12 +365,13 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
         }
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
+        // Drawn on TOP of the scroll content — rows slide under the ragged
+        // tear as they scroll up. Its back pill refracts the captured rows.
         SettingsHeroHeader(
-            title = "Experiments",
-            subtitle = "Try ideas before they ship",
-            onBack = { navController.popBackStack() }
+            title = "Dev page",
+            subtitle = "Experimental features and developer options",
+            onBack = { navController.popBackStack() },
+            glassBackdrop = glassBackdrop
         )
     }
 

@@ -1,3 +1,26 @@
+FIX: Compile errors from the sticky-back rollout (misplaced pills, missing imports).
+REVERT: Liquid glass and Clear glass stay OFF by default (the v256 default flip is undone).
+NEW: Glass tuning preview is a REAL draggable capsule over a collage - what you drag is how nav pills render.
+FIX: The detail page's glass more-menu is blurry by default now (was near-zero blur).
+FIX: Pet overlay companion compiles (missing imports).
+FIX: Scrolling heroes were inset from the screen sides - every settings-family banner is full-bleed again.
+ADD: The back pill returns as a sticky floating control (with the glass morph) once a scrolling hero moves up.
+FIX: Explore bubble expand is smooth now - the panel has a fixed width so the overlay window resizes in one step instead of fighting itself.
+NEW: Redesigned explore bubble panel - big chronometer readout, labeled Pause/Hide/Cancel controls, note field and Finish action.
+FIX: Pet Designer - the bare background strip behind the studio capsule is gone; the page runs edge-to-edge to the bottom.
+ADD: Pet outside the app - an opt-in overlay companion that floats over other apps (Pet Designer > Settings; drag, tap to hop, long-press to send home).
+ADD: Explore bubble wears the simulated liquid-glass pane when Liquid glass is on.
+CHANGE: Liquid glass and Clear glass are now ON by default.
+CHANGE: Below Android 12 the simulated glass is limited to the bottom nav and Topic Reveal - every other pill keeps its classic solid look (the faux-blur pills read badly there).
+FIX: Pill icons sat a touch too high - a small optical bias now seats glyph mass just below center in round buttons.
+FIX: Glass tuning dialog compiles again (missing imports).
+CHANGE: Every torn-hero page (Settings hub & sub-pages, Experiments, Backup, Support, Updates, Promo, Quests, Recycle bin, Recents, Manage categories) now scrolls its hero away with the page like Home & Profile - no more pinned tear.
+FIX: Home & Profile hero tears scroll away again - the v251 pinned-tear change is reverted.
+ADD: Explore bubble rests as a small icon-only pill and docks into the screen edge after idling (touch to slide it back out).
+IMPROVE: Explore bubble expands smoothly now; an untouched panel folds itself back up so it never keeps covering what you're watching.
+FIX: Pet hide-and-seek peeks on all screen sides, not just corners.
+FIX: Star-catch stars fall faster and stop piling up; taps no longer cancel a running game.
+IMPROVE: Glass tuning moves into a live-preview dialog; indicator-shadow slider removed.
 ADD: Sticky hero tear on Home & Profile - content slides under the pinned tear like Settings.
 ADD: iOS-style search field - flat gray capsule, Cancel while focused.
 FIX: Blob doubles killed per mode; full-content refraction restored under the finger.
@@ -309,3 +332,9 @@ REMOVE
 - Experiments: the five Spin visuals toggles are gone - all five looks are now the default.
 - The old update card in Support & diagnostics is gone — checking, release notes and installing now live on the dedicated Updates page.
 - Cabinet and Topic Browser: the sort control is gone — lists keep their default ordering (newest captures first / A–Z within each lane).
+
+HOTFIX v1.1.0-beta5:
+- Session note character limit increased to 600.
+- Detail hero fill reverted: uses Material primary only when Material theme is ON; original category gradient otherwise.
+- Settings/profile/quests icons reverted to original category-aware colors (not always Material primary).
+- Nav bar active accent reverted: uses Material primary only when Material theme is ON; category color otherwise.

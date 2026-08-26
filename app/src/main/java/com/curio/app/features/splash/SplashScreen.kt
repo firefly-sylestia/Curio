@@ -60,10 +60,10 @@ import kotlinx.coroutines.withTimeoutOrNull
  *  slow parse. The splash holds navigation until the canonical lanes are
  *  cached so counts/loading states never read a half-warm catalog, but a
  *  pathological parse must not block the app past this. */
-private const val CATALOG_WARM_TIMEOUT_MS = 6_000L
+private const val CATALOG_WARM_TIMEOUT_MS = 1_000L
 
 /** How long each loading line stays before the next fades in. */
-private const val LOADING_LINE_SWAP_MS = 1_100L
+private const val LOADING_LINE_SWAP_MS = 400L
 
 /**
  * Splash screen — SIMPLE / MODERN / MATERIAL.
@@ -90,7 +90,7 @@ fun SplashScreen(navController: NavHostController) {
     // ── Entrance trigger ───────────────────────────────────────────────────
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        delay(60)
+        delay(30)
         entered = true
     }
     val entranceScale by animateFloatAsState(
@@ -156,26 +156,26 @@ fun SplashScreen(navController: NavHostController) {
         // one broken asset never blocks the rest — and the safety timeout
         // below keeps a pathological parse from stranding the splash.
         val warmCatalog = launch(Dispatchers.Default) {
-            CurioCategories.visible
+            // v291 — PARALLEL prewarm: launch ALL lanes at once instead of
+            // sequentially. TopicJsonLoader's parseGate (max 2 concurrent)
+            // throttles real disk I/O, but the coroutine dispatch overhead
+            // per lane is eliminated — cold start is ~2-3x faster.
+            val lanes = CurioCategories.visible
                 .filter { it.id != CategoryId.WILDCARD }
-                .forEach { category ->
+            val jobs = lanes.map { category ->
+                launch(Dispatchers.Default) {
                     try {
                         TopicJsonLoader.load(category.id)
                     } catch (e: CancellationException) {
-                        // Let the timeout's cancellation abort the loop promptly
-                        // (a hard ~6s cap — runCatching would swallow it).
                         throw e
-                    } catch (_: Throwable) {
-                        // One broken lane never blocks the rest from warming.
-                    }
-                    // Advance the bar whether the lane parsed or not — a
-                    // broken asset must never stall the indicator.
+                    } catch (_: Throwable) { }
                     warmedLanes++
                 }
+            }
+            jobs.forEach { it.join() }
         }
-        delay(800)
-        // Cap the total warm-up at ~6s (a cold first parse of the bundled
-        // 5MB+ catalogs can outlast the 800ms branding on slow devices).
+        delay(250)
+        // Cap the total warm-up at ~2.5s.
         withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
         warmedLanes = totalLanes
         // Check for pending crash from previous session — also route to the

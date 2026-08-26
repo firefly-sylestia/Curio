@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,6 +66,8 @@ import com.curio.app.ui.theme.curioDialogContainerColor
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /** Dedicated data workspace for Curio backups and additive FieldMind import. */
 @Composable
@@ -319,17 +322,19 @@ fun BackupToolsScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
-        // The hero banner runs up BEHIND the status bar (the header applies
-        // its own status-bar inset for the back pill) — Profile/Home style.
-        // The hero is drawn LAST (on top of the scroll content): the rows
-        // scroll UP and disappear behind the ragged tear instead of clipping
-        // at a straight line.
+        // v255 — SCROLLING HERO (the Home/Profile construction): the banner
+        // lives INSIDE the list as the first item and scrolls away with the
+        // page. It still runs up behind the status bar (the header applies
+        // its own status-bar inset for the back pill).
+        val listState = rememberLazyListState()
+val glassBackdrop = rememberLayerBackdrop()
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight + 8.dp, bottom = 24.dp),
+            state = listState,
+            modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item { CurioSectionLabel("Your data") }
+                        item { CurioSectionLabel("Your data") }
             item {
                 // v115 — the backup rows sit in the shared settings card so
                 // the workspace reads as settings options, not transparent
@@ -483,12 +488,10 @@ fun BackupToolsScreen(navController: NavController) {
                 }
             }
         }
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Backup & restore",
-            subtitle = "Keep your captures safe",
-            onBack = { navController.popBackStack() }
-        )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Backup & restore", subtitle = "Keep your captures safe", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+
     }
 }

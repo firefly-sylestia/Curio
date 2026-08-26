@@ -49,7 +49,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -61,6 +60,9 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Manage Categories — see Curio category-management contract.
@@ -109,6 +111,7 @@ fun ManageCategoriesScreen(navController: NavController) {
     val dragStepPx = with(LocalDensity.current) { 76.dp.toPx() }
     // v5.8 — saveable-backed: keep the list's scroll position on rotation.
     val listState = rememberLazyListState()
+val glassBackdrop = rememberLayerBackdrop()
 
     fun shiftDraft(id: CategoryId, delta: Int) {
         val idx = draft.indexOfFirst { it.id == id }
@@ -151,18 +154,20 @@ fun ManageCategoriesScreen(navController: NavController) {
                 // v142 — full-bleed bottom: the NavHost no longer reserves
                 // the nav-bar slot for this route, so the page clears the
                 // gesture bar itself (the wash runs to the bottom edge).
-                modifier = Modifier
+                modifier = Modifier.layerBackdrop(glassBackdrop)
                     .fillMaxSize()
                     .navigationBarsPadding(),
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    // v255 — SCROLLING HERO: the banner is the list's first
+                    // item and scrolls away with the page.
+                    top = SettingsHeroTotalHeight,
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // ── Helper text + Reset order — flat caption under the hero
+                                // ── Helper text + Reset order — flat caption under the hero
                 item("help") {
                     Row(
                         modifier = Modifier
@@ -253,16 +258,13 @@ fun ManageCategoriesScreen(navController: NavController) {
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .navigationBarsPadding()
-                .padding(top = SettingsHeroTotalHeight + 10.dp, bottom = 16.dp)
+                .padding(top = 10.dp, bottom = 16.dp)
         )
+                // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+        // content: rows slide under the ragged tear as they scroll up, and
+        // the back pill refracts them through REAL liquid glass.
+        SettingsHeroHeader(title = "Manage categories", subtitle = "Show, hide, or reorder lanes", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
 
-        // Drawn on top of the scroll content — rows slide under the ragged
-        // tear as they scroll up.
-        SettingsHeroHeader(
-            title = "Manage categories",
-            subtitle = "Show, hide, or reorder lanes",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
 

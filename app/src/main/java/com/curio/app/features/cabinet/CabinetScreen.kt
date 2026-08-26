@@ -97,7 +97,7 @@ import com.curio.app.ui.components.curioSearchFill
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
-import com.curio.app.ui.components.isLiquidGlassRequested
+import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -474,9 +474,14 @@ fun CabinetScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     // v245 — the grid records into the chip bar's LOCAL glass
                     // capture while keeping its entrance-animated modifier.
+                    // v291 — only capture when chips are visible: the backdrop
+                    // re-records the full grid every frame, which is expensive
+                    // when the chip bar is closed.
                     modifier = m
                         .fillMaxSize()
-                        .layerBackdrop(chipGlassBackdrop)
+                        .then(if (chipsVisible && isLiquidGlassPillsActive())
+                            Modifier.layerBackdrop(chipGlassBackdrop)
+                        else Modifier)
                 ) {
                     items(visibleEntries, key = { it.id }) { entry ->
                         // v8.38 — the Cabinet→Detail morph is gone: the detail
@@ -553,7 +558,7 @@ fun CabinetScreen(navController: NavController) {
             ) + fadeOut(animationSpec = tween(220))
         ) {
             CabinetStickyChipBar(
-                glassBackdrop = if (isLiquidGlassRequested()) chipGlassBackdrop else null,
+                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
                 gridState = gridState,
                 barTop = heroTotal,
                 entries = entries,
@@ -1038,7 +1043,7 @@ private fun BoxScope.CabinetStickyChipBar(
                 )
             }
         }
-        itemsIndexed(CurioCategories.visible) { i, cat ->
+        itemsIndexed(CurioCategories.visible, key = { _, cat -> cat.id.name }) { i, cat ->
             val restSurface = cat.categoryChipSurface(MaterialTheme.colorScheme.surfaceVariant)
             CabinetChipPop(
                 index = i + 1,
@@ -1324,9 +1329,8 @@ private fun FilterChipLite(
                     Modifier.liquidGlassCapsule(
                         container = if (selected) accent
                                     else MaterialTheme.colorScheme.surfaceContainerLow,
-                        washAlpha = if (selected) 0.60f else 0.45f,
-                        backdrop = glassBackdrop,
-                        alwaysClear = true
+                        washAlpha = if (selected) 0.68f else 0.55f,
+                        backdrop = glassBackdrop
                     ) else Modifier
             )
             .curioDarkGlow(if (glass) 0.dp else 2.dp, RoundedCornerShape(50))

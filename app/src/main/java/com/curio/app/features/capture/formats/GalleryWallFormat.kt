@@ -85,6 +85,11 @@ import com.curio.app.ui.theme.pastelFillInk
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+/** v262 — mood-board QUOTES are hidden for now (user request). Flip to
+ *  false to bring the Add-quote option back. Existing saved entries with
+ *  quotes keep rendering them either way. */
+private const val MoodboardQuotesHidden = true
+
 // ── Mood board tile with pixel-based positioning ─────────────────────
 
 private data class MoodTile(
@@ -361,7 +366,9 @@ fun GalleryWallFormat(
             onExpand = { boardExpanded = true },
             onCollapse = {},
             // v7.19 — floating quote boxes live ON the board.
-            quoteState = quoteCards,
+            // v262 — quotes hidden for now: passing null removes the
+            // floating cards AND the Add-quote chip from the board.
+            quoteState = if (MoodboardQuotesHidden) null else quoteCards,
             onEditQuote = { editingQuoteIndex = it },
             // v7.22 — the board chip's quotes float ON the board.
             onAddQuote = { quoteCards.addCard(captionStyle, captionColor, onBoard = true) }
@@ -413,24 +420,23 @@ fun GalleryWallFormat(
             }
         )
 
-        // ── Quote boxes — the board chip's cards float ON the board above;
-        // THIS bottom section is for the separate BELOW-board cards: the
-        // Add button creates one below the board (onBoard = false), and the
-        // cards themselves render inline here (only the below-board subset —
-        // the on-board ones stay on the collage). The note-paper COLOR tool
-        // stays hidden for mood-board quotes (v7.19) while text formatting +
-        // paper style remain fully available.
-        QuoteCardsSection(
-            state = quoteCards,
-            header = "Quote boxes",
-            newCardStyle = { captionStyle },
-            newCardColor = { captionColor },
-            showColorTool = false,
-            cardsInline = true,
-            // v7.22 — only the below-board cards render + count here.
-            cardsFilter = { i -> quoteCards.onBoard.getOrElse(i) { true } == false },
-            onAddCard = { quoteCards.addCard(captionStyle, captionColor, onBoard = false) }
-        )
+        // ── Quote boxes — v262 HIDDEN FOR NOW (user request): the whole
+        // quotes feature keeps misbehaving in the mood board, so its Add
+        // option is switched off. Flip [MoodboardQuotesHidden] to false to
+        // restore. Saved entries that already carry quotes still render them.
+        if (!MoodboardQuotesHidden) {
+            QuoteCardsSection(
+                state = quoteCards,
+                header = "Quote boxes",
+                newCardStyle = { captionStyle },
+                newCardColor = { captionColor },
+                showColorTool = false,
+                cardsInline = true,
+                // v7.22 — only the below-board cards render + count here.
+                cardsFilter = { i -> quoteCards.onBoard.getOrElse(i) { true } == false },
+                onAddCard = { quoteCards.addCard(captionStyle, captionColor, onBoard = false) }
+            )
+        }
     }
 
     // ── Floating quote edit dialog (v7.19) — full rich-text editor for
@@ -530,7 +536,9 @@ fun GalleryWallFormat(
                     onCollapse = { boardExpanded = false },
                     // v7.19 — floating quote boxes also render in the
                     // full-screen editor.
-                    quoteState = quoteCards,
+                    // v262 — quotes hidden for now: passing null removes the
+            // floating cards AND the Add-quote chip from the board.
+            quoteState = if (MoodboardQuotesHidden) null else quoteCards,
                     onEditQuote = { editingQuoteIndex = it },
                     // v7.22 — the board chip's quotes float ON the board.
                     onAddQuote = { quoteCards.addCard(captionStyle, captionColor, onBoard = true) },

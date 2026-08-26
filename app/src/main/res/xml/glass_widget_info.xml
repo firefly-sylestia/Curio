@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v267 — the liquid-glass home-screen widget (frosted tile over the
+     wallpaper; RemoteViews can't refract per-pixel, so the glass look is
+     baked into the drawable layers). -->
+<!-- v272 — per-widget customization: config opens on placement AND on
+     long-press → Edit (reconfigurable). -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:minWidth="120dp"
+    android:minHeight="56dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:maxResizeWidth="320dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="10800000"
+    android:widgetCategory="home_screen"
+    android:description="@string/glass_widget_desc"
+    android:configure="com.curio.app.infrastructure.GlassWidgetConfigActivity"
+    android:widgetFeatures="reconfigurable"
+    app:widgetStyle="colorful"
+    app:widgetSize="small|wideSmall|medium|large" />

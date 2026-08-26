@@ -1797,11 +1797,17 @@ private fun FilterSheet(
             // v91 — the hero SHADE family: the calm/deep header accent the
             // Home/Detail banners wear (the raw themedAccent read brighter
             // than the app's hero shade).
-            val filterHeroFill = cat.headerAccent()
+            // v270 — MATERIAL LOOK: with the Material theme on, the filter
+            // hero (and every pill derived from its ink) wears the shared
+            // primaryContainer/onPrimaryContainer tear family instead of
+            // the category tear.
+            val filterHeroFill = if (materialThemeOn) MaterialTheme.colorScheme.primaryContainer
+                else cat.headerAccent()
             // v108 — hero-header ink: dark reads cream-white on the deep
             // banner (never the pastel light twin that washes out) — the
             // same ink the Cabinet/Home hero titles use.
-            val filterHeroInk = cat.heroHeaderInk()
+            val filterHeroInk = if (materialThemeOn) MaterialTheme.colorScheme.onPrimaryContainer
+                else cat.heroHeaderInk()
             val filterHeroTorn = remember(filterHeroSeed) {
                 SoftTornBottomShape(filterHeroSeed, bold = true)
             }
@@ -2130,7 +2136,9 @@ private fun FilterSheet(
             shape = applyShape,
             // v113 — the SOLID accent fill (the chip's selected state);
             // the accent's readable ink keeps the label crisp.
-            color = cat.themedButtonFill(),
+            // v270 — Material look under the Material theme.
+            color = if (materialThemeOn) MaterialTheme.colorScheme.primary
+                else cat.themedButtonFill(),
             shadowElevation = 4.dp,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -2151,7 +2159,8 @@ private fun FilterSheet(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold
                     ),
-                    color = cat.themedButtonInk()
+                    color = if (materialThemeOn) MaterialTheme.colorScheme.onPrimary
+                        else cat.themedButtonInk()
                 )
             }
         }
@@ -4440,10 +4449,13 @@ private fun CategoryPickerSheet(
             // v91 — the hero SHADE family: the calm/deep header accent the
             // Home/Detail banners wear (the raw themedAccent read brighter
             // than the app's hero shade).
-            val pickerHeroFill = currentCat.headerAccent()
+            // v270 — MATERIAL LOOK: same shared tear family as the filter hero.
+            val pickerHeroFill = if (materialThemeOn) MaterialTheme.colorScheme.primaryContainer
+                else currentCat.headerAccent()
             // v108 — hero-header ink: dark reads cream-white on the deep
             // banner (never the pastel light twin that washes out).
-            val pickerHeroInk = currentCat.heroHeaderInk()
+            val pickerHeroInk = if (materialThemeOn) MaterialTheme.colorScheme.onPrimaryContainer
+                else currentCat.heroHeaderInk()
             val pickerHeroTorn = remember(pickerHeroSeed) {
                 SoftTornBottomShape(pickerHeroSeed, bold = true)
             }

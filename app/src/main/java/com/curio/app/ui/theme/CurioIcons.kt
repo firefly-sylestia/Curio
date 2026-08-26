@@ -374,10 +374,16 @@ fun CurioIcon(
             ),
             // v246 — the measured ink shift (see above), applied as a layout
             // offset so the glyph's INK — not its line box — sits centered.
+            // v256 — plus a small OPTICAL BIAS DOWNWARD (~4% of the icon
+            // box): pure geometric centering consistently read a touch high
+            // inside circular pills on device — round buttons look right
+            // when the glyph mass rides a hair BELOW the exact middle.
             onTextLayout = { layout ->
                 val inkBounds = runCatching { layout.getBoundingBox(0) }.getOrNull()
                 if (inkBounds != null && layout.size.height > 0) {
-                    inkShiftPx = layout.size.height / 2f - (inkBounds.top + inkBounds.bottom) / 2f
+                    inkShiftPx = layout.size.height / 2f -
+                        (inkBounds.top + inkBounds.bottom) / 2f +
+                        layout.size.height * 0.04f
                 }
             },
             modifier = Modifier.offset {

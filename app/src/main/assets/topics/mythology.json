@@ -1,1262 +1,3635 @@
 [
- {
-  "id": "myth-the-epic-of-gilgamesh",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Epic of Gilgamesh",
-  "teaser": "The oldest surviving work of literature — written 4,000 years ago on clay tablets, it already contains a flood story that predates Noah, and the hero's quest for immortality ends with him learning to accept death.",
-  "imageUrl": "",
-  "byline": "Mesopotamia",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Epic of Gilgamesh",
-   "durationMinutes": 30,
-   "instruction": "Read the tablet where Gilgamesh loses his best friend Enkidu — the grief is the point. The story's genius is that the hero's 'greatness' is his willingness to be mortal."
+  {
+    "id": "myth-the-epic-of-gilgamesh",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Epic of Gilgamesh",
+    "teaser": "The oldest surviving work of literature — written 4,000 years ago on clay tablets, it already contains a flood story that predates Noah, and the hero's quest for immortality ends with him learning to accept death.",
+    "imageUrl": "",
+    "byline": "Mesopotamia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Epic of Gilgamesh",
+      "durationMinutes": 30,
+      "instruction": "Read the tablet where Gilgamesh loses his best friend Enkidu — the grief is the point. The story's genius is that the hero's 'greatness' is his willingness to be mortal."
+    },
+    "tags": [
+      "Epic",
+      "Sumerian",
+      "Ancient"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Epic",
-   "Sumerian",
-   "Ancient"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-trojan-war",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Trojan War",
-  "teaser": "A ten-year war fought over a woman — or over trade routes, depending on the historian — and the only surviving account is a poem about the anger of one man, not the war itself.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Trojan War",
-   "durationMinutes": 30,
-   "instruction": "Read the Iliad's opening scene — the rage of Achilles is the plot, and the war is the backdrop. The story's genius is that the 'hero' is the one who refuses to fight."
+  {
+    "id": "myth-the-trojan-war",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Trojan War",
+    "teaser": "A ten-year war fought over a woman — or over trade routes, depending on the historian — and the only surviving account is a poem about the anger of one man, not the war itself.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Trojan War",
+      "durationMinutes": 30,
+      "instruction": "Read the Iliad's opening scene — the rage of Achilles is the plot, and the war is the backdrop. The story's genius is that the 'hero' is the one who refuses to fight."
+    },
+    "tags": [
+      "Epic",
+      "Greek",
+      "War"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Epic",
-   "Greek",
-   "War"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-odyssey",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Odyssey",
-  "teaser": "Homer's epic about a man trying to get home for 10 years — every monster he meets is a version of the temptation to give up, and the poem's real subject is memory: who remembers you while you're gone.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Odyssey",
-   "durationMinutes": 30,
-   "instruction": "Read the encounter with the Sirens — the hero has himself tied to the mast so he can hear the song without dying. The story's genius is that the 'home' he returns to is strangers."
+  {
+    "id": "myth-the-odyssey",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Odyssey",
+    "teaser": "Homer's epic about a man trying to get home for 10 years — every monster he meets is a version of the temptation to give up, and the poem's real subject is memory: who remembers you while you're gone.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Odyssey",
+      "durationMinutes": 30,
+      "instruction": "Read the encounter with the Sirens — the hero has himself tied to the mast so he can hear the song without dying. The story's genius is that the 'home' he returns to is strangers."
+    },
+    "tags": [
+      "Epic",
+      "Greek",
+      "Adventure"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Epic",
-   "Greek",
-   "Adventure"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-ragnarok",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Ragnarök",
-  "teaser": "The Norse apocalypse — the gods know it's coming and prepare anyway, and the world is destroyed and reborn. Unlike most mythologies, Norse gods are mortal, which is the point.",
-  "imageUrl": "",
-  "byline": "Norse",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Ragnarök",
-   "durationMinutes": 30,
-   "instruction": "Read the prophecy of Ragnarök and notice the gods prepare without hope. The story's genius is that the doom IS the theology: courage in the face of certain loss."
+  {
+    "id": "myth-ragnarok",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Ragnarök",
+    "teaser": "The Norse apocalypse — the gods know it's coming and prepare anyway, and the world is destroyed and reborn. Unlike most mythologies, Norse gods are mortal, which is the point.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ragnarök",
+      "durationMinutes": 30,
+      "instruction": "Read the prophecy of Ragnarök and notice the gods prepare without hope. The story's genius is that the doom IS the theology: courage in the face of certain loss."
+    },
+    "tags": [
+      "Myth",
+      "Norse",
+      "Apocalypse"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Norse",
-   "Apocalypse"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-odin-s-sacrifice",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Odin's Sacrifice",
-  "teaser": "The All-Father hung himself from Yggdrasil for nine days to learn the runes — the sacrifice of self for knowledge is the template for every 'forbidden wisdom' story since.",
-  "imageUrl": "",
-  "byline": "Norse",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Odin's Sacrifice",
-   "durationMinutes": 30,
-   "instruction": "Read the Havamal passage where Odin describes hanging from the tree — the 'wounded by spear, offered to Odin, myself to myself' line is the thesis. The story's genius is that wisdom costs the self."
+  {
+    "id": "myth-odin-s-sacrifice",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Odin's Sacrifice",
+    "teaser": "The All-Father hung himself from Yggdrasil for nine days to learn the runes — the sacrifice of self for knowledge is the template for every 'forbidden wisdom' story since.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Odin's Sacrifice",
+      "durationMinutes": 30,
+      "instruction": "Read the Havamal passage where Odin describes hanging from the tree — the 'wounded by spear, offered to Odin, myself to myself' line is the thesis. The story's genius is that wisdom costs the self."
+    },
+    "tags": [
+      "Myth",
+      "Norse",
+      "Wisdom"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Norse",
-   "Wisdom"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-thor-s-hammer",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Thor's Hammer",
-  "teaser": "The hammer Mjolnir was forged by dwarves after Loki's bet — the story where Thor has to dress as a bride to get it back is the funniest myth in the Norse canon, and the hammer's 'worthiness' was added by Marvel.",
-  "imageUrl": "",
-  "byline": "Norse",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Thor's Hammer",
-   "durationMinutes": 30,
-   "instruction": "Read the story of Thor's stolen hammer and the bridal disguise — the gods' embarrassment is the comedy. The story's genius is that the 'mightiest god' wins by being ridiculous."
+  {
+    "id": "myth-thor-s-hammer",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Thor's Hammer",
+    "teaser": "The hammer Mjolnir was forged by dwarves after Loki's bet — the story where Thor has to dress as a bride to get it back is the funniest myth in the Norse canon, and the hammer's 'worthiness' was added by Marvel.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thor's Hammer",
+      "durationMinutes": 30,
+      "instruction": "Read the story of Thor's stolen hammer and the bridal disguise — the gods' embarrassment is the comedy. The story's genius is that the 'mightiest god' wins by being ridiculous."
+    },
+    "tags": [
+      "Myth",
+      "Norse",
+      "Comedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Norse",
-   "Comedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-anansi-the-spider",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Anansi the Spider",
-  "teaser": "The Akan trickster god of stories — Anansi is a spider who outwits gods and kings with his wits, and the name of the Ashanti people's storytelling tradition comes from his name.",
-  "imageUrl": "",
-  "byline": "West Africa",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Anansi the Spider",
-   "durationMinutes": 30,
-   "instruction": "Read the story where Anansi captures the world's wisdom in a pot — the pot is too heavy to carry alone. The story's genius is that the 'wisdom' is in the sharing."
+  {
+    "id": "myth-anansi-the-spider",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Anansi the Spider",
+    "teaser": "The Akan trickster god of stories — Anansi is a spider who outwits gods and kings with his wits, and the name of the Ashanti people's storytelling tradition comes from his name.",
+    "imageUrl": "",
+    "byline": "West Africa",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Anansi the Spider",
+      "durationMinutes": 30,
+      "instruction": "Read the story where Anansi captures the world's wisdom in a pot — the pot is too heavy to carry alone. The story's genius is that the 'wisdom' is in the sharing."
+    },
+    "tags": [
+      "Folk Tale",
+      "Trickster",
+      "Akan"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Folk Tale",
-   "Trickster",
-   "Akan"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-rainbow-serpent",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Rainbow Serpent",
-  "teaser": "The creator of the Dreamtime — the serpent shaped the land with its body, and the rivers are its tracks. The story is told on rock art thousands of years old.",
-  "imageUrl": "",
-  "byline": "Aboriginal Australia",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Rainbow Serpent",
-   "durationMinutes": 30,
-   "instruction": "Read the creation story and notice the land IS the story — the hills and rivers are the serpent's body. The myth's genius is that the landscape is the scripture."
+  {
+    "id": "myth-the-rainbow-serpent",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Rainbow Serpent",
+    "teaser": "The creator of the Dreamtime — the serpent shaped the land with its body, and the rivers are its tracks. The story is told on rock art thousands of years old.",
+    "imageUrl": "",
+    "byline": "Aboriginal Australia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Rainbow Serpent",
+      "durationMinutes": 30,
+      "instruction": "Read the creation story and notice the land IS the story — the hills and rivers are the serpent's body. The myth's genius is that the landscape is the scripture."
+    },
+    "tags": [
+      "Myth",
+      "Dreamtime",
+      "Creation"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Dreamtime",
-   "Creation"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-maui-and-the-sun",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Maui and the Sun",
-  "teaser": "The demigod Maui snared the sun with ropes woven from his sister's hair to slow it down so people could cook — the story is a founding myth of everyday convenience.",
-  "imageUrl": "",
-  "byline": "Polynesia",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Maui and the Sun",
-   "durationMinutes": 30,
-   "instruction": "Read the version where Maui beats the sun into submission — the 'sun's legs' are the ropes. The myth's genius is that the hero's prize is a longer day, not a treasure."
+  {
+    "id": "myth-maui-and-the-sun",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Maui and the Sun",
+    "teaser": "The demigod Maui snared the sun with ropes woven from his sister's hair to slow it down so people could cook — the story is a founding myth of everyday convenience.",
+    "imageUrl": "",
+    "byline": "Polynesia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Maui and the Sun",
+      "durationMinutes": 30,
+      "instruction": "Read the version where Maui beats the sun into submission — the 'sun's legs' are the ropes. The myth's genius is that the hero's prize is a longer day, not a treasure."
+    },
+    "tags": [
+      "Myth",
+      "Polynesian",
+      "Hero"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Polynesian",
-   "Hero"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-legend-of-king-arthur",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Legend of King Arthur",
-  "teaser": "The once and future king — whether he existed is debated, but the legend of the sword in the stone, Camelot and the Round Table shaped Western ideas of leadership for a thousand years.",
-  "imageUrl": "",
-  "byline": "Britain",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Legend of King Arthur",
-   "durationMinutes": 30,
-   "instruction": "Read the sword-in-the-stone scene and notice what makes Arthur king — not strength but restraint. The legend's genius is that the 'rightful king' is the one who doesn't want the crown."
+  {
+    "id": "myth-the-legend-of-king-arthur",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Legend of King Arthur",
+    "teaser": "The once and future king — whether he existed is debated, but the legend of the sword in the stone, Camelot and the Round Table shaped Western ideas of leadership for a thousand years.",
+    "imageUrl": "",
+    "byline": "Britain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Legend of King Arthur",
+      "durationMinutes": 30,
+      "instruction": "Read the sword-in-the-stone scene and notice what makes Arthur king — not strength but restraint. The legend's genius is that the 'rightful king' is the one who doesn't want the crown."
+    },
+    "tags": [
+      "Legend",
+      "Celtic",
+      "Chivalry"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Celtic",
-   "Chivalry"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-excalibur",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Excalibur",
-  "teaser": "The Lady of the Lake's sword — in the oldest versions, Arthur's first sword breaks and Excalibur is a replacement, and the sword's scabbard (not the blade) is the magic part.",
-  "imageUrl": "",
-  "byline": "Britain",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Excalibur",
-   "durationMinutes": 30,
-   "instruction": "Read the scene where Excalibur is returned to the lake — the hand rises to catch it. The legend's genius is that the sword must be given back, not kept."
+  {
+    "id": "myth-excalibur",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Excalibur",
+    "teaser": "The Lady of the Lake's sword — in the oldest versions, Arthur's first sword breaks and Excalibur is a replacement, and the sword's scabbard (not the blade) is the magic part.",
+    "imageUrl": "",
+    "byline": "Britain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Excalibur",
+      "durationMinutes": 30,
+      "instruction": "Read the scene where Excalibur is returned to the lake — the hand rises to catch it. The legend's genius is that the sword must be given back, not kept."
+    },
+    "tags": [
+      "Legend",
+      "Celtic",
+      "Sword"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Celtic",
-   "Sword"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-robin-hood",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Robin Hood",
-  "teaser": "The outlaw of Sherwood Forest — the 'robbing the rich to feed the poor' is a 16th-century addition, and the earliest ballads are about a yeoman defending his dignity against a sheriff's corruption.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Robin Hood",
-   "durationMinutes": 30,
-   "instruction": "Read the oldest ballad ('Robin Hood and the Monk') and notice Robin loses — the early stories are not invincible-hero fantasies. The legend's genius is that the outlaw is the law."
+  {
+    "id": "myth-robin-hood",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Robin Hood",
+    "teaser": "The outlaw of Sherwood Forest — the 'robbing the rich to feed the poor' is a 16th-century addition, and the earliest ballads are about a yeoman defending his dignity against a sheriff's corruption.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Robin Hood",
+      "durationMinutes": 30,
+      "instruction": "Read the oldest ballad ('Robin Hood and the Monk') and notice Robin loses — the early stories are not invincible-hero fantasies. The legend's genius is that the outlaw is the law."
+    },
+    "tags": [
+      "Legend",
+      "Outlaw",
+      "Folk"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Outlaw",
-   "Folk"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-beowulf",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Beowulf",
-  "teaser": "The oldest surviving English epic — the hero fights three monsters across his life, and the poem's real subject is what happens when the 'hero' grows old and the monster returns.",
-  "imageUrl": "",
-  "byline": "Anglo-Saxon England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Beowulf",
-   "durationMinutes": 30,
-   "instruction": "Read the dragon fight at the end — the aged hero wins but dies. The poem's genius is that the third monster is time itself."
+  {
+    "id": "myth-beowulf",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Beowulf",
+    "teaser": "The oldest surviving English epic — the hero fights three monsters across his life, and the poem's real subject is what happens when the 'hero' grows old and the monster returns.",
+    "imageUrl": "",
+    "byline": "Anglo-Saxon England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beowulf",
+      "durationMinutes": 30,
+      "instruction": "Read the dragon fight at the end — the aged hero wins but dies. The poem's genius is that the third monster is time itself."
+    },
+    "tags": [
+      "Epic",
+      "Anglo-Saxon",
+      "Monster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Epic",
-   "Anglo-Saxon",
-   "Monster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-minotaur",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Minotaur",
-  "teaser": "The half-bull half-man in the labyrinth — the maze was built by Daedalus to hide a royal shame, and Theseus navigates it with Ariadne's thread, the first 'unwinnable maze' solution in fiction.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Minotaur",
-   "durationMinutes": 30,
-   "instruction": "Read the Theseus story and notice the thread — the solution is not strength but a guide. The myth's genius is that the labyrinth is the mind."
+  {
+    "id": "myth-the-minotaur",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Minotaur",
+    "teaser": "The half-bull half-man in the labyrinth — the maze was built by Daedalus to hide a royal shame, and Theseus navigates it with Ariadne's thread, the first 'unwinnable maze' solution in fiction.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Minotaur",
+      "durationMinutes": 30,
+      "instruction": "Read the Theseus story and notice the thread — the solution is not strength but a guide. The myth's genius is that the labyrinth is the mind."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Monster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Monster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-icarus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Icarus",
-  "teaser": "The boy who flew too close to the sun — his father Daedalus built the wings, and the wax melted. The warning 'don't fly too high' was added later; the original moral is about youth ignoring craft.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Icarus",
-   "durationMinutes": 30,
-   "instruction": "Read the story and notice Daedalus' instructions — he warns about BOTH extremes, too high and too low. The myth's genius is that the tragedy is the middle path ignored."
+  {
+    "id": "myth-icarus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Icarus",
+    "teaser": "The boy who flew too close to the sun — his father Daedalus built the wings, and the wax melted. The warning 'don't fly too high' was added later; the original moral is about youth ignoring craft.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Icarus",
+      "durationMinutes": 30,
+      "instruction": "Read the story and notice Daedalus' instructions — he warns about BOTH extremes, too high and too low. The myth's genius is that the tragedy is the middle path ignored."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Tragedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Tragedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-pandora-s-box",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Pandora's Box",
-  "teaser": "The first woman in Greek myth opened a jar (not a box — a mistranslation) releasing all evils — but Hope remained inside, and the myth's real question is whether hope is a comfort or a curse.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pandora's Box",
-   "durationMinutes": 30,
-   "instruction": "Read the version where Hope stays in the jar — the ambiguity is the point. The myth's genius is that the 'evils' are the human condition, and hope is the unresolved part."
+  {
+    "id": "myth-pandora-s-box",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Pandora's Box",
+    "teaser": "The first woman in Greek myth opened a jar (not a box — a mistranslation) releasing all evils — but Hope remained inside, and the myth's real question is whether hope is a comfort or a curse.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pandora's Box",
+      "durationMinutes": 30,
+      "instruction": "Read the version where Hope stays in the jar — the ambiguity is the point. The myth's genius is that the 'evils' are the human condition, and hope is the unresolved part."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Creation"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Creation"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-prometheus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Prometheus",
-  "teaser": "The Titan who stole fire for humanity and was chained to a rock to have his liver eaten daily — the liver grew back, making his torment eternal, and his crime was 'thinking ahead' (his name means Forethought).",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Prometheus",
-   "durationMinutes": 30,
-   "instruction": "Read the Aeschylus play fragment where Prometheus refuses to apologize — the defiance is the character. The myth's genius is that the 'crime' is progress."
+  {
+    "id": "myth-prometheus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Prometheus",
+    "teaser": "The Titan who stole fire for humanity and was chained to a rock to have his liver eaten daily — the liver grew back, making his torment eternal, and his crime was 'thinking ahead' (his name means Forethought).",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Prometheus",
+      "durationMinutes": 30,
+      "instruction": "Read the Aeschylus play fragment where Prometheus refuses to apologize — the defiance is the character. The myth's genius is that the 'crime' is progress."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Tragedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Tragedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-medusa",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Medusa",
-  "teaser": "The snake-haired Gorgon whose gaze turns men to stone — the oldest versions have no backstory; the 'cursed by Poseidon in Athena's temple' version came later, and her face was worn on shields as armor.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Medusa",
-   "durationMinutes": 30,
-   "instruction": "Read the oldest reference in the Iliad — Medusa is just a face on a shield. The myth's genius is that the monster is the armor."
+  {
+    "id": "myth-medusa",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Medusa",
+    "teaser": "The snake-haired Gorgon whose gaze turns men to stone — the oldest versions have no backstory; the 'cursed by Poseidon in Athena's temple' version came later, and her face was worn on shields as armor.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Medusa",
+      "durationMinutes": 30,
+      "instruction": "Read the oldest reference in the Iliad — Medusa is just a face on a shield. The myth's genius is that the monster is the armor."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Monster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Monster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-perseus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Perseus",
-  "teaser": "The only Greek hero who gets a happy ending — he beheads Medusa using a mirrored shield, and his story is the template for 'the hero's journey' before Campbell codified it.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Perseus",
-   "durationMinutes": 30,
-   "instruction": "Read the Gorgon fight and notice Perseus uses the reflection, never looking directly — the indirect approach is the method. The myth's genius is that the 'mirror' is the strategy."
+  {
+    "id": "myth-perseus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Perseus",
+    "teaser": "The only Greek hero who gets a happy ending — he beheads Medusa using a mirrored shield, and his story is the template for 'the hero's journey' before Campbell codified it.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Perseus",
+      "durationMinutes": 30,
+      "instruction": "Read the Gorgon fight and notice Perseus uses the reflection, never looking directly — the indirect approach is the method. The myth's genius is that the 'mirror' is the strategy."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Hero"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Hero"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-twelve-labors-of-hercules",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Twelve Labors of Hercules",
-  "teaser": "The punishment for madness became the greatest quest list in myth — the labors (Nemean Lion, Hydra, Augean Stables...) are designed to be impossible, and Hercules wins some by trickery, not strength.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Twelve Labors of Hercules",
-   "durationMinutes": 30,
-   "instruction": "Read the Augean Stables labor — Hercules diverts two rivers instead of shoveling. The myth's genius is that the 'strength' is intelligence."
+  {
+    "id": "myth-the-twelve-labors-of-hercules",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Twelve Labors of Hercules",
+    "teaser": "The punishment for madness became the greatest quest list in myth — the labors (Nemean Lion, Hydra, Augean Stables...) are designed to be impossible, and Hercules wins some by trickery, not strength.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Twelve Labors of Hercules",
+      "durationMinutes": 30,
+      "instruction": "Read the Augean Stables labor — Hercules diverts two rivers instead of shoveling. The myth's genius is that the 'strength' is intelligence."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Hero"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Hero"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-theseus-and-the-labyrinth",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Theseus and the Labyrinth",
-  "teaser": "The hero who volunteered to be tribute — his thread through the maze is the origin of 'to find one's way', and the ending (abandoning Ariadne) is one of myth's crueler moments.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Theseus and the Labyrinth",
-   "durationMinutes": 30,
-   "instruction": "Read the story and notice Ariadne — she's the strategist, he's the muscle. The myth's genius is that the 'hero' is the one with the thread."
+  {
+    "id": "myth-theseus-and-the-labyrinth",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Theseus and the Labyrinth",
+    "teaser": "The hero who volunteered to be tribute — his thread through the maze is the origin of 'to find one's way', and the ending (abandoning Ariadne) is one of myth's crueler moments.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Theseus and the Labyrinth",
+      "durationMinutes": 30,
+      "instruction": "Read the story and notice Ariadne — she's the strategist, he's the muscle. The myth's genius is that the 'hero' is the one with the thread."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Adventure"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Adventure"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-orpheus-and-eurydice",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Orpheus and Eurydice",
-  "teaser": "The musician whose song moved the underworld — he was allowed to lead his wife out on one condition: don't look back. He looked. The myth is the template for every 'don't look' horror rule.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Orpheus and Eurydice",
-   "durationMinutes": 30,
-   "instruction": "Read the moment of the look back — the doubt is the tragedy. The myth's genius is that the 'condition' is the test of trust, and he fails it."
+  {
+    "id": "myth-orpheus-and-eurydice",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Orpheus and Eurydice",
+    "teaser": "The musician whose song moved the underworld — he was allowed to lead his wife out on one condition: don't look back. He looked. The myth is the template for every 'don't look' horror rule.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Orpheus and Eurydice",
+      "durationMinutes": 30,
+      "instruction": "Read the moment of the look back — the doubt is the tragedy. The myth's genius is that the 'condition' is the test of trust, and he fails it."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Tragedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Tragedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-narcissus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Narcissus",
-  "teaser": "The youth who fell in love with his reflection and drowned reaching for it — the flower that bears his name grows where he died, and 'narcissism' is the modern inheritance.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Narcissus",
-   "durationMinutes": 30,
-   "instruction": "Read the story and notice the reflection never loves back — the 'other' is a mirror. The myth's genius is that the self-love is self-loss."
+  {
+    "id": "myth-narcissus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Narcissus",
+    "teaser": "The youth who fell in love with his reflection and drowned reaching for it — the flower that bears his name grows where he died, and 'narcissism' is the modern inheritance.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Narcissus",
+      "durationMinutes": 30,
+      "instruction": "Read the story and notice the reflection never loves back — the 'other' is a mirror. The myth's genius is that the self-love is self-loss."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Tragedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Tragedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-sisyphus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Sisyphus",
-  "teaser": "The king condemned to roll a boulder uphill forever — his crime was cheating death TWICE, and Camus' essay made him the patron saint of the absurd: the struggle itself is the meaning.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Sisyphus",
-   "durationMinutes": 30,
-   "instruction": "Read Camus' last line — 'one must imagine Sisyphus happy'. The myth's genius is that the punishment is the metaphor for every human project."
+  {
+    "id": "myth-sisyphus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Sisyphus",
+    "teaser": "The king condemned to roll a boulder uphill forever — his crime was cheating death TWICE, and Camus' essay made him the patron saint of the absurd: the struggle itself is the meaning.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sisyphus",
+      "durationMinutes": 30,
+      "instruction": "Read Camus' last line — 'one must imagine Sisyphus happy'. The myth's genius is that the punishment is the metaphor for every human project."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Philosophy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Philosophy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-daedalus-and-icarus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Daedalus and Icarus",
-  "teaser": "The master craftsman who built the labyrinth and then escaped it with wings — the same genius who built the prison built the escape, and his son's fall is the cost of invention.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Daedalus and Icarus",
-   "durationMinutes": 30,
-   "instruction": "Read the escape scene and notice Daedalus watches his son die and keeps flying — the grief and the craft continue. The myth's genius is that the inventor is responsible for the invention."
+  {
+    "id": "myth-daedalus-and-icarus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Daedalus and Icarus",
+    "teaser": "The master craftsman who built the labyrinth and then escaped it with wings — the same genius who built the prison built the escape, and his son's fall is the cost of invention.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Daedalus and Icarus",
+      "durationMinutes": 30,
+      "instruction": "Read the escape scene and notice Daedalus watches his son die and keeps flying — the grief and the craft continue. The myth's genius is that the inventor is responsible for the invention."
+    },
+    "tags": [
+      "Myth",
+      "Greek",
+      "Craft"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Greek",
-   "Craft"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-phoenix",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Phoenix",
-  "teaser": "The bird that dies in flame and rises from its own ashes — the image appears in Egypt, Greece, Rome, and China independently, and the 'phoenix' is the most translated symbol in world myth.",
-  "imageUrl": "",
-  "byline": "Ancient",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Phoenix",
-   "durationMinutes": 30,
-   "instruction": "Read the Greek version where the phoenix is a bird that lives 500 years — the 'rebirth' is the promise. The myth's genius is that the symbol outlives every telling."
+  {
+    "id": "myth-the-phoenix",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Phoenix",
+    "teaser": "The bird that dies in flame and rises from its own ashes — the image appears in Egypt, Greece, Rome, and China independently, and the 'phoenix' is the most translated symbol in world myth.",
+    "imageUrl": "",
+    "byline": "Ancient",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Phoenix",
+      "durationMinutes": 30,
+      "instruction": "Read the Greek version where the phoenix is a bird that lives 500 years — the 'rebirth' is the promise. The myth's genius is that the symbol outlives every telling."
+    },
+    "tags": [
+      "Myth",
+      "Symbol",
+      "Rebirth"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Symbol",
-   "Rebirth"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-anubis",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Anubis",
-  "teaser": "The jackal-headed god of the dead — jackals were seen at graves, so the god who guards the dead was given their head, and Anubis weighs the heart against a feather in the judgment hall.",
-  "imageUrl": "",
-  "byline": "Ancient Egypt",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Anubis",
-   "durationMinutes": 30,
-   "instruction": "Read the Weighing of the Heart scene — the feather is the truth test. The myth's genius is that the 'judgment' is a balance, not a rulebook."
+  {
+    "id": "myth-anubis",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Anubis",
+    "teaser": "The jackal-headed god of the dead — jackals were seen at graves, so the god who guards the dead was given their head, and Anubis weighs the heart against a feather in the judgment hall.",
+    "imageUrl": "",
+    "byline": "Ancient Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Anubis",
+      "durationMinutes": 30,
+      "instruction": "Read the Weighing of the Heart scene — the feather is the truth test. The myth's genius is that the 'judgment' is a balance, not a rulebook."
+    },
+    "tags": [
+      "Myth",
+      "Egyptian",
+      "Death"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Egyptian",
-   "Death"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-osiris-and-isis",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Osiris and Isis",
-  "teaser": "The first resurrection myth in history — Osiris is dismembered and reassembled by Isis, and every Egyptian pharaoh's afterlife reenacts his story. The myth is 5,000 years old.",
-  "imageUrl": "",
-  "byline": "Ancient Egypt",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Osiris and Isis",
-   "durationMinutes": 30,
-   "instruction": "Read the reassembly scene and notice the missing piece — Osiris is incomplete. The myth's genius is that the 'resurrection' is a mending, not a miracle."
+  {
+    "id": "myth-osiris-and-isis",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Osiris and Isis",
+    "teaser": "The first resurrection myth in history — Osiris is dismembered and reassembled by Isis, and every Egyptian pharaoh's afterlife reenacts his story. The myth is 5,000 years old.",
+    "imageUrl": "",
+    "byline": "Ancient Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Osiris and Isis",
+      "durationMinutes": 30,
+      "instruction": "Read the reassembly scene and notice the missing piece — Osiris is incomplete. The myth's genius is that the 'resurrection' is a mending, not a miracle."
+    },
+    "tags": [
+      "Myth",
+      "Egyptian",
+      "Resurrection"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Egyptian",
-   "Resurrection"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-eye-of-horus",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Eye of Horus",
-  "teaser": "The eye torn out in a fight and restored — the Wedjat eye became the symbol of healing, and the 'eye' hieroglyph is the origin of the Rx symbol used in pharmacies today.",
-  "imageUrl": "",
-  "byline": "Ancient Egypt",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Eye of Horus",
-   "durationMinutes": 30,
-   "instruction": "Read the fight between Horus and Set — the eye's restoration is the plot. The myth's genius is that the 'healing' symbol is a wound made whole."
+  {
+    "id": "myth-the-eye-of-horus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Eye of Horus",
+    "teaser": "The eye torn out in a fight and restored — the Wedjat eye became the symbol of healing, and the 'eye' hieroglyph is the origin of the Rx symbol used in pharmacies today.",
+    "imageUrl": "",
+    "byline": "Ancient Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Eye of Horus",
+      "durationMinutes": 30,
+      "instruction": "Read the fight between Horus and Set — the eye's restoration is the plot. The myth's genius is that the 'healing' symbol is a wound made whole."
+    },
+    "tags": [
+      "Myth",
+      "Egyptian",
+      "Symbol"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Egyptian",
-   "Symbol"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-monkey-king",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Monkey King",
-  "teaser": "Sun Wukong — the stone-born monkey who learned 72 transformations and caused havoc in heaven until Buddha trapped him under a mountain for 500 years — is the hero of the 16th-century epic 'Journey to the West'.",
-  "imageUrl": "",
-  "byline": "China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Monkey King",
-   "durationMinutes": 30,
-   "instruction": "Read the scene where Sun Wukong challenges Buddha — the monkey tries to escape the Buddha's palm. The epic's genius is that the 'defeat' is the beginning of the journey."
+  {
+    "id": "myth-the-monkey-king",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Monkey King",
+    "teaser": "Sun Wukong — the stone-born monkey who learned 72 transformations and caused havoc in heaven until Buddha trapped him under a mountain for 500 years — is the hero of the 16th-century epic 'Journey to the West'.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Monkey King",
+      "durationMinutes": 30,
+      "instruction": "Read the scene where Sun Wukong challenges Buddha — the monkey tries to escape the Buddha's palm. The epic's genius is that the 'defeat' is the beginning of the journey."
+    },
+    "tags": [
+      "Epic",
+      "Chinese",
+      "Adventure"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Epic",
-   "Chinese",
-   "Adventure"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-jade-emperor",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Jade Emperor",
-  "teaser": "The supreme ruler of heaven in Chinese mythology — his court is a bureaucracy, and the myth's genius is that the 'emperor' is the mirror of earthly governance.",
-  "imageUrl": "",
-  "byline": "China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Jade Emperor",
-   "durationMinutes": 30,
-   "instruction": "Read the story where the Jade Emperor creates the zodiac race — the animals' order is the myth. The story's genius is that the 'order' is a story about effort."
+  {
+    "id": "myth-the-jade-emperor",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Jade Emperor",
+    "teaser": "The supreme ruler of heaven in Chinese mythology — his court is a bureaucracy, and the myth's genius is that the 'emperor' is the mirror of earthly governance.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Jade Emperor",
+      "durationMinutes": 30,
+      "instruction": "Read the story where the Jade Emperor creates the zodiac race — the animals' order is the myth. The story's genius is that the 'order' is a story about effort."
+    },
+    "tags": [
+      "Myth",
+      "Chinese",
+      "Cosmology"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Chinese",
-   "Cosmology"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-amaterasu",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Amaterasu",
-  "teaser": "The sun goddess of Shinto — she hid in a cave after a quarrel, plunging the world into darkness, and the other gods lured her out with a mirror and a dance. The Japanese imperial line claims descent from her.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Amaterasu",
-   "durationMinutes": 30,
-   "instruction": "Read the cave scene and notice what lures her out — her own reflection. The myth's genius is that the 'sun' returns when she sees herself."
+  {
+    "id": "myth-amaterasu",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Amaterasu",
+    "teaser": "The sun goddess of Shinto — she hid in a cave after a quarrel, plunging the world into darkness, and the other gods lured her out with a mirror and a dance. The Japanese imperial line claims descent from her.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Amaterasu",
+      "durationMinutes": 30,
+      "instruction": "Read the cave scene and notice what lures her out — her own reflection. The myth's genius is that the 'sun' returns when she sees herself."
+    },
+    "tags": [
+      "Myth",
+      "Japanese",
+      "Sun"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Japanese",
-   "Sun"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-susanoo",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Susanoo",
-  "teaser": "The storm god, Amaterasu's wild brother — his rampage caused her to hide, but his slaying of the eight-headed serpent Orochi (with eight barrels of sake) is the most famous dragon fight in Japanese myth.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Susanoo",
-   "durationMinutes": 30,
-   "instruction": "Read the Orochi fight — the god defeats the dragon with alcohol, not a sword. The myth's genius is that the 'storm' god wins by patience."
+  {
+    "id": "myth-susanoo",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Susanoo",
+    "teaser": "The storm god, Amaterasu's wild brother — his rampage caused her to hide, but his slaying of the eight-headed serpent Orochi (with eight barrels of sake) is the most famous dragon fight in Japanese myth.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Susanoo",
+      "durationMinutes": 30,
+      "instruction": "Read the Orochi fight — the god defeats the dragon with alcohol, not a sword. The myth's genius is that the 'storm' god wins by patience."
+    },
+    "tags": [
+      "Myth",
+      "Japanese",
+      "Storm"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Japanese",
-   "Storm"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-tsukuyomi",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Tsukuyomi",
-  "teaser": "The moon god who killed the food goddess Uke Mochi in disgust — his punishment was to never see the sun goddess again, which is why day and night are separate.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Tsukuyomi",
-   "durationMinutes": 30,
-   "instruction": "Read the creation story and notice the 'separation' — the moon and sun never meet. The myth's genius is that the 'why night is night' is a family quarrel."
+  {
+    "id": "myth-tsukuyomi",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Tsukuyomi",
+    "teaser": "The moon god who killed the food goddess Uke Mochi in disgust — his punishment was to never see the sun goddess again, which is why day and night are separate.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tsukuyomi",
+      "durationMinutes": 30,
+      "instruction": "Read the creation story and notice the 'separation' — the moon and sun never meet. The myth's genius is that the 'why night is night' is a family quarrel."
+    },
+    "tags": [
+      "Myth",
+      "Japanese",
+      "Moon"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Japanese",
-   "Moon"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-kitsune",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Kitsune",
-  "teaser": "The fox spirit that can shapeshift into beautiful women — the nine-tailed fox is the strongest, and the 'fox wedding' and 'fox fires' are real folk beliefs still told in rural Japan.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Kitsune",
-   "durationMinutes": 30,
-   "instruction": "Read a kitsune story and notice the shapeshifting rules — the tail is the tell. The folk tales' genius is that the 'fox' is the boundary between human and animal."
+  {
+    "id": "myth-the-kitsune",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Kitsune",
+    "teaser": "The fox spirit that can shapeshift into beautiful women — the nine-tailed fox is the strongest, and the 'fox wedding' and 'fox fires' are real folk beliefs still told in rural Japan.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Kitsune",
+      "durationMinutes": 30,
+      "instruction": "Read a kitsune story and notice the shapeshifting rules — the tail is the tell. The folk tales' genius is that the 'fox' is the boundary between human and animal."
+    },
+    "tags": [
+      "Folk",
+      "Japanese",
+      "Trickster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Folk",
-   "Japanese",
-   "Trickster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-tengu",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Tengu",
-  "teaser": "The long-nosed mountain goblins of Japanese folklore — originally bird-like, they became the archetype of the arrogant warrior, and their 'crow-tengu' form inspired the masks in Noh theater.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Tengu",
-   "durationMinutes": 30,
-   "instruction": "Read a tengu story and notice the arrogance — the tengu are punished pride. The folk tales' genius is that the 'demon' is the mirror of the warrior."
+  {
+    "id": "myth-the-tengu",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Tengu",
+    "teaser": "The long-nosed mountain goblins of Japanese folklore — originally bird-like, they became the archetype of the arrogant warrior, and their 'crow-tengu' form inspired the masks in Noh theater.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Tengu",
+      "durationMinutes": 30,
+      "instruction": "Read a tengu story and notice the arrogance — the tengu are punished pride. The folk tales' genius is that the 'demon' is the mirror of the warrior."
+    },
+    "tags": [
+      "Folk",
+      "Japanese",
+      "Supernatural"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Folk",
-   "Japanese",
-   "Supernatural"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-yokai",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Yokai",
-  "teaser": "The umbrella of Japanese folk creatures — hundreds of named spirits, from the umbrella ghost to the neck-stretching Rokurokubi, and the 'yokai' are the origin of most anime monster designs.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Yokai",
-   "durationMinutes": 30,
-   "instruction": "Read the yokai encyclopedia entries and notice the domestic items — the spirits are the household. The folklore's genius is that the 'monsters' are the mundane."
+  {
+    "id": "myth-yokai",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Yokai",
+    "teaser": "The umbrella of Japanese folk creatures — hundreds of named spirits, from the umbrella ghost to the neck-stretching Rokurokubi, and the 'yokai' are the origin of most anime monster designs.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yokai",
+      "durationMinutes": 30,
+      "instruction": "Read the yokai encyclopedia entries and notice the domestic items — the spirits are the household. The folklore's genius is that the 'monsters' are the mundane."
+    },
+    "tags": [
+      "Folk",
+      "Japanese",
+      "Supernatural"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Folk",
-   "Japanese",
-   "Supernatural"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-loch-ness-monster",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Loch Ness Monster",
-  "teaser": "The most famous cryptid in the world — the 'Surgeon's Photo' of 1934 was a hoax (a toy submarine), but the legend of a monster in the loch is centuries old, and the lake is deep enough to hide one.",
-  "imageUrl": "",
-  "byline": "Scotland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Loch Ness Monster",
-   "durationMinutes": 30,
-   "instruction": "Read the 1934 hoax story — the 'photograph' is a toy. The legend's genius is that the 'monster' is the lake's depth."
+  {
+    "id": "myth-the-loch-ness-monster",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Loch Ness Monster",
+    "teaser": "The most famous cryptid in the world — the 'Surgeon's Photo' of 1934 was a hoax (a toy submarine), but the legend of a monster in the loch is centuries old, and the lake is deep enough to hide one.",
+    "imageUrl": "",
+    "byline": "Scotland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Loch Ness Monster",
+      "durationMinutes": 30,
+      "instruction": "Read the 1934 hoax story — the 'photograph' is a toy. The legend's genius is that the 'monster' is the lake's depth."
+    },
+    "tags": [
+      "Legend",
+      "Cryptid",
+      "Modern"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Cryptid",
-   "Modern"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-bigfoot",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Bigfoot",
-  "teaser": "The apeman of the Pacific Northwest — the 'Patterson-Gimlin film' of 1967 is the most analyzed hoax or evidence in cryptozoology, and the name 'Sasquatch' comes from a real Salish word.",
-  "imageUrl": "",
-  "byline": "North America",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Bigfoot",
-   "durationMinutes": 30,
-   "instruction": "Read the Patterson-Gimlin story — the 'evidence' is a 59-second film. The legend's genius is that the 'monster' is the forest's silence."
+  {
+    "id": "myth-bigfoot",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Bigfoot",
+    "teaser": "The apeman of the Pacific Northwest — the 'Patterson-Gimlin film' of 1967 is the most analyzed hoax or evidence in cryptozoology, and the name 'Sasquatch' comes from a real Salish word.",
+    "imageUrl": "",
+    "byline": "North America",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bigfoot",
+      "durationMinutes": 30,
+      "instruction": "Read the Patterson-Gimlin story — the 'evidence' is a 59-second film. The legend's genius is that the 'monster' is the forest's silence."
+    },
+    "tags": [
+      "Legend",
+      "Cryptid",
+      "Modern"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Cryptid",
-   "Modern"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-yeti",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Yeti",
-  "teaser": "The 'Abominable Snowman' — the name was a mistranslation of a Sherpa phrase, and the 'yeti' footprints are likely melted snow or bear tracks. Edmund Hillary led an expedition hunting one.",
-  "imageUrl": "",
-  "byline": "Himalayas",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Yeti",
-   "durationMinutes": 30,
-   "instruction": "Read the 1951 footprint expedition — the 'yeti' was a misunderstanding. The legend's genius is that the 'monster' is the mountain."
+  {
+    "id": "myth-the-yeti",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Yeti",
+    "teaser": "The 'Abominable Snowman' — the name was a mistranslation of a Sherpa phrase, and the 'yeti' footprints are likely melted snow or bear tracks. Edmund Hillary led an expedition hunting one.",
+    "imageUrl": "",
+    "byline": "Himalayas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Yeti",
+      "durationMinutes": 30,
+      "instruction": "Read the 1951 footprint expedition — the 'yeti' was a misunderstanding. The legend's genius is that the 'monster' is the mountain."
+    },
+    "tags": [
+      "Legend",
+      "Cryptid",
+      "Modern"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Cryptid",
-   "Modern"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-chupacabra",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Chupacabra",
-  "teaser": "The 'goat sucker' — first reported in Puerto Rico in 1995, the creature became a media phenomenon, and the 'chupacabra' carcasses found since are always mangy dogs or coyotes.",
-  "imageUrl": "",
-  "byline": "Latin America",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Chupacabra",
-   "durationMinutes": 30,
-   "instruction": "Read the 1995 Puerto Rico reports — the 'sightings' spread by media. The legend's genius is that the 'monster' is the panic."
+  {
+    "id": "myth-the-chupacabra",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Chupacabra",
+    "teaser": "The 'goat sucker' — first reported in Puerto Rico in 1995, the creature became a media phenomenon, and the 'chupacabra' carcasses found since are always mangy dogs or coyotes.",
+    "imageUrl": "",
+    "byline": "Latin America",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Chupacabra",
+      "durationMinutes": 30,
+      "instruction": "Read the 1995 Puerto Rico reports — the 'sightings' spread by media. The legend's genius is that the 'monster' is the panic."
+    },
+    "tags": [
+      "Legend",
+      "Cryptid",
+      "Modern"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Cryptid",
-   "Modern"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-kraken",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Kraken",
-  "teaser": "The giant squid of Nordic sailors' tales — the 'kraken' was described in a 1755 natural history book as a real animal, and the giant squid was finally filmed alive in 2004.",
-  "imageUrl": "",
-  "byline": "Scandinavia",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Kraken",
-   "durationMinutes": 30,
-   "instruction": "Read the 1755 natural history description — the 'monster' was treated as science. The legend's genius is that the myth became a species."
+  {
+    "id": "myth-the-kraken",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Kraken",
+    "teaser": "The giant squid of Nordic sailors' tales — the 'kraken' was described in a 1755 natural history book as a real animal, and the giant squid was finally filmed alive in 2004.",
+    "imageUrl": "",
+    "byline": "Scandinavia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Kraken",
+      "durationMinutes": 30,
+      "instruction": "Read the 1755 natural history description — the 'monster' was treated as science. The legend's genius is that the myth became a species."
+    },
+    "tags": [
+      "Legend",
+      "Sea",
+      "Monster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Sea",
-   "Monster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-dragons",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Dragons",
-  "teaser": "The winged serpent appears in every culture independently — Chinese dragons are wise and bring rain, European dragons hoard gold and breathe fire, and the 'dragon' is the most universal monster.",
-  "imageUrl": "",
-  "byline": "Global",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Dragons",
-   "durationMinutes": 30,
-   "instruction": "Compare a Chinese dragon and a European dragon story — the difference is the theology. The myth's genius is that the 'dragon' is the environment's fear."
+  {
+    "id": "myth-dragons",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Dragons",
+    "teaser": "The winged serpent appears in every culture independently — Chinese dragons are wise and bring rain, European dragons hoard gold and breathe fire, and the 'dragon' is the most universal monster.",
+    "imageUrl": "",
+    "byline": "Global",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dragons",
+      "durationMinutes": 30,
+      "instruction": "Compare a Chinese dragon and a European dragon story — the difference is the theology. The myth's genius is that the 'dragon' is the environment's fear."
+    },
+    "tags": [
+      "Myth",
+      "Universal",
+      "Monster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Universal",
-   "Monster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-unicorns",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Unicorns",
-  "teaser": "The one-horned horse of medieval bestiaries — described by Pliny as a real animal, and the 'unicorn' was the symbol of purity that could only be caught by a virgin.",
-  "imageUrl": "",
-  "byline": "Europe",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Unicorns",
-   "durationMinutes": 30,
-   "instruction": "Read the medieval bestiary entry — the 'unicorn' was a natural history. The myth's genius is that the 'purity' was the fantasy."
+  {
+    "id": "myth-unicorns",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Unicorns",
+    "teaser": "The one-horned horse of medieval bestiaries — described by Pliny as a real animal, and the 'unicorn' was the symbol of purity that could only be caught by a virgin.",
+    "imageUrl": "",
+    "byline": "Europe",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Unicorns",
+      "durationMinutes": 30,
+      "instruction": "Read the medieval bestiary entry — the 'unicorn' was a natural history. The myth's genius is that the 'purity' was the fantasy."
+    },
+    "tags": [
+      "Myth",
+      "European",
+      "Symbol"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "European",
-   "Symbol"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-vampires",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Vampires",
-  "teaser": "The blood-drinking undead of Slavic folklore — the 'vampire' was blamed for epidemics (bodies were exhumed and staked), and Bram Stoker's 1897 novel fixed the modern image.",
-  "imageUrl": "",
-  "byline": "Eastern Europe",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Vampires",
-   "durationMinutes": 30,
-   "instruction": "Read the Slavic exhumation records — the 'vampire' was the plague. The legend's genius is that the 'monster' was the epidemiology."
+  {
+    "id": "myth-vampires",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Vampires",
+    "teaser": "The blood-drinking undead of Slavic folklore — the 'vampire' was blamed for epidemics (bodies were exhumed and staked), and Bram Stoker's 1897 novel fixed the modern image.",
+    "imageUrl": "",
+    "byline": "Eastern Europe",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vampires",
+      "durationMinutes": 30,
+      "instruction": "Read the Slavic exhumation records — the 'vampire' was the plague. The legend's genius is that the 'monster' was the epidemiology."
+    },
+    "tags": [
+      "Legend",
+      "Gothic",
+      "Supernatural"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Gothic",
-   "Supernatural"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-werewolves",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Werewolves",
-  "teaser": "The human who becomes a wolf at full moon — the curse is medieval, and the real 'werewolf' trials of the 16th century executed people who confessed to lycanthropy under torture.",
-  "imageUrl": "",
-  "byline": "Europe",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Werewolves",
-   "durationMinutes": 30,
-   "instruction": "Read the 16th-century trial records — the 'confessions' were coerced. The legend's genius is that the 'wolf' was the outsider."
+  {
+    "id": "myth-werewolves",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Werewolves",
+    "teaser": "The human who becomes a wolf at full moon — the curse is medieval, and the real 'werewolf' trials of the 16th century executed people who confessed to lycanthropy under torture.",
+    "imageUrl": "",
+    "byline": "Europe",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Werewolves",
+      "durationMinutes": 30,
+      "instruction": "Read the 16th-century trial records — the 'confessions' were coerced. The legend's genius is that the 'wolf' was the outsider."
+    },
+    "tags": [
+      "Legend",
+      "Gothic",
+      "Supernatural"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Gothic",
-   "Supernatural"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-zombies",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Zombies",
-  "teaser": "The 'living dead' of Haitian Vodou — the zombie was a person whose soul was stolen and body enslaved, and the 'zombie' of modern horror is a 20th-century American invention.",
-  "imageUrl": "",
-  "byline": "Haiti",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Zombies",
-   "durationMinutes": 30,
-   "instruction": "Read the Haitian origin and notice the difference — the original zombie is a worker, not a eater. The legend's genius is that the 'monster' was the slavery."
+  {
+    "id": "myth-zombies",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Zombies",
+    "teaser": "The 'living dead' of Haitian Vodou — the zombie was a person whose soul was stolen and body enslaved, and the 'zombie' of modern horror is a 20th-century American invention.",
+    "imageUrl": "",
+    "byline": "Haiti",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Zombies",
+      "durationMinutes": 30,
+      "instruction": "Read the Haitian origin and notice the difference — the original zombie is a worker, not a eater. The legend's genius is that the 'monster' was the slavery."
+    },
+    "tags": [
+      "Legend",
+      "Caribbean",
+      "Supernatural"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Caribbean",
-   "Supernatural"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-valhalla",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Valhalla",
-  "teaser": "The hall of the slain — Odin's warriors die in battle and feast in Valhalla until Ragnarök, and the 'einherjar' (the honored dead) train daily for a war they know they'll lose.",
-  "imageUrl": "",
-  "byline": "Norse",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Valhalla",
-   "durationMinutes": 30,
-   "instruction": "Read the description of Valhalla's daily routine — the warriors fight and feast in a loop. The myth's genius is that the 'paradise' is training for the end."
+  {
+    "id": "myth-valhalla",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Valhalla",
+    "teaser": "The hall of the slain — Odin's warriors die in battle and feast in Valhalla until Ragnarök, and the 'einherjar' (the honored dead) train daily for a war they know they'll lose.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Valhalla",
+      "durationMinutes": 30,
+      "instruction": "Read the description of Valhalla's daily routine — the warriors fight and feast in a loop. The myth's genius is that the 'paradise' is training for the end."
+    },
+    "tags": [
+      "Myth",
+      "Norse",
+      "Afterlife"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Norse",
-   "Afterlife"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-valkyries",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Valkyries",
-  "teaser": "The 'choosers of the slain' — the warrior women who decide who dies in battle and carry the worthy to Valhalla. Their name means 'choosers of the fallen'.",
-  "imageUrl": "",
-  "byline": "Norse",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Valkyries",
-   "durationMinutes": 30,
-   "instruction": "Read the oldest skaldic verse about the Valkyries — the 'choice' is the power. The myth's genius is that the 'angels' are the battle's arbiters."
+  {
+    "id": "myth-the-valkyries",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Valkyries",
+    "teaser": "The 'choosers of the slain' — the warrior women who decide who dies in battle and carry the worthy to Valhalla. Their name means 'choosers of the fallen'.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Valkyries",
+      "durationMinutes": 30,
+      "instruction": "Read the oldest skaldic verse about the Valkyries — the 'choice' is the power. The myth's genius is that the 'angels' are the battle's arbiters."
+    },
+    "tags": [
+      "Myth",
+      "Norse",
+      "War"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Norse",
-   "War"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-midgard-serpent",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Midgard Serpent",
-  "teaser": "Jörmungandr — the world serpent that encircles Midgard, biting its own tail. At Ragnarök it fights Thor, and they kill each other, the only balanced duel in the Norse endgame.",
-  "imageUrl": "",
-  "byline": "Norse",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Midgard Serpent",
-   "durationMinutes": 30,
-   "instruction": "Read the Ragnarök duel — Thor and the serpent die together. The myth's genius is that the 'world serpent' is the boundary of the world."
+  {
+    "id": "myth-the-midgard-serpent",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Midgard Serpent",
+    "teaser": "Jörmungandr — the world serpent that encircles Midgard, biting its own tail. At Ragnarök it fights Thor, and they kill each other, the only balanced duel in the Norse endgame.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Midgard Serpent",
+      "durationMinutes": 30,
+      "instruction": "Read the Ragnarök duel — Thor and the serpent die together. The myth's genius is that the 'world serpent' is the boundary of the world."
+    },
+    "tags": [
+      "Myth",
+      "Norse",
+      "Monster"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Myth",
-   "Norse",
-   "Monster"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-cu-chulainn",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Cú Chulainn",
-  "teaser": "The hound of Ulster — the greatest hero of Irish myth, whose warp-spasm battle frenzy made him a monster on the field, and whose tragic death is one of Celtic myth's greatest stories.",
-  "imageUrl": "",
-  "byline": "Ireland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Cú Chulainn",
-   "durationMinutes": 30,
-   "instruction": "Read the Cattle Raid of Cooley and notice the 'warp-spasm' — the rage is the power and the curse. The legend's genius is that the 'hero' is the rage he can't control."
+  {
+    "id": "myth-cu-chulainn",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Cú Chulainn",
+    "teaser": "The hound of Ulster — the greatest hero of Irish myth, whose warp-spasm battle frenzy made him a monster on the field, and whose tragic death is one of Celtic myth's greatest stories.",
+    "imageUrl": "",
+    "byline": "Ireland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cú Chulainn",
+      "durationMinutes": 30,
+      "instruction": "Read the Cattle Raid of Cooley and notice the 'warp-spasm' — the rage is the power and the curse. The legend's genius is that the 'hero' is the rage he can't control."
+    },
+    "tags": [
+      "Legend",
+      "Celtic",
+      "Hero"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Celtic",
-   "Hero"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-children-of-lir",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Children of Lir",
-  "teaser": "The four children turned into swans for 900 years by a jealous stepmother — the story is a national myth of Ireland, and the swans' final transformation is one of the saddest endings in myth.",
-  "imageUrl": "",
-  "byline": "Ireland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Children of Lir",
-   "durationMinutes": 30,
-   "instruction": "Read the 900-year exile and notice the time — the children outlive the language. The legend's genius is that the 'curse' is the passage of time itself."
+  {
+    "id": "myth-the-children-of-lir",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Children of Lir",
+    "teaser": "The four children turned into swans for 900 years by a jealous stepmother — the story is a national myth of Ireland, and the swans' final transformation is one of the saddest endings in myth.",
+    "imageUrl": "",
+    "byline": "Ireland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Children of Lir",
+      "durationMinutes": 30,
+      "instruction": "Read the 900-year exile and notice the time — the children outlive the language. The legend's genius is that the 'curse' is the passage of time itself."
+    },
+    "tags": [
+      "Legend",
+      "Celtic",
+      "Tragedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Celtic",
-   "Tragedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-finn-maccool",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Finn MacCool",
-  "teaser": "The giant warrior whose thumb gave him wisdom when he sucked it — the Giant's Causeway in Northern Ireland is, per the legend, the remains of his bridge to Scotland.",
-  "imageUrl": "",
-  "byline": "Ireland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Finn MacCool",
-   "durationMinutes": 30,
-   "instruction": "Read the causeway legend and notice the 'bridge' — the geology IS the story. The legend's genius is that the landscape is the myth's evidence."
+  {
+    "id": "myth-finn-maccool",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Finn MacCool",
+    "teaser": "The giant warrior whose thumb gave him wisdom when he sucked it — the Giant's Causeway in Northern Ireland is, per the legend, the remains of his bridge to Scotland.",
+    "imageUrl": "",
+    "byline": "Ireland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Finn MacCool",
+      "durationMinutes": 30,
+      "instruction": "Read the causeway legend and notice the 'bridge' — the geology IS the story. The legend's genius is that the landscape is the myth's evidence."
+    },
+    "tags": [
+      "Legend",
+      "Celtic",
+      "Giant"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "Celtic",
-   "Giant"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-nibelungenlied",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Nibelungenlied",
-  "teaser": "The German national epic — a dragon-slayer's treasure, a stolen bride, and a massacre. The poem's 'revenge spiral' influenced Wagner's Ring cycle and Tolkien's Silmarillion.",
-  "imageUrl": "",
-  "byline": "Germany",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Nibelungenlied",
-   "durationMinutes": 30,
-   "instruction": "Read the ending and notice the spiral — every revenge creates the next. The epic's genius is that the 'treasure' is the engine of ruin."
+  {
+    "id": "myth-the-nibelungenlied",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Nibelungenlied",
+    "teaser": "The German national epic — a dragon-slayer's treasure, a stolen bride, and a massacre. The poem's 'revenge spiral' influenced Wagner's Ring cycle and Tolkien's Silmarillion.",
+    "imageUrl": "",
+    "byline": "Germany",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Nibelungenlied",
+      "durationMinutes": 30,
+      "instruction": "Read the ending and notice the spiral — every revenge creates the next. The epic's genius is that the 'treasure' is the engine of ruin."
+    },
+    "tags": [
+      "Epic",
+      "German",
+      "Tragedy"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Epic",
-   "German",
-   "Tragedy"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-pied-piper",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Pied Piper",
-  "teaser": "The rat-catcher who led away Hamelin's children when the town refused to pay — the story is likely about the Children's Crusade of 1212, when hundreds of children left the town and never returned.",
-  "imageUrl": "",
-  "byline": "Germany",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Pied Piper",
-   "durationMinutes": 30,
-   "instruction": "Read the 1284 date on the Hamelin church window — the 'legend' is history. The story's genius is that the 'magic' is the migration."
+  {
+    "id": "myth-the-pied-piper",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Pied Piper",
+    "teaser": "The rat-catcher who led away Hamelin's children when the town refused to pay — the story is likely about the Children's Crusade of 1212, when hundreds of children left the town and never returned.",
+    "imageUrl": "",
+    "byline": "Germany",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Pied Piper",
+      "durationMinutes": 30,
+      "instruction": "Read the 1284 date on the Hamelin church window — the 'legend' is history. The story's genius is that the 'magic' is the migration."
+    },
+    "tags": [
+      "Legend",
+      "German",
+      "Folk"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Legend",
-   "German",
-   "Folk"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-tale-of-the-bamboo-cutter",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Tale of the Bamboo Cutter",
-  "teaser": "The oldest surviving Japanese narrative — a moon princess found in a bamboo stalk who must return to the moon, and the tale's ending (a letter and an elixir burned on a mountain) explains Mount Fuji's smoke.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Tale of the Bamboo Cutter",
-   "durationMinutes": 30,
-   "instruction": "Read the ending — the emperor's letter and the elixir are the mountain. The tale's genius is that the 'princess' is the moon's longing."
+  {
+    "id": "myth-the-tale-of-the-bamboo-cutter",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Tale of the Bamboo Cutter",
+    "teaser": "The oldest surviving Japanese narrative — a moon princess found in a bamboo stalk who must return to the moon, and the tale's ending (a letter and an elixir burned on a mountain) explains Mount Fuji's smoke.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Tale of the Bamboo Cutter",
+      "durationMinutes": 30,
+      "instruction": "Read the ending — the emperor's letter and the elixir are the mountain. The tale's genius is that the 'princess' is the moon's longing."
+    },
+    "tags": [
+      "Tale",
+      "Japanese",
+      "Classic"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Tale",
-   "Japanese",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-white-snake",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The White Snake",
-  "teaser": "The thousand-year-old snake spirit who marries a human — the tale is one of the four great Chinese folk stories, and the 'White Snake' has been retold in film dozens of times.",
-  "imageUrl": "",
-  "byline": "China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The White Snake",
-   "durationMinutes": 30,
-   "instruction": "Read the Leifeng Pagoda ending — the 'snake' is imprisoned. The tale's genius is that the 'demon' wife is the most human character."
+  {
+    "id": "myth-the-white-snake",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The White Snake",
+    "teaser": "The thousand-year-old snake spirit who marries a human — the tale is one of the four great Chinese folk stories, and the 'White Snake' has been retold in film dozens of times.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The White Snake",
+      "durationMinutes": 30,
+      "instruction": "Read the Leifeng Pagoda ending — the 'snake' is imprisoned. The tale's genius is that the 'demon' wife is the most human character."
+    },
+    "tags": [
+      "Tale",
+      "Chinese",
+      "Romance"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Tale",
-   "Chinese",
-   "Romance"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-the-butterfly-lovers",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "The Butterfly Lovers",
-  "teaser": "The Chinese Romeo and Juliet — two scholars fall in love, the girl's family forbids the match, and the lovers become butterflies. The story is 1,600 years old.",
-  "imageUrl": "",
-  "byline": "China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Butterfly Lovers",
-   "durationMinutes": 30,
-   "instruction": "Read the ending and notice the transformation — the butterflies are the reunion. The tale's genius is that the 'love' is the metamorphosis."
+  {
+    "id": "myth-the-butterfly-lovers",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "The Butterfly Lovers",
+    "teaser": "The Chinese Romeo and Juliet — two scholars fall in love, the girl's family forbids the match, and the lovers become butterflies. The story is 1,600 years old.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Butterfly Lovers",
+      "durationMinutes": 30,
+      "instruction": "Read the ending and notice the transformation — the butterflies are the reunion. The tale's genius is that the 'love' is the metamorphosis."
+    },
+    "tags": [
+      "Tale",
+      "Chinese",
+      "Romance"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Tale",
-   "Chinese",
-   "Romance"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-paul-bunyan",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Paul Bunyan",
-  "teaser": "The lumberjack giant of American tall tales — his blue ox Babe is a legend of the logging camps, and the 'tall tale' genre is America's original myth-making: exaggeration as a way of seeing.",
-  "imageUrl": "",
-  "byline": "America",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Paul Bunyan",
-   "durationMinutes": 30,
-   "instruction": "Read the tallest Paul Bunyan story — the 'facts' are the joke. The tall tale's genius is that the hyperbole IS the landscape."
+  {
+    "id": "myth-paul-bunyan",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Paul Bunyan",
+    "teaser": "The lumberjack giant of American tall tales — his blue ox Babe is a legend of the logging camps, and the 'tall tale' genre is America's original myth-making: exaggeration as a way of seeing.",
+    "imageUrl": "",
+    "byline": "America",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Paul Bunyan",
+      "durationMinutes": 30,
+      "instruction": "Read the tallest Paul Bunyan story — the 'facts' are the joke. The tall tale's genius is that the hyperbole IS the landscape."
+    },
+    "tags": [
+      "Tall Tale",
+      "American",
+      "Folk"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Tall Tale",
-   "American",
-   "Folk"
-  ],
-  "tier": 1
- },
- {
-  "id": "myth-pecos-bill",
-  "categoryId": "MYTHOLOGY",
-  "subtype": "Myth",
-  "name": "Pecos Bill",
-  "teaser": "The cowboy who rode a cyclone — raised by coyotes, he lassoed tornadoes, and the 'Pecos Bill' stories are the American west's creation myth in comic form.",
-  "imageUrl": "",
-  "byline": "America",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pecos Bill",
-   "durationMinutes": 30,
-   "instruction": "Read the cyclone-riding story — the 'impossible' is the genre. The tall tale's genius is that the west itself was the exaggeration."
+  {
+    "id": "myth-pecos-bill",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Pecos Bill",
+    "teaser": "The cowboy who rode a cyclone — raised by coyotes, he lassoed tornadoes, and the 'Pecos Bill' stories are the American west's creation myth in comic form.",
+    "imageUrl": "",
+    "byline": "America",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pecos Bill",
+      "durationMinutes": 30,
+      "instruction": "Read the cyclone-riding story — the 'impossible' is the genre. The tall tale's genius is that the west itself was the exaggeration."
+    },
+    "tags": [
+      "Tall Tale",
+      "American",
+      "Folk"
+    ],
+    "tier": 1
   },
-  "tags": [
-   "Tall Tale",
-   "American",
-   "Folk"
-  ],
-  "tier": 1
- }
+  {
+    "id": "myth-zeus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Zeus",
+    "teaser": "King of the Olympians who won the sky by lottery after freeing his swallowed siblings — his father Cronus ate every child at birth until Zeus arrived hidden in a swaddle of stones.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Zeus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Zeus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Ancient"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-hera",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Hera",
+    "teaser": "Queen of the gods whose jealousy shaped more Greek stories than any monster — Zeus once hung her from the sky with anvils tied to her ankles just to end an argument.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hera",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Hera in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Ancient"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-poseidon",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Poseidon",
+    "teaser": "God of the sea who lost the sky draw to Zeus and never quite got over it — he sent a flood to settle a land dispute with Athena and built Troy's walls for a wage he was cheated out of.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Poseidon",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Poseidon in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Ancient"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-apollo",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Apollo",
+    "teaser": "God of prophecy who killed the Python at Delphi and took over its oracle — his love affairs ended so badly that even his laurel tree used to be a fleeing woman named Daphne.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Apollo",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Apollo in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Prophecy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-artemis",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Artemis",
+    "teaser": "Hunter goddess who turned a peeping hunter into a stag to be killed by his own dogs — her temple at Ephesus was one of the Seven Wonders, twice.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Artemis",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Artemis in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Hunt"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-ares",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Ares",
+    "teaser": "The god of war whom even his own father called the most hateful of the Olympians — in one story he was trapped in a bronze jar for thirteen months by giants, and nobody came looking.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ares",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Ares in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "War"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-aphrodite",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Aphrodite",
+    "teaser": "Born from sea foam where Uranus's severed body fell — judges voted her the owner of the golden apple that started the entire Trojan War.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aphrodite",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Aphrodite in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Love"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-hermes",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Hermes",
+    "teaser": "Messenger god and patron of thieves who invented the lyre the same day he stole his brother's cattle — while still a newborn.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hermes",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Hermes in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Trickster"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-hephaestus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Hephaestus",
+    "teaser": "The smith god thrown off Olympus twice — once by each parent — who forged automatons of gold and built traps to catch his wife in bed with Ares, inviting the other gods to watch.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hephaestus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Hephaestus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Forge"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-dionysus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Dionysus",
+    "teaser": "The twice-born god of wine whose mother died asking Zeus for proof of his identity — pirates who kidnapped him once watched their ship sprout vines while their oars turned into snakes.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dionysus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Dionysus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Greek",
+      "Wine"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-demeter",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Demeter",
+    "teaser": "Harvest goddess whose grief for her missing daughter froze every crop on Earth — she drank an entire barrel of a joke-tender named Baubo to laugh and remember to let spring return.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Demeter",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Demeter in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Harvest",
+      "Greek",
+      "Ancient"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-persephone",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Persephone",
+    "teaser": "The queen of the underworld bound by a pomegranate seed rule — eat six seeds in the land of the dead, spend six months there every year. The original seasonal contract.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Persephone",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Persephone in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Underworld",
+      "Greek",
+      "Seasons"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-pandora",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Pandora",
+    "teaser": "The first woman, crafted by the gods as beautiful bait — her jar released every evil into the world, and only Hope stayed inside when the lid slammed shut.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pandora",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Pandora in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Origin",
+      "Greek",
+      "Ancient"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-midas",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Midas",
+    "teaser": "The king whose golden touch starved him before it enriched him — he washed it away in the Pactolus river, which really did contain gold, and ancient Greeks mined it for centuries.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Midas",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Midas in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gold",
+      "Greek",
+      "Hubris"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-echo",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Echo",
+    "teaser": "The nymph cursed to only repeat others' words — she loved Narcissus but could never speak first, and faded until only her voice remained.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Echo",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Echo in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Nymph",
+      "Greek",
+      "Love"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-theseus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Theseus",
+    "teaser": "The labyrinth-solver who forgot to swap his black sails for white ones — his father, watching the horizon, read the black cloth as death and leapt into the Aegean.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Theseus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Theseus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Hero",
+      "Labyrinth",
+      "Greek"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-minotaur",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Minotaur",
+    "teaser": "Half-bull half-man locked in Daedalus's labyrinth and fed Athenian youths yearly — the maze was built so well its architect barely escaped it himself.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Minotaur",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Minotaur in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Monster",
+      "Labyrinth",
+      "Greek"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-oedipus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Oedipus",
+    "teaser": "The man who fled a prophecy straight into it — he solved the Sphinx's riddle, became king, and discovered his queen was his mother, blinding himself when the truth surfaced.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Oedipus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Oedipus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Tragedy",
+      "Greek",
+      "Fate"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-achilles",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Achilles",
+    "teaser": "The near-invincible warrior dipped in immortality by his heel — he refused to fight over an insult, sulked while friends died, then avenged them knowing it meant his own death.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Achilles",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Achilles in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Hero",
+      "Trojan War",
+      "Greek"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-hector",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Hector",
+    "teaser": "Troy's greatest defender who faced Achilles knowing he would die — three times they ran the city walls before the gods tricked him into stopping.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hector",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Hector in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Trojan War",
+      "Greek",
+      "Hero"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-odysseus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Odysseus",
+    "teaser": "The trickster king whose ten-year voyage home included a one-eyed giant, singing monsters, and a witch who turned men into pigs — his dog recognized him first, then died.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Odysseus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Odysseus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Odyssey",
+      "Greek",
+      "Trickster"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-andromeda",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Andromeda",
+    "teaser": "The princess chained to a rock as dragon food to appease a sea god — rescued mid-wedding by Perseus waving Medusa's head, turning the wedding guests to stone.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Andromeda",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Andromeda in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Rescue",
+      "Greek",
+      "Constellation"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-heracles",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Heracles",
+    "teaser": "The strongest mortal alive driven temporarily insane by Hera into killing his family — his twelve labors were penance, starting with a lion whose hide no blade could cut.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heracles",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Heracles in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Labors",
+      "Greek",
+      "Hero"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-atlas",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Atlas",
+    "teaser": "The Titan condemned to hold up the sky forever — 'Atlantis' and the Atlantic are both named after him, and the tallest mountain range in northwest Africa is the Atlas Mountains.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Atlas",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Atlas in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Titan",
+      "Greek",
+      "Sky"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-cronus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Cronus",
+    "teaser": "The Titan who castrated his own father with a flint sickle, then ate his children fearing the same fate — his harvest festival, Kronia, was the Greek ancestor of Saturnalia.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cronus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Cronus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Titan",
+      "Greek",
+      "Time"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-tantalus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Tantalus",
+    "teaser": "The king who served his own son at a banquet for the gods — his eternal punishment gave English the word 'tantalize': food and water eternally retreating.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tantalus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Tantalus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Underworld",
+      "Greek",
+      "Punishment"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-arachne",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Arachne",
+    "teaser": "The mortal weaver who challenged Athena to a tie-dye of tapestries — hers depicted the gods' worst crimes, and the furious goddess shredded it and turned her into the first spider.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Arachne",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Arachne in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Weaving",
+      "Greek",
+      "Hubris"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-bellerophon",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Bellerophon",
+    "teaser": "The rider of Pegasus who defeated the Chimera by flying above its flames — he later tried to fly to Olympus itself, and Zeus's gadfly bucked him back to Earth.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bellerophon",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Bellerophon in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Pegasus",
+      "Greek",
+      "Hero"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-pegasus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Pegasus",
+    "teaser": "The winged horse born from Medusa's neck-blood — he carried thunderbolts for Zeus and stamped out the fountain Hippocrene, beloved of poets, on Mount Helicon.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pegasus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Pegasus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Winged horse",
+      "Greek",
+      "Mythic beast"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-chimera",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Chimera",
+    "teaser": "The lion-goat-serpent hybrid that breathed fire until Bellerophon flew above its blast — 'chimera' now means any impossible hybrid, including lab-made organisms.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chimera",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Chimera in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Monster",
+      "Greek",
+      "Hybrid"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-typhon",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Typhon",
+    "teaser": "The hundred-headed storm giant who ripped Zeus's tendons out and hid them in a cave — even the other gods fled to Egypt disguised as animals rather than face him.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Typhon",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Typhon in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Monster",
+      "Storm",
+      "Greek"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-eros-and-psyche",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Eros and Psyche",
+    "teaser": "The love god who visited his bride only in darkness — her curiosity with an oil lamp cost her three impossible trials, including sorting a mountain of mixed seeds overnight.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Eros and Psyche",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Eros and Psyche in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Love",
+      "Greek",
+      "Trial"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-atalanta",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Atalanta",
+    "teaser": "The fastest huntress alive who agreed to marry only a man who could outrun her — suitors lost and died until one dropped golden apples mid-race.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Atalanta",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Atalanta in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Race",
+      "Greek",
+      "Huntress"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-jason-and-the-argonauts",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Jason and the Argonauts",
+    "teaser": "The quest crew who sailed for the Golden Fleece with the era's entire hero roster aboard — their ship, the Argo, spoke to them through a talking prow-beam.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jason and the Argonauts",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Jason and the Argonauts in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Quest",
+      "Greek",
+      "Golden Fleece"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-medea",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Medea",
+    "teaser": "The sorceress who betrayed her homeland for love of Jason — years later she took revenge on his infidelity with gifts that literally ignited the new bride.",
+    "imageUrl": "",
+    "byline": "Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Medea",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Medea in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Sorcery",
+      "Greek",
+      "Revenge"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-romulus-and-remus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Romulus and Remus",
+    "teaser": "The twins raised by a wolf who founded Rome on the Palatine Hill — Remus mocked his brother's city walls by jumping over them, and paid with his life.",
+    "imageUrl": "",
+    "byline": "Rome",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Romulus and Remus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Romulus and Remus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Founding",
+      "Roman",
+      "Ancient"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-aeneas",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Aeneas",
+    "teaser": "The Trojan survivor who carried his father out of burning Troy on his back — Virgil made his journey the founding prophecy of the Roman Empire.",
+    "imageUrl": "",
+    "byline": "Rome",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aeneas",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Aeneas in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Troy",
+      "Roman",
+      "Epic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-odin",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Odin",
+    "teaser": "The one-eyed Allfather who traded an eye for a drink from the well of wisdom — he hanged himself on the world-tree for nine nights to steal the runes, dying and returning.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Odin",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Odin in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Gods",
+      "Norse",
+      "Wisdom"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-thor",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Thor",
+    "teaser": "The hammer-wielding thunder god who once dressed as a bride to infiltrate a giant wedding and retrieve Mjölnir — Loki played the bridesmaid, and nearly ruined the veil act.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thor",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Thor in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Thunder",
+      "Norse",
+      "Gods"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-loki",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Loki",
+    "teaser": "The shapeshifting trickster who cut Sif's hair on a dare, caused Baldr's death with mistletoe, and fathered the wolf destined to eat Odin.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Loki",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Loki in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Trickster",
+      "Norse",
+      "Mischief"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-freyja",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Freyja",
+    "teaser": "The love goddess who cries tears of gold and rides a chariot of cats — half of all battle-dead belonged to her, not Odin, and she got first pick.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Freyja",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Freyja in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Love",
+      "Norse",
+      "Valkyrie"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-fenrir",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Fenrir",
+    "teaser": "The wolf so large the gods had to chain him with a magical ribbon — he bit off the hand of the god who bound him, and will swallow Odin at Ragnarök.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fenrir",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Fenrir in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Wolf",
+      "Norse",
+      "Doom"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-j-rmungandr",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Jörmungandr",
+    "teaser": "The world-serpent so vast it encircles the ocean biting its own tail — Thor once tried to fish it up with an ox-head lure and nearly sank the boat.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jörmungandr",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Jörmungandr in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Serpent",
+      "Norse",
+      "Ocean"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-yggdrasil",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Yggdrasil",
+    "teaser": "The world-tree whose roots reach into wisdom wells and dragon lairs — an eagle and a hawk argue at its crown through a squirrel messenger named Ratatoskr.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yggdrasil",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Yggdrasil in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Cosmos",
+      "Norse",
+      "Tree"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-baldur",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Baldur",
+    "teaser": "The invulnerable god of light killed by a mistletoe dart blindfolded into a game — his mother extracted oaths from every object on Earth but skipped one shrub.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baldur",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Baldur in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Light",
+      "Norse",
+      "Death"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-heimdall",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Heimdall",
+    "teaser": "The watchman god who can see a hundred leagues and hear grass grow — he owns a horn loud enough to wake the dead and will kill Loki at Ragnarök, mutually.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heimdall",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Heimdall in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Watchman",
+      "Norse",
+      "Bifrost"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-wayland-the-smith",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Wayland the Smith",
+    "teaser": "The master smith hamstrung by a king who stole his sword and murdered his sons — he escaped on wings he forged himself after getting revenge via the king's children's deaths.",
+    "imageUrl": "",
+    "byline": "Norse",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wayland the Smith",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Wayland the Smith in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Smith",
+      "Norse",
+      "Revenge"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-ra",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Ra",
+    "teaser": "The sun god who sails a boat through the underworld nightly, fighting the chaos serpent Apophis — some pharaohs claimed to be his son so loudly they built pyramids as landing pads.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ra",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Ra in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Sun",
+      "Egyptian",
+      "Gods"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-osiris",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Osiris",
+    "teaser": "The murdered god resurrected as ruler of the dead — his jealous brother sealed him in a chest and scattered the pieces, and Isis collected fourteen of them to revive him.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Osiris",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Osiris in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Death",
+      "Egyptian",
+      "Resurrection"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-isis",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Isis",
+    "teaser": "The magic-using widow who pieced her husband back together and hid their son in the Nile marshes — Egyptians credited her with teaching medicine and weaving.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Isis",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Isis in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Magic",
+      "Egyptian",
+      "Mother"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-horus",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Horus",
+    "teaser": "The falcon-headed heir who fought Set for decades over his father's throne — he lost an eye in battle, and its restoration became Egypt's most protective symbol.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Horus",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Horus in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Sky",
+      "Egyptian",
+      "Falcon"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-set",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Set",
+    "teaser": "The desert god of chaos who murdered his brother and lost his testicles in the rematch — Egyptians saw him as necessary violence, defending Ra's sun-barque nightly.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Set",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Set in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Chaos",
+      "Egyptian",
+      "Desert"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-thoth",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Thoth",
+    "teaser": "The ibis-headed scribe god who invented writing and referees divine disputes — he won five extra calendar days from the moon in a gambling match, letting gods be born at all.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thoth",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Thoth in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Writing",
+      "Egyptian",
+      "Wisdom"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-sekhmet",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Sekhmet",
+    "teaser": "The lioness goddess sent to punish humanity who enjoyed slaughter so much she nearly wiped everyone out — she stopped only when the earth was flooded with beer dyed red to look like blood.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sekhmet",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Sekhmet in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Lioness",
+      "Egyptian",
+      "War"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-bastet",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Bastet",
+    "teaser": "The cat goddess whose cult center banned lion burials — her festival drew over 700,000 visitors a year, making it ancient Egypt's rowdiest party.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bastet",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Bastet in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Cat",
+      "Egyptian",
+      "Home"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-apophis",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Apophis",
+    "teaser": "The mile-long serpent of chaos who attacks the sun-boat every midnight — Egyptians held nightly rituals of spitting, cursing, and stepping on wax effigies to help Ra win.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Apophis",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Apophis in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Serpent",
+      "Egyptian",
+      "Chaos"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-weighing-of-the-heart",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Weighing of the Heart",
+    "teaser": "The afterlife entrance exam where your heart balances against Maat's feather — confess forty-two sins you did NOT commit while forty-two gods watch silently.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Weighing of the Heart",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Weighing of the Heart in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Afterlife",
+      "Egyptian",
+      "Judgment"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-marduk",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Marduk",
+    "teaser": "The storm god who split the sea-dragon Tiamat in half and built heaven and earth from her carcass — Babylon's New Year festival re-enacted it annually, king included.",
+    "imageUrl": "",
+    "byline": "Babylonian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Marduk",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Marduk in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Creation",
+      "Babylonian",
+      "Storm"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-tiamat",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Tiamat",
+    "teaser": "The primordial salt-sea dragon who birthed the gods then declared war on them — her eleven monster-children were the first recorded monster army.",
+    "imageUrl": "",
+    "byline": "Babylonian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tiamat",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Tiamat in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Dragon",
+      "Babylonian",
+      "Ocean"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-descent-of-ishtar",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Descent of Ishtar",
+    "teaser": "The love goddess who stormed the underworld gate by gate, shedding one power at each — while she sat imprisoned, all sex and birth on Earth simply stopped.",
+    "imageUrl": "",
+    "byline": "Babylonian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Descent of Ishtar",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Descent of Ishtar in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Underworld",
+      "Babylonian",
+      "Love"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-indra",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Indra",
+    "teaser": "The thunder god who rides a white elephant and drinks so much soma he needs the priests' help — he slew the drought-serpent Vritra with a bolt forged from sage bones.",
+    "imageUrl": "",
+    "byline": "Hindu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Indra",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Indra in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Thunder",
+      "Hindu",
+      "King"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-ganesha",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Ganesha",
+    "teaser": "The elephant-headed remover of obstacles who writes epics with a broken tusk — his head came about when Shiva beheaded him and swore to replace it with the first animal found: an elephant.",
+    "imageUrl": "",
+    "byline": "Hindu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ganesha",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Ganesha in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Elephant",
+      "Hindu",
+      "Wisdom"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-hanuman",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Hanuman",
+    "teaser": "The monkey god who once tried to eat the sun thinking it was fruit — as an adult he leapt the ocean to Lanka, burned a city with his tail, and carried a whole mountain of herbs.",
+    "imageUrl": "",
+    "byline": "Hindu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hanuman",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Hanuman in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Monkey",
+      "Hindu",
+      "Devotion"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-narasimha",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Narasimha",
+    "teaser": "The man-lion avatar engineered as a loophole — appearing at twilight, on a threshold, to kill a demon granted immunity from man, beast, day, night, indoors, and outdoors.",
+    "imageUrl": "",
+    "byline": "Hindu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Narasimha",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Narasimha in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Avatar",
+      "Hindu",
+      "Lion"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-kali",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Kali",
+    "teaser": "The blue-black goddess of time who danced so wildly on a battlefield she nearly destroyed it — her husband Shiva lay down under her feet to stop the dance, which is why she is shown standing on him.",
+    "imageUrl": "",
+    "byline": "Hindu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kali",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Kali in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Time",
+      "Hindu",
+      "Dance"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-samudra-manthan",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Samudra Manthan",
+    "teaser": "The churning of the cosmic ocean by gods and demons coiling a serpent around a mountain — poison emerged first, and Shiva drank it, holding it in his throat forever.",
+    "imageUrl": "",
+    "byline": "Hindu",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Samudra Manthan",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Samudra Manthan in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Ocean",
+      "Hindu",
+      "Creation"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-izanagi-and-izanami",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Izanagi and Izanami",
+    "teaser": "The creation couple who stirred the ocean with a jeweled spear — drops falling from its tip became Japan's first island, and their divorce created the border between life and death.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Izanagi and Izanami",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Izanagi and Izanami in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Creation",
+      "Japanese",
+      "Islands"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-kitsune",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Kitsune",
+    "teaser": "Fox spirits whose tails multiply with age and wisdom — nine-tailed kitsune can possess people, and statues at Inari shrines often wear tiny red bibs donated by devotees.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kitsune",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Kitsune in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Fox",
+      "Yokai",
+      "Japanese"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-tanuki",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Tanuki",
+    "teaser": "Raccoon-dog tricksters whose illusions famously fail at the tail — their statues outside bars and restaurants invite prosperity, and their scrotum-based transformations are a folk-art classic.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tanuki",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Tanuki in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Trickster",
+      "Yokai",
+      "Japanese"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-momotaro",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Momotaro",
+    "teaser": "The peach-born hero who recruited a talking dog, monkey, and pheasant with millet dumplings and raided Oni Island — every Japanese child learns the song before school age.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Momotaro",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Momotaro in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Hero",
+      "Folklore",
+      "Japanese"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-urashima-taro",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Urashima Taro",
+    "teaser": "The fisherman who rescued a turtle and spent days in the Dragon Palace that were centuries ashore — opening the forbidden box aged him instantly to dust.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Urashima Taro",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Urashima Taro in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Rip van Winkle",
+      "Folklore",
+      "Japanese"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-yuki-onna",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Yuki-onna",
+    "teaser": "The snow woman who freezes travelers with her breath — she spared a handsome young man because of his eyes, then married him, and melted when he told the story.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yuki-onna",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Yuki-onna in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Snow",
+      "Yokai",
+      "Japanese"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-kappa",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Kappa",
+    "teaser": "Water imps with bowls of life-water in their heads — bowing to one drains the bowl and defeats it, which is why cucumber offerings and deep bows feature in kappa etiquette.",
+    "imageUrl": "",
+    "byline": "Japanese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kappa",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Kappa in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Water",
+      "Yokai",
+      "Japanese"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-sun-wukong",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Sun Wukong",
+    "teaser": "The Monkey King who ate immortal peaches, erased his name from the ledger of the dead, and survived 49 days in a furnace — gaining fire-eyes that see through any disguise.",
+    "imageUrl": "",
+    "byline": "Chinese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sun Wukong",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Sun Wukong in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Monkey",
+      "Chinese",
+      "Journey West"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-n-wa",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Nüwa",
+    "teaser": "The serpent-bodied creator who molded humans from yellow clay by hand — tired halfway, she dragged a rope through mud to mass-produce the rest, explaining nobles and peasants alike.",
+    "imageUrl": "",
+    "byline": "Chinese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nüwa",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Nüwa in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Creation",
+      "Chinese",
+      "Goddess"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-pangu",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Pangu",
+    "teaser": "The primordial giant who cracked open the cosmic egg and separated sky from earth with his body — his breath became wind, his eyes the sun and moon, and his lice became humans.",
+    "imageUrl": "",
+    "byline": "Chinese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pangu",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Pangu in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Creation",
+      "Chinese",
+      "Giant"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-chang-e-and-hou-yi",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Chang'e and Hou Yi",
+    "teaser": "The archer who shot down nine of ten suns and won immortality pills — his wife swallowed them all and floated to the moon, where she lives with a jade rabbit.",
+    "imageUrl": "",
+    "byline": "Chinese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chang'e and Hou Yi",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Chang'e and Hou Yi in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Moon",
+      "Chinese",
+      "Legend"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-nezha",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Nezha",
+    "teaser": "The boy god born from a ball of flesh who fought a dragon prince, then returned his own body to his parents to spare them — rebuilt from lotus flowers by his teacher.",
+    "imageUrl": "",
+    "byline": "Chinese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nezha",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Nezha in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Boy god",
+      "Chinese",
+      "Rebellion"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-cowherd-and-weaver-girl",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Cowherd and Weaver Girl",
+    "teaser": "Star-crossed lovers separated by the Milky Way — magpies form a bridge once a year on the seventh day of the seventh moon, China's original Valentine's Day.",
+    "imageUrl": "",
+    "byline": "Chinese",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cowherd and Weaver Girl",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Cowherd and Weaver Girl in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Stars",
+      "Chinese",
+      "Romance"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-morr-gan",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Morrígan",
+    "teaser": "The phantom queen who appears as a crow on battlefields offering victory — she once tested hero Cú Chulainn as an old woman and cursed him when he spurned her.",
+    "imageUrl": "",
+    "byline": "Celtic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Morrígan",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Morrígan in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Crow",
+      "Celtic",
+      "War"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-dagda",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Dagda",
+    "teaser": "The good god whose club kills with one end and revives with the other — he owns a cauldron no company leaves unfed and a harp that plays the seasons themselves by mood.",
+    "imageUrl": "",
+    "byline": "Celtic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dagda",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Dagda in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Father",
+      "Celtic",
+      "Ireland"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-brigid",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Brigid",
+    "teaser": "The fire goddess of poetry and healing whom Christians canonized as Saint Brigid — her eternal flame at Kildare was tended by nuns for a thousand years.",
+    "imageUrl": "",
+    "byline": "Celtic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Brigid",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Brigid in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Fire",
+      "Celtic",
+      "Poetry"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-fionn-mac-cumhaill",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Fionn mac Cumhaill",
+    "teaser": "The Fenian leader who gained all knowledge by tasting the Salmon of Wisdom and burned his thumb — he built the Giant's Causeway as steps to Scotland.",
+    "imageUrl": "",
+    "byline": "Celtic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fionn mac Cumhaill",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Fionn mac Cumhaill in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Hunter",
+      "Celtic",
+      "Ireland"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-selkies",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Selkies",
+    "teaser": "Seal-folk who shed their skins to dance on shore — hide a selkie's skin and she stays married ashore, but find it, and the sea calls her home regardless of the children.",
+    "imageUrl": "",
+    "byline": "Scottish",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Selkies",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Selkies in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Seal",
+      "Scottish",
+      "Sea"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-banshee",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Banshee",
+    "teaser": "The keening woman whose wail foretells a death in certain families — she combs her hair with a silver comb, which is why picking up strange combs is Irish-bad luck.",
+    "imageUrl": "",
+    "byline": "Irish",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Banshee",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Banshee in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Omen",
+      "Irish",
+      "Death"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-baba-yaga",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Baba Yaga",
+    "teaser": "The witch who lives in a hut on chicken legs and flies a mortar with a pestle — her fence is made of skulls with glowing eye sockets, and she sometimes helps the brave.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baba Yaga",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Baba Yaga in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Witch",
+      "Slavic",
+      "Hut"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-koschei-the-deathless",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Koschei the Deathless",
+    "teaser": "The villain who cannot die because his soul hides in a needle inside an egg inside a duck inside a hare inside a chest buried on an island.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Koschei the Deathless",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Koschei the Deathless in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Immortal",
+      "Slavic",
+      "Villain"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-firebird",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Firebird",
+    "teaser": "The glowing bird whose single feather lights a room like a thousand candles — stealing one launches Russia's most famous quest tales.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Firebird",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Firebird in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Bird",
+      "Slavic",
+      "Glowing"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-domovoi",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Domovoi",
+    "teaser": "The household spirit living behind the stove — feed him and the milk stays sweet; anger him by sweeping toward the hearth at night and hair turns to rope.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Domovoi",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Domovoi in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Household spirit",
+      "Slavic",
+      "Home"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-rusalka",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Rusalka",
+    "teaser": "The water maiden drowned by betrayal who tickles travelers into rivers — during Rusalka week, swimming was forbidden and garlands floated instead.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rusalka",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Rusalka in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Water spirit",
+      "Slavic",
+      "River"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-perun-and-veles",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Perun and Veles",
+    "teaser": "The thunder god and serpent-cattle god feud that explains every storm — Veles steals Perun's cattle, Perun hurls lightning, and rain ends their chase.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Perun and Veles",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Perun and Veles in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Thunder",
+      "Slavic",
+      "Storm"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-vasilisa-the-beautiful",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Vasilisa the Beautiful",
+    "teaser": "The girl sent to Baba Yaga's hut for fire who survives by feeding the witch's talking skull-horses and completing impossible sorting tasks with doll magic.",
+    "imageUrl": "",
+    "byline": "Slavic",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Vasilisa the Beautiful",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Vasilisa the Beautiful in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Fairy tale",
+      "Slavic",
+      "Doll"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-anansi",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Anansi",
+    "teaser": "The spider trickster who bought all the world's stories from the sky god — price: a live leopard, hornets, and a fairy nobody can see, all caught by wit alone.",
+    "imageUrl": "",
+    "byline": "West African",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Anansi",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Anansi in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Spider",
+      "Trickster",
+      "African"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-maui",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Maui",
+    "teaser": "The demigod who fished islands out of the sea with a hook made of his grandmother's jawbone — his attempt at immortality for mankind failed when a bird laughed mid-spell.",
+    "imageUrl": "",
+    "byline": "Polynesian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Maui",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Maui in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Demigod",
+      "Polynesian",
+      "Trickster"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-rainbow-serpent",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Rainbow Serpent",
+    "teaser": "The creator being whose movements carved rivers and gorges — she sleeps in deep waterholes and sends floods when disturbed, so many billabongs remain unswum.",
+    "imageUrl": "",
+    "byline": "Aboriginal Australian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rainbow Serpent",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Rainbow Serpent in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Creation",
+      "Australian",
+      "Serpent"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-quetzalcoatl",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Quetzalcoatl",
+    "teaser": "The feathered serpent god who invented the calendar and books — he sailed east on a raft of serpents, promising to return, and the timing haunted Montezuma's welcome of Cortés.",
+    "imageUrl": "",
+    "byline": "Aztec",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Quetzalcoatl",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Quetzalcoatl in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Feathered serpent",
+      "Aztec",
+      "Wind"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-tezcatlipoca",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Tezcatlipoca",
+    "teaser": "The smoking-mirror god who ruled by night and quarreled with Quetzalcoatl across five world-ages — each world ended in jaguars, hurricanes, fire-rain, and flood.",
+    "imageUrl": "",
+    "byline": "Aztec",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tezcatlipoca",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Tezcatlipoca in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Jaguar",
+      "Aztec",
+      "Night"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-popol-vuh-twins",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Popol Vuh Twins",
+    "teaser": "The hero twins Hunahpu and Xbalanque who out-cheated the lords of death at a ballgame — after losing the first round fatally, they resurrected each other and sacrificed the gods instead.",
+    "imageUrl": "",
+    "byline": "Maya",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Popol Vuh Twins",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Popol Vuh Twins in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Twins",
+      "Maya",
+      "Ballgame"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-thunderbird",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Thunderbird",
+    "teaser": "The storm bird whose wingbeats are thunder and whose glance is lightning — petroglyphs of it guard cliff faces across the Pacific Northwest.",
+    "imageUrl": "",
+    "byline": "Native American",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thunderbird",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Thunderbird in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Thunder",
+      "Native American",
+      "Bird"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-wendigo",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Wendigo",
+    "teaser": "The gaunt ice-spirit born when a human eats human flesh during famine — it grows taller with every meal, always starving, always hunting.",
+    "imageUrl": "",
+    "byline": "Algonquian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wendigo",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Wendigo in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Ice",
+      "Algonquian",
+      "Cannibal"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-john-henry",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "John Henry",
+    "teaser": "The steel-driving man who raced a steam drill through a mountain and won — then died with hammer in hand, becoming labor's first folk martyr.",
+    "imageUrl": "",
+    "byline": "American",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "John Henry",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of John Henry in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Folk hero",
+      "American",
+      "Railroad"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-pied-piper-of-hamelin",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Pied Piper of Hamelin",
+    "teaser": "The rat-catcher whose flute lured 130 children away on June 26, 1284 — the town of Hamelin documented the date for centuries without ever explaining what happened.",
+    "imageUrl": "",
+    "byline": "German",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pied Piper of Hamelin",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Pied Piper of Hamelin in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Piper",
+      "German",
+      "Mystery"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-william-tell",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "William Tell",
+    "teaser": "The marksman forced to shoot an apple off his son's head — his second crossbow bolt, meant for the tyrant Gessler, started Switzerland's founding rebellion.",
+    "imageUrl": "",
+    "byline": "Swiss",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "William Tell",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of William Tell in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Marksman",
+      "Swiss",
+      "Apple"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-prester-john",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Prester John",
+    "teaser": "The legendary Christian king of the East whose letter to Europe promised a kingdom of wonders — explorers searched Africa and Asia for him for four centuries.",
+    "imageUrl": "",
+    "byline": "Medieval",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Prester John",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Prester John in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Legend",
+      "Medieval",
+      "King"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-kraken",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Kraken",
+    "teaser": "The sea monster so vast sailors mistook it for an island — anchoring on its back was fatal, and it dragged ships down with whirlpool-sucking arms.",
+    "imageUrl": "",
+    "byline": "Norwegian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kraken",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Kraken in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Sea monster",
+      "Norwegian",
+      "Kraken"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-kalevala",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Kalevala",
+    "teaser": "The national epic compiled from singing shamans — its wizard-hero Väinämöinen builds a boat by singing, and Tolkien borrowed its meter for his own legendarium.",
+    "imageUrl": "",
+    "byline": "Finnish",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kalevala",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Kalevala in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Epic",
+      "Finnish",
+      "Singing magic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-rostam-and-sohrab",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Rostam and Sohrab",
+    "teaser": "Iran's greatest hero unknowingly kills his own son in single combat — the tragedy anchors the Shahnameh, a poem longer than the Iliad and Odyssey combined.",
+    "imageUrl": "",
+    "byline": "Persian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rostam and Sohrab",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Rostam and Sohrab in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Epic",
+      "Persian",
+      "Tragedy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-simurgh",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Simurgh",
+    "teaser": "The benevolent thirty-bird giant of Persian myth whose feathers summon help — in Sufi poetry, thirty birds seeking the Simurgh discover they themselves are it ('si morgh').",
+    "imageUrl": "",
+    "byline": "Persian",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Simurgh",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Simurgh in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Bird",
+      "Persian",
+      "Wisdom"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-sundiata",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Sundiata",
+    "teaser": "The crippled prince who rose to found the Mali Empire — griots still recite his epic with instruments, and his lineage ruled the richest gold empire of medieval Africa.",
+    "imageUrl": "",
+    "byline": "West African",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sundiata",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Sundiata in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Epic",
+      "Malian",
+      "Founder"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-aswang",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Aswang",
+    "teaser": "The shapeshifting ghoul that appears as a neighbor by day and feeds on the sick at night — Philippine villages historically posted garlic and salt at doors.",
+    "imageUrl": "",
+    "byline": "Filipino",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aswang",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Aswang in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Shapeshifter",
+      "Filipino",
+      "Ghoul"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-bakunawa",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Bakunawa",
+    "teaser": "The moon-eating serpent who swallows eclipses — Filipinos banged pots and pans during eclipses to make it spit the moon back out.",
+    "imageUrl": "",
+    "byline": "Filipino",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bakunawa",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Bakunawa in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Moon-eater",
+      "Filipino",
+      "Serpent"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-tangun",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Tangun",
+    "teaser": "The bear-turned-woman whose son founded Korea's first kingdom in 2333 BC — Koreans still count their calendar from his reign.",
+    "imageUrl": "",
+    "byline": "Korean",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tangun",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Tangun in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Founder",
+      "Korean",
+      "Bear"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "myth-dokkaebi",
+    "categoryId": "MYTHOLOGY",
+    "subtype": "Myth",
+    "name": "Dokkaebi",
+    "teaser": "Night-spirit tricksters who challenge travelers to wrestling matches — carry a straw rope or answer riddles correctly and they gift you magic items instead of bruises.",
+    "imageUrl": "",
+    "byline": "Korean",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dokkaebi",
+      "durationMinutes": 30,
+      "instruction": "Read one complete retelling of Dokkaebi in a single sitting, then try explaining its strangest scene to someone else in under a minute — myths this durable survive because they still work on people who know nothing about the culture that told them."
+    },
+    "tags": [
+      "Spirit",
+      "Korean",
+      "Trickster"
+    ],
+    "tier": 2
+  }
 ]

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -15,6 +16,12 @@
     <!-- Explore-session timer: persistent elapsed-time notification + done reminder -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- v272 — Glass Widget Lab auto-detect: reading the system wallpaper on
+         Android 13+ is gated behind All-files access (a Settings-page special
+         permission, requested only from the lab's own opt-in button). -->
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
 
     <!-- Android 11+ package visibility: without this, resolveActivity() /
          queryIntentActivities() return nothing for OTHER apps' activities,
@@ -80,6 +87,17 @@
                 android:value="exploreSessionTimer" />
         </service>
 
+        <!-- v256 — the pet companion OUTSIDE the app: a tiny overlay window
+             that keeps the sprite floating over other apps (opt-in). -->
+        <service
+            android:name=".infrastructure.PetOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="petCompanionOverlay" />
+        </service>
+
         <receiver
             android:name=".infrastructure.ExploreReminderReceiver"
             android:exported="false" />
@@ -106,6 +124,53 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- v272 — glass widget configuration (placement + long-press Edit) -->
+        <activity
+            android:name=".infrastructure.GlassWidgetConfigActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Curio">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+
+        <!-- v267 — the liquid-glass home-screen widget -->
+        <receiver
+            android:name=".infrastructure.GlassWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/glass_widget_info" />
+        </receiver>
+
+        <!-- v292 — round analog clock widget (Glass Widget Lab shape) -->
+        <receiver
+            android:name=".infrastructure.AnalogClockWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/glass_analog_clock_info" />
+        </receiver>
+
+        <!-- v292 — fire (streak) widget (Glass Widget Lab shape) -->
+        <receiver
+            android:name=".infrastructure.FireWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/fire_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

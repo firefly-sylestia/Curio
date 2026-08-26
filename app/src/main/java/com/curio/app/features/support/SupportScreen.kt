@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +33,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
@@ -50,6 +50,9 @@ import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /**
  * Support & diagnostics — the dedicated page behind Profile's
@@ -103,12 +106,17 @@ fun SupportScreen(navController: NavController) {
         }
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
+            val listState = rememberLazyListState()
+            val glassBackdrop = rememberLayerBackdrop()
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                // v255 — SCROLLING HERO: the banner is the list's first item
+                // and scrolls away with the page (the Home/Profile way).
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight + 10.dp,
+                    top = SettingsHeroTotalHeight,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -176,18 +184,19 @@ fun SupportScreen(navController: NavController) {
                             }
                         }
                         CurioSettingsDivider()
-                        // v252 — open-source credit: the liquid-glass tab bar
-                        // is adapted from the vFlow project (GPL-2.0-or-later).
+                        // v286 — open-source credit: the liquid-glass
+                        // pipeline runs on Kyant0's backdrop library
+                        // (drawBackdrop + vibrancy + blur + lens recipe).
                         CurioSettingsRow(
                             CurioIcons.Info,
-                            "Liquid glass by vFlow",
-                            "github.com/ChaoMixian/vFlow (GPL-2.0)"
+                            "Liquid glass by Kyant",
+                            "github.com/Kyant0/AndroidLiquidGlass"
                         ) {
                             runCatching {
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://github.com/ChaoMixian/vFlow")
+                                        Uri.parse("https://github.com/Kyant0/AndroidLiquidGlass")
                                     )
                                 )
                             }
@@ -228,7 +237,7 @@ fun SupportScreen(navController: NavController) {
                                     if (versionTaps >= 5) {
                                         versionTaps = 0
                                         // v24 — the five-tap opens the
-                                        // Experiments screen (and keeps it
+                                        // Dev page (and keeps it
                                         // open); it no longer toggles promo
                                         // mode (promo lives in Experiments).
                                         navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
@@ -248,7 +257,7 @@ fun SupportScreen(navController: NavController) {
                                 Text(
                                     text = when {
                                         versionTaps in 1..4 ->
-                                            "Tap ${5 - versionTaps} more to open Experiments"
+                                            "Tap ${5 - versionTaps} more to open Dev page"
                                         else ->
                                             "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
                                     },
@@ -263,13 +272,16 @@ fun SupportScreen(navController: NavController) {
                     }
                 }
             }
+
+            // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
+            // content: rows slide under the ragged tear as they scroll up, and
+            // the back pill refracts them through REAL liquid glass.
+            SettingsHeroHeader(
+                title = "Support & diagnostics",
+                            subtitle = "Reports & help",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
         }
-        // ── Torn rose hero on top — rows disappear under the tear as they
-        // scroll (the settings overlay pattern).
-        SettingsHeroHeader(
-            title = "Support & diagnostics",
-            subtitle = "Reports & help",
-            onBack = { navController.popBackStack() }
-        )
     }
 }
