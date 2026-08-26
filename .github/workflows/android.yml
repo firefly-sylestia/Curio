@@ -66,6 +66,10 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          # Generate the derived Room asset from data/topics before packaging.
+          # Without this step the APK contains no topics.db and the first-launch
+          # importer has no catalog to load.
+          ./gradlew buildTopicDatabase
           ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
 
       - name: Verify release APKs and signatures
