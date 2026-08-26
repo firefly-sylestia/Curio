@@ -392,19 +392,24 @@ tasks.register("buildTopicDatabase") {
         }
         val outputDb = file("src/main/assets/topics.db")
         outputDb.parentFile.mkdirs()
-        // Run BuildTopicDb with the full runtime classpath
-        javaexec {
-            // Collect compiled classes + dependencies after compileDebugKotlin
-            classpath = files(
-                // Compiled Kotlin classes
-                file("build/intermediates/javac/debug/classes"),
-                file("build/tmp/kotlin-classes/debug"),
-                // Project dependencies from the app's runtime config
-                *configurations.runtimeClasspath.get().files.toTypedArray()
-            )
-            mainClass.set("com.curio.app.data.tools.BuildTopicDb")
-            args(jsonDir.absolutePath, outputDb.absolutePath)
+        // Build classpath: compiled classes + all runtime dependencies
+        val runtimeFiles = configurations.getByName("runtimeClasspath").files
+        val compiledClasses = file("build/intermediates/javac/debug/classes")
+        val kotlinClasses = file("build/tmp/kotlin-classes/debug")
+        val classpathStr = (listOf(compiledClasses, kotlinClasses) + runtimeFiles.toList())
+            .joinToString(File.pathSeparator) { it.absolutePath }
+        // Run BuildTopicDb as a separate JVM process
+        val proc = ProcessBuilder(
+            "java", "-cp", classpathStr,
+            "com.curio.app.data.tools.BuildTopicDb",
+            jsonDir.absolutePath, outputDb.absolutePath
+        ).directory(rootProject.projectDir).redirectErrorStream(true).start()
+        val output = proc.inputStream.bufferedReader().readText()
+        val exitCode = proc.waitFor()
+        if (exitCode != 0) {
+            logger.error("buildTopicDatabase failed:\n$output")
+            throw GradleException("buildTopicDatabase failed with exit code $exitCode")
         }
-        logger.lifecycle("✓ topics.db built → ${outputDb.absolutePath}")
+        logger.lifecycle(output)
     }
 }
