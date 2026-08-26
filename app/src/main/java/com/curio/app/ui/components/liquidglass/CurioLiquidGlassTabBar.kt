@@ -278,20 +278,13 @@ fun CurioLiquidGlassTabBar(
         ).also { holder.instance = it }
     }
 
-    // v245 — SNAP to the selected tab on the bar's FIRST composition after
-    // (re-)entering it; only SUBSEQUENT changes animate. Re-entering Cabinet
-    // from an entry used to replay the fly-in because the fresh animation
-    // started from its initial value instead of the live selection.
-    var pendingFirstSnap = remember { true }
-    LaunchedEffect(selectedIndex, dampedDragAnimation) {
-        if (pendingFirstSnap) {
-            pendingFirstSnap = false
-            dampedDragAnimation.updateValue(selectedIndex.toFloat())
-        } else {
-            // v292 — TAP = fast appearance under the new tab, not a
-            // sideways glide across the bar (iOS segmented-control feel).
-            dampedDragAnimation.animateToValue(selectedIndex.toFloat(), tabTapSpec)
-        }
+    // v292g — TAB SWITCH: always SNAP instantly to the new tab (no
+    // sideways glide). Drag-release animations are handled in onDragStopped
+    // only — this LaunchedEffect purely handles programmatic selectedIndex
+    // changes (taps, navigation) so the blob appears under the new tab
+    // immediately, never sliding from the old one.
+    LaunchedEffect(selectedIndex) {
+        dampedDragAnimation.updateValue(selectedIndex.toFloat())
     }
 
     val interactiveHighlight = remember(animationScope, totalWidthPx) {

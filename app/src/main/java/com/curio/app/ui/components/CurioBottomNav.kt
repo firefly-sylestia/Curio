@@ -248,8 +248,10 @@ internal fun curioGlassIndicatorColors(): Pair<Color, Color> {
         AppPreferences.NAV_INDICATOR_WHITE -> Color.White to Color.Black
         AppPreferences.NAV_INDICATOR_BLACK -> Color.Black to Color.White
         else -> when {
-            materialThemeOn ->
-                MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+            materialThemeOn -> {
+                val fill = MaterialTheme.colorScheme.primary
+                fill to (if (dark) Color.White else pastelFillInk(fill))
+            }
             AppPreferences.heroBlueState -> {
                 val fill = if (dark) CurioColors.HomeAzureDark else CurioColors.HomeAzure
                 fill to (if (dark) Color.White else pastelFillInk(fill))
