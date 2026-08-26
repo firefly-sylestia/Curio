@@ -605,7 +605,10 @@ fun CurioLiquidGlassTabBar(
         // v292g — the overlay is the only source of tab labels for
         // ghostFreeTabs (Pet Designer); at rest it shows crisp labels,
         // during press it fades to reveal the page-only refraction.
-        if (!classicIndicator) {
+        // v292h — always render overlay for ghostFreeTabs (Pet Designer)
+        // because the blob samples page-only so the overlay is the ONLY
+        // source of tab labels at rest.
+        if (!classicIndicator || ghostFreeTabs) {
             CompositionLocalProvider(LocalLiquidGlassTabOverlay provides true) {
                 Row(
                     Modifier

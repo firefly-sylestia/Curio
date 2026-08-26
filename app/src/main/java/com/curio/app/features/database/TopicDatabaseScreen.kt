@@ -742,9 +742,19 @@ fun TopicDatabaseScreen(navController: NavController) {
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 32.dp)
                     .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f }
-                    .shadow(6.dp, RoundedCornerShape(50))
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
+                    .then(
+                        if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        } else {
+                            Modifier
+                                .shadow(6.dp, RoundedCornerShape(50))
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
+                        }
+                    )
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -759,27 +769,27 @@ fun TopicDatabaseScreen(navController: NavController) {
                         onClick = { currentPage = (currentPage - 1).coerceAtLeast(0) },
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.surface,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(42.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             CurioIcon(CurioIcons.ChevronLeft, null,
-                                tint = MaterialTheme.colorScheme.onSurface, size = 18.dp)
+                                tint = MaterialTheme.colorScheme.onSurface, size = 20.dp)
                         }
                     }
                 }
                 // Page number pill
                 Surface(
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(22.dp),
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.height(36.dp)
+                    modifier = Modifier.height(42.dp)
                 ) {
                     Box(
-                        modifier = Modifier.padding(horizontal = 14.dp),
+                        modifier = Modifier.padding(horizontal = 18.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "${currentPage + 1}/$totalPages",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize),
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -791,13 +801,13 @@ fun TopicDatabaseScreen(navController: NavController) {
                     color = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.surface
                     else Color.Transparent,
                     enabled = currentPage < totalPages - 1,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(42.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         CurioIcon(CurioIcons.ChevronRight, null,
                             tint = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.onSurface
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                            size = 18.dp)
+                            size = 20.dp)
                     }
                 }
             }
@@ -828,9 +838,17 @@ fun TopicDatabaseScreen(navController: NavController) {
                     glyph = CurioIcons.Tune,
                     label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
                     ink = ink,
+                    // v292h — liquid glass category pill
+                    modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                        Modifier.liquidGlassCapsule(
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            backdrop = chipGlassBackdrop
+                        )
+                    else Modifier,
                     // v30 — chevron flips with the chips: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
-                        else CurioIcons.KeyboardArrowDown,
+                    trailingGlyph = if (categoryFilterOpen)
+                        CurioIcons.KeyboardArrowUp
+                    else CurioIcons.KeyboardArrowDown,
                     trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
                         else "Show category chips",
                     emphasized = categoryFilterOpen
@@ -854,7 +872,16 @@ fun TopicDatabaseScreen(navController: NavController) {
                         glyph = CurioIcons.Search,
                         contentDescription = "Search topics",
                         ink = ink,
-                        modifier = lm,
+                        modifier = lm.then(
+                            // v292h — liquid glass search pill matching the
+                            // back button and page nav pills.
+                            if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                                Modifier.liquidGlassCapsule(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                    backdrop = chipGlassBackdrop
+                                )
+                            else Modifier
+                        ),
                         // v85 — emphasized hero fill (the hero action-pill
                         // language).
                         emphasized = true
