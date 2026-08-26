@@ -14,6 +14,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -730,7 +731,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             )
         }
 
-        // ── v292g — FLOATING PAGE NAV (liquid glass, bottom center) ────
+        // ── v293 — FLOATING PAGE NAV: individual liquid glass pills ────
         if (totalPages > 1) {
             val navAlpha by animateFloatAsState(
                 targetValue = if (pageNavVisible) 1f else 0f,
@@ -740,26 +741,12 @@ fun TopicDatabaseScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp)
-                    .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f }
-                    .then(
-                        if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = chipGlassBackdrop
-                            )
-                        } else {
-                            Modifier
-                                .shadow(6.dp, RoundedCornerShape(50))
-                                .clip(RoundedCornerShape(50))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
-                        }
-                    )
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    .padding(bottom = 28.dp)
+                    .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f },
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Previous button — hidden on first page with animated size
+                // Previous button — liquid glass pill
                 AnimatedVisibility(
                     visible = currentPage > 0,
                     enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
@@ -767,47 +754,85 @@ fun TopicDatabaseScreen(navController: NavController) {
                 ) {
                     Surface(
                         onClick = { currentPage = (currentPage - 1).coerceAtLeast(0) },
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surface,
-                        modifier = Modifier.size(42.dp)
+                        shape = RoundedCornerShape(26.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+                        modifier = Modifier
+                            .height(52.dp)
+                            .defaultMinSize(minWidth = 52.dp)
+                            .then(
+                                if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
+                                    Modifier.liquidGlassCapsule(
+                                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                        backdrop = chipGlassBackdrop
+                                    )
+                                } else Modifier
+                            )
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.padding(horizontal = 14.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             CurioIcon(CurioIcons.ChevronLeft, null,
-                                tint = MaterialTheme.colorScheme.onSurface, size = 20.dp)
+                                tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
                         }
                     }
                 }
-                // Page number pill
+                // Page number pill — liquid glass with primary color
                 Surface(
-                    shape = RoundedCornerShape(22.dp),
+                    shape = RoundedCornerShape(26.dp),
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.height(42.dp)
+                    modifier = Modifier
+                        .height(52.dp)
+                        .defaultMinSize(minWidth = 80.dp)
+                        .then(
+                            if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
+                                Modifier.liquidGlassCapsule(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                                    backdrop = chipGlassBackdrop
+                                )
+                            } else Modifier
+                        )
                 ) {
                     Box(
-                        modifier = Modifier.padding(horizontal = 18.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "${currentPage + 1}/$totalPages",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelLarge.fontSize),
+                            text = "${currentPage + 1} / $totalPages",
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
-                // Next button
+                // Next button — liquid glass pill
                 Surface(
                     onClick = { currentPage = (currentPage + 1).coerceAtMost(totalPages - 1) },
-                    shape = CircleShape,
-                    color = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.surface
+                    shape = RoundedCornerShape(26.dp),
+                    color = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f)
                     else Color.Transparent,
                     enabled = currentPage < totalPages - 1,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier
+                        .height(52.dp)
+                        .defaultMinSize(minWidth = 52.dp)
+                        .then(
+                            if (isLiquidGlassPillsActive() && chipGlassBackdrop != null) {
+                                Modifier.liquidGlassCapsule(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                    backdrop = chipGlassBackdrop
+                                )
+                            } else Modifier
+                        )
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.padding(horizontal = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CurioIcon(CurioIcons.ChevronRight, null,
                             tint = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.onSurface
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                            size = 20.dp)
+                            size = 22.dp)
                     }
                 }
             }
