@@ -207,8 +207,6 @@ fun CurioLiquidGlassTabBar(
     // style instead, where the blob shows up under the new tab FAST even
     // on quick switches. Tap switches now use a very stiff ~90ms spring;
     // drag release keeps the soft glide (the finger led it there).
-    val tabGlideSpec = spring<Float>(dampingRatio = 0.82f, stiffness = 380f)
-    val tabTapSpec = spring<Float>(dampingRatio = 0.9f, stiffness = 2600f)
     val offsetAnimation = remember { Animatable(0f) }
     val panelOffset by remember(density) {
         derivedStateOf {
@@ -251,8 +249,10 @@ fun CurioLiquidGlassTabBar(
             },
             onDragStarted = {},
             onDragStopped = {
-                val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
-                animateToValue(targetIndex.toFloat(), tabGlideSpec)
+                // v292h — snap to final position (no re-press animation).
+                // Use value (current position) not targetValue for index.
+                val targetIndex = value.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
+                snapToValue(targetIndex.toFloat())
                 animationScope.launch {
                     offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
                 }
@@ -265,9 +265,13 @@ fun CurioLiquidGlassTabBar(
                     // a NARROW (collapsed) tab sat — visibly erratic on the
                     // right side of Cabinet. A fixed per-tab stride keeps the
                     // feel identical across the whole bar in both directions.
+                    // v292h — INSTANT DRAG TRACKING: use setDragValue (snap)
+                    // instead of updateValue (spring) so the blob follows
+                    // the finger without spring lag. Also use VALUE (current
+                    // position) not targetValue (spring target) for the base.
                     val tabStride = maxOf(totalWidthPx / tabsCount, 1f)
-                    updateValue(
-                        (targetValue + dragAmount.x / tabStride * if (isLtr) 1f else -1f)
+                    setDragValue(
+                        (value + dragAmount.x / tabStride * if (isLtr) 1f else -1f)
                             .fastCoerceIn(0f, (tabsCount - 1).toFloat())
                     )
                     animationScope.launch {
@@ -278,13 +282,12 @@ fun CurioLiquidGlassTabBar(
         ).also { holder.instance = it }
     }
 
-    // v292g — TAB SWITCH: always SNAP instantly to the new tab (no
-    // sideways glide). Drag-release animations are handled in onDragStopped
-    // only — this LaunchedEffect purely handles programmatic selectedIndex
-    // changes (taps, navigation) so the blob appears under the new tab
-    // immediately, never sliding from the old one.
+    // v292h — TAB SWITCH: SNAP instantly to the new tab on tap or
+    // programmatic navigation. No sideways glide, no spring — the blob
+    // appears under the new tab in one frame. Drag-release animations
+    // are handled in onDragStopped only.
     LaunchedEffect(selectedIndex) {
-        dampedDragAnimation.updateValue(selectedIndex.toFloat())
+        dampedDragAnimation.snapToValue(selectedIndex.toFloat())
     }
 
     val interactiveHighlight = remember(animationScope, totalWidthPx) {

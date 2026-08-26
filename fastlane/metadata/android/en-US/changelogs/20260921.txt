@@ -1,3 +1,6 @@
+FIX: Tab switch animation now snaps instantly to the new tab on tap - no more sideways glide that looked glitchy especially on Cabinet.
+FIX: Pet Designer nav blob hold-and-drag now tracks the finger without spring lag - the page switches correctly when releasing on a different tab.
+FIX: Nav indicator text in Material light mode uses pastel fill ink instead of white-on-white.
 
 FIX: Share card export no longer has white background or rounded corners - the image now matches the gradient card exactly.
 FIX: Pet Designer nav bar active indicator now shows tab labels at rest again.
