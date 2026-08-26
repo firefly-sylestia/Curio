@@ -1,6 +1,7 @@
 package com.curio.app.features.database
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -415,6 +416,39 @@ fun TopicDatabaseScreen(navController: NavController) {
         }
     }
 
+    // ── v292g — PAGINATION (100 per page) ─────────────────────────────
+    // The topic rows are paginated so only a manageable slice renders per
+    // page. A liquid-glass floating nav bar at the bottom controls paging.
+    var currentPage by rememberSaveable { mutableIntStateOf(0) }
+    // Topic-only rows (skip section headers for counting purposes).
+    val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }
+    val totalPages = ((topicOnlyRows.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
+    currentPage = currentPage.coerceIn(0, totalPages - 1)
+    // Slice the full rows list to only show the current page's topics,
+    // but keep section headers that belong to this page's range.
+    val topicStart = currentPage * PAGE_SIZE
+    val topicEnd = (topicStart + PAGE_SIZE).coerceAtMost(topicOnlyRows.size)
+    val pageTopicKeys = remember(topicOnlyRows, topicStart, topicEnd) {
+        topicOnlyRows.subList(topicStart, topicEnd).map { it.key }.toSet()
+    }
+    val paginatedRows = remember(rows, pageTopicKeys) {
+        // Keep all section headers + the topic rows for this page.
+        rows.filter { it.section != null || it.key in pageTopicKeys }
+    }
+    // Reset to page 0 when filter/search changes.
+    LaunchedEffect(effectiveCat, needle) {
+        currentPage = 0
+    }
+    // Page nav visibility: hide when scrolling, show when stopped.
+    var pageNavVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { scrolling ->
+                if (scrolling) pageNavVisible = false
+                else kotlinx.coroutines.delay(400); pageNavVisible = true
+            }
+    }
+
     // ── Scroll restore + persist ─────────────────────────────────────
     // The catalog loads asynchronously (produceState), so the first frames
     // after returning compose an EMPTY list. Restoring a LazyListState there
@@ -558,7 +592,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     }
                 } else {
                     items(
-                        rows,
+                        paginatedRows,
                         key = { it.key },
                         // v49 — section headers and topic rows reuse their own
                         // LazyColumn slots instead of being treated as one
@@ -691,6 +725,79 @@ fun TopicDatabaseScreen(navController: NavController) {
                 onSelectAll = { selectedCat = null },
                 onSelectCategory = { selectedCat = it }
             )
+        }
+
+        // ── v292g — FLOATING PAGE NAV (liquid glass, bottom center) ────
+        if (totalPages > 1) {
+            val navAlpha by animateFloatAsState(
+                targetValue = if (pageNavVisible) 1f else 0f,
+                animationSpec = tween(250),
+                label = "pageNavAlpha"
+            )
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp)
+                    .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f }
+                    .shadow(6.dp, RoundedCornerShape(50))
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f))
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Previous button — hidden on first page with animated size
+                AnimatedVisibility(
+                    visible = currentPage > 0,
+                    enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
+                    exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f)
+                ) {
+                    Surface(
+                        onClick = { currentPage = (currentPage - 1).coerceAtLeast(0) },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CurioIcon(CurioIcons.ChevronLeft, null,
+                                tint = MaterialTheme.colorScheme.onSurface, size = 18.dp)
+                        }
+                    }
+                }
+                // Page number pill
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Box(
+                        contentPadding = PaddingValues(horizontal = 14.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${currentPage + 1}/$totalPages",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+                // Next button
+                Surface(
+                    onClick = { currentPage = (currentPage + 1).coerceAtMost(totalPages - 1) },
+                    shape = CircleShape,
+                    color = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.surface
+                    else Color.Transparent,
+                    enabled = currentPage < totalPages - 1,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(CurioIcons.ChevronRight, null,
+                            tint = if (currentPage < totalPages - 1) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            size = 18.dp)
+                    }
+                }
+            }
         }
 
         // ── Torn rose hero on top — rows disappear under the tear. v36 —
@@ -854,6 +961,11 @@ private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + 2.dp
 private val DatabaseChipStickyThreshold = 56.dp
 /** The chip bar's layout height — scroll content starts below it. */
 private val DatabaseChipBarHeight = 52.dp
+/** Rows scrolled before the floating back-to-top arrow appears (≈ one
+ *  full screen — each row is roughly 70dp tall). */
+/** v292g — page size for Topic Database pagination. */
+private const val PAGE_SIZE = 100
+
 /** Rows scrolled before the floating back-to-top arrow appears (≈ one
  *  full screen — each row is roughly 70dp tall). */
 private const val BackToTopRowThreshold = 10

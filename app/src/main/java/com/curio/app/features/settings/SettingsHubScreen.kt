@@ -297,10 +297,12 @@ fun SettingsHeroHeader(
                         CurioBackButton(
                             onClick = onBack,
                             modifier = Modifier.then(
-                                // v263 — GLASSY BACK BUTTON (user request): when
-                                // a local capture is provided and Liquid glass is
-                                // active, the pill becomes clear refraction over
+                                // v263 — GLASSY BACK BUTTON: when a local
+                                // capture is provided and Liquid glass is
+                                // active, the pill becomes refraction over
                                 // the scrolling rows behind the tear.
+                                // v292g — alwaysClear removed to match other
+                                // UI liquid-glass pills (same frosted look).
                                 if (glassBackdrop != null && isInScreenGlassActive())
                                     Modifier.liquidGlassCapsule(
                                         if (isCurioDarkTheme()) {
@@ -310,7 +312,6 @@ fun SettingsHeroHeader(
                                         },
                                         washAlpha = 0.45f,
                                         backdrop = glassBackdrop,
-                                        alwaysClear = true,
                                         interactionSource = backInteraction
                                     )
                                 else Modifier
