@@ -60,10 +60,10 @@ import kotlinx.coroutines.withTimeoutOrNull
  *  slow parse. The splash holds navigation until the canonical lanes are
  *  cached so counts/loading states never read a half-warm catalog, but a
  *  pathological parse must not block the app past this. */
-private const val CATALOG_WARM_TIMEOUT_MS = 2_500L
+private const val CATALOG_WARM_TIMEOUT_MS = 1_000L
 
 /** How long each loading line stays before the next fades in. */
-private const val LOADING_LINE_SWAP_MS = 800L
+private const val LOADING_LINE_SWAP_MS = 400L
 
 /**
  * Splash screen — SIMPLE / MODERN / MATERIAL.
