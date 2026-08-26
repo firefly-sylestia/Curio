@@ -380,36 +380,6 @@ if (hasTopicFiles) {
 // v294 — Build pre-populated Room database from JSON assets.
 // Run: ./gradlew :app:buildTopicDatabase
 // Output: app/src/main/assets/topics.db (shipped with APK).
-tasks.register("buildTopicDatabase") {
-    group = "curio"
-    description = "Creates a pre-populated topics.db from data/topics/*.json"
-    dependsOn("compileDebugKotlin")
-    doLast {
-        val jsonDir = rootProject.file("data/topics")
-        if (!jsonDir.exists()) {
-            logger.warn("data/topics/ directory — nothing to build.")
-            return@doLast
-        }
-        val outputDb = file("src/main/assets/topics.db")
-        outputDb.parentFile.mkdirs()
-        // Build classpath: compiled classes + all runtime dependencies
-        val runtimeFiles = configurations.getByName("runtimeClasspath").files
-        val compiledClasses = file("build/intermediates/javac/debug/classes")
-        val kotlinClasses = file("build/tmp/kotlin-classes/debug")
-        val classpathStr = (listOf(compiledClasses, kotlinClasses) + runtimeFiles.toList())
-            .joinToString(File.pathSeparator) { it.absolutePath }
-        // Run BuildTopicDb as a separate JVM process
-        val proc = ProcessBuilder(
-            "java", "-cp", classpathStr,
-            "com.curio.app.data.tools.BuildTopicDb",
-            jsonDir.absolutePath, outputDb.absolutePath
-        ).directory(rootProject.projectDir).redirectErrorStream(true).start()
-        val output = proc.inputStream.bufferedReader().readText()
-        val exitCode = proc.waitFor()
-        if (exitCode != 0) {
-            logger.error("buildTopicDatabase failed:\n$output")
-            throw GradleException("buildTopicDatabase failed with exit code $exitCode")
-        }
-        logger.lifecycle(output)
-    }
-}
+// v294 — buildTopicDatabase task was moved to CI workflow only.
+// It cannot resolve Android's runtimeClasspath from a Gradle script task.
+// See .github/workflows/android.yml for the build step.

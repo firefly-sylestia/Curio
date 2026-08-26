@@ -66,7 +66,6 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew buildTopicDatabase
           ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
 
       - name: Verify release APKs and signatures
