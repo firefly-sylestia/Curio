@@ -24,11 +24,13 @@ object TopicRepository {
     /** Check if repository has been initialized (Room populated). */
     fun isInitialized() = initialized
 
+    private var appContext: Context? = null
+
     /** Load topics directly from Room (for TopicJsonLoader fast path). */
     suspend fun loadFromRoom(categoryId: CategoryId): List<CurioTopic> {
-        if (!initialized) return emptyList()
+        if (!initialized || appContext == null) return emptyList()
         return try {
-            val db = CurioDatabase.getInstance(android.app.ActivityThread.currentApplication())
+            val db = CurioDatabase.getInstance(appContext!!)
             val dao = db.topicDao()
             dao.getByCategory(categoryId.name).map { it.toCurioTopic() }
         } catch (_: Exception) { emptyList() }
@@ -41,6 +43,7 @@ object TopicRepository {
     suspend fun init(context: Context) {
         if (initialized) return
         initialized = true
+        appContext = context.applicationContext
 
         val db = CurioDatabase.getInstance(context)
         val dao = db.topicDao()

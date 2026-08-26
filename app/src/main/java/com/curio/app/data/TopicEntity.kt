@@ -2,8 +2,9 @@ package com.curio.app.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Fts4
 import androidx.room.PrimaryKey
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 /**
  * v294 — Room entity for topics. Mirrors [CurioTopic] fields 1:1.

@@ -109,8 +109,11 @@ object TopicJsonLoader {
      * attempted before [install].
      */
     @Volatile private var assets: android.content.res.AssetManager? = null
+    @Volatile private var appContext: Context? = null
     fun install(context: Context) {
-        assets = context.applicationContext.assets
+        val ctx = context.applicationContext
+        assets = ctx.assets
+        appContext = ctx
     }
 
     /**
@@ -129,10 +132,9 @@ object TopicJsonLoader {
         cache[id]?.let { return it }
         // v294 — Room fast path: if topics are in Room, use them (instant).
         try {
-            val ctx = assets?.let { null } // check if we have context
-            // TopicRepository provides Room-backed instant access.
+            // v294 — TopicRepository provides Room-backed instant access.
             // On first launch Room is empty → falls through to JSON parse.
-            if (com.curio.app.data.TopicRepository.isInitialized) {
+            if (com.curio.app.data.TopicRepository.isInitialized()) {
                 val roomTopics = com.curio.app.data.TopicRepository.loadFromRoom(id)
                 if (roomTopics.isNotEmpty()) {
                     synchronized(cacheWriteLock) { cache[id] = roomTopics }
@@ -208,9 +210,9 @@ object TopicJsonLoader {
         // v294 — Also populate Room database for fast subsequent access.
         try {
             if (com.curio.app.data.TopicRepository.isInitialized() && parsed.isNotEmpty()) {
-                val ctx = android.app.ActivityThread.currentApplication()
-                if (ctx != null) {
-                    val db = com.curio.app.data.CurioDatabase.getInstance(ctx)
+                val appCtx = appContext
+                if (appCtx != null) {
+                    val db = com.curio.app.data.CurioDatabase.getInstance(appCtx)
                     val entities = parsed.map { com.curio.app.data.TopicEntity.fromCurioTopic(it) }
                     db.topicDao().insertAll(entities)
                 }
