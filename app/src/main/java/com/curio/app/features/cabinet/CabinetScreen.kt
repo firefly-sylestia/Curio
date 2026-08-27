@@ -699,7 +699,8 @@ fun CabinetScreen(navController: NavController) {
                         emphasized = true
                     )
                 }
-            }
+            },
+            glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null
         )
     }
 }
@@ -777,7 +778,9 @@ private fun CabinetHeroHeader(
     titleTrailing: (@Composable (ink: Color, backdrop: Color) -> Unit)? = null,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
-    compact: Boolean = false
+    compact: Boolean = false,
+    // v292h — optional glass backdrop for the sticky-bar cancel pill.
+    glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     val bannerHeight = if (compact) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
     val totalHeight = bannerHeight + CabinetHeroSheetExtent
@@ -889,10 +892,10 @@ private fun CabinetHeroHeader(
                                 contentDescription = "Close search",
                                 ink = ink,
                                 backdrop = fill,
-                                modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                                modifier = if (isLiquidGlassPillsActive() && glassBackdrop != null)
                                     Modifier.liquidGlassCapsule(
                                         MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                        backdrop = chipGlassBackdrop
+                                        backdrop = glassBackdrop
                                     )
                                 else Modifier
                             )
