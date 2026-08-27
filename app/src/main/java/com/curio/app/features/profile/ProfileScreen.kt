@@ -198,6 +198,10 @@ private data class ProfileHeroPair(
 fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    // v311 — debounce back-tap: two quick taps on the back pill would pop
+    // Profile AND the screen behind it, leaving a blank screen. A short
+    // lock prevents the second pop from firing.
+    var isPopping by remember { mutableStateOf(false) }
     var displayName by remember { mutableStateOf(AppPreferences.getDisplayName(context)) }
     var showNameDialog by remember { mutableStateOf(false) }
     var nameInput by remember(displayName) { mutableStateOf(displayName) }
@@ -600,7 +604,13 @@ fun ProfileScreen(navController: NavController) {
             val backPillInteraction = remember { MutableInteractionSource() }
             val searchPillInteraction = remember { MutableInteractionSource() }
             CurioBackButton(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                    if (!isPopping) {
+                        isPopping = true
+                        navController.popBackStack()
+                        scope.launch { kotlinx.coroutines.delay(300); isPopping = false }
+                    }
+                },
                 containerColor = pillBg,
                 contentColor = pillIcon,
                 shadowElevation = if (glassOn) 0.dp else 6.dp * frostShift,
