@@ -1,12 +1,7 @@
 package com.curio.app.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -94,36 +89,34 @@ fun LiquidGlassPageNav(
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Prev button — fades in/out, takes space even when invisible
-        // so the pill doesn't shift.
-        Box(modifier = Modifier.size(48.dp)) {
-            AnimatedVisibility(
-                visible = currentPage > 0,
-                enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
-                exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f),
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Surface(
-                    onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shadowElevation = 4.dp,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .then(
-                            if (glassBackdrop != null && isLiquidGlassPillsActive()) {
-                                Modifier.liquidGlassCapsule(
-                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                    backdrop = glassBackdrop
-                                )
-                            } else Modifier
+        // Prev button — always takes 48dp space (pill stays centered),
+        // fades via graphicsLayer alpha when on page 1.
+        val prevAlpha by animateFloatAsState(
+            targetValue = if (currentPage > 0) 1f else 0f,
+            animationSpec = tween(200),
+            label = "prevAlpha"
+        )
+        Surface(
+            onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = if (currentPage > 0) 4.dp else 0.dp,
+            enabled = currentPage > 0,
+            modifier = Modifier
+                .size(48.dp)
+                .graphicsLayer { alpha = prevAlpha; scaleX = 0.7f + prevAlpha * 0.3f; scaleY = 0.7f + prevAlpha * 0.3f }
+                .then(
+                    if (glassBackdrop != null && isLiquidGlassPillsActive()) {
+                        Modifier.liquidGlassCapsule(
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            backdrop = glassBackdrop
                         )
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CurioIcon(CurioIcons.ChevronLeft, null,
-                            tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
-                    }
-                }
+                    } else Modifier
+                )
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                CurioIcon(CurioIcons.ChevronLeft, null,
+                    tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
             }
         }
 
