@@ -377,37 +377,3 @@ if (hasTopicFiles) {
     }
 }
 
-// v294 — Build the pre-populated Room database from the repository catalog.
-// The generated topics.db is an APK asset, so release builds must run this
-// task before assembleRelease. It is intentionally generated in CI rather
-// than committed because it is a derived binary.
-tasks.register("buildTopicDatabase") {
-    group = "curio"
-    description = "Creates the pre-populated topics.db from data/topics/*.json"
-    dependsOn("compileDebugKotlin")
-    doLast {
-        val jsonDir = rootProject.file("data/topics")
-        if (!jsonDir.exists()) {
-            throw GradleException("Missing topic source directory: ${jsonDir.absolutePath}")
-        }
-        val outputDb = file("src/main/assets/topics.db")
-        outputDb.parentFile.mkdirs()
-        val runtimeFiles = configurations.getByName("runtimeClasspath").files
-        val compiledClasses = file("build/intermediates/javac/debug/classes")
-        val kotlinClasses = file("build/tmp/kotlin-classes/debug")
-        val classpathStr = (listOf(compiledClasses, kotlinClasses) + runtimeFiles.toList())
-            .joinToString(File.pathSeparator) { it.absolutePath }
-        val proc = ProcessBuilder(
-            "java", "-cp", classpathStr,
-            "com.curio.app.data.tools.BuildTopicDb",
-            jsonDir.absolutePath, outputDb.absolutePath
-        ).directory(rootProject.projectDir).redirectErrorStream(true).start()
-        val output = proc.inputStream.bufferedReader().readText()
-        val exitCode = proc.waitFor()
-        if (exitCode != 0) {
-            logger.error("buildTopicDatabase failed:\n$output")
-            throw GradleException("buildTopicDatabase failed with exit code $exitCode")
-        }
-        logger.lifecycle(output)
-    }
-}

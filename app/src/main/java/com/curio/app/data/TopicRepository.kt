@@ -1,7 +1,9 @@
 package com.curio.app.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -67,11 +69,73 @@ object TopicRepository {
         }
     }
 
+    /** Rebuild the Room topics table from the bundled SQLite asset. */
+    suspend fun importBundledRoomDatabase(context: Context): Int = withContext(Dispatchers.IO) {
+        initializationMutex.withLock { importBundledRoomDatabaseLocked(context) }
+    }
+
+    private suspend fun importBundledRoomDatabaseLocked(context: Context): Int {
+        withContext(Dispatchers.IO) {
+            val db = CurioDatabase.getInstance(context)
+            val dao = db.topicDao()
+            val assetFile = File(context.cacheDir, "topics-import.db")
+            try {
+                context.assets.open("topics.db").use { input ->
+                    assetFile.outputStream().use { output -> input.copyTo(output) }
+                }
+                SQLiteDatabase.openDatabase(assetFile.path, null, SQLiteDatabase.OPEN_READONLY).use { source ->
+                    source.rawQuery("SELECT * FROM topics", null).use { cursor ->
+                        val imported = mutableListOf<TopicEntity>()
+                        while (cursor.moveToNext()) {
+                            imported += TopicEntity(
+                                id = cursor.getString(cursor.getColumnIndexOrThrow("id")),
+                                categoryId = cursor.getString(cursor.getColumnIndexOrThrow("categoryId")),
+                                subtype = cursor.getString(cursor.getColumnIndexOrThrow("subtype")),
+                                name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                                teaser = cursor.getString(cursor.getColumnIndexOrThrow("teaser")),
+                                imageUrl = cursor.getString(cursor.getColumnIndexOrThrow("imageUrl")),
+                                byline = cursor.getString(cursor.getColumnIndexOrThrow("byline")),
+                                tags = cursor.getString(cursor.getColumnIndexOrThrow("tags")),
+                                tier = cursor.getInt(cursor.getColumnIndexOrThrow("tier")),
+                                exploreVerb = cursor.getString(cursor.getColumnIndexOrThrow("exploreVerb")),
+                                exploreTargetName = cursor.getString(cursor.getColumnIndexOrThrow("exploreTargetName")),
+                                exploreDurationMinutes = cursor.getInt(cursor.getColumnIndexOrThrow("exploreDurationMinutes")),
+                                exploreInstruction = cursor.getString(cursor.getColumnIndexOrThrow("exploreInstruction")),
+                                pageCount = cursor.getNullableInt("pageCount"),
+                                episodeCount = cursor.getNullableInt("episodeCount"),
+                                altPageLabel = cursor.getString(cursor.getColumnIndexOrThrow("altPageLabel")),
+                                altPageCount = cursor.getNullableInt("altPageCount")
+                            )
+                        }
+                        require(imported.isNotEmpty()) { "Bundled topics.db contains no topics" }
+                        dao.deleteAll()
+                        dao.insertAll(imported)
+                        initialized = true
+                        imported.size
+                    }
+                }
+            } finally {
+                assetFile.delete()
+            }
+        }
+    }
+
+    private fun android.database.Cursor.getNullableInt(column: String): Int? {
+        val index = getColumnIndexOrThrow(column)
+        return if (isNull(index)) null else getInt(index)
+    }
+
     /**
-     * Populate Room database from JSON assets.
+     * Populate Room database from JSON assets as a compatibility fallback.
      * Runs once on first launch, then topics are served from Room.
      */
     private suspend fun populateFromJson(context: Context, dao: TopicDao) {
+        try {
+            importBundledRoomDatabaseLocked(context)
+            return
+        } catch (error: Exception) {
+            Log.w("TopicRepository", "Bundled Room asset unavailable; falling back to JSON", error)
+        }
         withContext(Dispatchers.IO) {
             // Ensure TopicJsonLoader is installed
             TopicJsonLoader.install(context)
