@@ -158,6 +158,9 @@ fun SplashScreen(navController: NavHostController) {
         // v294 — If Room is already populated, skip JSON warm-up entirely.
         // Topics are served from Room (instant indexed queries).
         if (com.curio.app.data.TopicRepository.isInitialized()) {
+            // v311 — even when Room is already warm, hold the splash for
+            // a minimum time so the branding is visible on warm starts.
+            delay(1_000)
             warmedLanes = totalLanes
         } else {
             val warmCatalog = launch(Dispatchers.Default) {

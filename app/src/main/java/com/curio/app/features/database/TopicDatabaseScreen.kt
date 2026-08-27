@@ -447,7 +447,13 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Topic-only rows (skip section headers for counting purposes).
     val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }
     val totalPages = ((topicOnlyRows.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
-    currentPage = currentPage.coerceIn(0, totalPages - 1)
+    // v311 — only coerce AFTER rows load: on return the async produceState
+    // starts with emptyList(), making totalPages=1 and clamping the saved
+    // page to 0 before the catalog arrives. Guarding on rows.isNotEmpty()
+    // preserves the saved page until the data is ready.
+    if (rows.isNotEmpty()) {
+        currentPage = currentPage.coerceIn(0, totalPages - 1)
+    }
     // Slice the full rows list to only show the current page's topics,
     // but keep section headers that belong to this page's range.
     val topicStart = currentPage * PAGE_SIZE
