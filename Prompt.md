@@ -1,5 +1,20 @@
 # Prompt.md — current request log
 
+## Request: v292g — Room persistence fix + smooth splash progress bar (COMPLETE)
+
+- ROOM PERSISTENCE: `TopicRepository.populateFromJson()` was never setting
+  `initialized = true` after the JSON fallback import succeeded (the bundled
+  `topics.db` asset doesn't exist, so it always falls to JSON). The flag
+  stayed false, causing Room re-import on every restart. Fixed by adding
+  `initialized = true` after the JSON populate completes.
+- SPLASH SMOOTHNESS: warm starts (Room already populated) jumped 0→100%
+  in one step after a 1s delay. Replaced with a smooth 6-step ramp
+  (150ms per step) so the progress bar fills incrementally — same total
+  duration, no jarring jump.
+- Status: committed & pushed.
+
+---
+
 ## Request: v292f — share preview/export sync, splash speed, chip frost (IN PROGRESS)
 
 - SHARE PREVIEW: preview renders the card at a FIXED 280dp width (matching
