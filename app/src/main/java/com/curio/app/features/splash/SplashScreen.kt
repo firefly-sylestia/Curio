@@ -160,8 +160,13 @@ fun SplashScreen(navController: NavHostController) {
         if (com.curio.app.data.TopicRepository.isInitialized()) {
             // v311 — even when Room is already warm, hold the splash for
             // a minimum time so the branding is visible on warm starts.
-            delay(1_000)
-            warmedLanes = totalLanes
+            // Smoothly ramp progress so the bar doesn't jump 0→100%.
+            val rampSteps = 6
+            val rampDelay = 150L
+            for (step in 1..rampSteps) {
+                delay(rampDelay)
+                warmedLanes = (totalLanes * step / rampSteps).coerceAtMost(totalLanes)
+            }
         } else {
             val warmCatalog = launch(Dispatchers.Default) {
                 // v291 — PARALLEL prewarm: launch ALL lanes at once instead of

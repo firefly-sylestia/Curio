@@ -149,6 +149,7 @@ object TopicRepository {
                 }
             }
         }
+        initialized = true
     }
 
     /** Get all topics for a category (from Room, instant). */
