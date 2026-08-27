@@ -66,10 +66,18 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # Generate the derived Room asset from data/topics before packaging.
-          # Use Python's standard-library sqlite3 here: the Android module cannot
-          # reliably expose a JVM runtimeClasspath for a standalone generator.
-          python3 scripts/build_topics_db.py data/topics app/src/main/assets/topics.db
+          # Bundle the source catalogs as Android assets. The app imports these
+          # JSON files into its user database on first launch (and retries for
+          # existing installs whose previous import produced zero rows).
+          rm -rf app/src/main/assets/topics
+          mkdir -p app/src/main/assets/topics
+          cp data/topics/*.json app/src/main/assets/topics/
+          topic_files=$(find app/src/main/assets/topics -maxdepth 1 -name '*.json' | wc -l)
+          if [ "$topic_files" -eq 0 ]; then
+            echo "::error::No topic JSON assets were bundled."
+            exit 1
+          fi
+          echo "Bundled $topic_files topic catalog files into the APK."
           ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
 
       - name: Verify release APKs and signatures
