@@ -612,6 +612,12 @@ fun CabinetScreen(navController: NavController) {
                     label = categoryLabel,
                     ink = ink,
                     backdrop = backdrop,
+                    modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                        Modifier.liquidGlassCapsule(
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            backdrop = chipGlassBackdrop
+                        )
+                    else Modifier,
                     // v30 — chevron flips with the chips: ▾ closed, ▴ open.
                     trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
                         else CurioIcons.KeyboardArrowDown,
@@ -636,6 +642,12 @@ fun CabinetScreen(navController: NavController) {
                         label = if (allVisibleSelected) "Clear" else "Select all",
                         ink = ink,
                         backdrop = backdrop,
+                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
                         emphasized = true
                     )
                     CabinetHeroActionPill(
@@ -645,6 +657,12 @@ fun CabinetScreen(navController: NavController) {
                         label = "Delete (${selectedEntryIds.size})",
                         ink = ink,
                         backdrop = backdrop,
+                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
                         emphasized = true,
                         destructive = true
                     )
@@ -653,7 +671,13 @@ fun CabinetScreen(navController: NavController) {
                         glyph = CurioIcons.Close,
                         contentDescription = "Cancel selection",
                         ink = ink,
-                        backdrop = backdrop
+                        backdrop = backdrop,
+                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier
                     )
                 } else {
                     // v105 — the sort dropdown is gone; the hero row keeps
@@ -664,6 +688,12 @@ fun CabinetScreen(navController: NavController) {
                         contentDescription = "Search captures",
                         ink = ink,
                         backdrop = backdrop,
+                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
                         // v85 — emphasized hero fill (the hero action-pill
                         // language).
                         emphasized = true
@@ -858,7 +888,13 @@ private fun CabinetHeroHeader(
                                 glyph = CurioIcons.Close,
                                 contentDescription = "Close search",
                                 ink = ink,
-                                backdrop = fill
+                                backdrop = fill,
+                                modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                                    Modifier.liquidGlassCapsule(
+                                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                        backdrop = chipGlassBackdrop
+                                    )
+                                else Modifier
                             )
                         } else {
                             Row(
@@ -1187,7 +1223,8 @@ private fun CabinetHeroActionPill(
     trailingGlyph: String? = null,
     trailingContentDescription: String? = null,
     emphasized: Boolean = false,
-    destructive: Boolean = false
+    destructive: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     // v27 — deepen the ink-glass: the old 18% fill vanished on the rose
     // banner (especially in light mode), so hero actions like Select /
@@ -1227,7 +1264,7 @@ private fun CabinetHeroActionPill(
         // v85 — same One UI glass glow as the sort dropdown, so the search /
         // select / cancel pills render as the sort pill's identical sibling
         // in dark (before, the sort pill glowed and these stayed flat).
-        modifier = Modifier
+        modifier = modifier
             .curioDarkGlow(3.dp, RoundedCornerShape(50))
             .curioGlassGlow(RoundedCornerShape(50), ink)
     ) {
