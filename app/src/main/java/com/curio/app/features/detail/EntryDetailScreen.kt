@@ -4612,15 +4612,18 @@ private fun EntryShareSheet(
                 customEditing = activeId == com.curio.app.ui.components.CUSTOM_FACT_ID,
                 customText = customText,
                 onCustomTextChange = { customText = it },
-                onShared = onDismiss
+                onShared = onDismiss,
+                categoryFamily = category.family,
+                topicByline = entry.topic.byline
             )
 
-            // Quiet secondary: plain-text share (unchanged payload).
+            // Quiet secondary: plain-text share — quote mode shows quote + author only.
             TextButton(onClick = {
+                val isQuote = activeId == "quote"
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
-                    putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
+                    putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category, isQuote = isQuote))
                 }
                 context.startActivity(Intent.createChooser(intent, "Share entry"))
                 onDismiss()
@@ -4673,8 +4676,24 @@ private fun ShareFormatPill(
     }
 }
 
-/** Plain-text share payload for an entry (the sheet's Text format). */
-private fun entryShareText(entry: CurioEntry, category: CurioCategory): String {
+/** Plain-text share payload for an entry (the sheet's Text format).
+ *  When [isQuote] is true, the payload is just the quote + author.
+ */
+private fun entryShareText(entry: CurioEntry, category: CurioCategory, isQuote: Boolean = false): String {
+    if (isQuote) {
+        val data = entry.captureData
+        val quote = when (data) {
+            is com.curio.app.data.CaptureData.ReelNotes -> data.quotes.firstOrNull { it.isNotBlank() }
+            is com.curio.app.data.CaptureData.Marginalia -> data.quotes.firstOrNull { it.isNotBlank() }
+            is com.curio.app.data.CaptureData.SoundBite -> data.quotes.firstOrNull { it.isNotBlank() }
+            else -> null
+        }
+        val author = entry.topic.byline.ifBlank { null }
+        return buildString {
+            append("\u201c${quote.orEmpty()}\u201d")
+            if (!author.isNullOrBlank()) append(" — $author")
+        }
+    }
     val formatLabel = entry.format.name.replace(Regex("([a-z])([A-Z])"), "$1 $2")
     val daysAgo = when (entry.capturedAtDaysAgo) {
         0 -> "today"

@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.data.AppPreferences
+import com.curio.app.ui.theme.CategoryFamily
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -96,7 +97,12 @@ fun TopicShareCard(
     sharerName: String,
     aspect: ShareCardAspect,
     modifier: Modifier = Modifier,
-    ratingStars: Int? = null
+    ratingStars: Int? = null,
+    categoryFamily: CategoryFamily = CategoryFamily.WILDCARD,
+    /** When non-null, the card renders in QUOTE mode: big quote text +
+     *  author name, no frost pane, no quick fact. */
+    quoteText: String? = null,
+    quoteAuthor: String? = null
 ) {
     val base = toHsl(accent)
     val deep = fromHsl(base.h, base.s, (base.l * 0.55f).coerceIn(0f, 0.5f))
@@ -112,8 +118,13 @@ fun TopicShareCard(
                 RoundedCornerShape(4.dp)
             )
     ) {
-        // ── Category-glyph watermark tile ───────────────────────────────
-        GlyphWatermark(glyph = categoryGlyph, tint = ink.copy(alpha = 0.07f), seed = topicName.hashCode())
+        // ── Multi-glyph watermark scatter ───────────────────────────────
+        MultiGlyphWatermark(
+            family = categoryFamily,
+            fallbackGlyph = categoryGlyph,
+            tint = ink.copy(alpha = 0.07f),
+            seed = topicName.hashCode()
+        )
 
         // ── Content ────────────────────────────────────────────────────
         Column(
@@ -122,7 +133,7 @@ fun TopicShareCard(
                 .padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top row: category chip + sparkle.
+            // Top row: category chip + icon.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -143,7 +154,7 @@ fun TopicShareCard(
                     }
                 }
                 CurioIcon(
-                    name = CurioIcons.AutoAwesome,
+                    name = CurioIcons.Lightbulb,
                     contentDescription = null,
                     tint = ink.copy(alpha = 0.55f),
                     size = 20.dp
@@ -151,62 +162,23 @@ fun TopicShareCard(
             }
 
             // Middle: topic name + frosted content pane (+ optional stars).
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = display,
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontFamily = ChangaOneFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 40.sp
-                    ),
-                    color = ink,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (ratingStars != null && ratingStars > 0) {
-                    // Review share: the star row rides above the pane so the
-                    // rating reads instantly, matching the Reel Notes editor.
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        repeat(5) { i ->
-                            CurioIcon(
-                                name = if (i < ratingStars) CurioIcons.Star else CurioIcons.StarOutline,
-                                contentDescription = null,
-                                tint = if (i < ratingStars) Color(0xFFFFC94D) else ink.copy(alpha = 0.35f),
-                                size = 26.dp
-                            )
-                        }
-                    }
-                }
-                // Simulated-frost pane holding the chosen content.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .drawBehind {
-                            // Soft grounded shadow directly under the pane…
-                            drawRoundRect(
-                                color = Color.Black.copy(alpha = 0.12f),
-                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
-                                topLeft = Offset(0f, 4.dp.toPx())
-                            )
-                            // …a gentle top-lit glass wash…
-                            drawRoundRect(
-                                brush = Brush.verticalGradient(
-                                    listOf(Color.White.copy(alpha = 0.24f), Color.White.copy(alpha = 0.10f))
-                                ),
-                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx())
-                            )
-                            // …and one crisp hairline rim (the glass edge).
-                            drawRoundRect(
-                                color = Color.White.copy(alpha = 0.30f),
-                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
-                                style = Stroke(width = 1.dp.toPx())
-                            )
-                        }
-                        .padding(20.dp)
-                ) {
+            // In QUOTE mode: big quote text + author name instead.
+            if (quoteText != null) {
+                // ── Quote mode ──────────────────────────────────────────
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CurioIcon(
+                        name = CurioIcons.FormatQuote,
+                        contentDescription = null,
+                        tint = ink.copy(alpha = 0.30f),
+                        size = 36.dp
+                    )
                     Text(
-                        text = factText,
-                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 21.sp),
+                        text = quoteText,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontFamily = ChangaOneFontFamily,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 30.sp
+                        ),
                         color = ink,
                         maxLines = when (aspect) {
                             ShareCardAspect.PORTRAIT -> 8
@@ -214,23 +186,111 @@ fun TopicShareCard(
                         },
                         overflow = TextOverflow.Ellipsis
                     )
+                    if (!quoteAuthor.isNullOrBlank()) {
+                        Text(
+                            text = "— $quoteAuthor",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = ink.copy(alpha = 0.80f)
+                        )
+                    }
+                }
+            } else {
+                // ── Normal mode: topic name + frost pane ────────────────
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = display,
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontFamily = ChangaOneFontFamily,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 40.sp
+                        ),
+                        color = ink,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (ratingStars != null && ratingStars > 0) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                repeat(5) { i ->
+                                    CurioIcon(
+                                        name = if (i < ratingStars) CurioIcons.Star else CurioIcons.StarOutline,
+                                        contentDescription = null,
+                                        tint = if (i < ratingStars) Color(0xFFFFC94D) else ink.copy(alpha = 0.35f),
+                                        size = 26.dp
+                                    )
+                                }
+                            }
+                            Text(
+                                text = when (ratingStars) {
+                                    1 -> "Not for me"
+                                    2 -> "It was okay"
+                                    3 -> "Pretty good"
+                                    4 -> "Really liked it"
+                                    5 -> "Loved it"
+                                    else -> ""
+                                },
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = ink.copy(alpha = 0.75f)
+                            )
+                        }
+                    }
+                    // Simulated-frost pane holding the chosen content.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawBehind {
+                                drawRoundRect(
+                                    color = Color.Black.copy(alpha = 0.12f),
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
+                                    topLeft = Offset(0f, 4.dp.toPx())
+                                )
+                                drawRoundRect(
+                                    brush = Brush.verticalGradient(
+                                        listOf(Color.White.copy(alpha = 0.24f), Color.White.copy(alpha = 0.10f))
+                                    ),
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx())
+                                )
+                                drawRoundRect(
+                                    color = Color.White.copy(alpha = 0.30f),
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(24.dp.toPx()),
+                                    style = Stroke(width = 1.dp.toPx())
+                                )
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            text = factText,
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                            color = ink,
+                            maxLines = when (aspect) {
+                                ShareCardAspect.PORTRAIT -> 10
+                                ShareCardAspect.CLASSIC -> 8
+                            },
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
 
-            // Footer: sparkle + branding — single line, never clipped.
+            // Footer: branding — single line, never clipped.
+            // Quote mode gets a distinct footer: "Shared by Name ~ Stay Curious"
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 CurioIcon(
-                    name = CurioIcons.AutoAwesome,
+                    name = CurioIcons.Lightbulb,
                     contentDescription = null,
                     tint = ink.copy(alpha = 0.45f),
                     size = 18.dp
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
+                    text = if (quoteText != null) {
+                        if (sharerName.isNotBlank()) "$sharerName ~ Stay Curious" else "Stay Curious"
+                    } else {
+                        if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio"
+                    },
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = ink.copy(alpha = 0.85f),
                     maxLines = 1,
@@ -242,37 +302,45 @@ fun TopicShareCard(
 }
 
 /**
- * v292e — seeded TILE of the category's own glyph across the card. Same
- * language as the app's page watermarks (CurioWatermarkBackdrop): the real
- * category icon, softly rotated per cell by a deterministic wobble.
+ * v292g — MULTI-GLYPH WATERMARK: scatters several category-family icons
+ * across the card in an organic, non-grid pattern. Each glyph gets a
+ * unique size, rotation, and position seeded deterministically from the
+ * topic name hash — no two cards look the same.
  */
 @Composable
-private fun GlyphWatermark(glyph: String, tint: Color, seed: Int) {
+private fun MultiGlyphWatermark(
+    family: CategoryFamily,
+    fallbackGlyph: String,
+    tint: Color,
+    seed: Int
+) {
+    val symbols = CurioIcons.heroWatermarkSymbols(family)
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val cell = 118.dp
-        val iconSize = 54.dp
-        var row = 0
-        var y = -cell / 2
-        while (y.value < maxHeight.value + cell.value) {
-            val xOff = if (row % 2 == 0) 0f else cell.value / 2f
-            var col = 0
-            var x = -cell.value / 2f + xOff
-            while (x < maxWidth.value + cell.value) {
-                val wobble = kotlin.math.sin((seed + row * 13 + col * 7).toFloat()) * 12f
-                CurioIcon(
-                    name = glyph,
-                    contentDescription = null,
-                    tint = tint,
-                    size = iconSize,
-                    modifier = Modifier
-                        .offset(x = x.dp, y = y)
-                        .rotate(wobble)
-                )
-                x += cell.value
-                col++
-            }
-            y += cell
-            row++
+        val w = maxWidth.value
+        val h = maxHeight.value
+        // Scatter ~12 glyphs across the card in a pseudo-random layout
+        val count = 12
+        for (i in 0 until count) {
+            val hash = seed + i * 31
+            val glyph = symbols[i % symbols.size]
+            // Position: seeded x/y across the full card area
+            val px = ((kotlin.math.sin(hash.toDouble()) * 0.5 + 0.5) * w).toFloat()
+            val py = ((kotlin.math.cos((hash * 3).toDouble()) * 0.5 + 0.5) * h).toFloat()
+            // Size: varies between 32dp and 64dp
+            val sz = (32 + (kotlin.math.abs(kotlin.math.sin((hash * 7).toDouble())) * 32)).toFloat()
+            // Rotation: -20° to +20°
+            val rot = (kotlin.math.sin((hash * 11).toDouble()) * 20f).toFloat()
+            // Alpha: subtle variation
+            val a = (0.04f + kotlin.math.abs(kotlin.math.sin((hash * 5).toDouble())) * 0.06f).toFloat()
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = tint.copy(alpha = a),
+                size = sz.dp,
+                modifier = Modifier
+                    .offset(x = px.dp, y = py.dp)
+                    .rotate(rot)
+            )
         }
     }
 }
@@ -299,7 +367,9 @@ fun TopicShareSheet(
     authority: String,
     context: android.content.Context,
     savedSources: List<ShareCardContent> = emptyList(),
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    categoryFamily: CategoryFamily = CategoryFamily.WILDCARD,
+    topicByline: String = ""
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var aspect by rememberSaveable { mutableStateOf(ShareCardAspect.PORTRAIT) }
@@ -352,7 +422,9 @@ fun TopicShareSheet(
                 customEditing = activeId == CUSTOM_FACT_ID,
                 customText = customText,
                 onCustomTextChange = { customText = it },
-                onShared = onDismiss
+                onShared = onDismiss,
+                categoryFamily = categoryFamily,
+                topicByline = topicByline
             )
         }
     }
@@ -384,11 +456,14 @@ fun ShareHubBody(
     customEditing: Boolean,
     customText: String,
     onCustomTextChange: (String) -> Unit,
-    onShared: () -> Unit
+    onShared: () -> Unit,
+    categoryFamily: CategoryFamily = CategoryFamily.WILDCARD,
+    topicByline: String = ""
 ) {
     // v292f — preview renders at EXACTLY the same dp width the export
     // captures at, centered in the sheet. No graphicsLayer scaling.
     val previewWidth = 280.dp
+    val isQuote = activeSource.id == "quote"
     Box(
         modifier = Modifier
             .width(previewWidth)
@@ -404,7 +479,10 @@ fun ShareHubBody(
             factText = activeSource.text,
             sharerName = sharerName,
             aspect = aspect,
-            ratingStars = activeSource.rating
+            ratingStars = activeSource.rating,
+            categoryFamily = categoryFamily,
+            quoteText = if (isQuote) activeSource.text else null,
+            quoteAuthor = if (isQuote) topicByline.ifBlank { null } else null
         )
     }
 
@@ -423,8 +501,9 @@ fun ShareHubBody(
     }
 
     // ── Content source picker ──
+    // When a quote is selected, hide the Quick fact pill (quote replaces it).
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        sources.forEach { option ->
+        sources.filter { !isQuote || it.id != QUICK_FACT_ID }.forEach { option ->
             ShareOptionPill(
                 label = option.label + (option.rating?.takeIf { it > 0 }
                     ?.let { r -> " · " + "★".repeat(r) } ?: ""),
@@ -469,7 +548,10 @@ fun ShareHubBody(
                         factText = activeSource.text,
                         sharerName = sharerName,
                         aspect = aspect,
-                        ratingStars = activeSource.rating
+                        ratingStars = activeSource.rating,
+                        categoryFamily = categoryFamily,
+                        quoteText = if (isQuote) activeSource.text else null,
+                        quoteAuthor = if (isQuote) topicByline.ifBlank { null } else null
                     )
                 }
             )

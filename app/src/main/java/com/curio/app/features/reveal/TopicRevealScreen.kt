@@ -911,7 +911,9 @@ fun TopicRevealScreen(
                     quickFact = resolved.teaser,
                     authority = "${context.packageName}.fileprovider",
                     context = context,
-                    onDismiss = { showShareSheet = false }
+                    onDismiss = { showShareSheet = false },
+                    categoryFamily = cat.family,
+                    topicByline = resolved.byline
                 )
             }
         }
