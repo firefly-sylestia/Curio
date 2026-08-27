@@ -1,5 +1,22 @@
 # Prompt.md — current request log
 
+## Request: v292i — Topic Database fixes: page persistence, nav spacing, search (COMPLETE)
+
+- PAGE PERSISTENCE: currentPage saved in TopicBrowserSession (process-scoped
+  singleton, same as selectedSlug) so it survives navigation to topic
+  reveal and back. Previously rememberSaveable died with the composable.
+- NAV BUTTONS: switched from Box(fillMaxWidth) to Row with 12dp spacing
+  so prev/next sit close to the pill instead of at screen edges. Prev
+  button reserves space even when invisible (fixed-size Box wrapper)
+  so the pill never shifts.
+- SEARCH: forces effectiveCat=null when searching so results span ALL
+  categories regardless of selected filter. Results are globally sorted
+  by name relevance (exact match → startsWith → contains → other fields)
+  instead of per-category grouping.
+- Status: committed & pushed.
+
+---
+
 ## Request: v292h — share card redesign + quote mode + rating labels (COMPLETE)
 
 - WATERMARK: replaced single-glyph grid with multi-glyph scatter using
