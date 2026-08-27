@@ -67,9 +67,9 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           # Generate the derived Room asset from data/topics before packaging.
-          # Without this step the APK contains no topics.db and the first-launch
-          # importer has no catalog to load.
-          ./gradlew buildTopicDatabase
+          # Use Python's standard-library sqlite3 here: the Android module cannot
+          # reliably expose a JVM runtimeClasspath for a standalone generator.
+          python3 scripts/build_topics_db.py data/topics app/src/main/assets/topics.db
           ./gradlew lintDebug validateTopics assembleRelease -PcurioAbiSplits=false --stacktrace
 
       - name: Verify release APKs and signatures
