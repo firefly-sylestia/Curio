@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -85,45 +86,48 @@ fun LiquidGlassPageNav(
         label = "pageNavAlpha"
     )
 
-    // v294 — Box layout keeps the pill CENTERED regardless of prev-button
-    // visibility. The old Row shifted the pill left when prev appeared/disappeared.
-    Box(
+    // v292h — Row layout keeps prev/next CLOSE to the pill (12dp gap)
+    // instead of spread across the full screen width.
+    Row(
         modifier = modifier
-            .fillMaxWidth()
             .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f },
-        contentAlignment = Alignment.Center
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Prev button — anchored to START
-        AnimatedVisibility(
-            visible = currentPage > 0,
-            enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
-            exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f),
-            modifier = Modifier.align(Alignment.CenterStart)
-        ) {
-            Surface(
-                onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shadowElevation = 4.dp,
-                modifier = Modifier
-                    .size(48.dp)
-                    .then(
-                        if (glassBackdrop != null && isLiquidGlassPillsActive()) {
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = glassBackdrop
-                            )
-                        } else Modifier
-                    )
+        // Prev button — fades in/out, takes space even when invisible
+        // so the pill doesn't shift.
+        Box(modifier = Modifier.size(48.dp)) {
+            AnimatedVisibility(
+                visible = currentPage > 0,
+                enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
+                exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f),
+                modifier = Modifier.align(Alignment.Center)
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronLeft, null,
-                        tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
+                Surface(
+                    onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shadowElevation = 4.dp,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .then(
+                            if (glassBackdrop != null && isLiquidGlassPillsActive()) {
+                                Modifier.liquidGlassCapsule(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                    backdrop = glassBackdrop
+                                )
+                            } else Modifier
+                        )
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(CurioIcons.ChevronLeft, null,
+                            tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
+                    }
                 }
             }
         }
 
-        // Page number capsule — always CENTERED, hold to jump
+        // Page number capsule — hold to jump
         val pageInteraction = remember { MutableInteractionSource() }
         Surface(
             shape = RoundedCornerShape(24.dp),
@@ -161,7 +165,7 @@ fun LiquidGlassPageNav(
             }
         }
 
-        // Next button — anchored to END
+        // Next button
         Surface(
             onClick = { onPageChange((currentPage + 1).coerceAtMost(totalPages - 1)) },
             shape = CircleShape,
@@ -170,7 +174,6 @@ fun LiquidGlassPageNav(
             enabled = currentPage < totalPages - 1,
             shadowElevation = if (currentPage < totalPages - 1) 4.dp else 0.dp,
             modifier = Modifier
-                .align(Alignment.CenterEnd)
                 .size(48.dp)
                 .then(
                     if (glassBackdrop != null && isLiquidGlassPillsActive()) {

@@ -141,6 +141,7 @@ import androidx.compose.foundation.layout.heightIn
 object TopicBrowserSession {
     var selectedSlug by mutableStateOf<String?>(null)
     var chipBarOpen by mutableStateOf(false)
+    var savedPage by mutableIntStateOf(0)
 }
 
 @Composable
@@ -374,8 +375,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v7.97 — the persisted filter can outlive its lane (a category hidden in
     // Manage Categories drops out of the catalog). Fall back to All instead
     // of leaving an invisible "no topics" state with no visible chip.
-    val effectiveCat = remember(catalog, selectedCat) {
-        if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null else selectedCat
+    // v292h — when searching, force All so results span every category.
+    val effectiveCat = remember(catalog, selectedCat, searchActive) {
+        if (searchActive) null
+        else if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null
+        else selectedCat
     }
 
     // Filtered rows — section headers while browsing All, topic rows always.
@@ -412,27 +416,43 @@ fun TopicDatabaseScreen(navController: NavController) {
     ) {
         value = withContext(Dispatchers.Default) {
             val indexById = indexedTopics.associateBy { it.topic.id }
-            // v105 — the sort control is removed; the browser always keeps
-            // its default per-lane A–Z order (stable sort: ties keep file
-            // order) with the category section headers grouping the lanes.
-            buildList {
+            // v292h — when searching, collect ALL matches globally, sort by
+            // name relevance, and render flat (no category sections). When
+            // browsing, keep the per-lane A–Z order with section headers.
+            if (needle.isNotEmpty()) {
+                // SEARCH MODE: flat global results sorted by name relevance.
+                val allMatches = mutableListOf<IndexedTopic>()
                 catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    val shown = topics.mapNotNull { indexById[it.id] }
-                        .filter(matches)
-                        .sortedWith(titleComparator)
-                    if (shown.isEmpty()) return@forEach
-                    if (effectiveCat == null) {
-                        add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
-                    }
-                    shown.forEach { indexed ->
-                        add(
-                            DatabaseRow(
-                                key = indexed.topic.id,
-                                topic = indexed.topic,
-                                done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                    allMatches += topics.mapNotNull { indexById[it.id] }.filter(matches)
+                }
+                allMatches.sortedWith(titleComparator).map { indexed ->
+                    DatabaseRow(
+                        key = indexed.topic.id,
+                        topic = indexed.topic,
+                        done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
+                    )
+                }
+            } else {
+                // BROWSE MODE: per-lane with section headers.
+                buildList {
+                    catalog.forEach { (cat, topics) ->
+                        if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                        val shown = topics.mapNotNull { indexById[it.id] }
+                            .filter(matches)
+                            .sortedWith(titleComparator)
+                        if (shown.isEmpty()) return@forEach
+                        if (effectiveCat == null) {
+                            add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
+                        }
+                        shown.forEach { indexed ->
+                            add(
+                                DatabaseRow(
+                                    key = indexed.topic.id,
+                                    topic = indexed.topic,
+                                    done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -443,7 +463,8 @@ fun TopicDatabaseScreen(navController: NavController) {
     // The topic rows are paginated so only a manageable slice renders per
     // page. A floating nav bar at the bottom controls paging.
     // Persistence: page number survives navigation via rememberSaveable.
-    var currentPage by rememberSaveable { mutableIntStateOf(0) }
+    var currentPage by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedPage) }
+    LaunchedEffect(currentPage) { TopicBrowserSession.savedPage = currentPage }
     // Topic-only rows (skip section headers for counting purposes).
     val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }
     val totalPages = ((topicOnlyRows.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
