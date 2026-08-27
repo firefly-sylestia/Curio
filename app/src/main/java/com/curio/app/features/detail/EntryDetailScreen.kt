@@ -1375,12 +1375,8 @@ private fun BoxScope.DetailStickyBar(
                     }
                     .liquidGlassCapsule(
                         heroFill,
-                        washAlpha = 0.35f,
+                        washAlpha = 0.45f,
                         backdrop = glassBackdrop,
-                        // v258 — the panel is BLURRY BY DEFAULT now: the old
-                        // alwaysClear flag ran the near-zero-blur recipe, so
-                        // the expanded menu read as bare transparent glass.
-                        // Dropping it gives the standard 8dp×scale frost.
                         shape = RoundedCornerShape(20.dp)
                     )
                     .width(MoreMenuWidth)
