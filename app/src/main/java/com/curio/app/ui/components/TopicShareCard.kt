@@ -162,7 +162,8 @@ fun TopicShareCard(
             }
 
             // Middle: topic name + frosted content pane (+ optional stars).
-            // In QUOTE mode: big quote text + author name instead.                    if (quoteText != null) {
+            // In QUOTE mode: big quote text + author name instead.
+            if (quoteText != null) {
                 // ── Quote mode ──────────────────────────────────────────
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     CurioIcon(
