@@ -1,5 +1,30 @@
 # Prompt.md — current request log
 
+## Request: v292h — share card redesign + quote mode + rating labels (COMPLETE)
+
+- WATERMARK: replaced single-glyph grid with multi-glyph scatter using
+  `heroWatermarkSymbols(family)` — 12 category-family icons with varied
+  size (32-64dp), rotation (-20° to +20°), and organic positioning
+  seeded from topic name hash. No two cards look the same.
+- QUICK FACT TEXT: reduced from bodyMedium (14sp) to bodySmall (12sp)
+  with tighter lineHeight (18sp) + increased maxLines so the full fact
+  is visible.
+- SPARKLE ICON: replaced AutoAwesome with Lightbulb in top-right and
+  footer (fits discovery theme better).
+- RATING LABELS: share card now shows the descriptive rating text
+  ("Not for me" / "It was okay" / "Pretty good" / "Really liked it" /
+  "Loved it") below the star row when a review is selected.
+- QUOTE MODE: when the Quote source is selected, the card renders the
+  quote as big headline text (ChangaOne) with "— Author" below, quote
+  icon at top, no frost pane. Quick fact pill is hidden in quote mode.
+- QUOTE TEXT SHARE: plain-text share for quotes shows just the quote
+  with curly quotes + author name, no quick fact or footer.
+- QUOTE FOOTER: "Shared by Name ~ Stay Curious" instead of
+  "via Curio" when in quote mode.
+- Status: committed & pushed.
+
+---
+
 ## Request: v292g — Room persistence fix + smooth splash progress bar (COMPLETE)
 
 - ROOM PERSISTENCE: `TopicRepository.populateFromJson()` was never setting
