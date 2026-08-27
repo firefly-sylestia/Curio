@@ -74,8 +74,7 @@ object TopicRepository {
         initializationMutex.withLock { importBundledRoomDatabaseLocked(context) }
     }
 
-    private suspend fun importBundledRoomDatabaseLocked(context: Context): Int {
-        withContext(Dispatchers.IO) {
+    private suspend fun importBundledRoomDatabaseLocked(context: Context): Int = withContext(Dispatchers.IO) {
             val db = CurioDatabase.getInstance(context)
             val dao = db.topicDao()
             val assetFile = File(context.cacheDir, "topics-import.db")
@@ -118,7 +117,6 @@ object TopicRepository {
                 assetFile.delete()
             }
         }
-    }
 
     private fun android.database.Cursor.getNullableInt(column: String): Int? {
         val index = getColumnIndexOrThrow(column)
