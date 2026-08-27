@@ -13,7 +13,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -86,17 +85,20 @@ fun LiquidGlassPageNav(
         label = "pageNavAlpha"
     )
 
-    Row(
+    // v294 — Box layout keeps the pill CENTERED regardless of prev-button
+    // visibility. The old Row shifted the pill left when prev appeared/disappeared.
+    Box(
         modifier = modifier
+            .fillMaxWidth()
             .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f },
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+        contentAlignment = Alignment.Center
     ) {
-        // Previous button — circular pill
+        // Prev button — anchored to START
         AnimatedVisibility(
             visible = currentPage > 0,
             enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
-            exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f)
+            exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f),
+            modifier = Modifier.align(Alignment.CenterStart)
         ) {
             Surface(
                 onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
@@ -121,7 +123,7 @@ fun LiquidGlassPageNav(
             }
         }
 
-        // Page number capsule — hold to jump
+        // Page number capsule — always CENTERED, hold to jump
         val pageInteraction = remember { MutableInteractionSource() }
         Surface(
             shape = RoundedCornerShape(24.dp),
@@ -159,7 +161,7 @@ fun LiquidGlassPageNav(
             }
         }
 
-        // Next button — circular pill
+        // Next button — anchored to END
         Surface(
             onClick = { onPageChange((currentPage + 1).coerceAtMost(totalPages - 1)) },
             shape = CircleShape,
@@ -168,6 +170,7 @@ fun LiquidGlassPageNav(
             enabled = currentPage < totalPages - 1,
             shadowElevation = if (currentPage < totalPages - 1) 4.dp else 0.dp,
             modifier = Modifier
+                .align(Alignment.CenterEnd)
                 .size(48.dp)
                 .then(
                     if (glassBackdrop != null && isLiquidGlassPillsActive()) {

@@ -456,10 +456,16 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     // Slice the full rows list to only show the current page's topics,
     // but keep section headers that belong to this page's range.
-    val topicStart = currentPage * PAGE_SIZE
-    val topicEnd = (topicStart + PAGE_SIZE).coerceAtMost(topicOnlyRows.size)
+    // Guard: when topicOnlyRows is empty (async data hasn't loaded yet or
+    // filter removed all topics), clamp start to 0 so subList never gets
+    // fromIndex > toIndex — the persisted currentPage can exceed the new
+    // row count after a category switch or data reload.
+    val safeTopicCount = topicOnlyRows.size
+    val topicStart = if (safeTopicCount == 0) 0 else (currentPage * PAGE_SIZE).coerceAtMost(safeTopicCount)
+    val topicEnd = if (safeTopicCount == 0) 0 else (topicStart + PAGE_SIZE).coerceAtMost(safeTopicCount)
     val pageTopicKeys = remember(topicOnlyRows, topicStart, topicEnd) {
-        topicOnlyRows.subList(topicStart, topicEnd).map { it.key }.toSet()
+        if (topicStart < topicEnd) topicOnlyRows.subList(topicStart, topicEnd).map { it.key }.toSet()
+        else emptySet()
     }
     val paginatedRows = remember(rows, pageTopicKeys) {
         // Keep all section headers + the topic rows for this page.
