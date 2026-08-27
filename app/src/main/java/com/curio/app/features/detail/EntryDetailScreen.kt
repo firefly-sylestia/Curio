@@ -4563,7 +4563,9 @@ private fun EntryShareSheet(
     val custom = com.curio.app.ui.components.ShareCardContent(
         com.curio.app.ui.components.CUSTOM_FACT_ID, "Custom fact", ""
     )
-    val activeId = selectedId ?: quick.id
+    // v292i — default to the first quote if available.
+    val defaultId = savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
+    val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         com.curio.app.ui.components.CUSTOM_FACT_ID ->
             custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })

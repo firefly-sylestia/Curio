@@ -85,7 +85,10 @@ fun CurioSearchField(
     ink: Color? = null,
     fill: Color? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-    keyboardActions: KeyboardActions = KeyboardActions(onSearch = {})
+    keyboardActions: KeyboardActions = KeyboardActions(onSearch = {}),
+    // v292i — optional cancel callback: when the iOS-style Cancel button
+    // is tapped, fires this in addition to clearing the query/focus.
+    onCancel: (() -> Unit)? = null
 ) {
     val resolvedInk = ink ?: MaterialTheme.colorScheme.onSurface
     // v251 — iOS systemGray fill (secondarySystemFill): flat, borderless.
@@ -176,6 +179,7 @@ fun CurioSearchField(
                         .clickable {
                             onQueryChange("")
                             focusManager.clearFocus()
+                            onCancel?.invoke()
                         }
                         .padding(start = 4.dp, top = 8.dp, bottom = 8.dp, end = 2.dp)
                 )

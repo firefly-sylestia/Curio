@@ -388,6 +388,7 @@ fun SettingsHeroHeader(
                                 // v108 — dark: the filter chips' near-black
                                 // raised glass instead of the mid-tone lift.
                                 fill = curioSearchFill(fill),
+                                onCancel = onCloseSearch,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .then(

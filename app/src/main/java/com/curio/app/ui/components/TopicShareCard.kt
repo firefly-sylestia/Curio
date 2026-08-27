@@ -162,8 +162,7 @@ fun TopicShareCard(
             }
 
             // Middle: topic name + frosted content pane (+ optional stars).
-            // In QUOTE mode: big quote text + author name instead.
-            if (quoteText != null) {
+            // In QUOTE mode: big quote text + author name instead.                    if (quoteText != null) {
                 // ── Quote mode ──────────────────────────────────────────
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     CurioIcon(
@@ -174,15 +173,15 @@ fun TopicShareCard(
                     )
                     Text(
                         text = quoteText,
-                        style = MaterialTheme.typography.headlineSmall.copy(
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontFamily = ChangaOneFontFamily,
                             fontWeight = FontWeight.Normal,
-                            lineHeight = 30.sp
+                            lineHeight = 26.sp
                         ),
                         color = ink,
                         maxLines = when (aspect) {
-                            ShareCardAspect.PORTRAIT -> 8
-                            ShareCardAspect.CLASSIC -> 6
+                            ShareCardAspect.PORTRAIT -> 12
+                            ShareCardAspect.CLASSIC -> 10
                         },
                         overflow = TextOverflow.Ellipsis
                     )
@@ -378,9 +377,11 @@ fun TopicShareSheet(
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
 
     // Source order: Quick fact → saved content (quote/note/review…) → Custom.
+    // v292i — default to the first quote if available (quote replaces quick fact).
     val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    val activeId = selectedId ?: quick.id
+    val defaultId = savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
+    val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
         else -> (savedSources.firstOrNull { it.id == activeId } ?: quick)

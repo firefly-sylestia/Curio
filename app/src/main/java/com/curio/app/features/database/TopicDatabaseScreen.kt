@@ -1,5 +1,6 @@
 package com.curio.app.features.database
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -170,6 +171,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // in the header instead of scrolling inside the list.
     var searchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    // v292i — BackHandler: close search before exiting the page.
+    BackHandler(enabled = searchActive) {
+        searchActive = false
+        searchQuery = ""
+    }
     // v30 — the Category pill (second row under the hero pills) toggles the
     // sticky category chips; they also show while searching. Hidden by
     // default (matches the Cabinet), so the Category pill is the way in.
@@ -472,7 +478,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // starts with emptyList(), making totalPages=1 and clamping the saved
     // page to 0 before the catalog arrives. Guarding on rows.isNotEmpty()
     // preserves the saved page until the data is ready.
-    if (rows.isNotEmpty()) {
+    // v292i — only coerce AFTER rows AND topicOnlyRows load: on return
+    // the async produceState starts with emptyList(), making totalPages=1
+    // and clamping the saved page to 0. Guarding on topicOnlyRows.isNotEmpty()
+    // preserves the saved page until the data is ready.
+    if (topicOnlyRows.isNotEmpty()) {
         currentPage = currentPage.coerceIn(0, totalPages - 1)
     }
     // Slice the full rows list to only show the current page's topics,
