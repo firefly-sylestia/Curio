@@ -247,7 +247,9 @@ data class CurioCategory(
     val family: CategoryFamily,
     val defaultFormat: CaptureFormat,
     val isHidden: Boolean = false,
-    val isReady: Boolean = false,
+    // All categories currently included in the canonical catalog have shipped topic data.
+    // Keep this explicit at the model boundary so picker readiness matches the catalog.
+    val isReady: Boolean = true,
     // Kept LAST so positional constructions never shift the mid-constructor
     // defaults (all current call sites use named args; appending keeps that safe).
     val lightAccent: Color = accent
@@ -286,7 +288,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryIndigoTint,
             iconGlyph     = "person",
             family        = CategoryFamily.MUSIC,
-            defaultFormat = CaptureFormat.SoundBite
+            defaultFormat = CaptureFormat.SoundBite,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.ALBUMS,
@@ -376,7 +379,7 @@ object CurioCategories {
             family        = CategoryFamily.VISUAL_ART,
             defaultFormat = CaptureFormat.GalleryWall
         ),
-        // ── Science family (Sky) ────────────────────────────────────────
+        // ── Science family (Sky) ─────────────────────────────────────────
         CurioCategory(
             id            = CategoryId.SCIENTISTS,
             displayName   = "Scientists",

@@ -510,9 +510,12 @@ fun TopicDatabaseScreen(navController: NavController) {
         // Keep all section headers + the topic rows for this page.
         rows.filter { it.section != null || it.key in pageTopicKeys }
     }
-    // Only reset to page 0 when CATEGORY filter changes (not search).
+    // Preserve the session page on the first composition after navigation, then
+    // reset only when the category filter actually changes.
+    var categoryInitialized by remember { mutableStateOf(false) }
     LaunchedEffect(effectiveCat) {
-        currentPage = 0
+        if (categoryInitialized) currentPage = 0
+        else categoryInitialized = true
     }
     // Page nav visibility: hide when scrolling, show when stopped.
     var pageNavVisible by remember { mutableStateOf(true) }
