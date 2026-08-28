@@ -714,7 +714,7 @@ private fun SelectionBottomBar(
             .padding(horizontal = 12.dp)
             .then(
                 if (useGlass) Modifier.liquidGlassCapsule(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                    container = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
                     backdrop = backdrop
                 ) else Modifier
             )
