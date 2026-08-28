@@ -451,29 +451,28 @@ private fun CollageShareCard(
                 modifier = Modifier
                     .offset(x = (polaroidX + polaroidW * 0.15f).dp, y = (polaroidY - 4f).dp)
                     .size(width = (polaroidW * 0.55f).dp, height = 18.dp)
-                    .drawBehind {
-                        // Tape: translucent warm beige
-                        drawRoundRect(
-                            color = Color(0xFFD9BE8A).copy(alpha = 0.65f),
-                            cornerRadius = CornerRadius(2.dp.toPx()),
-                            topLeft = Offset.Zero,
-                            size = Size(size.width, size.height)
-                        )
-                        // Subtle wrinkles
-                        drawLine(
-                            Color.White.copy(alpha = 0.15f),
-                            Offset(size.width * 0.1f, size.height * 0.35f),
-                            Offset(size.width * 0.9f, size.height * 0.3f),
-                            strokeWidth = 0.8.dp.toPx()
-                        )
-                        drawLine(
-                            Color(0xFF9B7847).copy(alpha = 0.10f),
-                            Offset(size.width * 0.2f, size.height * 0.65f),
-                            Offset(size.width * 0.85f, size.height * 0.7f),
-                            strokeWidth = 0.6.dp.toPx()
-                        )
-                    }
-            )
+            ) {
+                // Tape: translucent warm beige
+                drawRoundRect(
+                    color = Color(0xFFD9BE8A).copy(alpha = 0.65f),
+                    cornerRadius = CornerRadius(2.dp.toPx()),
+                    topLeft = Offset.Zero,
+                    size = Size(size.width, size.height)
+                )
+                // Subtle wrinkles
+                drawLine(
+                    Color.White.copy(alpha = 0.15f),
+                    Offset(size.width * 0.1f, size.height * 0.35f),
+                    Offset(size.width * 0.9f, size.height * 0.3f),
+                    strokeWidth = 0.8.dp.toPx()
+                )
+                drawLine(
+                    Color(0xFF9B7847).copy(alpha = 0.10f),
+                    Offset(size.width * 0.2f, size.height * 0.65f),
+                    Offset(size.width * 0.85f, size.height * 0.7f),
+                    strokeWidth = 0.6.dp.toPx()
+                )
+            }
 
             // Polaroid frame
             Canvas(
@@ -515,7 +514,7 @@ private fun CollageShareCard(
             val textMeasurer = rememberTextMeasurer()
             val handwrittenStyle = TextStyle(
                 fontFamily = PatrickHandFontFamily,
-                fontSize = (polaroidW * 0.062f).sp.coerceIn(11.sp, 16.sp),
+                fontSize = (polaroidW * 0.062f).coerceIn(11f, 16f).sp,
                 color = ink,
                 lineHeight = (polaroidW * 0.075f).sp
             )
@@ -1050,7 +1049,7 @@ fun ShareHubBody(
 
     // Style picker — swipeable row
     StylePickerRow(
-        selectedIndex = styleIndex,
+        selectedIndex = style.ordinal,
         onSelect = onStyleChange
     )
 
