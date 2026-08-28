@@ -76,10 +76,10 @@ import kotlin.math.sin
 
 // ─── Style enum ────────────────────────────────────────────────────────
 enum class ShareCardStyle(val label: String, val glyph: String) {
-    PAPER("Paper", "description"),
+    PAPER("Paper", "article"),
     VINYL("Vinyl", "album"),
-    COLLAGE("Collage", "collections_bookmark"),
-    NEUMORPHIC("Clean", "circle")
+    COLLAGE("Collage", "collections"),
+    NEUMORPHIC("Clean", "lens")
 }
 
 // ─── Aspect + Content ──────────────────────────────────────────────────
