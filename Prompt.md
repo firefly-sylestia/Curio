@@ -1,6 +1,15 @@
 # Prompt.md — current request log
 
-## Request: v292j — Stable Shuffle → Topic Reveal morph title (IN PROGRESS)
+## Request: v292k — smooth 120Hz share morphs and focused quote cards (COMPLETE)
+
+- MORPH: switched the Shuffle → Topic Reveal bounds transform to a critically damped spring for smoother high-refresh-rate handoffs without easing snaps or overshoot.
+- QUOTE SOURCES: quote-category sharing now exposes only the full quote, never the quick fact, while detail sharing retains individual quote, note, and review choices.
+- QUOTE CARD: quote text remains the sole main content, is scaled to avoid truncation, and the author is anchored in the bottom-right attribution area.
+- WATERMARK: replaced irregular size/gradient variation with a consistent, theme-independent gradient treatment and evenly weighted glyph placement.
+- Status: static review complete; CI validation pending.
+
+---
+
 
 - ROOT CAUSE: Topic Reveal resolved its topic through `produceState`, so the shared-element destination rendered one frame with the raw route name before the canonical topic loaded. That exposed years in titles and quote text during the morph.
 - FIX: Resolve the topic with `remember(topicName, cat.id)` before rendering the shared hero, giving the morph a single stable display model.

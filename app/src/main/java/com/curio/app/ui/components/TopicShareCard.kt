@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,8 +50,6 @@ import com.curio.app.data.CategoryFamily
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.fromHsl
-import com.curio.app.ui.theme.toHsl
 
 /** v292 — share-card aspect options. */
 enum class ShareCardAspect(val label: String, val widthDp: Int, val heightDp: Int) {
@@ -87,6 +86,20 @@ data class ShareCardContent(
  * Frost is simulated on purpose: the capture draws through a software
  * Canvas where RenderEffect blur is unavailable.
  */
+private val ShareCardGradient = listOf(
+    Color(0xFF173B5E),
+    Color(0xFF2B6F77),
+    Color(0xFFB56B4A)
+)
+
+private fun quoteFontSize(length: Int): TextUnit = when {
+    length > 900 -> 15.sp
+    length > 650 -> 17.sp
+    length > 420 -> 19.sp
+    length > 260 -> 21.sp
+    else -> 24.sp
+}
+
 @Composable
 fun TopicShareCard(
     topicName: String,
@@ -104,17 +117,19 @@ fun TopicShareCard(
     quoteText: String? = null,
     quoteAuthor: String? = null
 ) {
-    val base = toHsl(accent)
-    val deep = fromHsl(base.h, base.s, (base.l * 0.55f).coerceIn(0f, 0.5f))
+    // Share cards are exported artwork, not a themed surface: keep one
+    // consistent palette in light and dark mode and ignore the category tint.
+    val shareGradient = ShareCardGradient
     val ink = Color.White
     val display = topicName.substringBeforeLast(" (")
+    val quoteSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(4.dp))
             .background(
-                Brush.verticalGradient(listOf(deep, accent)),
+                Brush.verticalGradient(shareGradient),
                 RoundedCornerShape(4.dp)
             )
     ) {
@@ -177,23 +192,13 @@ fun TopicShareCard(
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontFamily = ChangaOneFontFamily,
                             fontWeight = FontWeight.Normal,
-                            lineHeight = 26.sp
+                            fontSize = quoteSize,
+                            lineHeight = (quoteSize.value * 1.28f).sp
                         ),
                         color = ink,
-                        // v301 — increased maxLines so full quotes are visible
-                        maxLines = when (aspect) {
-                            ShareCardAspect.PORTRAIT -> 14
-                            ShareCardAspect.CLASSIC -> 10
-                        },
-                        overflow = TextOverflow.Ellipsis
+                        maxLines = Int.MAX_VALUE,
+                        overflow = TextOverflow.Clip
                     )
-                    if (!quoteAuthor.isNullOrBlank()) {
-                        Text(
-                            text = "— $quoteAuthor",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = ink.copy(alpha = 0.80f)
-                        )
-                    }
                 }
             } else {
                 // ── Normal mode: topic name + frost pane ────────────────
@@ -286,6 +291,18 @@ fun TopicShareCard(
                     size = 18.dp
                 )
                 Spacer(Modifier.height(6.dp))
+                if (quoteText != null && !quoteAuthor.isNullOrBlank()) {
+                    Text(
+                        text = "— $quoteAuthor",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = ink.copy(alpha = 0.82f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
                 Text(
                     text = if (quoteText != null) {
                         if (sharerName.isNotBlank()) "$sharerName ~ Stay Curious" else "Stay Curious"
@@ -319,42 +336,23 @@ private fun MultiGlyphWatermark(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val w = maxWidth.value
         val h = maxHeight.value
-        // v301b — Fixed grid: 3 cols × 4 rows, one glyph per cell.
-        // Jitter ±15% keeps them looking natural without overlapping.
-        // Icons are small (24-30dp) and low-alpha so they never clash
-        // with the card content.
-        val cols = 3
-        val rows = 4
-        val cellW = w / cols
-        val cellH = h / rows
-        for (row in 0 until rows) {
-            for (col in 0 until cols) {
-                val i = row * cols + col
-                val hash = seed + i * 31
-                val glyph = symbols[i % symbols.size]
-                // Position: cell center + seeded jitter ±15%
-                val jitterX = (kotlin.math.sin(hash.toDouble()) * 0.15).toFloat()
-                val jitterY = (kotlin.math.cos((hash * 3).toDouble()) * 0.15).toFloat()
-                val px = (col * cellW + cellW * 0.5f + cellW * jitterX).toFloat()
-                val py = (row * cellH + cellH * 0.5f + cellH * jitterY).toFloat()
-                // Size: 24-30dp (tiny to avoid bleed)
-                val sz = (24 + (kotlin.math.abs(kotlin.math.sin((hash * 7).toDouble())) * 6)).toFloat()
-                // Rotation: -5° to +5° (minimal)
-                val rot = (kotlin.math.sin((hash * 11).toDouble()) * 5f).toFloat()
-                // Alpha: very subtle 0.03-0.06
-                val a = (0.03f + kotlin.math.abs(kotlin.math.sin((hash * 5).toDouble())) * 0.03f).toFloat()
-                CurioIcon(
-                    name = glyph,
-                    contentDescription = null,
-                    tint = tint.copy(alpha = a),
-                    size = sz.dp,
-                    modifier = Modifier
-                        .offset(x = px.dp, y = py.dp)
-                        .rotate(rot)
-                )
-            }
-        }
-    }
+  // Deliberate, evenly weighted placement: variation belongs to the glyphs,
+  // not their size, rotation, or gradient treatment.
+  val positions = listOf(
+  0.16f to 0.18f, 0.84f to 0.18f,
+  0.18f to 0.50f, 0.82f to 0.50f,
+  0.16f to 0.82f, 0.84f to 0.82f
+  )
+  positions.forEachIndexed { i, (x, y) ->
+  CurioIcon(
+  name = symbols[i % symbols.size],
+  contentDescription = null,
+  tint = tint.copy(alpha = 0.045f),
+  size = 28.dp,
+  modifier = Modifier.offset(x = (w * x - 14).dp, y = (h * y - 14).dp)
+  )
+  }
+  }
 }
 
 /**
@@ -394,19 +392,16 @@ fun TopicShareSheet(
     // v301 — For QUOTES category, the quickFact IS the quote text. Combine
     // byline + quote so the share card shows author and full quote.
     val isQuotesCategory = categoryName == "Quotes"
-    val quickText = if (isQuotesCategory && topicByline.isNotBlank() && quickFact.isNotBlank()) {
-        "${topicByline} — ${quickFact}"
-    } else {
-        quickFact
-    }
-    val quick = ShareCardContent(QUICK_FACT_ID, if (isQuotesCategory) "Quote" else "Quick fact", quickText)
+    val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
+    val quote = ShareCardContent("quote", "Quote", quickFact)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    val defaultId = if (isQuotesCategory) quick.id
+    val availableSources = if (isQuotesCategory) listOf(quote) else listOf(quick) + savedSources
+    val defaultId = if (isQuotesCategory) quote.id
         else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
-        else -> (savedSources.firstOrNull { it.id == activeId } ?: quick)
+        else -> (availableSources.firstOrNull { it.id == activeId } ?: quick)
     }
 
     ModalBottomSheet(
@@ -439,7 +434,7 @@ fun TopicShareSheet(
                 context = context,
                 aspect = aspect,
                 onAspectChange = { aspect = it },
-                sources = listOf(quick) + savedSources + listOf(custom),
+                sources = availableSources + listOf(custom),
                 activeSource = activeSource,
                 onSelectSource = { selectedId = it },
                 customEditing = activeId == CUSTOM_FACT_ID,

@@ -3,9 +3,7 @@ package com.curio.app.ui.adaptive
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
@@ -24,12 +22,14 @@ import androidx.compose.runtime.staticCompositionLocalOf
 const val RevealSharedElementKey = "reveal-hero"
 
 /**
- * Bounds animation for the reveal morph — a quick, even FastOutSlowIn
- * tween (320ms) so the card expands into the hero smoothly without the
- * default spring's wobble or the earlier laggy feel.
+ * Bounds animation for the reveal morph — a frame-rate-independent,
+ * critically damped tween that stays smooth on 60–120Hz displays without
+ * spring overshoot or a late settling wobble.
  */
 val RevealBoundsTransform = BoundsTransform { _, _ ->
-    tween(320, easing = FastOutSlowInEasing)
+    // A critically damped spring remains frame-rate independent and avoids
+    // the easing-curve snap visible during the shared hero handoff.
+    spring(dampingRatio = 1f, stiffness = 420f)
 }
 
 /**
