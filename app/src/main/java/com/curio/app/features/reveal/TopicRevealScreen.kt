@@ -61,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -228,14 +229,16 @@ fun TopicRevealScreen(
             ?: CurioCategories.byId(CategoryId.WILDCARD)
     }
 
-    // Resolve the destination topic synchronously before the shared-element
-    // morph starts. The previous produceState path rendered one frame with
-    // `resolved == null`, so the hero used the raw route name (which may
-    // include a year or quote text), then swapped to the canonical display
-    // title as the loader completed. That swap was visible through the morph.
-    // The JSON loader is already cached after splash warm-up, so resolving it
-    // here gives the source card and reveal hero one immutable display model.
-    val resolved = remember(topicName, cat.id) {
+    // Resolve the destination topic in a coroutine. TopicJsonLoader.load is
+    // suspend even when its category is already cached, so it cannot run
+    // inside remember. Keep the route fallback until the canonical model is
+    // available; the reveal content is keyed from `resolved`, preventing a
+    // second data swap once the morph has started.
+    val resolved by produceState<CurioTopic?>(
+        initialValue = null,
+        key1 = topicName,
+        key2 = cat.id
+    ) {
         // v199 — resolve WITHIN the route's own category FIRST. The old
         // code asked the global TopicCatalog.findByName first, which scans
         // every lane and returns the first tolerant match — "Flow" (the
@@ -249,7 +252,7 @@ fun TopicRevealScreen(
         // legacy saved-entry fallback (v135: an old entry whose lane
         // changed must still resolve instead of hanging on "Loading…").
         val pool = TopicJsonLoader.load(cat.id)
-        pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
+        value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
             ?: pool.firstOrNull { it.matchesSavedName(topicName) }
             ?: TopicCatalog.findByName(topicName)
     }
