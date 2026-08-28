@@ -55,6 +55,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.AudioStorageManager
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.shortName
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ImageStorageManager
@@ -771,7 +772,7 @@ private fun formatIcon(format: com.curio.app.data.CaptureFormat): String = when 
     com.curio.app.data.CaptureFormat.SoundBite -> CurioIcons.Mic
     com.curio.app.data.CaptureFormat.GalleryWall -> CurioIcons.Image
     com.curio.app.data.CaptureFormat.FieldNotes -> CurioIcons.Edit
-    com.curio.app.data.CaptureFormat.OpenNotebook -> CurioIcons.Bolt
+    com.curio.app.data.CaptureFormat.OpenNotebook -> CurioIcons.AutoAwesome
 }
 
 private fun expiryLabel(days: Int): String =
