@@ -351,6 +351,10 @@ fun SettingsHeroHeader(
                     // the tear (skipped with [titleAtTop], where the title
                     // sits at the top of the banner).
                     if (!titleAtTop) Spacer(Modifier.weight(1f))
+                    // v294 — when titleAtTop, add breathing room between
+                    // the top row (back + search/category pills) and the
+                    // title row so the pills don't touch.
+                    if (titleAtTop) Spacer(Modifier.height(8.dp))
 
                     // ── Title + subtitle OR the morph-open search field —
                     //    the search bar scales in from the pill's position

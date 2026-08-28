@@ -681,7 +681,7 @@ fun CabinetScreen(navController: NavController) {
                     )
                 } else {
                     // v105 — the sort dropdown is gone; the hero row keeps
-                    // the Search pill only.
+                    // the Search pill + Recycle Bin pill.
                     CabinetHeroActionPill(
                         onClick = { searchActive = true },
                         glyph = CurioIcons.Search,
@@ -697,6 +697,19 @@ fun CabinetScreen(navController: NavController) {
                         // v85 — emphasized hero fill (the hero action-pill
                         // language).
                         emphasized = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = { navController.navigate(CurioRoutes.RECYCLE_BIN) },
+                        glyph = CurioIcons.Delete,
+                        contentDescription = "Recycle bin",
+                        ink = ink,
+                        backdrop = backdrop,
+                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier
                     )
                 }
             },

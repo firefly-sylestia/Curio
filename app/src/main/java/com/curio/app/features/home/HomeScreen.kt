@@ -682,7 +682,8 @@ fun HomeScreen(navController: NavController) {
                                             label = "Streak",
                                             tint = questInk,
                                             ink = questInk,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
                                         )
                                         VerticalDivider(
                                             modifier = Modifier.height(34.dp),
@@ -694,7 +695,8 @@ fun HomeScreen(navController: NavController) {
                                             label = "Cabinet",
                                             tint = questInk,
                                             ink = questInk,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
                                         )
                                         VerticalDivider(
                                             modifier = Modifier.height(34.dp),
@@ -711,7 +713,8 @@ fun HomeScreen(navController: NavController) {
                                             label = "Topics",
                                             tint = questInk,
                                             ink = questInk,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
                                         )
                                     }
                                 }
@@ -1383,12 +1386,15 @@ private fun HeroStatSegment(
     label: String,
     tint: Color,
     ink: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     // Colored icon accent, extra-bold value, soft label — mirrors
     // EntryDetail's FrostedSegment, with the icon wearing the color accent.
     Column(
-        modifier = modifier,
+        modifier = modifier.then(
+            if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
