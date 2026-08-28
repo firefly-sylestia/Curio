@@ -259,8 +259,8 @@ private fun PaperCard(
 
 // ═══════════════════════════════════════════════════════════════════════
 // STYLE 1 — VINYL (MUSIC family primary)
-// Right-side partial record + accent label + text left
-// ═══════════════════════════════════════════════════════════════════════
+// Scrapbook: title + artist + fact + info panel, vinyl bleeds right
+// ════════════════════════════════════════════════════════════════════
 @Composable
 private fun VinylCard(
     display: String, categoryName: String, categoryGlyph: String,
@@ -269,70 +269,194 @@ private fun VinylCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null
 ) {
-    val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
-    Box(
-        modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))
-            .background(Brush.verticalGradient(listOf(Color(0xFFF8F0E0), Color(0xFFEDE0C8), Color(0xFFDFD0B0))), RoundedCornerShape(6.dp))
-    ) {
+    val roseBg = Color(0xFFF5E6E0)
+    val roseDusty = Color(0xFFD4A0A0)
+    val roseLight = Color(0xFFF0D0C8)
+    val cream = Color(0xFFFAF5F0)
+    val inkDark = Color(0xFF3A2820)
+    val roseFaint = Color(0xFFE8C8C0)
+
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(roseBg, RoundedCornerShape(6.dp))) {
+        // Paper texture
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
 
-        // Vinyl record — bottom-right, text wraps around it
-        val vinylSize = 180.dp
-        Canvas(
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .size(vinylSize)
-                .offset(x = 10.dp, y = 10.dp)
-        ) {
-            drawVinylPartial(palette.accent)
+        // Decorative elements — sparkles, dots, music icon
+        Canvas(Modifier.fillMaxSize().zIndex(0f)) {
+            val w = size.width; val h = size.height
+            // Sparkle dots
+            drawCircle(roseDusty.copy(alpha = 0.18f), 3f, Offset(w * 0.42f, h * 0.08f))
+            drawCircle(roseDusty.copy(alpha = 0.12f), 2f, Offset(w * 0.55f, h * 0.10f))
+            drawCircle(roseDusty.copy(alpha = 0.15f), 2.5f, Offset(w * 0.38f, h * 0.12f))
+            drawCircle(roseDusty.copy(alpha = 0.10f), 2f, Offset(w * 0.62f, h * 0.06f))
+            // Dot grid pattern — right side
+            for (row in 0..3) for (col in 0..3) {
+                drawCircle(roseDusty.copy(alpha = 0.08f), 1.2f, Offset(w * 0.72f + col * 6f, h * 0.14f + row * 6f))
+            }
+            // Small music note icon placeholder (faded square)
+            drawRoundRect(roseFaint.copy(alpha = 0.30f), Offset(w * 0.78f, h * 0.04f), Size(36f, 36f), CornerRadius(4f))
         }
 
-        Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.04f), display.hashCode())
+        // Vinyl record — large, bleeding right edge
+        val vinylDiameter = 260.dp
+        val sleeveSize = 300.dp
+        // Dusty rose sleeve circle behind vinyl
+        Canvas(
+            modifier = Modifier.align(Alignment.CenterEnd)
+                .size(sleeveSize)
+                .offset(x = 30.dp, y = 60.dp)
+        ) {
+            drawCircle(roseLight.copy(alpha = 0.35f), radius = size.minDimension / 2f)
+        }
+        // Vinyl record
+        Canvas(
+            modifier = Modifier.align(Alignment.CenterEnd)
+                .size(vinylDiameter)
+                .offset(x = 15.dp, y = 75.dp)
+        ) {
+            drawVinylPartial(roseDusty)
+        }
+        // Thin arcs around vinyl
+        Canvas(
+            modifier = Modifier.align(Alignment.CenterEnd)
+                .size(320.dp)
+                .offset(x = 5.dp, y = 55.dp)
+        ) {
+            drawArc(
+                color = roseDusty.copy(alpha = 0.12f), startAngle = -30f, sweepAngle = 60f,
+                useCenter = false, style = Stroke(1.dp.toPx()),
+                topLeft = Offset(0f, size.height * 0.1f),
+                size = Size(size.width, size.height * 0.8f)
+            )
+            drawArc(
+                color = roseDusty.copy(alpha = 0.08f), startAngle = 150f, sweepAngle = 60f,
+                useCenter = false, style = Stroke(0.8.dp.toPx()),
+                topLeft = Offset(size.width * 0.05f, size.height * 0.15f),
+                size = Size(size.width * 0.9f, size.height * 0.7f)
+            )
+        }
 
-        Column(modifier = Modifier.fillMaxSize().padding(24.dp).zIndex(1f), verticalArrangement = Arrangement.SpaceBetween) {
-            HeaderRow(categoryName, categoryGlyph, palette)
+        // Watermark glyphs
+        Watermark(family, categoryGlyph, roseDusty.copy(alpha = 0.04f), display.hashCode())
 
-            // Full-width text column — fact text wraps around the vinyl
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (quoteText != null) {
-                    CurioIcon(name = CurioIcons.FormatQuote, tint = palette.accent.copy(alpha = 0.35f), size = 28.dp)
-                    Text(text = quoteText, style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.30f).sp
-                    ), color = palette.ink, maxLines = 6, overflow = TextOverflow.Ellipsis)
-                } else {
-                    Text(text = display, style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = ChangaOneFontFamily, lineHeight = 32.sp
-                    ), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                    // Metadata line
-                    val vMetaParts = mutableListOf<String>()
-                    if (byline.isNotBlank()) vMetaParts.add(byline)
-                    if (year != null) vMetaParts.add(year)
-                    if (vMetaParts.isNotEmpty()) {
-                        Text(vMetaParts.joinToString(" \u2022 "), style = MaterialTheme.typography.labelSmall.copy(
-                            fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
-                            color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        // ── Content layout ──
+        Column(modifier = Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 16.dp).zIndex(1f)) {
+            // Category pill + lightbulb icon
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+                Surface(shape = RoundedCornerShape(14.dp), color = roseDusty) {
+                    Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
+                        Text(categoryName, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold, letterSpacing = 1.5.sp), color = Color.White)
                     }
-                    // Accent underline
-                    Spacer(Modifier.height(2.dp))
-                    Canvas(Modifier.size(width = 36.dp, height = 2.dp)) {
-                        drawRoundRect(palette.accent, cornerRadius = CornerRadius(1f))
-                    }
-                    Spacer(Modifier.height(2.dp))
-                    // Quick fact — larger font, fills the space above vinyl
-                    val qfSize = quickFactFontSize(factText.length)
-                    Text(text = factText, style = MaterialTheme.typography.bodyLarge.copy(
-                        fontFamily = LoraFontFamily, fontSize = qfSize,
-                        lineHeight = (qfSize.value * 1.35f).sp
-                    ), color = palette.ink.copy(alpha = 0.75f), maxLines = 10, overflow = TextOverflow.Ellipsis)
                 }
-                if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
+                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.40f), size = 20.dp)
             }
 
-            Footer(sharerName, quoteText, quoteAuthor, palette)
+            Spacer(Modifier.height(16.dp))
+
+            // Title — large serif
+            Text(display, style = TextStyle(
+                fontFamily = ChangaOneFontFamily, fontSize = 36.sp,
+                lineHeight = 40.sp, fontWeight = FontWeight.Normal, color = inkDark
+            ), maxLines = 2, overflow = TextOverflow.Ellipsis)
+
+            // Artist / byline
+            if (byline.isNotBlank()) {
+                Text(byline, style = TextStyle(
+                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                    fontSize = 18.sp, color = roseDusty
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            } else if (year != null) {
+                Text(year, style = TextStyle(
+                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                    fontSize = 18.sp, color = roseDusty
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+
+            // Accent underline
+            Spacer(Modifier.height(6.dp))
+            Canvas(Modifier.size(width = 40.dp, height = 2.dp)) {
+                drawRoundRect(roseDusty, cornerRadius = CornerRadius(1f))
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // Body text — Lora serif, constrained width for left column
+            val bodySize = when {
+                factText.length > 280 -> 11.sp; factText.length > 180 -> 12.sp; else -> 13.sp
+            }
+            Text(factText, style = TextStyle(
+                fontFamily = LoraFontFamily, fontSize = bodySize,
+                lineHeight = (bodySize.value * 1.55f).sp, color = inkDark.copy(alpha = 0.82f)
+            ), modifier = Modifier.widthIn(max = 260.dp), maxLines = 12, overflow = TextOverflow.Ellipsis)
+
+            Spacer(Modifier.height(14.dp))
+
+            // Info panel — cream card with 3 rows
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = cream,
+                shadowElevation = 1.dp,
+                modifier = Modifier.widthIn(max = 280.dp)
+            ) {
+                Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // Row 1: LATE-NIGHT
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CurioIcon(name = "nightlight", tint = roseDusty, size = 18.dp)
+                        Column {
+                            Text("LATE-NIGHT", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, color = roseDusty))
+                            Text("Themes of reflection, memory & overthinking", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 10.sp, lineHeight = 14.sp,
+                                color = inkDark.copy(alpha = 0.65f)))
+                        }
+                    }
+                    // Row 2: TRACKS
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CurioIcon(name = "headphones", tint = roseDusty, size = 18.dp)
+                        Column {
+                            Text("TRACKS", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, color = roseDusty))
+                            Text("Curated picks to explore and discover", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 10.sp, lineHeight = 14.sp,
+                                color = inkDark.copy(alpha = 0.65f)))
+                        }
+                    }
+                    // Row 3: RECOGNITION
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CurioIcon(name = "workspace_premium", tint = roseDusty, size = 18.dp)
+                        Column {
+                            Text("RECOGNITION", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, color = roseDusty))
+                            Text("Explore this ${categoryName.lowercase()} topic via Curio", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 10.sp, lineHeight = 14.sp,
+                                color = inkDark.copy(alpha = 0.65f)))
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            // Footer — centered, subtle
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Canvas(Modifier.size(width = 80.dp, height = 1.dp)) {
+                    drawLine(roseDusty.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
+                }
+                Spacer(Modifier.height(6.dp))
+                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.35f), size = 14.dp)
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
+                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold, color = roseDusty.copy(alpha = 0.65f)),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
 // STYLE 2 — COLLAGE (torn paper layers + polaroid + tape)
 // ═══════════════════════════════════════════════════════════════════════
 @Composable
