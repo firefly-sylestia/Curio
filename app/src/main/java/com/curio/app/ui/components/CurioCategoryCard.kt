@@ -19,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +36,6 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.TopicJsonLoader
-import kotlinx.coroutines.CancellationException
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMotion
@@ -123,22 +121,11 @@ fun CurioCategoryCard(
     // already wears the full solid-accent gradient, so it never needs to
     // raise (the old 8/3 raise was the blurry-shadow bug class).
     val cardElevation = 2.dp
-    // Live topic count — reads the warm cache immediately, then reloads (a
-    // cache hit) if the pool was ever cleared (e.g. onTrimMemory) so the
-    // card never latches a stale "0 topics". With the catalog warmed during
-    // splash this resolves on the first frame from cache.
-    val topicCount by produceState(
-        initialValue = TopicJsonLoader.cached(category.id)?.size ?: 0,
-        category.id
-    ) {
-        value = try {
-            TopicJsonLoader.load(category.id).size
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Throwable) {
-            0
-        }
-    }
+    // Live topic count — reads the warm cache synchronously. The catalog
+    // is warmed during splash, so cached() always has data by the time the
+    // picker opens. This avoids launching a coroutine per card (36+ cards
+    // each spinning up produceState was the main lag source in the picker).
+    val topicCount = TopicJsonLoader.cached(category.id)?.size ?: 0
 
     Surface(
         shape = RoundedCornerShape(22.dp),

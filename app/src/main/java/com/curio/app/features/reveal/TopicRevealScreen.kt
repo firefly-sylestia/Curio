@@ -61,7 +61,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -229,31 +228,19 @@ fun TopicRevealScreen(
             ?: CurioCategories.byId(CategoryId.WILDCARD)
     }
 
-    // Resolve the destination topic in a coroutine. TopicJsonLoader.load is
-    // suspend even when its category is already cached, so it cannot run
-    // inside remember. Keep the route fallback until the canonical model is
-    // available; the reveal content is keyed from `resolved`, preventing a
-    // second data swap once the morph has started.
-    val resolved by produceState<CurioTopic?>(
-        initialValue = null,
-        key1 = topicName,
-        key2 = cat.id
-    ) {
-        // v199 — resolve WITHIN the route's own category FIRST. The old
-        // code asked the global TopicCatalog.findByName first, which scans
-        // every lane and returns the first tolerant match — "Flow" (the
-        // 2024 film) opened "Flower Boy" (an album) because ALBUMS scans
-        // before FILMS and "flower" contains "flow" (and even the full
-        // name "Flow (2024)" base-collided the same way). The category
-        // pool owns the match, TIERED exactly like findByName: strict
-        // (exact / base-name) hits before tolerant (containment) hits, so
-        // a loose match earlier in the file can't beat a precise one later
-        // in the same lane either. The global lookup stays only as the
-        // legacy saved-entry fallback (v135: an old entry whose lane
-        // changed must still resolve instead of hanging on "Loading…").
-        val pool = TopicJsonLoader.load(cat.id)
-        value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
-            ?: pool.firstOrNull { it.matchesSavedName(topicName) }
+    // v8.50 — resolve the topic SYNCHRONOUSLY from the warm cache so the
+    // shared-element morph starts with the correct title on frame 1. The
+    // old produceState(initialValue=null) left the hero showing the raw
+    // route name for one frame, which caused a visible title flash during
+    // the morph (especially for QUOTES where the route name ≠ byline).
+    // TopicJsonLoader.cached() is always populated after splash warm-up;
+    // if the cache is cold (app restore after process death) we fall back
+    // to a best-effort global lookup — still better than null.
+    val resolved = remember(topicName, cat.id) {
+        TopicJsonLoader.cached(cat.id)
+            ?.firstOrNull { it.matchesSavedNameStrict(topicName) }
+            ?: TopicJsonLoader.cached(cat.id)
+                ?.firstOrNull { it.matchesSavedName(topicName) }
             ?: TopicCatalog.findByName(topicName)
     }
 
