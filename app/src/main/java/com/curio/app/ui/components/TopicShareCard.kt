@@ -348,40 +348,55 @@ private fun CollageCard(
             drawTornLine(botY, w, layerMid, layerBot)
         }
 
-        // Polaroid frame (top-right) — original position
+        // Polaroid frame — tilted, with vintage filter + shadow
         BoxWithConstraints(Modifier.fillMaxSize().zIndex(2f)) {
             val cw = maxWidth.value; val ch = maxHeight.value
             val pW = cw * 0.42f; val pH = pW * 1.18f
-            val pX = cw * 0.52f; val pY = ch * 0.04f
+            val pX = cw * 0.50f; val pY = ch * 0.03f
 
-            // Tape
-            Canvas(Modifier.offset((pX + pW * 0.18f).dp, (pY - 3f).dp).size((pW * 0.5f).dp, 16.dp)) {
-                drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.65f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
-            }
-            // Polaroid white frame
-            Canvas(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)) {
-                val b = size.width * 0.07f
-                drawRoundRect(Color.White, Offset.Zero, Size(size.width, size.height), CornerRadius(3.dp.toPx()))
-                if (userPhoto != null) {
-                    // User's photo fills the inner area
-                    drawImage(userPhoto,
-                        dstOffset = androidx.compose.ui.unit.IntOffset(b.toInt(), b.toInt()),
-                        dstSize = androidx.compose.ui.unit.IntSize((size.width - b * 2).toInt(), (size.height * 0.70f).toInt()))
-                } else {
-                    // Placeholder — accent tinted area
-                    drawRoundRect(palette.accent.copy(alpha = 0.10f), Offset(b, b), Size(size.width - b * 2, size.height * 0.70f), CornerRadius(2.dp.toPx()))
-                    // Camera icon hint
+            // Tilted polaroid container with shadow
+            Box(Modifier.offset((pX - 2).dp, (pY - 2).dp).size(pW.dp, pH.dp)
+                .graphicsLayer {
+                    rotationZ = -4f
+                    shadowElevation = 6f
+                    shape = RoundedCornerShape(3.dp)
+                    clip = true
                 }
-            }
-            // Topic name — Lora italic for elegant cursive look
-            val tm = rememberTextMeasurer()
-            val hs = TextStyle(fontFamily = LoraFontFamily, fontWeight = FontWeight.Normal,
-                fontStyle = FontStyle.Italic,
-                fontSize = (pW * 0.062f).coerceIn(11f, 16f).sp, color = palette.ink,
-                lineHeight = (pW * 0.075f).sp)
-            val tl = tm.measure(display, hs, maxLines = 3, overflow = TextOverflow.Ellipsis)
-            Canvas(Modifier.offset((pX + pW * 0.08f).dp, (pY + pH * 0.74f).dp).size((pW * 0.84f).dp, (pH * 0.22f).dp)) {
-                drawText(tl)
+                .background(Color.White, RoundedCornerShape(3.dp))
+            ) {
+                // Tape on top
+                Canvas(Modifier.offset((pW * 0.20f).dp, (-4f).dp).size((pW * 0.45f).dp, 16.dp)) {
+                    drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.60f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
+                }
+                // Photo area with vintage filter
+                Canvas(Modifier.offset(6.dp, 6.dp).size((pW - 12).dp, (pH * 0.68f).dp)) {
+                    if (userPhoto != null) {
+                        drawImage(userPhoto,
+                            dstOffset = androidx.compose.ui.unit.IntOffset(0, 0),
+                            dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt()))
+                        // Warm vintage overlay — sepia tint
+                        drawRect(Color(0xFFD4A574).copy(alpha = 0.12f))
+                        // Slight vignette darkening at edges
+                        drawRect(Brush.radialGradient(
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.10f)),
+                            center = Offset(size.width / 2f, size.height / 2f),
+                            radius = size.width * 0.7f
+                        ))
+                    } else {
+                        // Placeholder
+                        drawRoundRect(palette.accent.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
+                    }
+                }
+                // Topic name below the photo — Lora italic
+                val tm = rememberTextMeasurer()
+                val hs = TextStyle(fontFamily = LoraFontFamily, fontWeight = FontWeight.Normal,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = (pW * 0.055f).coerceIn(10f, 14f).sp, color = palette.ink,
+                    lineHeight = (pW * 0.068f).sp)
+                val tl = tm.measure(display, hs, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Canvas(Modifier.offset(8.dp, (pH * 0.72f).dp).size((pW - 16).dp, (pH * 0.24f).dp)) {
+                    drawText(tl)
+                }
             }
         }
 

@@ -518,7 +518,7 @@ fun CurioNavHost(
                 // keeps the nav-bar inset the Scaffold's contentWindowInsets
                 // used to deliver.
                 modifier = Modifier
-                    .then(if (wide) Modifier else Modifier.weight(1f))
+                    .then(if (wide) Modifier.fillMaxWidth() else Modifier.weight(1f))
                     .fillMaxHeight()
                     // v227 — the liquid-glass capture layer: pages only.
                     // The floating bar / sentiment pill / tour dock
