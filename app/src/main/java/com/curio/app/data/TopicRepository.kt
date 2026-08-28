@@ -126,6 +126,15 @@ object TopicRepository {
     /**
      * Populate Room database from JSON assets as a compatibility fallback.
      * Runs once on first launch, then topics are served from Room.
+     *
+     * KEY FIX: TopicJsonLoader.load() is a suspend fun that already awaits
+     * its internal parse. We call it to get the parsed list, then write
+     * directly to Room. Relying on parseAndCache's internal Room write
+     * fails on first launch because `initialized` is still false when it
+     * runs — so we do the Room write ourselves, right here.
+     *
+     * Also: do NOT set `initialized` here — the caller (init()) verifies
+     * Room was actually populated before marking ready.
      */
     private suspend fun populateFromJson(context: Context, dao: TopicDao) {
         try {
@@ -139,17 +148,22 @@ object TopicRepository {
             TopicJsonLoader.install(context)
 
             val categories = CategoryId.values().filter { it != CategoryId.WILDCARD }
+            var totalInserted = 0
             for (cat in categories) {
                 try {
+                    // load() suspends and returns the parsed topic list
                     val topics = TopicJsonLoader.load(cat)
-                    val entities = topics.map { TopicEntity.fromCurioTopic(it) }
-                    dao.insertAll(entities)
-                } catch (_: Exception) {
-                    // Skip categories that fail to load
+                    if (topics.isNotEmpty()) {
+                        val entities = topics.map { TopicEntity.fromCurioTopic(it) }
+                        dao.insertAll(entities)
+                        totalInserted += entities.size
+                    }
+                } catch (e: Exception) {
+                    Log.w("TopicRepository", "Failed to load category ${cat.routeSlug}: ${e.message}")
                 }
             }
+            Log.i("TopicRepository", "JSON→Room import: $totalInserted topics across ${categories.size} categories")
         }
-        initialized = true
     }
 
     /** Get all topics for a category (from Room, instant). */
