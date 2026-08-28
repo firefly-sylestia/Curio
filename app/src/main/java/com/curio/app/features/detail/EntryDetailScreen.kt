@@ -4621,7 +4621,8 @@ private fun EntryShareSheet(
                 context = context,
                 aspect = aspect,
                 onAspectChange = { aspect = it },
-                sources = listOf(quick) + savedSources + listOf(custom),
+                sources = if (entry.topic.categoryId.name == "QUOTES") savedSources + listOf(custom)
+                else listOf(quick) + savedSources + listOf(custom),
                 activeSource = activeSource,
                 onSelectSource = { selectedId = it },
                 customEditing = activeId == com.curio.app.ui.components.CUSTOM_FACT_ID,

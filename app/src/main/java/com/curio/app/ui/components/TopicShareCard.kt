@@ -396,7 +396,8 @@ fun TopicShareSheet(
     val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
     val quote = ShareCardContent("quote", "Quote", quickFact)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    val availableSources = if (isQuotesCategory) listOf(quote) else listOf(quick) + savedSources
+    val availableSources = if (isQuotesCategory) listOf(quote) + listOf(custom)
+    else listOf(quick) + savedSources
     val defaultId = if (isQuotesCategory) quote.id
         else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
