@@ -552,8 +552,8 @@ private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?,
         Text(
             if (quoteText != null) { if (sharerName.isNotBlank()) "$sharerName ~ Stay Curious" else "Stay Curious" }
             else { if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio" },
-            style = MaterialTheme.typography.labelMedium.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold),
-            color = palette.ink.copy(alpha = 0.75f), maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic),
+            color = palette.ink.copy(alpha = 0.45f), maxLines = 1, overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -591,28 +591,35 @@ private fun DrawScope.drawPaperFibers(palette: ShareCardPalette) {
 }
 
 private fun DrawScope.drawTornBottom(palette: ShareCardPalette) {
-    val w = size.width; val h = size.height; val ty = h * 0.88f
-    val tint = palette.ink.copy(alpha = 0.08f)
-    // Shadow under the tear edge for depth — starts at the left edge
+    val w = size.width; val h = size.height; val ty = h * 0.92f
+    val tint = palette.ink.copy(alpha = 0.05f)
+    // Three-layer organic tear: broad wave + mid ripple + fine jitter
+    fun tearY(x: Float): Float {
+        val broad = sin(x * 0.025f + 1.7f) * 8f
+        val mid = sin(x * 0.06f + 3.2f) * 3.5f
+        val fine = sin(x * 0.14f + 0.9f) * 1.5f
+        return ty + broad + mid + fine
+    }
+    // Shadow under the tear edge for depth
     val shadow = Path().apply {
         moveTo(0f, ty - 2f); var x = 0f
-        while (x <= w) { lineTo(x, ty + sin(x * 0.03f + 1.7f) * 10f + sin(x * 0.08f + 3.2f) * 4f + 3f); x += w / 50f }
+        while (x <= w) { lineTo(x, tearY(x) + 3f); x += w / 60f }
         lineTo(w, ty + 16f); lineTo(0f, ty + 16f); close()
     }
-    drawPath(shadow, Color.Black.copy(alpha = 0.06f))
-    // Main torn shape
+    drawPath(shadow, Color.Black.copy(alpha = 0.04f))
+    // Main torn shape — lighter, shorter
     val p = Path().apply {
         moveTo(0f, h); var x = 0f
-        while (x <= w) { lineTo(x, ty + sin(x * 0.03f + 1.7f) * 10f + sin(x * 0.08f + 3.2f) * 4f); x += w / 50f }
+        while (x <= w) { lineTo(x, tearY(x)); x += w / 60f }
         lineTo(w, h); close()
     }
     drawPath(p, tint)
     // Edge highlight along the tear — connects left to right
     val edge = Path().apply {
-        moveTo(0f, ty - 1f); var x = 0f
-        while (x <= w) { lineTo(x, ty + sin(x * 0.03f + 1.7f) * 10f + sin(x * 0.08f + 3.2f) * 4f - 1f); x += w / 50f }
+        moveTo(0f, tearY(0f) - 1f); var x = 0f
+        while (x <= w) { lineTo(x, tearY(x) - 1f); x += w / 60f }
     }
-    drawPath(edge, Color.White.copy(alpha = 0.40f), style = Stroke(1.2f))
+    drawPath(edge, Color.White.copy(alpha = 0.35f), style = Stroke(1f))
 }
 
 private fun DrawScope.drawTornLine(y: Float, w: Float, above: Color, below: Color) {
