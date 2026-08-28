@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -308,7 +307,7 @@ private fun CollageCard(
         Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 22.dp, bottom = 18.dp), verticalArrangement = Arrangement.SpaceBetween) {
             Surface(shape = RoundedCornerShape(14.dp), color = palette.ink.copy(alpha = 0.80f)) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CurioIcon(categoryGlyph, null, Color.White, 14.dp)
+                    CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
                 }
             }
@@ -319,7 +318,7 @@ private fun CollageCard(
                     drawCircle(palette.accent.copy(alpha = 0.15f), radius = size.minDimension / 2f)
                     drawCircle(palette.accent.copy(alpha = 0.30f), radius = size.minDimension / 2f, style = Stroke(1.2.dp.toPx()))
                 }, contentAlignment = Alignment.Center) {
-                    CurioIcon(categoryGlyph, null, palette.accent, 18.dp)
+                    CurioIcon(name = categoryGlyph, contentDescription = null, tint = palette.accent, size = 18.dp)
                 }
                 if (quoteText != null) {
                     Text(quoteText, style = MaterialTheme.typography.titleMedium.copy(fontFamily = PatrickHandFontFamily, fontSize = quoteFontSize(quoteText.length), lineHeight = (quoteFontSize(quoteText.length).value * 1.3f).sp), color = palette.ink, maxLines = 5, overflow = TextOverflow.Ellipsis)
@@ -360,7 +359,7 @@ private fun NeumorphicCard(
         }
         // Glyph inside the circle
         Box(Modifier.align(Alignment.TopEnd).offset((-85).dp, 105.dp).size(80.dp), contentAlignment = Alignment.Center) {
-            CurioIcon(categoryGlyph, null, palette.ink.copy(alpha = 0.35f), 36.dp)
+            CurioIcon(name = categoryGlyph, tint = palette.ink.copy(alpha = 0.35f), size = 36.dp)
         }
 
         // Small neumorphic bar icon (bottom-right)
@@ -374,7 +373,7 @@ private fun NeumorphicCard(
             // Category pill — light neumorphic
             Surface(shape = RoundedCornerShape(14.dp), color = bg, shadowElevation = 2.dp) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CurioIcon(categoryGlyph, null, palette.ink.copy(alpha = 0.55f), 14.dp)
+                    CurioIcon(name = categoryGlyph, tint = palette.ink.copy(alpha = 0.55f), size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = palette.ink)
                 }
             }
@@ -404,16 +403,14 @@ private fun HeaderRow(categoryName: String, glyph: String, palette: ShareCardPal
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
         Surface(shape = RoundedCornerShape(14.dp), color = palette.accent.copy(alpha = 0.85f)) {
             Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                CurioIcon(glyph, null, Color.White, 14.dp)
+                CurioIcon(name = glyph, tint = Color.White, size = 14.dp)
                 Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
             }
         }
-        CurioIcon(CurioIcons.Lightbulb, null, palette.ink.copy(alpha = 0.30f), 18.dp)
+        CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.30f), size = 18.dp)
     }
 }
 
-@Composable
-// Inline version (not an extension) for the PaperCard's Column scope
 @Composable
 private fun MiddleContent(
     display: String, factText: String, aspect: ShareCardAspect,
@@ -422,7 +419,7 @@ private fun MiddleContent(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (quoteText != null) {
-            CurioIcon(CurioIcons.FormatQuote, null, palette.ink.copy(alpha = 0.20f), 32.dp)
+            CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
             Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = Int.MAX_VALUE, overflow = TextOverflow.Clip)
         } else {
             Text(display, style = MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -449,8 +446,7 @@ private fun StarRow(rating: Int, palette: ShareCardPalette) {
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             repeat(5) { i ->
-                CurioIcon(if (i < rating) CurioIcons.Star else CurioIcons.StarOutline, null,
-                    if (i < rating) palette.accent else palette.ink.copy(alpha = 0.25f), 20.dp)
+                CurioIcon(name = if (i < rating) CurioIcons.Star else CurioIcons.StarOutline, tint = if (i < rating) palette.accent else palette.ink.copy(alpha = 0.25f), size = 20.dp)
             }
         }
     }
@@ -459,7 +455,7 @@ private fun StarRow(rating: Int, palette: ShareCardPalette) {
 @Composable
 private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?, palette: ShareCardPalette) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        CurioIcon(CurioIcons.Lightbulb, null, palette.ink.copy(alpha = 0.30f), 14.dp)
+        CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.30f), size = 14.dp)
         Spacer(Modifier.height(3.dp))
         if (quoteText != null && !quoteAuthor.isNullOrBlank()) {
             Text("— $quoteAuthor", style = MaterialTheme.typography.labelMedium.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold), color = palette.ink.copy(alpha = 0.70f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)
@@ -549,7 +545,7 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val w = maxWidth.value; val h = maxHeight.value
         listOf(0.15f to 0.18f, 0.85f to 0.18f, 0.15f to 0.82f, 0.85f to 0.82f).forEachIndexed { i, (x, y) ->
-            CurioIcon(symbols[i % symbols.size], null, tint, 26.dp, Modifier.offset((w * x - 13).dp, (h * y - 13).dp))
+            CurioIcon(name = symbols[i % symbols.size], tint = tint, size = 26.dp, modifier = Modifier.offset((w * x - 13).dp, (h * y - 13).dp))
         }
     }
 }
@@ -611,7 +607,7 @@ fun TopicShareSheet(
                         val sel = i == safeIdx
                         Surface(onClick = { styleIdx = i }, shape = RoundedCornerShape(50), color = if (sel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
                             Row(Modifier.padding(horizontal = 14.dp, vertical = 0.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                                CurioIcon(s.glyph, null, if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, 14.dp)
+                                CurioIcon(name = s.glyph, tint = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                 Text(s.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
@@ -673,7 +669,7 @@ fun ShareHubBody(
                 val sel = i == si
                 Surface(onClick = { onStyleChange(i) }, shape = RoundedCornerShape(50), color = if (sel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
                     Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        CurioIcon(s.glyph, null, if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, 14.dp)
+                        CurioIcon(name = s.glyph, tint = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                         Text(s.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -704,7 +700,7 @@ fun ShareHubBody(
 private fun Pill(label: String, icon: String, selected: Boolean, onClick: () -> Unit) {
     Surface(onClick, RoundedCornerShape(50), if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(38.dp)) {
         Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            CurioIcon(icon, null, if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, 15.dp)
+            CurioIcon(name = icon, tint = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
             Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
