@@ -592,7 +592,7 @@ fun TopicShareSheet(
             // Card preview
             val pw = 280.dp
             Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-                TopicShareCard(topicName, categoryName, categoryGlyph, accent, activeSource.text, sharerName = sharer, aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null)
+                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null)
             }
 
             // Style picker — only show available styles for this family
@@ -635,7 +635,7 @@ fun TopicShareSheet(
             val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
             Button(onClick = {
                 shareComposableCard(context, androidx.compose.ui.unit.DpSize(pw, eh), 4f, authority, card = {
-                    TopicShareCard(topicName, categoryName, categoryGlyph, accent, activeSource.text, sharerName = sharer, aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null)
+                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null)
                 }); onDismiss()
             }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
                 Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
@@ -659,7 +659,7 @@ fun ShareHubBody(
     val pw = 280.dp
     val isQ = activeSource.id == "quote"
     Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-        TopicShareCard(topicName, categoryName, categoryGlyph, accent, activeSource.text, sharerName, aspect, style = style, ratingStars = activeSource.rating, categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null)
+        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null)
     }
     val styles = availableStylesForFamily(categoryFamily)
     if (styles.size > 1) {
@@ -689,7 +689,7 @@ fun ShareHubBody(
     val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
     Button(onClick = {
         shareComposableCard(context, androidx.compose.ui.unit.DpSize(pw, eh), 4f, authority, card = {
-            TopicShareCard(topicName, categoryName, categoryGlyph, accent, activeSource.text, sharerName, aspect, style = style, ratingStars = activeSource.rating, categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null)
+            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null)
         }); onShared()
     }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
         Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
@@ -698,7 +698,7 @@ fun ShareHubBody(
 
 @Composable
 private fun Pill(label: String, icon: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(onClick, RoundedCornerShape(50), if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(38.dp)) {
+    Surface(onClick = onClick, shape = RoundedCornerShape(50), color = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(38.dp)) {
         Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             CurioIcon(name = icon, tint = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
             Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
