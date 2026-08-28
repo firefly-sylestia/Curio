@@ -1083,7 +1083,7 @@ fun TopicRevealScreen(
     }
 
     if (showExploreDialog && resolved != null) {
-        val topic = resolved
+        val topic = resolved!!
         // v41 — the `action` val (verb/duration copy) was removed with the
         // dialog's helper paragraphs; the pills only need the service glyphs.
         // v27s — music topics (Album / Artist / Song) route the second pill
