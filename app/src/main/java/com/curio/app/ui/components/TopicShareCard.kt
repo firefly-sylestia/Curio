@@ -180,8 +180,9 @@ fun TopicShareCard(
                             lineHeight = 26.sp
                         ),
                         color = ink,
+                        // v301 — increased maxLines so full quotes are visible
                         maxLines = when (aspect) {
-                            ShareCardAspect.PORTRAIT -> 12
+                            ShareCardAspect.PORTRAIT -> 14
                             ShareCardAspect.CLASSIC -> 10
                         },
                         overflow = TextOverflow.Ellipsis

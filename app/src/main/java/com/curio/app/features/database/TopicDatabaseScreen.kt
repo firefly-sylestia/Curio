@@ -143,6 +143,8 @@ object TopicBrowserSession {
     var selectedSlug by mutableStateOf<String?>(null)
     var chipBarOpen by mutableStateOf(false)
     var savedPage by mutableIntStateOf(0)
+    var savedScrollIndex by mutableIntStateOf(0)
+    var savedScrollOffset by mutableIntStateOf(0)
 }
 
 @Composable
@@ -190,6 +192,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v30 — the chip-bar reservation only applies while the chips are
     // visible (the pill or search); collapsed, content starts right below
     // the (taller) hero.
+    // v301 — when search activates, auto-open the chip bar so
+    // category chips are immediately accessible.
+    LaunchedEffect(searchActive) {
+        if (searchActive) categoryFilterOpen = true
+    }
     val chipsVisible = categoryFilterOpen || searchActive
     // v36 — the Sort/Search pills live back INSIDE the hero (their top
     // row). v42 — the Category pill moved INSIDE the hero too (beside the
@@ -209,8 +216,8 @@ fun TopicDatabaseScreen(navController: NavController) {
     // clamped to 0 before the topics arrive — scrolling back to the top.
     // Saving the raw numbers and scrolling again once rows exist restores the
     // exact spot reliably.
-    var savedScrollIndex by rememberSaveable { mutableIntStateOf(0) }
-    var savedScrollOffset by rememberSaveable { mutableIntStateOf(0) }
+    var savedScrollIndex by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedScrollIndex) }
+    var savedScrollOffset by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedScrollOffset) }
     val listState = rememberLazyListState()
     // v245 — LOCAL GLASS CAPTURE for the floating category chip bar: the
     // scrolling list records into its own layer; the chips (a sibling
@@ -468,7 +475,6 @@ fun TopicDatabaseScreen(navController: NavController) {
     // ── v293 — PAGINATION (100 per page) ─────────────────────────────
     // The topic rows are paginated so only a manageable slice renders per
     // page. A floating nav bar at the bottom controls paging.
-    // Persistence: page number survives navigation via rememberSaveable.
     var currentPage by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedPage) }
     LaunchedEffect(currentPage) { TopicBrowserSession.savedPage = currentPage }
     // Topic-only rows (skip section headers for counting purposes).
@@ -542,6 +548,8 @@ fun TopicDatabaseScreen(navController: NavController) {
             .collect { index ->
                 savedScrollIndex = index
                 savedScrollOffset = 0
+                TopicBrowserSession.savedScrollIndex = index
+                TopicBrowserSession.savedScrollOffset = 0
             }
     }
     // v27r — switching the CATEGORY filter (or All) starts from the top,

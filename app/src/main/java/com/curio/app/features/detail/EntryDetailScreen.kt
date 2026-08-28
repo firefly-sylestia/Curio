@@ -1350,12 +1350,15 @@ private fun BoxScope.DetailStickyBar(
         // that fades the pill, so the handoff reads as one morphing surface.
         // A full-screen scrim behind it dismisses on any outside tap.
         if (detailGlassActive && morph > 0.01f) {
-            // v264 — the scrim was removed: a full-screen Box covered the
-            // back button and blocked its touch. BackHandler (line 1156)
-            // handles system-back; tapping the glass panel's own items
-            // dismisses via their onClick. A half-screen scrim below the
-            // panel still catches outside taps on the menu area.
-            Box(modifier = Modifier.fillMaxSize()) {
+            // v301 — tap-outside dismiss: the full-screen Box catches taps
+            // ANYWHERE that aren't on the glass panel itself, dismissing
+            // the menu. BackHandler still handles system-back.
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .clickable(interactionSource = null, indication = null) {
+                    menuExpanded = false
+                }
+            ) {
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Transparent,
@@ -4542,9 +4545,16 @@ private fun EntryShareSheet(
         ?.let { it.reviewText.trim() to it.rating }
     val noteText = entry.sessionNote?.trim().orEmpty()
 
+    // v301 — For QUOTES topics, prepend the byline to the quote text so
+    // the share card shows "Author Name — quote text".
+    val quoteText = if (entry.categoryId.name == "QUOTES" && entry.topic.byline.isNotBlank()) {
+        "${entry.topic.byline} — ${firstQuote}"
+    } else {
+        firstQuote
+    }
     val savedSources = buildList {
-        if (!firstQuote.isNullOrBlank()) {
-            add(com.curio.app.ui.components.ShareCardContent("quote", "Quote", firstQuote))
+        if (!quoteText.isNullOrBlank()) {
+            add(com.curio.app.ui.components.ShareCardContent("quote", "Quote", quoteText))
         }
         if (reviewInfo != null) {
             add(com.curio.app.ui.components.ShareCardContent(
@@ -4563,8 +4573,15 @@ private fun EntryShareSheet(
     val custom = com.curio.app.ui.components.ShareCardContent(
         com.curio.app.ui.components.CUSTOM_FACT_ID, "Custom fact", ""
     )
-    // v292i — default to the first quote if available.
-    val defaultId = savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
+    // v292i + v301 — For QUOTES topics default to quote source (author +
+    // full quote) instead of Quick fact; other categories default to first
+    // saved source (or Quick fact).
+    val quoteSource = savedSources.firstOrNull { it.id == "quote" }
+    val defaultId = if (entry.categoryId.name == "QUOTES" && quoteSource != null) {
+        quoteSource.id
+    } else {
+        savedSources.firstOrNull()?.id ?: quick.id
+    }
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         com.curio.app.ui.components.CUSTOM_FACT_ID ->
