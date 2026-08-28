@@ -1674,7 +1674,9 @@ private fun RevealAlreadyButton(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** The reveal hero's resting height (matches the pre-v8.36 fixed size). */
-private val RevealHeroBaseHeight = 260.dp
+private val RevealHeroBaseHeightPortrait = 260.dp
+/** Landscape hero — shorter to leave room for content below. */
+private val RevealHeroBaseHeightLandscape = 180.dp
 
 @Composable
 private fun HeroCard(
@@ -1771,8 +1773,9 @@ private fun HeroCard(
         settledOverflowPx = titleOverflowPx
     }
     val density = LocalDensity.current
+    val revealHeroBase = if (windowWidthSizeClass().isWide) RevealHeroBaseHeightLandscape else RevealHeroBaseHeightPortrait
     val heroHeight by animateDpAsState(
-        targetValue = RevealHeroBaseHeight +
+        targetValue = revealHeroBase +
             with(density) { settledOverflowPx.toDp() },
         animationSpec = tween(240, easing = FastOutSlowInEasing),
         label = "revealHeroHeight"

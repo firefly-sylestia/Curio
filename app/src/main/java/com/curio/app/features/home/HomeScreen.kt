@@ -215,7 +215,9 @@ import java.util.Calendar
 /** The quest hero's solid body height — the torn banner. Tall enough for
  *  the greeting + the Streak · Cabinet · Recent bar (pinned just above the
  *  tear) and generous at large font scales. */
-private val HomeQuestHeroHeight = 300.dp
+private val HomeQuestHeroHeightPortrait = 300.dp
+/** Landscape hero — shorter to leave room for content below. */
+private val HomeQuestHeroHeightLandscape = 200.dp
 /** Extra layout space reserved for the white sheet below the torn banner. */
 private val HomeQuestSheetExtent = 24.dp
 /** Scroll distance (dp) before the menu + profile pills fully pin as
@@ -419,6 +421,8 @@ fun HomeScreen(navController: NavController) {
             val sheetShape = remember(HOME_TEAR_SEED) {
                 SoftTornSheetShape(HOME_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
             }
+            // Adaptive hero height — shorter in landscape to leave room for content
+            val homeHeroHeight = if (windowWidthSizeClass().isWide) HomeQuestHeroHeightLandscape else HomeQuestHeroHeightPortrait
             // The quest is always the wildcard Surprise now (the category
             // chip row is gone). The banner wears the muted rose-wood hero
             // accent — in pastel mode (the shipped default) it resolves to
@@ -430,7 +434,7 @@ fun HomeScreen(navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(HomeQuestHeroHeight + HomeQuestSheetExtent)
+                    .height(homeHeroHeight + HomeQuestSheetExtent)
             ) {
                 // ── White under-sheet — same as the detail hero's: the
                 // sheet's torn top hides behind the opaque banner while its
@@ -444,7 +448,7 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(42.dp)
-                        .offset(y = HomeQuestHeroHeight - 18.dp)
+                        .offset(y = homeHeroHeight - 18.dp)
                         .clip(sheetShape)
                         // v81 — dark: a subtle lighter lip under the tear so
                         // the paper seam still reads on the dark banner.
@@ -464,7 +468,7 @@ fun HomeScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(HomeQuestHeroHeight)
+                        .height(homeHeroHeight)
                         .offset(y = 1.dp)
                         .clip(heroTornShape)
                         .background(Color.Black.copy(alpha = 0.20f))
@@ -478,7 +482,7 @@ fun HomeScreen(navController: NavController) {
                     shadowElevation = 0.dp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(HomeQuestHeroHeight)
+                        .height(homeHeroHeight)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         // v27 — experimental paper accents (OFF by default;
