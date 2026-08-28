@@ -4547,7 +4547,7 @@ private fun EntryShareSheet(
 
     // v301 — For QUOTES topics, prepend the byline to the quote text so
     // the share card shows "Author Name — quote text".
-    val quoteText = if (entry.categoryId.name == "QUOTES" && entry.topic.byline.isNotBlank()) {
+    val quoteText = if (entry.topic.categoryId.name == "QUOTES" && entry.topic.byline.isNotBlank()) {
         "${entry.topic.byline} — ${firstQuote}"
     } else {
         firstQuote
@@ -4577,7 +4577,7 @@ private fun EntryShareSheet(
     // full quote) instead of Quick fact; other categories default to first
     // saved source (or Quick fact).
     val quoteSource = savedSources.firstOrNull { it.id == "quote" }
-    val defaultId = if (entry.categoryId.name == "QUOTES" && quoteSource != null) {
+    val defaultId = if (entry.topic.categoryId.name == "QUOTES" && quoteSource != null) {
         quoteSource.id
     } else {
         savedSources.firstOrNull()?.id ?: quick.id
