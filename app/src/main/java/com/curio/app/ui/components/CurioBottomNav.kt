@@ -156,6 +156,11 @@ object CurioDrawerState {
 
     fun publishOpen(open: Boolean) {
         isOpen = open
+        // Reset the request counter when the drawer closes so a stale
+        // openTick (> 0) doesn't re-fire the LaunchedEffect on process
+        // recreation or recomposition — the root cause of the phantom
+        // drawer openings across restarts.
+        if (!open) openTick = 0
     }
 
     fun requestOpen() {
