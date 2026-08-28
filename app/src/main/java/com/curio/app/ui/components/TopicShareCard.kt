@@ -934,10 +934,14 @@ fun TopicShareSheet(
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
 
     val isQuotesCategory = categoryName == "Quotes"
+    // v310 — For QUOTES, the actual quote IS the topicName (not the teaser
+    // which is a placeholder like "An author insight..."). Use topicName as
+    // the quote content; the teaser is discarded.
+    val quoteText = if (isQuotesCategory) topicName else quickFact
     val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
-    val quote = ShareCardContent("quote", "Quote", quickFact)
+    val quote = ShareCardContent("quote", "Quote", quoteText)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    val availableSources = if (isQuotesCategory) listOf(quote) + listOf(custom)
+    val availableSources = if (isQuotesCategory) listOf(quote)
     else listOf(quick) + savedSources
     val defaultId = if (isQuotesCategory) quote.id
     else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
@@ -980,7 +984,7 @@ fun TopicShareSheet(
                 onAspectChange = { aspect = it },
                 style = currentStyle,
                 onStyleChange = { styleIndex = it },
-                sources = availableSources + listOf(custom),
+                sources = availableSources,
                 activeSource = activeSource,
                 onSelectSource = { selectedId = it },
                 customEditing = activeId == CUSTOM_FACT_ID,

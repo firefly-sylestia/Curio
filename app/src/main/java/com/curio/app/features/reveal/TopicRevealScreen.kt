@@ -919,7 +919,7 @@ fun TopicRevealScreen(
                     categoryName = cat.displayName,
                     categoryGlyph = cat.iconGlyph,
                     accent = cat.themedAccent(),
-                    quickFact = floatingTopic.teaser,
+                    quickFact = if (cat.id.name == "QUOTES") floatingTopic.name else floatingTopic.teaser,
                     authority = "${context.packageName}.fileprovider",
                     context = context,
                     onDismiss = { showShareSheet = false },

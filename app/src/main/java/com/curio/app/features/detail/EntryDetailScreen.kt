@@ -4566,21 +4566,28 @@ private fun EntryShareSheet(
         }
     }
 
+    // v310 — For QUOTES, the topic name IS the actual quote. The teaser is
+    // a placeholder ("An author insight..."). Always use topicName for QUOTES.
+    val isQuotesCategory = entry.topic.categoryId.name == "QUOTES"
     val quickFact = entry.topic.teaser
     val quick = com.curio.app.ui.components.ShareCardContent(
         com.curio.app.ui.components.QUICK_FACT_ID, "Quick fact", quickFact
     )
+    val actualQuoteText = if (isQuotesCategory) entry.topic.name else null
+    val quoteFromTopic = if (actualQuoteText != null) {
+        com.curio.app.ui.components.ShareCardContent("quote", "Quote", actualQuoteText)
+    } else null
     val custom = com.curio.app.ui.components.ShareCardContent(
         com.curio.app.ui.components.CUSTOM_FACT_ID, "Custom fact", ""
     )
     // v292i + v301 — For QUOTES topics default to quote source (author +
     // full quote) instead of Quick fact; other categories default to first
     // saved source (or Quick fact).
-    val quoteSource = savedSources.firstOrNull { it.id == "quote" }
-    val defaultId = if (entry.topic.categoryId.name == "QUOTES" && quoteSource != null) {
-        quoteSource.id
-    } else {
-        savedSources.firstOrNull()?.id ?: quick.id
+    // v310 — For QUOTES: prefer topic-name quote > saved quote > quick.
+    val defaultId = when {
+        isQuotesCategory && quoteFromTopic != null -> quoteFromTopic.id
+        isQuotesCategory -> quick.id
+        else -> savedSources.firstOrNull()?.id ?: quick.id
     }
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
@@ -4621,8 +4628,11 @@ private fun EntryShareSheet(
                 context = context,
                 aspect = aspect,
                 onAspectChange = { aspect = it },
-                sources = if (entry.topic.categoryId.name == "QUOTES") savedSources + listOf(custom)
-                else listOf(quick) + savedSources + listOf(custom),
+                sources = if (isQuotesCategory) {
+                    listOfNotNull(quoteFromTopic) + savedSources.filter { it.id != "quote" }
+                } else {
+                    listOf(quick) + savedSources
+                },
                 activeSource = activeSource,
                 onSelectSource = { selectedId = it },
                 customEditing = activeId == com.curio.app.ui.components.CUSTOM_FACT_ID,
