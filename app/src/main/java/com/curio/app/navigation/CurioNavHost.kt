@@ -506,12 +506,8 @@ fun CurioNavHost(
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             if (wide && showBottomBar) {
-                // Wide windows: the rail sits at the left edge, full height,
-                // and applies its own system-bar insets.
-                CurioNavigationRail(
-                    navController = navController,
-                    modifier = Modifier.fillMaxHeight()
-                )
+                // Wide windows: replaced side rail with bottom disappearing
+                // capsule — content fills full width, nav floats at bottom.
             }
             Box(
                 // v129 — no Scaffold: page content runs full-bleed and the
@@ -522,7 +518,7 @@ fun CurioNavHost(
                 // keeps the nav-bar inset the Scaffold's contentWindowInsets
                 // used to deliver.
                 modifier = Modifier
-                    .weight(1f)
+                    .then(if (wide) Modifier else Modifier.weight(1f))
                     .fillMaxHeight()
                     // v227 — the liquid-glass capture layer: pages only.
                     // The floating bar / sentiment pill / tour dock
@@ -944,7 +940,7 @@ fun CurioNavHost(
         // floating pill dock floats at the same bottom-center spot, and the
         // old opaque dock covered the bar anyway, so the bar must not show
         // behind/around the tour pill on tab stops.
-        if (!wide && barVisible && TourController.currentStep == null) {
+        if (barVisible && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
                 // While the bar lingers after leaving the tab set, force the

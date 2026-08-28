@@ -1170,74 +1170,93 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         //    vertical pills, and the deck + Spin button stay centered.
         val wide = windowWidthSizeClass().isWide
         if (wide) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.Center
+            // Wide / landscape: deck centered vertically, controls below.
+            // No side rail — Categories/Filter sit as horizontal pills
+            // below the deck, same as phone but with more breathing room.
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 84.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                // Center stage — deck carousel + Spin button, sized to the
-                // available width minus the side rail.
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                SpinDeckSection(
+                    compact = compactHeight,
+                    extraCompact = false,
+                    densityExtraCompact = false,
+                    roomy = false,
+                    cat = deckCat,
+                    deckAccent = deckAccent,
+                    deckGradient = deckGradient,
+                    isMixed = isMixedDeck,
+                    mixSeed = mixSeed,
+                    displayPool = hand,
+                    cycleIndex = cycleIndex,
+                    shuffling = shuffling,
+                    shuffleProgress = shuffleProgress,
+                    landedTopic = landedTopic,
+                    opening = isOpening,
+                    enabled = filteredPool.isNotEmpty() && !shuffling,
+                    buttonPulse = buttonPulse,
+                    fitScale = wideFit,
+                    poolLoading = poolLoading,
+                    poolLoadFailed = poolLoadFailed,
+                    onRetryPool = { poolRetryKey++ },
+                    onCardTap = onDeckCardTap,
+                    onCycle = onDeckCycle,
+                    onSpinClick = onSpinClick
+                )
+                // Categories + Filter as horizontal pills below deck
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    SpinDeckSection(
-                        compact = compactHeight,
-                        extraCompact = false,
-                        densityExtraCompact = false,
-                        roomy = false,
-                        cat = deckCat,
-                        deckAccent = deckAccent,
-                        deckGradient = deckGradient,
-                        isMixed = isMixedDeck,
-                        mixSeed = mixSeed,
-                        displayPool = hand,
-                        cycleIndex = cycleIndex,
-                        shuffling = shuffling,
-                        shuffleProgress = shuffleProgress,
-                        landedTopic = landedTopic,
-                        opening = isOpening,
-                        enabled = filteredPool.isNotEmpty() && !shuffling,
-                        buttonPulse = buttonPulse,
-                        fitScale = wideFit,
-                        poolLoading = poolLoading,
-                        poolLoadFailed = poolLoadFailed,
-                        onRetryPool = { poolRetryKey++ },
-                        onCardTap = onDeckCardTap,
-                        onCycle = onDeckCycle,
-                        onSpinClick = onSpinClick
-                    )
-                }
-                // Right rail — Categories + Filter as tall vertical pills
-                Column(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .fillMaxHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    VerticalDeckButton(
-                        label = if (isMixedDeck) "Mixed · $mixedTopicCount" else deckCat.displayName,
-                        icon = deckCat.iconGlyph,
-                        cat = deckCat,
-                        selected = true,
+                    // Category pill
+                    Surface(
                         onClick = { showCategoryPicker = true },
-                        modifier = Modifier.padding(vertical = 6.dp)
-                    )
-                    VerticalDeckButton(
-                        // v83 — the badge shows the total TOPICS matching the
-                        // selected filters (the filtered pool size), not how
-                        // many filter chips are ticked.
-                        label = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
-                            "Filter · ${filteredPool.size}" else "Filter",
-                        icon = CurioIcons.Search,
-                        cat = deckCat,
-                        selected = activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty(),
+                        shape = RoundedCornerShape(50),
+                        color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        shadowElevation = 3.dp
+                    ) {
+                        Row(
+                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            CurioIcon(name = deckCat.iconGlyph, tint = deckCat.categoryInk(), size = 18.dp)
+                            Text(
+                                if (isMixedDeck) "Mixed · $mixedTopicCount" else deckCat.displayName,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = deckCat.categoryInk()
+                            )
+                        }
+                    }
+                    // Filter pill
+                    Surface(
                         onClick = { showFilters = true },
-                        modifier = Modifier.padding(vertical = 6.dp)
-                    )
+                        shape = RoundedCornerShape(50),
+                        color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
+                            deckCat.themedAccent() else deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        shadowElevation = 3.dp
+                    ) {
+                        Row(
+                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Search,
+                                tint = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk(),
+                                size = 18.dp
+                            )
+                            Text(
+                                if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) "Filter · ${filteredPool.size}" else "Filter",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk()
+                            )
+                        }
+                    }
                 }
             }
         } else {
@@ -1246,7 +1265,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 .fillMaxSize()
                 // v129 — the pill bar floats over the page now (no Scaffold
                 // slot), so the phone layout clears the gesture bar + the
-                // floating pill itself; wide windows use the rail instead.
+                // floating pill itself. Wide windows also use the floating
+                // pill (bottom capsule instead of side rail).
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 // v131 — clearance grew with the bigger pill (76 → 84dp).
                 .padding(bottom = 84.dp)
