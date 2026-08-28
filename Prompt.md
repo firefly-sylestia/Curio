@@ -1,5 +1,13 @@
 # Prompt.md — current request log
 
+## Request: v292j — Stable Shuffle → Topic Reveal morph title (IN PROGRESS)
+
+- ROOT CAUSE: Topic Reveal resolved its topic through `produceState`, so the shared-element destination rendered one frame with the raw route name before the canonical topic loaded. That exposed years in titles and quote text during the morph.
+- FIX: Resolve the topic with `remember(topicName, cat.id)` before rendering the shared hero, giving the morph a single stable display model.
+- Status: static review complete; CI validation pending.
+
+---
+
 ## Request: v292i — Topic Database fixes: page persistence, nav spacing, search (COMPLETE)
 
 - PAGE PERSISTENCE: currentPage saved in TopicBrowserSession (process-scoped

@@ -60,7 +60,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -229,7 +228,14 @@ fun TopicRevealScreen(
             ?: CurioCategories.byId(CategoryId.WILDCARD)
     }
 
-    val topic by produceState<CurioTopic?>(initialValue = null, topicName, cat.id) {
+    // Resolve the destination topic synchronously before the shared-element
+    // morph starts. The previous produceState path rendered one frame with
+    // `resolved == null`, so the hero used the raw route name (which may
+    // include a year or quote text), then swapped to the canonical display
+    // title as the loader completed. That swap was visible through the morph.
+    // The JSON loader is already cached after splash warm-up, so resolving it
+    // here gives the source card and reveal hero one immutable display model.
+    val resolved = remember(topicName, cat.id) {
         // v199 — resolve WITHIN the route's own category FIRST. The old
         // code asked the global TopicCatalog.findByName first, which scans
         // every lane and returns the first tolerant match — "Flow" (the
@@ -243,12 +249,11 @@ fun TopicRevealScreen(
         // legacy saved-entry fallback (v135: an old entry whose lane
         // changed must still resolve instead of hanging on "Loading…").
         val pool = TopicJsonLoader.load(cat.id)
-        value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
+        pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
             ?: pool.firstOrNull { it.matchesSavedName(topicName) }
             ?: TopicCatalog.findByName(topicName)
     }
 
-    val resolved = topic
     val context = LocalContext.current
     // v29 — clipboard for the auto-copy on explore: the search query lands on
     // the clipboard so the user can paste it into an app's own search box
