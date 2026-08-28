@@ -213,7 +213,7 @@ fun TopicShareCard(
     when (style) {
         ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto)
+        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year)
         ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
     }
 }
@@ -341,33 +341,47 @@ private fun CollageCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null
+    userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
+    byline: String = "", year: String? = null
 ) {
-    val layerTop = Color(0xFFF5EDE0)
-    val layerMid = Color(0xFFE5D5BC)
-    val layerBot = palette.accent.copy(alpha = 0.25f)
+    val topCream = Color(0xFFF5EDE0)
+    val bottomSage = Color(0xFFD5CCBA)
+    val tornEdge = Color(0xFFE8DFD0)
+    val sageAccent = Color(0xFF6B7C65)
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(layerTop, RoundedCornerShape(6.dp))) {
-        // Torn paper layers
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(topCream, RoundedCornerShape(6.dp))) {
+        // Bottom section + torn paper edge
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
-            val midY = h * 0.50f; val botY = h * 0.68f
-            drawRect(layerMid, Offset(0f, midY), Size(w, h - midY))
-            drawRect(layerBot, Offset(0f, botY), Size(w, h - botY))
-            drawTornLine(midY, w, layerTop, layerMid)
-            drawTornLine(botY, w, layerMid, layerBot)
+            val tearY = h * 0.44f
+            drawRect(bottomSage, Offset(0f, tearY), Size(w, h - tearY))
+            drawTornLine(tearY, w, topCream, tornEdge)
         }
 
-        // Polaroid frame — tilted, with vintage filter + shadow
+        // Decorative elements — sparkles top-left, concentric circles right
+        Canvas(Modifier.fillMaxSize().zIndex(0f)) {
+            val w = size.width; val h = size.height
+            drawCircle(palette.accent.copy(alpha = 0.15f), 3f, Offset(w * 0.08f, h * 0.06f))
+            drawCircle(palette.accent.copy(alpha = 0.10f), 2f, Offset(w * 0.12f, h * 0.04f))
+            drawCircle(palette.accent.copy(alpha = 0.12f), 2.5f, Offset(w * 0.06f, h * 0.09f))
+            val cx = w * 0.88f; val cy = h * 0.25f
+            for (r in listOf(28f, 22f, 16f, 10f)) {
+                drawCircle(palette.accent.copy(alpha = 0.06f), r, Offset(cx, cy), style = Stroke(0.8f))
+            }
+            drawCircle(palette.accent.copy(alpha = 0.10f), 3f, Offset(cx, cy))
+        }
+
+        // ── TOP SECTION: title + metadata + quote (left) + polaroid (right) ──
         BoxWithConstraints(Modifier.fillMaxSize().zIndex(2f)) {
             val cw = maxWidth.value; val ch = maxHeight.value
-            val pW = cw * 0.42f; val pH = pW * 1.18f
-            val pX = cw * 0.50f; val pY = ch * 0.03f
 
-            // Tilted polaroid container with shadow
-            Box(Modifier.offset((pX - 2).dp, (pY - 2).dp).size(pW.dp, pH.dp)
+            // Polaroid — right side, slightly tilted, with tape
+            val pW = cw * 0.40f; val pH = pW * 1.15f
+            val pX = cw * 0.52f; val pY = ch * 0.02f
+
+            Box(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)
                 .graphicsLayer {
-                    rotationZ = -4f
+                    rotationZ = -3f
                     shadowElevation = 6f
                     shape = RoundedCornerShape(3.dp)
                     clip = true
@@ -375,73 +389,111 @@ private fun CollageCard(
                 .background(Color.White, RoundedCornerShape(3.dp))
             ) {
                 // Tape on top
-                Canvas(Modifier.offset((pW * 0.20f).dp, (-4f).dp).size((pW * 0.45f).dp, 16.dp)) {
-                    drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.60f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
+                Canvas(Modifier.offset((pW * 0.25f).dp, (-3f).dp).size((pW * 0.40f).dp, 14.dp)) {
+                    drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.55f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
                 }
-                // Photo area with vintage filter
-                Canvas(Modifier.offset(6.dp, 6.dp).size((pW - 12).dp, (pH * 0.68f).dp)) {
+                // Photo area
+                Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, (pH * 0.72f).dp)) {
                     if (userPhoto != null) {
                         drawImage(userPhoto,
                             dstOffset = androidx.compose.ui.unit.IntOffset(0, 0),
                             dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt()))
-                        // Warm vintage overlay — sepia tint
-                        drawRect(Color(0xFFD4A574).copy(alpha = 0.12f))
-                        // Slight vignette darkening at edges
-                        drawRect(Brush.radialGradient(
-                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.10f)),
-                            center = Offset(size.width / 2f, size.height / 2f),
-                            radius = size.width * 0.7f
-                        ))
+                        drawRect(Color(0xFFD4A574).copy(alpha = 0.10f))
                     } else {
-                        // Placeholder
-                        drawRoundRect(palette.accent.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
+                        drawRoundRect(Color(0xFFE0D8CC), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
                     }
                 }
-                // Topic name below the photo — Lora italic
+                // Handwritten name below photo
                 val tm = rememberTextMeasurer()
-                val hs = TextStyle(fontFamily = LoraFontFamily, fontWeight = FontWeight.Normal,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = (pW * 0.055f).coerceIn(10f, 14f).sp, color = palette.ink,
-                    lineHeight = (pW * 0.068f).sp)
-                val tl = tm.measure(display, hs, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Canvas(Modifier.offset(8.dp, (pH * 0.72f).dp).size((pW - 16).dp, (pH * 0.24f).dp)) {
+                val hs = TextStyle(fontFamily = PatrickHandFontFamily, fontWeight = FontWeight.Normal,
+                    fontSize = (pW * 0.065f).coerceIn(11f, 15f).sp, color = palette.ink,
+                    lineHeight = (pW * 0.08f).sp)
+                val tl = tm.measure(display, hs, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Canvas(Modifier.offset(8.dp, (pH * 0.74f).dp).size((pW - 16).dp, (pH * 0.22f).dp)) {
                     drawText(tl)
                 }
             }
-        }
 
-        // Text content — anchored to BOTTOM, below polaroid + muddy layer
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp).zIndex(1f), verticalArrangement = Arrangement.Bottom) {
-            Surface(shape = RoundedCornerShape(14.dp), color = palette.accentDark, shadowElevation = 0.dp) {
-                Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
-                    Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
+            // Title — large serif, top-left
+            Column(modifier = Modifier.offset(22.dp, (ch * 0.06f).dp).width((cw * 0.52f).dp)) {
+                Text(display, style = TextStyle(
+                    fontFamily = ChangaOneFontFamily, fontSize = (cw * 0.085f).coerceIn(24f, 36f).sp,
+                    lineHeight = (cw * 0.095f).coerceIn(28f, 40f).sp,
+                    fontWeight = FontWeight.Normal, color = palette.ink
+                ), maxLines = 3, overflow = TextOverflow.Ellipsis)
+
+                Spacer(Modifier.height(6.dp))
+
+                // Metadata — small caps, letter-spaced
+                val metaParts = mutableListOf<String>()
+                if (byline.isNotBlank()) metaParts.add(byline.uppercase())
+                if (year != null) metaParts.add(year)
+                if (metaParts.isNotEmpty()) {
+                    Text(metaParts.joinToString(" \u2022 "), style = TextStyle(
+                        fontFamily = LoraFontFamily, fontSize = 9.sp,
+                        letterSpacing = 2.sp, fontWeight = FontWeight.SemiBold,
+                        color = palette.ink.copy(alpha = 0.55f)
+                    ), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Quote — italic serif in curly quotes
+                if (quoteText != null) {
+                    Text("\u201c$quoteText\u201d", style = TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = quoteFontSize(quoteText.length),
+                        lineHeight = (quoteFontSize(quoteText.length).value * 1.35f).sp,
+                        color = palette.ink
+                    ), maxLines = 3, overflow = TextOverflow.Ellipsis)
                 }
             }
-            Spacer(Modifier.height(6.dp))
-            // Quick fact / quote — below polaroid + muddy layer
-            if (quoteText != null) {
-                Text(quoteText, style = MaterialTheme.typography.titleMedium.copy(fontFamily = LoraFontFamily,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = quoteFontSize(quoteText.length), lineHeight = (quoteFontSize(quoteText.length).value * 1.3f).sp), color = palette.ink, maxLines = 5, overflow = TextOverflow.Ellipsis)
-            } else {
-                val qfSize = quickFactFontSize(factText.length)
-                Text(factText, style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = LoraFontFamily, fontSize = qfSize,
-                    lineHeight = (qfSize.value * 1.4f).sp
-                ), color = palette.ink.copy(alpha = 0.85f), maxLines = 15, overflow = TextOverflow.Ellipsis)
+        }
+
+        // ── BOTTOM SECTION: category pill + body text + footer ──
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, bottom = 16.dp).zIndex(1f),
+            verticalArrangement = Arrangement.Bottom) {
+            // Category pill + horizontal line
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Surface(shape = RoundedCornerShape(14.dp), color = sageAccent, shadowElevation = 0.dp) {
+                    Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
+                        Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(
+                            fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold), color = Color.White)
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                Canvas(Modifier.weight(1f).height(1.dp)) {
+                    drawLine(palette.ink.copy(alpha = 0.15f), Offset.Zero, Offset(size.width, 0f))
+                }
             }
-            if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
+
+            Spacer(Modifier.height(10.dp))
+
+            // Body text — serif, fills width
+            val bodySize = when {
+                factText.length > 280 -> 10.sp; factText.length > 180 -> 11.sp; else -> 12.sp
+            }
+            Text(factText, style = TextStyle(
+                fontFamily = LoraFontFamily, fontSize = bodySize,
+                lineHeight = (bodySize.value * 1.55f).sp, color = palette.ink.copy(alpha = 0.88f)
+            ), maxLines = 20, overflow = TextOverflow.Ellipsis)
+
+            if (ratingStars != null && ratingStars > 0) {
+                Spacer(Modifier.height(6.dp))
+                StarRow(ratingStars, palette)
+            }
+
             Spacer(Modifier.height(8.dp))
-            // via Curio
-            Text(if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold),
-                color = palette.inkFaint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+
+            // Footer — via Curio
+            Text(if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
+                style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold, color = palette.inkFaint),
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
 // STYLE 3 — NEUMORPHIC (clean light, embossed/debossed elements)
 // ═══════════════════════════════════════════════════════════════════════
 @Composable
