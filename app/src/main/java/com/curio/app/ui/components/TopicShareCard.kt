@@ -193,15 +193,18 @@ fun TopicShareCard(
     categoryFamily: CategoryFamily = CategoryFamily.WILDCARD,
     quoteText: String? = null,
     quoteAuthor: String? = null,
-    userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null
+    userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
+    byline: String = ""
 ) {
     val display = topicName.substringBeforeLast(" (")
+    // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
+    val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent)
     when (style) {
-        ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor)
-        ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor)
+        ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
+        ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto)
-        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor)
+        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
     }
 }
 
@@ -214,27 +217,31 @@ private fun PaperCard(
     display: String, categoryName: String, categoryGlyph: String,
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
-    family: CategoryFamily, quoteText: String?, quoteAuthor: String?
+    family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
+    byline: String = "", year: String? = null
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
     Box(
         modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))
+            .shadow(4.dp, RoundedCornerShape(6.dp))
             .background(Brush.verticalGradient(listOf(palette.bgLight, palette.bgBase, palette.bgMid)), RoundedCornerShape(6.dp))
     ) {
         // Rich paper texture layers — visible grain + fiber lines + subtle speckle
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
         Canvas(Modifier.fillMaxSize()) { drawPaperFibers(palette) }
         Canvas(Modifier.fillMaxSize()) { drawTornBottom(palette) }
-        // Subtle inner shadow around edges for depth
+        // Subtle inner shadow around edges + faint border highlight for depth
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             drawRect(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.04f), Color.Transparent, Color.Black.copy(alpha = 0.03f))), Offset.Zero, Size(w, h))
+            // Extremely subtle inner border highlight
+            drawRoundRect(Color.White.copy(alpha = 0.12f), Offset.Zero, Size(w, h), CornerRadius(6.dp.toPx()), style = Stroke(0.8f))
         }
         Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
         Column(modifier = modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
-            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor)
+            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year)
             Footer(sharerName, quoteText, quoteAuthor, palette)
         }
     }
@@ -249,7 +256,8 @@ private fun VinylCard(
     display: String, categoryName: String, categoryGlyph: String,
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
-    family: CategoryFamily, quoteText: String?, quoteAuthor: String?
+    family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
+    byline: String = "", year: String? = null
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
     Box(
@@ -285,6 +293,15 @@ private fun VinylCard(
                     Text(text = display, style = MaterialTheme.typography.headlineMedium.copy(
                         fontFamily = ChangaOneFontFamily, lineHeight = 34.sp
                     ), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    // Metadata line
+                    val vMetaParts = mutableListOf<String>()
+                    if (byline.isNotBlank()) vMetaParts.add(byline)
+                    if (year != null) vMetaParts.add(year)
+                    if (vMetaParts.isNotEmpty()) {
+                        Text(vMetaParts.joinToString(" \u2022 "), style = MaterialTheme.typography.labelSmall.copy(
+                            fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
+                            color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     // Accent underline
                     Spacer(Modifier.height(4.dp))
                     Canvas(Modifier.size(width = 44.dp, height = 3.dp)) {
@@ -349,8 +366,8 @@ private fun CollageCard(
                 if (userPhoto != null) {
                     // User's photo fills the inner area
                     drawImage(userPhoto,
-                        dstOffset = androidx.compose.ui.geometry.Offset(b, b),
-                        dstSize = androidx.compose.ui.geometry.Size(size.width - b * 2, size.height * 0.70f))
+                        dstOffset = androidx.compose.ui.unit.IntOffset(b.toInt(), b.toInt()),
+                        dstSize = androidx.compose.ui.unit.IntSize((size.width - b * 2).toInt(), (size.height * 0.70f).toInt()))
                 } else {
                     // Placeholder — accent tinted area
                     drawRoundRect(palette.accent.copy(alpha = 0.10f), Offset(b, b), Size(size.width - b * 2, size.height * 0.70f), CornerRadius(2.dp.toPx()))
@@ -419,7 +436,8 @@ private fun NeumorphicCard(
     display: String, categoryName: String, categoryGlyph: String,
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
-    family: CategoryFamily, quoteText: String?, quoteAuthor: String?
+    family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
+    byline: String = "", year: String? = null
 ) {
     val bg = Color(0xFFF0F0F0)
     val shadowLight = Color.White
@@ -463,6 +481,15 @@ private fun NeumorphicCard(
                     Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = ChangaOneFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = 5, overflow = TextOverflow.Ellipsis)
                 } else {
                     Text(display, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = ChangaOneFontFamily, lineHeight = 34.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    // Metadata line
+                    val nMetaParts = mutableListOf<String>()
+                    if (byline.isNotBlank()) nMetaParts.add(byline)
+                    if (year != null) nMetaParts.add(year)
+                    if (nMetaParts.isNotEmpty()) {
+                        Text(nMetaParts.joinToString(" \u2022 "), style = MaterialTheme.typography.labelSmall.copy(
+                            fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
+                            color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     // Accent underline instead of gray
                     Canvas(Modifier.size(width = 40.dp, height = 2.dp)) { drawRoundRect(palette.accent.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f)) }
                     // Quick fact — dynamic font size, Lora serif for depth
@@ -500,14 +527,27 @@ private fun HeaderRow(categoryName: String, glyph: String, palette: ShareCardPal
 private fun MiddleContent(
     display: String, factText: String, aspect: ShareCardAspect,
     palette: ShareCardPalette, ratingStars: Int?,
-    quoteText: String?, qSize: TextUnit, quoteAuthor: String?
+    quoteText: String?, qSize: TextUnit, quoteAuthor: String?,
+    byline: String = "", year: String? = null
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
             Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = Int.MAX_VALUE, overflow = TextOverflow.Clip)
         } else {
+            // Title
             Text(display, style = MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            // Metadata line — byline • year (e.g. "GUNS N' ROSES • 1987")
+            val metaParts = mutableListOf<String>()
+            if (byline.isNotBlank()) metaParts.add(byline)
+            if (year != null) metaParts.add(year)
+            if (metaParts.isNotEmpty()) {
+                Text(
+                    metaParts.joinToString(" \u2022 "),
+                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
+                    color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             FrostPane(palette) {
                 Text(factText, style = MaterialTheme.typography.bodySmall.copy(
@@ -746,7 +786,7 @@ fun TopicShareSheet(
             // Card preview
             val pw = 280.dp
             Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto)
+                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline)
             }
 
             // Photo picker — only for Collage style
@@ -803,7 +843,7 @@ fun TopicShareSheet(
             val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
             Button(onClick = {
                 shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto)
+                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline)
                 }); onDismiss()
             }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
                 Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
@@ -827,7 +867,7 @@ fun ShareHubBody(
     val pw = 280.dp
     val isQ = activeSource.id == "quote"
     Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null)
+        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
     }
     val styles = availableStylesForFamily(categoryFamily)
     if (styles.size > 1) {
@@ -857,7 +897,7 @@ fun ShareHubBody(
     val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
     Button(onClick = {
         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null)
+            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
         }); onShared()
     }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
         Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
