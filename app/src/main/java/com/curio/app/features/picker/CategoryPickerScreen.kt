@@ -136,6 +136,7 @@ fun CategoryPickerScreen(navController: NavController) {
     // multi-select with every lane ticked, so the user can SEE and CHANGE
     // the mix instead of it collapsing to the single first category. Hidden
     // lanes are filtered out so they never show as pre-selected.
+    val draft = CategoryPickerDraft
     val persistedVisible = remember {
         AppPreferences.getLastSpinCategories(context)
             .mapNotNull { id -> categories.firstOrNull { it.id == id } }
@@ -336,7 +337,7 @@ fun CategoryPickerScreen(navController: NavController) {
                                     if (multiSelectMode) {
                                         toggleSlug(slug)
                                     } else {
-                                        onCategorySelected(cat)
+                                        navController.navigate(CurioRoutes.spinWithCategory(cat.id.routeSlug)) { launchSingleTop = true }
                                     }
                                 }
                             },
