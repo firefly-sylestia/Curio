@@ -391,9 +391,18 @@ fun TopicShareSheet(
 
     // Source order: Quick fact → saved content (quote/note/review…) → Custom.
     // v292i — default to the first quote if available (quote replaces quick fact).
-    val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
+    // v301 — For QUOTES category, the quickFact IS the quote text. Combine
+    // byline + quote so the share card shows author and full quote.
+    val isQuotesCategory = categoryName == "Quotes"
+    val quickText = if (isQuotesCategory && topicByline.isNotBlank() && quickFact.isNotBlank()) {
+        "${topicByline} — ${quickFact}"
+    } else {
+        quickFact
+    }
+    val quick = ShareCardContent(QUICK_FACT_ID, if (isQuotesCategory) "Quote" else "Quick fact", quickText)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    val defaultId = savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
+    val defaultId = if (isQuotesCategory) quick.id
+        else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })

@@ -388,10 +388,10 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v7.97 — the persisted filter can outlive its lane (a category hidden in
     // Manage Categories drops out of the catalog). Fall back to All instead
     // of leaving an invisible "no topics" state with no visible chip.
-    // v292h — when searching, force All so results span every category.
-    val effectiveCat = remember(catalog, selectedCat, searchActive) {
-        if (searchActive) null
-        else if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null
+    // v301 — category filter now works during search too (user can narrow
+    // results by category while searching).
+    val effectiveCat = remember(catalog, selectedCat) {
+        if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null
         else selectedCat
     }
 
@@ -475,7 +475,9 @@ fun TopicDatabaseScreen(navController: NavController) {
     // ── v293 — PAGINATION (100 per page) ─────────────────────────────
     // The topic rows are paginated so only a manageable slice renders per
     // page. A floating nav bar at the bottom controls paging.
-    var currentPage by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedPage) }
+    // v301 — page lives in TopicBrowserSession (process-scoped singleton)
+    // so it survives navigation reliably. LaunchedEffect syncs user changes.
+    var currentPage by remember { mutableIntStateOf(TopicBrowserSession.savedPage) }
     LaunchedEffect(currentPage) { TopicBrowserSession.savedPage = currentPage }
     // Topic-only rows (skip section headers for counting purposes).
     val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }

@@ -4547,7 +4547,7 @@ private fun EntryShareSheet(
 
     // v301 — For QUOTES topics, prepend the byline to the quote text so
     // the share card shows "Author Name — quote text".
-    val quoteText = if (entry.topic.categoryId.name == "QUOTES" && entry.topic.byline.isNotBlank()) {
+    val quoteText = if (entry.topic.categoryId.name == "QUOTES" && !firstQuote.isNullOrBlank() && entry.topic.byline.isNotBlank()) {
         "${entry.topic.byline} — ${firstQuote}"
     } else {
         firstQuote

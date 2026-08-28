@@ -125,10 +125,14 @@ fun CategoryPickerScreen(navController: NavController) {
     // v27i — `visible` already excludes new lanes that haven't shipped, so the
     // original page (and every other surface) never shows empty dead tiles.
     val categories = CurioCategories.visible
-    // v301 — Single flat grid, no pager. Wildcard first, then alphabetical.
-    val sortedCategories = remember(categories) {
-        val wildcard = categories.filter { it.id == CategoryId.WILDCARD }
-        val rest = categories.filter { it.id != CategoryId.WILDCARD }
+    // v301 — Single flat grid. Uses ALL categories (not just visible) so
+    // Coming Soon tiles show for unready lanes. Hidden lanes filtered out.
+    val allUnhidden = remember {
+        CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
+    }
+    val sortedCategories = remember(allUnhidden) {
+        val wildcard = allUnhidden.filter { it.id == CategoryId.WILDCARD }
+        val rest = allUnhidden.filter { it.id != CategoryId.WILDCARD }
             .sortedBy { it.displayName.lowercase() }
         wildcard + rest
     }

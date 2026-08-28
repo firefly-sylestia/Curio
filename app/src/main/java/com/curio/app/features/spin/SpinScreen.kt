@@ -4358,11 +4358,15 @@ private fun CategoryPickerSheet(
     // intact — user: "even when i cancel the selected in category picker and
     // i tap back make it apply too". Reset whenever a fresh selection starts.
     var mixCancelled by remember { mutableStateOf(false) }
-    // v301 — Single flat grid, no pager, no Original/New split.
-    // Categories sorted: Wildcard first, then alphabetical.
-    val sortedCategories = remember(categories) {
-        val wildcard = categories.filter { it.id == CategoryId.WILDCARD }
-        val rest = categories.filter { it.id != CategoryId.WILDCARD }
+    // v301 — Single flat grid, no pager. Uses ALL categories (not just
+    // visible) so Coming Soon tiles show for unready lanes. Hidden lanes
+    // are filtered out; Wildcard first, then alphabetical.
+    val allUnhidden = remember {
+        CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
+    }
+    val sortedCategories = remember(allUnhidden) {
+        val wildcard = allUnhidden.filter { it.id == CategoryId.WILDCARD }
+        val rest = allUnhidden.filter { it.id != CategoryId.WILDCARD }
             .sortedBy { it.displayName.lowercase() }
         wildcard + rest
     }
