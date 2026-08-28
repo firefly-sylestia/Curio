@@ -267,7 +267,7 @@ fun TopicRevealScreen(
     // Reads the REACTIVE pinnedTopicsState (not prefs) so the icon toggles
     // immediately when the user taps pin/unpin.
     val isPinned = resolved != null &&
-        AppPreferences.pinnedTopicsState.any { it.categoryId == cat.id && it.topicName == resolved.name }
+        AppPreferences.pinnedTopicsState.any { it.categoryId == cat.id && it.topicName == resolved?.name }
     // v7.92 — reactive done state: the "Already …" button flips to a filled
     // marked state once the topic is done, and the unwatch action appears.
     // Reads doneTopicsState inside composition, so it updates the moment
@@ -836,26 +836,28 @@ fun TopicRevealScreen(
                 // v135 — only rendered once the topic resolves: an
                 // unresolvable legacy topic shows its name + actions instead
                 // of a permanent "Loading topic…" placeholder.
-                if (resolved != null) {
+                val teaserTopic = resolved
+                if (teaserTopic != null) {
                     RevealContentEntrance(delayMillis = 160) {
                         TeaserCard(
                             cat = cat,
-                            teaser = resolved.teaser,
+                            teaser = teaserTopic.teaser,
                             modifier = Modifier.padding(top = 20.dp)
                         )
                     }
                 }
 
                 // ── 6. Action prompt card ──────────────────────────────────
-                if (resolved != null) {
+                val actionTopic = resolved
+                if (actionTopic != null) {
                     RevealContentEntrance(delayMillis = 210) {
                         ActionPromptCard(
                             cat = cat,
-                            action = resolved.exploreAction,
-                            subtype = resolved.subtype,
+                            action = actionTopic.exploreAction,
+                            subtype = actionTopic.subtype,
                             modifier = Modifier.padding(top = 14.dp),
                             // v221 — for QUOTES, show the full quote text.
-                            instructionOverride = if (resolved.categoryId == CategoryId.QUOTES) resolved.name else null
+                            instructionOverride = if (actionTopic.categoryId == CategoryId.QUOTES) actionTopic.name else null
                         )
                     }
                 }
@@ -873,7 +875,8 @@ fun TopicRevealScreen(
         // Replaces the old Like/Dislike pill: category icon + name on the
         // left (expands on favorite), favorite star on the right. Slides
         // away on scroll-down, back on scroll-up. Hidden in Browse-Topics.
-        if (!browseMode && resolved != null) {
+        val floatingTopic = resolved
+        if (!browseMode && floatingTopic != null) {
             // v292 — TOPIC SHARE: tapping the Share pill in the floating
             // bar opens the customizable topic share card sheet.
             var showShareSheet by remember { mutableStateOf(false) }
@@ -897,7 +900,7 @@ fun TopicRevealScreen(
                             onShare = { showShareSheet = true },
                             onFavorite = {
                                 AppPreferences.setTopicSentiment(
-                                    context, cat.id, resolved.id,
+                                    context, cat.id, floatingTopic.id,
                                     if (sentiment == AppPreferences.SENTIMENT_LIKE)
                                         AppPreferences.SENTIMENT_NONE
                                     else AppPreferences.SENTIMENT_LIKE
@@ -912,16 +915,16 @@ fun TopicRevealScreen(
             }
             if (showShareSheet) {
                 com.curio.app.ui.components.TopicShareSheet(
-                    topicName = resolved.name,
+                    topicName = floatingTopic.name,
                     categoryName = cat.displayName,
                     categoryGlyph = cat.iconGlyph,
                     accent = cat.themedAccent(),
-                    quickFact = resolved.teaser,
+                    quickFact = floatingTopic.teaser,
                     authority = "${context.packageName}.fileprovider",
                     context = context,
                     onDismiss = { showShareSheet = false },
                     categoryFamily = cat.family,
-                    topicByline = resolved.byline
+                    topicByline = floatingTopic.byline
                 )
             }
         }
