@@ -8,14 +8,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [CaptureEntity::class, TopicEntity::class],
-    version = 9,
+    entities = [CaptureEntity::class, TopicEntity::class, CachedTopicEntity::class],
+    version = 10,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
 
     abstract fun captureDao(): CaptureDao
     abstract fun topicDao(): TopicDao
+    abstract fun cachedTopicDao(): CachedTopicDao
 
     companion object {
         @Volatile
@@ -164,6 +165,33 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /** v9 → v10 (v294): cached_topics table for durable topic data on save. */
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS cached_topics (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        categoryId TEXT NOT NULL,
+                        subtype TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        teaser TEXT NOT NULL,
+                        imageUrl TEXT NOT NULL DEFAULT '',
+                        byline TEXT NOT NULL DEFAULT '',
+                        tags TEXT NOT NULL DEFAULT '',
+                        tier INTEGER NOT NULL DEFAULT 1,
+                        exploreVerb TEXT NOT NULL DEFAULT '',
+                        exploreTargetName TEXT NOT NULL DEFAULT '',
+                        exploreDurationMinutes INTEGER NOT NULL DEFAULT 0,
+                        exploreInstruction TEXT NOT NULL DEFAULT '',
+                        pageCount INTEGER DEFAULT 0,
+                        episodeCount INTEGER DEFAULT 0,
+                        altPageLabel TEXT NOT NULL DEFAULT '',
+                        altPageCount INTEGER DEFAULT 0
+                    )
+                """)
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -178,7 +206,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

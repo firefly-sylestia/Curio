@@ -17,11 +17,11 @@ object CurioRepositoryHolder {
             "from MainActivity.onCreate() before any screen accesses it."
         )
 
-    fun init(dao: CaptureDao) {
+    fun init(dao: CaptureDao, cachedTopicDao: CachedTopicDao) {
         if (_repo == null) {
             synchronized(this) {
                 if (_repo == null) {
-                    _repo = CaptureRepository(dao)
+                    _repo = CaptureRepository(dao, cachedTopicDao)
                 }
             }
         }

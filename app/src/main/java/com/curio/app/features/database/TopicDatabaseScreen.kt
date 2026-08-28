@@ -381,7 +381,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                             year = topicYear(topic)
                         )
                     }
-                }
+                }.distinctBy { it.topic.id }
             }
         }
     }

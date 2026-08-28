@@ -11,7 +11,10 @@ import java.util.UUID
  *
  * Provides coroutine-friendly APIs and handles entity ↔ domain model conversion.
  */
-class CaptureRepository(private val dao: CaptureDao) {
+class CaptureRepository(
+    private val dao: CaptureDao,
+    private val cachedTopicDao: CachedTopicDao
+) {
 
     // v38 — decode cache: Room re-emits the FULL list on every insert, so a
     // large Cabinet re-ran Gson decoding (and fresh Gson allocations) for
@@ -56,14 +59,26 @@ class CaptureRepository(private val dao: CaptureDao) {
     suspend fun getByCategory(categoryId: CategoryId): List<CurioEntry> =
         dao.getByCategory(categoryId.name).map { it.toEntry() }
 
-    /** Save a new capture. Returns the generated entry ID. */
+    /** Save a new capture. Also caches the full topic data so the entry
+     *  survives topic deletion from JSON assets. Returns nothing. */
     suspend fun save(entry: CurioEntry) {
         dao.insert(entry.toEntity())
+        // v294 — cache the full topic so the entry persists even if the
+        // topic is later removed from bundled JSON or Room's topics table.
+        runCatching {
+            cachedTopicDao.upsert(CachedTopicEntity.fromCurioTopic(entry.topic))
+        }
     }
 
     /** Get a single capture by ID. */
     suspend fun getById(id: String): CurioEntry? =
         dao.getById(id)?.toEntry()
+
+    /** Look up the cached topic data for an entry's topic ID. Returns null
+     *  if the topic was never cached (e.g. legacy entries). */
+    suspend fun getCachedTopic(topicId: String): CurioTopic? {
+        return runCatching { cachedTopicDao.getById(topicId)?.toCurioTopic() }.getOrNull()
+    }
 
     /** Permanently delete a capture by ID (recycle-bin purge / import cleanup). */
     suspend fun deleteById(id: String) {
