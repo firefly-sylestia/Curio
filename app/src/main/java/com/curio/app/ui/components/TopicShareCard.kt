@@ -169,11 +169,11 @@ private fun quoteFontSize(length: Int): TextUnit = when {
  *  so the text never gets cut off. Short facts get a slightly larger,
  *  more impactful size. */
 private fun quickFactFontSize(length: Int): TextUnit = when {
-    length > 200 -> 7.sp
-    length > 140 -> 8.sp
-    length > 90 -> 9.sp
-    length > 50 -> 10.sp
-    else -> 11.sp
+    length > 200 -> 10.sp
+    length > 140 -> 11.sp
+    length > 90 -> 12.sp
+    length > 50 -> 13.sp
+    else -> 14.sp
 }
 
 /** Even smaller for 3:4 aspect ratio. */
@@ -276,11 +276,12 @@ private fun VinylCard(
     ) {
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
 
-        // Vinyl record — right side, positioned to not cover text or button
+        // Vinyl record — bottom-right, text wraps around it
+        val vinylSize = 180.dp
         Canvas(
-            modifier = Modifier.align(Alignment.CenterEnd)
-                .size(width = 200.dp, height = 200.dp)
-                .offset(x = 50.dp, y = 30.dp)
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .size(vinylSize)
+                .offset(x = 10.dp, y = 10.dp)
         ) {
             drawVinylPartial(palette.accent)
         }
@@ -290,8 +291,8 @@ private fun VinylCard(
         Column(modifier = Modifier.fillMaxSize().padding(24.dp).zIndex(1f), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
 
-            // Text on left side — avoid blending with record
-            Column(modifier = Modifier.weight(1f).width(200.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // Full-width text column — fact text wraps around the vinyl
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (quoteText != null) {
                     CurioIcon(name = CurioIcons.FormatQuote, tint = palette.accent.copy(alpha = 0.35f), size = 28.dp)
                     Text(text = quoteText, style = MaterialTheme.typography.titleLarge.copy(
@@ -316,12 +317,12 @@ private fun VinylCard(
                         drawRoundRect(palette.accent, cornerRadius = CornerRadius(1f))
                     }
                     Spacer(Modifier.height(2.dp))
-                    // Quick fact — dynamic font size, generous maxLines
+                    // Quick fact — larger font, fills the space above vinyl
                     val qfSize = quickFactFontSize(factText.length)
-                    Text(text = factText, style = MaterialTheme.typography.bodyMedium.copy(
+                    Text(text = factText, style = MaterialTheme.typography.bodyLarge.copy(
                         fontFamily = LoraFontFamily, fontSize = qfSize,
-                        lineHeight = (qfSize.value * 1.4f).sp
-                    ), color = palette.ink.copy(alpha = 0.75f), maxLines = 8, overflow = TextOverflow.Ellipsis)
+                        lineHeight = (qfSize.value * 1.35f).sp
+                    ), color = palette.ink.copy(alpha = 0.75f), maxLines = 10, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             }
