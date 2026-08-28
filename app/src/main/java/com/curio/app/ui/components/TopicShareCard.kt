@@ -88,7 +88,7 @@ data class ShareCardContent(
     val rating: Int? = null
 )
 
-// ─── Per-category palette ──────────────────────────────────────────────
+// ─── Curated share-card palette (3-4 beautiful tones cycling through categories) ───
 data class ShareCardPalette(
     val bgBase: Color,
     val bgLight: Color,
@@ -99,18 +99,39 @@ data class ShareCardPalette(
     val inkFaint: Color
 )
 
-private fun paletteFor(accent: Color): ShareCardPalette {
-    val hsl = FloatArray(3)
-    android.graphics.Color.colorToHSV(accent.hashCode(), hsl)
-    return ShareCardPalette(
-        bgBase = accent.copy(alpha = 0.08f),
-        bgLight = accent.copy(alpha = 0.04f),
-        bgMid = accent.copy(alpha = 0.12f),
-        accent = accent,
-        accentDark = accent.copy(alpha = 0.85f),
-        ink = Color(0xFF1A1A1A),
-        inkFaint = Color(0xFF6B6B6B)
+// Four curated tones — warm, beautiful, NOT derived from category colors.
+// Each category maps to one of these by index, so every share card
+// looks intentional and visually rich.
+private val curatedTones = listOf(
+    // Warm Rose — deep muted rose on warm cream
+    ShareCardPalette(
+        bgBase = Color(0xFFFDF0EE), bgLight = Color(0xFFFDF6F5), bgMid = Color(0xFFF8E0DC),
+        accent = Color(0xFFB85C6E), accentDark = Color(0xFF8A3A4C),
+        ink = Color(0xFF2C1A1E), inkFaint = Color(0xFF8A6B72)
+    ),
+    // Soft Sage — deep teal on greenish cream
+    ShareCardPalette(
+        bgBase = Color(0xFFF0F5F0), bgLight = Color(0xFFF7FAF7), bgMid = Color(0xFFDCE8DC),
+        accent = Color(0xFF5E8A72), accentDark = Color(0xFF3D6B52),
+        ink = Color(0xFF1A2420), inkFaint = Color(0xFF6B8A7C)
+    ),
+    // Golden Ochre — warm gold on pale parchment
+    ShareCardPalette(
+        bgBase = Color(0xFFFAF5EB), bgLight = Color(0xFFFDFBF5), bgMid = Color(0xFFF0E6D0),
+        accent = Color(0xFFB08840), accentDark = Color(0xFF8A6520),
+        ink = Color(0xFF2A2010), inkFaint = Color(0xFF8A7A60)
+    ),
+    // Deep Indigo — moody purple on cool parchment
+    ShareCardPalette(
+        bgBase = Color(0xFFF2EFF8), bgLight = Color(0xFFF8F6FC), bgMid = Color(0xFFE2DDEF),
+        accent = Color(0xFF6A5A9A), accentDark = Color(0xFF4A3A7A),
+        ink = Color(0xFF1C1630), inkFaint = Color(0xFF7A6A90)
     )
+)
+
+private fun paletteFor(accent: Color): ShareCardPalette {
+    // Cycle through curated tones using the accent hash
+    return curatedTones[Math.abs(accent.hashCode()) % curatedTones.size]
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
@@ -182,11 +203,18 @@ private fun PaperCard(
         modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))
             .background(Brush.verticalGradient(listOf(palette.bgLight, palette.bgBase, palette.bgMid)), RoundedCornerShape(6.dp))
     ) {
+        // Rich paper texture layers — visible grain + fiber lines + subtle speckle
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
-        Canvas(Modifier.fillMaxSize()) { drawTornBottom(palette.ink.copy(alpha = 0.06f)) }
-        Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.035f), display.hashCode())
+        Canvas(Modifier.fillMaxSize()) { drawPaperFibers(palette) }
+        Canvas(Modifier.fillMaxSize()) { drawTornBottom(palette.ink.copy(alpha = 0.08f)) }
+        // Subtle inner shadow around edges for depth
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height
+            drawRect(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.04f), Color.Transparent, Color.Black.copy(alpha = 0.03f))), Offset.Zero, Size(w, h))
+        }
+        Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
-        Column(modifier = Modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
             MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor)
             Footer(sharerName, quoteText, quoteAuthor, palette)
@@ -215,35 +243,39 @@ private fun VinylCard(
         // Vinyl record — RIGHT side, partially cropped off edge
         Canvas(
             modifier = Modifier.align(Alignment.CenterEnd)
-                .size(width = 340.dp, height = 340.dp)
-                .offset(x = 80.dp, y = 0.dp)
+                .size(width = 300.dp, height = 300.dp)
+                .offset(x = 90.dp, y = 30.dp)
         ) {
             drawVinylPartial(palette.accent)
         }
 
-        Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.03f), display.hashCode())
+        Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.04f), display.hashCode())
 
-        Column(modifier = Modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
 
-            // Text on left, record visible on right
-            Column(modifier = Modifier.weight(1f).width(200.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            // Text on left side — wider area to avoid blending with record
+            Column(modifier = Modifier.weight(1f).width(220.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (quoteText != null) {
+                    // Quote mode — clean, readable quote
+                    CurioIcon(name = CurioIcons.FormatQuote, tint = palette.accent.copy(alpha = 0.35f), size = 28.dp)
                     Text(text = quoteText, style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp
+                        fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.30f).sp
                     ), color = palette.ink, maxLines = 6, overflow = TextOverflow.Ellipsis)
                 } else {
                     Text(text = display, style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = ChangaOneFontFamily, lineHeight = 36.sp
+                        fontFamily = ChangaOneFontFamily, lineHeight = 34.sp
                     ), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
                     // Accent underline
-                    Spacer(Modifier.height(2.dp))
-                    Canvas(Modifier.size(width = 50.dp, height = 3.dp)) {
+                    Spacer(Modifier.height(4.dp))
+                    Canvas(Modifier.size(width = 44.dp, height = 3.dp)) {
                         drawRoundRect(palette.accent, cornerRadius = CornerRadius(2f))
                     }
-                    Text(text = factText, style = MaterialTheme.typography.bodySmall.copy(
-                        fontFamily = LoraFontFamily, lineHeight = 17.sp
-                    ), color = palette.inkFaint, maxLines = 5, overflow = TextOverflow.Ellipsis)
+                    Spacer(Modifier.height(2.dp))
+                    // Quick fact — larger, better positioned, fully visible
+                    Text(text = factText, style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = LoraFontFamily, lineHeight = 19.sp
+                    ), color = palette.ink.copy(alpha = 0.75f), maxLines = 4, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             }
@@ -303,31 +335,32 @@ private fun CollageCard(
             }
         }
 
-        // Content left
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 22.dp, bottom = 18.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Surface(shape = RoundedCornerShape(14.dp), color = palette.ink.copy(alpha = 0.80f)) {
+        // Content left — compact, no blank space
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 18.dp, bottom = 16.dp), verticalArrangement = Arrangement.Top) {
+            Surface(shape = RoundedCornerShape(14.dp), color = palette.accentDark) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
                 }
             }
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(14.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Category glyph stamp
-                Box(Modifier.size(36.dp).drawBehind {
-                    drawCircle(palette.accent.copy(alpha = 0.15f), radius = size.minDimension / 2f)
-                    drawCircle(palette.accent.copy(alpha = 0.30f), radius = size.minDimension / 2f, style = Stroke(1.2.dp.toPx()))
+                // Category glyph stamp — larger
+                Box(Modifier.size(40.dp).drawBehind {
+                    drawCircle(palette.accent.copy(alpha = 0.18f), radius = size.minDimension / 2f)
+                    drawCircle(palette.accent.copy(alpha = 0.35f), radius = size.minDimension / 2f, style = Stroke(1.4.dp.toPx()))
                 }, contentAlignment = Alignment.Center) {
-                    CurioIcon(name = categoryGlyph, contentDescription = null, tint = palette.accent, size = 18.dp)
+                    CurioIcon(name = categoryGlyph, contentDescription = null, tint = palette.accent, size = 20.dp)
                 }
                 if (quoteText != null) {
                     Text(quoteText, style = MaterialTheme.typography.titleMedium.copy(fontFamily = PatrickHandFontFamily, fontSize = quoteFontSize(quoteText.length), lineHeight = (quoteFontSize(quoteText.length).value * 1.3f).sp), color = palette.ink, maxLines = 5, overflow = TextOverflow.Ellipsis)
                 } else {
-                    Text(factText, style = MaterialTheme.typography.bodySmall.copy(fontFamily = GeomFontFamily, lineHeight = 16.sp), color = palette.ink.copy(alpha = 0.80f), maxLines = 4, overflow = TextOverflow.Ellipsis)
+                    Text(factText, style = MaterialTheme.typography.bodyMedium.copy(fontFamily = GeomFontFamily, lineHeight = 18.sp), color = palette.ink.copy(alpha = 0.85f), maxLines = 5, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
-                Text(if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio", style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily), color = palette.inkFaint, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
+            Spacer(Modifier.weight(1f))
+            Text(if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio", style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily), color = palette.inkFaint, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -348,44 +381,45 @@ private fun NeumorphicCard(
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
-        // Neumorphic circle with glyph (top-right area)
-        Canvas(Modifier.align(Alignment.TopEnd).offset((-60).dp, 80.dp).size(130.dp)) {
+        // Neumorphic circle with glyph (top-right area) — larger, more visible
+        Canvas(Modifier.align(Alignment.TopEnd).offset((-55).dp, 70.dp).size(140.dp)) {
             // Outer shadow (dark)
-            drawCircle(shadowDark.copy(alpha = 0.5f), radius = size.minDimension / 2f + 4f, center = Offset(size.width / 2f + 3f, size.height / 2f + 3f))
+            drawCircle(shadowDark.copy(alpha = 0.45f), radius = size.minDimension / 2f + 5f, center = Offset(size.width / 2f + 3f, size.height / 2f + 3f))
             // Inner highlight (light)
-            drawCircle(shadowLight, radius = size.minDimension / 2f - 2f, center = Offset(size.width / 2f - 2f, size.height / 2f - 2f))
+            drawCircle(shadowLight, radius = size.minDimension / 2f - 3f, center = Offset(size.width / 2f - 2f, size.height / 2f - 2f))
             // Surface
-            drawCircle(bg, radius = size.minDimension / 2f - 4f)
+            drawCircle(bg, radius = size.minDimension / 2f - 5f)
         }
-        // Glyph inside the circle
-        Box(Modifier.align(Alignment.TopEnd).offset((-85).dp, 105.dp).size(80.dp), contentAlignment = Alignment.Center) {
-            CurioIcon(name = categoryGlyph, tint = palette.ink.copy(alpha = 0.35f), size = 36.dp)
+        // Glyph inside the circle — larger and more visible
+        Box(Modifier.align(Alignment.TopEnd).offset((-78).dp, 94.dp).size(86.dp), contentAlignment = Alignment.Center) {
+            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.50f), size = 42.dp)
         }
 
-        // Small neumorphic bar icon (bottom-right)
+        // Small neumorphic bar icon (bottom-right) — accent colored
         Canvas(Modifier.align(Alignment.BottomEnd).offset((-24).dp, (-80).dp).size(44.dp)) {
             drawRoundRect(shadowDark.copy(alpha = 0.4f), Offset(2f, 2f), Size(size.width, size.height), CornerRadius(10.dp.toPx()))
             drawRoundRect(shadowLight, Offset.Zero, Size(size.width - 2f, size.height - 2f), CornerRadius(10.dp.toPx()))
-            drawRoundRect(bg, Offset(2f, 2f), Size(size.width - 4f, size.height - 4f), CornerRadius(9.dp.toPx()))
+            drawRoundRect(palette.accent.copy(alpha = 0.12f), Offset(2f, 2f), Size(size.width - 4f, size.height - 4f), CornerRadius(9.dp.toPx()))
         }
 
         Column(modifier = Modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
             // Category pill — light neumorphic
-            Surface(shape = RoundedCornerShape(14.dp), color = bg, shadowElevation = 2.dp) {
+            Surface(shape = RoundedCornerShape(14.dp), color = bg, shadowElevation = 3.dp) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CurioIcon(name = categoryGlyph, tint = palette.ink.copy(alpha = 0.55f), size = 14.dp)
+                    CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.70f), size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = palette.ink)
                 }
             }
 
-            Column(modifier = Modifier.width(220.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(modifier = Modifier.width(230.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (quoteText != null) {
+                    CurioIcon(name = CurioIcons.FormatQuote, tint = palette.accent.copy(alpha = 0.30f), size = 26.dp)
                     Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = ChangaOneFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = 5, overflow = TextOverflow.Ellipsis)
                 } else {
-                    Text(display, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = ChangaOneFontFamily, lineHeight = 36.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                    // Gray underline
-                    Canvas(Modifier.size(width = 40.dp, height = 2.dp)) { drawRoundRect(shadowDark, cornerRadius = CornerRadius(1f)) }
-                    Text(factText, style = MaterialTheme.typography.bodySmall.copy(fontFamily = GeomFontFamily, lineHeight = 17.sp), color = palette.inkFaint, maxLines = 5, overflow = TextOverflow.Ellipsis)
+                    Text(display, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = ChangaOneFontFamily, lineHeight = 34.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    // Accent underline instead of gray
+                    Canvas(Modifier.size(width = 40.dp, height = 2.dp)) { drawRoundRect(palette.accent.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f)) }
+                    Text(factText, style = MaterialTheme.typography.bodyMedium.copy(fontFamily = GeomFontFamily, lineHeight = 18.sp), color = palette.ink.copy(alpha = 0.70f), maxLines = 5, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             }
@@ -475,11 +509,30 @@ private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?,
 // ═══════════════════════════════════════════════════════════════════════
 private fun DrawScope.drawPaperTexture(palette: ShareCardPalette) {
     val w = size.width; val h = size.height; val s = (w * 1000 + h).toInt()
-    for (i in 0 until 80) {
+    // Dense grain — many small dots at varying opacity
+    for (i in 0 until 120) {
         val x = ((s * (i + 1) * 7919) % 10000) / 10000f * w
         val y = ((s * (i + 1) * 6271) % 10000) / 10000f * h
-        val a = 0.025f + ((s * (i + 1) * 3571) % 100) / 100f * 0.03f
-        drawCircle(palette.ink.copy(alpha = a), 1f + ((s * (i + 1) * 4201) % 100) / 100f * 1.5f, Offset(x, y))
+        val a = 0.035f + ((s * (i + 1) * 3571) % 100) / 100f * 0.05f
+        val r = 1f + ((s * (i + 1) * 4201) % 100) / 100f * 2f
+        drawCircle(palette.ink.copy(alpha = a), r, Offset(x, y))
+    }
+    // Speckle — larger, sparser spots for paper fiber feel
+    for (i in 0 until 25) {
+        val x = ((s * (i + 1) * 9113) % 10000) / 10000f * w
+        val y = ((s * (i + 1) * 5381) % 10000) / 10000f * h
+        drawCircle(palette.ink.copy(alpha = 0.02f), 3f + ((s * (i + 1) * 7727) % 100) / 100f * 3f, Offset(x, y))
+    }
+}
+
+/** Horizontal fiber lines for a realistic paper look. */
+private fun DrawScope.drawPaperFibers(palette: ShareCardPalette) {
+    val w = size.width; val h = size.height; val s = (w * 1000 + h).toInt()
+    for (i in 0 until 12) {
+        val y = ((s * (i + 1) * 4637) % 10000) / 10000f * h
+        val x0 = ((s * (i + 1) * 2371) % 10000) / 10000f * w * 0.3f
+        val x1 = x0 + ((s * (i + 1) * 6529) % 10000) / 10000f * w * 0.4f + w * 0.1f
+        drawLine(palette.ink.copy(alpha = 0.02f), Offset(x0, y), Offset(x1, y), strokeWidth = 0.8f)
     }
 }
 
@@ -544,9 +597,13 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
     val symbols = CurioIcons.heroWatermarkSymbols(family)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val w = maxWidth.value; val h = maxHeight.value
-        listOf(0.15f to 0.18f, 0.85f to 0.18f, 0.15f to 0.82f, 0.85f to 0.82f).forEachIndexed { i, (x, y) ->
-            CurioIcon(name = symbols[i % symbols.size], tint = tint, size = 26.dp, modifier = Modifier.offset((w * x - 13).dp, (h * y - 13).dp))
+        // Larger watermark glyphs (42dp) positioned at corners
+        val half = 21
+        listOf(0.14f to 0.16f, 0.86f to 0.16f, 0.14f to 0.84f, 0.86f to 0.84f).forEachIndexed { i, (x, y) ->
+            CurioIcon(name = symbols[i % symbols.size], tint = tint, size = 42.dp, modifier = Modifier.offset((w * x - half).dp, (h * y - half).dp))
         }
+        // Center watermark — fainter, larger
+        CurioIcon(name = symbols[seed.mod(symbols.size)], tint = tint.copy(alpha = tint.alpha * 0.5f), size = 80.dp, modifier = Modifier.offset((w * 0.5f - 40).dp, (h * 0.5f - 40).dp))
     }
 }
 
