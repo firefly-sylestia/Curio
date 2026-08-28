@@ -169,11 +169,11 @@ private fun quoteFontSize(length: Int): TextUnit = when {
  *  so the text never gets cut off. Short facts get a slightly larger,
  *  more impactful size. */
 private fun quickFactFontSize(length: Int): TextUnit = when {
-    length > 200 -> 10.sp
-    length > 140 -> 11.sp
-    length > 90 -> 12.sp
-    length > 50 -> 13.sp
-    else -> 14.sp
+    length > 200 -> 8.sp
+    length > 140 -> 9.sp
+    length > 90 -> 10.sp
+    length > 50 -> 11.sp
+    else -> 12.sp
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -240,7 +240,7 @@ private fun PaperCard(
         }
         Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
-        Column(modifier = modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
             MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year)
             Footer(sharerName, quoteText, quoteAuthor, palette)
@@ -267,12 +267,11 @@ private fun VinylCard(
     ) {
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
 
-        // Vinyl record — RIGHT side, partially cropped off edge
-        // Moved further right + down so text never overlaps
+        // Vinyl record — compact, pushed to corner so text stays clear
         Canvas(
-            modifier = Modifier.align(Alignment.CenterEnd)
-                .size(width = 300.dp, height = 300.dp)
-                .offset(x = 110.dp, y = 60.dp)
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .size(width = 200.dp, height = 200.dp)
+                .offset(x = 40.dp, y = 40.dp)
         ) {
             drawVinylPartial(palette.accent)
         }
@@ -386,26 +385,16 @@ private fun CollageCard(
             }
         }
 
-        // Left column — category chip + glyph, then quick fact BELOW the polaroid area
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 12.dp).zIndex(1f), verticalArrangement = Arrangement.Top) {
+        // Text content — anchored to BOTTOM so it sits below the polaroid
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 16.dp).zIndex(1f), verticalArrangement = Arrangement.Bottom) {
             Surface(shape = RoundedCornerShape(14.dp), color = palette.accentDark) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
                 }
             }
-            Spacer(Modifier.height(14.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Category glyph stamp
-                Box(Modifier.size(40.dp).drawBehind {
-                    drawCircle(palette.accent.copy(alpha = 0.18f), radius = size.minDimension / 2f)
-                    drawCircle(palette.accent.copy(alpha = 0.35f), radius = size.minDimension / 2f, style = Stroke(1.4.dp.toPx()))
-                }, contentAlignment = Alignment.Center) {
-                    CurioIcon(name = categoryGlyph, contentDescription = null, tint = palette.accent, size = 20.dp)
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            // Quick fact / quote — positioned BELOW the polaroid area
+            Spacer(Modifier.height(10.dp))
+            // Quick fact / quote — clearly in the bottom half
             if (quoteText != null) {
                 Text(quoteText, style = MaterialTheme.typography.titleMedium.copy(fontFamily = LoraFontFamily,
                     fontStyle = FontStyle.Italic,
@@ -418,8 +407,8 @@ private fun CollageCard(
                 ), color = palette.ink.copy(alpha = 0.85f), maxLines = 10, overflow = TextOverflow.Ellipsis)
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
-            Spacer(Modifier.weight(1f))
-            // via Curio — refined look
+            Spacer(Modifier.height(8.dp))
+            // via Curio
             Text(if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
                 style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold),
                 color = palette.inkFaint, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -444,37 +433,29 @@ private fun NeumorphicCard(
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
-        // Background detail — subtle neumorphic circles for depth
+        // Background detail — multiple neumorphic shapes for depth
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
-            // Large soft circle (top-right)
-            drawCircle(shadowDark.copy(alpha = 0.08f), 120f, Offset(w * 0.78f, h * 0.22f))
-            drawCircle(shadowLight.copy(alpha = 0.12f), 115f, Offset(w * 0.78f, h * 0.22f))
-            // Medium circle (bottom-left)
-            drawCircle(shadowDark.copy(alpha = 0.06f), 80f, Offset(w * 0.18f, h * 0.75f))
-            drawCircle(shadowLight.copy(alpha = 0.10f), 76f, Offset(w * 0.18f, h * 0.75f))
-            // Small accent dot
-            drawCircle(palette.accent.copy(alpha = 0.08f), 30f, Offset(w * 0.55f, h * 0.58f))
+            // Soft raised circles
+            drawCircle(shadowDark.copy(alpha = 0.08f), 100f, Offset(w * 0.78f, h * 0.20f))
+            drawCircle(shadowLight.copy(alpha = 0.12f), 96f, Offset(w * 0.78f, h * 0.20f))
+            drawCircle(shadowDark.copy(alpha = 0.06f), 70f, Offset(w * 0.15f, h * 0.72f))
+            drawCircle(shadowLight.copy(alpha = 0.10f), 66f, Offset(w * 0.15f, h * 0.72f))
+            // Accent ring detail
+            drawCircle(palette.accent.copy(alpha = 0.06f), 50f, Offset(w * 0.65f, h * 0.45f), style = Stroke(2.dp.toPx()))
+            drawCircle(palette.accent.copy(alpha = 0.04f), 35f, Offset(w * 0.35f, h * 0.30f), style = Stroke(1.5.dp.toPx()))
+            // Soft inner glow
+            drawCircle(shadowLight.copy(alpha = 0.06f), 90f, Offset(w * 0.50f, h * 0.50f))
         }
-        // Neumorphic circle with glyph (top-right area) — larger, more visible
-        Canvas(Modifier.align(Alignment.TopEnd).offset((-35).dp, 50.dp).size(200.dp)) {
-            // Outer shadow (dark)
-            drawCircle(shadowDark.copy(alpha = 0.45f), radius = size.minDimension / 2f + 5f, center = Offset(size.width / 2f + 3f, size.height / 2f + 3f))
-            // Inner highlight (light)
-            drawCircle(shadowLight, radius = size.minDimension / 2f - 3f, center = Offset(size.width / 2f - 2f, size.height / 2f - 2f))
-            // Surface
-            drawCircle(bg, radius = size.minDimension / 2f - 5f)
+        // Neumorphic circle (top-right) — container only, NOT oversized
+        Canvas(Modifier.align(Alignment.TopEnd).offset((-50).dp, 55.dp).size(160.dp)) {
+            drawCircle(shadowDark.copy(alpha = 0.40f), radius = size.minDimension / 2f + 4f, center = Offset(size.width / 2f + 2f, size.height / 2f + 2f))
+            drawCircle(shadowLight, radius = size.minDimension / 2f - 2f, center = Offset(size.width / 2f - 1f, size.height / 2f - 1f))
+            drawCircle(bg, radius = size.minDimension / 2f - 4f)
         }
-        // Glyph inside the circle — much larger
-        Box(Modifier.align(Alignment.TopEnd).offset((-78).dp, 82.dp).size(120.dp), contentAlignment = Alignment.Center) {
-            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.50f), size = 64.dp)
-        }
-
-        // Small neumorphic bar icon (bottom-right) — accent colored
-        Canvas(Modifier.align(Alignment.BottomEnd).offset((-24).dp, (-80).dp).size(44.dp)) {
-            drawRoundRect(shadowDark.copy(alpha = 0.4f), Offset(2f, 2f), Size(size.width, size.height), CornerRadius(10.dp.toPx()))
-            drawRoundRect(shadowLight, Offset.Zero, Size(size.width - 2f, size.height - 2f), CornerRadius(10.dp.toPx()))
-            drawRoundRect(palette.accent.copy(alpha = 0.12f), Offset(2f, 2f), Size(size.width - 4f, size.height - 4f), CornerRadius(9.dp.toPx()))
+        // Glyph inside — BIG, fills the circle
+        Box(Modifier.align(Alignment.TopEnd).offset((-82).dp, 78.dp).size(96.dp), contentAlignment = Alignment.Center) {
+            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.55f), size = 60.dp)
         }
 
         Column(modifier = Modifier.fillMaxSize().padding(28.dp).zIndex(1f), verticalArrangement = Arrangement.SpaceBetween) {
@@ -644,28 +625,13 @@ private fun DrawScope.drawPaperFibers(palette: ShareCardPalette) {
 private fun DrawScope.drawTornBottom(palette: ShareCardPalette) {
     val w = size.width; val h = size.height; val ty = h * 0.88f
     val tint = palette.ink.copy(alpha = 0.08f)
-    // Simple two-sine tear — the original look that worked well
     fun tearY(x: Float): Float = ty + sin(x * 0.03f + 1.7f) * 10f + sin(x * 0.08f + 3.2f) * 4f
-    // Shadow under the tear edge for depth
-    val shadow = Path().apply {
-        moveTo(0f, ty - 2f); var x = 0f
-        while (x <= w) { lineTo(x, tearY(x) + 3f); x += w / 50f }
-        lineTo(w, ty + 16f); lineTo(0f, ty + 16f); close()
-    }
-    drawPath(shadow, Color.Black.copy(alpha = 0.06f))
-    // Main torn shape
     val p = Path().apply {
         moveTo(0f, h); var x = 0f
         while (x <= w) { lineTo(x, tearY(x)); x += w / 50f }
         lineTo(w, h); close()
     }
     drawPath(p, tint)
-    // Edge highlight along the tear — connects left to right
-    val edge = Path().apply {
-        moveTo(0f, tearY(0f) - 1f); var x = 0f
-        while (x <= w) { lineTo(x, tearY(x) - 1f); x += w / 50f }
-    }
-    drawPath(edge, Color.White.copy(alpha = 0.40f), style = Stroke(1.2f))
 }
 
 private fun DrawScope.drawTornLine(y: Float, w: Float, above: Color, below: Color) {
