@@ -861,9 +861,10 @@ fun TopicRevealScreen(
         // ── Floating Category + Favorite bar (v212) ──────────────────────
         // Replaces the old Like/Dislike pill: category icon + name on the
         // left (expands on favorite), favorite star on the right. Slides
-        // away on scroll-down, back on scroll-up. Hidden in Browse-Topics.
+        // away on scroll-down, back on scroll-up. Now also visible in
+        // Browse-Topics so users can favorite/share from the topic browser.
         val floatingTopic = resolved
-        if (!browseMode && floatingTopic != null) {
+        if (floatingTopic != null) {
             // v292 — TOPIC SHARE: tapping the Share pill in the floating
             // bar opens the customizable topic share card sheet.
             var showShareSheet by remember { mutableStateOf(false) }
