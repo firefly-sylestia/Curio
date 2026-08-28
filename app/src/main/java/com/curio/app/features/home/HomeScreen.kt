@@ -217,7 +217,7 @@ import java.util.Calendar
  *  tear) and generous at large font scales. */
 private val HomeQuestHeroHeightPortrait = 300.dp
 /** Landscape hero — shorter to leave room for content below. */
-private val HomeQuestHeroHeightLandscape = 200.dp
+private val HomeQuestHeroHeightLandscape = 230.dp
 /** Extra layout space reserved for the white sheet below the torn banner. */
 private val HomeQuestSheetExtent = 24.dp
 /** Scroll distance (dp) before the menu + profile pills fully pin as

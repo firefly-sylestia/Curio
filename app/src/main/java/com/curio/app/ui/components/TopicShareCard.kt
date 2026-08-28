@@ -169,11 +169,20 @@ private fun quoteFontSize(length: Int): TextUnit = when {
  *  so the text never gets cut off. Short facts get a slightly larger,
  *  more impactful size. */
 private fun quickFactFontSize(length: Int): TextUnit = when {
-    length > 200 -> 8.sp
-    length > 140 -> 9.sp
-    length > 90 -> 10.sp
-    length > 50 -> 11.sp
-    else -> 12.sp
+    length > 200 -> 7.sp
+    length > 140 -> 8.sp
+    length > 90 -> 9.sp
+    length > 50 -> 10.sp
+    else -> 11.sp
+}
+
+/** Even smaller for 3:4 aspect ratio. */
+private fun quickFactFontSize34(length: Int): TextUnit = when {
+    length > 200 -> 6.sp
+    length > 140 -> 7.sp
+    length > 90 -> 8.sp
+    length > 50 -> 9.sp
+    else -> 10.sp
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -267,11 +276,11 @@ private fun VinylCard(
     ) {
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
 
-        // Vinyl record — compact, pushed to corner so text stays clear
+        // Vinyl record — right side, positioned to not cover text or button
         Canvas(
-            modifier = Modifier.align(Alignment.BottomEnd)
+            modifier = Modifier.align(Alignment.CenterEnd)
                 .size(width = 200.dp, height = 200.dp)
-                .offset(x = 40.dp, y = 40.dp)
+                .offset(x = 50.dp, y = 30.dp)
         ) {
             drawVinylPartial(palette.accent)
         }
@@ -400,16 +409,16 @@ private fun CollageCard(
             }
         }
 
-        // Text content — anchored to BOTTOM so it sits below the polaroid
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 16.dp).zIndex(1f), verticalArrangement = Arrangement.Bottom) {
-            Surface(shape = RoundedCornerShape(14.dp), color = palette.accentDark) {
+        // Text content — anchored to BOTTOM, below polaroid + muddy layer
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 14.dp).zIndex(1f), verticalArrangement = Arrangement.Bottom) {
+            Surface(shape = RoundedCornerShape(14.dp), color = palette.accentDark, shadowElevation = 0.dp) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
                 }
             }
-            Spacer(Modifier.height(10.dp))
-            // Quick fact / quote — clearly in the bottom half
+            Spacer(Modifier.height(6.dp))
+            // Quick fact / quote — below polaroid + muddy layer
             if (quoteText != null) {
                 Text(quoteText, style = MaterialTheme.typography.titleMedium.copy(fontFamily = LoraFontFamily,
                     fontStyle = FontStyle.Italic,
@@ -419,7 +428,7 @@ private fun CollageCard(
                 Text(factText, style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = LoraFontFamily, fontSize = qfSize,
                     lineHeight = (qfSize.value * 1.4f).sp
-                ), color = palette.ink.copy(alpha = 0.85f), maxLines = 10, overflow = TextOverflow.Ellipsis)
+                ), color = palette.ink.copy(alpha = 0.85f), maxLines = 15, overflow = TextOverflow.Ellipsis)
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             Spacer(Modifier.height(8.dp))
@@ -462,20 +471,20 @@ private fun NeumorphicCard(
             // Soft inner glow
             drawCircle(shadowLight.copy(alpha = 0.06f), 90f, Offset(w * 0.50f, h * 0.50f))
         }
-        // Neumorphic circle (top-right) — container only, NOT oversized
-        Canvas(Modifier.align(Alignment.TopEnd).offset((-50).dp, 55.dp).size(160.dp)) {
-            drawCircle(shadowDark.copy(alpha = 0.40f), radius = size.minDimension / 2f + 4f, center = Offset(size.width / 2f + 2f, size.height / 2f + 2f))
+        // Neumorphic circle (top-right) — centered glyph
+        Canvas(Modifier.align(Alignment.TopEnd).offset((-55).dp, 55.dp).size(150.dp)) {
+            drawCircle(shadowDark.copy(alpha = 0.30f), radius = size.minDimension / 2f + 3f, center = Offset(size.width / 2f + 2f, size.height / 2f + 2f))
             drawCircle(shadowLight, radius = size.minDimension / 2f - 2f, center = Offset(size.width / 2f - 1f, size.height / 2f - 1f))
-            drawCircle(bg, radius = size.minDimension / 2f - 4f)
+            drawCircle(bg, radius = size.minDimension / 2f - 3f)
         }
-        // Glyph inside — BIG, fills the circle
-        Box(Modifier.align(Alignment.TopEnd).offset((-82).dp, 78.dp).size(96.dp), contentAlignment = Alignment.Center) {
-            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.55f), size = 60.dp)
+        // Glyph inside — centered in circle
+        Box(Modifier.align(Alignment.TopEnd).offset((-85).dp, 80.dp).size(80.dp), contentAlignment = Alignment.Center) {
+            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.50f), size = 48.dp)
         }
 
         Column(modifier = Modifier.fillMaxSize().padding(28.dp).zIndex(1f), verticalArrangement = Arrangement.SpaceBetween) {
-            // Category pill — light neumorphic
-            Surface(shape = RoundedCornerShape(14.dp), color = bg, shadowElevation = 3.dp) {
+            // Category pill — subtle, not grabbing attention
+            Surface(shape = RoundedCornerShape(14.dp), color = bg, shadowElevation = 1.dp) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.70f), size = 14.dp)
                     Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = palette.ink)
@@ -499,12 +508,12 @@ private fun NeumorphicCard(
                     }
                     // Accent underline instead of gray
                     Canvas(Modifier.size(width = 40.dp, height = 2.dp)) { drawRoundRect(palette.accent.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f)) }
-                    // Quick fact — dynamic font size, Lora serif, generous maxLines
+                    // Quick fact — dynamic font size, Lora serif, very generous maxLines
                     val qfSize = quickFactFontSize(factText.length)
                     Text(factText, style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = LoraFontFamily, fontSize = qfSize,
                         lineHeight = (qfSize.value * 1.4f).sp
-                    ), color = palette.ink.copy(alpha = 0.70f), maxLines = 10, overflow = TextOverflow.Ellipsis)
+                    ), color = palette.ink.copy(alpha = 0.70f), maxLines = 15, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             }
@@ -557,10 +566,11 @@ private fun MiddleContent(
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             FrostPane(palette) {
+                val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(factText.length) else quickFactFontSize(factText.length)
                 Text(factText, style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = LoraFontFamily, fontSize = quickFactFontSize(factText.length),
-                    lineHeight = (quickFactFontSize(factText.length).value * 1.4f).sp
-                ), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 10, overflow = TextOverflow.Ellipsis)
+                    fontFamily = LoraFontFamily, fontSize = qfs,
+                    lineHeight = (qfs.value * 1.4f).sp
+                ), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 15 else 12, overflow = TextOverflow.Ellipsis)
             }
         }
     }
