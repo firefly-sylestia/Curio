@@ -319,29 +319,40 @@ private fun MultiGlyphWatermark(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val w = maxWidth.value
         val h = maxHeight.value
-        // Scatter ~12 glyphs across the card in a pseudo-random layout
-        val count = 12
-        for (i in 0 until count) {
-            val hash = seed + i * 31
-            val glyph = symbols[i % symbols.size]
-            // Position: seeded x/y across the full card area
-            val px = ((kotlin.math.sin(hash.toDouble()) * 0.5 + 0.5) * w).toFloat()
-            val py = ((kotlin.math.cos((hash * 3).toDouble()) * 0.5 + 0.5) * h).toFloat()
-            // Size: varies between 32dp and 64dp
-            val sz = (32 + (kotlin.math.abs(kotlin.math.sin((hash * 7).toDouble())) * 32)).toFloat()
-            // Rotation: -20° to +20°
-            val rot = (kotlin.math.sin((hash * 11).toDouble()) * 20f).toFloat()
-            // Alpha: subtle variation
-            val a = (0.04f + kotlin.math.abs(kotlin.math.sin((hash * 5).toDouble())) * 0.06f).toFloat()
-            CurioIcon(
-                name = glyph,
-                contentDescription = null,
-                tint = tint.copy(alpha = a),
-                size = sz.dp,
-                modifier = Modifier
-                    .offset(x = px.dp, y = py.dp)
-                    .rotate(rot)
-            )
+        // v301b — Fixed grid: 3 cols × 4 rows, one glyph per cell.
+        // Jitter ±15% keeps them looking natural without overlapping.
+        // Icons are small (24-30dp) and low-alpha so they never clash
+        // with the card content.
+        val cols = 3
+        val rows = 4
+        val cellW = w / cols
+        val cellH = h / rows
+        for (row in 0 until rows) {
+            for (col in 0 until cols) {
+                val i = row * cols + col
+                val hash = seed + i * 31
+                val glyph = symbols[i % symbols.size]
+                // Position: cell center + seeded jitter ±15%
+                val jitterX = (kotlin.math.sin(hash.toDouble()) * 0.15).toFloat()
+                val jitterY = (kotlin.math.cos((hash * 3).toDouble()) * 0.15).toFloat()
+                val px = (col * cellW + cellW * 0.5f + cellW * jitterX).toFloat()
+                val py = (row * cellH + cellH * 0.5f + cellH * jitterY).toFloat()
+                // Size: 24-30dp (tiny to avoid bleed)
+                val sz = (24 + (kotlin.math.abs(kotlin.math.sin((hash * 7).toDouble())) * 6)).toFloat()
+                // Rotation: -5° to +5° (minimal)
+                val rot = (kotlin.math.sin((hash * 11).toDouble()) * 5f).toFloat()
+                // Alpha: very subtle 0.03-0.06
+                val a = (0.03f + kotlin.math.abs(kotlin.math.sin((hash * 5).toDouble())) * 0.03f).toFloat()
+                CurioIcon(
+                    name = glyph,
+                    contentDescription = null,
+                    tint = tint.copy(alpha = a),
+                    size = sz.dp,
+                    modifier = Modifier
+                        .offset(x = px.dp, y = py.dp)
+                        .rotate(rot)
+                )
+            }
         }
     }
 }

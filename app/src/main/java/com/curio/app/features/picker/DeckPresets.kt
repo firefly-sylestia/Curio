@@ -61,6 +61,8 @@ data class DeckPreset(
  * drop out), so a preset never silently overrides Manage Categories.
  */
 val deckPresets = listOf(
+    // v301 — Clear is first so users can reset with one tap.
+    DeckPreset("Clear", "close", emptyList(), clearAll = true),
     DeckPreset("Science", "science", listOf(
         CategoryId.SCIENTISTS, CategoryId.DISCOVERIES,
         CategoryId.BIOLOGY, CategoryId.CHEMISTRY,
@@ -85,10 +87,7 @@ val deckPresets = listOf(
         CategoryId.HISTORY, CategoryId.SCIENTISTS,
         CategoryId.DISCOVERIES, CategoryId.MYTHOLOGY,
         CategoryId.LANGUAGE, CategoryId.AUTHORS
-    )),
-    // Clear = deselect every lane (stays in multi-select so the mix can be
-    // rebuilt from scratch without closing the picker).
-    DeckPreset("Clear", "close", emptyList(), clearAll = true)
+    ))
 )
 
 /**

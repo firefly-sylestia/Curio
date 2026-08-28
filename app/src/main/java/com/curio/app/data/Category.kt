@@ -79,7 +79,7 @@ enum class CategoryId {
          * v27i — the 15 lanes added in the content-expansion pass. The
          * category picker splits its deck grid into the original 21 lanes
          * and these new lanes (a swipeable second page). v200 —
-         * ANIMATED_MOVIES joins as a 16th new lane (the Animated Movies
+         * ANIMATED_MOVIES joins as a 16th new lane (the Animated Films
          * content-expansion pass).
          */
         val newLanes: Set<CategoryId> = setOf(
@@ -325,7 +325,7 @@ object CurioCategories {
         //    is the Western/world animation side of the Movies domain.
         CurioCategory(
             id            = CategoryId.ANIMATED_MOVIES,
-            displayName   = "Animated Movies",
+            displayName   = "Animated Films",
             accent        = CurioColors.CategoryAnimation,
             lightAccent   = CurioColors.CategoryAnimationInk,
             tint          = CurioColors.CategoryAnimationTint,

@@ -118,7 +118,6 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
 import com.curio.app.data.TourController
-import com.curio.app.features.picker.PickerPageTab
 import com.curio.app.features.picker.PickerPresetChip
 import com.curio.app.features.picker.deckPresets
 import com.curio.app.ui.pet.PetLandmark
@@ -183,8 +182,6 @@ import kotlin.math.sin
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.RevealBoundsTransform
@@ -4361,14 +4358,14 @@ private fun CategoryPickerSheet(
     // intact — user: "even when i cancel the selected in category picker and
     // i tap back make it apply too". Reset whenever a fresh selection starts.
     var mixCancelled by remember { mutableStateOf(false) }
-    // v27k — the two pages (Original lanes / New lanes) behind the same grid,
-    // and a scope for tab jumps. Same split as the full-screen picker.
-    val newLanes = CurioCategories.all.filter {
-        it.id in CategoryId.newLanes && it.id !in AppPreferences.hiddenCategoriesState
+    // v301 — Single flat grid, no pager, no Original/New split.
+    // Categories sorted: Wildcard first, then alphabetical.
+    val sortedCategories = remember(categories) {
+        val wildcard = categories.filter { it.id == CategoryId.WILDCARD }
+        val rest = categories.filter { it.id != CategoryId.WILDCARD }
+            .sortedBy { it.displayName.lowercase() }
+        wildcard + rest
     }
-    val originalLanes = categories.filter { it.id !in CategoryId.newLanes }
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val scope = rememberCoroutineScope()
     // v27k — total topics across the ticked lanes (the Mix button shows the
     // pool size, not the lane count).
     var selectedTopicCount by remember { mutableStateOf(0) }
@@ -4400,7 +4397,8 @@ private fun CategoryPickerSheet(
     // v90 — the tear grew again (184 → 208dp): the two-line 28sp title +
     // status chip + Original/New tabs + preset row all ride the banner, and
     // the old 184dp crushed the preset chips into a squished, thin row.
-    val pickerHeroHeight = 208.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // v301 — hero shrunk: Original/New tabs removed, only title + presets remain.
+    val pickerHeroHeight = 152.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     ModalBottomSheet(
         onDismissRequest = {
             // v189 — popping the sheet back (swipe / scrim tap / back)
@@ -4592,42 +4590,7 @@ private fun CategoryPickerSheet(
                                 }
                             }
                         }
-                        Spacer(Modifier.height(8.dp))
-                        // ── Original / New page tabs on the banner (v83): the
-                        //    selected tab is a SOLID hero-ink pill with the
-                        //    banner's category color as its content; idle tabs
-                        //    are hero-glass — both dynamic to the category.
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            PickerPageTab(
-                                label = "Original",
-                                count = originalLanes.size,
-                                selected = pagerState.currentPage == 0,
-                                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-                                accent = pickerHeroInk,
-                                accentInk = pickerHeroFill,
-                                idleInk = pickerHeroInk,
-                                // v90 — OPAQUE idle glass (the old 16% alpha
-                                // let the 3dp elevation shadow bleed through
-                                // the pill — "shadow leaking from above").
-                                idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f)
-                            )
-                            PickerPageTab(
-                                label = "New",
-                                count = newLanes.size,
-                                selected = pagerState.currentPage == 1,
-                                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-                                accent = pickerHeroInk,
-                                accentInk = pickerHeroFill,
-                                idleInk = pickerHeroInk,
-                                // v90 — OPAQUE idle glass (shadow-leak fix).
-                                idleFill = lerp(pickerHeroFill, pickerHeroInk, 0.16f)
-                            )
-                        }
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(4.dp))
                         // ── Quick-mix preset chips on the banner (v83) — same
                         //    ink-glass language; the preset glyph rides the ink.
                         Row(
@@ -4715,101 +4678,45 @@ private fun CategoryPickerSheet(
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        // v83 — no-overshoot entrance: the elastic spring's
-                        // ~5% overshoot read as a brief "more elevated" card
-                        // shadow flash before settling.
+                        // v301 — Single flat grid, 3 columns, no pager.
+                        // Wildcard is first, then alphabetical. Tap opens,
+                        // hold to mix.
                         MorphEntrance(bouncy = false) {
-                            HorizontalPager(
-                                state = pagerState,
+                            LazyVerticalGrid(
+                                columns = if (wide) GridCells.Adaptive(minSize = 140.dp) else GridCells.Fixed(3),
+                                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = if (multiSelectMode) 88.dp else 20.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxSize()
-                            ) { page ->
-                                when (page) {
-                                    0 -> LazyVerticalGrid(
-                                        columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                        // v180 — extra bottom clearance in multi-select so the floating Mix/Cancel
-                                        // controls never cover the grid's last row.
-                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = if (multiSelectMode) 88.dp else 20.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                    // Original lanes — tap opens, hold to mix.
-                                    items(originalLanes) { cat ->
-                                        val slug = cat.id.routeSlug
-                                        CurioCategoryCard(
-                                            category = cat,
-                                            isSelected = if (multiSelectMode) slug in selectedSlugs
-                                            else cat.id == currentCat.id,
-                                            onClick = {
+                            ) {
+                                items(sortedCategories) { cat ->
+                                    val slug = cat.id.routeSlug
+                                    val comingSoon = !cat.isReady
+                                    CurioCategoryCard(
+                                        category = cat,
+                                        comingSoon = comingSoon,
+                                        isSelected = if (multiSelectMode) slug in selectedSlugs
+                                        else cat.id == currentCat.id,
+                                        onClick = {
+                                            if (!comingSoon) {
                                                 if (multiSelectMode) {
                                                     selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug
                                                     else selectedSlugs + slug
                                                 } else {
                                                     onCategorySelected(cat)
                                                 }
-                                            },
-                                            onLongClick = {
-                                                // v196 — long-press starts a
-                                                // FRESH mix selection (tap-to-open
-                                                // is the default; only hold
-                                                // enters multi-select). Any
-                                                // pending cancel is cleared so
-                                                // back applies this new state.
+                                            }
+                                        },
+                                        onLongClick = if (comingSoon) null else {
+                                            {
                                                 mixCancelled = false
                                                 multiSelectMode = true
                                                 if (slug !in selectedSlugs) {
                                                     selectedSlugs = selectedSlugs + slug
                                                 }
                                             }
-                                        )
-                                    }
-                                    }
-                                    else -> LazyVerticalGrid(
-                                        columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                                        // v180 — extra bottom clearance in multi-select so the floating Mix/Cancel
-                                        // controls never cover the grid's last row.
-                                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = if (multiSelectMode) 88.dp else 20.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                    // New lanes — not-yet-shipped ones show as
-                                    // Coming soon tiles.
-                                    items(newLanes) { cat ->
-                                        val slug = cat.id.routeSlug
-                                        val comingSoon = !cat.isReady
-                                        CurioCategoryCard(
-                                            category = cat,
-                                            comingSoon = comingSoon,
-                                            isSelected = if (multiSelectMode) slug in selectedSlugs
-                                            else cat.id == currentCat.id,
-                                            onClick = {
-                                                if (!comingSoon) {
-                                                    if (multiSelectMode) {
-                                                        selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug
-                                                        else selectedSlugs + slug
-                                                    } else {
-                                                        onCategorySelected(cat)
-                                                    }
-                                                }
-                                            },
-                                            onLongClick = if (comingSoon) null else {
-                                                {
-                                                    // v196 — long-press starts a
-                                                    // FRESH mix selection (hold
-                                                    // is the only way into
-                                                    // multi-select); clears any
-                                                    // pending mix-cancel.
-                                                    mixCancelled = false
-                                                    multiSelectMode = true
-                                                    if (slug !in selectedSlugs) {
-                                                        selectedSlugs = selectedSlugs + slug
-                                                    }
-                                                }
-                                            }
-                                        )
-                                    }
-                                    }
+                                        }
+                                    )
                                 }
                             }
                         }

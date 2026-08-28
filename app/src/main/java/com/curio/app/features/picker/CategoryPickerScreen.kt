@@ -16,8 +16,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
@@ -83,32 +81,6 @@ import kotlinx.coroutines.launch
  * math, technology, then human sciences. Unknown ids fall back to a high
  * rank so they sort after every ranked lane (then alpha by display name).
  */
-private fun newLaneRank(id: CategoryId): Int = when (id) {
-    // Life sciences
-    CategoryId.BIOLOGY -> 0
-    CategoryId.ANIMALS -> 1
-    CategoryId.PLANTS -> 2
-    CategoryId.MEDICINE -> 3
-    // Chemistry
-    CategoryId.CHEMISTRY -> 4
-    // Earth & space
-    CategoryId.ASTRONOMY -> 5
-    CategoryId.GEOLOGY -> 6
-    CategoryId.OCEANS -> 7
-    // Mathematics
-    CategoryId.MATHEMATICS -> 8
-    // Technology
-    CategoryId.TECHNOLOGIES -> 9
-    CategoryId.ENGINEERING -> 10
-    // Human sciences
-    CategoryId.PSYCHOLOGY -> 11
-    CategoryId.LANGUAGE -> 12
-    CategoryId.HISTORY -> 13
-    CategoryId.ECONOMICS -> 14
-    CategoryId.QUOTES -> 15
-    else -> 100
-}
-
 /**
  * v44 — process-scoped draft of the category picker. The selection, the
  * multi-select mode, the Original/New page and BOTH grids' scroll offsets
@@ -122,20 +94,10 @@ private fun newLaneRank(id: CategoryId): Int = when (id) {
 object CategoryPickerDraft {
     var selected: List<String>? = null
     var multiSelect: Boolean = false
-    var page: Int = 0
-    var originalIndex: Int = 0
-    var originalOffset: Int = 0
-    var newIndex: Int = 0
-    var newOffset: Int = 0
 
     fun clear() {
         selected = null
         multiSelect = false
-        page = 0
-        originalIndex = 0
-        originalOffset = 0
-        newIndex = 0
-        newOffset = 0
     }
 }
 
@@ -163,16 +125,13 @@ fun CategoryPickerScreen(navController: NavController) {
     // v27i — `visible` already excludes new lanes that haven't shipped, so the
     // original page (and every other surface) never shows empty dead tiles.
     val categories = CurioCategories.visible
-    // v27i — the NEW-lanes page reads `all` directly so it can show the
-    // not-yet-shipped lanes as Coming soon tiles (they're filtered out of
-    // `visible` until their content ships).
-    // v27l — the New page groups the expanded lanes logically instead of
-    // creation order: life sciences, chemistry, earth & space, math, tech,
-    // then human sciences. Everything not in the rank falls back to alpha.
-    val newLanes = CurioCategories.all
-        .filter { it.id in CategoryId.newLanes && it.id !in AppPreferences.hiddenCategoriesState }
-        .sortedBy { cat -> newLaneRank(cat.id) }
-    val originalLanes = categories.filter { it.id !in CategoryId.newLanes }
+    // v301 — Single flat grid, no pager. Wildcard first, then alphabetical.
+    val sortedCategories = remember(categories) {
+        val wildcard = categories.filter { it.id == CategoryId.WILDCARD }
+        val rest = categories.filter { it.id != CategoryId.WILDCARD }
+            .sortedBy { it.displayName.lowercase() }
+        wildcard + rest
+    }
     // v26 — reopen with the persisted deck: a mixed selection comes back in
     // multi-select with every lane ticked, so the user can SEE and CHANGE
     // the mix instead of it collapsing to the single first category. Hidden
@@ -181,17 +140,8 @@ fun CategoryPickerScreen(navController: NavController) {
         AppPreferences.getLastSpinCategories(context)
             .mapNotNull { id -> categories.firstOrNull { it.id == id } }
     }
-    // v44 — the picker draft restores your place: grid scroll offsets (and
-    // the page + selection below) survive leaving the picker until restart.
-    val draft = CategoryPickerDraft
-    val originalGridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = if (draft.selected != null) draft.originalIndex else 0,
-        initialFirstVisibleItemScrollOffset = if (draft.selected != null) draft.originalOffset else 0
-    )
-    val newGridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = if (draft.selected != null) draft.newIndex else 0,
-        initialFirstVisibleItemScrollOffset = if (draft.selected != null) draft.newOffset else 0
-    )
+    // v301 — single grid state (no pager).
+    val gridState = rememberLazyGridState()
     // Wide windows (tablet / landscape) spread the deck grid and cap the
     // sheet's content width so the picker stays readable on large screens.
     val wide = windowWidthSizeClass().isWide
@@ -231,12 +181,6 @@ fun CategoryPickerScreen(navController: NavController) {
         }
     }
 
-    // ── v27i — the two pages (Original / New) + a scope for tab jumps ──
-    // v44 — reopen on the page you left (draft.page), restored until restart.
-    val pagerState = rememberPagerState(
-        initialPage = if (draft.selected != null) draft.page else 0,
-        pageCount = { 2 }
-    )
     val scope = rememberCoroutineScope()
 
     // v44 — keep the draft live: every selection/mode/page/scroll change is
@@ -247,25 +191,7 @@ fun CategoryPickerScreen(navController: NavController) {
         draft.selected = selectedSlugs
         draft.multiSelect = multiSelectMode
     }
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect { draft.page = it }
-    }
-    LaunchedEffect(originalGridState) {
-        snapshotFlow {
-            originalGridState.firstVisibleItemIndex to originalGridState.firstVisibleItemScrollOffset
-        }.collect { (index, offset) ->
-            draft.originalIndex = index
-            draft.originalOffset = offset
-        }
-    }
-    LaunchedEffect(newGridState) {
-        snapshotFlow {
-            newGridState.firstVisibleItemIndex to newGridState.firstVisibleItemScrollOffset
-        }.collect { (index, offset) ->
-            draft.newIndex = index
-            draft.newOffset = offset
-        }
-    }
+
 
     // Same full-screen + swipe-down-dismiss pattern as the filter page — a
     // ModalBottomSheet expanded to full height with a drag handle.
@@ -366,46 +292,14 @@ fun CategoryPickerScreen(navController: NavController) {
             }
         }
 
-        // ── v27i — page tabs: Original vs the new lanes ─────────────
-        Row(
-            // v90 — a touch more room under the tabs (1/4 → 2/6) so the
-            // two rows breathe.
-            modifier = Modifier.padding(top = 2.dp, bottom = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PickerPageTab(
-                label = "Original",
-                count = originalLanes.size,
-                selected = pagerState.currentPage == 0,
-                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-                // v83 — dynamic: the selected tab wears the wash category's
-                // accent (deep same-hue in dark, never the pale rose).
-                accent = washCat.themedAccent(),
-                accentInk = washCat.onAccent()
-            )
-            PickerPageTab(
-                label = "New",
-                count = newLanes.size,
-                selected = pagerState.currentPage == 1,
-                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-                accent = washCat.themedAccent(),
-                accentInk = washCat.onAccent()
-            )
-            Spacer(Modifier.weight(1f))
-            // v27i — the tap/hold hint moved here so the preset chips could
-            // take the subtitle slot; multi-select is still a long-press.
-            Text(
-                text = if (multiSelectMode) {
-                    "Tap to toggle decks"
-                } else {
-                    "Tap opens · hold to mix"
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                maxLines = 1
-            )
-        }
+        // v301 — single flat grid, no tabs. Hint row:
+        Text(
+            text = if (multiSelectMode) "Tap to toggle decks" else "Tap opens · hold to mix",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            maxLines = 1,
+            modifier = Modifier.padding(top = 2.dp, bottom = 6.dp)
+        )
 
         // v7.4 — the grid sits inside a WEIGHTED Box that is a DIRECT child
         // of the sheet Column. Weight inside the old MorphEntrance wrapper
@@ -421,85 +315,43 @@ fun CategoryPickerScreen(navController: NavController) {
             // overshoot read as a brief "more elevated" card shadow flash
             // before settling on the category page.
             MorphEntrance(bouncy = false) {
-                HorizontalPager(
-                    state = pagerState,
+                // v301 — Single flat grid, 3 columns, Wildcard first.
+                LazyVerticalGrid(
+                    state = gridState,
+                    columns = if (wide) GridCells.Adaptive(minSize = 140.dp) else GridCells.Fixed(3),
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
-                ) { page ->
-                    when (page) {
-                        0 -> LazyVerticalGrid(
-                            state = originalGridState,
-                            columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                            contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                        items(originalLanes) { cat ->
-                            val slug = cat.id.routeSlug
-                            CurioCategoryCard(
-                                category = cat,
-                                isSelected = multiSelectMode && slug in selectedSlugs,
-                                onClick = {
+                ) {
+                    items(sortedCategories) { cat ->
+                        val slug = cat.id.routeSlug
+                        val comingSoon = !cat.isReady
+                        CurioCategoryCard(
+                            category = cat,
+                            comingSoon = comingSoon,
+                            isSelected = multiSelectMode && slug in selectedSlugs,
+                            onClick = {
+                                if (!comingSoon) {
                                     if (multiSelectMode) {
                                         toggleSlug(slug)
                                     } else {
-                                        // Default: tap opens this category on the
-                                        // persistent Shuffle tab (the plain "spin"
-                                        // route), not a separate spin/{slug} page.
-                                        // The selection is persisted so it survives
-                                        // back navigation, tab switches and relaunch.
-                                        AppPreferences.setLastSpinCategories(context, listOf(cat.id))
-                                        CategoryPickerDraft.clear()
-                                        navController.navigateToTab(CurioRoutes.SPIN)
+                                        onCategorySelected(cat)
                                     }
-                                },
-                                onLongClick = {
-                                    // Enter multi-select mode and select this card.
-                                    multiSelectMode = true
-                                    if (slug !in selectedSlugs) toggleSlug(slug)
                                 }
-                            )
-                        }
-                        }
-                        else -> LazyVerticalGrid(
-                            state = newGridState,
-                            columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                            contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                        items(newLanes) { cat ->
-                            val slug = cat.id.routeSlug
-                            val comingSoon = !cat.isReady
-                            CurioCategoryCard(
-                                category = cat,
-                                comingSoon = comingSoon,
-                                isSelected = multiSelectMode && slug in selectedSlugs,
-                                onClick = {
-                                    if (!comingSoon) {
-                                        if (multiSelectMode) {
-                                            toggleSlug(slug)
-                                        } else {
-                                            AppPreferences.setLastSpinCategories(context, listOf(cat.id))
-                                            CategoryPickerDraft.clear()
-                                            navController.navigateToTab(CurioRoutes.SPIN)
-                                        }
-                                    }
-                                },
-                                onLongClick = if (comingSoon) null else {
-                                    {
+                            },
+                            onLongClick = if (comingSoon) null else {
+                                {
+                                    if (!multiSelectMode) {
                                         multiSelectMode = true
-                                        if (slug !in selectedSlugs) toggleSlug(slug)
                                     }
+                                    toggleSlug(slug)
                                 }
-                            )
-                        }
-                        }
+                            }
+                        )
                     }
                 }
-            }
-        }
+            }        }
 
         if (multiSelectMode) {
             // ── Mix row — only visible in multi-select mode ────────────
