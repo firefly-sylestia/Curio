@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -168,11 +169,11 @@ private fun quoteFontSize(length: Int): TextUnit = when {
  *  so the text never gets cut off. Short facts get a slightly larger,
  *  more impactful size. */
 private fun quickFactFontSize(length: Int): TextUnit = when {
-    length > 200 -> 12.sp
-    length > 140 -> 13.sp
-    length > 90 -> 14.sp
-    length > 50 -> 15.sp
-    else -> 16.sp
+    length > 200 -> 10.sp
+    length > 140 -> 11.sp
+    length > 90 -> 12.sp
+    length > 50 -> 13.sp
+    else -> 14.sp
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -239,7 +240,7 @@ private fun PaperCard(
         }
         Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
-        Column(modifier = modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 16.dp), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
             MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year)
             Footer(sharerName, quoteText, quoteAuthor, palette)
@@ -281,17 +282,16 @@ private fun VinylCard(
         Column(modifier = Modifier.fillMaxSize().padding(24.dp).zIndex(1f), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
 
-            // Text on left side — wider area to avoid blending with record
-            Column(modifier = Modifier.weight(1f).width(220.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Text on left side — avoid blending with record
+            Column(modifier = Modifier.weight(1f).width(200.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (quoteText != null) {
-                    // Quote mode — clean, readable quote
                     CurioIcon(name = CurioIcons.FormatQuote, tint = palette.accent.copy(alpha = 0.35f), size = 28.dp)
                     Text(text = quoteText, style = MaterialTheme.typography.titleLarge.copy(
                         fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.30f).sp
                     ), color = palette.ink, maxLines = 6, overflow = TextOverflow.Ellipsis)
                 } else {
                     Text(text = display, style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = ChangaOneFontFamily, lineHeight = 34.sp
+                        fontFamily = ChangaOneFontFamily, lineHeight = 32.sp
                     ), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
                     // Metadata line
                     val vMetaParts = mutableListOf<String>()
@@ -303,17 +303,17 @@ private fun VinylCard(
                             color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     // Accent underline
-                    Spacer(Modifier.height(4.dp))
-                    Canvas(Modifier.size(width = 44.dp, height = 3.dp)) {
-                        drawRoundRect(palette.accent, cornerRadius = CornerRadius(2f))
+                    Spacer(Modifier.height(2.dp))
+                    Canvas(Modifier.size(width = 36.dp, height = 2.dp)) {
+                        drawRoundRect(palette.accent, cornerRadius = CornerRadius(1f))
                     }
                     Spacer(Modifier.height(2.dp))
-                    // Quick fact — dynamic font size based on length, Lora serif for depth
+                    // Quick fact — dynamic font size, generous maxLines
                     val qfSize = quickFactFontSize(factText.length)
                     Text(text = factText, style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = LoraFontFamily, fontSize = qfSize,
-                        lineHeight = (qfSize.value * 1.35f).sp
-                    ), color = palette.ink.copy(alpha = 0.75f), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                        lineHeight = (qfSize.value * 1.4f).sp
+                    ), color = palette.ink.copy(alpha = 0.75f), maxLines = 8, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             }
@@ -387,7 +387,7 @@ private fun CollageCard(
         }
 
         // Left column — category chip + glyph, then quick fact BELOW the polaroid area
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 18.dp, bottom = 16.dp).zIndex(1f), verticalArrangement = Arrangement.Top) {
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 12.dp).zIndex(1f), verticalArrangement = Arrangement.Top) {
             Surface(shape = RoundedCornerShape(14.dp), color = palette.accentDark) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
@@ -414,15 +414,14 @@ private fun CollageCard(
                 val qfSize = quickFactFontSize(factText.length)
                 Text(factText, style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = LoraFontFamily, fontSize = qfSize,
-                    lineHeight = (qfSize.value * 1.35f).sp
-                ), color = palette.ink.copy(alpha = 0.85f), maxLines = 6, overflow = TextOverflow.Ellipsis)
+                    lineHeight = (qfSize.value * 1.4f).sp
+                ), color = palette.ink.copy(alpha = 0.85f), maxLines = 10, overflow = TextOverflow.Ellipsis)
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             Spacer(Modifier.weight(1f))
-            // via Curio — Lora italic for a refined look
+            // via Curio — refined look
             Text(if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily,
-                    fontStyle = FontStyle.Italic),
+                style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold),
                 color = palette.inkFaint, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -445,8 +444,20 @@ private fun NeumorphicCard(
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
+        // Background detail — subtle neumorphic circles for depth
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height
+            // Large soft circle (top-right)
+            drawCircle(shadowDark.copy(alpha = 0.08f), 120f, Offset(w * 0.78f, h * 0.22f))
+            drawCircle(shadowLight.copy(alpha = 0.12f), 115f, Offset(w * 0.78f, h * 0.22f))
+            // Medium circle (bottom-left)
+            drawCircle(shadowDark.copy(alpha = 0.06f), 80f, Offset(w * 0.18f, h * 0.75f))
+            drawCircle(shadowLight.copy(alpha = 0.10f), 76f, Offset(w * 0.18f, h * 0.75f))
+            // Small accent dot
+            drawCircle(palette.accent.copy(alpha = 0.08f), 30f, Offset(w * 0.55f, h * 0.58f))
+        }
         // Neumorphic circle with glyph (top-right area) — larger, more visible
-        Canvas(Modifier.align(Alignment.TopEnd).offset((-45).dp, 60.dp).size(170.dp)) {
+        Canvas(Modifier.align(Alignment.TopEnd).offset((-35).dp, 50.dp).size(200.dp)) {
             // Outer shadow (dark)
             drawCircle(shadowDark.copy(alpha = 0.45f), radius = size.minDimension / 2f + 5f, center = Offset(size.width / 2f + 3f, size.height / 2f + 3f))
             // Inner highlight (light)
@@ -454,9 +465,9 @@ private fun NeumorphicCard(
             // Surface
             drawCircle(bg, radius = size.minDimension / 2f - 5f)
         }
-        // Glyph inside the circle — larger and more visible
-        Box(Modifier.align(Alignment.TopEnd).offset((-83).dp, 89.dp).size(100.dp), contentAlignment = Alignment.Center) {
-            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.50f), size = 52.dp)
+        // Glyph inside the circle — much larger
+        Box(Modifier.align(Alignment.TopEnd).offset((-78).dp, 82.dp).size(120.dp), contentAlignment = Alignment.Center) {
+            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.50f), size = 64.dp)
         }
 
         // Small neumorphic bar icon (bottom-right) — accent colored
@@ -492,12 +503,12 @@ private fun NeumorphicCard(
                     }
                     // Accent underline instead of gray
                     Canvas(Modifier.size(width = 40.dp, height = 2.dp)) { drawRoundRect(palette.accent.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f)) }
-                    // Quick fact — dynamic font size, Lora serif for depth
+                    // Quick fact — dynamic font size, Lora serif, generous maxLines
                     val qfSize = quickFactFontSize(factText.length)
                     Text(factText, style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = LoraFontFamily, fontSize = qfSize,
-                        lineHeight = (qfSize.value * 1.35f).sp
-                    ), color = palette.ink.copy(alpha = 0.70f), maxLines = 6, overflow = TextOverflow.Ellipsis)
+                        lineHeight = (qfSize.value * 1.4f).sp
+                    ), color = palette.ink.copy(alpha = 0.70f), maxLines = 10, overflow = TextOverflow.Ellipsis)
                 }
                 if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             }
@@ -592,8 +603,8 @@ private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?,
         Text(
             if (quoteText != null) { if (sharerName.isNotBlank()) "$sharerName ~ Stay Curious" else "Stay Curious" }
             else { if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio" },
-            style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic),
-            color = palette.ink.copy(alpha = 0.45f), maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold),
+            color = palette.ink.copy(alpha = 0.60f), maxLines = 1, overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -631,35 +642,30 @@ private fun DrawScope.drawPaperFibers(palette: ShareCardPalette) {
 }
 
 private fun DrawScope.drawTornBottom(palette: ShareCardPalette) {
-    val w = size.width; val h = size.height; val ty = h * 0.92f
-    val tint = palette.ink.copy(alpha = 0.05f)
-    // Three-layer organic tear: broad wave + mid ripple + fine jitter
-    fun tearY(x: Float): Float {
-        val broad = sin(x * 0.025f + 1.7f) * 8f
-        val mid = sin(x * 0.06f + 3.2f) * 3.5f
-        val fine = sin(x * 0.14f + 0.9f) * 1.5f
-        return ty + broad + mid + fine
-    }
+    val w = size.width; val h = size.height; val ty = h * 0.88f
+    val tint = palette.ink.copy(alpha = 0.08f)
+    // Simple two-sine tear — the original look that worked well
+    fun tearY(x: Float): Float = ty + sin(x * 0.03f + 1.7f) * 10f + sin(x * 0.08f + 3.2f) * 4f
     // Shadow under the tear edge for depth
     val shadow = Path().apply {
         moveTo(0f, ty - 2f); var x = 0f
-        while (x <= w) { lineTo(x, tearY(x) + 3f); x += w / 60f }
+        while (x <= w) { lineTo(x, tearY(x) + 3f); x += w / 50f }
         lineTo(w, ty + 16f); lineTo(0f, ty + 16f); close()
     }
-    drawPath(shadow, Color.Black.copy(alpha = 0.04f))
-    // Main torn shape — lighter, shorter
+    drawPath(shadow, Color.Black.copy(alpha = 0.06f))
+    // Main torn shape
     val p = Path().apply {
         moveTo(0f, h); var x = 0f
-        while (x <= w) { lineTo(x, tearY(x)); x += w / 60f }
+        while (x <= w) { lineTo(x, tearY(x)); x += w / 50f }
         lineTo(w, h); close()
     }
     drawPath(p, tint)
     // Edge highlight along the tear — connects left to right
     val edge = Path().apply {
         moveTo(0f, tearY(0f) - 1f); var x = 0f
-        while (x <= w) { lineTo(x, tearY(x) - 1f); x += w / 60f }
+        while (x <= w) { lineTo(x, tearY(x) - 1f); x += w / 50f }
     }
-    drawPath(edge, Color.White.copy(alpha = 0.35f), style = Stroke(1f))
+    drawPath(edge, Color.White.copy(alpha = 0.40f), style = Stroke(1.2f))
 }
 
 private fun DrawScope.drawTornLine(y: Float, w: Float, above: Color, below: Color) {
@@ -713,13 +719,18 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
     val symbols = CurioIcons.heroWatermarkSymbols(family)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val w = maxWidth.value; val h = maxHeight.value
-        // Larger watermark glyphs (42dp) positioned at corners
         val half = 21
+        // Random tilts per glyph for organic feel — seeded from position
+        val tilts = listOf(-12f, 8f, -5f, 15f, -18f)
         listOf(0.14f to 0.16f, 0.86f to 0.16f, 0.14f to 0.84f, 0.86f to 0.84f).forEachIndexed { i, (x, y) ->
-            CurioIcon(name = symbols[i % symbols.size], tint = tint, size = 42.dp, modifier = Modifier.offset((w * x - half).dp, (h * y - half).dp))
+            CurioIcon(name = symbols[i % symbols.size], tint = tint, size = 42.dp,
+                modifier = Modifier.offset((w * x - half).dp, (h * y - half).dp)
+                    .graphicsLayer { rotationZ = tilts[i % tilts.size] })
         }
-        // Center watermark — fainter, larger
-        CurioIcon(name = symbols[seed.mod(symbols.size)], tint = tint.copy(alpha = tint.alpha * 0.5f), size = 80.dp, modifier = Modifier.offset((w * 0.5f - 40).dp, (h * 0.5f - 40).dp))
+        // Center watermark — fainter, larger, with its own tilt
+        CurioIcon(name = symbols[seed.mod(symbols.size)], tint = tint.copy(alpha = tint.alpha * 0.5f), size = 80.dp,
+            modifier = Modifier.offset((w * 0.5f - 40).dp, (h * 0.5f - 40).dp)
+                .graphicsLayer { rotationZ = -7f })
     }
 }
 
