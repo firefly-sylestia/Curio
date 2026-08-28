@@ -69,6 +69,8 @@ import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -301,7 +303,8 @@ fun RecycleBinScreen(navController: NavController) {
             SelectionBottomBar(
                 selectedCount = selectedIds.size,
                 onDeleteForever = { showEmptyBinConfirm = true },
-                onRestore = { restoreSelected() }
+                onRestore = { restoreSelected() },
+                backdrop = glassBackdrop
             )
         }
     }
@@ -362,11 +365,18 @@ fun RecycleBinScreen(navController: NavController) {
                 }
             },
             dismissButton = {
-                TextButton(
+                Surface(
                     onClick = { purgeTarget = null },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Cancel", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Cancel",
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+                    )
                 }
             }
         )
@@ -443,11 +453,18 @@ fun RecycleBinScreen(navController: NavController) {
                 }
             },
             dismissButton = {
-                TextButton(
+                Surface(
                     onClick = { showEmptyBinConfirm = false },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Cancel", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Cancel",
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+                    )
                 }
             }
         )
@@ -683,18 +700,29 @@ private fun TrashedEntryRow(
 private fun SelectionBottomBar(
     selectedCount: Int,
     onDeleteForever: () -> Unit,
-    onRestore: () -> Unit
+    onRestore: () -> Unit,
+    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
+    val useGlass = backdrop != null && isLiquidGlassPillsActive()
     Surface(
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 8.dp,
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(50),
+        color = if (useGlass) Color.Transparent
+        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = if (useGlass) 0.dp else 8.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .then(
+                if (useGlass) Modifier.liquidGlassCapsule(
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                    backdrop = backdrop
+                ) else Modifier
+            )
     ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .padding(bottom = 8.dp),
+                .padding(bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
