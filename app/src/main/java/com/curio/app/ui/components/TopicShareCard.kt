@@ -654,65 +654,8 @@ private fun CollageCard(
 
             Spacer(Modifier.weight(1f))
 
-            // ── Decorative bottom section ──
-            // Torn edge divider + stamp badge
-            Canvas(Modifier.fillMaxWidth().height(6.dp)) {
-                val w = size.width
-                val torn = Path().apply {
-                    moveTo(0f, 0f)
-                    var x = 0f
-                    while (x <= w) {
-                        val y = 1f + kotlin.math.sin(x * 0.04f + 2.1f).toFloat() * 2f +
-                                kotlin.math.sin(x * 0.12f + 3.7f).toFloat() * 1f
-                        lineTo(x, y)
-                        x += w / 40f
-                    }
-                    lineTo(w, size.height); lineTo(0f, size.height); close()
-                }
-                drawPath(torn, Color.White.copy(alpha = 0.15f))
-                // Edge highlight
-                val edge = Path().apply {
-                    moveTo(0f, 0f)
-                    var x = 0f
-                    while (x <= w) {
-                        val y = kotlin.math.sin(x * 0.04f + 2.1f).toFloat() * 2f +
-                                kotlin.math.sin(x * 0.12f + 3.7f).toFloat() * 1f
-                        lineTo(x, y)
-                        x += w / 40f
-                    }
-                }
-                drawPath(edge, Color.White.copy(alpha = 0.30f), style = Stroke(0.8f))
-            }
-            // Stamp badge + botanical accents
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Canvas(Modifier.width(50.dp).height(1.dp)) {
-                    drawLine(Color.White.copy(alpha = 0.18f), Offset.Zero, Offset(size.width, 0f))
-                }
-                // Center — stamp badge
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = Color.White.copy(alpha = 0.08f)
-                ) {
-                    Row(
-                        Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        CurioIcon(name = categoryGlyph, tint = Color.White.copy(alpha = 0.50f), size = 10.dp)
-                        Text("DISCOVERED", style = TextStyle(
-                            fontFamily = GeomFontFamily, fontSize = 5.5.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 2.sp,
-                            color = Color.White.copy(alpha = 0.45f)
-                        ))
-                    }
-                }
-                // Right — botanical line
-                Canvas(Modifier.width(80.dp).height(2.dp)) {
-                    drawLine(Color.White.copy(alpha = 0.25f), Offset.Zero, Offset(size.width, 0f), strokeWidth = 1.2f)
-                }
-            }
-
-            Spacer(Modifier.height(6.dp))
+            // ── Footer area ──
+            Spacer(Modifier.height(8.dp))
 
             // Footer credit
             Text(
@@ -754,6 +697,15 @@ private fun NeumorphicCard(
         }
 
 
+
+        // Oversized category glyph — signature element of Clean card
+        CurioIcon(
+            name = categoryGlyph,
+            tint = Color.White.copy(alpha = 0.18f),
+            size = 150.dp,
+            modifier = Modifier.align(Alignment.TopEnd).offset(x = 32.dp, y = 18.dp)
+                .graphicsLayer { rotationZ = -10f }
+        )
 
         Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
             Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart)) {
