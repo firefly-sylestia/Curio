@@ -392,7 +392,7 @@ private fun VinylCard(
             // Accent underline
             Spacer(Modifier.height(4.dp))
             Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
-                drawRoundRect(roseDusty, cornerRadius = 1f)
+                drawRoundRect(roseDusty, cornerRadius = CornerRadius(1f))
             }
 
             Spacer(Modifier.height(10.dp))
