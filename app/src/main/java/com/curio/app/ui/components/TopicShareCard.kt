@@ -1064,6 +1064,35 @@ private data class SignatureDesign(
 // Each popular topic gets a completely unique design — colors, textures,
 // decorative elements. keyword match on topic name → unique SignatureDesign.
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════
+// Helper: draw a snowflake with 6-fold symmetry
+private fun DrawScope.drawSnowflake(cx: Float, cy: Float, r: Float, color: Color) {
+    for (arm in 0 until 6) {
+        val angle = Math.toRadians((60.0 * arm)).toFloat()
+        val ex = cx + kotlin.math.cos(angle) * r
+        val ey = cy + kotlin.math.sin(angle) * r
+        drawLine(color, Offset(cx, cy), Offset(ex, ey), strokeWidth = 1.2f)
+        val mx = cx + kotlin.math.cos(angle) * r * 0.55f
+        val my = cy + kotlin.math.sin(angle) * r * 0.55f
+        val ba = angle + 0.5f; val bb = angle - 0.5f
+        drawLine(color, Offset(mx, my), Offset(mx + kotlin.math.cos(ba) * r * 0.25f, my + kotlin.math.sin(ba) * r * 0.25f), strokeWidth = 0.8f)
+        drawLine(color, Offset(mx, my), Offset(mx + kotlin.math.cos(bb) * r * 0.25f, my + kotlin.math.sin(bb) * r * 0.25f), strokeWidth = 0.8f)
+    }
+}
+
+// Helper: draw an 8-point star
+private fun DrawScope.drawStar(cx: Float, cy: Float, outerR: Float, innerR: Float, color: Color) {
+    val path = Path()
+    for (i in 0 until 16) {
+        val angle = Math.toRadians((360.0 * i / 16 - 90.0)).toFloat()
+        val r = if (i % 2 == 0) outerR else innerR
+        val px = cx + kotlin.math.cos(angle) * r
+        val py = cy + kotlin.math.sin(angle) * r
+        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+    }
+    path.close()
+    drawPath(path, color)
+}
+
 // TOPIC-SPECIFIC CUSTOM DESIGNS (50+ popular topics)
 // Category-validated: only triggers when topic matches its category.
 // ══════════════════════════════════════════════════════════════════════════════════════════════════
