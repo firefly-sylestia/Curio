@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -393,50 +394,6 @@ private fun VinylCard(
 
             Spacer(Modifier.height(10.dp))
 
-            // Info panel — compact cream card with 3 rows
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = cream,
-                shadowElevation = 1.dp,
-                modifier = Modifier.widthIn(max = 200.dp)
-            ) {
-                Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Row 1
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CurioIcon(name = "nightlight", tint = roseDusty, size = 14.dp)
-                        Column {
-                            Text("LATE-NIGHT", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 7.5.sp,
-                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = roseDusty))
-                            Text("Themes of reflection & memory", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 8.5.sp, lineHeight = 12.sp,
-                                color = inkDark.copy(alpha = 0.65f)))
-                        }
-                    }
-                    // Row 2
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CurioIcon(name = "headphones", tint = roseDusty, size = 14.dp)
-                        Column {
-                            Text("TRACKS", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 7.5.sp,
-                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = roseDusty))
-                            Text("Curated picks to explore & discover", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 8.5.sp, lineHeight = 12.sp,
-                                color = inkDark.copy(alpha = 0.65f)))
-                        }
-                    }
-                    // Row 3
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CurioIcon(name = "workspace_premium", tint = roseDusty, size = 14.dp)
-                        Column {
-                            Text("RECOGNITION", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 7.5.sp,
-                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = roseDusty))
-                            Text("Explore via Curio", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 8.5.sp, lineHeight = 12.sp,
-                                color = inkDark.copy(alpha = 0.65f)))
-                        }
-                    }
-                }
-            }
-
             Spacer(Modifier.weight(1f))
 
             // Footer — centered, subtle
@@ -453,6 +410,53 @@ private fun VinylCard(
                         fontWeight = FontWeight.SemiBold, color = roseDusty.copy(alpha = 0.65f)),
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+
+        // ── Instrument panel — bottom-left ──
+        Surface(
+            shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 0.dp, bottomEnd = 6.dp),
+            color = inkDark,
+            shadowElevation = 3.dp,
+            modifier = Modifier.align(Alignment.BottomStart)
+        ) {
+            Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                // Row 1 — nightlight + label
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(roseDusty))
+                    CurioIcon(name = "nightlight", tint = roseDusty, size = 13.dp)
+                    Column {
+                        Text("LATE-NIGHT", style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp, color = roseDusty))
+                        Text("Themes of reflection & memory", style = TextStyle(
+                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 11.sp,
+                            color = Color.White.copy(alpha = 0.55f)))
+                    }
+                }
+                // Row 2 — headphones + label
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(roseDusty))
+                    CurioIcon(name = "headphones", tint = roseDusty, size = 13.dp)
+                    Column {
+                        Text("TRACKS", style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp, color = roseDusty))
+                        Text("Curated picks to explore & discover", style = TextStyle(
+                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 11.sp,
+                            color = Color.White.copy(alpha = 0.55f)))
+                    }
+                }
+                // Row 3 — award + label
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(roseDusty))
+                    CurioIcon(name = "workspace_premium", tint = roseDusty, size = 13.dp)
+                    Column {
+                        Text("RECOGNITION", style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp, color = roseDusty))
+                        Text("Explore via Curio", style = TextStyle(
+                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 11.sp,
+                            color = Color.White.copy(alpha = 0.55f)))
+                    }
+                }
             }
         }
     }
@@ -483,17 +487,9 @@ private fun CollageCard(
             val tearY = h * 0.44f
             // Sage bottom
             drawRect(bottomSage, Offset(0f, tearY), Size(w, h - tearY))
+            // More visible tear line — thicker + brighter
             drawTornLine(tearY, w, topCream, tornEdge)
-
-            // Observatory silhouette — right side, emerging from tear
-            val obsX = w * 0.72f; val obsY = tearY - 8f
-            // Dome
-            drawArc(bottomDark.copy(alpha = 0.35f), 180f, 180f, true,
-                Offset(obsX - 18f, obsY - 20f), Size(36f, 28f))
-            // Building body
-            drawRect(bottomDark.copy(alpha = 0.30f), Offset(obsX - 14f, obsY - 2f), Size(28f, 22f))
-            // Pillar
-            drawRect(bottomDark.copy(alpha = 0.25f), Offset(obsX - 3f, obsY + 18f), Size(6f, 14f))
+            drawTornLine(tearY + 1.5f, w, topCream, tornEdge.copy(alpha = 0.7f))
 
             // Curved dark green footer base
             val footerY = h * 0.88f
@@ -508,48 +504,6 @@ private fun CollageCard(
                 },
                 bottomDark
             )
-        }
-
-        // ── Decorative elements ──
-        Canvas(Modifier.fillMaxSize().zIndex(0f)) {
-            val w = size.width; val h = size.height
-            // 4-point stars — top-left
-            val starX = w * 0.06f; val starY = h * 0.05f
-            drawLine(inkDark.copy(alpha = 0.25f), Offset(starX, starY - 6f), Offset(starX, starY + 6f), strokeWidth = 1.2f)
-            drawLine(inkDark.copy(alpha = 0.25f), Offset(starX - 6f, starY), Offset(starX + 6f, starY), strokeWidth = 1.2f)
-            // Second star
-            val s2x = w * 0.10f; val s2y = h * 0.03f
-            drawLine(inkDark.copy(alpha = 0.18f), Offset(s2x, s2y - 5f), Offset(s2x, s2y + 5f), strokeWidth = 1f)
-            drawLine(inkDark.copy(alpha = 0.18f), Offset(s2x - 5f, s2y), Offset(s2x + 5f, s2y), strokeWidth = 1f)
-            // 4-point star near category pill
-            val s3x = w * 0.82f; val s3y = h * 0.48f
-            drawLine(bottomDark.copy(alpha = 0.20f), Offset(s3x, s3y - 5f), Offset(s3x, s3y + 5f), strokeWidth = 1f)
-            drawLine(bottomDark.copy(alpha = 0.20f), Offset(s3x - 5f, s3y), Offset(s3x + 5f, s3y), strokeWidth = 1f)
-
-            // Dot grid pattern — right of category pill
-            for (row in 0..3) for (col in 0..3) {
-                drawCircle(bottomDark.copy(alpha = 0.12f), 1.2f,
-                    Offset(w * 0.82f + col * 5f, h * 0.50f + row * 5f))
-            }
-
-            // Concentric circles — top-right (polaroid area)
-            val ccx = w * 0.88f; val ccy = h * 0.22f
-            for (r in listOf(24f, 18f, 12f, 7f)) {
-                drawCircle(inkDark.copy(alpha = 0.05f), r, Offset(ccx, ccy), style = Stroke(0.6f))
-            }
-            drawCircle(inkDark.copy(alpha = 0.08f), 2.5f, Offset(ccx, ccy))
-
-            // Spiral galaxy — bottom-right footer area
-            val gx = w * 0.82f; val gy = h * 0.92f
-            for (angle in 0..360 step 15) {
-                val rad = Math.toRadians(angle.toDouble())
-                val spiralR = 4f + angle * 0.06f
-                val px = gx + (spiralR * Math.cos(rad)).toFloat()
-                val py = gy + (spiralR * Math.sin(rad)).toFloat()
-                drawCircle(Color.White.copy(alpha = 0.15f + (angle / 720f)), 0.8f, Offset(px, py))
-            }
-            // Galaxy center glow
-            drawCircle(Color.White.copy(alpha = 0.25f), 3f, Offset(gx, gy))
         }
 
         // Watermark
@@ -634,31 +588,21 @@ private fun CollageCard(
             }
         }
 
-        // ── BOTTOM SECTION: category pill + body text + footer ──
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, bottom = 16.dp).zIndex(1f),
-            verticalArrangement = Arrangement.Bottom) {
-            // Category pill + 4-point star + dot grid
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Surface(shape = RoundedCornerShape(14.dp), color = sagePill) {
-                    Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
-                        Text(categoryName, style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp), color = Color.White)
-                    }
-                }
-                Spacer(Modifier.width(10.dp))
-                // 4-point star accent
-                Canvas(Modifier.size(12.dp)) {
-                    val cx = size.width / 2f; val cy = size.height / 2f
-                    drawLine(Color.White.copy(alpha = 0.40f), Offset(cx, cy - 5f), Offset(cx, cy + 5f), strokeWidth = 1f)
-                    drawLine(Color.White.copy(alpha = 0.40f), Offset(cx - 5f, cy), Offset(cx + 5f, cy), strokeWidth = 1f)
+        // ── MIDDLE SECTION: category pill + body text + footer ──
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 240.dp).zIndex(1f)) {
+            // Category pill
+            Surface(shape = RoundedCornerShape(14.dp), color = sagePill) {
+                Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
+                    Text(categoryName, style = TextStyle(
+                        fontFamily = LoraFontFamily, fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp), color = Color.White)
                 }
             }
 
             Spacer(Modifier.height(10.dp))
 
-            // Body text — serif, starts from middle, generous line height
+            // Body text — serif, generous line height
             val bodySize = when {
                 factText.length > 280 -> 10.sp; factText.length > 180 -> 11.sp; else -> 12.sp
             }
@@ -707,75 +651,31 @@ private fun NeumorphicCard(
     val cream = Color(0xFFF5F8F5)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
-        // ── Hero: celestial moon circle ──
+        // ── Background moon circle — dynamic per category ──
         val heroSize = 200.dp
-        Box(Modifier.align(Alignment.TopCenter).padding(top = 50.dp).size(heroSize)) {
-            // Outer orbital rings
-            Canvas(Modifier.size(280.dp).offset((-40).dp, (-40).dp)) {
-                // Ring 1 — outermost
-                drawCircle(sageMid.copy(alpha = 0.25f), radius = size.minDimension / 2f,
-                    style = Stroke(0.8.dp.toPx()))
-                // Ring 2 — mid
-                drawCircle(sageMid.copy(alpha = 0.18f), radius = size.minDimension / 2f * 0.88f,
-                    style = Stroke(0.6.dp.toPx()))
-                // Ring 3 — inner
-                drawCircle(sageMid.copy(alpha = 0.12f), radius = size.minDimension / 2f * 0.76f,
-                    style = Stroke(0.5.dp.toPx()))
-                // Small orbital dot
-                drawCircle(sageDark.copy(alpha = 0.35f), 4f,
-                    Offset(size.width * 0.92f, size.height * 0.30f))
-                drawCircle(sageDark.copy(alpha = 0.25f), 3f,
-                    Offset(size.width * 0.08f, size.height * 0.65f))
-            }
-            // Main moon circle — dark interior
+        val accentCol = palette.accent
+        Box(Modifier.align(Alignment.TopCenter).padding(top = 50.dp).size(heroSize).zIndex(0f)) {
             Canvas(Modifier.fillMaxSize()) {
                 val r = size.minDimension / 2f
                 val cx = size.width / 2f; val cy = size.height / 2f
-                // Drop shadow
-                drawCircle(Color.Black.copy(alpha = 0.10f), r + 4f, Offset(cx + 1f, cy + 2f))
-                // Dark night sky
-                drawCircle(inkDark, r, Offset(cx, cy))
-                // Crescent highlight — lighter sage arc
-                drawCircle(sageLight.copy(alpha = 0.18f), r * 0.88f, Offset(cx - r * 0.20f, cy - r * 0.15f))
+                // Soft glow behind
+                drawCircle(accentCol.copy(alpha = 0.12f), r + 16f, Offset(cx, cy))
+                // Main circle — category accent dark
+                drawCircle(accentCol.copy(alpha = 0.35f), r, Offset(cx, cy))
+                // Inner highlight
+                drawCircle(accentCol.copy(alpha = 0.15f), r * 0.82f, Offset(cx - r * 0.15f, cy - r * 0.12f))
                 // Subtle star dots inside
-                drawCircle(Color.White.copy(alpha = 0.50f), 1.5f, Offset(cx - r * 0.3f, cy - r * 0.4f))
-                drawCircle(Color.White.copy(alpha = 0.40f), 1f, Offset(cx + r * 0.2f, cy - r * 0.25f))
-                drawCircle(Color.White.copy(alpha = 0.35f), 1.2f, Offset(cx + r * 0.35f, cy + r * 0.1f))
-                drawCircle(Color.White.copy(alpha = 0.45f), 1.3f, Offset(cx - r * 0.1f, cy + r * 0.3f))
-                // Shooting star line
-                drawLine(Color.White.copy(alpha = 0.25f),
-                    Offset(cx + r * 0.1f, cy - r * 0.6f),
-                    Offset(cx + r * 0.5f, cy - r * 0.2f), strokeWidth = 0.8f)
-            }
-        }
-
-        // ── Decorative elements ──
-        Canvas(Modifier.fillMaxSize().zIndex(0f)) {
-            val w = size.width; val h = size.height
-            // 4-point star top-left
-            drawLine(sageDark.copy(alpha = 0.30f), Offset(w * 0.42f, h * 0.04f), Offset(w * 0.42f, h * 0.04f + 12f), strokeWidth = 1.2f)
-            drawLine(sageDark.copy(alpha = 0.30f), Offset(w * 0.42f - 6f, h * 0.04f + 6f), Offset(w * 0.42f + 6f, h * 0.04f + 6f), strokeWidth = 1.2f)
-            // 4-point star right
-            drawLine(sageDark.copy(alpha = 0.22f), Offset(w * 0.88f, h * 0.14f), Offset(w * 0.88f, h * 0.14f + 10f), strokeWidth = 1f)
-            drawLine(sageDark.copy(alpha = 0.22f), Offset(w * 0.88f - 5f, h * 0.14f + 5f), Offset(w * 0.88f + 5f, h * 0.14f + 5f), strokeWidth = 1f)
-            // Small dots
-            drawCircle(sageDark.copy(alpha = 0.15f), 2f, Offset(w * 0.20f, h * 0.38f))
-            drawCircle(sageDark.copy(alpha = 0.12f), 1.5f, Offset(w * 0.75f, h * 0.42f))
-            drawCircle(sageDark.copy(alpha = 0.10f), 1.8f, Offset(w * 0.10f, h * 0.55f))
-            // Pale circle bottom-left
-            drawCircle(sageLight.copy(alpha = 0.25f), 50f, Offset(w * 0.12f, h * 0.78f))
-            drawCircle(sageMid.copy(alpha = 0.10f), 46f, Offset(w * 0.12f, h * 0.78f), style = Stroke(0.8.dp.toPx()))
-            // Dot trail — bottom-left
-            for (i in 0..4) {
-                drawCircle(sageDark.copy(alpha = 0.08f + i * 0.02f), 1.5f,
-                    Offset(w * 0.08f + i * 10f, h * 0.85f + i * 4f))
+                drawCircle(Color.White.copy(alpha = 0.45f), 1.5f, Offset(cx - r * 0.3f, cy - r * 0.4f))
+                drawCircle(Color.White.copy(alpha = 0.35f), 1f, Offset(cx + r * 0.25f, cy - r * 0.2f))
+                drawCircle(Color.White.copy(alpha = 0.30f), 1.2f, Offset(cx + r * 0.3f, cy + r * 0.15f))
+                drawCircle(Color.White.copy(alpha = 0.40f), 1.3f, Offset(cx - r * 0.1f, cy + r * 0.35f))
             }
         }
 
         // Watermark glyphs
         Watermark(family, categoryGlyph, sageDark.copy(alpha = 0.04f), display.hashCode())
 
-        // ── Content ──
+        // ── Content — overlays the moon ──
         Column(modifier = Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 14.dp).zIndex(1f)) {
             // Category pill — top-left
             Surface(shape = RoundedCornerShape(12.dp), color = Color.White.copy(alpha = 0.60f), shadowElevation = 0.5.dp) {
@@ -785,8 +685,6 @@ private fun NeumorphicCard(
                         fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp), color = inkDark)
                 }
             }
-
-            Spacer(Modifier.height(220.dp)) // space for hero circle
 
             if (quoteText != null) {
                 // ── Quote mode ──
