@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -82,9 +83,6 @@ import com.curio.app.ui.theme.PatrickHandFontFamily
 import kotlin.math.sin
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 
 // ─── Style enum ────────────────────────────────────────────────────────
@@ -1808,8 +1806,8 @@ fun TopicShareSheet(
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
                     }); onDismiss()
                 }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(50.dp)) {
-                    Icon(imageVector = androidx.compose.material.icons.Icons.Default.Download, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
-                    Spacer(Modifier.width(6.dp))
+                    Text("\u2B07", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.width(4.dp))
                     Text("Save", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                 }
                 // Share button
