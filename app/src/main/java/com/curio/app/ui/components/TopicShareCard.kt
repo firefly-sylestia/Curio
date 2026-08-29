@@ -157,21 +157,25 @@ private fun paletteFor(accent: Color): ShareCardPalette {
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
-fun availableStylesForFamily(family: CategoryFamily): List<ShareCardStyle> = when (family) {
-    CategoryFamily.MUSIC -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.VINYL, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.MOVIES -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.BOOKS -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.VISUAL_ART -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.SCIENCE -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.ANIME_COMICS -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.GAMES -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.MYTHOLOGY -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.SPORTS -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.FOOD -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.INTERNET -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
-    CategoryFamily.WILDCARD -> listOf(ShareCardStyle.CUSTOM, ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+fun availableStylesForFamily(family: CategoryFamily, topicName: String = ""): List<ShareCardStyle> {
+    val hasCustom = topicVariant(topicName, family) != null
+    val custom = if (hasCustom) listOf(ShareCardStyle.CUSTOM) else emptyList()
+    return custom + when (family) {
+    CategoryFamily.MUSIC -> listOf(ShareCardStyle.PAPER, ShareCardStyle.VINYL, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.MOVIES -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.BOOKS -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.VISUAL_ART -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.SCIENCE -> listOf(ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.ANIME_COMICS -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.GAMES -> listOf(ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.MYTHOLOGY -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.SPORTS -> listOf(ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.FOOD -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.INTERNET -> listOf(ShareCardStyle.PAPER, ShareCardStyle.NEUMORPHIC, ShareCardStyle.COLLAGE, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
+    CategoryFamily.WILDCARD -> listOf(ShareCardStyle.PAPER, ShareCardStyle.COLLAGE, ShareCardStyle.NEUMORPHIC, ShareCardStyle.EDITORIAL, ShareCardStyle.MINIMAL, ShareCardStyle.SIGNATURE)
 }
 
+}
 const val QUICK_FACT_ID = "quick_fact"
 const val CUSTOM_FACT_ID = "custom_fact"
 const val NO_FACT_ID = "no_fact"
@@ -1507,14 +1511,14 @@ private fun topicVariant(topicName: String, family: CategoryFamily): SignatureDe
             val lbx = w * 0.22f; val lby = h * 0.22f; val lbr = w * 0.065f
             drawCircle(Color(0xFFBCEFFF).copy(alpha = 0.21f), lbr, Offset(lbx, lby))
             drawCircle(Color.White.copy(alpha = 0.14f), lbr * 0.95f, Offset(lbx, lby), style = Stroke(1.5f))
-            drawEllipse(Color.White.copy(alpha = 0.35f), Offset(lbx - lbr * 0.25f, lby - lbr * 0.2f), Size(lbr * 0.35f, lbr * 0.20f))
+            drawOval(Color.White.copy(alpha = 0.35f), Offset(lbx - lbr * 0.25f, lby - lbr * 0.2f), Size(lbr * 0.35f, lbr * 0.20f))
             drawCircle(Color.White.copy(alpha = 0.14f), lbr * 0.15f, Offset(lbx + lbr * 0.2f, lby + lbr * 0.25f))
 
             // Medium bubble
             val mbx = w * 0.72f; val mby = h * 0.18f; val mbr = w * 0.038f
             drawCircle(Color(0xFFBCEFFF).copy(alpha = 0.21f), mbr, Offset(mbx, mby))
             drawCircle(Color.White.copy(alpha = 0.14f), mbr * 0.95f, Offset(mbx, mby), style = Stroke(1.2f))
-            drawEllipse(Color.White.copy(alpha = 0.35f), Offset(mbx - mbr * 0.25f, mby - mbr * 0.2f), Size(mbr * 0.35f, mbr * 0.18f))
+            drawOval(Color.White.copy(alpha = 0.35f), Offset(mbx - mbr * 0.25f, mby - mbr * 0.2f), Size(mbr * 0.35f, mbr * 0.18f))
 
             // Small bubbles cluster
             val sbubbles = listOf(
