@@ -447,6 +447,27 @@ object TopicJsonLoader {
         }
     }
 
+    /**
+     * v294 — Pre-warm counts from Room so TopicJsonLoader doesn't need to
+     * re-parse JSON files on every process restart. Called from
+     * TopicRepository.init() after confirming Room has data.
+     */
+    fun warmCountsFromRoom(counts: Map<CategoryId, Int>) {
+        counts.forEach { (id, count) -> countsCache[id] = count }
+        canonicalTopicCount = counts.values.sum()
+    }
+
+    /**
+     * v294 — Pre-warm the topic cache from Room so cached() returns data
+     * immediately after a process restart. Called from TopicRepository.init()
+     * after confirming Room has data.
+     */
+    fun warmCacheFromRoom(categoryId: CategoryId, topics: List<CurioTopic>) {
+        if (topics.isNotEmpty()) {
+            synchronized(cacheWriteLock) { cache[categoryId] = topics }
+        }
+    }
+
     // ── Internal ───────────────────────────────────────────────────────────
 
     /**

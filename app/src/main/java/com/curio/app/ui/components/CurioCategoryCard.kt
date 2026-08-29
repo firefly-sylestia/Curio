@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategory
-import com.curio.app.data.TopicJsonLoader
 import com.curio.app.ui.theme.CurioGradients
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioMotion
@@ -46,9 +45,8 @@ import com.curio.app.ui.theme.themedAccent
 
 /**
  * Compact category card shared by the standalone category picker and the
- * Spin page picker sheet — category name, live topic count, a subtle ghost
- * watermark of the category glyph on the right edge, and an optional
- * selected state. One component so the two pickers can never drift apart
+ * Spin page picker sheet — category name, a subtle ghost watermark of the
+ * category glyph on the right edge, and an optional selected state. One component so the two pickers can never drift apart
  * visually.
  *
  * Interaction contract (both pickers agree on this):
@@ -121,11 +119,6 @@ fun CurioCategoryCard(
     // already wears the full solid-accent gradient, so it never needs to
     // raise (the old 8/3 raise was the blurry-shadow bug class).
     val cardElevation = 2.dp
-    // Live topic count — reads the warm cache synchronously. The catalog
-    // is warmed during splash, so cached() always has data by the time the
-    // picker opens. This avoids launching a coroutine per card (36+ cards
-    // each spinning up produceState was the main lag source in the picker).
-    val topicCount = TopicJsonLoader.cached(category.id)?.size ?: 0
 
     Surface(
         shape = RoundedCornerShape(22.dp),
@@ -232,17 +225,15 @@ fun CurioCategoryCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = when {
-                            comingSoon -> "Coming soon"
-                            isWildcard -> "Surprise mix"
-                            else -> "$topicCount topics"
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isSelected) selectedInk.copy(alpha = 0.85f)
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (comingSoon) 0.8f else 1f),
-                        maxLines = 1
-                    )
+                    if (comingSoon || isWildcard) {
+                        Text(
+                            text = if (comingSoon) "Coming soon" else "Surprise mix",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (isSelected) selectedInk.copy(alpha = 0.85f)
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (comingSoon) 0.8f else 1f),
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }

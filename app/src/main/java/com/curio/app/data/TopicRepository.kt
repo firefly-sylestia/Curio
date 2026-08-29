@@ -63,9 +63,45 @@ object TopicRepository {
             val importedCount = dao.getTotalCount()
             if (importedCount > 0) {
                 initialized = true
+                // v294 — Pre-warm TopicJsonLoader caches from Room so
+                // counts and topic data are available immediately on
+                // restart (the in-memory caches are empty after process
+                // death). This prevents the flash of "0 topics" and
+                // avoids re-parsing JSON files.
+                warmLoaderFromRoom(dao)
             } else {
                 Log.e("TopicRepository", "Topic import completed with zero rows; will retry next launch")
             }
+        }
+    }
+
+    /**
+     * v294 — Pre-warm TopicJsonLoader's in-memory caches from Room data.
+     * Called after init() confirms Room has topics. This prevents the
+     * loader from re-parsing JSON files on every process restart.
+     */
+    private suspend fun warmLoaderFromRoom(dao: TopicDao) = withContext(Dispatchers.IO) {
+        try {
+            // Warm the per-category counts cache.
+            val counts = mutableMapOf<CategoryId, Int>()
+            for (cat in CategoryId.values()) {
+                if (cat == CategoryId.WILDCARD) continue
+                val catCount = dao.getCount(cat.name)
+                if (catCount > 0) {
+                    counts[cat] = catCount
+                }
+            }
+            TopicJsonLoader.warmCountsFromRoom(counts)
+            // Warm the full topic cache per category.
+            for (cat in CategoryId.values()) {
+                if (cat == CategoryId.WILDCARD) continue
+                try {
+                    val topics = dao.getByCategory(cat.name).map { it.toCurioTopic() }
+                    TopicJsonLoader.warmCacheFromRoom(cat, topics)
+                } catch (_: Exception) { }
+            }
+        } catch (e: Exception) {
+            Log.w("TopicRepository", "Failed to warm loader from Room: ${e.message}")
         }
     }
 
