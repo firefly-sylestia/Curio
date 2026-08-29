@@ -1274,8 +1274,6 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                     }
                 }
                 for (i in 0 until 50) { drawLine(Color(0xFF00FF88).copy(alpha = 0.025f), Offset(0f, i * h / 50f), Offset(w, i * h / 50f)) }
-                // Neon glow bottom-right
-                drawCircle(Color(0xFF00FF88).copy(alpha = 0.06f), w * 0.3f, Offset(w * 0.85f, h * 0.9f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF00CC66), badgeInk = Color(0xFF080812),
             badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
