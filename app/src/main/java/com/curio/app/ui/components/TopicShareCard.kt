@@ -753,8 +753,7 @@ private fun NeumorphicCard(
             drawCircle(Color.Black.copy(alpha = 0.20f), w * 0.74f, Offset(w * 0.95f, h * 0.72f))
         }
 
-        // Watermark glyphs (no oversized icon — keep it clean)
-        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.10f), display.hashCode())
+
 
         Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
             Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart)) {
