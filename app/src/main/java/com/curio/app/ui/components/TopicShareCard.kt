@@ -817,7 +817,7 @@ private fun NeumorphicCard(
                                 fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                                 fontSize = 13.sp, lineHeight = 18.sp, color = inkDark
                             ), maxLines = 4, overflow = TextOverflow.Ellipsis)
-                            if (quoteAuthor.isNotBlank()) {
+                            if (!quoteAuthor.isNullOrBlank()) {
                                 Spacer(Modifier.height(6.dp))
                                 Text("— ${quoteAuthor.uppercase()}", style = TextStyle(
                                     fontFamily = LoraFontFamily, fontSize = 8.sp,
