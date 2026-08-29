@@ -388,14 +388,20 @@ private fun VinylCard(
 
             Spacer(Modifier.height(10.dp))
 
-            // Body text — Lora serif, constrained width for left column, border instead of shadow
+            // Body text — Lora serif, with semi-transparent cream background for readability over vinyl
             val bodySize = when {
                 factText.length > 280 -> 9.sp; factText.length > 180 -> 10.sp; else -> 10.5.sp
             }
-            Text(factText, style = TextStyle(
-                fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.82f)
-            ), modifier = Modifier.widthIn(max = 220.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
+            Surface(
+                shape = RoundedCornerShape(4.dp),
+                color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
+                modifier = Modifier.widthIn(max = 220.dp)
+            ) {
+                Text(factText, style = TextStyle(
+                    fontFamily = LoraFontFamily, fontSize = bodySize,
+                    lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.88f)
+                ), modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
+            }
 
             Spacer(Modifier.height(10.dp))
 
@@ -418,12 +424,12 @@ private fun VinylCard(
             }
         }
 
-        // ── Info copy — bottom-left, no enclosing box, border not shadow ──
+        // ── Info copy — bottom-left, avoids vinyl record area ──
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 20.dp, bottom = 32.dp)
-                .widthIn(max = 212.dp),
+                .padding(start = 16.dp, bottom = 24.dp)
+                .widthIn(max = 190.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             listOf(
@@ -633,11 +639,38 @@ private fun CollageCard(
             Spacer(Modifier.weight(1f))
 
             // ── Decorative bottom section ──
-            // Stamp badge + vine/botanical accent line
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                // Left — botanical line
-                Canvas(Modifier.width(80.dp).height(2.dp)) {
-                    drawLine(Color.White.copy(alpha = 0.25f), Offset.Zero, Offset(size.width, 0f), strokeWidth = 1.2f)
+            // Torn edge divider + stamp badge
+            Canvas(Modifier.fillMaxWidth().height(6.dp)) {
+                val w = size.width
+                val torn = Path().apply {
+                    moveTo(0f, 0f)
+                    var x = 0f
+                    while (x <= w) {
+                        val y = 1f + kotlin.math.sin(x * 0.04f + 2.1f).toFloat() * 2f +
+                                kotlin.math.sin(x * 0.12f + 3.7f).toFloat() * 1f
+                        lineTo(x, y)
+                        x += w / 40f
+                    }
+                    lineTo(w, size.height); lineTo(0f, size.height); close()
+                }
+                drawPath(torn, Color.White.copy(alpha = 0.15f))
+                // Edge highlight
+                val edge = Path().apply {
+                    moveTo(0f, 0f)
+                    var x = 0f
+                    while (x <= w) {
+                        val y = kotlin.math.sin(x * 0.04f + 2.1f).toFloat() * 2f +
+                                kotlin.math.sin(x * 0.12f + 3.7f).toFloat() * 1f
+                        lineTo(x, y)
+                        x += w / 40f
+                    }
+                }
+                drawPath(edge, Color.White.copy(alpha = 0.30f), style = Stroke(0.8f))
+            }
+            // Stamp badge + botanical accents
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Canvas(Modifier.width(50.dp).height(1.dp)) {
+                    drawLine(Color.White.copy(alpha = 0.18f), Offset.Zero, Offset(size.width, 0f))
                 }
                 // Center — stamp badge
                 Surface(
@@ -702,21 +735,6 @@ private fun NeumorphicCard(
             drawCircle(Color.White.copy(alpha = 0.10f), w * 0.72f, Offset(w * 0.12f, h * 0.12f))
             // Depth shadow bottom-right
             drawCircle(Color.Black.copy(alpha = 0.20f), w * 0.74f, Offset(w * 0.95f, h * 0.72f))
-            // Subtle glass card backdrop — single rounded rect with accent tint
-            drawRoundRect(
-                Brush.verticalGradient(listOf(categoryGlow.copy(alpha = 0.12f), Color.Transparent)),
-                topLeft = Offset(w * 0.10f, h * 0.20f),
-                size = Size(w * 0.74f, h * 0.38f),
-                cornerRadius = CornerRadius(28f, 28f)
-            )
-            // Thin border for the glass card
-            drawRoundRect(
-                Color.White.copy(alpha = 0.10f),
-                topLeft = Offset(w * 0.10f, h * 0.20f),
-                size = Size(w * 0.74f, h * 0.38f),
-                cornerRadius = CornerRadius(28f, 28f),
-                style = Stroke(0.8f)
-            )
         }
 
         // Oversized category-family glyphs make Clean unique per lane instead of a generic background.
@@ -736,11 +754,11 @@ private fun NeumorphicCard(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
             }
 
-            Column(Modifier.align(Alignment.CenterStart).padding(start = 4.dp, end = 4.dp, top = 8.dp), horizontalAlignment = Alignment.Start) {
+            Column(Modifier.align(Alignment.CenterStart).padding(start = 4.dp, end = 4.dp, top = 0.dp), horizontalAlignment = Alignment.Start) {
                 Text(display, style = TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = 31.sp, lineHeight = 33.sp,
                     fontWeight = FontWeight.Normal, color = Color.White
-                ), maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.84f))
+                ), maxLines = 5, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.90f))
                 val metaParts = mutableListOf<String>()
                 if (byline.isNotBlank()) metaParts.add(byline.uppercase())
                 if (year != null) metaParts.add(year)
@@ -754,7 +772,7 @@ private fun NeumorphicCard(
             }
 
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
-                val bodySize = when { body.length > 280 -> 9.sp; body.length > 180 -> 10.sp; else -> 11.sp }
+                val bodySize = when { body.length > 350 -> 8.sp; body.length > 260 -> 9.sp; body.length > 180 -> 9.5.sp; else -> 10.5.sp }
                 Text(body, style = TextStyle(
                     fontFamily = LoraFontFamily,
                     fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal,
@@ -1074,10 +1092,59 @@ fun TopicShareSheet(
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Share this topic", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
 
-            // Card preview
+            // The card carousel IS the preview — no separate static card
             val pw = 280.dp
-            Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (styles.size > 1) {
+                    // Style label
+                    Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // Swipeable card carousel — the card IS the preview
+                    val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx) { styles.size }
+                    androidx.compose.runtime.LaunchedEffect(pagerState.currentPage) { styleIdx = pagerState.currentPage }
+                    androidx.compose.foundation.pager.HorizontalPager(
+                        state = pagerState,
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 36.dp),
+                        pageSpacing = 16.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { page ->
+                        val isCenter = page == pagerState.currentPage
+                        Box(
+                            modifier = Modifier
+                                .width(pw)
+                                .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+                                .shadow(if (isCenter) 4.dp else 1.dp, RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(6.dp))
+                                .graphicsLayer {
+                                    val pageOffset = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction)
+                                    val scale = 1f - 0.08f * kotlin.math.abs(pageOffset)
+                                    scaleX = scale; scaleY = scale
+                                    alpha = 1f - 0.25f * kotlin.math.abs(pageOffset)
+                                }
+                        ) {
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+                        }
+                    }
+                    // Style dots
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        styles.forEachIndexed { i, _ ->
+                            Box(Modifier.size(if (i == pagerState.currentPage) 7.dp else 5.dp).background(
+                                if (i == pagerState.currentPage) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), CircleShape
+                            ))
+                        }
+                    }
+                } else {
+                    // Single style — just show the card directly
+                    Box(
+                        modifier = Modifier
+                            .width(pw)
+                            .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+                            .shadow(4.dp, RoundedCornerShape(6.dp))
+                            .clip(RoundedCornerShape(6.dp))
+                    ) {
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+                    }
+                }
             }
 
             // Photo picker for Collage — compact row below card
@@ -1101,46 +1168,6 @@ fun TopicShareSheet(
                         textStyle = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.weight(1f).height(34.dp)
                     )
-                }
-            }
-
-            // Style carousel — full-size cards side by side, active centered
-            if (styles.size > 1) {
-                val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx) { styles.size }
-                androidx.compose.runtime.LaunchedEffect(pagerState.currentPage) { styleIdx = pagerState.currentPage }
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    androidx.compose.foundation.pager.HorizontalPager(
-                        state = pagerState,
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 48.dp),
-                        pageSpacing = 12.dp,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { page ->
-                        val isCenter = page == pagerState.currentPage
-                        Box(
-                            modifier = Modifier
-                                .width(pw)
-                                .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-                                .shadow(if (isCenter) 4.dp else 1.dp, RoundedCornerShape(6.dp))
-                                .clip(RoundedCornerShape(6.dp))
-                                .graphicsLayer {
-                                    val pageOffset = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction)
-                                    val scale = 1f - 0.10f * kotlin.math.abs(pageOffset)
-                                    scaleX = scale; scaleY = scale
-                                    alpha = 1f - 0.3f * kotlin.math.abs(pageOffset)
-                                }
-                        ) {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
-                        }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        styles.forEachIndexed { i, _ ->
-                            Box(Modifier.size(if (i == pagerState.currentPage) 7.dp else 5.dp).background(
-                                if (i == pagerState.currentPage) MaterialTheme.colorScheme.secondary
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), CircleShape
-                            ))
-                        }
-                    }
                 }
             }
 
@@ -1187,15 +1214,13 @@ fun ShareHubBody(
 ) {
     val pw = 280.dp
     val isQ = activeSource.id == "quote"
-    Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
-    }
     val styles = availableStylesForFamily(categoryFamily)
-    if (styles.size > 1) {
-        val si = style.ordinal.coerceIn(0, styles.lastIndex)
-        val hubPagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = si) { styles.size }
-        androidx.compose.runtime.LaunchedEffect(hubPagerState.currentPage) { onStyleChange(hubPagerState.currentPage) }
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (styles.size > 1) {
+            // Multi-style: carousel IS the preview
+            val si = style.ordinal.coerceIn(0, styles.lastIndex)
+            val hubPagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = si) { styles.size }
+            androidx.compose.runtime.LaunchedEffect(hubPagerState.currentPage) { onStyleChange(hubPagerState.currentPage) }
             Text(style.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             androidx.compose.foundation.pager.HorizontalPager(
                 state = hubPagerState,
@@ -1228,25 +1253,36 @@ fun ShareHubBody(
                     ))
                 }
             }
+        } else {
+            // Single style: just show the card directly
+            Box(
+                modifier = Modifier
+                    .width(pw)
+                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+                    .shadow(4.dp, RoundedCornerShape(6.dp))
+                    .clip(RoundedCornerShape(6.dp))
+            ) {
+                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
+            }
         }
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Pill(ShareCardAspect.PORTRAIT.label, CurioIcons.Image, aspect == ShareCardAspect.PORTRAIT) { onAspectChange(ShareCardAspect.PORTRAIT) }
-        Pill(ShareCardAspect.CLASSIC.label, CurioIcons.Image, aspect == ShareCardAspect.CLASSIC) { onAspectChange(ShareCardAspect.CLASSIC) }
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        sources.filter { !isQ || it.id != QUICK_FACT_ID }.forEach { opt ->
-            Pill(opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "★".repeat(it) } ?: ""), CurioIcons.FormatText, opt.id == activeSource.id) { onSelectSource(opt.id) }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Pill(ShareCardAspect.PORTRAIT.label, CurioIcons.Image, aspect == ShareCardAspect.PORTRAIT) { onAspectChange(ShareCardAspect.PORTRAIT) }
+            Pill(ShareCardAspect.CLASSIC.label, CurioIcons.Image, aspect == ShareCardAspect.CLASSIC) { onAspectChange(ShareCardAspect.CLASSIC) }
         }
-    }
-    if (customEditing) OutlinedTextField(customText, onCustomTextChange, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
-    val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
-    Button(onClick = {
-        shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
-        }); onShared()
-    }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
-        Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            sources.filter { !isQ || it.id != QUICK_FACT_ID }.forEach { opt ->
+                Pill(opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "★".repeat(it) } ?: ""), CurioIcons.FormatText, opt.id == activeSource.id) { onSelectSource(opt.id) }
+            }
+        }
+        if (customEditing) OutlinedTextField(customText, onCustomTextChange, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
+        val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
+        Button(onClick = {
+            shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
+            }); onShared()
+        }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
+            Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+        }
     }
 }
 
