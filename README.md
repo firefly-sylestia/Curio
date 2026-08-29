@@ -2,7 +2,7 @@
 
 > **Explore something. Notice more. Keep the discovery.**
 
-A curated discovery app for curious people. Spin a roulette deck of 5,838 hand-written topics across 11 lanes (500+ in every lane), then capture what you notice in a beautiful, personal offline library. No accounts. No feed. No ads. Just you, a topic, and the world.
+A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 categories, then capture what you notice in a beautiful, personal offline library. Share your discoveries as stunning, topic-specific cards. No accounts. No feed. No ads. Just you, a topic, and the world.
 
 ---
 
@@ -17,7 +17,7 @@ Built with **Kotlin + Jetpack Compose** on Android 8.0+.
 ## ✨ Features
 
 ### 🎡 The Spin — Your Discovery Deck
-Pick from 11 curated lanes (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries, or Wildcard) — or blend 2–4 into a mixed deck. Curio shuffles a roulette of topics, each with a teaser, imagery, and a structured "go do this" explore action with a suggested time. The deck *feels* like a deck: stacked peek cards, category-tinted edges, shadows, and a satisfying shuffle. Anti-repeat history means you'll never see the same topic back-to-back.
+Pick from 38 curated categories (Music, Films, Books, Art, Science, Games, Anime, Food, History, Sports, Internet, Mythology, and more) — or blend into a mixed deck. Curio shuffles a roulette of topics, each with a teaser, imagery, and a structured "go do this" explore action with a suggested time. The deck *feels* like a deck: stacked peek cards, category-tinted edges, shadows, and a satisfying shuffle. Anti-repeat history means you'll never see the same topic back-to-back.
 
 ### 📝 Six Capture Formats on Paper-Textured Notes
 Whatever you discover, there's a format waiting: **SoundBite** (voice notes) · **ReelNotes** (reviews) · **Marginalia** (journals) · **Gallery Wall** (mood boards) · **Field Notes** (observations) · **Open Notebook** (wildcard). Every note lives on a rich, paper-styled editor with ruled lines, torn edges, coffee stains, and watermark paper. Full rich text, quotes, images, audio, and tags — all autosaving.
@@ -108,8 +108,8 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 ## 📚 Complete Feature List
 
 ### Discovery — The Spin
-- **11 curated lanes**: Artists · Albums · Directors · Films · Authors · Books · Painters · Artworks · Scientists · Discoveries · Wildcard
-- **5,838 topics** (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
+- **38 curated categories**: Music · Films · Books · Art · Science · Games · Anime · Food · History · Sports · Internet · Mythology · and more
+- **16,000+ topics** across 38 categories (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
 - Roulette deck with stacked cards, category-tinted edges, shadows, and satisfying shuffle
 - Single-lane or mixed decks (2–4 categories blended into one)
 - Anti-repeat history — never see the same topic twice in a row
@@ -133,6 +133,15 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - Sessions survive reboots; pause, queue, and resume
 - Daily shuffle reminders (scheduled notifications)
 - Recently explored/unexplored topic tracking on Home
+
+### Share Cards
+- **8 share card styles** — Paper, Vinyl, Collage, Clean, Editorial, Minimal, Signature, and Custom
+- **Custom style** — 50+ unique topic-specific designs (Pokemon pokeball, Frozen snowflakes, Star Wars starfield, Marvel halftone, etc.) that only appear when a matching design exists
+- **Signature style** — 13 category-specific designs (music vinyl grooves, film grain, book spine, anime speed lines, etc.)
+- **Carousel picker** — swipe through full-size card previews to pick a style
+- 9:12 and 3:4 aspect ratios
+- Quick fact, custom fact, and no-fact options
+- Save as image or share directly
 
 ### The Cabinet (Library)
 - Browse all captures; filter by category or view All
@@ -227,7 +236,7 @@ We'd love contributions! Here's how:
 - Link to any related issues
 
 ### Topic Contributions
-The 5,838 curated topics are hand-picked. If you have topics to suggest for any lane (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries), open a **Feature Request** with specifics.
+The 16,000+ curated topics are hand-picked. If you have topics to suggest for any lane (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries), open a **Feature Request** with specifics.
 
 ---
 
@@ -268,6 +277,8 @@ Found a bug? Have an idea? Want to request a topic?
 ## 👋 Credits
 
 **Made by Firefly** — design, code, and curated topic catalog.
+
+> **Note:** Approximately 70% of this project's codebase was written and iterated on with AI assistance (Codebuff). Human direction, design decisions, product judgment, and curation drove every feature — AI handled the heavy lifting of implementation, debugging, and polish across thousands of commits.
 
 Special thanks to the early testers and people who shared topics and feedback.
 
