@@ -80,6 +80,12 @@ import com.curio.app.ui.theme.GeomFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
 import kotlin.math.sin
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 
 // ─── Style enum ────────────────────────────────────────────────────────
 enum class ShareCardStyle(val label: String, val glyph: String) {
@@ -433,15 +439,17 @@ private fun VinylCard(
             }
         }
 
-        // ── Info copy — bottom-left, avoids vinyl record area ──
-        Column(
+        // ── Info copy — bottom-left, cream box like body text ──
+        Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 16.dp, bottom = 24.dp)
-                .widthIn(max = 190.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+                .padding(start = 16.dp, bottom = 20.dp)
+                .widthIn(max = 180.dp)
         ) {
-            listOf(
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
+                listOf(
                 Triple("nightlight", "LATE-NIGHT", "Themes of reflection & memory"),
                 Triple("headphones", "TRACKS", "Curated picks to explore & discover"),
                 Triple("workspace_premium", "RECOGNITION", "Explore via Curio")
@@ -458,6 +466,7 @@ private fun VinylCard(
                 }
             }
         }
+    }
     }
 }
 
@@ -746,15 +755,8 @@ private fun NeumorphicCard(
             drawCircle(Color.Black.copy(alpha = 0.20f), w * 0.74f, Offset(w * 0.95f, h * 0.72f))
         }
 
-        // Oversized category-family glyphs make Clean unique per lane instead of a generic background.
-        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.13f), display.hashCode())
-        CurioIcon(
-            name = categoryGlyph,
-            tint = Color.White.copy(alpha = 0.18f),
-            size = 150.dp,
-            modifier = Modifier.align(Alignment.TopEnd).offset(x = 32.dp, y = 18.dp)
-                .graphicsLayer { rotationZ = -10f }
-        )
+        // Watermark glyphs (no oversized icon — keep it clean)
+        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.10f), display.hashCode())
 
         Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
             Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart)) {
@@ -780,7 +782,7 @@ private fun NeumorphicCard(
                 }
             }
 
-            Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
+            Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(bottom = 16.dp)) {
                 val bodySize = when { body.length > 350 -> 8.sp; body.length > 260 -> 9.sp; body.length > 180 -> 9.5.sp; else -> 10.5.sp }
                 Text(body, style = TextStyle(
                     fontFamily = LoraFontFamily,
@@ -834,9 +836,9 @@ private fun EditorialCard(
             }
         }
 
-        // Left vertical accent rule
-        Canvas(Modifier.padding(start = 22.dp).width(3.dp).fillMaxSize()) {
-            drawRect(accentRule.copy(alpha = 0.70f), Offset.Zero, Size(size.width, size.height))
+        // Left vertical accent rule — bold editorial line
+        Canvas(Modifier.padding(start = 22.dp).width(4.dp).fillMaxSize()) {
+            drawRect(accentRule.copy(alpha = 0.80f), Offset.Zero, Size(size.width, size.height))
         }
 
         // Content — editorial layout
@@ -960,9 +962,16 @@ private fun MinimalCard(
                 ))
             }
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(16.dp))
 
-            // Body text — bottom-aligned, generous spacing
+            // Accent divider
+            Canvas(Modifier.width(40.dp).height(2.dp)) {
+                drawRoundRect(accent, cornerRadius = CornerRadius(1f))
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Body text — generous spacing
             val bodySize = when {
                 body.length > 350 -> 8.sp; body.length > 260 -> 9.sp
                 body.length > 180 -> 10.sp; else -> 11.sp
@@ -1104,11 +1113,15 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             bg = Color(0xFF2A1F14), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Faint grooves
-                for (i in 0 until 20) {
-                    val r = w * 0.15f + i * w * 0.035f
-                    drawCircle(Color.White.copy(alpha = 0.02f), r, Offset(w * 0.8f, h * 0.75f), style = Stroke(0.8f))
+                for (i in 0 until 18) {
+                    val r = w * 0.12f + i * w * 0.04f
+                    drawCircle(Color(0xFFB08840).copy(alpha = 0.06f), r, Offset(w * 0.78f, h * 0.72f), style = Stroke(1.2f))
                 }
-                drawCircle(Color(0xFF3D2E1A).copy(alpha = 0.4f), w * 0.35f, Offset(w * 0.8f, h * 0.75f))
+                // Vinyl center label
+                drawCircle(Color(0xFFB08840).copy(alpha = 0.20f), w * 0.10f, Offset(w * 0.78f, h * 0.72f))
+                drawCircle(Color(0xFF2A1F14).copy(alpha = 0.30f), w * 0.03f, Offset(w * 0.78f, h * 0.72f))
+                // Accent glow
+                drawCircle(Color(0xFFB08840).copy(alpha = 0.06f), w * 0.4f, Offset(w * 0.5f, h * 0.5f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFB08840), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp,
@@ -1125,13 +1138,18 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 // Film grain dots
                 val s = (w * 1000 + h).toInt()
-                for (i in 0 until 80) {
+                for (i in 0 until 120) {
                     val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
                     val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
-                    drawCircle(Color.White.copy(alpha = 0.015f), 1f, Offset(x, y))
+                    drawCircle(Color.White.copy(alpha = 0.025f), 1.2f, Offset(x, y))
                 }
                 // Light leak top-right
-                drawCircle(Color(0xFF3D1A0A).copy(alpha = 0.25f), w * 0.3f, Offset(w * 0.9f, -h * 0.1f))
+                drawCircle(Color(0xFF6B1A1A).copy(alpha = 0.15f), w * 0.35f, Offset(w * 0.9f, -h * 0.05f))
+                // Film sprocket holes left
+                for (i in 0 until 8) {
+                    val y = h * 0.05f + i * h * 0.12f
+                    drawRoundRect(Color.White.copy(alpha = 0.04f), Offset(w * 0.02f, y), Size(w * 0.025f, h * 0.06f), CornerRadius(2f))
+                }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF8B1A1A), badgeInk = Color.White,
             badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp,
@@ -1213,12 +1231,18 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             bg = Color(0xFF0A0A14), cornerRadius = 4f,
             drawBackground = { w, h ->
                 // Pixel grid hint
-                for (i in 0 until 12) {
-                    val x = w * 0.05f + i * w * 0.08f
-                    for (j in 0 until 18) {
-                        val y = h * 0.03f + j * h * 0.055f
-                        if ((i + j) % 3 == 0) drawRect(Color(0xFF00FF88).copy(alpha = 0.025f), Offset(x, y), Size(w * 0.04f, h * 0.03f))
+                for (i in 0 until 15) {
+                    val x = w * 0.04f + i * w * 0.063f
+                    for (j in 0 until 22) {
+                        val y = h * 0.02f + j * h * 0.044f
+                        if ((i + j) % 2 == 0) drawRect(Color(0xFF00FF88).copy(alpha = 0.04f), Offset(x, y), Size(w * 0.045f, h * 0.03f))
+                        else if ((i + j) % 5 == 0) drawRect(Color(0xFF00CCFF).copy(alpha = 0.03f), Offset(x, y), Size(w * 0.045f, h * 0.03f))
                     }
+                }
+                // Scanline effect
+                for (i in 0 until 40) {
+                    val y = i * h / 40f
+                    drawLine(Color(0xFF00FF88).copy(alpha = 0.015f), Offset(0f, y), Offset(w, y))
                 }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF00CC66), badgeInk = Color(0xFF0A0A14),
@@ -1675,7 +1699,7 @@ fun TopicShareSheet(
     val currentStyle = styles[safeIdx]
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Share this topic", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
 
             // The card carousel IS the preview — no separate static card
@@ -1774,13 +1798,28 @@ fun TopicShareSheet(
                 OutlinedTextField(customText, { customText = it }, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
             }
 
+            Spacer(Modifier.height(4.dp))
+            // Save + Share buttons — side by side
             val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
-            Button(onClick = {
-                shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
-                }); onDismiss()
-            }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                // Save button
+                OutlinedButton(onClick = {
+                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+                    }); onDismiss()
+                }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(50.dp)) {
+                    Icon(imageVector = androidx.compose.material.icons.Icons.Default.Download, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Save", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                }
+                // Share button
+                Button(onClick = {
+                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+                    }); onDismiss()
+                }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.weight(1f).height(50.dp)) {
+                    Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                }
             }
         }
     }
