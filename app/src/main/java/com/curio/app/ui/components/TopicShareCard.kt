@@ -46,6 +46,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -205,7 +206,8 @@ fun TopicShareCard(
     quoteText: String? = null,
     quoteAuthor: String? = null,
     userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
-    byline: String = ""
+    byline: String = "",
+    polaroidCaption: String = ""
 ) {
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
@@ -214,7 +216,7 @@ fun TopicShareCard(
     when (style) {
         ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year)
+        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year, polaroidCaption)
         ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
     }
 }
@@ -275,6 +277,7 @@ private fun VinylCard(
     val roseLight = Color(0xFFF0D0C8)
     val inkDark = Color(0xFF3A2820)
     val roseFaint = Color(0xFFE8C8C0)
+    val whiteLift = Shadow(Color.White.copy(alpha = 0.90f), Offset(0f, 1.4f), blurRadius = 4f)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(roseBg, RoundedCornerShape(6.dp))) {
         // Paper texture
@@ -387,7 +390,7 @@ private fun VinylCard(
             }
             Text(factText, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.82f)
+                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.82f), shadow = whiteLift
             ), modifier = Modifier.widthIn(max = 220.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
 
             Spacer(Modifier.height(10.dp))
@@ -415,9 +418,9 @@ private fun VinylCard(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 18.dp, bottom = 16.dp)
-                .widthIn(max = 190.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
+                .padding(start = 20.dp, bottom = 20.dp)
+                .widthIn(max = 212.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             listOf(
                 Triple("nightlight", "LATE-NIGHT", "Themes of reflection & memory"),
@@ -425,13 +428,13 @@ private fun VinylCard(
                 Triple("workspace_premium", "RECOGNITION", "Explore via Curio")
             ).forEach { (icon, label, detail) ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                    CurioIcon(name = icon, tint = roseDusty.copy(alpha = 0.86f), size = 12.dp)
+                    CurioIcon(name = icon, tint = roseDusty.copy(alpha = 0.92f), size = 13.dp)
                     Column {
                         Text(label, style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp, color = inkDark.copy(alpha = 0.78f)))
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp, color = inkDark.copy(alpha = 0.78f), shadow = whiteLift))
                         Text(detail, style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 7.5.sp, lineHeight = 10.sp,
-                            color = inkDark.copy(alpha = 0.54f)))
+                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 10.5.sp,
+                            color = inkDark.copy(alpha = 0.54f), shadow = whiteLift))
                     }
                 }
             }
@@ -448,7 +451,8 @@ private fun CollageCard(
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    polaroidCaption: String = ""
 ) {
     val topCream = Color(0xFFF5EDE0)
     val bottomSage = Color(0xFF6B7C65)
@@ -458,53 +462,51 @@ private fun CollageCard(
     val sagePill = Color(0xFF4A5A44)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(topCream, RoundedCornerShape(6.dp))) {
-        // ── Bottom section: sage green ──
+        // ── Layered paper + botanical lower field with a natural torn seam ──
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
-            val tearY = h * 0.40f
-            // Sage bottom
-            drawRect(bottomSage, Offset(0f, tearY), Size(w, h - tearY))
-            // More visible tear line — thicker + brighter
-            drawTornLine(tearY, w, topCream, tornEdge)
-            drawTornLine(tearY + 1.5f, w, topCream, tornEdge.copy(alpha = 0.7f))
-
-            // Curved dark green footer base
+            val tearY = h * 0.42f
+            drawRect(bottomSage, Offset.Zero, Size(w, h))
+            drawRect(Brush.verticalGradient(listOf(bottomSage, bottomDark)), Offset(0f, h * 0.70f), Size(w, h * 0.30f))
+            drawNaturalTearPanel(tearY = tearY, top = topCream, edge = tornEdge, shadow = bottomDark.copy(alpha = 0.22f))
             val footerY = h * 0.86f
-            drawRect(bottomDark, Offset(0f, footerY), Size(w, h - footerY))
-            // Organic curve at top of footer
             drawPath(
                 Path().apply {
-                    moveTo(0f, footerY)
-                    quadraticBezierTo(w * 0.3f, footerY - 18f, w * 0.5f, footerY - 10f)
-                    quadraticBezierTo(w * 0.7f, footerY - 2f, w, footerY - 14f)
+                    moveTo(0f, footerY + 4f)
+                    cubicTo(w * 0.22f, footerY - 18f, w * 0.43f, footerY + 12f, w * 0.62f, footerY - 8f)
+                    cubicTo(w * 0.78f, footerY - 24f, w * 0.90f, footerY + 2f, w, footerY - 14f)
                     lineTo(w, h); lineTo(0f, h); close()
                 },
-                bottomDark
+                bottomDark.copy(alpha = 0.82f)
             )
         }
 
-        // Watermark
-        Watermark(family, categoryGlyph, inkDark.copy(alpha = 0.04f), display.hashCode())
+        // Watermark glyphs on both paper and green field so the collage feels intentional.
+        Watermark(family, categoryGlyph, inkDark.copy(alpha = 0.045f), display.hashCode())
+        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.045f), display.hashCode() + 17)
 
         // ── TOP SECTION: title + metadata + quote (left) + polaroid (right) ──
         BoxWithConstraints(Modifier.fillMaxSize().zIndex(2f)) {
             val cw = maxWidth.value; val ch = maxHeight.value
 
             // Polaroid — right side, tilted, with tape + handwritten name
-            val pW = cw * 0.38f; val pH = pW * 1.15f
-            val pX = cw * 0.54f; val pY = ch * 0.02f
+            val pW = cw * 0.34f; val pH = pW * 1.18f
+            val pX = cw * 0.62f; val pY = ch * 0.035f
+            val polaroidLabel = polaroidCaption.ifBlank {
+                if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio"
+            }
 
             Box(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)
                 .graphicsLayer {
                     rotationZ = -3f
                     shadowElevation = 6f
                     shape = RoundedCornerShape(3.dp)
-                    clip = true
+                    clip = false
                 }
                 .background(Color.White, RoundedCornerShape(3.dp))
             ) {
                 // Tape on top
-                Canvas(Modifier.offset((pW * 0.25f).dp, (-3f).dp).size((pW * 0.40f).dp, 14.dp)) {
+                Canvas(Modifier.offset((pW * 0.23f).dp, 1.dp).size((pW * 0.46f).dp, 12.dp)) {
                     drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.55f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
                 }
                 // Photo area
@@ -523,19 +525,19 @@ private fun CollageCard(
                 val hs = TextStyle(fontFamily = PatrickHandFontFamily, fontWeight = FontWeight.Normal,
                     fontSize = (pW * 0.065f).coerceIn(11f, 15f).sp, color = inkDark,
                     lineHeight = (pW * 0.08f).sp)
-                val tl = tm.measure(display, hs, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val tl = tm.measure(polaroidLabel, hs, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Canvas(Modifier.offset(8.dp, (pH * 0.74f).dp).size((pW - 16).dp, (pH * 0.22f).dp)) {
                     drawText(tl)
                 }
             }
 
             // Title — large serif, dark green, top-left
-            Column(modifier = Modifier.offset(22.dp, (ch * 0.06f).dp).width((cw * 0.50f).dp)) {
+            Column(modifier = Modifier.offset(22.dp, (ch * 0.055f).dp).width((cw * 0.56f).dp)) {
                 Text(display, style = TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = (cw * 0.08f).coerceIn(24f, 34f).sp,
                     lineHeight = (cw * 0.09f).coerceIn(28f, 38f).sp,
                     fontWeight = FontWeight.Normal, color = inkDark
-                ), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                ), maxLines = 4, overflow = TextOverflow.Ellipsis)
 
                 Spacer(Modifier.height(6.dp))
 
@@ -595,22 +597,18 @@ private fun CollageCard(
 
             Spacer(Modifier.height(10.dp))
 
-            // Footer — leaf icon + name + via Curio
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                CurioIcon(name = "eco", tint = Color.White.copy(alpha = 0.45f), size = 14.dp)
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
-                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.60f)),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis
-                )
-            }
+            // Footer — clean credit, no leading icon.
+            Text(
+                if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
+                style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Color.White.copy(alpha = 0.66f)),
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
 
-// STYLE 3 — CLEAN / NEUMORPHIC (monochrome stacked-depth portal)
+// STYLE 3 — CLEAN / NEUMORPHIC (category monolith depth poster)
 // ═══════════════════════════════════════════════════════════════════════
 @Composable
 private fun NeumorphicCard(
@@ -620,89 +618,96 @@ private fun NeumorphicCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null
 ) {
-    val paper = Color(0xFFF1F1EE)
-    val warm = Color(0xFFE3E1DA)
-    val graphite = Color(0xFF181818)
-    val mid = Color(0xFF6C6C68)
-    val pale = Color(0xFFFFFFFF)
+    val ink = Color(0xFF101010)
+    val paper = Color(0xFFF8F6EF)
+    val categoryGlow = palette.accent
+    val categoryDeep = palette.accentDark
+    val body = quoteText ?: factText
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(paper, RoundedCornerShape(6.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(categoryDeep, RoundedCornerShape(6.dp))) {
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
-            drawRect(Brush.verticalGradient(listOf(pale, paper, warm)))
-            for (i in 0 until 8) {
-                val inset = i * 13f
-                val alpha = 0.13f - i * 0.012f
+            drawRect(Brush.verticalGradient(listOf(categoryGlow.copy(alpha = 0.95f), categoryDeep, ink)))
+            drawCircle(Color.White.copy(alpha = 0.10f), w * 0.72f, Offset(w * 0.12f, h * 0.12f))
+            drawCircle(Color.Black.copy(alpha = 0.20f), w * 0.74f, Offset(w * 0.95f, h * 0.72f))
+            for (i in 0 until 9) {
+                val inset = i * 12f
                 drawRoundRect(
-                    color = Color.Black.copy(alpha = alpha.coerceAtLeast(0.018f)),
-                    topLeft = Offset(w * 0.18f + inset, h * 0.19f + inset * 0.52f),
-                    size = Size(w * 0.58f - inset * 0.75f, h * 0.36f - inset * 0.22f),
-                    cornerRadius = CornerRadius(28f + i * 2f, 28f + i * 2f),
-                    style = Stroke((10f - i).coerceAtLeast(2f))
+                    color = if (i % 2 == 0) Color.White.copy(alpha = 0.16f - i * 0.012f) else Color.Black.copy(alpha = 0.18f - i * 0.012f),
+                    topLeft = Offset(w * 0.18f + inset * 0.45f, h * 0.14f + inset),
+                    size = Size(w * 0.70f - inset, h * 0.54f - inset * 0.78f),
+                    cornerRadius = CornerRadius(34f + i * 2f, 34f + i * 2f),
+                    style = Stroke((14f - i).coerceAtLeast(3f))
                 )
             }
             drawRoundRect(
-                Brush.radialGradient(listOf(Color.White.copy(alpha = 0.94f), paper.copy(alpha = 0.70f), Color.Transparent), center = Offset(w * 0.48f, h * 0.35f), radius = w * 0.52f),
-                topLeft = Offset(w * 0.08f, h * 0.08f),
-                size = Size(w * 0.84f, h * 0.56f),
-                cornerRadius = CornerRadius(36f, 36f)
+                Color.Black.copy(alpha = 0.34f),
+                topLeft = Offset(w * 0.13f, h * 0.24f + 18f),
+                size = Size(w * 0.74f, h * 0.35f),
+                cornerRadius = CornerRadius(30f, 30f)
             )
-            drawLine(graphite.copy(alpha = 0.18f), Offset(w * 0.08f, h * 0.70f), Offset(w * 0.92f, h * 0.60f), strokeWidth = 1.4f)
-            drawLine(Color.White.copy(alpha = 0.85f), Offset(w * 0.10f, h * 0.705f), Offset(w * 0.90f, h * 0.605f), strokeWidth = 1f)
+            drawRoundRect(
+                Brush.verticalGradient(listOf(paper, Color(0xFFE8E2D2))),
+                topLeft = Offset(w * 0.10f, h * 0.22f),
+                size = Size(w * 0.74f, h * 0.35f),
+                cornerRadius = CornerRadius(30f, 30f)
+            )
         }
 
-        Watermark(family, categoryGlyph, graphite.copy(alpha = 0.035f), display.hashCode())
+        // Oversized category-family glyphs make Clean unique per lane instead of a generic background.
+        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.13f), display.hashCode())
+        CurioIcon(
+            name = categoryGlyph,
+            tint = Color.White.copy(alpha = 0.18f),
+            size = 150.dp,
+            modifier = Modifier.align(Alignment.TopEnd).offset(x = 32.dp, y = 18.dp)
+                .graphicsLayer { rotationZ = -10f }
+        )
 
         Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
-            Surface(shape = RoundedCornerShape(50), color = graphite, modifier = Modifier.align(Alignment.TopStart)) {
-                Row(Modifier.padding(horizontal = 11.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CurioIcon(name = categoryGlyph, tint = Color.White, size = 13.dp)
-                    Text(categoryName.uppercase(), style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
-                        fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp), color = Color.White)
-                }
+            Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart)) {
+                Text(categoryName.uppercase(), style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
+                    fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp), color = Color.White,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
             }
 
-            Column(Modifier.align(Alignment.Center).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 4.dp), horizontalAlignment = Alignment.Start) {
                 Text(display, style = TextStyle(
-                    fontFamily = ChangaOneFontFamily, fontSize = 30.sp, lineHeight = 32.sp,
-                    fontWeight = FontWeight.Normal, color = graphite, textAlign = TextAlign.Center
-                ), maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth())
+                    fontFamily = ChangaOneFontFamily, fontSize = 31.sp, lineHeight = 33.sp,
+                    fontWeight = FontWeight.Normal, color = ink, shadow = Shadow(Color.White.copy(alpha = 0.70f), Offset(0f, 2f), 3f)
+                ), maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.84f))
                 val metaParts = mutableListOf<String>()
                 if (byline.isNotBlank()) metaParts.add(byline.uppercase())
                 if (year != null) metaParts.add(year)
                 if (metaParts.isNotEmpty()) {
                     Spacer(Modifier.height(5.dp))
                     Text(metaParts.joinToString("  /  "), style = TextStyle(
-                        fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.4.sp, color = mid, textAlign = TextAlign.Center
+                        fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.3.sp, color = ink.copy(alpha = 0.56f)
                     ), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
 
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
-                val body = quoteText ?: factText
-                val bodySize = when {
-                    body.length > 280 -> 9.sp; body.length > 180 -> 10.sp; else -> 11.sp
-                }
+                val bodySize = when { body.length > 280 -> 9.sp; body.length > 180 -> 10.sp; else -> 11.sp }
                 Text(body, style = TextStyle(
                     fontFamily = LoraFontFamily,
                     fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal,
-                    fontSize = bodySize, lineHeight = (bodySize.value * 1.42f).sp,
-                    color = graphite.copy(alpha = 0.78f)
+                    fontSize = bodySize, lineHeight = (bodySize.value * 1.40f).sp,
+                    color = Color.White.copy(alpha = 0.88f),
+                    shadow = Shadow(Color.Black.copy(alpha = 0.62f), Offset(0f, 2f), 5f)
                 ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, overflow = TextOverflow.Ellipsis)
                 if (ratingStars != null && ratingStars > 0) {
-                    Spacer(Modifier.height(6.dp))
-                    StarRow(ratingStars, palette.copy(accent = graphite, ink = graphite, inkFaint = mid))
+                    Spacer(Modifier.height(7.dp))
+                    StarRow(ratingStars, palette.copy(accent = Color.White, ink = Color.White, inkFaint = Color.White.copy(alpha = 0.45f)))
                 }
-                Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Canvas(Modifier.size(width = 48.dp, height = 1.dp)) { drawLine(graphite.copy(alpha = 0.30f), Offset.Zero, Offset(size.width, 0f)) }
-                    Text(
-                        if (quoteText != null && !quoteAuthor.isNullOrBlank()) "— $quoteAuthor" else if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
-                        style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = mid),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Spacer(Modifier.height(13.dp))
+                Text(
+                    if (quoteText != null && !quoteAuthor.isNullOrBlank()) "— $quoteAuthor" else if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
+                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.8.sp, color = Color.White.copy(alpha = 0.72f)),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -844,6 +849,38 @@ private fun DrawScope.drawTornBottom(palette: ShareCardPalette) {
     drawPath(p, tint)
 }
 
+private fun DrawScope.drawNaturalTearPanel(tearY: Float, top: Color, edge: Color, shadow: Color) {
+    val w = size.width
+    fun yAt(x: Float): Float {
+        val t = x / w
+        val tooth = ((t * 19f).toInt() % 3 - 1) * 2.7f
+        return tearY + sin(t * 8.2f + 0.8f) * 7.5f + sin(t * 31f + 1.9f) * 3.2f + tooth
+    }
+    val shadowPath = Path().apply {
+        moveTo(0f, yAt(0f) + 7f)
+        var x = 0f
+        while (x <= w) { lineTo(x, yAt(x) + 7f); x += w / 64f }
+        lineTo(w, yAt(w) + 18f); lineTo(0f, yAt(0f) + 18f); close()
+    }
+    drawPath(shadowPath, shadow)
+    val topPath = Path().apply {
+        moveTo(0f, 0f); lineTo(w, 0f); lineTo(w, yAt(w))
+        var x = w
+        while (x >= 0f) { lineTo(x, yAt(x)); x -= w / 72f }
+        close()
+    }
+    drawPath(topPath, top)
+    var x = 0f
+    while (x <= w) {
+        val y = yAt(x)
+        drawLine(edge.copy(alpha = 0.55f), Offset(x, y + 1f), Offset((x + w / 90f).coerceAtMost(w), yAt((x + w / 90f).coerceAtMost(w)) + 1f), strokeWidth = 1.3f)
+        if ((x / (w / 12f)).toInt() % 3 == 0) {
+            drawLine(edge.copy(alpha = 0.35f), Offset(x, y + 2f), Offset((x + 10f).coerceAtMost(w), y + 5f), strokeWidth = 0.8f)
+        }
+        x += w / 48f
+    }
+}
+
 private fun DrawScope.drawTornLine(y: Float, w: Float, above: Color, below: Color) {
     // Shadow
     val sp = Path().apply {
@@ -925,6 +962,7 @@ fun TopicShareSheet(
     var aspect by rememberSaveable { mutableStateOf(ShareCardAspect.PORTRAIT) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
+    var polaroidCaption by rememberSaveable { mutableStateOf("") }
     var styleIdx by rememberSaveable { mutableIntStateOf(0) }
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
     // Photo picker state — only used for Collage style
@@ -973,7 +1011,7 @@ fun TopicShareSheet(
             // Card preview
             val pw = 280.dp
             Box(Modifier.width(pw).aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat()).shadow(2.dp, RoundedCornerShape(6.dp)).clip(RoundedCornerShape(6.dp))) {
-                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline)
+                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
             }
 
             // Photo picker — only for Collage style
@@ -988,6 +1026,13 @@ fun TopicShareSheet(
                         )
                     }
                 }
+                OutlinedTextField(
+                    value = polaroidCaption,
+                    onValueChange = { polaroidCaption = it.take(36) },
+                    placeholder = { Text(if (sharer.isNotBlank()) "$sharer · via Curio" else "via Curio") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             // Style picker — only show available styles for this family
@@ -1030,7 +1075,7 @@ fun TopicShareSheet(
             val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
             Button(onClick = {
                 shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline)
+                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
                 }); onDismiss()
             }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
                 Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))

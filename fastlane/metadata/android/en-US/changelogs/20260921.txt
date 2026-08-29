@@ -1,4 +1,4 @@
-FIX: Topic share card styles polished - Vinyl info text loses its box, Paper 9:16 text fits better, Clean goes monochrome-depth, and Collage joins its middle section cleanly.
+FIX: Topic share card styles polished - Vinyl text is cleaner, Paper 9:16 facts fit better, Clean gets a category-depth poster, and Collage has a natural tear with editable polaroid credit.
 FIX: Room topic migration crash - repairs the topics table defaults and removes undeclared legacy indexes while preserving existing topic data.
 
 FIX: Liquid glass crash recovery - auto-disables glass after 3 consecutive native crashes on budget devices (Infinix/Samsung on Android 16) to prevent SIGKILL on RenderThread.
