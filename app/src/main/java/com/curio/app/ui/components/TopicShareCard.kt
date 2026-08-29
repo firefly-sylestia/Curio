@@ -173,6 +173,7 @@ fun availableStylesForFamily(family: CategoryFamily): List<ShareCardStyle> = whe
 
 const val QUICK_FACT_ID = "quick_fact"
 const val CUSTOM_FACT_ID = "custom_fact"
+const val NO_FACT_ID = "no_fact"
 
 private fun quoteFontSize(length: Int): TextUnit = when {
     length > 900 -> 15.sp; length > 650 -> 17.sp; length > 420 -> 19.sp
@@ -962,7 +963,7 @@ private fun SignatureCard(
 ) {
     val body = quoteText ?: factText
     // Get unique design per category
-    val sig = signatureDesign(categoryName, family)
+    val sig = topicVariant(display, family) ?: signatureDesign(categoryName, family)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp)).background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))) {
         // Background pattern/texture
@@ -1054,6 +1055,1137 @@ private data class SignatureDesign(
     val bodySize: Float, val bodyLineHeight: Float, val bodyColor: Color,
     val footerSpacer: Dp, val footerFont: FontFamily, val footerColor: Color
 )
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// TOPIC-SPECIFIC SIGNATURE VARIANTS (50+ popular topics)
+// Each popular topic gets a completely unique design — colors, textures,
+// decorative elements. keyword match on topic name → unique SignatureDesign.
+// ═══════════════════════════════════════════════════════════════════════
+private fun topicVariant(topicName: String, family: CategoryFamily): SignatureDesign? {
+    val t = topicName.uppercase().trim()
+    // ── GAMES ──
+    if (t.contains("MARIO") || t.contains("SUPER MARIO")) return SignatureDesign(
+        bg = Color(0xFFE52521), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Brick pattern top
+            for (row in 0 until 4) for (col in 0 until 12) {
+                val x = col * w * 0.08f + (row % 2) * w * 0.04f
+                val y = row * h * 0.04f + h * 0.02f
+                drawRoundRect(Color(0xFFC41E1A).copy(alpha = 0.25f), Offset(x, y), Size(w * 0.07f, h * 0.03f), CornerRadius(1f))
+            }
+            // Pixel clouds
+            drawCircle(Color.White.copy(alpha = 0.10f), w * 0.06f, Offset(w * 0.2f, h * 0.08f))
+            drawCircle(Color.White.copy(alpha = 0.08f), w * 0.04f, Offset(w * 0.24f, h * 0.07f))
+            drawCircle(Color.White.copy(alpha = 0.06f), w * 0.05f, Offset(w * 0.17f, h * 0.06f))
+            // Yellow coin
+            drawCircle(Color(0xFFFFD700).copy(alpha = 0.15f), w * 0.04f, Offset(w * 0.85f, h * 0.12f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFCC0000), badgeInk = Color.White,
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFFFFF),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFD700),
+        bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFFFF0E0).copy(alpha = 0.90f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFD700).copy(alpha = 0.70f)
+    )
+    if (t.contains("ZELDA") || t.contains("LEGEND OF ZELDA")) return SignatureDesign(
+        bg = Color(0xFF1A3C2A), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Forest silhouette bottom
+            for (i in 0 until 8) {
+                val x = w * 0.05f + i * w * 0.12f
+                val treeH = h * 0.08f + ((i * 7919) % 100) / 100f * h * 0.06f
+                drawLine(Color(0xFF0A2A18).copy(alpha = 0.20f), Offset(x, h * 0.88f), Offset(x, h * 0.88f - treeH), strokeWidth = 2f)
+                drawCircle(Color(0xFF0A2A18).copy(alpha = 0.12f), treeH * 0.4f, Offset(x, h * 0.88f - treeH))
+            }
+            // Triforce hint top-right
+            val tx = w * 0.82f; val ty = h * 0.10f; val ts = w * 0.06f
+            drawLine(Color(0xFFD4AF37).copy(alpha = 0.12f), Offset(tx, ty - ts), Offset(tx + ts, ty + ts), strokeWidth = 1f)
+            drawLine(Color(0xFFD4AF37).copy(alpha = 0.12f), Offset(tx + ts, ty + ts), Offset(tx - ts, ty + ts), strokeWidth = 1f)
+            drawLine(Color(0xFFD4AF37).copy(alpha = 0.12f), Offset(tx - ts, ty + ts), Offset(tx, ty - ts), strokeWidth = 1f)
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD4AF37), badgeInk = Color(0xFF1A3C2A),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD4AF37),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF7AA060),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC8E0C0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF7AA060).copy(alpha = 0.65f)
+    )
+    if (t.contains("MINECRAFT")) return SignatureDesign(
+        bg = Color(0xFF8B6914), cornerRadius = 2f,
+        drawBackground = { w, h ->
+            // Pixel block grid
+            val bs = w * 0.05f
+            for (row in 0 until 18) for (col in 0 until 12) {
+                val x = col * bs + (row % 2) * bs * 0.5f
+                val y = row * bs * 0.6f
+                val c = if ((row + col) % 3 == 0) Color(0xFF5D8C2E) else if ((row + col) % 3 == 1) Color(0xFF7A5520) else Color(0xFF9B7B3A)
+                drawRect(c.copy(alpha = 0.15f), Offset(x, y), Size(bs * 0.9f, bs * 0.55f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF5D8C2E), badgeInk = Color.White,
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFF8E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF5D8C2E),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE8D8B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF5D8C2E).copy(alpha = 0.65f)
+    )
+    if (t.contains("POKEMON") || t.contains("POK\u00C9MON") || t.contains("PIKACHU")) return SignatureDesign(
+        bg = Color(0xFFFFF8E1), cornerRadius = 10f,
+        drawBackground = { w, h ->
+            // Pokeball half-circle motif
+            drawArc(Color(0xFFCC0000).copy(alpha = 0.12f), 180f, 180f, false, Offset(w * 0.55f, h * 0.05f), Size(w * 0.35f, h * 0.30f))
+            drawArc(Color.White.copy(alpha = 0.15f), 0f, 180f, false, Offset(w * 0.55f, h * 0.05f), Size(w * 0.35f, h * 0.30f))
+            drawLine(Color(0xFF333333).copy(alpha = 0.10f), Offset(w * 0.55f, h * 0.20f), Offset(w * 0.90f, h * 0.20f), strokeWidth = 2f)
+            drawCircle(Color(0xFF333333).copy(alpha = 0.08f), w * 0.025f, Offset(w * 0.725f, h * 0.20f))
+            drawCircle(Color.White.copy(alpha = 0.12f), w * 0.015f, Offset(w * 0.725f, h * 0.20f))
+            // Sparkles
+            drawCircle(Color(0xFFFFD700).copy(alpha = 0.12f), 2.5f, Offset(w * 0.15f, h * 0.08f))
+            drawCircle(Color(0xFFFFD700).copy(alpha = 0.10f), 2f, Offset(w * 0.30f, h * 0.05f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFCC0000), badgeInk = Color.White,
+        badgeRadius = 10.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF333333),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFCC0000),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF4A4030).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFCC0000).copy(alpha = 0.65f)
+    )
+    if (t.contains("FORTNITE")) return SignatureDesign(
+        bg = Color(0xFF0B1628), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Storm swirl
+            val s = (w * 1000 + h).toInt()
+            for (i in 0 until 30) {
+                val angle = i * 12f
+                val rad = Math.toRadians(angle.toDouble()).toFloat()
+                val r = w * 0.15f + i * w * 0.008f
+                drawCircle(Color(0xFF00D4FF).copy(alpha = 0.04f), 1.5f, Offset(w * 0.75f + kotlin.math.cos(rad) * r, h * 0.25f + kotlin.math.sin(rad) * r * 0.6f))
+            }
+            // Starfield
+            for (i in 0 until 50) {
+                val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
+                val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
+                drawCircle(Color.White.copy(alpha = 0.08f), 1f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF00D4FF), badgeInk = Color(0xFF0B1628),
+        badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0F0FF),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF00D4FF),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0C8E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00D4FF).copy(alpha = 0.65f)
+    )
+    if (t.contains("GTA") || t.contains("GRAND THEFT")) return SignatureDesign(
+        bg = Color(0xFF0A0A0A), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Dollar bill texture
+            for (i in 0 until 6) {
+                val y = h * 0.10f + i * h * 0.15f
+                drawLine(Color(0xFF00C853).copy(alpha = 0.06f), Offset(w * 0.05f, y), Offset(w * 0.95f, y), strokeWidth = 0.5f)
+            }
+            drawCircle(Color(0xFF00C853).copy(alpha = 0.08f), w * 0.15f, Offset(w * 0.80f, h * 0.15f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF00C853), badgeInk = Color(0xFF0A0A0A),
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE0E0E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF00C853),
+        bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFB0B0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00C853).copy(alpha = 0.65f)
+    )
+    if (t.contains("CALL OF DUTY") || t.contains("COD")) return SignatureDesign(
+        bg = Color(0xFF3C3C28), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Crosshair
+            val cx = w * 0.82f; val cy = h * 0.15f; val cr = w * 0.05f
+            drawLine(Color(0xFFFFB300).copy(alpha = 0.12f), Offset(cx - cr, cy), Offset(cx + cr, cy), strokeWidth = 1f)
+            drawLine(Color(0xFFFFB300).copy(alpha = 0.12f), Offset(cx, cy - cr), Offset(cx, cy + cr), strokeWidth = 1f)
+            drawCircle(Color(0xFFFFB300).copy(alpha = 0.06f), cr, Offset(cx, cy), style = Stroke(0.8f))
+            // Military grid
+            for (i in 0 until 8) { drawLine(Color(0xFFFFB300).copy(alpha = 0.04f), Offset(w * 0.05f, h * 0.05f + i * h * 0.12f), Offset(w * 0.40f, h * 0.05f + i * h * 0.12f), strokeWidth = 0.5f) }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFB300), badgeInk = Color(0xFF3C3C28),
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0D8C0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFB300),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C8B0).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFB300).copy(alpha = 0.65f)
+    )
+    if (t.contains("PAC-MAN") || t.contains("PACMAN")) return SignatureDesign(
+        bg = Color(0xFF000000), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Dots trail
+            for (i in 0 until 15) {
+                val x = w * 0.08f + i * w * 0.055f
+                val y = h * 0.50f + kotlin.math.sin(i * 0.5f).toFloat() * h * 0.05f
+                drawCircle(Color(0xFFFFFF00).copy(alpha = 0.15f), 2f, Offset(x, y))
+            }
+            // Maze hint
+            drawLine(Color(0xFF2196F3).copy(alpha = 0.08f), Offset(w * 0.02f, h * 0.02f), Offset(w * 0.02f, h * 0.40f), strokeWidth = 2f)
+            drawLine(Color(0xFF2196F3).copy(alpha = 0.08f), Offset(w * 0.02f, h * 0.40f), Offset(w * 0.20f, h * 0.40f), strokeWidth = 2f)
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFEB3B), badgeInk = Color(0xFF000000),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFFF00),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFEB3B),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0E0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFEB3B).copy(alpha = 0.65f)
+    )
+    // ── FILMS & ANIMATION ──
+    if (t.contains("STAR WARS")) return SignatureDesign(
+        bg = Color(0xFF0A0A1A), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            val s = (w * 1000 + h).toInt()
+            for (i in 0 until 80) {
+                val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
+                val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
+                drawCircle(Color.White.copy(alpha = 0.06f + ((s * (i+1) * 3571) % 100) / 100f * 0.08f), 1f, Offset(x, y))
+            }
+            // Holo scan lines
+            for (i in 0 until 4) { drawLine(Color(0xFF4FC3F7).copy(alpha = 0.06f), Offset(0f, h * 0.20f + i * h * 0.18f), Offset(w, h * 0.20f + i * h * 0.18f), strokeWidth = 0.5f) }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF4FC3F7), badgeInk = Color(0xFF0A0A1A),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE0F0FF),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF4FC3F7),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC0D0E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF4FC3F7).copy(alpha = 0.65f)
+    )
+    if (t.contains("MARVEL") || t.contains("AVENGERS") || t.contains("SPIDER-MAN") || t.contains("SPIDERMAN")) return SignatureDesign(
+        bg = Color(0xFF1A0A0A), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Halftone dots
+            for (i in 0 until 10) for (j in 0 until 14) {
+                val x = w * 0.03f + i * w * 0.04f
+                val y = h * 0.55f + j * h * 0.025f
+                drawCircle(Color(0xFFD32F2F).copy(alpha = 0.06f), 1.5f - j * 0.08f, Offset(x, y))
+            }
+            // Comic panel border
+            drawRoundRect(Color(0xFFD32F2F).copy(alpha = 0.08f), Offset(w * 0.60f, h * 0.05f), Size(w * 0.35f, h * 0.25f), CornerRadius(2f), style = Stroke(1.5f))
+            // Gold accent corner
+            drawLine(Color(0xFFFFD700).copy(alpha = 0.10f), Offset(w * 0.05f, h * 0.04f), Offset(w * 0.15f, h * 0.04f), strokeWidth = 2f)
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD32F2F), badgeInk = Color(0xFFFFD700),
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFF0E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFD32F2F),
+        bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFE0D0C0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD32F2F).copy(alpha = 0.65f)
+    )
+    if (t.contains("BATMAN") || t.contains("DC COMIC")) return SignatureDesign(
+        bg = Color(0xFF1A1A2E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Rain lines
+            for (i in 0 until 30) {
+                val x = ((i * 7919) % 1000) / 1000f * w
+                val len = 20f + ((i * 3571) % 100) / 100f * 30f
+                drawLine(Color(0xFF1565C0).copy(alpha = 0.08f), Offset(x, h * 0.10f + ((i * 6271) % 100) / 100f * h * 0.6f), Offset(x, h * 0.10f + ((i * 6271) % 100) / 100f * h * 0.6f + len), strokeWidth = 0.6f)
+            }
+            // Bat shadow silhouette (simplified)
+            drawCircle(Color(0xFF0D1B3E).copy(alpha = 0.15f), w * 0.18f, Offset(w * 0.78f, h * 0.12f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF1565C0), badgeInk = Color.White,
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFB0C8E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF1565C0),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF90A8C0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF1565C0).copy(alpha = 0.65f)
+    )
+    if (t.contains("HARRY POTTER")) return SignatureDesign(
+        bg = Color(0xFF1A0A2E), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Stars
+            for (i in 0 until 40) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h * 0.5f
+                drawCircle(Color(0xFFD4AF37).copy(alpha = 0.06f + ((i * 3571) % 100) / 100f * 0.08f), 1.5f, Offset(x, y))
+            }
+            // Wand sparkle trail
+            for (i in 0 until 6) {
+                val t2 = i / 6f
+                drawCircle(Color(0xFFD4AF37).copy(alpha = 0.12f - t2 * 0.08f), 2f - t2, Offset(w * 0.85f - t2 * w * 0.15f, h * 0.10f + t2 * h * 0.12f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD4AF37), badgeInk = Color(0xFF1A0A2E),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD4AF37),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF9A7AD0),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC8B8E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD4AF37).copy(alpha = 0.65f)
+    )
+    if (t.contains("LORD OF THE RINGS") || t.contains("HOBBIT") || t.contains("TOLKIEN")) return SignatureDesign(
+        bg = Color(0xFF2A2A1A), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Mountain silhouette
+            val path = Path().apply { moveTo(w * 0.05f, h * 0.85f); lineTo(w * 0.25f, h * 0.55f); lineTo(w * 0.40f, h * 0.70f); lineTo(w * 0.55f, h * 0.50f); lineTo(w * 0.70f, h * 0.65f); lineTo(w * 0.85f, h * 0.45f); lineTo(w * 0.95f, h * 0.60f); lineTo(w * 0.95f, h * 0.85f); close() }
+            drawPath(path, Color(0xFF1A1A0A).copy(alpha = 0.20f))
+            // Ring circle
+            drawCircle(Color(0xFFC9A959).copy(alpha = 0.12f), w * 0.06f, Offset(w * 0.80f, h * 0.15f), style = Stroke(1.5f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFC9A959), badgeInk = Color(0xFF2A2A1A),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFC9A959),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A7A40),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD0C8A0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC9A959).copy(alpha = 0.55f)
+    )
+    if (t.contains("DISNEY")) return SignatureDesign(
+        bg = Color(0xFF0D1B3E), cornerRadius = 12f,
+        drawBackground = { w, h ->
+            // Castle silhouette
+            val path = Path().apply {
+                moveTo(w * 0.30f, h * 0.80f); lineTo(w * 0.30f, h * 0.50f); lineTo(w * 0.32f, h * 0.45f)
+                lineTo(w * 0.35f, h * 0.50f); lineTo(w * 0.35f, h * 0.42f); lineTo(w * 0.37f, h * 0.38f)
+                lineTo(w * 0.39f, h * 0.42f); lineTo(w * 0.42f, h * 0.48f); lineTo(w * 0.45f, h * 0.35f)
+                lineTo(w * 0.48f, h * 0.48f); lineTo(w * 0.50f, h * 0.42f); lineTo(w * 0.52f, h * 0.38f)
+                lineTo(w * 0.54f, h * 0.42f); lineTo(w * 0.55f, h * 0.50f); lineTo(w * 0.58f, h * 0.45f)
+                lineTo(w * 0.60f, h * 0.50f); lineTo(w * 0.60f, h * 0.80f); close()
+            }
+            drawPath(path, Color(0xFFFF6B9D).copy(alpha = 0.06f))
+            // Pixie dust
+            for (i in 0 until 12) {
+                val x = w * 0.15f + i * w * 0.06f
+                val y = h * 0.08f + kotlin.math.sin(i * 1.2f).toFloat() * h * 0.04f
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.08f), 1.5f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF6B9D), badgeInk = Color.White,
+        badgeRadius = 12.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFB0C8),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFF6B9D),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C0D8).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF6B9D).copy(alpha = 0.65f)
+    )
+    if (t.contains("FROZEN")) return SignatureDesign(
+        bg = Color(0xFFE3F2FD), cornerRadius = 10f,
+        drawBackground = { w, h ->
+            // Snowflakes
+            for (i in 0 until 20) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h
+                val r = 2f + ((i * 3571) % 100) / 100f * 3f
+                drawCircle(Color(0xFF2196F3).copy(alpha = 0.06f), r, Offset(x, y))
+                // Crystal arms
+                for (k in 0 until 6) {
+                    val a = Math.toRadians((60.0 * k)).toFloat()
+                    drawLine(Color(0xFF2196F3).copy(alpha = 0.04f), Offset(x, y), Offset(x + kotlin.math.cos(a) * r * 2, y + kotlin.math.sin(a) * r * 2), strokeWidth = 0.5f)
+                }
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF2196F3), badgeInk = Color.White,
+        badgeRadius = 10.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF1565C0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF2196F3),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF1A3A5A).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF2196F3).copy(alpha = 0.65f)
+    )
+    if (t.contains("MATRIX")) return SignatureDesign(
+        bg = Color(0xFF0A0A0A), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Code rain
+            for (col in 0 until 20) {
+                val x = w * 0.05f + col * w * 0.048f
+                for (row in 0 until 25) {
+                    val y = h * 0.02f + row * h * 0.038f
+                    val a = if ((col + row) % 4 == 0) 0.12f else 0.04f
+                    drawCircle(Color(0xFF00E676).copy(alpha = a), 1.5f, Offset(x, y))
+                }
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF00E676), badgeInk = Color(0xFF0A0A0A),
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = GeomFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF00E676),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF00C853),
+        bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFB0D0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00C853).copy(alpha = 0.65f)
+    )
+    if (t.contains("INTERSTELLAR") || t.contains("BLACK HOLE")) return SignatureDesign(
+        bg = Color(0xFF0A0A14), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Black hole accretion disk
+            drawOval(Color(0xFFFF6D00).copy(alpha = 0.08f), Offset(w * 0.50f, h * 0.08f), Size(w * 0.40f, h * 0.08f), style = Stroke(2f))
+            drawOval(Color(0xFFFF8F00).copy(alpha = 0.05f), Offset(w * 0.52f, h * 0.10f), Size(w * 0.36f, h * 0.06f), style = Stroke(1.5f))
+            // Starfield
+            val s = (w * 1000 + h).toInt()
+            for (i in 0 until 60) {
+                val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
+                val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
+                drawCircle(Color.White.copy(alpha = 0.06f), 1f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF6D00), badgeInk = Color(0xFF0A0A14),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0D0C0),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFFF6D00),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC0B0A0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF6D00).copy(alpha = 0.65f)
+    )
+    if (t.contains("AVATAR") && (t.contains("JAMES CAMERON") || t.contains("PANDORA"))) return SignatureDesign(
+        bg = Color(0xFF0A2020), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Bioluminescent dots
+            for (i in 0 until 30) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h
+                val r = 2f + ((i * 3571) % 100) / 100f * 4f
+                drawCircle(Color(0xFF00BCD4).copy(alpha = 0.06f + ((i * 4201) % 100) / 100f * 0.08f), r, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF00BCD4), badgeInk = Color(0xFF0A2020),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF80DEEA),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF00BCD4),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0D0D0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00BCD4).copy(alpha = 0.65f)
+    )
+    if (t.contains("TITANIC")) return SignatureDesign(
+        bg = Color(0xFF0A0A1E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Wave line
+            val path = Path().apply {
+                moveTo(0f, h * 0.60f)
+                for (i in 0..40) {
+                    val x = i * w / 40f
+                    val y = h * 0.60f + kotlin.math.sin(i * 0.3f).toFloat() * h * 0.03f
+                    lineTo(x, y)
+                }
+            }
+            drawPath(path, Color(0xFFD4AF37).copy(alpha = 0.10f), style = Stroke(1.5f))
+            // Stars
+            for (i in 0 until 30) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h * 0.50f
+                drawCircle(Color.White.copy(alpha = 0.06f), 1f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD4AF37), badgeInk = Color(0xFF0A0A1E),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFD4AF37),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A8AA0),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFC0C0D8).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD4AF37).copy(alpha = 0.55f)
+    )
+    if (t.contains("COCO")) return SignatureDesign(
+        bg = Color(0xFF4A148C), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Marigold petals
+            for (i in 0 until 25) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h
+                drawCircle(Color(0xFFFF6D00).copy(alpha = 0.06f), 3f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF6D00), badgeInk = Color(0xFF4A148C),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFB080),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFF6D00),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C0E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF6D00).copy(alpha = 0.65f)
+    )
+    if (t.contains("LION KING")) return SignatureDesign(
+        bg = Color(0xFFFF8F00), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Savanna horizon
+            drawLine(Color(0xFF5D4037).copy(alpha = 0.12f), Offset(0f, h * 0.75f), Offset(w, h * 0.75f), strokeWidth = 1.5f)
+            // Sun circle
+            drawCircle(Color(0xFFFFD700).copy(alpha = 0.15f), w * 0.12f, Offset(w * 0.75f, h * 0.30f))
+            drawCircle(Color(0xFFFFD700).copy(alpha = 0.08f), w * 0.16f, Offset(w * 0.75f, h * 0.30f), style = Stroke(1f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF5D4037), badgeInk = Color.White,
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2010),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF5D4037),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF4A3020).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF5D4037).copy(alpha = 0.65f)
+    )
+    // ── MUSIC ──
+    if (t.contains("BEATLES")) return SignatureDesign(
+        bg = Color(0xFF2A0A3E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Psychedelic swirls
+            for (i in 0 until 8) {
+                val cx = w * 0.20f + i * w * 0.08f
+                drawCircle(Color(0xFFFF6D00).copy(alpha = 0.05f), w * 0.06f, Offset(cx, h * 0.15f), style = Stroke(1.5f))
+            }
+            // 60s circles
+            for (i in 0 until 5) {
+                drawCircle(Color(0xFFE040FB).copy(alpha = 0.04f), w * 0.04f + i * w * 0.02f, Offset(w * 0.80f, h * 0.12f + i * h * 0.03f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF6D00), badgeInk = Color(0xFF2A0A3E),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFB080),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFFF6D00),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C0E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF6D00).copy(alpha = 0.65f)
+    )
+    if (t.contains("TAYLOR SWIFT")) return SignatureDesign(
+        bg = Color(0xFFFFF0F5), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Sparkle stars
+            for (i in 0 until 15) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h
+                drawCircle(Color(0xFFE91E63).copy(alpha = 0.08f), 2f, Offset(x, y))
+            }
+            // Diary feel — faint ruled lines
+            for (i in 0 until 4) { drawLine(Color(0xFFE91E63).copy(alpha = 0.04f), Offset(w * 0.10f, h * 0.12f + i * h * 0.06f), Offset(w * 0.40f, h * 0.12f + i * h * 0.06f), strokeWidth = 0.5f) }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFE91E63), badgeInk = Color.White,
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF880E4F),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE91E63),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF6A3040).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFE91E63).copy(alpha = 0.55f)
+    )
+    if (t.contains("MICHAEL JACKSON")) return SignatureDesign(
+        bg = Color(0xFF0A0A0A), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Spotlight cone
+            val path = Path().apply { moveTo(w * 0.50f, 0f); lineTo(w * 0.30f, h * 0.60f); lineTo(w * 0.70f, h * 0.60f); close() }
+            drawPath(path, Color(0xFFFFD700).copy(alpha = 0.06f))
+            // Sparkle
+            for (i in 0 until 8) {
+                val x = w * 0.40f + ((i * 3571) % 100) / 100f * w * 0.20f
+                val y = h * 0.05f + ((i * 4201) % 100) / 100f * h * 0.30f
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.10f), 1.5f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFD700), badgeInk = Color(0xFF0A0A0A),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFD700),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFC0A030),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0D0D0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFD700).copy(alpha = 0.65f)
+    )
+    if (t.contains("BEYONCE") || t.contains("BEYONC")) return SignatureDesign(
+        bg = Color(0xFF0A0A0A), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Crown silhouette (triangle)
+            val path = Path().apply { moveTo(w * 0.70f, h * 0.08f); lineTo(w * 0.76f, h * 0.04f); lineTo(w * 0.82f, h * 0.08f); lineTo(w * 0.88f, h * 0.04f); lineTo(w * 0.90f, h * 0.10f); lineTo(w * 0.68f, h * 0.10f); close() }
+            drawPath(path, Color(0xFFFFC107).copy(alpha = 0.08f))
+            // Sparkle
+            for (i in 0 until 10) {
+                val x = w * 0.65f + ((i * 3571) % 100) / 100f * w * 0.30f
+                val y = ((i * 4201) % 100) / 100f * h * 0.20f
+                drawCircle(Color(0xFFFFC107).copy(alpha = 0.06f), 1.5f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFC107), badgeInk = Color(0xFF0A0A0A),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFC107),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC0A030),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0D0D0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFC107).copy(alpha = 0.65f)
+    )
+    if (t.contains("PINK FLOYD")) return SignatureDesign(
+        bg = Color(0xFF0A0A2E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Prism triangle
+            val cx = w * 0.75f; val cy = h * 0.20f; val s2 = w * 0.08f
+            val path = Path().apply { moveTo(cx, cy - s2); lineTo(cx + s2, cy + s2); lineTo(cx - s2, cy + s2); close() }
+            drawPath(path, Color.White.copy(alpha = 0.08f), style = Stroke(1.5f))
+            // Rainbow spectrum lines
+            val colors = listOf(Color(0xFFFF0000), Color(0xFFFF8800), Color(0xFFFFFF00), Color(0xFF00FF00), Color(0xFF0088FF), Color(0xFF8800FF))
+            colors.forEachIndexed { i, c ->
+                drawLine(c.copy(alpha = 0.06f), Offset(cx + s2, cy), Offset(cx + s2 + w * 0.15f, cy - s2 * 0.5f + i * s2 * 0.18f), strokeWidth = 1f)
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF7B1FA2), badgeInk = Color.White,
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE0D0F0),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF7B1FA2),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFC0B0D0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF7B1FA2).copy(alpha = 0.55f)
+    )
+    if (t.contains("NIRVANA")) return SignatureDesign(
+        bg = Color(0xFF0A0A0A), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Grunge texture
+            val s = (w * 1000 + h).toInt()
+            for (i in 0 until 80) {
+                val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
+                val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
+                drawCircle(Color(0xFFFFEB3B).copy(alpha = 0.04f), 1.5f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFEB3B), badgeInk = Color(0xFF0A0A0A),
+        badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFEB3B),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC0B020),
+        bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFD0D0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC0B020).copy(alpha = 0.65f)
+    )
+    if (t.contains("DAVID BOWIE")) return SignatureDesign(
+        bg = Color(0xFF1565C0), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Lightning bolt
+            val path = Path().apply { moveTo(w * 0.75f, h * 0.04f); lineTo(w * 0.70f, h * 0.28f); lineTo(w * 0.78f, h * 0.24f); lineTo(w * 0.72f, h * 0.50f) }
+            drawPath(path, Color(0xFFD32F2F).copy(alpha = 0.12f), style = Stroke(2.5f))
+            // Star
+            drawCircle(Color(0xFFD32F2F).copy(alpha = 0.08f), 3f, Offset(w * 0.20f, h * 0.10f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD32F2F), badgeInk = Color.White,
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0F0FF),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD32F2F),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC0D8F0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD32F2F).copy(alpha = 0.65f)
+    )
+    if (t.contains("ELVIS")) return SignatureDesign(
+        bg = Color(0xFFFFD700), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Lightning bolts
+            for (i in 0 until 3) {
+                val x = w * 0.10f + i * w * 0.30f
+                val path = Path().apply { moveTo(x, h * 0.05f); lineTo(x - 5f, h * 0.20f); lineTo(x + 5f, h * 0.18f); lineTo(x - 3f, h * 0.35f) }
+                drawPath(path, Color(0xFF0A0A0A).copy(alpha = 0.06f), style = Stroke(1.5f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF0A0A0A), badgeInk = Color(0xFFFFD700),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2810),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF0A0A0A),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF4A3820).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF0A0A0A).copy(alpha = 0.65f)
+    )
+    // ── ANIME ──
+    if (t.contains("NARUTO")) return SignatureDesign(
+        bg = Color(0xFFFF6D00), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Konoha spiral
+            val cx = w * 0.80f; val cy = h * 0.15f; val cr = w * 0.06f
+            for (i in 0 until 12) {
+                val angle = i * 30f
+                val rad = Math.toRadians(angle.toDouble()).toFloat()
+                val r = cr * (1f - i * 0.07f)
+                drawCircle(Color(0xFF1565C0).copy(alpha = 0.08f), 1f, Offset(cx + kotlin.math.cos(rad) * r, cy + kotlin.math.sin(rad) * r))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF1565C0), badgeInk = Color.White,
+        badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF3A2010),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF1565C0),
+        bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFF5A3010).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF1565C0).copy(alpha = 0.65f)
+    )
+    if (t.contains("DRAGON BALL")) return SignatureDesign(
+        bg = Color(0xFFFF6D00), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Dragon ball stars
+            for (i in 0 until 7) {
+                val x = w * 0.15f + (i % 4) * w * 0.18f
+                val y = h * 0.08f + (i / 4) * h * 0.12f
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.10f), w * 0.03f, Offset(x, y))
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.06f), w * 0.02f, Offset(x, y))
+            }
+            // Energy burst lines
+            for (i in 0 until 6) {
+                val angle = i * 60f
+                val rad = Math.toRadians(angle.toDouble()).toFloat()
+                drawLine(Color(0xFF1565C0).copy(alpha = 0.06f), Offset(w * 0.85f, h * 0.12f), Offset(w * 0.85f + kotlin.math.cos(rad) * w * 0.08f, h * 0.12f + kotlin.math.sin(rad) * h * 0.08f), strokeWidth = 1f)
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF1565C0), badgeInk = Color.White,
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2010),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF1565C0),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF5A3010).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF1565C0).copy(alpha = 0.65f)
+    )
+    if (t.contains("ONE PIECE")) return SignatureDesign(
+        bg = Color(0xFFC62828), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Waves
+            for (i in 0 until 3) {
+                val path = Path().apply {
+                    moveTo(0f, h * 0.80f + i * h * 0.05f)
+                    for (j in 0..20) {
+                        val x = j * w / 20f
+                        val y = h * 0.80f + i * h * 0.05f + kotlin.math.sin(j * 0.8f + i).toFloat() * h * 0.02f
+                        lineTo(x, y)
+                    }
+                }
+                drawPath(path, Color(0xFF1565C0).copy(alpha = 0.08f), style = Stroke(1.5f))
+            }
+            // Jolly roger skull hint
+            drawCircle(Color.White.copy(alpha = 0.06f), w * 0.04f, Offset(w * 0.82f, h * 0.10f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF1565C0), badgeInk = Color.White,
+        badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFF0E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF1565C0),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0D0C0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF1565C0).copy(alpha = 0.65f)
+    )
+    if (t.contains("DEMON SLAYER") || t.contains("KIMETSU")) return SignatureDesign(
+        bg = Color(0xFF1A0A0A), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Flame + water wave
+            drawArc(Color(0xFFFF3D00).copy(alpha = 0.06f), 200f, 160f, false, Offset(w * 0.55f, h * 0.02f), Size(w * 0.35f, h * 0.30f), style = Stroke(1.5f))
+            // Water wave
+            val path = Path().apply { moveTo(w * 0.05f, h * 0.85f); for (i in 0..15) { lineTo(w * 0.05f + i * w * 0.06f, h * 0.85f + kotlin.math.sin(i * 0.8f).toFloat() * h * 0.03f) } }
+            drawPath(path, Color(0xFF00897B).copy(alpha = 0.10f), style = Stroke(1.5f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF3D00), badgeInk = Color.White,
+        badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFF0E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFFF3D00),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0C0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF3D00).copy(alpha = 0.65f)
+    )
+    if (t.contains("SAILOR MOON")) return SignatureDesign(
+        bg = Color(0xFF0D1B3E), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Moon crescent
+            drawCircle(Color(0xFFF48FB1).copy(alpha = 0.10f), w * 0.08f, Offset(w * 0.80f, h * 0.12f))
+            drawCircle(Color(0xFF0D1B3E).copy(alpha = 0.12f), w * 0.08f, Offset(w * 0.83f, h * 0.10f))
+            // Stars
+            for (i in 0 until 12) {
+                val x = ((i * 7919) % 10000) / 10000f * w * 0.9f + w * 0.05f
+                val y = ((i * 6271) % 10000) / 10000f * h * 0.3f
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.06f), 1.5f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFF48FB1), badgeInk = Color(0xFF0D1B3E),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF48FB1),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC08090),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD0C0D8).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFF48FB1).copy(alpha = 0.55f)
+    )
+    if (t.contains("GHIBLI") || t.contains("TOTORO")) return SignatureDesign(
+        bg = Color(0xFFE8F5E9), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Forest
+            for (i in 0 until 6) {
+                val x = w * 0.10f + i * w * 0.15f
+                val th = h * 0.10f + ((i * 3571) % 100) / 100f * h * 0.05f
+                drawCircle(Color(0xFF5D4037).copy(alpha = 0.06f), th * 0.5f, Offset(x, h * 0.88f - th))
+                drawLine(Color(0xFF5D4037).copy(alpha = 0.08f), Offset(x, h * 0.88f), Offset(x, h * 0.88f - th), strokeWidth = 1.5f)
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF5D4037), badgeInk = Color.White,
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF2E4A2E),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF5D4037),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF3A5A3A).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF5D4037).copy(alpha = 0.55f)
+    )
+    // ── FOOD & DRINK ──
+    if (t.contains("PIZZA")) return SignatureDesign(
+        bg = Color(0xFFC62828), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Semicircle pizza
+            drawArc(Color(0xFFFFEB3B).copy(alpha = 0.08f), 0f, 180f, false, Offset(w * 0.55f, h * 0.05f), Size(w * 0.35f, h * 0.25f))
+            // Steam
+            for (i in 0 until 3) {
+                val path = Path().apply { moveTo(w * 0.70f + i * 8f, h * 0.05f); cubicTo(w * 0.68f + i * 8f, h * 0.02f, w * 0.72f + i * 8f, h * 0.00f, w * 0.70f + i * 8f, h * -0.02f) }
+                drawPath(path, Color.White.copy(alpha = 0.06f), style = Stroke(0.8f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFEB3B), badgeInk = Color(0xFFC62828),
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFF0E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFEB3B),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0D0C0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFEB3B).copy(alpha = 0.65f)
+    )
+    if (t.contains("SUSHI")) return SignatureDesign(
+        bg = Color(0xFFFAFAFA), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Chopstick lines
+            drawLine(Color(0xFFD32F2F).copy(alpha = 0.10f), Offset(w * 0.75f, h * 0.05f), Offset(w * 0.90f, h * 0.35f), strokeWidth = 1.5f)
+            drawLine(Color(0xFFD32F2F).copy(alpha = 0.08f), Offset(w * 0.78f, h * 0.05f), Offset(w * 0.93f, h * 0.35f), strokeWidth = 1.5f)
+            // Wave
+            val path = Path().apply { moveTo(0f, h * 0.80f); for (i in 0..15) { lineTo(i * w / 15f, h * 0.80f + kotlin.math.sin(i * 0.6f).toFloat() * h * 0.02f) } }
+            drawPath(path, Color(0xFF1565C0).copy(alpha = 0.06f), style = Stroke(1f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD32F2F), badgeInk = Color.White,
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF1A1A1A),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFD32F2F),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF4A4A4A).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD32F2F).copy(alpha = 0.65f)
+    )
+    if (t.contains("COFFEE") || t.contains("ESPRESSO")) return SignatureDesign(
+        bg = Color(0xFF2E1A0E), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Cup rim
+            drawArc(Color(0xFFFFF8E1).copy(alpha = 0.06f), 0f, 180f, false, Offset(w * 0.60f, h * 0.08f), Size(w * 0.25f, h * 0.08f), style = Stroke(1.5f))
+            // Steam
+            for (i in 0 until 3) {
+                val path = Path().apply { moveTo(w * 0.70f + i * 6f, h * 0.08f); cubicTo(w * 0.68f + i * 6f, h * 0.04f, w * 0.72f + i * 6f, h * 0.02f, w * 0.70f + i * 6f, h * 0.00f) }
+                drawPath(path, Color(0xFFFFF8E1).copy(alpha = 0.06f), style = Stroke(0.8f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFF8E1), badgeInk = Color(0xFF2E1A0E),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFF0E0),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A6A42),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD8C8B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8A6A42).copy(alpha = 0.55f)
+    )
+    if (t.contains("CHOCOLATE")) return SignatureDesign(
+        bg = Color(0xFF3E2723), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Cocoa beans
+            for (i in 0 until 6) {
+                val x = w * 0.15f + i * w * 0.13f
+                val y = h * 0.08f + ((i * 3571) % 100) / 100f * h * 0.05f
+                drawOval(Color(0xFFD4AF37).copy(alpha = 0.06f), Offset(x, y), Size(w * 0.04f, h * 0.03f))
+            }
+            // Swirl
+            drawArc(Color(0xFFD4AF37).copy(alpha = 0.06f), 0f, 270f, false, Offset(w * 0.72f, h * 0.06f), Size(w * 0.18f, h * 0.12f), style = Stroke(1f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD4AF37), badgeInk = Color(0xFF3E2723),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFD4AF37),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF8A6A30),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD0C0A0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD4AF37).copy(alpha = 0.55f)
+    )
+    if (t.contains("WINE") || t.contains("VINEYARD")) return SignatureDesign(
+        bg = Color(0xFF4A0A0A), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Grape cluster
+            val gcx = w * 0.80f; val gcy = h * 0.15f
+            for (i in 0 until 7) {
+                val x = gcx + ((i * 3571) % 100) / 100f * w * 0.08f - w * 0.04f
+                val y = gcy + ((i * 4201) % 100) / 100f * h * 0.06f
+                drawCircle(Color(0xFFC9A959).copy(alpha = 0.08f), w * 0.015f, Offset(x, y))
+            }
+            // Glass rim
+            drawArc(Color(0xFFC9A959).copy(alpha = 0.06f), 0f, 180f, false, Offset(w * 0.70f, h * 0.05f), Size(w * 0.20f, h * 0.06f), style = Stroke(1f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFC9A959), badgeInk = Color(0xFF4A0A0A),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFC9A959),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A6A30),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD0B8A0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC9A959).copy(alpha = 0.55f)
+    )
+    // ── HISTORY ──
+    if (t.contains("EGYPT") || t.contains("PYRAMID") || t.contains("PHARAOH")) return SignatureDesign(
+        bg = Color(0xFFF0E0C0), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Pyramid triangle
+            val path = Path().apply { moveTo(w * 0.50f, h * 0.08f); lineTo(w * 0.35f, h * 0.30f); lineTo(w * 0.65f, h * 0.30f); close() }
+            drawPath(path, Color(0xFFC9A959).copy(alpha = 0.08f), style = Stroke(1.5f))
+            // Hieroglyph dots
+            for (i in 0 until 6) { drawCircle(Color(0xFFC9A959).copy(alpha = 0.08f), 1.5f, Offset(w * 0.08f, h * 0.08f + i * h * 0.04f)) }
+            // Desert stars
+            for (i in 0 until 10) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h * 0.30f
+                drawCircle(Color(0xFFC9A959).copy(alpha = 0.06f), 1f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFC9A959), badgeInk = Color(0xFFF0E0C0),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF5A4020),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFC9A959),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF6A5030).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC9A959).copy(alpha = 0.55f)
+    )
+    if (t.contains("ROME") || t.contains("COLOSSEUM") || t.contains("GLADIATOR")) return SignatureDesign(
+        bg = Color(0xFFF0EDE8), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Column
+            drawLine(Color(0xFF8B0000).copy(alpha = 0.08f), Offset(w * 0.10f, h * 0.05f), Offset(w * 0.10f, h * 0.95f), strokeWidth = 3f)
+            drawLine(Color(0xFF8B0000).copy(alpha = 0.06f), Offset(w * 0.08f, h * 0.05f), Offset(w * 0.12f, h * 0.05f), strokeWidth = 2f)
+            drawLine(Color(0xFF8B0000).copy(alpha = 0.06f), Offset(w * 0.08f, h * 0.95f), Offset(w * 0.12f, h * 0.95f), strokeWidth = 2f)
+            // Arch
+            drawArc(Color(0xFF8B0000).copy(alpha = 0.06f), 180f, 180f, false, Offset(w * 0.72f, h * 0.06f), Size(w * 0.20f, h * 0.15f), style = Stroke(1.5f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF8B0000), badgeInk = Color.White,
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF3A2020),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8B0000),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF5A3A30).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8B0000).copy(alpha = 0.55f)
+    )
+    if (t.contains("SAMURAI") || t.contains("JAPAN") || t.contains("SHOGUN")) return SignatureDesign(
+        bg = Color(0xFF1A0A0A), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Cherry blossom
+            for (i in 0 until 12) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h * 0.40f
+                drawCircle(Color(0xFFC62828).copy(alpha = 0.06f), 2.5f, Offset(x, y))
+            }
+            // Katana line
+            drawLine(Color(0xFFB0BEC5).copy(alpha = 0.08f), Offset(w * 0.80f, h * 0.05f), Offset(w * 0.80f, h * 0.50f), strokeWidth = 1f)
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFC62828), badgeInk = Color.White,
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0D0C0),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFC62828),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC62828).copy(alpha = 0.65f)
+    )
+    if (t.contains("VIKING") || t.contains("NORSE")) return SignatureDesign(
+        bg = Color(0xFF1A1A2E), cornerRadius = 4f,
+        drawBackground = { w, h ->
+            // Rune
+            drawLine(Color(0xFFB0BEC5).copy(alpha = 0.10f), Offset(w * 0.80f, h * 0.06f), Offset(w * 0.80f, h * 0.22f), strokeWidth = 2f)
+            drawLine(Color(0xFFB0BEC5).copy(alpha = 0.08f), Offset(w * 0.78f, h * 0.12f), Offset(w * 0.82f, h * 0.16f), strokeWidth = 1.5f)
+            // Longship silhouette
+            val path = Path().apply { moveTo(w * 0.10f, h * 0.88f); quadraticBezierTo(w * 0.30f, h * 0.82f, w * 0.50f, h * 0.88f); quadraticBezierTo(w * 0.70f, h * 0.82f, w * 0.90f, h * 0.85f); lineTo(w * 0.85f, h * 0.88f); lineTo(w * 0.15f, h * 0.88f); close() }
+            drawPath(path, Color(0xFFB0BEC5).copy(alpha = 0.05f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFB0BEC5), badgeInk = Color(0xFF1A1A2E),
+        badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFB0BEC5),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF7A8A90),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC0C8D0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF7A8A90).copy(alpha = 0.65f)
+    )
+    // ── INTERNET & TECH ──
+    if (t.contains("BITCOIN") || t.contains("CRYPTO") || t.contains("ETHEREUM")) return SignatureDesign(
+        bg = Color(0xFFF7931A), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Circuit traces
+            for (i in 0 until 8) {
+                val x1 = w * 0.10f + i * w * 0.10f
+                drawLine(Color(0xFF0A0A0A).copy(alpha = 0.06f), Offset(x1, h * 0.05f), Offset(x1, h * 0.30f), strokeWidth = 0.8f)
+                drawLine(Color(0xFF0A0A0A).copy(alpha = 0.06f), Offset(x1, h * 0.30f), Offset(x1 + w * 0.05f, h * 0.30f), strokeWidth = 0.8f)
+                drawCircle(Color(0xFF0A0A0A).copy(alpha = 0.08f), 2f, Offset(x1 + w * 0.05f, h * 0.30f))
+            }
+            // Coin circle
+            drawCircle(Color(0xFF0A0A0A).copy(alpha = 0.06f), w * 0.08f, Offset(w * 0.80f, h * 0.12f), style = Stroke(1.5f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF0A0A0A), badgeInk = Color(0xFFF7931A),
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2010),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF0A0A0A),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF4A3020).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF0A0A0A).copy(alpha = 0.65f)
+    )
+    if (t.contains("SPACEX") || t.contains("ROCKET") || t.contains("NASA")) return SignatureDesign(
+        bg = Color(0xFF0A0A14), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Rocket trail
+            drawLine(Color(0xFF42A5F5).copy(alpha = 0.08f), Offset(w * 0.80f, h * 0.12f), Offset(w * 0.80f, h * 0.40f), strokeWidth = 2f)
+            // Orbit ellipse
+            drawOval(Color(0xFF42A5F5).copy(alpha = 0.06f), Offset(w * 0.60f, h * 0.05f), Size(w * 0.35f, h * 0.15f), style = Stroke(0.8f))
+            // Stars
+            for (i in 0 until 30) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h
+                drawCircle(Color.White.copy(alpha = 0.06f), 1f, Offset(x, y))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF42A5F5), badgeInk = Color(0xFF0A0A14),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0F0FF),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF42A5F5),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0C8E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF42A5F5).copy(alpha = 0.65f)
+    )
+    if (t.contains("SHAKESPEARE")) return SignatureDesign(
+        bg = Color(0xFFF5E6D0), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Quill
+            drawLine(Color(0xFF5D4037).copy(alpha = 0.10f), Offset(w * 0.82f, h * 0.05f), Offset(w * 0.85f, h * 0.30f), strokeWidth = 1.5f)
+            // Ink blot
+            drawCircle(Color(0xFF5D4037).copy(alpha = 0.06f), w * 0.03f, Offset(w * 0.85f, h * 0.32f))
+            // Ruled lines
+            for (i in 0 until 10) { drawLine(Color(0xFFC8B898).copy(alpha = 0.10f), Offset(w * 0.08f, h * 0.12f + i * h * 0.06f), Offset(w * 0.70f, h * 0.12f + i * h * 0.06f), strokeWidth = 0.5f) }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF5D4037), badgeInk = Color(0xFFF5E6D0),
+        badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF3A2814),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF5D4037),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF6A5030).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF5D4037).copy(alpha = 0.55f)
+    )
+    if (t.contains("VAN GOGH") || t.contains("STARRY NIGHT")) return SignatureDesign(
+        bg = Color(0xFF1A1A3E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Starry swirl
+            for (i in 0 until 12) {
+                val cx = w * 0.20f + i * w * 0.06f
+                val cy = h * 0.12f + kotlin.math.sin(i * 0.8f).toFloat() * h * 0.04f
+                drawCircle(Color(0xFFFFC107).copy(alpha = 0.08f), w * 0.03f, Offset(cx, cy), style = Stroke(1.5f))
+            }
+            // Bright star
+            drawCircle(Color(0xFFFFC107).copy(alpha = 0.15f), 3f, Offset(w * 0.78f, h * 0.10f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFC107), badgeInk = Color(0xFF1A1A3E),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFC107),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A8AA0),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFC0C0D8).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFFFC107).copy(alpha = 0.55f)
+    )
+    // ── SPORTS ──
+    if (t.contains("OLYMPICS")) return SignatureDesign(
+        bg = Color(0xFF0D1B3E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Five rings
+            val ringColors = listOf(Color(0xFF2196F3), Color(0xFFFFEB3B), Color(0xFF000000), Color(0xFF4CAF50), Color(0xFFF44336))
+            ringColors.forEachIndexed { i, c ->
+                drawCircle(c.copy(alpha = 0.08f), w * 0.03f, Offset(w * 0.62f + i * w * 0.05f, h * 0.12f + (i % 2) * h * 0.03f), style = Stroke(1.2f))
+            }
+            // Torch flame
+            drawCircle(Color(0xFFFFD700).copy(alpha = 0.10f), w * 0.02f, Offset(w * 0.15f, h * 0.08f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFFFD700), badgeInk = Color(0xFF0D1B3E),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0F0FF),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFD700),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0C8E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFD700).copy(alpha = 0.65f)
+    )
+    if (t.contains("NBA") || t.contains("BASKETBALL")) return SignatureDesign(
+        bg = Color(0xFF1A0A0A), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Court lines
+            drawLine(Color(0xFF1565C0).copy(alpha = 0.08f), Offset(w * 0.05f, h * 0.50f), Offset(w * 0.95f, h * 0.50f), strokeWidth = 1.5f)
+            drawCircle(Color(0xFF1565C0).copy(alpha = 0.06f), w * 0.15f, Offset(w * 0.50f, h * 0.50f), style = Stroke(1f))
+            // Ball arc
+            drawArc(Color(0xFFD32F2F).copy(alpha = 0.06f), 0f, 120f, false, Offset(w * 0.70f, h * 0.06f), Size(w * 0.20f, h * 0.15f), style = Stroke(1f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFD32F2F), badgeInk = Color.White,
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0D0C0),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFD32F2F),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C0B0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD32F2F).copy(alpha = 0.65f)
+    )
+    if (t.contains("CRICKET")) return SignatureDesign(
+        bg = Color(0xFFF5F5F0), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Bat
+            drawLine(Color(0xFFC62828).copy(alpha = 0.08f), Offset(w * 0.80f, h * 0.08f), Offset(w * 0.80f, h * 0.35f), strokeWidth = 2f)
+            drawRoundRect(Color(0xFFC62828).copy(alpha = 0.06f), Offset(w * 0.77f, h * 0.06f), Size(w * 0.06f, h * 0.06f), CornerRadius(2f))
+            // Ball
+            drawCircle(Color(0xFFC62828).copy(alpha = 0.08f), w * 0.015f, Offset(w * 0.85f, h * 0.10f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFC62828), badgeInk = Color.White,
+        badgeRadius = 6.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF1A1A1A),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC62828),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFF4A4A4A).copy(alpha = 0.85f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC62828).copy(alpha = 0.65f)
+    )
+    // ── WILDCARD ──
+    if (t.contains("PHILOSOPHY")) return SignatureDesign(
+        bg = Color(0xFF1A1A2E), cornerRadius = 8f,
+        drawBackground = { w, h ->
+            // Column
+            drawLine(Color(0xFFC9A959).copy(alpha = 0.10f), Offset(w * 0.12f, h * 0.06f), Offset(w * 0.12f, h * 0.94f), strokeWidth = 2.5f)
+            drawLine(Color(0xFFC9A959).copy(alpha = 0.06f), Offset(w * 0.10f, h * 0.06f), Offset(w * 0.14f, h * 0.06f), strokeWidth = 1.5f)
+            drawLine(Color(0xFFC9A959).copy(alpha = 0.06f), Offset(w * 0.10f, h * 0.94f), Offset(w * 0.14f, h * 0.94f), strokeWidth = 1.5f)
+            // Scroll
+            drawArc(Color(0xFFC9A959).copy(alpha = 0.06f), 180f, 180f, false, Offset(w * 0.72f, h * 0.06f), Size(w * 0.15f, h * 0.06f), style = Stroke(1f))
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFC9A959), badgeInk = Color(0xFF1A1A2E),
+        badgeRadius = 8.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFC9A959),
+        metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A8AA0),
+        bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFC0C0D8).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC9A959).copy(alpha = 0.55f)
+    )
+    if (t.contains("PSYCHOLOGY") || t.contains("MIND") || t.contains("BRAIN")) return SignatureDesign(
+        bg = Color(0xFF1A0A2E), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Brain outline (simplified)
+            drawArc(Color(0xFFE91E63).copy(alpha = 0.06f), 0f, 360f, false, Offset(w * 0.70f, h * 0.05f), Size(w * 0.20f, h * 0.15f), style = Stroke(1.5f))
+            // Spiral
+            for (i in 0 until 8) {
+                val angle = i * 45f
+                val rad = Math.toRadians(angle.toDouble()).toFloat()
+                val r = w * 0.02f + i * w * 0.005f
+                drawCircle(Color(0xFFE91E63).copy(alpha = 0.08f), 1.5f, Offset(w * 0.80f + kotlin.math.cos(rad) * r, h * 0.12f + kotlin.math.sin(rad) * r))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFFE91E63), badgeInk = Color(0xFF1A0A2E),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF0C0D8),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE91E63),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0B0C8).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE91E63).copy(alpha = 0.65f)
+    )
+    if (t.contains("OCEAN") || t.contains("DEEP SEA") || t.contains("MARINE")) return SignatureDesign(
+        bg = Color(0xFF0A1428), cornerRadius = 6f,
+        drawBackground = { w, h ->
+            // Wave
+            val path = Path().apply { moveTo(0f, h * 0.40f); for (i in 0..20) { lineTo(i * w / 20f, h * 0.40f + kotlin.math.sin(i * 0.5f).toFloat() * h * 0.04f) } }
+            drawPath(path, Color(0xFF00BCD4).copy(alpha = 0.10f), style = Stroke(1.5f))
+            // Bubbles
+            for (i in 0 until 10) {
+                val x = ((i * 7919) % 10000) / 10000f * w
+                val y = ((i * 6271) % 10000) / 10000f * h
+                val r = 2f + ((i * 3571) % 100) / 100f * 3f
+                drawCircle(Color(0xFF00BCD4).copy(alpha = 0.06f), r, Offset(x, y), style = Stroke(0.8f))
+            }
+        },
+        padding = PaddingValues(22.dp), badgeColor = Color(0xFF00BCD4), badgeInk = Color(0xFF0A1428),
+        badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+        badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+        titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF80DEEA),
+        metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF00BCD4),
+        bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0D0E0).copy(alpha = 0.88f),
+        footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00BCD4).copy(alpha = 0.65f)
+    )
+    // No match — fall back to category-level design
+    return null
+}
+
 
 private fun signatureDesign(categoryName: String, family: CategoryFamily): SignatureDesign {
     val cat = categoryName.uppercase().trim()
@@ -1815,12 +2947,14 @@ fun TopicShareSheet(
     val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
     val quote = ShareCardContent("quote", "Quote", quoteText)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    // Custom fact available for all styles except Quotes
-    val available = if (isQuotes) listOf(quote) else listOf(quick) + savedSources + listOf(custom)
+    // Custom fact + No Fact available for all styles except Quotes
+    val noFact = ShareCardContent(NO_FACT_ID, "No fact", "")
+    val available = if (isQuotes) listOf(quote) else listOf(quick, noFact) + savedSources + listOf(custom)
     val defaultId = if (isQuotes) quote.id else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
+        NO_FACT_ID -> noFact
         else -> available.firstOrNull { it.id == activeId } ?: quick
     }
 
