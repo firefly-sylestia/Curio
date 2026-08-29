@@ -1021,3 +1021,11 @@ User's batched asks across the session:
 **Remaining:**
 - Liquid glass 120fps: the per-chip drawBackdrop calls scale linearly with visible chip count. Current compact mode (no lens, 0.5dp blur) is already optimal per-chip. Full 120fps with many visible chips requires architectural batching (render all chips as one backdrop region).
 - Pushing; watching CI.
+
+## Current request — share-card visual fixes
+- Scope: Android app only. Do not touch web/desktop.
+- User asked: Vinyl info block text should sit at the bottom-left corner only with no enclosing box.
+- User asked: Paper 9:16 share-card text is still getting cut; reduce quick-fact text size by 1sp.
+- User asked: Clean share-card design is bad; scratch/rework that style into a monochrome look with a new high-depth style.
+- User asked: Collage middle design looks cut/disconnected; fix it so it connects better.
+- User preference for this request: add to Prompt.md; do not delete/replace existing Prompt.md content.

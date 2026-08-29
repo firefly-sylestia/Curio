@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -171,11 +170,11 @@ private fun quoteFontSize(length: Int): TextUnit = when {
  *  so the text never gets cut off. Short facts get a slightly larger,
  *  more impactful size. */
 private fun quickFactFontSize(length: Int): TextUnit = when {
-    length > 200 -> 10.sp
-    length > 140 -> 11.sp
-    length > 90 -> 12.sp
-    length > 50 -> 13.sp
-    else -> 14.sp
+    length > 200 -> 9.sp
+    length > 140 -> 10.sp
+    length > 90 -> 11.sp
+    length > 50 -> 12.sp
+    else -> 13.sp
 }
 
 /** Even smaller for 3:4 aspect ratio. */
@@ -274,7 +273,6 @@ private fun VinylCard(
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
     val roseLight = Color(0xFFF0D0C8)
-    val cream = Color(0xFFFAF5F0)
     val inkDark = Color(0xFF3A2820)
     val roseFaint = Color(0xFFE8C8C0)
 
@@ -413,48 +411,27 @@ private fun VinylCard(
             }
         }
 
-        // ── Instrument panel — bottom-left ──
-        Surface(
-            shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 0.dp, bottomEnd = 6.dp),
-            color = inkDark,
-            shadowElevation = 3.dp,
-            modifier = Modifier.align(Alignment.BottomStart)
+        // ── Info copy — bottom-left, no enclosing box ──
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 18.dp, bottom = 16.dp)
+                .widthIn(max = 190.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                // Row 1 — nightlight + label
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(Modifier.size(6.dp).clip(CircleShape).background(roseDusty))
-                    CurioIcon(name = "nightlight", tint = roseDusty, size = 13.dp)
+            listOf(
+                Triple("nightlight", "LATE-NIGHT", "Themes of reflection & memory"),
+                Triple("headphones", "TRACKS", "Curated picks to explore & discover"),
+                Triple("workspace_premium", "RECOGNITION", "Explore via Curio")
+            ).forEach { (icon, label, detail) ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                    CurioIcon(name = icon, tint = roseDusty.copy(alpha = 0.86f), size = 12.dp)
                     Column {
-                        Text("LATE-NIGHT", style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp, color = roseDusty))
-                        Text("Themes of reflection & memory", style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 11.sp,
-                            color = Color.White.copy(alpha = 0.55f)))
-                    }
-                }
-                // Row 2 — headphones + label
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(Modifier.size(6.dp).clip(CircleShape).background(roseDusty))
-                    CurioIcon(name = "headphones", tint = roseDusty, size = 13.dp)
-                    Column {
-                        Text("TRACKS", style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp, color = roseDusty))
-                        Text("Curated picks to explore & discover", style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 11.sp,
-                            color = Color.White.copy(alpha = 0.55f)))
-                    }
-                }
-                // Row 3 — award + label
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(Modifier.size(6.dp).clip(CircleShape).background(roseDusty))
-                    CurioIcon(name = "workspace_premium", tint = roseDusty, size = 13.dp)
-                    Column {
-                        Text("RECOGNITION", style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp, color = roseDusty))
-                        Text("Explore via Curio", style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 11.sp,
-                            color = Color.White.copy(alpha = 0.55f)))
+                        Text(label, style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp, color = inkDark.copy(alpha = 0.78f)))
+                        Text(detail, style = TextStyle(
+                            fontFamily = LoraFontFamily, fontSize = 7.5.sp, lineHeight = 10.sp,
+                            color = inkDark.copy(alpha = 0.54f)))
                     }
                 }
             }
@@ -484,7 +461,7 @@ private fun CollageCard(
         // ── Bottom section: sage green ──
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
-            val tearY = h * 0.44f
+            val tearY = h * 0.40f
             // Sage bottom
             drawRect(bottomSage, Offset(0f, tearY), Size(w, h - tearY))
             // More visible tear line — thicker + brighter
@@ -492,7 +469,7 @@ private fun CollageCard(
             drawTornLine(tearY + 1.5f, w, topCream, tornEdge.copy(alpha = 0.7f))
 
             // Curved dark green footer base
-            val footerY = h * 0.88f
+            val footerY = h * 0.86f
             drawRect(bottomDark, Offset(0f, footerY), Size(w, h - footerY))
             // Organic curve at top of footer
             drawPath(
@@ -589,7 +566,7 @@ private fun CollageCard(
         }
 
         // ── MIDDLE SECTION: category pill + body text + footer ──
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 240.dp).zIndex(1f)) {
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = if (aspect == ShareCardAspect.PORTRAIT) 214.dp else 190.dp, bottom = 18.dp).zIndex(1f)) {
             // Category pill
             Surface(shape = RoundedCornerShape(14.dp), color = sagePill) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -633,7 +610,7 @@ private fun CollageCard(
     }
 }
 
-// STYLE 3 — CLEAN / NEUMORPHIC (sage + celestial moon hero)
+// STYLE 3 — CLEAN / NEUMORPHIC (monochrome stacked-depth portal)
 // ═══════════════════════════════════════════════════════════════════════
 @Composable
 private fun NeumorphicCard(
@@ -643,140 +620,89 @@ private fun NeumorphicCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null
 ) {
-    val bg = Color(0xFFE8EFEA)
-    val sageDark = Color(0xFF7A8B7A)
-    val sageMid = Color(0xFFB8C8B8)
-    val sageLight = Color(0xFFD8E2D8)
-    val inkDark = Color(0xFF2A3A2E)
-    val cream = Color(0xFFF5F8F5)
+    val paper = Color(0xFFF1F1EE)
+    val warm = Color(0xFFE3E1DA)
+    val graphite = Color(0xFF181818)
+    val mid = Color(0xFF6C6C68)
+    val pale = Color(0xFFFFFFFF)
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
-        // ── Background moon circle — dynamic per category ──
-        val heroSize = 200.dp
-        val accentCol = palette.accent
-        Box(Modifier.align(Alignment.TopCenter).padding(top = 50.dp).size(heroSize).zIndex(0f)) {
-            Canvas(Modifier.fillMaxSize()) {
-                val r = size.minDimension / 2f
-                val cx = size.width / 2f; val cy = size.height / 2f
-                // Soft glow behind
-                drawCircle(accentCol.copy(alpha = 0.12f), r + 16f, Offset(cx, cy))
-                // Main circle — category accent dark
-                drawCircle(accentCol.copy(alpha = 0.35f), r, Offset(cx, cy))
-                // Inner highlight
-                drawCircle(accentCol.copy(alpha = 0.15f), r * 0.82f, Offset(cx - r * 0.15f, cy - r * 0.12f))
-                // Subtle star dots inside
-                drawCircle(Color.White.copy(alpha = 0.45f), 1.5f, Offset(cx - r * 0.3f, cy - r * 0.4f))
-                drawCircle(Color.White.copy(alpha = 0.35f), 1f, Offset(cx + r * 0.25f, cy - r * 0.2f))
-                drawCircle(Color.White.copy(alpha = 0.30f), 1.2f, Offset(cx + r * 0.3f, cy + r * 0.15f))
-                drawCircle(Color.White.copy(alpha = 0.40f), 1.3f, Offset(cx - r * 0.1f, cy + r * 0.35f))
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(paper, RoundedCornerShape(6.dp))) {
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height
+            drawRect(Brush.verticalGradient(listOf(pale, paper, warm)))
+            for (i in 0 until 8) {
+                val inset = i * 13f
+                val alpha = 0.13f - i * 0.012f
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = alpha.coerceAtLeast(0.018f)),
+                    topLeft = Offset(w * 0.18f + inset, h * 0.19f + inset * 0.52f),
+                    size = Size(w * 0.58f - inset * 0.75f, h * 0.36f - inset * 0.22f),
+                    cornerRadius = CornerRadius(28f + i * 2f, 28f + i * 2f),
+                    style = Stroke((10f - i).coerceAtLeast(2f))
+                )
             }
+            drawRoundRect(
+                Brush.radialGradient(listOf(Color.White.copy(alpha = 0.94f), paper.copy(alpha = 0.70f), Color.Transparent), center = Offset(w * 0.48f, h * 0.35f), radius = w * 0.52f),
+                topLeft = Offset(w * 0.08f, h * 0.08f),
+                size = Size(w * 0.84f, h * 0.56f),
+                cornerRadius = CornerRadius(36f, 36f)
+            )
+            drawLine(graphite.copy(alpha = 0.18f), Offset(w * 0.08f, h * 0.70f), Offset(w * 0.92f, h * 0.60f), strokeWidth = 1.4f)
+            drawLine(Color.White.copy(alpha = 0.85f), Offset(w * 0.10f, h * 0.705f), Offset(w * 0.90f, h * 0.605f), strokeWidth = 1f)
         }
 
-        // Watermark glyphs
-        Watermark(family, categoryGlyph, sageDark.copy(alpha = 0.04f), display.hashCode())
+        Watermark(family, categoryGlyph, graphite.copy(alpha = 0.035f), display.hashCode())
 
-        // ── Content — overlays the moon ──
-        Column(modifier = Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 14.dp).zIndex(1f)) {
-            // Category pill — top-left
-            Surface(shape = RoundedCornerShape(12.dp), color = Color.White.copy(alpha = 0.60f), shadowElevation = 0.5.dp) {
-                Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    CurioIcon(name = categoryGlyph, tint = sageDark, size = 13.dp)
-                    Text(categoryName, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp), color = inkDark)
+        Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
+            Surface(shape = RoundedCornerShape(50), color = graphite, modifier = Modifier.align(Alignment.TopStart)) {
+                Row(Modifier.padding(horizontal = 11.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    CurioIcon(name = categoryGlyph, tint = Color.White, size = 13.dp)
+                    Text(categoryName.uppercase(), style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
+                        fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp), color = Color.White)
                 }
             }
 
-            if (quoteText != null) {
-                // ── Quote mode ──
+            Column(Modifier.align(Alignment.Center).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(display, style = TextStyle(
-                    fontFamily = ChangaOneFontFamily, fontSize = 24.sp,
-                    lineHeight = 28.sp, fontWeight = FontWeight.Normal, color = inkDark
-                ), maxLines = 2, overflow = TextOverflow.Ellipsis)
-
-                Spacer(Modifier.height(4.dp))
-                Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
-                    drawRoundRect(sageDark.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f))
-                }
-                Spacer(Modifier.height(10.dp))
-
-                // Quote card — bottom-right aligned
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = sageLight.copy(alpha = 0.50f),
-                        modifier = Modifier.widthIn(max = 240.dp)
-                    ) {
-                        Column(Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
-                            Text("“", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 40.sp,
-                                fontWeight = FontWeight.Bold, color = sageDark.copy(alpha = 0.40f),
-                                lineHeight = 30.sp))
-                            Text(quoteText, style = TextStyle(
-                                fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                                fontSize = 13.sp, lineHeight = 18.sp, color = inkDark
-                            ), maxLines = 4, overflow = TextOverflow.Ellipsis)
-                            if (!quoteAuthor.isNullOrBlank()) {
-                                Spacer(Modifier.height(6.dp))
-                                Text("— ${quoteAuthor.uppercase()}", style = TextStyle(
-                                    fontFamily = LoraFontFamily, fontSize = 8.sp,
-                                    fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp,
-                                    color = sageDark.copy(alpha = 0.60f)))
-                            }
-                        }
-                    }
-                }
-            } else {
-                // ── Title mode ──
-                Text(display, style = TextStyle(
-                    fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
-                    lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
-                ), maxLines = 2, overflow = TextOverflow.Ellipsis)
-
-                // Byline
-                if (byline.isNotBlank()) {
-                    Text(byline, style = TextStyle(
-                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                        fontSize = 12.sp, color = sageDark
-                    ), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                } else if (year != null) {
-                    Text(year, style = TextStyle(
-                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                        fontSize = 12.sp, color = sageDark
+                    fontFamily = ChangaOneFontFamily, fontSize = 30.sp, lineHeight = 32.sp,
+                    fontWeight = FontWeight.Normal, color = graphite, textAlign = TextAlign.Center
+                ), maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth())
+                val metaParts = mutableListOf<String>()
+                if (byline.isNotBlank()) metaParts.add(byline.uppercase())
+                if (year != null) metaParts.add(year)
+                if (metaParts.isNotEmpty()) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(metaParts.joinToString("  /  "), style = TextStyle(
+                        fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.4.sp, color = mid, textAlign = TextAlign.Center
                     ), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
+            }
 
-                Spacer(Modifier.height(4.dp))
-                Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
-                    drawRoundRect(sageDark.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f))
-                }
-                Spacer(Modifier.height(10.dp))
-
-                // Body text — full width, Lora serif
+            Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
+                val body = quoteText ?: factText
                 val bodySize = when {
-                    factText.length > 280 -> 9.5.sp; factText.length > 180 -> 10.sp; else -> 10.5.sp
+                    body.length > 280 -> 9.sp; body.length > 180 -> 10.sp; else -> 11.sp
                 }
-                Text(factText, style = TextStyle(
-                    fontFamily = LoraFontFamily, fontSize = bodySize,
-                    lineHeight = (bodySize.value * 1.55f).sp, color = inkDark.copy(alpha = 0.80f)
-                ), maxLines = 12, overflow = TextOverflow.Ellipsis)
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            // Footer
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Canvas(Modifier.size(width = 60.dp, height = 1.dp)) {
-                    drawLine(sageDark.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
+                Text(body, style = TextStyle(
+                    fontFamily = LoraFontFamily,
+                    fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal,
+                    fontSize = bodySize, lineHeight = (bodySize.value * 1.42f).sp,
+                    color = graphite.copy(alpha = 0.78f)
+                ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, overflow = TextOverflow.Ellipsis)
+                if (ratingStars != null && ratingStars > 0) {
+                    Spacer(Modifier.height(6.dp))
+                    StarRow(ratingStars, palette.copy(accent = graphite, ink = graphite, inkFaint = mid))
                 }
-                Spacer(Modifier.height(4.dp))
-                CurioIcon(name = CurioIcons.Lightbulb, tint = sageDark.copy(alpha = 0.35f), size = 12.dp)
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
-                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp,
-                        fontWeight = FontWeight.SemiBold, color = sageDark.copy(alpha = 0.55f)),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis
-                )
+                Spacer(Modifier.height(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Canvas(Modifier.size(width = 48.dp, height = 1.dp)) { drawLine(graphite.copy(alpha = 0.30f), Offset.Zero, Offset(size.width, 0f)) }
+                    Text(
+                        if (quoteText != null && !quoteAuthor.isNullOrBlank()) "— $quoteAuthor" else if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
+                        style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = mid),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }
