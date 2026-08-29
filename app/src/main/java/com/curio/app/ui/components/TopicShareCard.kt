@@ -1442,6 +1442,19 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
 }
 
 @Composable
+private fun HeaderRow(categoryName: String, glyph: String, palette: ShareCardPalette) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+        Surface(shape = RoundedCornerShape(14.dp), color = palette.accent.copy(alpha = 0.85f)) {
+            Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                CurioIcon(name = glyph, tint = Color.White, size = 14.dp)
+                Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
+            }
+        }
+        CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.30f), size = 18.dp)
+    }
+}
+
+@Composable
 private fun MiddleContent(
     display: String, factText: String, aspect: ShareCardAspect,
     palette: ShareCardPalette, ratingStars: Int?,
