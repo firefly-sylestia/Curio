@@ -298,39 +298,39 @@ private fun VinylCard(
         }
 
         // Vinyl record — large, bleeding right edge
-        val vinylDiameter = 260.dp
-        val sleeveSize = 300.dp
+        val vinylDiameter = 220.dp
+        val sleeveSize = 260.dp
         // Dusty rose sleeve circle behind vinyl
         Canvas(
             modifier = Modifier.align(Alignment.CenterEnd)
                 .size(sleeveSize)
-                .offset(x = 30.dp, y = 60.dp)
+                .offset(x = 35.dp, y = 80.dp)
         ) {
-            drawCircle(roseLight.copy(alpha = 0.35f), radius = size.minDimension / 2f)
+            drawCircle(roseLight.copy(alpha = 0.30f), radius = size.minDimension / 2f)
         }
         // Vinyl record
         Canvas(
             modifier = Modifier.align(Alignment.CenterEnd)
                 .size(vinylDiameter)
-                .offset(x = 15.dp, y = 75.dp)
+                .offset(x = 25.dp, y = 90.dp)
         ) {
             drawVinylPartial(roseDusty)
         }
         // Thin arcs around vinyl
         Canvas(
             modifier = Modifier.align(Alignment.CenterEnd)
-                .size(320.dp)
-                .offset(x = 5.dp, y = 55.dp)
+                .size(280.dp)
+                .offset(x = 15.dp, y = 75.dp)
         ) {
             drawArc(
-                color = roseDusty.copy(alpha = 0.12f), startAngle = -30f, sweepAngle = 60f,
-                useCenter = false, style = Stroke(1.dp.toPx()),
+                color = roseDusty.copy(alpha = 0.10f), startAngle = -30f, sweepAngle = 60f,
+                useCenter = false, style = Stroke(0.8.dp.toPx()),
                 topLeft = Offset(0f, size.height * 0.1f),
                 size = Size(size.width, size.height * 0.8f)
             )
             drawArc(
-                color = roseDusty.copy(alpha = 0.08f), startAngle = 150f, sweepAngle = 60f,
-                useCenter = false, style = Stroke(0.8.dp.toPx()),
+                color = roseDusty.copy(alpha = 0.06f), startAngle = 150f, sweepAngle = 60f,
+                useCenter = false, style = Stroke(0.6.dp.toPx()),
                 topLeft = Offset(size.width * 0.05f, size.height * 0.15f),
                 size = Size(size.width * 0.9f, size.height * 0.7f)
             )
@@ -340,97 +340,97 @@ private fun VinylCard(
         Watermark(family, categoryGlyph, roseDusty.copy(alpha = 0.04f), display.hashCode())
 
         // ── Content layout ──
-        Column(modifier = Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 16.dp).zIndex(1f)) {
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 16.dp, bottom = 14.dp).zIndex(1f)) {
             // Category pill + lightbulb icon
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                Surface(shape = RoundedCornerShape(14.dp), color = roseDusty) {
-                    Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
-                        Text(categoryName, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold, letterSpacing = 1.5.sp), color = Color.White)
+                Surface(shape = RoundedCornerShape(12.dp), color = roseDusty) {
+                    Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        CurioIcon(name = categoryGlyph, tint = Color.White, size = 12.dp)
+                        Text(categoryName, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
+                            fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp), color = Color.White)
                     }
                 }
-                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.40f), size = 20.dp)
+                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.40f), size = 18.dp)
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Title — large serif
+            // Title — strong serif
             Text(display, style = TextStyle(
-                fontFamily = ChangaOneFontFamily, fontSize = 36.sp,
-                lineHeight = 40.sp, fontWeight = FontWeight.Normal, color = inkDark
+                fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
+                lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
             ), maxLines = 2, overflow = TextOverflow.Ellipsis)
 
             // Artist / byline
             if (byline.isNotBlank()) {
                 Text(byline, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 18.sp, color = roseDusty
+                    fontSize = 13.sp, color = roseDusty
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else if (year != null) {
                 Text(year, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 18.sp, color = roseDusty
+                    fontSize = 13.sp, color = roseDusty
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
 
             // Accent underline
-            Spacer(Modifier.height(6.dp))
-            Canvas(Modifier.size(width = 40.dp, height = 2.dp)) {
+            Spacer(Modifier.height(4.dp))
+            Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
                 drawRoundRect(roseDusty, cornerRadius = CornerRadius(1f))
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(10.dp))
 
             // Body text — Lora serif, constrained width for left column
             val bodySize = when {
-                factText.length > 280 -> 11.sp; factText.length > 180 -> 12.sp; else -> 13.sp
+                factText.length > 280 -> 9.sp; factText.length > 180 -> 10.sp; else -> 10.5.sp
             }
             Text(factText, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.55f).sp, color = inkDark.copy(alpha = 0.82f)
-            ), modifier = Modifier.widthIn(max = 260.dp), maxLines = 12, overflow = TextOverflow.Ellipsis)
+                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.82f)
+            ), modifier = Modifier.widthIn(max = 220.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(10.dp))
 
-            // Info panel — cream card with 3 rows
+            // Info panel — compact cream card with 3 rows
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = cream,
                 shadowElevation = 1.dp,
-                modifier = Modifier.widthIn(max = 280.dp)
+                modifier = Modifier.widthIn(max = 200.dp)
             ) {
-                Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Row 1: LATE-NIGHT
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        CurioIcon(name = "nightlight", tint = roseDusty, size = 18.dp)
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Row 1
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        CurioIcon(name = "nightlight", tint = roseDusty, size = 14.dp)
                         Column {
-                            Text("LATE-NIGHT", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, color = roseDusty))
-                            Text("Themes of reflection, memory & overthinking", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 10.sp, lineHeight = 14.sp,
+                            Text("LATE-NIGHT", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 7.5.sp,
+                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = roseDusty))
+                            Text("Themes of reflection & memory", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 8.5.sp, lineHeight = 12.sp,
                                 color = inkDark.copy(alpha = 0.65f)))
                         }
                     }
-                    // Row 2: TRACKS
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        CurioIcon(name = "headphones", tint = roseDusty, size = 18.dp)
+                    // Row 2
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        CurioIcon(name = "headphones", tint = roseDusty, size = 14.dp)
                         Column {
-                            Text("TRACKS", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, color = roseDusty))
-                            Text("Curated picks to explore and discover", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 10.sp, lineHeight = 14.sp,
+                            Text("TRACKS", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 7.5.sp,
+                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = roseDusty))
+                            Text("Curated picks to explore & discover", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 8.5.sp, lineHeight = 12.sp,
                                 color = inkDark.copy(alpha = 0.65f)))
                         }
                     }
-                    // Row 3: RECOGNITION
-                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        CurioIcon(name = "workspace_premium", tint = roseDusty, size = 18.dp)
+                    // Row 3
+                    Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        CurioIcon(name = "workspace_premium", tint = roseDusty, size = 14.dp)
                         Column {
-                            Text("RECOGNITION", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
-                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp, color = roseDusty))
-                            Text("Explore this ${categoryName.lowercase()} topic via Curio", style = TextStyle(
-                                fontFamily = LoraFontFamily, fontSize = 10.sp, lineHeight = 14.sp,
+                            Text("RECOGNITION", style = TextStyle(fontFamily = LoraFontFamily, fontSize = 7.5.sp,
+                                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp, color = roseDusty))
+                            Text("Explore via Curio", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 8.5.sp, lineHeight = 12.sp,
                                 color = inkDark.copy(alpha = 0.65f)))
                         }
                     }
@@ -441,12 +441,12 @@ private fun VinylCard(
 
             // Footer — centered, subtle
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Canvas(Modifier.size(width = 80.dp, height = 1.dp)) {
+                Canvas(Modifier.size(width = 60.dp, height = 1.dp)) {
                     drawLine(roseDusty.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
                 }
-                Spacer(Modifier.height(6.dp))
-                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.35f), size = 14.dp)
                 Spacer(Modifier.height(4.dp))
+                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.35f), size = 12.dp)
+                Spacer(Modifier.height(2.dp))
                 Text(
                     if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
                     style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
