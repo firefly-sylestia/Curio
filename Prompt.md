@@ -1021,3 +1021,17 @@ User's batched asks across the session:
 **Remaining:**
 - Liquid glass 120fps: the per-chip drawBackdrop calls scale linearly with visible chip count. Current compact mode (no lens, 0.5dp blur) is already optimal per-chip. Full 120fps with many visible chips requires architectural batching (render all chips as one backdrop region).
 - Pushing; watching CI.
+
+## Current request — share-card visual fixes
+- Scope: Android app only. Do not touch web/desktop.
+- User asked: Vinyl info block text should sit at the bottom-left corner only with no enclosing box.
+- User asked: Paper 9:16 share-card text is still getting cut; reduce quick-fact text size by 1sp.
+- User asked: Clean share-card design is bad; scratch/rework that style into a monochrome look with a new high-depth style.
+- User asked: Collage middle design looks cut/disconnected; fix it so it connects better.
+- User preference for this request: add to Prompt.md; do not delete/replace existing Prompt.md content.
+
+## Current request follow-up — share-card polish revision
+- Keep Android-only scope.
+- Vinyl: improve bottom-left info placement/size and preserve text color with a subtle white lift/shadow.
+- Clean: replace the monochrome portal attempt again with a category-unique depth poster.
+- Collage: remove the cream/green seam glitch with a more natural torn-paper seam, add more watermark glyphs/details, keep tape inside bounds, allow 4-line title without polaroid overlap, make polaroid caption editable, and move via-Curio text into the polaroid/footer without the leading icon.
