@@ -2,6 +2,7 @@ package com.curio.app.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -36,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.border
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
@@ -169,22 +172,24 @@ private fun quoteFontSize(length: Int): TextUnit = when {
 
 /** Dynamic font size for quick fact text — scales down for longer facts
  *  so the text never gets cut off. Short facts get a slightly larger,
- *  more impactful size. */
+ *  more impactful size. More aggressive steps for very long texts. */
 private fun quickFactFontSize(length: Int): TextUnit = when {
-    length > 200 -> 9.sp
-    length > 140 -> 10.sp
-    length > 90 -> 11.sp
-    length > 50 -> 12.sp
-    else -> 13.sp
+    length > 300 -> 7.5.sp
+    length > 220 -> 8.5.sp
+    length > 150 -> 9.5.sp
+    length > 100 -> 10.5.sp
+    length > 50 -> 11.5.sp
+    else -> 12.5.sp
 }
 
 /** Even smaller for 3:4 aspect ratio. */
 private fun quickFactFontSize34(length: Int): TextUnit = when {
-    length > 200 -> 6.sp
-    length > 140 -> 7.sp
-    length > 90 -> 8.sp
-    length > 50 -> 9.sp
-    else -> 10.sp
+    length > 300 -> 5.sp
+    length > 220 -> 6.sp
+    length > 150 -> 7.sp
+    length > 100 -> 8.sp
+    length > 50 -> 8.5.sp
+    else -> 9.5.sp
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -384,13 +389,13 @@ private fun VinylCard(
 
             Spacer(Modifier.height(10.dp))
 
-            // Body text — Lora serif, constrained width for left column
+            // Body text — Lora serif, constrained width for left column, border instead of shadow
             val bodySize = when {
                 factText.length > 280 -> 9.sp; factText.length > 180 -> 10.sp; else -> 10.5.sp
             }
             Text(factText, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.82f), shadow = whiteLift
+                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.82f)
             ), modifier = Modifier.widthIn(max = 220.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
 
             Spacer(Modifier.height(10.dp))
@@ -414,11 +419,11 @@ private fun VinylCard(
             }
         }
 
-        // ── Info copy — bottom-left, no enclosing box ──
+        // ── Info copy — bottom-left, no enclosing box, border not shadow ──
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 20.dp, bottom = 20.dp)
+                .padding(start = 20.dp, bottom = 32.dp)
                 .widthIn(max = 212.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -428,13 +433,13 @@ private fun VinylCard(
                 Triple("workspace_premium", "RECOGNITION", "Explore via Curio")
             ).forEach { (icon, label, detail) ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                    CurioIcon(name = icon, tint = roseDusty.copy(alpha = 0.92f), size = 13.dp)
+                    CurioIcon(name = icon, tint = roseDusty.copy(alpha = 0.92f), size = 12.dp)
                     Column {
-                        Text(label, style = TextStyle(fontFamily = GeomFontFamily, fontSize = 7.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp, color = inkDark.copy(alpha = 0.78f), shadow = whiteLift))
+                        Text(label, style = TextStyle(fontFamily = GeomFontFamily, fontSize = 6.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp, color = inkDark.copy(alpha = 0.78f)))
                         Text(detail, style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 8.sp, lineHeight = 10.5.sp,
-                            color = inkDark.copy(alpha = 0.54f), shadow = whiteLift))
+                            fontFamily = LoraFontFamily, fontSize = 7.sp, lineHeight = 9.5.sp,
+                            color = inkDark.copy(alpha = 0.54f)))
                     }
                 }
             }
@@ -504,13 +509,14 @@ private fun CollageCard(
                     clip = false
                 }
                 .background(Color.White, RoundedCornerShape(3.dp))
+                .clickable(enabled = userPhoto == null) { /* tap handled by caller */ }
             ) {
                 // Tape on top
                 Canvas(Modifier.offset((pW * 0.23f).dp, 1.dp).size((pW * 0.46f).dp, 12.dp)) {
                     drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.55f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
                 }
-                // Photo area
-                Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, (pH * 0.72f).dp)) {
+                // Photo area — tappable when empty
+                Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, (pH * 0.68f).dp)) {
                     if (userPhoto != null) {
                         drawImage(userPhoto,
                             dstOffset = androidx.compose.ui.unit.IntOffset(0, 0),
@@ -518,15 +524,47 @@ private fun CollageCard(
                         drawRect(Color(0xFFD4A574).copy(alpha = 0.10f))
                     } else {
                         drawRoundRect(Color(0xFFE0D8CC), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
+                        // Hint — camera icon + text when no photo
+                        val cx = size.width / 2f
+                        val cy = size.height / 2f
+                        // Camera body
+                        val camW = size.width * 0.30f
+                        val camH = camW * 0.70f
+                        drawRoundRect(
+                            Color(0xFFB0A898).copy(alpha = 0.35f),
+                            Offset(cx - camW / 2f, cy - camH / 2f - 6f),
+                            Size(camW, camH),
+                            CornerRadius(4f)
+                        )
+                        // Lens circle
+                        drawCircle(Color(0xFFB0A898).copy(alpha = 0.30f), camW * 0.22f, Offset(cx, cy - 6f))
+                        // Text hint below
+                        val hintTm = androidx.compose.ui.text.rememberTextMeasurer()
                     }
                 }
-                // Handwritten name below photo
+                // Hint text overlay (drawn outside Canvas via drawText is complex, use a simple Text)
+                if (userPhoto == null) {
+                    Column(
+                        modifier = Modifier
+                            .offset(5.dp, (pH * 0.52f).dp)
+                            .size((pW - 10).dp, (pH * 0.16f).dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CurioIcon(name = "photo_camera", tint = Color(0xFFB0A898).copy(alpha = 0.50f), size = 14.dp)
+                        Text("Tap to add photo", style = TextStyle(
+                            fontFamily = LoraFontFamily, fontSize = 7.sp,
+                            color = Color(0xFFB0A898).copy(alpha = 0.60f)
+                        ))
+                    }
+                }
+                // Handwritten name below photo — more breathing room
                 val tm = rememberTextMeasurer()
                 val hs = TextStyle(fontFamily = PatrickHandFontFamily, fontWeight = FontWeight.Normal,
                     fontSize = (pW * 0.065f).coerceIn(11f, 15f).sp, color = inkDark,
                     lineHeight = (pW * 0.08f).sp)
                 val tl = tm.measure(polaroidLabel, hs, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Canvas(Modifier.offset(8.dp, (pH * 0.74f).dp).size((pW - 16).dp, (pH * 0.22f).dp)) {
+                Canvas(Modifier.offset(8.dp, (pH * 0.78f).dp).size((pW - 16).dp, (pH * 0.18f).dp)) {
                     drawText(tl)
                 }
             }
@@ -567,7 +605,7 @@ private fun CollageCard(
             }
         }
 
-        // ── MIDDLE SECTION: category pill + body text + footer ──
+        // ── MIDDLE SECTION: category pill + body text + decorative bottom ──
         Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = if (aspect == ShareCardAspect.PORTRAIT) 214.dp else 190.dp, bottom = 18.dp).zIndex(1f)) {
             // Category pill
             Surface(shape = RoundedCornerShape(14.dp), color = sagePill) {
@@ -595,14 +633,50 @@ private fun CollageCard(
                 StarRow(ratingStars, palette)
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.weight(1f))
 
-            // Footer — clean credit, no leading icon.
+            // ── Decorative bottom section ──
+            // Stamp badge + vine/botanical accent line
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                // Left — botanical line
+                Canvas(Modifier.width(80.dp).height(2.dp)) {
+                    drawLine(Color.White.copy(alpha = 0.25f), Offset.Zero, Offset(size.width, 0f), strokeWidth = 1.2f)
+                }
+                // Center — stamp badge
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color.White.copy(alpha = 0.10f),
+                    modifier = Modifier.border(0.8.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(6.dp))
+                ) {
+                    Row(
+                        Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        CurioIcon(name = categoryGlyph, tint = Color.White.copy(alpha = 0.50f), size = 10.dp)
+                        Text("DISCOVERED", style = TextStyle(
+                            fontFamily = GeomFontFamily, fontSize = 5.5.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 2.sp,
+                            color = Color.White.copy(alpha = 0.45f)
+                        ))
+                    }
+                }
+                // Right — botanical line
+                Canvas(Modifier.width(80.dp).height(2.dp)) {
+                    drawLine(Color.White.copy(alpha = 0.25f), Offset.Zero, Offset(size.width, 0f), strokeWidth = 1.2f)
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+
+            // Footer credit
             Text(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
                 style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Color.White.copy(alpha = 0.66f)),
-                maxLines = 1, overflow = TextOverflow.Ellipsis
+                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -628,29 +702,24 @@ private fun NeumorphicCard(
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             drawRect(Brush.verticalGradient(listOf(categoryGlow.copy(alpha = 0.95f), categoryDeep, ink)))
+            // Soft ambient glow top-left
             drawCircle(Color.White.copy(alpha = 0.10f), w * 0.72f, Offset(w * 0.12f, h * 0.12f))
+            // Depth shadow bottom-right
             drawCircle(Color.Black.copy(alpha = 0.20f), w * 0.74f, Offset(w * 0.95f, h * 0.72f))
-            for (i in 0 until 9) {
-                val inset = i * 12f
-                drawRoundRect(
-                    color = if (i % 2 == 0) Color.White.copy(alpha = 0.16f - i * 0.012f) else Color.Black.copy(alpha = 0.18f - i * 0.012f),
-                    topLeft = Offset(w * 0.18f + inset * 0.45f, h * 0.14f + inset),
-                    size = Size(w * 0.70f - inset, h * 0.54f - inset * 0.78f),
-                    cornerRadius = CornerRadius(34f + i * 2f, 34f + i * 2f),
-                    style = Stroke((14f - i).coerceAtLeast(3f))
-                )
-            }
+            // Subtle glass card backdrop — single rounded rect with accent tint
             drawRoundRect(
-                Color.Black.copy(alpha = 0.34f),
-                topLeft = Offset(w * 0.13f, h * 0.24f + 18f),
-                size = Size(w * 0.74f, h * 0.35f),
-                cornerRadius = CornerRadius(30f, 30f)
+                Brush.verticalGradient(listOf(categoryGlow.copy(alpha = 0.12f), Color.Transparent)),
+                topLeft = Offset(w * 0.10f, h * 0.20f),
+                size = Size(w * 0.74f, h * 0.38f),
+                cornerRadius = CornerRadius(28f, 28f)
             )
+            // Thin border for the glass card
             drawRoundRect(
-                Brush.verticalGradient(listOf(paper, Color(0xFFE8E2D2))),
-                topLeft = Offset(w * 0.10f, h * 0.22f),
-                size = Size(w * 0.74f, h * 0.35f),
-                cornerRadius = CornerRadius(30f, 30f)
+                Color.White.copy(alpha = 0.10f),
+                topLeft = Offset(w * 0.10f, h * 0.20f),
+                size = Size(w * 0.74f, h * 0.38f),
+                cornerRadius = CornerRadius(28f, 28f),
+                style = Stroke(0.8f)
             )
         }
 
@@ -671,10 +740,10 @@ private fun NeumorphicCard(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
             }
 
-            Column(Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 4.dp), horizontalAlignment = Alignment.Start) {
+            Column(Modifier.align(Alignment.CenterStart).padding(start = 4.dp, end = 4.dp, top = 8.dp), horizontalAlignment = Alignment.Start) {
                 Text(display, style = TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = 31.sp, lineHeight = 33.sp,
-                    fontWeight = FontWeight.Normal, color = ink, shadow = Shadow(Color.White.copy(alpha = 0.70f), Offset(0f, 2f), 3f)
+                    fontWeight = FontWeight.Normal, color = Color.White
                 ), maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.84f))
                 val metaParts = mutableListOf<String>()
                 if (byline.isNotBlank()) metaParts.add(byline.uppercase())
@@ -760,7 +829,7 @@ private fun MiddleContent(
                 Text(factText, style = MaterialTheme.typography.bodySmall.copy(
                     fontFamily = LoraFontFamily, fontSize = qfs,
                     lineHeight = (qfs.value * 1.4f).sp
-                ), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 15 else 12, overflow = TextOverflow.Ellipsis)
+                ), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -992,7 +1061,8 @@ fun TopicShareSheet(
     val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
     val quote = ShareCardContent("quote", "Quote", quoteText)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
-    val available = if (isQuotes) listOf(quote) else listOf(quick) + savedSources
+    // Custom fact available for all styles except Quotes
+    val available = if (isQuotes) listOf(quote) else listOf(quick) + savedSources + listOf(custom)
     val defaultId = if (isQuotes) quote.id else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
@@ -1014,42 +1084,65 @@ fun TopicShareSheet(
                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
             }
 
-            // Photo picker — only for Collage style
+            // Photo picker for Collage — compact row below card
             if (currentStyle == ShareCardStyle.COLLAGE) {
-                Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(38.dp)) {
-                    Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                        Text(
-                            if (userPhoto != null) "Change photo" else "Add photo to polaroid",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(34.dp)) {
+                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                            Text(
+                                if (userPhoto != null) "Change" else "Photo",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
+                    OutlinedTextField(
+                        value = polaroidCaption,
+                        onValueChange = { polaroidCaption = it.take(36) },
+                        placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.bodySmall) },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f).height(34.dp)
+                    )
                 }
-                OutlinedTextField(
-                    value = polaroidCaption,
-                    onValueChange = { polaroidCaption = it.take(36) },
-                    placeholder = { Text(if (sharer.isNotBlank()) "$sharer · via Curio" else "via Curio") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
 
-            // Style picker — only show available styles for this family
+            // Style carousel — full-size cards side by side, active centered
             if (styles.size > 1) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.pointerInput(safeIdx) {
-                    detectHorizontalDragGestures { _, drag ->
-                        if (drag > 15f && safeIdx > 0) styleIdx = safeIdx - 1
-                        else if (drag < -15f && safeIdx < styles.lastIndex) styleIdx = safeIdx + 1
+                val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx) { styles.size }
+                androidx.compose.runtime.LaunchedEffect(pagerState.currentPage) { styleIdx = pagerState.currentPage }
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    androidx.compose.foundation.pager.HorizontalPager(
+                        state = pagerState,
+                        contentPadding = androidx.compose.foundation.pager.PagerDefaults.pagerContentPadding(horizontalPadding = 48.dp),
+                        pageSpacing = 12.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { page ->
+                        val isCenter = page == pagerState.currentPage
+                        Box(
+                            modifier = Modifier
+                                .width(pw)
+                                .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+                                .shadow(if (isCenter) 4.dp else 1.dp, RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(6.dp))
+                                .graphicsLayer {
+                                    val pageOffset = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction)
+                                    val scale = 1f - 0.10f * kotlin.math.abs(pageOffset)
+                                    scaleX = scale; scaleY = scale
+                                    alpha = 1f - 0.3f * kotlin.math.abs(pageOffset)
+                                }
+                        ) {
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+                        }
                     }
-                }) {
-                    styles.forEachIndexed { i, s ->
-                        val sel = i == safeIdx
-                        Surface(onClick = { styleIdx = i }, shape = RoundedCornerShape(50), color = if (sel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
-                            Row(Modifier.padding(horizontal = 14.dp, vertical = 0.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                                CurioIcon(name = s.glyph, tint = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                                Text(s.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        styles.forEachIndexed { i, _ ->
+                            Box(Modifier.size(if (i == pagerState.currentPage) 7.dp else 5.dp).background(
+                                if (i == pagerState.currentPage) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), CircleShape
+                            ))
                         }
                     }
                 }
@@ -1104,14 +1197,39 @@ fun ShareHubBody(
     val styles = availableStylesForFamily(categoryFamily)
     if (styles.size > 1) {
         val si = style.ordinal.coerceIn(0, styles.lastIndex)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            styles.forEachIndexed { i, s ->
-                val sel = i == si
-                Surface(onClick = { onStyleChange(i) }, shape = RoundedCornerShape(50), color = if (sel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
-                    Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        CurioIcon(name = s.glyph, tint = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                        Text(s.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (sel) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+        val hubPagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = si) { styles.size }
+        androidx.compose.runtime.LaunchedEffect(hubPagerState.currentPage) { onStyleChange(hubPagerState.currentPage) }
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(style.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            androidx.compose.foundation.pager.HorizontalPager(
+                state = hubPagerState,
+                contentPadding = androidx.compose.foundation.pager.PagerDefaults.pagerContentPadding(horizontalPadding = 48.dp),
+                pageSpacing = 12.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) { page ->
+                val isCenter = page == hubPagerState.currentPage
+                Box(
+                    modifier = Modifier
+                        .width(pw)
+                        .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
+                        .shadow(if (isCenter) 4.dp else 1.dp, RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(6.dp))
+                        .graphicsLayer {
+                            val pageOffset = (hubPagerState.currentPage - page + hubPagerState.currentPageOffsetFraction)
+                            val scale = 1f - 0.10f * kotlin.math.abs(pageOffset)
+                            scaleX = scale; scaleY = scale
+                            alpha = 1f - 0.3f * kotlin.math.abs(pageOffset)
+                        }
+                ) {
+                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline)
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                styles.forEachIndexed { i, _ ->
+                    Box(Modifier.size(if (i == hubPagerState.currentPage) 7.dp else 5.dp).background(
+                        if (i == hubPagerState.currentPage) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), CircleShape
+                    ))
                 }
             }
         }

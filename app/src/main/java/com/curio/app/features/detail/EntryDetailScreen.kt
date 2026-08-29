@@ -4530,6 +4530,10 @@ private fun EntryShareSheet(
     ) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
+    var entryStyleIdx by rememberSaveable { mutableIntStateOf(0) }
+    val entryStyles = com.curio.app.ui.components.availableStylesForFamily(category.family)
+    val entrySafeIdx = entryStyleIdx.coerceIn(0, entryStyles.lastIndex)
+    val entryCurrentStyle = entryStyles[entrySafeIdx]
 
     // Build the SAVED sources from this entry's capture data — only what
     // actually exists gets a pill.
@@ -4627,6 +4631,7 @@ private fun EntryShareSheet(
                 authority = authority,
                 context = context,
                 aspect = aspect,
+                style = entryCurrentStyle, onStyleChange = { entryStyleIdx = it },
                 onAspectChange = { aspect = it },
                 sources = if (isQuotesCategory) {
                     listOfNotNull(quoteFromTopic) + savedSources.filter { it.id != "quote" }
