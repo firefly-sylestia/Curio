@@ -392,7 +392,7 @@ private fun VinylCard(
             // Accent underline
             Spacer(Modifier.height(4.dp))
             Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
-                drawRoundRect(roseDusty, cornerRadius = CornerRadius(1f))
+                drawRoundRect(roseDusty, cornerRadius = 1f)
             }
 
             Spacer(Modifier.height(10.dp))
@@ -1005,7 +1005,7 @@ private fun SignatureCard(
     // Get unique design per category
     val sig = signatureDesign(categoryName, family)
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius)).background(sig.bg, RoundedCornerShape(sig.cornerRadius))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp)).background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))) {
         // Background pattern/texture
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
@@ -1083,7 +1083,7 @@ private fun SignatureCard(
 
 // ─── Signature per-category design data ────────────────────────────────
 private data class SignatureDesign(
-    val bg: Color, val cornerRadius: CornerRadius,
+    val bg: Color, val cornerRadius: Float,
     val drawBackground: DrawScope.(w: Float, h: Float) -> Unit,
     val padding: PaddingValues,
     val badgeColor: Color, val badgeInk: Color, val badgeRadius: Dp,
@@ -1101,7 +1101,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
     return when {
         // MUSIC — warm amber on dark, vinyl-inspired texture
         family == CategoryFamily.MUSIC || cat.contains("MUSIC") || cat.contains("ALBUM") || cat.contains("SONG") -> SignatureDesign(
-            bg = Color(0xFF2A1F14), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFF2A1F14), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Faint grooves
                 for (i in 0 until 20) {
@@ -1121,7 +1121,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // MOVIES — dark cinematic with film grain
         family == CategoryFamily.MOVIES || cat.contains("FILM") || cat.contains("MOVIE") || cat.contains("SERIES") || cat.contains("DIRECTOR") -> SignatureDesign(
-            bg = Color(0xFF0D0D12), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFF0D0D12), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Film grain dots
                 val s = (w * 1000 + h).toInt()
@@ -1144,7 +1144,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // BOOKS — warm library tones, parchment feel
         family == CategoryFamily.BOOKS || cat.contains("BOOK") -> SignatureDesign(
-            bg = Color(0xFFF5EDE0), cornerRadius = CornerRadius(8f),
+            bg = Color(0xFFF5EDE0), cornerRadius = 8f,
             drawBackground = { w, h ->
                 // Faint ruled lines
                 for (i in 0 until 15) {
@@ -1164,7 +1164,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // SCIENCE — clean blue-white with grid
         family == CategoryFamily.SCIENCE || cat.contains("SCIENCE") || cat.contains("PHYSICS") || cat.contains("CHEMISTRY") || cat.contains("BIOLOGY") || cat.contains("ASTRONOMY") -> SignatureDesign(
-            bg = Color(0xFFF0F4F8), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFFF0F4F8), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Grid pattern
                 for (i in 0 until 25) {
@@ -1187,7 +1187,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // ANIME/COMICS — bold colors, dynamic angles
         family == CategoryFamily.ANIME_COMICS || cat.contains("ANIME") || cat.contains("MANGA") || cat.contains("MANHWA") -> SignatureDesign(
-            bg = Color(0xFFF8F0FF), cornerRadius = CornerRadius(4f),
+            bg = Color(0xFFF8F0FF), cornerRadius = 4f,
             drawBackground = { w, h ->
                 // Speed lines from corner
                 for (i in 0 until 12) {
@@ -1210,7 +1210,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // GAMES — dark with neon accents, pixel-grid hint
         family == CategoryFamily.GAMES || cat.contains("GAME") -> SignatureDesign(
-            bg = Color(0xFF0A0A14), cornerRadius = CornerRadius(4f),
+            bg = Color(0xFF0A0A14), cornerRadius = 4f,
             drawBackground = { w, h ->
                 // Pixel grid hint
                 for (i in 0 until 12) {
@@ -1232,7 +1232,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // MYTHOLOGY — classical gold-marble
         family == CategoryFamily.MYTHOLOGY || cat.contains("MYTH") || cat.contains("LEGEND") -> SignatureDesign(
-            bg = Color(0xFFFAF5E8), cornerRadius = CornerRadius(8f),
+            bg = Color(0xFFFAF5E8), cornerRadius = 8f,
             drawBackground = { w, h ->
                 // Marble veining
                 val s = (w * 1000 + h).toInt()
@@ -1256,7 +1256,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // SPORTS — energetic green with scorecard elements
         family == CategoryFamily.SPORTS || cat.contains("SPORT") || cat.contains("OLYMPIC") -> SignatureDesign(
-            bg = Color(0xFFF2F8F0), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFFF2F8F0), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Scorecard lines
                 drawLine(Color(0xFF2E7D32).copy(alpha = 0.08f), Offset(w * 0.05f, h * 0.42f), Offset(w * 0.95f, h * 0.42f), strokeWidth = 1.5f)
@@ -1273,7 +1273,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // FOOD — warm terracotta with recipe card feel
         family == CategoryFamily.FOOD || cat.contains("FOOD") || cat.contains("CUISINE") -> SignatureDesign(
-            bg = Color(0xFFFFF5EE), cornerRadius = CornerRadius(10f),
+            bg = Color(0xFFFFF5EE), cornerRadius = 10f,
             drawBackground = { w, h ->
                 // Dotted border inset
                 for (i in 0 until 40) {
@@ -1299,7 +1299,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // VISUAL ART — gallery white with frame accent
         family == CategoryFamily.VISUAL_ART || cat.contains("ART") || cat.contains("PAINT") -> SignatureDesign(
-            bg = Color(0xFFF8F6F2), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFFF8F6F2), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Gallery frame lines
                 val inset = w * 0.06f
@@ -1318,7 +1318,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // INTERNET — gradient tech feel
         family == CategoryFamily.INTERNET || cat.contains("INTERNET") || cat.contains("TECH") || cat.contains("DISCOVER") -> SignatureDesign(
-            bg = Color(0xFFF5F8FF), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFFF5F8FF), cornerRadius = 6f,
             drawBackground = { w, h ->
                 // Subtle gradient overlay
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF4A90D9).copy(alpha = 0.04f), Color.Transparent, Color(0xFF4A90D9).copy(alpha = 0.03f))), Offset.Zero, Size(w, h))
@@ -1341,7 +1341,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // QUOTES — elegant serif-heavy, scroll-like
         cat.contains("QUOTE") -> SignatureDesign(
-            bg = Color(0xFFFDF8F0), cornerRadius = CornerRadius(10f),
+            bg = Color(0xFFFDF8F0), cornerRadius = 10f,
             drawBackground = { w, h ->
                 // Scroll border — faint curly edges
                 drawLine(Color(0xFF8A6B42).copy(alpha = 0.08f), Offset(w * 0.08f, h * 0.04f), Offset(w * 0.08f, h * 0.96f), strokeWidth = 1.5f)
@@ -1359,7 +1359,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         )
         // DEFAULT / WILDCARD — deep navy with constellation dots
         else -> SignatureDesign(
-            bg = Color(0xFF0F1724), cornerRadius = CornerRadius(6f),
+            bg = Color(0xFF0F1724), cornerRadius = 6f,
             drawBackground = { w, h ->
                 val s = (w * 1000 + h).toInt()
                 for (i in 0 until 40) {
