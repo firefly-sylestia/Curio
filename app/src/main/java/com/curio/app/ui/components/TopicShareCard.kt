@@ -38,7 +38,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.border
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
@@ -538,11 +537,9 @@ private fun CollageCard(
                         )
                         // Lens circle
                         drawCircle(Color(0xFFB0A898).copy(alpha = 0.30f), camW * 0.22f, Offset(cx, cy - 6f))
-                        // Text hint below
-                        val hintTm = androidx.compose.ui.text.rememberTextMeasurer()
                     }
                 }
-                // Hint text overlay (drawn outside Canvas via drawText is complex, use a simple Text)
+                // Hint text overlay when no photo
                 if (userPhoto == null) {
                     Column(
                         modifier = Modifier
@@ -645,8 +642,7 @@ private fun CollageCard(
                 // Center — stamp badge
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = Color.White.copy(alpha = 0.10f),
-                    modifier = Modifier.border(0.8.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(6.dp))
+                    color = Color.White.copy(alpha = 0.08f)
                 ) {
                     Row(
                         Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -1116,7 +1112,7 @@ fun TopicShareSheet(
                     Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     androidx.compose.foundation.pager.HorizontalPager(
                         state = pagerState,
-                        contentPadding = androidx.compose.foundation.pager.PagerDefaults.pagerContentPadding(horizontalPadding = 48.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 48.dp),
                         pageSpacing = 12.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) { page ->
@@ -1203,7 +1199,7 @@ fun ShareHubBody(
             Text(style.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             androidx.compose.foundation.pager.HorizontalPager(
                 state = hubPagerState,
-                contentPadding = androidx.compose.foundation.pager.PagerDefaults.pagerContentPadding(horizontalPadding = 48.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 48.dp),
                 pageSpacing = 12.dp,
                 modifier = Modifier.fillMaxWidth()
             ) { page ->
