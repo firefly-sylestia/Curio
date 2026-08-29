@@ -619,7 +619,7 @@ private fun CollageCard(
         }
     }
 }
-// STYLE 3 — NEUMORPHIC (clean light, embossed/debossed elements)
+// STYLE 3 — CLEAN / NEUMORPHIC (sage + celestial moon hero)
 // ═══════════════════════════════════════════════════════════════════════
 @Composable
 private fun NeumorphicCard(
@@ -629,74 +629,187 @@ private fun NeumorphicCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null
 ) {
-    val bg = Color(0xFFF0F0F0)
-    val shadowLight = Color.White
-    val shadowDark = Color(0xFFD0D0D0)
-    val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
+    val bg = Color(0xFFE8EFEA)
+    val sageDark = Color(0xFF7A8B7A)
+    val sageMid = Color(0xFFB8C8B8)
+    val sageLight = Color(0xFFD8E2D8)
+    val inkDark = Color(0xFF2A3A2E)
+    val cream = Color(0xFFF5F8F5)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
-        // Background detail — multiple neumorphic shapes for depth
-        Canvas(Modifier.fillMaxSize()) {
+        // ── Hero: celestial moon circle ──
+        val heroSize = 200.dp
+        Box(Modifier.align(Alignment.TopCenter).padding(top = 50.dp).size(heroSize)) {
+            // Outer orbital rings
+            Canvas(Modifier.size(280.dp).offset((-40).dp, (-40).dp)) {
+                // Ring 1 — outermost
+                drawCircle(sageMid.copy(alpha = 0.25f), radius = size.minDimension / 2f,
+                    style = Stroke(0.8.dp.toPx()))
+                // Ring 2 — mid
+                drawCircle(sageMid.copy(alpha = 0.18f), radius = size.minDimension / 2f * 0.88f,
+                    style = Stroke(0.6.dp.toPx()))
+                // Ring 3 — inner
+                drawCircle(sageMid.copy(alpha = 0.12f), radius = size.minDimension / 2f * 0.76f,
+                    style = Stroke(0.5.dp.toPx()))
+                // Small orbital dot
+                drawCircle(sageDark.copy(alpha = 0.35f), 4f,
+                    Offset(size.width * 0.92f, size.height * 0.30f))
+                drawCircle(sageDark.copy(alpha = 0.25f), 3f,
+                    Offset(size.width * 0.08f, size.height * 0.65f))
+            }
+            // Main moon circle — dark interior
+            Canvas(Modifier.fillMaxSize()) {
+                val r = size.minDimension / 2f
+                val cx = size.width / 2f; val cy = size.height / 2f
+                // Drop shadow
+                drawCircle(Color.Black.copy(alpha = 0.10f), r + 4f, Offset(cx + 1f, cy + 2f))
+                // Dark night sky
+                drawCircle(inkDark, r, Offset(cx, cy))
+                // Crescent highlight — lighter sage arc
+                drawCircle(sageLight.copy(alpha = 0.18f), r * 0.88f, Offset(cx - r * 0.20f, cy - r * 0.15f))
+                // Subtle star dots inside
+                drawCircle(Color.White.copy(alpha = 0.50f), 1.5f, Offset(cx - r * 0.3f, cy - r * 0.4f))
+                drawCircle(Color.White.copy(alpha = 0.40f), 1f, Offset(cx + r * 0.2f, cy - r * 0.25f))
+                drawCircle(Color.White.copy(alpha = 0.35f), 1.2f, Offset(cx + r * 0.35f, cy + r * 0.1f))
+                drawCircle(Color.White.copy(alpha = 0.45f), 1.3f, Offset(cx - r * 0.1f, cy + r * 0.3f))
+                // Shooting star line
+                drawLine(Color.White.copy(alpha = 0.25f),
+                    Offset(cx + r * 0.1f, cy - r * 0.6f),
+                    Offset(cx + r * 0.5f, cy - r * 0.2f), strokeWidth = 0.8f)
+            }
+        }
+
+        // ── Decorative elements ──
+        Canvas(Modifier.fillMaxSize().zIndex(0f)) {
             val w = size.width; val h = size.height
-            // Soft raised circles
-            drawCircle(shadowDark.copy(alpha = 0.08f), 100f, Offset(w * 0.78f, h * 0.20f))
-            drawCircle(shadowLight.copy(alpha = 0.12f), 96f, Offset(w * 0.78f, h * 0.20f))
-            drawCircle(shadowDark.copy(alpha = 0.06f), 70f, Offset(w * 0.15f, h * 0.72f))
-            drawCircle(shadowLight.copy(alpha = 0.10f), 66f, Offset(w * 0.15f, h * 0.72f))
-            // Accent ring detail
-            drawCircle(palette.accent.copy(alpha = 0.06f), 50f, Offset(w * 0.65f, h * 0.45f), style = Stroke(2.dp.toPx()))
-            drawCircle(palette.accent.copy(alpha = 0.04f), 35f, Offset(w * 0.35f, h * 0.30f), style = Stroke(1.5.dp.toPx()))
-            // Soft inner glow
-            drawCircle(shadowLight.copy(alpha = 0.06f), 90f, Offset(w * 0.50f, h * 0.50f))
-        }
-        // Neumorphic circle (top-right) — centered glyph
-        Canvas(Modifier.align(Alignment.TopEnd).offset((-55).dp, 55.dp).size(150.dp)) {
-            drawCircle(shadowDark.copy(alpha = 0.30f), radius = size.minDimension / 2f + 3f, center = Offset(size.width / 2f + 2f, size.height / 2f + 2f))
-            drawCircle(shadowLight, radius = size.minDimension / 2f - 2f, center = Offset(size.width / 2f - 1f, size.height / 2f - 1f))
-            drawCircle(bg, radius = size.minDimension / 2f - 3f)
-        }
-        // Glyph inside — centered in circle
-        Box(Modifier.align(Alignment.TopEnd).offset((-85).dp, 80.dp).size(80.dp), contentAlignment = Alignment.Center) {
-            CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.50f), size = 48.dp)
+            // 4-point star top-left
+            drawLine(sageDark.copy(alpha = 0.30f), Offset(w * 0.42f, h * 0.04f), Offset(w * 0.42f, h * 0.04f + 12f), strokeWidth = 1.2f)
+            drawLine(sageDark.copy(alpha = 0.30f), Offset(w * 0.42f - 6f, h * 0.04f + 6f), Offset(w * 0.42f + 6f, h * 0.04f + 6f), strokeWidth = 1.2f)
+            // 4-point star right
+            drawLine(sageDark.copy(alpha = 0.22f), Offset(w * 0.88f, h * 0.14f), Offset(w * 0.88f, h * 0.14f + 10f), strokeWidth = 1f)
+            drawLine(sageDark.copy(alpha = 0.22f), Offset(w * 0.88f - 5f, h * 0.14f + 5f), Offset(w * 0.88f + 5f, h * 0.14f + 5f), strokeWidth = 1f)
+            // Small dots
+            drawCircle(sageDark.copy(alpha = 0.15f), 2f, Offset(w * 0.20f, h * 0.38f))
+            drawCircle(sageDark.copy(alpha = 0.12f), 1.5f, Offset(w * 0.75f, h * 0.42f))
+            drawCircle(sageDark.copy(alpha = 0.10f), 1.8f, Offset(w * 0.10f, h * 0.55f))
+            // Pale circle bottom-left
+            drawCircle(sageLight.copy(alpha = 0.25f), 50f, Offset(w * 0.12f, h * 0.78f))
+            drawCircle(sageMid.copy(alpha = 0.10f), 46f, Offset(w * 0.12f, h * 0.78f), style = Stroke(0.8.dp.toPx()))
+            // Dot trail — bottom-left
+            for (i in 0..4) {
+                drawCircle(sageDark.copy(alpha = 0.08f + i * 0.02f), 1.5f,
+                    Offset(w * 0.08f + i * 10f, h * 0.85f + i * 4f))
+            }
         }
 
-        Column(modifier = Modifier.fillMaxSize().padding(28.dp).zIndex(1f), verticalArrangement = Arrangement.SpaceBetween) {
-            // Category pill — subtle, not grabbing attention
-            Surface(shape = RoundedCornerShape(14.dp), color = bg, shadowElevation = 1.dp) {
-                Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CurioIcon(name = categoryGlyph, tint = palette.accent.copy(alpha = 0.70f), size = 14.dp)
-                    Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = palette.ink)
+        // Watermark glyphs
+        Watermark(family, categoryGlyph, sageDark.copy(alpha = 0.04f), display.hashCode())
+
+        // ── Content ──
+        Column(modifier = Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 14.dp).zIndex(1f)) {
+            // Category pill — top-left
+            Surface(shape = RoundedCornerShape(12.dp), color = Color.White.copy(alpha = 0.60f), shadowElevation = 0.5.dp) {
+                Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    CurioIcon(name = categoryGlyph, tint = sageDark, size = 13.dp)
+                    Text(categoryName, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp), color = inkDark)
                 }
             }
 
-            Column(modifier = Modifier.width(240.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (quoteText != null) {
-                    CurioIcon(name = CurioIcons.FormatQuote, tint = palette.accent.copy(alpha = 0.30f), size = 26.dp)
-                    Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = ChangaOneFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = 5, overflow = TextOverflow.Ellipsis)
-                } else {
-                    Text(display, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = ChangaOneFontFamily, lineHeight = 34.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                    // Metadata line
-                    val nMetaParts = mutableListOf<String>()
-                    if (byline.isNotBlank()) nMetaParts.add(byline)
-                    if (year != null) nMetaParts.add(year)
-                    if (nMetaParts.isNotEmpty()) {
-                        Text(nMetaParts.joinToString(" \u2022 "), style = MaterialTheme.typography.labelSmall.copy(
-                            fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
-                            color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(220.dp)) // space for hero circle
+
+            if (quoteText != null) {
+                // ── Quote mode ──
+                Text(display, style = TextStyle(
+                    fontFamily = ChangaOneFontFamily, fontSize = 24.sp,
+                    lineHeight = 28.sp, fontWeight = FontWeight.Normal, color = inkDark
+                ), maxLines = 2, overflow = TextOverflow.Ellipsis)
+
+                Spacer(Modifier.height(4.dp))
+                Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
+                    drawRoundRect(sageDark.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f))
+                }
+                Spacer(Modifier.height(10.dp))
+
+                // Quote card — bottom-right aligned
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd) {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = sageLight.copy(alpha = 0.50f),
+                        modifier = Modifier.widthIn(max = 240.dp)
+                    ) {
+                        Column(Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
+                            Text("“", style = TextStyle(
+                                fontFamily = LoraFontFamily, fontSize = 40.sp,
+                                fontWeight = FontWeight.Bold, color = sageDark.copy(alpha = 0.40f),
+                                lineHeight = 30.sp))
+                            Text(quoteText, style = TextStyle(
+                                fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                                fontSize = 13.sp, lineHeight = 18.sp, color = inkDark
+                            ), maxLines = 4, overflow = TextOverflow.Ellipsis)
+                            if (quoteAuthor.isNotBlank()) {
+                                Spacer(Modifier.height(6.dp))
+                                Text("— ${quoteAuthor.uppercase()}", style = TextStyle(
+                                    fontFamily = LoraFontFamily, fontSize = 8.sp,
+                                    fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp,
+                                    color = sageDark.copy(alpha = 0.60f)))
+                            }
+                        }
                     }
-                    // Accent underline instead of gray
-                    Canvas(Modifier.size(width = 40.dp, height = 2.dp)) { drawRoundRect(palette.accent.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f)) }
-                    // Quick fact — dynamic font size, Lora serif, very generous maxLines
-                    val qfSize = quickFactFontSize(factText.length)
-                    Text(factText, style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = LoraFontFamily, fontSize = qfSize,
-                        lineHeight = (qfSize.value * 1.4f).sp
-                    ), color = palette.ink.copy(alpha = 0.70f), maxLines = 15, overflow = TextOverflow.Ellipsis)
                 }
-                if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
+            } else {
+                // ── Title mode ──
+                Text(display, style = TextStyle(
+                    fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
+                    lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
+                ), maxLines = 2, overflow = TextOverflow.Ellipsis)
+
+                // Byline
+                if (byline.isNotBlank()) {
+                    Text(byline, style = TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 12.sp, color = sageDark
+                    ), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                } else if (year != null) {
+                    Text(year, style = TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 12.sp, color = sageDark
+                    ), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+
+                Spacer(Modifier.height(4.dp))
+                Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
+                    drawRoundRect(sageDark.copy(alpha = 0.5f), cornerRadius = CornerRadius(1f))
+                }
+                Spacer(Modifier.height(10.dp))
+
+                // Body text — full width, Lora serif
+                val bodySize = when {
+                    factText.length > 280 -> 9.5.sp; factText.length > 180 -> 10.sp; else -> 10.5.sp
+                }
+                Text(factText, style = TextStyle(
+                    fontFamily = LoraFontFamily, fontSize = bodySize,
+                    lineHeight = (bodySize.value * 1.55f).sp, color = inkDark.copy(alpha = 0.80f)
+                ), maxLines = 12, overflow = TextOverflow.Ellipsis)
             }
 
-            Footer(sharerName, quoteText, quoteAuthor, palette)
+            Spacer(Modifier.weight(1f))
+
+            // Footer
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Canvas(Modifier.size(width = 60.dp, height = 1.dp)) {
+                    drawLine(sageDark.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
+                }
+                Spacer(Modifier.height(4.dp))
+                CurioIcon(name = CurioIcons.Lightbulb, tint = sageDark.copy(alpha = 0.35f), size = 12.dp)
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
+                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp,
+                        fontWeight = FontWeight.SemiBold, color = sageDark.copy(alpha = 0.55f)),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
