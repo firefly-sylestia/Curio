@@ -4530,6 +4530,7 @@ private fun EntryShareSheet(
     ) }
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
+    var styleIdx by rememberSaveable { mutableIntStateOf(0) }
 
     // Build the SAVED sources from this entry's capture data — only what
     // actually exists gets a pill.
@@ -4618,6 +4619,8 @@ private fun EntryShareSheet(
             )
 
             // ── The shared hub: accurate preview + aspect/source pickers ──
+            val entryStyles = com.curio.app.ui.components.availableStylesForFamily(category.family)
+            val entryStyleIdx = styleIdx.coerceIn(0, entryStyles.lastIndex)
             com.curio.app.ui.components.ShareHubBody(
                 topicName = entry.topic.name,
                 categoryName = category.displayName,
@@ -4640,7 +4643,9 @@ private fun EntryShareSheet(
                 onCustomTextChange = { customText = it },
                 onShared = onDismiss,
                 categoryFamily = category.family,
-                topicByline = entry.topic.byline
+                topicByline = entry.topic.byline,
+                style = entryStyles[entryStyleIdx],
+                onStyleChange = { styleIdx = it }
             )
 
             // Quiet secondary: plain-text share — quote mode shows quote + author only.
