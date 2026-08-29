@@ -1102,6 +1102,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                     val y2 = ((s * (i+1) * 6271) % 10000) / 10000f * h
                     drawCircle(Color.White.copy(alpha = 0.035f), 1f, Offset(x, y2))
                 }
+                // Subtle ambient glow top-right
+                drawCircle(Color(0xFFC0392B).copy(alpha = 0.08f), w * 0.28f, Offset(w * 0.82f, h * 0.12f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFC0392B), badgeInk = Color.White,
             badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
