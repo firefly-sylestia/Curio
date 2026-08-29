@@ -1,5 +1,18 @@
 # Prompt.md — current request log
 
+## Request: v293 — category picker topic count removal + database restart fix (COMPLETE)
+
+- CATEGORY COUNT REMOVED: CurioCategoryCard no longer shows the "N topics"
+  subtitle under each category name; only "Coming soon" and "Surprise mix"
+  labels remain on their respective tiles.
+- DATABASE RESTART FIX: TopicRepository.init() now pre-warms TopicJsonLoader's
+  in-memory caches (countsCache + cache) from Room after confirming data
+  exists. This prevents the flash of "0 topics" on restart and eliminates
+  the redundant JSON re-parse that ran every process start.
+- Status: committed & pushed.
+
+---
+
 ## Request: v292k — smooth 120Hz share morphs and focused quote cards (COMPLETE)
 
 - MORPH: switched the Shuffle → Topic Reveal bounds transform to a critically damped spring for smoother high-refresh-rate handoffs without easing snaps or overshoot.
