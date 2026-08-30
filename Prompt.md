@@ -1,5 +1,43 @@
 # Prompt.md — current request log
 
+## Request: audit + polish drawn signature-card designs (base first, then detailed) (COMPLETE)
+
+- User: many drawn designs are broken/random/not detailed enough in BOTH
+  modes (deepen on and off). Fix the non-deepened (base) designs FIRST,
+  then check which detailed ones need work.
+- Audited all 38 base signatureDesign branches. Flagged as broken/weak:
+  ARTISTS, PAINTERS, OCEANS, SERIES, ANIMATED FILMS, FILMS, MANHWA.
+- Rebuilt base designs (all keep the same text/badge colors, only the
+  background changes):
+  - ARTISTS: full stage scene — gradient stage, visible spotlight cones,
+    light pools, singer silhouette at a round-head mic, monitor wedge
+    speaker, falling confetti, floating music notes.
+  - PAINTERS: easel A-frame, canvas with colour-field painting, kidney
+    palette (two overlapping ovals + thumb hole) with wells around the
+    rim, brush with ferrule + bristles, paint drips under the canvas.
+  - OCEANS: deep azure gradient, sun shaft, surface shimmer, fish school
+    (3 fish), rising bubbles, mid-water waves, coral + seaweed bed.
+  - SERIES: maroon vignette + red glow, TV playing a dusk scene (mountain
+    silhouettes, sun, progress bar), TV stand, episode chips on the right,
+    binge-tracker dots below.
+  - ANIMATED FILMS: shared-center rainbow ribbon (all arcs one center,
+    tightly stacked), bouncing star trail riding the ribbon, colour orbs,
+    sparkles.
+  - FILMS: TWO prominent film strips down the left edge (bright grey
+    bands at 0.34 alpha with clearly punched sprocket holes) + projector
+    flicker beam; ALL text colors kept identical.
+  - MANHWA: pastel gradient, bokeh blobs, arch with posts, floating heart
+    inside the arch, orbiting sparkles.
+- Verified: stack-based brace/paren check OK (current + HEAD both OK),
+  raw braces 846/846, 38 detailed branches intact, all gradient drawRect
+  calls properly closed. Changelog bullet added. Committed & pushed.
+- NOTE: the detailed set was already rebuilt/verified in the previous
+  session (ARTISTS stage, PAINTERS easel, OCEANS, SERIES, ANIMATED
+  MOVIES all rich); spot-checked DISCOVERIES/SPORTS/MANHWA/WILDCARD/
+  ARTWORKS — all cohesive, so no further detailed edits this round.
+
+---
+
 ## Request: restore classic signature designs as an extra + fix collage caption (COMPLETE)
 
 - User pointed at commit f6dd7f19 (the 13-category family-based signature
