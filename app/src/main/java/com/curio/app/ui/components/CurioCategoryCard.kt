@@ -68,7 +68,6 @@ import com.curio.app.ui.theme.themedAccent
  * when selected.
  */
 @Composable
-@Composable
 fun CurioCategoryCard(
     category: CurioCategory,
     onClick: () -> Unit,
