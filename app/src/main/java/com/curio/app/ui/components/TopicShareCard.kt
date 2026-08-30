@@ -2463,26 +2463,29 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                 drawRect(Color(0xFF2980B9), Offset(w * 0.36f, h * 0.22f), Size(w * 0.10f, h * 0.08f))
                 drawRect(Color(0xFFC0392B), Offset(w * 0.26f, h * 0.28f), Size(w * 0.20f, h * 0.10f))
                 drawRect(Color(0xFF27AE60), Offset(w * 0.28f, h * 0.38f), Size(w * 0.14f, h * 0.06f))
-                // Palette — kidney shape (two overlapping ovals + thumb hole)
-                val pcx = w * 0.74f; val pcy = h * 0.56f
-                drawOval(Color(0xFFE8E2D4).copy(alpha = 0.95f), Offset(pcx - w * 0.10f, pcy - w * 0.075f), Size(w * 0.20f, w * 0.15f))
-                drawOval(Color(0xFFE8E2D4).copy(alpha = 0.95f), Offset(pcx + w * 0.03f, pcy - w * 0.05f), Size(w * 0.13f, w * 0.12f))
+                // Palette — kidney shape (two overlapping ovals + thumb hole).
+                // Lowered to h*0.72 so it sits BELOW the body text zone (the
+                // title+meta are top, body is bottom-pinned; the palette was at
+                // h*0.56 which collided with the body on long content).
+                val pcx = w * 0.74f; val pcy = h * 0.78f
+                drawOval(Color(0xFFE8E2D4).copy(alpha = 0.55f), Offset(pcx - w * 0.10f, pcy - w * 0.075f), Size(w * 0.20f, w * 0.15f))
+                drawOval(Color(0xFFE8E2D4).copy(alpha = 0.55f), Offset(pcx + w * 0.03f, pcy - w * 0.05f), Size(w * 0.13f, w * 0.12f))
                 // Thumb hole
                 drawCircle(Color(0xFF26211D), w * 0.028f, Offset(pcx - w * 0.045f, pcy + w * 0.02f))
                 // Colour wells around the rim
                 val wells = listOf(Color(0xFFC0392B), Color(0xFF2980B9), Color(0xFF27AE60), Color(0xFFF39C12), Color(0xFF8E44AD), Color(0xFFE67E22))
                 val wellPos = listOf(Offset(-0.065f, -0.055f), Offset(0.02f, -0.07f), Offset(0.075f, -0.02f), Offset(0.065f, 0.05f), Offset(-0.01f, 0.075f), Offset(-0.075f, 0.045f))
                 wellPos.forEachIndexed { i, (dx, dy) ->
-                    drawCircle(wells[i], w * 0.018f, Offset(pcx + dx * w, pcy + dy * w))
+                    drawCircle(wells[i].copy(alpha = 0.60f), w * 0.018f, Offset(pcx + dx * w, pcy + dy * w))
                 }
                 // Brush resting across the palette
-                drawLine(Color(0xFFC9BFA8).copy(alpha = 0.85f), Offset(w * 0.84f, h * 0.70f), Offset(w * 0.98f, h * 0.22f), strokeWidth = 2.2f)
-                drawLine(Color(0xFF6A5C42).copy(alpha = 0.85f), Offset(w * 0.98f, h * 0.22f), Offset(w * 0.995f, h * 0.17f), strokeWidth = 2.0f)  // ferrule
+                drawLine(Color(0xFFC9BFA8).copy(alpha = 0.55f), Offset(w * 0.84f, h * 0.82f), Offset(w * 0.98f, h * 0.40f), strokeWidth = 2.2f)
+                drawLine(Color(0xFF6A5C42).copy(alpha = 0.55f), Offset(w * 0.98f, h * 0.40f), Offset(w * 0.995f, h * 0.35f), strokeWidth = 2.0f)  // ferrule
                 // Bristles — short fan
                 for (i in 0 until 4) {
                     val bx = w * 0.995f + i * 0.0f
-                    val by = h * 0.17f + i * h * 0.008f - h * 0.012f
-                    drawLine(Color(0xFFE67E22).copy(alpha = 0.85f), Offset(bx, by), Offset(bx + w * 0.014f, by - h * 0.004f), strokeWidth = 1.1f)
+                    val by = h * 0.35f + i * h * 0.008f - h * 0.012f
+                    drawLine(Color(0xFFE67E22).copy(alpha = 0.55f), Offset(bx, by), Offset(bx + w * 0.014f, by - h * 0.004f), strokeWidth = 1.1f)
                 }
                 // Paint drips under the canvas
                 listOf(Offset(w * 0.28f, h * 0.48f), Offset(w * 0.33f, h * 0.52f), Offset(w * 0.40f, h * 0.50f)).forEachIndexed { i, p ->
@@ -3044,15 +3047,16 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         cat == "ANIMALS" -> SignatureDesign(
             bg = Color(0xFF142412), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Paw print trail (inline)
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.55f), 4.4f, Offset(w * 0.18f, h * 0.22f))
-                listOf(-3.3f, -1.4f, 1.4f, 3.3f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.45f), 2.4f, Offset(w * 0.18f + ox, h * 0.22f - 6f)) }
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.50f), 3.6f, Offset(w * 0.32f, h * 0.38f))
-                listOf(-2.7f, -1.1f, 1.1f, 2.7f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.40f), 2f, Offset(w * 0.32f + ox, h * 0.38f - 5f)) }
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.45f), 3f, Offset(w * 0.50f, h * 0.55f))
-                listOf(-2.3f, -0.9f, 0.9f, 2.3f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.35f), 1.7f, Offset(w * 0.50f + ox, h * 0.55f - 4f)) }
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.40f), 2.4f, Offset(w * 0.70f, h * 0.70f))
-                listOf(-1.8f, -0.8f, 0.8f, 1.8f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.30f), 1.4f, Offset(w * 0.70f + ox, h * 0.70f - 3.5f)) }
+                // Paw print trail — w-relative sizes so prints scale correctly
+                // on both 9:16 (405×720) and 3:4 (450×600) cards.
+                drawCircle(Color(0xFFE0A458).copy(alpha = 0.55f), w * 0.014f, Offset(w * 0.18f, h * 0.22f))
+                listOf(-0.010f, -0.004f, 0.004f, 0.010f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.45f), w * 0.007f, Offset(w * 0.18f + ox * w, h * 0.22f - w * 0.018f)) }
+                drawCircle(Color(0xFFE0A458).copy(alpha = 0.50f), w * 0.011f, Offset(w * 0.32f, h * 0.38f))
+                listOf(-0.008f, -0.003f, 0.003f, 0.008f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.40f), w * 0.006f, Offset(w * 0.32f + ox * w, h * 0.38f - w * 0.015f)) }
+                drawCircle(Color(0xFFE0A458).copy(alpha = 0.45f), w * 0.009f, Offset(w * 0.50f, h * 0.55f))
+                listOf(-0.007f, -0.003f, 0.003f, 0.007f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.35f), w * 0.005f, Offset(w * 0.50f + ox * w, h * 0.55f - w * 0.012f)) }
+                drawCircle(Color(0xFFE0A458).copy(alpha = 0.40f), w * 0.007f, Offset(w * 0.70f, h * 0.70f))
+                listOf(-0.005f, -0.002f, 0.002f, 0.005f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.30f), w * 0.004f, Offset(w * 0.70f + ox * w, h * 0.70f - w * 0.010f)) }
                 // Grass blades bottom
                 for (i in 0 until 24) {
                     val gx = w * 0.02f + i * w * 0.042f

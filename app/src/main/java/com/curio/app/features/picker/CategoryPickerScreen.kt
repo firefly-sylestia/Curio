@@ -176,11 +176,69 @@ private val mixModeLaneIds: List<CategoryId> =
 @Composable
 fun CategoryPickerScreen(navController: NavController) {
     val context = LocalContext.current
-    // v7.94 — read the REACTIVE visible list directly (no remember): hidden
-    // lanes drop out and reordered lanes follow Manage Categories instantly.
-    // v27i — `visible` already excludes new lanes that haven't shipped, so the
-    // original page (and every other surface) never shows empty dead tiles.
     val categories = CurioCategories.visible
+    val washCat = remember {
+        val id = AppPreferences.getLastSpinCategories(context).firstOrNull()
+            ?: AppPreferences.getLastSpinCategory(context)
+        CurioCategories.byId(id)
+    }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("picker", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("picker", false) }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = { navController.popBackStack() },
+        sheetState = sheetState,
+        containerColor = washCat.categoryBackgroundWash(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        CategoryPickerContent(
+            washCat = washCat,
+            categories = categories,
+            onDismiss = { navController.popBackStack() },
+            onCategorySelected = { cat ->
+                AppPreferences.setLastSpinCategories(context, listOf(cat.id))
+                navController.navigateToTab(CurioRoutes.SPIN)
+            },
+            onCategoriesMixed = { cats ->
+                if (cats.isEmpty()) {
+                    val single = AppPreferences.getLastSpinCategory(context)
+                    AppPreferences.setLastSpinCategories(context, listOf(single))
+                } else {
+                    AppPreferences.setLastSpinCategories(context, cats.map { it.id })
+                }
+                navController.navigateToTab(CurioRoutes.SPIN)
+            }
+        )
+    }
+}
+
+/**
+ * The redesigned picker's inner content — the Curio/Knowledge/Mix mode tabs,
+ * preset chips, icon-tile grid and Mix/Cancel row. Shared by the full-screen
+ * [CategoryPickerScreen] (wrapped in its own ModalBottomSheet) and the Spin
+ * page's inline sheet (shown above the shuffle deck).
+ *
+ * @param washCat the category whose tint wash the picker wears.
+ * @param categories the visible category list (for preset resolution).
+ * @param onCategorySelected fired on tap-to-open (Curio/Knowledge mode, or
+ *   Mix single-tap). The caller persists the selection and dismisses.
+ * @param onCategoriesMixed fired on Mix (empty = cancelled mix → revert to
+ *   the last single category). The caller persists and dismisses.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryPickerContent(
+    washCat: CurioCategory,
+    categories: List<CurioCategory>,
+    onCategorySelected: (CurioCategory) -> Unit,
+    onCategoriesMixed: (List<CurioCategory>) -> Unit,
+    onDismiss: () -> Unit = {}
+) {
+    val context = LocalContext.current
     // v301 — Single flat grid. Uses ALL categories (not just visible) so
     // Coming Soon tiles show for unready lanes. Hidden lanes filtered out.
     val allUnhidden = remember {
@@ -192,31 +250,13 @@ fun CategoryPickerScreen(navController: NavController) {
             .sortedBy { it.displayName.lowercase() }
         wildcard + rest
     }
-    // v26 — reopen with the persisted deck: a mixed selection comes back in
-    // multi-select with every lane ticked, so the user can SEE and CHANGE
-    // the mix instead of it collapsing to the single first category. Hidden
-    // lanes are filtered out so they never show as pre-selected.
     val draft = CategoryPickerDraft
     val persistedVisible = remember {
         AppPreferences.getLastSpinCategories(context)
             .mapNotNull { id -> categories.firstOrNull { it.id == id } }
     }
-    // v301 — single grid state (no pager).
     val gridState = rememberLazyGridState()
-    // Wide windows (tablet / landscape) spread the deck grid and cap the
-    // sheet's content width so the picker stays readable on large screens.
     val wide = windowWidthSizeClass().isWide
-    // ── Category tint wash — this picker hands off straight to the Shuffle
-    //    tab, so it wears the last-used deck's color story (same wash as the
-    //    Spin page / Save / Cabinet) instead of a plain theme background.
-    val washCat = remember {
-        val id = AppPreferences.getLastSpinCategories(context).firstOrNull()
-            ?: AppPreferences.getLastSpinCategory(context)
-        CurioCategories.byId(id)
-    }
-    // Null = not in multi-select mode (tap-to-open). Once set, cards toggle.
-    // v44 — seed from the process draft when one is staged (selection + mode
-    // restored), else from the persisted deck as before.
     var selectedSlugs by rememberSaveable {
         mutableStateOf(
             draft.selected ?: persistedVisible.map { it.id.routeSlug }
@@ -225,9 +265,6 @@ fun CategoryPickerScreen(navController: NavController) {
     var multiSelectMode by rememberSaveable {
         mutableStateOf(if (draft.selected != null) draft.multiSelect else persistedVisible.size > 1)
     }
-    // The redesigned picker's mode tab — Curio / Knowledge / Mix. Mix is the
-    // classic multi-select picker (everything + Wildcard); Curio/Knowledge
-    // are tap-to-open grouped decks.
     var modeName by rememberSaveable { mutableStateOf(PickerMode.MIX.name) }
     val mode = runCatching { PickerMode.valueOf(modeName) }.getOrDefault(PickerMode.MIX)
 
@@ -235,8 +272,6 @@ fun CategoryPickerScreen(navController: NavController) {
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug
     }
 
-    // v27k — total topics across the ticked lanes (the Mix button shows the
-    // pool size, not the lane count).
     var selectedTopicCount by remember { mutableStateOf(0) }
     LaunchedEffect(selectedSlugs) {
         val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
@@ -247,43 +282,20 @@ fun CategoryPickerScreen(navController: NavController) {
         }
     }
 
-    // v44 — keep the draft live: every selection/mode/page/scroll change is
-    // mirrored into [CategoryPickerDraft] so leaving and reopening the
-    // picker restores exactly where you were (selection, preset mix, page
-    // and both grids' scroll offsets).
     LaunchedEffect(selectedSlugs, multiSelectMode) {
         draft.selected = selectedSlugs
         draft.multiSelect = multiSelectMode
     }
 
-
-    // Same full-screen + swipe-down-dismiss pattern as the filter page — a
-    // ModalBottomSheet expanded to full height with a drag handle.
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    // v8.21 — tell the pet a drawer is up so it comes over to peek.
-    LaunchedEffect(Unit) { PetLandmarks.noteSheet("picker", true) }
-    DisposableEffect(Unit) {
-        onDispose { PetLandmarks.noteSheet("picker", false) }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = { navController.popBackStack() },
-        sheetState = sheetState,
-        // Theme-aware category wash — deep accent over cream in light,
-        // pastel twin glow over midnight in dark.
-        containerColor = washCat.categoryBackgroundWash(),
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    // The sheet spans the whole window; on wide windows the content is
+    // centered in the same max-width column as every other page.
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        // contentAlignment takes a full Alignment, not Alignment.Horizontal
+        // (CenterHorizontally) — Center also matches the vertical no-op
+        // since the box wraps the sheet content's height.
+        contentAlignment = Alignment.Center
     ) {
-        // The sheet spans the whole window; on wide windows the content is
-        // centered in the same max-width column as every other page.
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // contentAlignment takes a full Alignment, not Alignment.Horizontal
-            // (CenterHorizontally) — Center also matches the vertical no-op
-            // since the box wraps the sheet content's height.
-            contentAlignment = Alignment.Center
-        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -298,7 +310,7 @@ fun CategoryPickerScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CurioBackButton(onClick = { navController.popBackStack() })
+            CurioBackButton(onClick = onDismiss)
             Text(
                 text = "What are we exploring?",
                 style = MaterialTheme.typography.headlineSmall,
@@ -431,7 +443,7 @@ fun CategoryPickerScreen(navController: NavController) {
                                 onClick = {
                                     if (!cat.isReady) return@PickerIconTile
                                     if (multiSelectMode) toggleSlug(slug)
-                                    else navController.navigate(CurioRoutes.spinWithCategory(slug)) { launchSingleTop = true }
+                                    else onCategorySelected(cat)
                                 },
                                 onLongClick = if (cat.isReady) {
                                     {
@@ -476,7 +488,7 @@ fun CategoryPickerScreen(navController: NavController) {
                                         selected = false,
                                         onClick = {
                                             if (!cat.isReady) return@PickerIconTile
-                                            navController.navigate(CurioRoutes.spinWithCategory(cat.id.routeSlug)) { launchSingleTop = true }
+                                            onCategorySelected(cat)
                                         }
                                     )
                                 }
@@ -499,19 +511,10 @@ fun CategoryPickerScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (selectedSlugs.isEmpty()) return@Button
-                        // Resolve the chosen slugs and persist the FULL set
-                        // (single or mixed) so the Shuffle tab reopens the
-                        // same deck after back navigation, tab switches and
-                        // app restarts. navigateToTab drops the picker and
-                        // lands on the real Shuffle tab — not a separate
-                        // spin/{slug} instance.
-                        val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
-                        if (ids.isEmpty()) return@Button
-                        AppPreferences.setLastSpinCategories(context, ids)
-                        // The mix is committed — drop the draft so the next
-                        // picker open shows the persisted deck fresh.
+                        val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
+                        if (cats.isEmpty()) return@Button
                         CategoryPickerDraft.clear()
-                        navController.navigateToTab(CurioRoutes.SPIN)
+                        onCategoriesMixed(cats)
                     },
                     enabled = selectedSlugs.isNotEmpty(),
                     shape = mixShape,
@@ -555,7 +558,6 @@ fun CategoryPickerScreen(navController: NavController) {
                 }
             }
         }
-    }
     }
     }
 }

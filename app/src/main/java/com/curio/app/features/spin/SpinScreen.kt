@@ -554,31 +554,17 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         mutableStateOf(setOf<String>())
     }
     var showFilters by remember { mutableStateOf(false) }
+    var showCategoryPicker by remember { mutableStateOf(false) }
 
     // v142 — consume the one-shot "open the picker" request from Home's
     // first-run "Pick a lane" (it navigates to the Spin tab with the flag
     // set); keyed on the flag so it also fires when the tab was already
-    // composed. Opens the full-screen CategoryPickerScreen.
+    // composed. Opens the inline redesigned category picker sheet.
     LaunchedEffect(SpinPickerRequest.pending) {
         if (SpinPickerRequest.pending) {
             SpinPickerRequest.pending = false
-            navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
+            showCategoryPicker = true
         }
-    }
-    // Re-read the persisted deck when returning from the picker — the new
-    // full-screen CategoryPickerScreen persists its selection and pops back,
-    // so Spin must sync activeCatIds on RESUME to pick up the change.
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && categorySlug == null) {
-                val persisted = AppPreferences.getLastSpinCategories(context)
-                if (persisted.isNotEmpty() && activeCatIds != persisted) {
-                    activeCatIds = persisted
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     // Broader OR-based filtering: a topic matches if it has ANY of the
@@ -1228,7 +1214,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 ) {
                     // Category pill
                     Surface(
-                        onClick = { navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true } },
+                        onClick = { showCategoryPicker = true },
                         shape = RoundedCornerShape(50),
                         color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                         shadowElevation = 3.dp
@@ -1394,14 +1380,53 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             filterActiveCount = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
                 filteredPool.size else null,
             vertical = extraCompact,
-            onCategories = { navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true } },
+            onCategories = { showCategoryPicker = true },
             onFilter = { showFilters = true }
         )
         }
         }
     }
 
-
+    // ── Inline redesigned category picker sheet (Curio/Knowledge/Mix) ──
+    // Opens smoothly above the shuffle page as a ModalBottomSheet — no
+    // navigation to a separate route. The picker persists its own selection
+    // via AppPreferences; the callbacks sync activeCatIds + dismiss.
+    if (showCategoryPicker) {
+        val pickerSheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        LaunchedEffect(Unit) { PetLandmarks.noteSheet("spin", true) }
+        DisposableEffect(Unit) {
+            onDispose { PetLandmarks.noteSheet("spin", false) }
+        }
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { showCategoryPicker = false },
+            sheetState = pickerSheetState,
+            containerColor = deckCat.categoryBackgroundWash(),
+            dragHandle = { androidx.compose.material3.BottomSheetDefaults.DragHandle() },
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        ) {
+            com.curio.app.features.picker.CategoryPickerContent(
+                washCat = deckCat,
+                categories = CurioCategories.visible,
+                onDismiss = { showCategoryPicker = false },
+                onCategorySelected = { c ->
+                    activeCatIds = listOf(c.id)
+                    AppPreferences.setLastSpinCategories(context, listOf(c.id))
+                    showCategoryPicker = false
+                },
+                onCategoriesMixed = { cats ->
+                    if (cats.isEmpty()) {
+                        val single = AppPreferences.getLastSpinCategory(context)
+                        activeCatIds = listOf(single)
+                        AppPreferences.setLastSpinCategories(context, listOf(single))
+                    } else {
+                        activeCatIds = cats.map { it.id }
+                        AppPreferences.setLastSpinCategories(context, cats.map { it.id })
+                    }
+                    showCategoryPicker = false
+                }
+            )
+        }
+    }
 
     // ── ModalBottomSheet — compact multi-select filter dialog ──────────
     if (showFilters) {
