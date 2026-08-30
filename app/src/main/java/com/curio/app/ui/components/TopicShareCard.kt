@@ -2899,7 +2899,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "SONGS" -> SignatureDesign(
             bg = Color(0xFF261023), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF4A1638), Color(0xFF261023), Color(0xFF120811)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF4A1638), Color(0xFF261023), Color(0xFF120811))), size = Size(w, h))
                 // Soft bokeh orbs
                 listOf(Pair(Offset(w * 0.18f, h * 0.22f), Color(0xFFFF9AB8)), Pair(Offset(w * 0.86f, h * 0.30f), Color(0xFFC084FC)), Pair(Offset(w * 0.72f, h * 0.80f), Color(0xFFFFB74D))).forEach { (c, col) ->
                     drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.30f), col.copy(alpha = 0f))), radius = w * 0.16f, center = c)
@@ -2984,7 +2984,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ANIMATED MOVIES" -> SignatureDesign(
             bg = Color(0xFF2A1A3E), cornerRadius = 10f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF5B2A6E), Color(0xFF2A1A3E), Color(0xFF12101F)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF5B2A6E), Color(0xFF2A1A3E), Color(0xFF12101F))), size = Size(w, h))
                 // Dreamy color orbs
                 listOf(Pair(Offset(w * 0.20f, h * 0.20f), Color(0xFFFF6B9D)), Pair(Offset(w * 0.85f, h * 0.25f), Color(0xFFFFB86B)), Pair(Offset(w * 0.75f, h * 0.78f), Color(0xFF6BCBFF))).forEach { (c, col) ->
                     drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.32f), col.copy(alpha = 0f))), radius = w * 0.22f, center = c)
@@ -3023,7 +3023,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "AUTHORS" -> SignatureDesign(
             bg = Color(0xFF131A2E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF22355C), Color(0xFF131A2E), Color(0xFF0A0F1C)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF22355C), Color(0xFF131A2E), Color(0xFF0A0F1C))), size = Size(w, h))
                 // Warm desk-lamp glow from the corner
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.26f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.38f, center = Offset(w * 0.78f, h * 0.26f))
                 // Manuscript ruled lines
@@ -3096,7 +3096,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ARTWORKS" -> SignatureDesign(
             bg = Color(0xFF232327), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF3E3E44), Color(0xFF232327), Color(0xFF131316)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF3E3E44), Color(0xFF232327), Color(0xFF131316))), size = Size(w, h))
                 // Dim gallery spotlights — soft pools, never bright behind text
                 listOf(Offset(w * 0.28f, 0f), Offset(w * 0.74f, 0f)).forEach { c ->
                     val cone = Path().apply { moveTo(c.x, c.y); lineTo(c.x - w * 0.09f, h * 0.58f); lineTo(c.x + w * 0.09f, h * 0.58f); close() }
@@ -3110,7 +3110,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                     drawRoundRect(Color(0xFF8A8070), topLeft = Offset(c.x - fw / 2, c.y - fh / 2), size = Size(fw, fh), cornerRadius = CornerRadius(2f))
                     drawRoundRect(Color(0xFF1C1C1F), topLeft = Offset(c.x - fw / 2 + w * 0.009f, c.y - fh / 2 + w * 0.009f), size = Size(fw - w * 0.018f, fh - w * 0.018f), cornerRadius = CornerRadius(1.5f))
                     val mw = fw - w * 0.04f; val mh = fh - w * 0.04f
-                    if (kind == 1) {
+                    if (kind == 1f) {
                         drawCircle(Brush.radialGradient(listOf(Color(0xFFB86B4F), Color(0xFF4E2A1E)), center = Offset(c.x, c.y - mh * 0.18f), radius = mw * 0.5f), radius = mw * 0.24f, center = Offset(c.x, c.y - mh * 0.18f))
                         drawOval(Color(0xFF2E4A5E), topLeft = Offset(c.x - mw * 0.26f, c.y + mh * 0.02f), size = Size(mw * 0.52f, mh * 0.30f))
                         drawLine(Color(0xFF0E0E10), Offset(c.x - mw * 0.32f, c.y + mh * 0.40f), Offset(c.x + mw * 0.32f, c.y + mh * 0.40f), strokeWidth = 1.6f)
@@ -3141,7 +3141,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "SCIENTISTS" -> SignatureDesign(
             bg = Color(0xFF14202E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF23405C), Color(0xFF14202E), Color(0xFF0B121B)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF23405C), Color(0xFF14202E), Color(0xFF0B121B))), size = Size(w, h))
                 // Faint blueprint grid
                 for (i in 0 until 16) drawLine(Color(0xFF6BB8E8).copy(alpha = 0.06f), Offset(i * w / 15f, 0f), Offset(i * w / 15f, h), strokeWidth = 0.6f)
                 for (i in 0 until 20) drawLine(Color(0xFF6BB8E8).copy(alpha = 0.06f), Offset(0f, i * h / 19f), Offset(w, i * h / 19f), strokeWidth = 0.6f)
@@ -3271,7 +3271,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ANIME" -> SignatureDesign(
             bg = Color(0xFF3A1A4A), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF7A3A8A), Color(0xFF3A1A4A), Color(0xFF1A0E24)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF7A3A8A), Color(0xFF3A1A4A), Color(0xFF1A0E24))), size = Size(w, h))
                 // Sunburst from top-right
                 for (i in 0 until 12) {
                     val a = Math.toRadians((360.0 * i / 12)).toFloat()
@@ -3308,7 +3308,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "MANGA" -> SignatureDesign(
             bg = Color(0xFFE8E4DA), cornerRadius = 6f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFFFFFFFF), Color(0xFFE8E4DA), Color(0xFFCFC8B8)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFFFFFFFF), Color(0xFFE8E4DA), Color(0xFFCFC8B8))), size = Size(w, h))
                 // Bold speed lines bursting from bottom-left
                 val bx = w * 0.14f; val by = h * 0.92f
                 for (i in 0 until 22) {
@@ -3345,7 +3345,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "MANHWA" -> SignatureDesign(
             bg = Color(0xFFE8E0F2), cornerRadius = 10f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFFFFE8F2), Color(0xFFE8E0F2), Color(0xFFD4E4F5)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFFFFE8F2), Color(0xFFE8E0F2), Color(0xFFD4E4F5))), size = Size(w, h))
                 // Pastel clouds
                 listOf(Pair(Offset(w * 0.20f, h * 0.22f), Color(0xFFFFD9E8)), Pair(Offset(w * 0.72f, h * 0.30f), Color(0xFFD9E8FF))).forEach { (c, col) ->
                     drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.9f), col.copy(alpha = 0f))), radius = w * 0.16f, center = c)
@@ -3432,7 +3432,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "SPORTS" -> SignatureDesign(
             bg = Color(0xFF0E2A1E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A34), Color(0xFF0E2A1E), Color(0xFF06140D)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A34), Color(0xFF0E2A1E), Color(0xFF06140D))), size = Size(w, h))
                 // Floodlight cones from both top corners
                 listOf(Pair(Offset(w * 0.10f, -h * 0.02f), Color(0xFFFFF3C4)), Pair(Offset(w * 0.90f, -h * 0.02f), Color(0xFFFFF3C4))).forEach { (c, col) ->
                     val cone = Path().apply { moveTo(c.x, c.y); lineTo(c.x - w * 0.14f, h * 0.60f); lineTo(c.x + w * 0.14f, h * 0.60f); close() }
@@ -3471,7 +3471,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "FOOD" -> SignatureDesign(
             bg = Color(0xFF2E1E12), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF5E3820), Color(0xFF2E1E12), Color(0xFF180E06)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF5E3820), Color(0xFF2E1E12), Color(0xFF180E06))), size = Size(w, h))
                 // Warm glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2A84F).copy(alpha = 0.20f), Color(0xFFF2A84F).copy(alpha = 0f))), radius = w * 0.34f, center = Offset(w * 0.30f, h * 0.40f))
                 // Overhead plate
@@ -3520,7 +3520,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "INTERNET" -> SignatureDesign(
             bg = Color(0xFF0E1E2E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A6E), Color(0xFF0E1E2E), Color(0xFF060E18)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A6E), Color(0xFF0E1E2E), Color(0xFF060E18))), size = Size(w, h))
                 // Glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF4FA8E8).copy(alpha = 0.18f), Color(0xFF4FA8E8).copy(alpha = 0f))), radius = w * 0.36f, center = Offset(w * 0.32f, h * 0.40f))
                 // Browser bar top
@@ -3562,7 +3562,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "BIOLOGY" -> SignatureDesign(
             bg = Color(0xFF0E2418), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A30), Color(0xFF0E2418), Color(0xFF06120C)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A30), Color(0xFF0E2418), Color(0xFF06120C))), size = Size(w, h))
                 // Glow behind the helix
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF6BE3A0).copy(alpha = 0.22f), Color(0xFF6BE3A0).copy(alpha = 0f))), radius = w * 0.34f, center = Offset(w * 0.42f, h * 0.42f))
                 // DNA double helix, right side
@@ -3609,7 +3609,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "CHEMISTRY" -> SignatureDesign(
             bg = Color(0xFF0E1A2E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E3A5E), Color(0xFF0E1A2E), Color(0xFF080C18)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E3A5E), Color(0xFF0E1A2E), Color(0xFF080C18))), size = Size(w, h))
                 // Cyan glow behind the lattice
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF4FE8E8).copy(alpha = 0.18f), Color(0xFF4FE8E8).copy(alpha = 0f))), radius = w * 0.42f, center = Offset(w * 0.62f, h * 0.40f))
                 // Hexagon helper — one ring, optionally with a double bond
@@ -3673,7 +3673,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ANIMALS" -> SignatureDesign(
             bg = Color(0xFF14261A), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF2E4A2E), Color(0xFF14261A), Color(0xFF0A120C)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF2E4A2E), Color(0xFF14261A), Color(0xFF0A120C))), size = Size(w, h))
                 // Moonlight glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2E4C8).copy(alpha = 0.16f), Color(0xFFF2E4C8).copy(alpha = 0f))), radius = w * 0.28f, center = Offset(w * 0.80f, h * 0.14f))
                 drawCircle(Color(0xFFF2E4C8).copy(alpha = 0.5f), w * 0.014f, Offset(w * 0.80f, h * 0.14f))
@@ -3718,7 +3718,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "PLANTS" -> SignatureDesign(
             bg = Color(0xFF122A12), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF2E5E2E), Color(0xFF122A12), Color(0xFF081408)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF2E5E2E), Color(0xFF122A12), Color(0xFF081408))), size = Size(w, h))
                 // Sunbeams from top-left
                 for (i in 0 until 7) {
                     val a = Math.toRadians((25.0 + i * 9)).toFloat()
@@ -3767,7 +3767,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "TECHNOLOGIES" -> SignatureDesign(
             bg = Color(0xFF0A1626), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF16345E), Color(0xFF0A1626), Color(0xFF040A12)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF16345E), Color(0xFF0A1626), Color(0xFF040A12))), size = Size(w, h))
                 // Electric cyan glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF4FE8FF).copy(alpha = 0.18f), Color(0xFF4FE8FF).copy(alpha = 0f))), radius = w * 0.36f, center = Offset(w * 0.30f, h * 0.34f))
                 // Circuit traces
@@ -3884,7 +3884,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "GEOLOGY" -> SignatureDesign(
             bg = Color(0xFF241A12), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF4E3A26), Color(0xFF241A12), Color(0xFF120C06)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF4E3A26), Color(0xFF241A12), Color(0xFF120C06))), size = Size(w, h))
                 // Strata layers, wavy
                 val strata = listOf(Pair(Color(0xFF8A6A3A), 0.62f), Pair(Color(0xFF6E4E2E), 0.70f), Pair(Color(0xFF5E3E24), 0.78f), Pair(Color(0xFF4A3018), 0.86f))
                 strata.forEach { (col, topFrac) ->
@@ -3920,7 +3920,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "MEDICINE" -> SignatureDesign(
             bg = Color(0xFF0E2226), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A4E), Color(0xFF0E2226), Color(0xFF060E10)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A4E), Color(0xFF0E2226), Color(0xFF060E10))), size = Size(w, h))
                 // Teal glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF6BE8D8).copy(alpha = 0.18f), Color(0xFF6BE8D8).copy(alpha = 0f))), radius = w * 0.34f, center = Offset(w * 0.66f, h * 0.36f))
                 // Pulse rings bottom-left
@@ -3968,7 +3968,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "PSYCHOLOGY" -> SignatureDesign(
             bg = Color(0xFF1E1630), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF3E2E5E), Color(0xFF1E1630), Color(0xFF100A1C)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF3E2E5E), Color(0xFF1E1630), Color(0xFF100A1C))), size = Size(w, h))
                 // Soft violet glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF9A8AFF).copy(alpha = 0.16f), Color(0xFF9A8AFF).copy(alpha = 0f))), radius = w * 0.36f, center = Offset(w * 0.36f, h * 0.40f))
                 // Brain hemispheres — two lobe outlines
@@ -4013,7 +4013,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "MATHEMATICS" -> SignatureDesign(
             bg = Color(0xFF121A30), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF22345E), Color(0xFF121A30), Color(0xFF080C18)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF22345E), Color(0xFF121A30), Color(0xFF080C18))), size = Size(w, h))
                 // Faint coordinate grid
                 for (i in 0 until 14) drawLine(Color(0xFF8AA8E8).copy(alpha = 0.05f), Offset(i * w / 13f, 0f), Offset(i * w / 13f, h), strokeWidth = 0.6f)
                 for (i in 0 until 18) drawLine(Color(0xFF8AA8E8).copy(alpha = 0.05f), Offset(0f, i * h / 17f), Offset(w, i * h / 17f), strokeWidth = 0.6f)
@@ -4055,7 +4055,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ECONOMICS" -> SignatureDesign(
             bg = Color(0xFF0E2418), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A34), Color(0xFF0E2418), Color(0xFF06120C)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A34), Color(0xFF0E2418), Color(0xFF06120C))), size = Size(w, h))
                 // Emerald/gold glows
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF6BE3A0).copy(alpha = 0.16f), Color(0xFF6BE3A0).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.30f, h * 0.40f))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE0C84F).copy(alpha = 0.14f), Color(0xFFE0C84F).copy(alpha = 0f))), radius = w * 0.26f, center = Offset(w * 0.78f, h * 0.30f))
@@ -4092,7 +4092,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "LANGUAGE" -> SignatureDesign(
             bg = Color(0xFF2E1A12), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF5E3820), Color(0xFF2E1A12), Color(0xFF180C06)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF5E3820), Color(0xFF2E1A12), Color(0xFF180C06))), size = Size(w, h))
                 // Warm glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2A84F).copy(alpha = 0.16f), Color(0xFFF2A84F).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.70f, h * 0.36f))
                 // Speech bubbles
@@ -4130,7 +4130,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ENGINEERING" -> SignatureDesign(
             bg = Color(0xFF0E1A2E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E3A5E), Color(0xFF0E1A2E), Color(0xFF060C18)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E3A5E), Color(0xFF0E1A2E), Color(0xFF060C18))), size = Size(w, h))
                 // Blueprint grid
                 for (i in 0 until 18) drawLine(Color(0xFF9FC8E8).copy(alpha = 0.06f), Offset(i * w / 17f, 0f), Offset(i * w / 17f, h), strokeWidth = 0.6f)
                 for (i in 0 until 22) drawLine(Color(0xFF9FC8E8).copy(alpha = 0.06f), Offset(0f, i * h / 21f), Offset(w, i * h / 21f), strokeWidth = 0.6f)
@@ -4171,7 +4171,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "OCEANS" -> SignatureDesign(
             bg = Color(0xFF0A1A2E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A6E), Color(0xFF0A1A2E), Color(0xFF040A14)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E4A6E), Color(0xFF0A1A2E), Color(0xFF040A14))), size = Size(w, h))
                 // Sun rays from the surface
                 for (i in 0 until 6) {
                     val a = Math.toRadians((15.0 + i * 8)).toFloat()
@@ -4222,7 +4222,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "QUOTES" -> SignatureDesign(
             bg = Color(0xFFF2ECDC), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFFFFFBF2), Color(0xFFF2ECDC), Color(0xFFE2D8C0)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFFFFFBF2), Color(0xFFF2ECDC), Color(0xFFE2D8C0))), size = Size(w, h))
                 // Soft warm glow, center
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.14f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.5f, h * 0.30f))
                 // Giant opening quote mark
@@ -4305,7 +4305,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         else -> SignatureDesign(
             bg = Color(0xFF14141C), cornerRadius = 6f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF2A2A38), Color(0xFF14141C), Color(0xFF0A0A10)), size = Size(w, h))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF2A2A38), Color(0xFF14141C), Color(0xFF0A0A10))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF6A6A8A).copy(alpha = 0.14f), Color(0xFF6A6A8A).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.70f, h * 0.30f))
                 val s = (w * 1000 + h).toInt()
                 for (i in 0 until 50) {
