@@ -46,19 +46,6 @@ Everything lives on your device. No accounts. No analytics. No tracking. Open so
 
 > **Google Play support is not planned.** v1.0 ships via GitHub Releases.
 
-### Install on Windows (Desktop App)
-
-Curio also ships as a **native Windows app** (the Compose Multiplatform desktop port) — no emulator or Android SDK needed.
-
-1. Open the [Releases page](https://github.com/firefly-sylestia/Curio/releases) and find the latest release
-2. Download **one** of the Windows files:
-   - **`Curio-Windows-<version>-portable.zip`** — *portable*: unzip it anywhere, then double-click `Curio.exe` to run. No installation.
-   - **`Curio-<version>.msi`** — *installer*: run it to add Curio to your Start menu, complete with an uninstaller.
-3. **Windows 10/11, 64-bit.** If SmartScreen shows "Windows protected your PC", click **More info → Run anyway** — the app isn't code-signed yet.
-4. Your window size, position, theme, saved discoveries, and last deck are remembered between runs (stored under `%USERPROFILE%\.curio`).
-
-> The desktop app mirrors the Android app (Home, Spin, Cabinet, Settings). Capture/sessions, quests, and the floating explore bubble aren't ported yet.
-
 ### Build from Source
 
 ```bash
@@ -95,8 +82,8 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 
 | | |
 |---|---|
-| **Platform** | Android (v1.0) · Windows desktop app |
-| **Minimum OS** | Android 8.0 (API 26) and up · Windows 10/11 64-bit |
+| **Platform** | Android (v1.0) |
+| **Minimum OS** | Android 8.0 (API 26) and up |
 | **Target OS** | Android 17 (API 37) |
 | **Permissions** | Microphone (voice notes + dictation) · Notifications (reminders) · "Display over other apps" (optional floating explore bubble) · Background service (explore timer) |
 | **Language** | English |

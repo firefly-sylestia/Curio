@@ -1,3 +1,4 @@
+ADD: Category picker redesigned - three modes (Curio / Knowledge / Mix): Curio is a relaxed culture-first deck, Knowledge groups the deep learning lanes by theme, and Mix keeps multi-select with the quick-mix presets and Wildcard; every lane now renders as a compact quiet icon tile instead of the old large category-color cards.
 ADD: Share hub in Settings - browse every share-card design as a full preview grid, search any topic in the catalog, pick a design, and share that topic as a card (9:16 or 3:4, Signature Current or Classic included).
 FIX: Save button in the topic share sheet now saves the card image straight to your gallery (Pictures/Curio) instead of opening the share panel - the same Save + Share split now works in the entry-detail share view too.
 FIX: Songs share-card waveform restored to solid bars with a compact vertical span (rather than thin slivers), and the Albums vinyl sits further down and to the right.

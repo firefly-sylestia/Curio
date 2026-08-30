@@ -1,5 +1,43 @@
 # Prompt.md — current request log
 
+## Request: Redesigned Category Picker (Curio/Knowledge/Mix) + README desktop removal (COMPLETE)
+
+- User: "fully redesigning" the category picker bottom sheet. New design
+  must NOT use category colors / huge cards — it uses the category icon;
+  split into a casual "Curio" mode (no science knowledge needed), a
+  Knowledge mode, and Mix; and be future-ready for branched/daily
+  discovery topics. From README, remove the desktop app.
+- ask_user answers: 3 tabs (Curio · Knowledge · Mix); grouped categories
+  AND difficulty framing (both); compact icon tiles; clean + extendable
+  data layer (no visible branch scaffolding yet).
+- README: removed the "Install on Windows (Desktop App)" section and the
+  desktop rows from the requirements table.
+- CategoryPickerScreen rework (data layer first, declarative so branches
+  slot in later without touching the grid renderer):
+  - PickerMode enum (Curio/Knowledge/Mix) — glyphs must exist in the
+    bundled font subset, so used AutoAwesome/Science/Check.
+  - PickerGroup + curioModeGroups + knowledgeModeGroups: Curio =
+    Music / On screen / Stories / Art & artists / Comics & anime /
+    Play & taste; Knowledge = Life sciences / Physical sciences /
+    How things work / The human mind / Our world. mixModeLaneIds =
+    everything (Wildcard lives there).
+  - Mode tabs row (PickerPresetChip) above the content; switching to
+    Curio/Knowledge drops a transient multi-select.
+  - Mix tab keeps the old preset chips + full grid + multi-select + Mix
+    button (gated to multiSelectMode && mode == MIX).
+  - Curio/Knowledge render grouped grids with full-width group labels;
+    lanes resolved from CurioCategories.all filtered against hidden set
+    (coming-soon still shows disabled); tap-to-open.
+  - NEW PickerIconTile: compact 38dp glyph-in-circle over the name on a
+    THEME-NEUTRAL surface (no category color/gradient), selection check
+    for Mix multi-select, grayed Coming soon, "Surprise mix" for Wildcard.
+  - Removed CurioCategoryCard usage from the picker (still used by Spin).
+- Verified: mode coverage (all 38 lanes: 21 Curio + 17 Knowledge +
+  Wildcard in Mix), stack-brace balanced, unused imports cleaned. Changelog
+  bullet added. Committed & pushed.
+
+---
+
 ## Request: Save-to-gallery fix + Songs/Alnums share-card tweaks (COMPLETE)
 
 - User: the topic share sheet's Save button was opening the share panel
