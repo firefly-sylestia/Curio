@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -65,6 +66,7 @@ import com.curio.app.ui.theme.themedAccent
  * little different") and the card pops to the full bright gradient only
  * when selected.
  */
+@Composable
 private fun expressiveCategorySurface(category: CurioCategory, base: Color): Color {
     // Each lane gets its own material treatment instead of one generic tint.
     // Books and Games intentionally retain their established surfaces.
