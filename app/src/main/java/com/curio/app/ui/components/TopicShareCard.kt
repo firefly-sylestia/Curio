@@ -2232,7 +2232,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         cat == "ALBUMS" -> SignatureDesign(
             bg = Color(0xFF160F14), cornerRadius = 8f,
             drawBackground = { w, h ->
-                val cx = w * 0.30f; val cy = h * 0.42f
+                val cx = w * 0.34f; val cy = h * 0.47f
                 for (i in 0 until 18) { drawCircle(Color(0xFFE8D5B5).copy(alpha = 0.30f), w * 0.20f - i * w * 0.011f, Offset(cx, cy), style = Stroke(1f)) }
                 drawCircle(Color(0xFFE8D5B5).copy(alpha = 0.40f), w * 0.20f, Offset(cx, cy))
                 drawCircle(Color(0xFFC2402E), w * 0.075f, Offset(cx, cy))
@@ -2253,11 +2253,13 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         cat == "SONGS" -> SignatureDesign(
             bg = Color(0xFF26091B), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Soundwave bars — thin elegant lines
+                // Soundwave bars — solid bars grouped low, compact vertical
+                // span (not thin lines; the waveform's top-to-bottom extent
+                // is kept close to the centre so it never dominates the card)
                 for (i in 0 until 22) {
                     val x = w * 0.08f + i * w * 0.038f
-                    val hgt = h * (0.18f + 0.34f * kotlin.math.abs(kotlin.math.sin(i * 0.9f)).toFloat())
-                    drawRoundRect(Color(0xFFFF8FA3).copy(alpha = 0.45f), Offset(x, h * 0.52f - hgt / 2f), Size(w * 0.009f, hgt), CornerRadius(2f))
+                    val hgt = h * (0.14f + 0.22f * kotlin.math.abs(kotlin.math.sin(i * 0.9f)).toFloat())
+                    drawRoundRect(Color(0xFFFF8FA3).copy(alpha = 0.45f), Offset(x, h * 0.52f - hgt / 2f), Size(w * 0.016f, hgt), CornerRadius(2f))
                 }
                 // Music note glyph
                 drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.55f), w * 0.035f, Offset(w * 0.78f, h * 0.30f))
@@ -5783,7 +5785,7 @@ fun TopicShareSheet(
                 OutlinedButton(onClick = {
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
-                    }); onDismiss()
+                    }, saveToGallery = true); onDismiss()
                 }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(50.dp)) {
                     Text("\u2B07", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.width(4.dp))
@@ -5885,12 +5887,23 @@ fun ShareHubBody(
         }
         if (customEditing) OutlinedTextField(customText, onCustomTextChange, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
         val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
-        Button(onClick = {
-            shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
-            }); onShared()
-        }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(52.dp)) {
-            Text("Share image card", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+        // Save + Share side by side — Save writes the PNG to the gallery,
+        // Share launches the chooser (the topic sheet's same two actions).
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = {
+                shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
+                }, saveToGallery = true); onShared()
+            }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(52.dp)) {
+                Text("Save", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+            }
+            Button(onClick = {
+                shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
+                }); onShared()
+            }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.weight(1f).height(52.dp)) {
+                Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+            }
         }
     }
 }

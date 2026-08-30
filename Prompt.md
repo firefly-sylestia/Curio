@@ -1,5 +1,31 @@
 # Prompt.md — current request log
 
+## Request: Save-to-gallery fix + Songs/Alnums share-card tweaks (COMPLETE)
+
+- User: the topic share sheet's Save button was opening the share panel
+  instead of saving; Songs bars should keep a real width (they didn't ask
+  for thin) but the top-to-bottom SPAN should shrink; move the Albums vinyl
+  a bit down and right.
+- shareComposableCard gained saveToGallery: Boolean = false — when true
+  it writes the PNG to the gallery instead of launching the ACTION_SEND
+  chooser (MediaStore insert on API 29+, Pictures/Curio + scan on 26-28,
+  mirroring MoodBoardExport.saveBitmapToGallery) and calls onShared.
+- TopicShareSheet Save button now passes saveToGallery = true.
+- ShareHubBody (used by the ENTRY DETAIL share view) replaced its single
+  "Share image card" button with a Save + Share side-by-side row — Save
+  passes saveToGallery = true — so detail-view sharing gets the same Save
+  behaviour. (TopicShareSheet already had its own Save+Share row.)
+- SONGS base: bars back to w*0.016 width (real bars, not thin slivers);
+  vertical span reduced via hgt = h*(0.14 + 0.22*sin) so the waveform
+  stays compact around the centre.
+- ALBUMS base: vinyl centre moved down + right (0.30w/0.42h -> 0.34w/
+  0.47h).
+- Verified: both edited files stack-balanced; OutlinedButton already
+  imported in TopicShareCard.kt. Changelog bullets added. Committed &
+  pushed.
+
+---
+
 ## Request: Share hub in Settings — design grid + topic search + share (COMPLETE)
 
 - User: "make a share hub in settings where all of the designs shows in
