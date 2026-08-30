@@ -1,3 +1,4 @@
+IMPROVE: Share card signature backgrounds decluttered - Science, Anime, Mythology, Sports, Food, Internet, Quotes and Default get clean solid backgrounds, and heavy decorations (book corner curl, ringed planet, biology cells/veins, chemistry flask, art brushstrokes) are gone.
 FIX: Topic share card styles polished - Vinyl text is cleaner, Paper 9:16 facts fit better, Clean gets a category-depth poster, and Collage has a natural tear with editable polaroid credit.
 FIX: Room topic migration crash - repairs the topics table defaults and removes undeclared legacy indexes while preserving existing topic data.
 

@@ -1,5 +1,22 @@
 # Prompt.md — current request log
 
+## Request: declutter signature share-card designs per category (COMPLETE)
+
+- Presented the full element catalog of signatureDesign() in TopicShareCard.kt
+  (16 category designs) and let the user pick removals per category via ask_user.
+- REMOVED (Book: corner curl + gold leaf; Astronomy: ringed planet + moon;
+  Biology: cell membranes + leaf veins + now-unused `s` seed; Chemistry:
+  flask + bubbles; Visual Art: brushstrokes).
+- EMPTIED to clean solid backgrounds (drawBackground = { _, _ -> }): Science,
+  Anime/Comics, Mythology, Sports, Food, Internet, Quotes, Default/Wildcard.
+- UNTOUCHED: Music, Movies, Games (user kept everything). Topic-specific
+  variants (topicVariant) untouched.
+- Verified: 8 empty lambdas, 0 leftover refs to removed vars, Stroke/Path
+  still widely used (no import fallout). Changelog bullet added to
+  20260921.txt. Committed & pushed.
+
+---
+
 ## Request: revert 3a93fed1..HEAD — keep CurioCategoryCard, drop TopicShareCard (COMPLETE)
 
 - Discarded the half-finished conflicted `git revert 3a93fed1` that was in
