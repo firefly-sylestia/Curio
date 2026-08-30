@@ -275,7 +275,7 @@ private fun PaperCard(
         }
         Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
-        Column(modifier = modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = Modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
             MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year)
             Footer(sharerName, quoteText, quoteAuthor, palette)
@@ -300,7 +300,9 @@ private fun VinylCard(
     val roseLight = Color(0xFFF0D0C8)
     val inkDark = Color(0xFF3A2820)
     val roseFaint = Color(0xFFE8C8C0)
-    val whiteLift = Shadow(Color.White.copy(alpha = 0.90f), Offset(0f, 1.4f), blurRadius = 4f)
+    // For quote cards, the title is the author/byline — display IS the quote.
+    val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
+    val body = quoteText ?: factText
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(roseBg, RoundedCornerShape(6.dp))) {
         // Paper texture
@@ -381,13 +383,13 @@ private fun VinylCard(
             Spacer(Modifier.height(12.dp))
 
             // Title — strong serif
-            Text(display, style = TextStyle(
+            Text(title, style = TextStyle(
                 fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
                 lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
             ), maxLines = 2, overflow = TextOverflow.Ellipsis)
 
             // Artist / byline
-            if (byline.isNotBlank()) {
+            if (quoteText == null && byline.isNotBlank()) {
                 Text(byline, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
@@ -409,16 +411,17 @@ private fun VinylCard(
 
             // Body text — Lora serif, with semi-transparent cream background for readability over vinyl
             val bodySize = when {
-                factText.length > 280 -> 9.sp; factText.length > 180 -> 10.sp; else -> 10.5.sp
+                body.length > 280 -> 9.sp; body.length > 180 -> 10.sp; else -> 10.5.sp
             }
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
                 modifier = Modifier.widthIn(max = 220.dp)
             ) {
-                Text(factText, style = TextStyle(
+                Text(body, style = TextStyle(
                     fontFamily = LoraFontFamily, fontSize = bodySize,
-                    lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.88f)
+                    lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.88f),
+                    fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
                 ), modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
             }
 
@@ -597,7 +600,7 @@ private fun CollageCard(
 
             // Title — large serif, dark green, top-left
             Column(modifier = Modifier.offset(22.dp, (ch * 0.055f).dp).width((cw * 0.56f).dp)) {
-                Text(display, style = TextStyle(
+                Text(if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display, style = TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = (cw * 0.08f).coerceIn(24f, 34f).sp,
                     lineHeight = (cw * 0.09f).coerceIn(28f, 38f).sp,
                     fontWeight = FontWeight.Normal, color = inkDark
@@ -607,7 +610,7 @@ private fun CollageCard(
 
                 // Metadata — small caps, letter-spaced
                 val metaParts = mutableListOf<String>()
-                if (byline.isNotBlank()) metaParts.add(byline.uppercase())
+                if (quoteText == null && byline.isNotBlank()) metaParts.add(byline.uppercase())
                 if (year != null) metaParts.add(year)
                 if (metaParts.isNotEmpty()) {
                     Text(metaParts.joinToString(" \u2022 "), style = TextStyle(
@@ -615,18 +618,6 @@ private fun CollageCard(
                         letterSpacing = 2.sp, fontWeight = FontWeight.SemiBold,
                         color = inkDark.copy(alpha = 0.55f)
                     ), maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
-
-                Spacer(Modifier.height(10.dp))
-
-                // Quote — italic serif in curly quotes
-                if (quoteText != null) {
-                    Text("\u201c$quoteText\u201d", style = TextStyle(
-                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                        fontSize = quoteFontSize(quoteText.length),
-                        lineHeight = (quoteFontSize(quoteText.length).value * 1.35f).sp,
-                        color = inkDark
-                    ), maxLines = 3, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -646,12 +637,14 @@ private fun CollageCard(
             Spacer(Modifier.height(10.dp))
 
             // Body text — serif, generous line height
+            val body = quoteText ?: factText
             val bodySize = when {
-                factText.length > 280 -> 10.sp; factText.length > 180 -> 11.sp; else -> 12.sp
+                body.length > 280 -> 10.sp; body.length > 180 -> 11.sp; else -> 12.sp
             }
-            Text(factText, style = TextStyle(
+            Text(body, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.55f).sp, color = Color.White.copy(alpha = 0.92f)
+                lineHeight = (bodySize.value * 1.55f).sp, color = Color.White.copy(alpha = 0.92f),
+                fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
             ), maxLines = 18, overflow = TextOverflow.Ellipsis)
 
             if (ratingStars != null && ratingStars > 0) {
@@ -692,6 +685,8 @@ private fun NeumorphicCard(
     val categoryGlow = palette.accent
     val categoryDeep = palette.accentDark
     val body = quoteText ?: factText
+    // For quote cards, the title is the author/byline — display IS the quote, so showing both duplicates it.
+    val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(categoryDeep, RoundedCornerShape(6.dp))) {
         Canvas(Modifier.fillMaxSize()) {
@@ -722,7 +717,7 @@ private fun NeumorphicCard(
             }
 
             Column(Modifier.align(Alignment.CenterStart).padding(start = 4.dp, end = 4.dp, top = 0.dp), horizontalAlignment = Alignment.Start) {
-                Text(display, style = TextStyle(
+                Text(title, style = TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = 31.sp, lineHeight = 33.sp,
                     fontWeight = FontWeight.Normal, color = Color.White
                 ), maxLines = 5, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.90f))
@@ -733,7 +728,7 @@ private fun NeumorphicCard(
                     Spacer(Modifier.height(5.dp))
                     Text(metaParts.joinToString("  /  "), style = TextStyle(
                         fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.3.sp, color = ink.copy(alpha = 0.56f)
+                        letterSpacing = 1.3.sp, color = Color.White.copy(alpha = 0.56f)
                     ), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -780,6 +775,7 @@ private fun EditorialCard(
     val inkDark = Color(0xFF1C1814)
     val accentRule = palette.accent
     val body = quoteText ?: factText
+    val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(cream, RoundedCornerShape(6.dp))) {
         // Subtle texture
@@ -809,14 +805,14 @@ private fun EditorialCard(
             Spacer(Modifier.height(8.dp))
 
             // Title — large serif
-            Text(display, style = TextStyle(
+            Text(title, style = TextStyle(
                 fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
                 lineHeight = 32.sp, color = inkDark
             ), maxLines = 3, overflow = TextOverflow.Ellipsis)
 
             // Byline + year
             val metaParts = mutableListOf<String>()
-            if (byline.isNotBlank()) metaParts.add(byline)
+            if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
             if (metaParts.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
@@ -882,6 +878,7 @@ private fun MinimalCard(
     val inkDark = Color(0xFF1A1A1A)
     val accent = palette.accent
     val body = quoteText ?: factText
+    val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 24.dp)) {
@@ -898,7 +895,7 @@ private fun MinimalCard(
             Spacer(Modifier.height(20.dp))
 
             // Title — large, clean, lots of space
-            Text(display, style = TextStyle(
+            Text(title, style = TextStyle(
                 fontFamily = ChangaOneFontFamily, fontSize = 30.sp,
                 lineHeight = 34.sp, color = inkDark
             ), maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -968,6 +965,7 @@ private fun SignatureCard(
     classicSignature: Boolean = false
 ) {
     val body = quoteText ?: factText
+    val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
     // Design pick: Classic (f6dd7f19 family designs) > Detailed experiment > current
     val sig = when {
         classicSignature -> signatureDesignClassic(categoryName, family)
@@ -1001,14 +999,14 @@ private fun SignatureCard(
             Spacer(Modifier.height(sig.titleTopSpacer))
 
             // Title
-            Text(display, style = TextStyle(
+            Text(title, style = TextStyle(
                 fontFamily = sig.titleFont, fontSize = sig.titleSize,
                 lineHeight = sig.titleLineHeight, color = sig.titleColor
             ), maxLines = 4, overflow = TextOverflow.Ellipsis)
 
             // Byline
             val metaParts = mutableListOf<String>()
-            if (byline.isNotBlank()) metaParts.add(byline)
+            if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
             if (metaParts.isNotEmpty()) {
                 Spacer(Modifier.height(sig.metaSpacer))
@@ -5314,6 +5312,7 @@ private fun CustomCard(
     byline: String = "", year: String? = null
 ) {
     val body = quoteText ?: factText
+    val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
     val sig = topicVariant(topicName, family) ?: signatureDesign(categoryName, family)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp)).background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))) {
@@ -5321,7 +5320,7 @@ private fun CustomCard(
             val w = size.width; val h = size.height
             sig.drawBackground(this, w, h)
         }
-        Column(modifier = modifier.fillMaxSize().padding(sig.padding)) {
+        Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
             Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor) {
                 Row(Modifier.padding(horizontal = sig.badgeHPadding, vertical = sig.badgeVPadding),
                     verticalAlignment = Alignment.CenterVertically,
@@ -5335,12 +5334,12 @@ private fun CustomCard(
                 }
             }
             Spacer(Modifier.height(sig.titleTopSpacer))
-            Text(display, style = TextStyle(
+            Text(title, style = TextStyle(
                 fontFamily = sig.titleFont, fontSize = sig.titleSize,
                 lineHeight = sig.titleLineHeight, color = sig.titleColor
             ), maxLines = 4, overflow = TextOverflow.Ellipsis)
             val metaParts = mutableListOf<String>()
-            if (byline.isNotBlank()) metaParts.add(byline)
+            if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
             if (metaParts.isNotEmpty()) {
                 Spacer(Modifier.height(sig.metaSpacer))
@@ -5399,7 +5398,7 @@ private fun MiddleContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
-            Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = Int.MAX_VALUE, overflow = TextOverflow.Clip)
+            Text(quoteText, style = MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, overflow = TextOverflow.Ellipsis)
         } else {
             // Title
             Text(display, style = MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis)
