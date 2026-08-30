@@ -1,5 +1,39 @@
 # Prompt.md — current request log
 
+## Request: per-category signature share-card redesign (COMPLETE)
+
+- User asked: every lane gets its OWN signature design (no shared layouts/
+  design language), researched premium palette per category; keep Games,
+  Films and Books as-is; Biology keeps its DNA helix.
+- Rewrote signatureDesign() in TopicShareCard.kt from family-grouped
+  branches to one branch per category (38 exact display-name matches +
+  fallback). 35 brand-new designs: Artists (stage spotlights/mic),
+  Albums (vinyl), Songs (waveform+notes), Directors (clapperboard/reels),
+  Animated Films (rainbow swoosh/stars), Authors (inkwell/manuscript),
+  Painters (palette/brush), Artworks (gallery wall of mini-frames),
+  Scientists (molecule/beaker/blueprint), Discoveries (compass/trail),
+  Series (TV/episode dots), Anime (sakura/sunburst), Manga (b/w speed
+  lines/screentone), Manhwa (pastel blobs), Mythology (gold Greek-key
+  meander + columns on dark marble), Sports (floodlights/field/trophy),
+  Food (overhead plate/bowl/herbs), Internet (globe/nodes/browser),
+  Biology (glowing helix + cells + chromosomes), Chemistry (periodic
+  tiles/flask/molecule), Animals (paw trail/grass), Plants (botanical
+  leaf/droplets), Technologies (circuits/chip/binary), Astronomy
+  (galaxy/planet), History (scroll/hourglass/timeline), Geology
+  (strata/crystals), Medicine (EKG/capsule), Psychology (brain/thought
+  bubbles), Mathematics (golden spiral/geometry), Economics
+  (chart/coins), Language (bubbles/calligraphy), Engineering
+  (blueprint/gear), Oceans (rays/waves/fish), Quotes (giant marks/gold
+  rules), Wildcard (comet/coral glow), plus a quiet neutral fallback.
+- Palettes researched (science=slate navy/teal, medical=clinical teal,
+  tech=deep navy/cyan, mythology=gold on marble, literature=blue/brown/
+  gold, anime=sakura pink, manga=monochrome+red, webtoon=pastel).
+- Verified: 38 branches, 0 empty lambdas, braces balanced (159/159),
+  old family branches gone, STYLE 7/CustomCard untouched. Changelog
+  bullet updated in 20260921.txt. Committed & pushed.
+
+---
+
 ## Request: declutter signature share-card designs per category (COMPLETE)
 
 - Presented the full element catalog of signatureDesign() in TopicShareCard.kt
