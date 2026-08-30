@@ -980,10 +980,27 @@ private fun SignatureCard(
             sig.drawBackground(this, w, h)
         }
 
-        // Content
-        Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
-            // Category badge
-            Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor) {
+        // Meta parts (byline / year) shared across layouts
+        val metaParts = mutableListOf<String>()
+        if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
+        if (year != null) metaParts.add(year)
+
+        // Body text size shrinks for long content
+        val bodySize = when {
+            body.length > 350 -> sig.bodySize - 2.5f
+            body.length > 260 -> sig.bodySize - 1.5f
+            body.length > 180 -> sig.bodySize - 0.5f
+            else -> sig.bodySize
+        }.coerceAtLeast(7f)
+
+        val bodyMaxLines = if (aspect == ShareCardAspect.PORTRAIT) 14 else 10
+        val footerText = if (sharerName.isNotBlank()) "$sharerName \u00b7 Curio" else "Curio"
+
+        // ── Category badge (shared) ────────────────────────────
+        @Composable
+        fun CategoryBadge(centered: Boolean = false) {
+            Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor,
+                modifier = if (centered) Modifier else Modifier) {
                 Row(Modifier.padding(horizontal = sig.badgeHPadding, vertical = sig.badgeVPadding),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -995,61 +1012,194 @@ private fun SignatureCard(
                     ), maxLines = 1)
                 }
             }
+        }
 
-            Spacer(Modifier.height(sig.titleTopSpacer))
-
-            // Title
+        // ── Title (shared) ─────────────────────────────────────
+        @Composable
+        fun TitleText(centered: Boolean = false) {
             Text(title, style = TextStyle(
                 fontFamily = sig.titleFont, fontSize = sig.titleSize,
                 lineHeight = sig.titleLineHeight, color = sig.titleColor
-            ), maxLines = 4, overflow = TextOverflow.Ellipsis)
+            ), maxLines = 4, overflow = TextOverflow.Ellipsis,
+                textAlign = if (centered) TextAlign.Center else TextAlign.Start,
+                modifier = if (centered) Modifier.fillMaxWidth() else Modifier)
+        }
 
-            // Byline
-            val metaParts = mutableListOf<String>()
-            if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
-            if (year != null) metaParts.add(year)
+        // ── Meta (shared) ──────────────────────────────────────
+        @Composable
+        fun MetaText(centered: Boolean = false) {
             if (metaParts.isNotEmpty()) {
                 Spacer(Modifier.height(sig.metaSpacer))
                 Text(metaParts.joinToString(sig.metaSeparator), style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = sig.metaSize, color = sig.metaColor
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    textAlign = if (centered) TextAlign.Center else TextAlign.Start,
+                    modifier = if (centered) Modifier.fillMaxWidth() else Modifier)
             }
+        }
 
-            Spacer(Modifier.weight(1f))
-
-            // Body text
-            val bodySize = when {
-                body.length > 350 -> sig.bodySize - 2.5f
-                body.length > 260 -> sig.bodySize - 1.5f
-                body.length > 180 -> sig.bodySize - 0.5f
-                else -> sig.bodySize
-            }.coerceAtLeast(7f)
+        // ── Body (shared) ─────────────────────────────────────
+        @Composable
+        fun BodyText(centered: Boolean = false) {
             Text(body, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize.sp,
                 lineHeight = (bodySize * sig.bodyLineHeight).sp,
                 color = sig.bodyColor
-            ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, overflow = TextOverflow.Ellipsis)
+            ), maxLines = bodyMaxLines, overflow = TextOverflow.Ellipsis,
+                textAlign = if (centered) TextAlign.Center else TextAlign.Start,
+                modifier = if (centered) Modifier.fillMaxWidth() else Modifier)
+        }
 
-            if (ratingStars != null && ratingStars > 0) {
-                Spacer(Modifier.height(6.dp))
-                StarRow(ratingStars, palette)
+        // ── Footer (shared) ────────────────────────────────────
+        @Composable
+        fun FooterText(centered: Boolean = false) {
+            Text(footerText, style = TextStyle(fontFamily = sig.footerFont, fontSize = 9.sp,
+                fontWeight = FontWeight.SemiBold, color = sig.footerColor),
+                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                textAlign = if (centered) TextAlign.Center else TextAlign.Start,
+                modifier = if (centered) Modifier.fillMaxWidth() else Modifier)
+        }
+
+        when (sig.layout) {
+            // ═══ STANDARD — badge top, title, spacer, body bottom, footer ═══
+            SignatureLayout.STANDARD -> {
+                Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
+                    CategoryBadge()
+                    Spacer(Modifier.height(sig.titleTopSpacer))
+                    TitleText()
+                    MetaText()
+                    Spacer(Modifier.weight(1f))
+                    BodyText()
+                    if (ratingStars != null && ratingStars > 0) {
+                        Spacer(Modifier.height(6.dp))
+                        StarRow(ratingStars, palette)
+                    }
+                    Spacer(Modifier.height(sig.footerSpacer))
+                    FooterText()
+                }
             }
 
-            Spacer(Modifier.height(sig.footerSpacer))
+            // ═══ CENTERED — everything centered, badge top-center ═══
+            SignatureLayout.CENTERED -> {
+                Column(modifier = Modifier.fillMaxSize().padding(sig.padding),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top) {
+                    CategoryBadge(centered = true)
+                    Spacer(Modifier.height(sig.titleTopSpacer))
+                    TitleText(centered = true)
+                    MetaText(centered = true)
+                    Spacer(Modifier.weight(1f))
+                    BodyText(centered = true)
+                    if (ratingStars != null && ratingStars > 0) {
+                        Spacer(Modifier.height(6.dp))
+                        StarRow(ratingStars, palette)
+                    }
+                    Spacer(Modifier.height(sig.footerSpacer))
+                    FooterText(centered = true)
+                }
+            }
 
-            // Footer
-            Text(
-                if (sharerName.isNotBlank()) "$sharerName \u00b7 Curio" else "Curio",
-                style = TextStyle(fontFamily = sig.footerFont, fontSize = 9.sp,
-                    fontWeight = FontWeight.SemiBold, color = sig.footerColor),
-                maxLines = 1, overflow = TextOverflow.Ellipsis
-            )
+            // ═══ BOTTOM — badge top, big spacer, everything stacked at bottom ═══
+            SignatureLayout.BOTTOM -> {
+                Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
+                    CategoryBadge()
+                    Spacer(Modifier.weight(1f))
+                    TitleText()
+                    Spacer(Modifier.height(sig.metaSpacer))
+                    MetaText()
+                    Spacer(Modifier.height(8.dp))
+                    BodyText()
+                    if (ratingStars != null && ratingStars > 0) {
+                        Spacer(Modifier.height(6.dp))
+                        StarRow(ratingStars, palette)
+                    }
+                    Spacer(Modifier.height(sig.footerSpacer))
+                    FooterText()
+                }
+            }
+
+            // ═══ SIDE — left column: badge+title+footer; right: body ═══
+            SignatureLayout.SIDE -> {
+                Row(modifier = Modifier.fillMaxSize().padding(sig.padding),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    // Left panel — badge, title, meta, footer
+                    Column(modifier = Modifier.weight(0.42f).fillMaxHeight()) {
+                        CategoryBadge()
+                        Spacer(Modifier.height(sig.titleTopSpacer))
+                        TitleText()
+                        MetaText()
+                        Spacer(Modifier.weight(1f))
+                        FooterText()
+                    }
+                    // Right panel — body text
+                    Column(modifier = Modifier.weight(0.58f).fillMaxHeight(),
+                        verticalArrangement = Arrangement.Bottom) {
+                        BodyText()
+                        if (ratingStars != null && ratingStars > 0) {
+                            Spacer(Modifier.height(6.dp))
+                            StarRow(ratingStars, palette)
+                        }
+                    }
+                }
+            }
+
+            // ═══ OVERLAY — title overlaid center, body at bottom ═══
+            SignatureLayout.OVERLAY -> {
+                Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
+                    CategoryBadge()
+                    Spacer(Modifier.weight(1f))
+                    TitleText(centered = true)
+                    MetaText(centered = true)
+                    Spacer(Modifier.weight(1f))
+                    BodyText()
+                    if (ratingStars != null && ratingStars > 0) {
+                        Spacer(Modifier.height(6.dp))
+                        StarRow(ratingStars, palette)
+                    }
+                    Spacer(Modifier.height(sig.footerSpacer))
+                    FooterText()
+                }
+            }
+
+            // ═══ POSTER — badge top, large title center, body+footer bottom ═══
+            SignatureLayout.POSTER -> {
+                Column(modifier = Modifier.fillMaxSize().padding(sig.padding),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    CategoryBadge(centered = true)
+                    Spacer(Modifier.weight(0.6f))
+                    TitleText(centered = true)
+                    Spacer(Modifier.height(2.dp))
+                    MetaText(centered = true)
+                    Spacer(Modifier.weight(1f))
+                    BodyText()
+                    if (ratingStars != null && ratingStars > 0) {
+                        Spacer(Modifier.height(6.dp))
+                        StarRow(ratingStars, palette)
+                    }
+                    Spacer(Modifier.height(sig.footerSpacer))
+                    FooterText(centered = true)
+                }
+            }
         }
     }
 }
 
 // ─── Signature per-category design data ────────────────────────────────
+/**
+ * Distinct text-placement layouts for signature cards. Each category can
+ * pick a layout so the cards don't all look the same — the title, body,
+ * badge and footer shift position per-layout.
+ *
+ * STANDARD  — badge top-left, title below, spacer, body bottom, footer.
+ * CENTERED  — badge centered top, title centered, body centered, footer.
+ * BOTTOM    — badge top, big spacer, title+meta+body all stacked at bottom.
+ * SIDE      — left column: badge+title+footer; right column: body text.
+ * OVERLAY   — title overlaid center over the art, body at the very bottom.
+ * POSTER    — badge top, title large center, meta under it, body+footer bottom.
+ */
+private enum class SignatureLayout { STANDARD, CENTERED, BOTTOM, SIDE, OVERLAY, POSTER }
+
 private data class SignatureDesign(
     val bg: Color, val cornerRadius: Float,
     val drawBackground: DrawScope.(w: Float, h: Float) -> Unit,
@@ -1061,7 +1211,8 @@ private data class SignatureDesign(
     val titleLineHeight: TextUnit, val titleColor: Color,
     val metaSpacer: Dp, val metaSeparator: String, val metaSize: TextUnit, val metaColor: Color,
     val bodySize: Float, val bodyLineHeight: Float, val bodyColor: Color,
-    val footerSpacer: Dp, val footerFont: FontFamily, val footerColor: Color
+    val footerSpacer: Dp, val footerFont: FontFamily, val footerColor: Color,
+    val layout: SignatureLayout = SignatureLayout.STANDARD
 )
 
 
@@ -2224,7 +2375,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFEFE9FF),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF8F7BFF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD9D0F5).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF8F7BFF).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF8F7BFF).copy(alpha = 0.70f),
+            layout = SignatureLayout.OVERLAY
         )
         // ═══ ALBUMS — vinyl record, grooves, crimson label ═══
         cat == "ALBUMS" -> SignatureDesign(
@@ -2245,7 +2397,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF5E9E2),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC2402E),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0D2CE).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC2402E).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC2402E).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ SONGS — thin glowing waveform bars + floating notes ═══
         cat == "SONGS" -> SignatureDesign(
@@ -2273,7 +2426,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFD9E4),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFF8FA3),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE8C4D2).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF8FA3).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF8FA3).copy(alpha = 0.70f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ DIRECTORS — clapperboard, film reels, gold auteur frame ═══
         cat == "DIRECTORS" -> SignatureDesign(
@@ -2307,7 +2461,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE8E2D4),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD9B45B),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFCFC8BC).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD9B45B).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD9B45B).copy(alpha = 0.60f),
+            layout = SignatureLayout.POSTER
         )
         // ═══ FILMS — dark cinematic, prominent film strips + sprocket holes ═══
         cat == "FILMS" -> SignatureDesign(
@@ -2349,7 +2504,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleLineHeight = 34.sp, titleColor = Color(0xFFF0F0F0),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8B1A1A),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0D0D0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8B1A1A).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8B1A1A).copy(alpha = 0.70f),
+            layout = SignatureLayout.POSTER
         )
         // ═══ ANIMATED FILMS — shared-center rainbow swoosh + star trail ═══
         cat == "ANIMATED FILMS" || cat == "ANIMATED MOVIES" -> SignatureDesign(
@@ -2386,7 +2542,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFF3D9),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFD9A0),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFDCCFE8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFD9A0).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFFD9A0).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ AUTHORS — inkwell, nib, manuscript lines ═══
         cat == "AUTHORS" -> SignatureDesign(
@@ -2414,7 +2571,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE8DCC0),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD9C58A),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFC8D2E8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD9C58A).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD9C58A).copy(alpha = 0.60f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ BOOKS — warm library manuscript with leather spine ═══
         cat == "BOOKS" -> SignatureDesign(
@@ -2443,7 +2601,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF3A2814),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF5C3317).copy(alpha = 0.65f),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF4A3824).copy(alpha = 0.85f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF5C3317).copy(alpha = 0.55f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF5C3317).copy(alpha = 0.55f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ PAINTERS — easel, canvas, kidney palette, brush ═══
         cat == "PAINTERS" -> SignatureDesign(
@@ -2499,35 +2658,37 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF2EEE6),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFE67E22),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD8D2C8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFE67E22).copy(alpha = 0.65f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFE67E22).copy(alpha = 0.65f),
+            layout = SignatureLayout.SIDE
         )
-        // ═══ ARTWORKS — gallery wall of framed pieces ═══
+        // ═══ ARTWORKS — museum gallery wall: spotlit framed paintings ═══
         cat == "ARTWORKS" -> SignatureDesign(
             bg = Color(0xFFECE9E4), cornerRadius = 6f,
             drawBackground = { w, h ->
-                // Framed pieces (frame + abstract color field)
-                drawRect(Color(0xFF4A463E), Offset(w * 0.08f, h * 0.10f), Size(w * 0.26f, h * 0.34f))
-                drawRect(Color(0xFFC0392B), Offset(w * 0.10f, h * 0.12f), Size(w * 0.22f, h * 0.30f))
-                drawRect(Color(0xFF1A1A2E), Offset(w * 0.10f, h * 0.12f), Size(w * 0.10f, h * 0.30f))
-                drawRect(Color(0xFF4A463E), Offset(w * 0.40f, h * 0.06f), Size(w * 0.22f, h * 0.28f))
-                drawRect(Color(0xFF2980B9), Offset(w * 0.42f, h * 0.08f), Size(w * 0.18f, h * 0.24f))
-                drawRect(Color(0xFFF2C879), Offset(w * 0.42f, h * 0.08f), Size(w * 0.18f, h * 0.10f))
-                drawRect(Color(0xFF4A463E), Offset(w * 0.66f, h * 0.18f), Size(w * 0.26f, h * 0.40f))
-                drawRect(Color(0xFF27AE60), Offset(w * 0.68f, h * 0.20f), Size(w * 0.22f, h * 0.36f))
-                drawRect(Color(0xFF8E44AD), Offset(w * 0.68f, h * 0.20f), Size(w * 0.10f, h * 0.36f))
-                drawRect(Color(0xFF4A463E), Offset(w * 0.16f, h * 0.56f), Size(w * 0.30f, h * 0.32f))
-                drawRect(Color(0xFF8E44AD), Offset(w * 0.18f, h * 0.58f), Size(w * 0.26f, h * 0.28f))
-                drawRect(Color(0xFFE67E22), Offset(w * 0.18f, h * 0.58f), Size(w * 0.12f, h * 0.28f))
-                drawRect(Color(0xFF4A463E), Offset(w * 0.56f, h * 0.62f), Size(w * 0.36f, h * 0.26f))
-                drawRect(Color(0xFFF39C12), Offset(w * 0.58f, h * 0.64f), Size(w * 0.32f, h * 0.22f))
-                drawRect(Color(0xFFC0392B), Offset(w * 0.58f, h * 0.64f), Size(w * 0.15f, h * 0.22f))
-                // Wall texture dots
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 40) {
-                    val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
-                    val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
-                    drawCircle(Color(0xFF8A867E).copy(alpha = 0.15f), 0.7f, Offset(x, y))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFFF2F0EC), Color(0xFFECE9E4), Color(0xFFD8D4CC))), size = Size(w, h))
+                // Three spotlight cones from above onto the paintings
+                listOf(w * 0.22f, w * 0.56f, w * 0.82f).forEach { cx ->
+                    val cone = Path().apply { moveTo(cx, 0f); lineTo(cx - w * 0.10f, h * 0.55f); lineTo(cx + w * 0.10f, h * 0.55f); close() }
+                    drawPath(cone, Color.White.copy(alpha = 0.12f))
+                    drawCircle(brush = Brush.radialGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Transparent)), radius = w * 0.08f, center = Offset(cx, h * 0.60f))
                 }
+                // Three framed paintings on the wall — staggered heights
+                // Frame 1 (left, tall)
+                drawRect(Color(0xFF6A665E), Offset(w * 0.08f, h * 0.20f), Size(w * 0.26f, h * 0.42f))
+                drawRect(Color(0xFFC0392B), Offset(w * 0.10f, h * 0.22f), Size(w * 0.22f, h * 0.38f))
+                drawRect(Color(0xFF1A1A2E).copy(alpha = 0.40f), Offset(w * 0.10f, h * 0.22f), Size(w * 0.22f, h * 0.12f))
+                // Frame 2 (center, medium)
+                drawRect(Color(0xFF6A665E), Offset(w * 0.42f, h * 0.16f), Size(w * 0.22f, h * 0.32f))
+                drawRect(Color(0xFF2980B9), Offset(w * 0.44f, h * 0.18f), Size(w * 0.18f, h * 0.28f))
+                drawRect(Color(0xFFF2C879).copy(alpha = 0.50f), Offset(w * 0.44f, h * 0.18f), Size(w * 0.18f, h * 0.10f))
+                // Frame 3 (right, tall)
+                drawRect(Color(0xFF6A665E), Offset(w * 0.68f, h * 0.22f), Size(w * 0.24f, h * 0.40f))
+                drawRect(Color(0xFF27AE60), Offset(w * 0.70f, h * 0.24f), Size(w * 0.20f, h * 0.36f))
+                drawRect(Color(0xFF8E44AD).copy(alpha = 0.45f), Offset(w * 0.70f, h * 0.24f), Size(w * 0.20f, h * 0.14f))
+                // Museum bench silhouette bottom
+                drawRect(Color(0xFF4A463E).copy(alpha = 0.25f), Offset(w * 0.20f, h * 0.80f), Size(w * 0.60f, h * 0.04f))
+                drawLine(Color(0xFF4A463E).copy(alpha = 0.20f), Offset(w * 0.26f, h * 0.80f), Offset(w * 0.26f, h * 0.88f), strokeWidth = 1.5f)
+                drawLine(Color(0xFF4A463E).copy(alpha = 0.20f), Offset(w * 0.74f, h * 0.80f), Offset(w * 0.74f, h * 0.88f), strokeWidth = 1.5f)
             },
             padding = PaddingValues(horizontal = 26.dp, vertical = 24.dp), badgeColor = Color(0xFF4A463E), badgeInk = Color.White,
             badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
@@ -2535,7 +2696,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF26231E),
             metaSpacer = 6.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF7A766E),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF4A463E).copy(alpha = 0.85f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8A867E)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8A867E),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ SCIENTISTS — molecule, beaker, blueprint grid ═══
         cat == "SCIENTISTS" -> SignatureDesign(
@@ -2570,7 +2732,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0F2F0),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF5FD4C8),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB8D0CC).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF5FD4C8).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF5FD4C8).copy(alpha = 0.70f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ DISCOVERIES — compass rose, dotted trail, contour map ═══
         cat == "DISCOVERIES" -> SignatureDesign(
@@ -2611,7 +2774,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = GeomFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF2E2C8),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFD9A05B),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0CEB0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD9A05B).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD9A05B).copy(alpha = 0.70f),
+            layout = SignatureLayout.POSTER
         )
         // ═══ SERIES — cinematic streaming poster: play motif, film strip, glow ═══
         cat == "SERIES" -> SignatureDesign(
@@ -2681,7 +2845,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFFFE8F2),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFF9EC6),
             bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFE0C4D8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF5FA2).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF5FA2).copy(alpha = 0.70f),
+            layout = SignatureLayout.OVERLAY
         )
         // ═══ MANGA — black & white, bold speed lines, burst, screentone ═══
         cat == "MANGA" -> SignatureDesign(
@@ -2717,7 +2882,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color.White,
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE23B3B),
             bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFD8D8D8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE23B3B).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE23B3B).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ MANHWA — pastel scene: arch, heart, sparkles, bokeh ═══
         cat == "MANHWA" -> SignatureDesign(
@@ -2757,24 +2923,39 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2C55),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF8E7CC3),
             bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFF5A4A75).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF8E7CC3).copy(alpha = 0.65f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF8E7CC3).copy(alpha = 0.65f),
+            layout = SignatureLayout.CENTERED
         )
-        // ═══ GAMES — dark with neon accents, pixel-grid hint ═══
+        // ═══ GAMES — neon arcade: glowing D-pad, A/B buttons, coin, scanlines ═══
         cat == "GAMES" -> SignatureDesign(
             bg = Color(0xFF0A0A14), cornerRadius = 4f,
             drawBackground = { w, h ->
-                for (i in 0 until 15) {
-                    val x = w * 0.04f + i * w * 0.063f
-                    for (j in 0 until 22) {
-                        val y = h * 0.02f + j * h * 0.044f
-                        if ((i + j) % 2 == 0) drawRect(Color(0xFF00FF88).copy(alpha = 0.04f), Offset(x, y), Size(w * 0.045f, h * 0.03f))
-                        else if ((i + j) % 5 == 0) drawRect(Color(0xFF00CCFF).copy(alpha = 0.03f), Offset(x, y), Size(w * 0.045f, h * 0.03f))
-                    }
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF0F0F1E), Color(0xFF0A0A14), Color(0xFF050508))), size = Size(w, h))
+                // Neon glow behind the D-pad and coin
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF00CC66).copy(alpha = 0.18f), Color.Transparent)), radius = w * 0.30f, center = Offset(w * 0.30f, h * 0.70f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF00CCFF).copy(alpha = 0.14f), Color.Transparent)), radius = w * 0.25f, center = Offset(w * 0.78f, h * 0.22f))
+                // D-pad cross — iconic plus shape
+                val dpx = w * 0.30f; val dpy = h * 0.70f; val dps = w * 0.05f
+                drawRect(Color(0xFF00FF88).copy(alpha = 0.45f), Offset(dpx - dps * 0.3f, dpy - dps), Size(dps * 0.6f, dps * 2f))
+                drawRect(Color(0xFF00FF88).copy(alpha = 0.45f), Offset(dpx - dps, dpy - dps * 0.3f), Size(dps * 2f, dps * 0.6f))
+                drawRect(Color(0xFF0A0A14).copy(alpha = 0.6f), Offset(dpx - dps * 0.12f, dpy - dps * 0.12f), Size(dps * 0.24f, dps * 0.24f))
+                // A/B buttons
+                drawCircle(Color(0xFFFF3A6B).copy(alpha = 0.55f), dps * 0.4f, Offset(dpx + dps * 1.6f, dpy - dps * 0.3f))
+                drawCircle(Color(0xFF00CCFF).copy(alpha = 0.55f), dps * 0.4f, Offset(dpx + dps * 2.2f, dpy + dps * 0.3f))
+                // Gold coin top-right
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.20f), w * 0.10f, Offset(w * 0.78f, h * 0.22f))
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.55f), w * 0.06f, Offset(w * 0.78f, h * 0.22f), style = Stroke(2f))
+                drawCircle(Color(0xFFFFD700).copy(alpha = 0.40f), w * 0.035f, Offset(w * 0.78f, h * 0.22f), style = Stroke(1.5f))
+                // Pixel stars scattered
+                val s = (w * 1000 + h).toInt()
+                for (i in 0 until 20) {
+                    val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
+                    val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
+                    val sz = 1.5f + ((s * (i+1) * 3571) % 100) / 100f * 1.5f
+                    drawRect(Color(0xFF00FF88).copy(alpha = 0.25f + ((s * (i+1) * 4201) % 100) / 100f * 0.15f), Offset(x, y), Size(sz, sz))
                 }
-                for (i in 0 until 40) {
-                    val y = i * h / 40f
-                    drawLine(Color(0xFF00FF88).copy(alpha = 0.015f), Offset(0f, y), Offset(w, y))
-                }
+                // CRT scanlines
+                for (i in 0 until 30) { drawLine(Color(0xFF00FF88).copy(alpha = 0.020f), Offset(0f, i * h / 30f), Offset(w, i * h / 30f), strokeWidth = 0.5f) }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF00CC66), badgeInk = Color(0xFF0A0A14),
             badgeRadius = 2.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp,
@@ -2783,7 +2964,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleLineHeight = 34.sp, titleColor = Color(0xFF00FF88),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF00CC66),
             bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFC0D0C0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00CC66).copy(alpha = 0.65f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF00CC66).copy(alpha = 0.65f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ MYTHOLOGY — gold on dark marble, meander border, columns ═══
         cat == "MYTHOLOGY" -> SignatureDesign(
@@ -2822,7 +3004,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF0EAD8),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD8B25C),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD8D0BC).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD8B25C).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD8B25C).copy(alpha = 0.60f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ SPORTS — arena floodlights, field stripes, trophy ═══
         cat == "SPORTS" -> SignatureDesign(
@@ -2855,7 +3038,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFEAF5EA),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF3FBF5A),
             bodySize = 10f, bodyLineHeight = 1.50f, bodyColor = Color(0xFFBFD8C4).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FBF5A).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FBF5A).copy(alpha = 0.70f),
+            layout = SignatureLayout.OVERLAY
         )
         // ═══ FOOD — overhead table: hero plate, steaming bowl, herbs ═══
         cat == "FOOD" -> SignatureDesign(
@@ -2901,7 +3085,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF4A2410),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE4572E),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF6A3A22).copy(alpha = 0.85f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFE4572E).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFE4572E).copy(alpha = 0.60f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ INTERNET — globe, network nodes, browser bar ═══
         cat == "INTERNET" -> SignatureDesign(
@@ -2931,7 +3116,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD8E8FF),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF4E8BFF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFA8C4E0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF4E8BFF).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF4E8BFF).copy(alpha = 0.70f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ BIOLOGY — luminous DNA helix, cells, chromosomes ═══
         cat == "BIOLOGY" -> SignatureDesign(
@@ -2966,7 +3152,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD8F5E0),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF7FE8A0),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB8DCC4).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF7FE8A0).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF7FE8A0).copy(alpha = 0.70f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ CHEMISTRY — connected hexagon lattice + water molecule ═══
         cat == "CHEMISTRY" -> SignatureDesign(
@@ -3031,28 +3218,44 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0C8E0).copy(alpha = 0.88f),
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FD0E8).copy(alpha = 0.70f)
         )
-        // ═══ ANIMALS — paw print trail, grass, forest ═══
+        // ═══ ANIMALS — forest canopy: paw trail, tree silhouette, moon glow ═══
         cat == "ANIMALS" -> SignatureDesign(
             bg = Color(0xFF142412), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Paw print trail — w-relative sizes so prints scale correctly
-                // on both 9:16 (405×720) and 3:4 (450×600) cards.
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.55f), w * 0.014f, Offset(w * 0.18f, h * 0.22f))
-                listOf(-0.010f, -0.004f, 0.004f, 0.010f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.45f), w * 0.007f, Offset(w * 0.18f + ox * w, h * 0.22f - w * 0.018f)) }
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.50f), w * 0.011f, Offset(w * 0.32f, h * 0.38f))
-                listOf(-0.008f, -0.003f, 0.003f, 0.008f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.40f), w * 0.006f, Offset(w * 0.32f + ox * w, h * 0.38f - w * 0.015f)) }
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.45f), w * 0.009f, Offset(w * 0.50f, h * 0.55f))
-                listOf(-0.007f, -0.003f, 0.003f, 0.007f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.35f), w * 0.005f, Offset(w * 0.50f + ox * w, h * 0.55f - w * 0.012f)) }
-                drawCircle(Color(0xFFE0A458).copy(alpha = 0.40f), w * 0.007f, Offset(w * 0.70f, h * 0.70f))
-                listOf(-0.005f, -0.002f, 0.002f, 0.005f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = 0.30f), w * 0.004f, Offset(w * 0.70f + ox * w, h * 0.70f - w * 0.010f)) }
-                // Grass blades bottom
-                for (i in 0 until 24) {
-                    val gx = w * 0.02f + i * w * 0.042f
-                    drawPath(Path().apply { moveTo(gx, h); quadraticBezierTo(gx + 3f, h - h * 0.12f, gx - 2f, h - h * 0.20f) }, Color(0xFF3FBF5A).copy(alpha = 0.25f), style = Stroke(1f))
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E341C), Color(0xFF142412), Color(0xFF0A1208))), size = Size(w, h))
+                // Moon glow top-right
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFE8B0).copy(alpha = 0.16f), Color.Transparent)), radius = w * 0.25f, center = Offset(w * 0.80f, h * 0.18f))
+                drawCircle(Color(0xFFFFE8B0).copy(alpha = 0.35f), w * 0.055f, Offset(w * 0.80f, h * 0.18f))
+                drawCircle(Color(0xFFFFE8B0).copy(alpha = 0.20f), w * 0.065f, Offset(w * 0.80f, h * 0.18f), style = Stroke(1f))
+                // Large tree silhouette left — trunk + layered canopy
+                drawLine(Color(0xFF2A1E12).copy(alpha = 0.65f), Offset(w * 0.14f, h * 0.85f), Offset(w * 0.14f, h * 0.42f), strokeWidth = 4f)
+                // Branches
+                drawLine(Color(0xFF2A1E12).copy(alpha = 0.45f), Offset(w * 0.14f, h * 0.50f), Offset(w * 0.06f, h * 0.40f), strokeWidth = 2f)
+                drawLine(Color(0xFF2A1E12).copy(alpha = 0.40f), Offset(w * 0.14f, h * 0.46f), Offset(w * 0.22f, h * 0.36f), strokeWidth = 2f)
+                // Canopy clusters
+                drawCircle(Color(0xFF1A3A18).copy(alpha = 0.55f), w * 0.08f, Offset(w * 0.10f, h * 0.36f))
+                drawCircle(Color(0xFF1A3A18).copy(alpha = 0.50f), w * 0.06f, Offset(w * 0.16f, h * 0.32f))
+                drawCircle(Color(0xFF1A3A18).copy(alpha = 0.45f), w * 0.05f, Offset(w * 0.06f, h * 0.42f))
+                drawCircle(Color(0xFF1A3A18).copy(alpha = 0.40f), w * 0.07f, Offset(w * 0.20f, h * 0.40f))
+                // Paw print trail — w-relative, diagonal across lower-right
+                listOf(Offset(w * 0.38f, h * 0.62f), Offset(w * 0.52f, h * 0.72f), Offset(w * 0.66f, h * 0.64f), Offset(w * 0.80f, h * 0.74f)).forEachIndexed { idx, p ->
+                    val a = 0.50f - idx * 0.08f
+                    drawCircle(Color(0xFFE0A458).copy(alpha = a), w * 0.012f, p)
+                    listOf(-0.008f, -0.003f, 0.003f, 0.008f).forEach { ox -> drawCircle(Color(0xFFE0A458).copy(alpha = a * 0.8f), w * 0.006f, Offset(p.x + ox * w, p.y - w * 0.016f)) }
                 }
-                // Tree silhouette top-left
-                drawLine(Color(0xFF2A4A2A).copy(alpha = 0.5f), Offset(w * 0.10f, h * 0.30f), Offset(w * 0.10f, h * 0.52f), strokeWidth = 2.5f)
-                drawCircle(Color(0xFF2A4A2A).copy(alpha = 0.35f), w * 0.05f, Offset(w * 0.10f, h * 0.28f))
+                // Fireflies
+                val s = (w * 1000 + h).toInt()
+                for (i in 0 until 12) {
+                    val x = w * 0.30f + ((s * (i+1) * 7919) % 10000) / 10000f * w * 0.60f
+                    val y = h * 0.20f + ((s * (i+1) * 6271) % 10000) / 10000f * h * 0.50f
+                    drawCircle(Color(0xFFFFE8A0).copy(alpha = 0.45f), 1.5f, Offset(x, y))
+                    drawCircle(Color(0xFFFFE8A0).copy(alpha = 0.12f), 3f, Offset(x, y))
+                }
+                // Grass blades bottom
+                for (i in 0 until 18) {
+                    val gx = w * 0.02f + i * w * 0.055f
+                    drawPath(Path().apply { moveTo(gx, h); quadraticBezierTo(gx + 3f, h - h * 0.08f, gx - 2f, h - h * 0.14f) }, Color(0xFF3FBF5A).copy(alpha = 0.22f), style = Stroke(1f))
+                }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE0A458), badgeInk = Color(0xFF142412),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
@@ -3060,7 +3263,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = GeomFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF0E8D0),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE0A458),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFC8D8C0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE0A458).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE0A458).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ PLANTS — botanical leaf, stems, water droplets ═══
         cat == "PLANTS" -> SignatureDesign(
@@ -3095,7 +3299,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF1E3A24),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF4E8C4E),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF3A4A3A).copy(alpha = 0.85f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF4E8C4E).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF4E8C4E).copy(alpha = 0.60f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ TECHNOLOGIES — circuit traces, chip, data streams ═══
         cat == "TECHNOLOGIES" -> SignatureDesign(
@@ -3133,7 +3338,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = GeomFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD8F2FF),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF33E0FF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFA8C4DC).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF33E0FF).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF33E0FF).copy(alpha = 0.70f),
+            layout = SignatureLayout.OVERLAY
         )
         // ═══ ASTRONOMY — spiral galaxy, ringed planet, star clusters ═══
         cat == "ASTRONOMY" -> SignatureDesign(
@@ -3167,7 +3373,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE0DAF8),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF9A8CFF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB8B4D8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF9A8CFF).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF9A8CFF).copy(alpha = 0.70f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ HISTORY — parchment scroll, hourglass, timeline ═══
         cat == "HISTORY" -> SignatureDesign(
@@ -3196,7 +3403,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF4A3824),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFF8A6A3A),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF5A4828).copy(alpha = 0.85f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8A6A3A).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF8A6A3A).copy(alpha = 0.60f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ GEOLOGY — rock strata, crystal shards, cross-section ═══
         cat == "GEOLOGY" -> SignatureDesign(
@@ -3234,7 +3442,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = GeomFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF0E0C8),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC98A5B),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD8C0A8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC98A5B).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC98A5B).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ MEDICINE — EKG trace, cross, capsule, pulse rings ═══
         cat == "MEDICINE" -> SignatureDesign(
@@ -3268,38 +3477,43 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFDCF2EE),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF4FD8C8),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB0CCC8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF4FD8C8).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF4FD8C8).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
-        // ═══ PSYCHOLOGY — brain lobes, thought bubbles, light rays ═══
+        // ═══ PSYCHOLOGY — head silhouette with neural network + thought cloud ═══
         cat == "PSYCHOLOGY" -> SignatureDesign(
             bg = Color(0xFF171030), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Brain — two hemispheres
-                val bcx = w * 0.30f; val bcy = h * 0.44f
-                drawPath(Path().apply {
-                    moveTo(bcx, bcy - h * 0.14f)
-                    quadraticBezierTo(bcx - w * 0.10f, bcy - h * 0.16f, bcx - w * 0.11f, bcy)
-                    quadraticBezierTo(bcx - w * 0.10f, bcy + h * 0.14f, bcx, bcy + h * 0.12f)
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1E1438), Color(0xFF171030), Color(0xFF0C0820))), size = Size(w, h))
+                // Head profile silhouette — a smooth side-profile path
+                val hpx = w * 0.72f; val hpy = h * 0.18f
+                val head = Path().apply {
+                    moveTo(hpx, hpy)
+                    cubicTo(hpx + w * 0.10f, hpy, hpx + w * 0.14f, hpy + h * 0.16f, hpx + w * 0.08f, hpy + h * 0.24f)
+                    cubicTo(hpx + w * 0.06f, hpy + h * 0.28f, hpx + w * 0.06f, hpy + h * 0.34f, hpx + w * 0.02f, hpy + h * 0.36f)
+                    cubicTo(hpx - w * 0.02f, hpy + h * 0.38f, hpx - w * 0.04f, hpy + h * 0.42f, hpx - w * 0.04f, hpy + h * 0.48f)
+                    lineTo(hpx - w * 0.12f, hpy + h * 0.48f)
+                    lineTo(hpx - w * 0.12f, hpy + h * 0.50f)
+                    cubicTo(hpx - w * 0.12f, hpy + h * 0.54f, hpx - w * 0.08f, hpy + h * 0.56f, hpx - w * 0.06f, hpy + h * 0.56f)
+                    cubicTo(hpx - w * 0.04f, hpy + h * 0.60f, hpx - w * 0.08f, hpy + h * 0.64f, hpx - w * 0.06f, hpy + h * 0.66f)
+                    cubicTo(hpx - w * 0.04f, hpy + h * 0.68f, hpx, hpy + h * 0.66f, hpx, hpy + h * 0.62f)
                     close()
-                }, Color(0xFFC4B0F0).copy(alpha = 0.30f), style = Stroke(1.2f))
-                drawPath(Path().apply {
-                    moveTo(bcx, bcy - h * 0.14f)
-                    quadraticBezierTo(bcx + w * 0.10f, bcy - h * 0.16f, bcx + w * 0.11f, bcy)
-                    quadraticBezierTo(bcx + w * 0.10f, bcy + h * 0.14f, bcx, bcy + h * 0.12f)
-                    close()
-                }, Color(0xFFC4B0F0).copy(alpha = 0.30f), style = Stroke(1.2f))
-                drawArc(Color(0xFFC4B0F0).copy(alpha = 0.40f), 0f, 360f, false, Offset(bcx - w * 0.05f, bcy - h * 0.03f), Size(w * 0.10f, h * 0.06f), style = Stroke(0.8f))
-                // Thought bubbles
-                listOf(Offset(w * 0.72f, h * 0.26f), Offset(w * 0.84f, h * 0.42f)).forEachIndexed { i, p ->
-                    drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.30f), if (i == 0) w * 0.06f else w * 0.045f, p, style = Stroke(1f))
                 }
-                drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.35f), 2.2f, Offset(w * 0.66f, h * 0.34f))
-                drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.25f), 1.5f, Offset(w * 0.64f, h * 0.30f))
-                // Light rays from top
-                for (i in 0 until 8) {
-                    val a = Math.toRadians(215.0 + i * 6.0).toFloat()
-                    drawLine(Color(0xFFE8E0F8).copy(alpha = 0.08f), Offset(w * 0.02f, 0f), Offset(kotlin.math.cos(a) * w * 1.1f, kotlin.math.sin(a) * h * 1.0f), strokeWidth = 1f)
+                drawPath(head, Color(0xFFC4B0F0).copy(alpha = 0.12f))
+                // Neural network inside the head — nodes + connections
+                val nodes = listOf(Offset(hpx + w * 0.04f, hpy + h * 0.16f), Offset(hpx + w * 0.02f, hpy + h * 0.28f), Offset(hpx - w * 0.02f, hpy + h * 0.22f), Offset(hpx + w * 0.06f, hpy + h * 0.34f), Offset(hpx - w * 0.04f, hpy + h * 0.36f))
+                for (i in nodes.indices) {
+                    for (j in i + 1 until nodes.size) {
+                        drawLine(Color(0xFFC4B0F0).copy(alpha = 0.25f), nodes[i], nodes[j], strokeWidth = 0.6f)
+                    }
+                    drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.65f), 2.5f, nodes[i])
                 }
+                // Thought cloud — stacked rounded bubbles top-left
+                drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.12f), w * 0.08f, Offset(w * 0.20f, h * 0.20f), style = Stroke(1.2f))
+                drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.18f), w * 0.05f, Offset(w * 0.14f, h * 0.30f), style = Stroke(1f))
+                drawCircle(Color(0xFFE8E0F8).copy(alpha = 0.22f), w * 0.025f, Offset(w * 0.10f, h * 0.36f), style = Stroke(0.8f))
+                // Soft connecting dots
+                for (i in 0 until 4) { drawCircle(Color(0xFFC4B0F0).copy(alpha = 0.30f - i * 0.05f), 1.5f, Offset(w * 0.12f + i * w * 0.015f, h * 0.40f + i * h * 0.01f)) }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFC4B0F0), badgeInk = Color(0xFF171030),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
@@ -3307,7 +3521,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF0E8F8),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC4B0F0),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C4E0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC4B0F0).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC4B0F0).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ MATHEMATICS — golden spiral, geometry, coordinate grid ═══
         cat == "MATHEMATICS" -> SignatureDesign(
@@ -3338,7 +3553,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFE8E4F8),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE8C05C),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB8B4D0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE8C05C).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE8C05C).copy(alpha = 0.70f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ ECONOMICS — rising chart, coin stack, trend arrow ═══
         cat == "ECONOMICS" -> SignatureDesign(
@@ -3366,7 +3582,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFDCF2E2),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF3FBF5A),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFB8D8C0).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FBF5A).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FBF5A).copy(alpha = 0.70f),
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ LANGUAGE — speech bubbles, calligraphy strokes ═══
         cat == "LANGUAGE" -> SignatureDesign(
@@ -3388,7 +3605,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF3A2A22),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD96C4A),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF5A4636).copy(alpha = 0.85f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD96C4A).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD96C4A).copy(alpha = 0.60f),
+            layout = SignatureLayout.SIDE
         )
         // ═══ ENGINEERING — blueprint grid, gear, dimension lines ═══
         cat == "ENGINEERING" -> SignatureDesign(
@@ -3419,7 +3637,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = GeomFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD8E4FF),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF6FA8FF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFA8BCDC).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF6FA8FF).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF6FA8FF).copy(alpha = 0.70f),
+            layout = SignatureLayout.OVERLAY
         )
         // ═══ OCEANS — sun shaft, fish school, coral bed ═══
         cat == "OCEANS" -> SignatureDesign(
@@ -3483,7 +3702,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFD8F2FC),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF3FB8E8),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFA8D4E8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FB8E8).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FB8E8).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ QUOTES — giant quote marks, gold rules, flourish ═══
         cat == "QUOTES" -> SignatureDesign(
@@ -3507,7 +3727,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = LoraFontFamily, titleSize = 26.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF2A2418),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFC9A227),
             bodySize = 10.5f, bodyLineHeight = 1.65f, bodyColor = Color(0xFF4A4234).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC9A227).copy(alpha = 0.60f)
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC9A227).copy(alpha = 0.60f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ WILDCARD — comet, sparkles, glow orb (brand coral) ═══
         cat == "WILDCARD" -> SignatureDesign(
@@ -3539,7 +3760,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF8E0E0),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFF7A6B),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0C4C8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF7A6B).copy(alpha = 0.70f)
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF7A6B).copy(alpha = 0.70f),
+            layout = SignatureLayout.CENTERED
         )
         // ═══ FALLBACK — quiet deep neutral (unknown category names) ═══
         else -> SignatureDesign(
