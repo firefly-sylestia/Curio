@@ -227,7 +227,8 @@ fun TopicShareCard(
     userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
     byline: String = "",
     polaroidCaption: String = "",
-    classicSignature: Boolean = false
+    classicSignature: Boolean = false,
+    onPhotoTap: (() -> Unit)? = null
 ) {
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
@@ -236,7 +237,7 @@ fun TopicShareCard(
     when (style) {
         ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year, polaroidCaption)
+        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap)
         ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.EDITORIAL -> EditorialCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.MINIMAL -> MinimalCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
@@ -489,7 +490,8 @@ private fun CollageCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
     byline: String = "", year: String? = null,
-    polaroidCaption: String = ""
+    polaroidCaption: String = "",
+    onPhotoTap: (() -> Unit)? = null
 ) {
     val topCream = Color(0xFFF5EDE0)
     val bottomSage = Color(0xFF6B7C65)
@@ -541,7 +543,7 @@ private fun CollageCard(
                     clip = false
                 }
                 .background(Color.White, RoundedCornerShape(3.dp))
-                .clickable(enabled = userPhoto == null) { /* tap handled by caller */ }
+                .clickable(enabled = onPhotoTap != null && userPhoto == null) { onPhotoTap?.invoke() }
             ) {
                 // Tape on top
                 Canvas(Modifier.offset((pW * 0.23f).dp, 1.dp).size((pW * 0.46f).dp, 12.dp)) {
@@ -5915,7 +5917,7 @@ fun TopicShareSheet(
                                     alpha = 1f - 0.25f * kotlin.math.abs(pageOffset)
                                 }
                         ) {
-                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign)
+                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") })
                         }
                     }
                     // Style dots
@@ -5936,7 +5938,7 @@ fun TopicShareSheet(
                             .shadow(4.dp, RoundedCornerShape(6.dp))
                             .clip(RoundedCornerShape(6.dp))
                     ) {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") })
                     }
                 }
             }

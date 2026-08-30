@@ -10,6 +10,7 @@ ADD: Share hub now shows every per-category signature design as its own pickable
 ADD: The Spin page's category picker now opens the redesigned Curio/Knowledge/Mix picker (compact icon tiles) as a smooth inline sheet above the shuffle page.
 FIX: Signature share-card overhaul - every category now has a UNIQUE text layout (badge/title/body positions vary per category instead of identical placement), and the worst backgrounds were redesigned: Games gets a neon arcade with glowing D-pad + A/B buttons + coin, Psychology gets a head profile with neural network, Artworks gets a spotlit museum gallery wall with bench, Animals gets a moonlit forest with fireflies.
 FIX: Collage polaroid caption field is no longer squished - proper height shows the text you type.
+FIX: Collage polaroid photo box is tappable again - tapping the empty "Tap to add photo" frame opens the photo picker instead of swallowing the tap (and no longer fights the card swipe).
 FIX: Category picker tiles are theme-aware - selected tiles wear their category accent (not a generic secondary color), the sheet has a glass grabber handle and a centered title with a glass close chip.
 FIX: Quote share cards no longer show the quote twice - Vinyl, Collage, Clean, Editorial, Minimal, Signature and Custom now put the author in the title and the quote in the body (Paper was already correct).
 FIX: Collage polaroid caption no longer squished or clipped - the handwritten credit ellipsizes cleanly with proper line height on any aspect ratio.
