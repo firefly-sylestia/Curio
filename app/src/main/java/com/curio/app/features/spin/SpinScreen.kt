@@ -554,17 +554,31 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         mutableStateOf(setOf<String>())
     }
     var showFilters by remember { mutableStateOf(false) }
-    var showCategoryPicker by remember { mutableStateOf(false) }
 
     // v142 — consume the one-shot "open the picker" request from Home's
     // first-run "Pick a lane" (it navigates to the Spin tab with the flag
     // set); keyed on the flag so it also fires when the tab was already
-    // composed. Opens the SAME category picker sheet the lane chips use.
+    // composed. Opens the full-screen CategoryPickerScreen.
     LaunchedEffect(SpinPickerRequest.pending) {
         if (SpinPickerRequest.pending) {
             SpinPickerRequest.pending = false
-            showCategoryPicker = true
+            navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
         }
+    }
+    // Re-read the persisted deck when returning from the picker — the new
+    // full-screen CategoryPickerScreen persists its selection and pops back,
+    // so Spin must sync activeCatIds on RESUME to pick up the change.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && categorySlug == null) {
+                val persisted = AppPreferences.getLastSpinCategories(context)
+                if (persisted.isNotEmpty() && activeCatIds != persisted) {
+                    activeCatIds = persisted
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     // Broader OR-based filtering: a topic matches if it has ANY of the
@@ -1214,7 +1228,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 ) {
                     // Category pill
                     Surface(
-                        onClick = { showCategoryPicker = true },
+                        onClick = { navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true } },
                         shape = RoundedCornerShape(50),
                         color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
                         shadowElevation = 3.dp
@@ -1380,7 +1394,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             filterActiveCount = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
                 filteredPool.size else null,
             vertical = extraCompact,
-            onCategories = { showCategoryPicker = true },
+            onCategories = { navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true } },
             onFilter = { showFilters = true }
         )
         }
@@ -1388,39 +1402,6 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     }
 
 
-
-    // ── CategoryPickerSheet ───────────────────────────────────────────
-    if (showCategoryPicker) {
-        CategoryPickerSheet(
-            currentCat = deckCat,
-            onDismiss = { showCategoryPicker = false },
-            onCategorySelected = { c ->
-                activeCatIds = listOf(c.id)
-                // v5.5 — persist so the Spin tab reopens on this category
-                // after the app is killed and relaunched.
-                AppPreferences.setLastSpinCategories(context, listOf(c.id))
-                showCategoryPicker = false
-            },
-            onCategoriesSelected = { cats ->
-                if (cats.isEmpty()) {
-                    // v196 — a CANCELLED mix: the user cleared the ticks in
-                    // the picker and left via back — the mix is gone, the
-                    // deck reverts to the last single category (and that
-                    // single is persisted so it can't resurrect).
-                    val single = AppPreferences.getLastSpinCategory(context)
-                    activeCatIds = listOf(single)
-                    AppPreferences.setLastSpinCategories(context, listOf(single))
-                } else {
-                    activeCatIds = cats.map { it.id }
-                    // v5.15 — persist the FULL mixed set (not just the first)
-                    // so a multi-select deck survives back navigation, tab
-                    // switches and app restarts.
-                    AppPreferences.setLastSpinCategories(context, cats.map { it.id })
-                }
-                showCategoryPicker = false
-            },
-        )
-    }
 
     // ── ModalBottomSheet — compact multi-select filter dialog ──────────
     if (showFilters) {

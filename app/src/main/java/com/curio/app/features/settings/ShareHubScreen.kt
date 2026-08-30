@@ -46,6 +46,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
+import com.curio.app.data.CurioCategory
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.ui.adaptive.isWide
@@ -312,6 +313,13 @@ fun ShareHubScreen(navController: NavController) {
                 )
             }
             HubDesigns.forEachIndexed { i, design ->
+                // The per-category signature cells start after the 9 base
+                // styles — show a section label before them.
+                if (i == 9) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        CurioSectionLabel("Per-category signature designs")
+                    }
+                }
                 item {
                     HubDesignCell(
                         design = design,
@@ -339,6 +347,15 @@ fun ShareHubScreen(navController: NavController) {
                         val topic = pickedTopic ?: return@Button
                         val cat = CurioCategories.byId(topic.categoryId)
                         val isQuotes = cat.id == CategoryId.QUOTES
+                        // When the selected design has a category override
+                        // (a per-category signature cell), export with the
+                        // overridden category's params so the shared card
+                        // shows that category's signature design.
+                        val ov = design.categoryOverride
+                        val exportCategoryName = ov?.displayName ?: cat.displayName
+                        val exportGlyph = ov?.glyph ?: cat.iconGlyph
+                        val exportAccent = ov?.accent ?: cat.themedAccent()
+                        val exportFamily = ov?.family ?: cat.family
                         val pw = 280.dp
                         val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
                         shareComposableCard(
@@ -349,15 +366,15 @@ fun ShareHubScreen(navController: NavController) {
                             card = {
                                 TopicShareCard(
                                     topicName = topic.name,
-                                    categoryName = cat.displayName,
-                                    categoryGlyph = cat.iconGlyph,
-                                    accent = cat.themedAccent(),
+                                    categoryName = exportCategoryName,
+                                    categoryGlyph = exportGlyph,
+                                    accent = exportAccent,
                                     factText = if (isQuotes) topic.name else topic.teaser,
                                     sharerName = sharer,
                                     aspect = aspect,
                                     style = design.style,
                                     ratingStars = null,
-                                    categoryFamily = cat.family,
+                                    categoryFamily = exportFamily,
                                     quoteText = if (isQuotes) topic.name else null,
                                     quoteAuthor = if (isQuotes) topic.byline.ifBlank { null } else null,
                                     byline = topic.byline,
@@ -401,7 +418,10 @@ fun ShareHubScreen(navController: NavController) {
     }
 }
 
-/** One design cell in the grid — a full mini preview of [TopicShareCard]. */
+/** One design cell in the grid — a full mini preview of [TopicShareCard].
+ *  When [design] has a [categoryOverride], the preview renders that
+ *  category's signature design (background, glyph, accent, family) while
+ *  keeping the picked topic's name/fact/byline. */
 @Composable
 private fun HubDesignCell(
     design: HubDesign,
@@ -415,6 +435,14 @@ private fun HubDesignCell(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+        // When a category override is set, the cell renders with the
+        // overridden category's params — so the user sees that category's
+        // signature design, not the picked topic's own category.
+        val ov = design.categoryOverride
+        val cellCategoryName = ov?.displayName ?: preview.categoryName
+        val cellGlyph = ov?.glyph ?: preview.glyph
+        val cellAccent = ov?.accent ?: preview.accent
+        val cellFamily = ov?.family ?: preview.family
         val isQuotes = preview.categoryName == "Quotes"
         Surface(
             onClick = onSelect,
@@ -437,14 +465,14 @@ private fun HubDesignCell(
             ) {
                 TopicShareCard(
                     topicName = preview.topicName,
-                    categoryName = preview.categoryName,
-                    categoryGlyph = preview.glyph,
-                    accent = preview.accent,
+                    categoryName = cellCategoryName,
+                    categoryGlyph = cellGlyph,
+                    accent = cellAccent,
                     factText = preview.fact,
                     sharerName = sharer,
                     aspect = aspect,
                     style = design.style,
-                    categoryFamily = preview.family,
+                    categoryFamily = cellFamily,
                     quoteText = if (isQuotes) preview.fact else null,
                     quoteAuthor = if (isQuotes) preview.byline.ifBlank { null } else null,
                     byline = preview.byline,
@@ -458,7 +486,8 @@ private fun HubDesignCell(
                 fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold,
                 color = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            maxLines = 1
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -497,22 +526,62 @@ private data class ShareHubPreview(
     val byline: String
 )
 
-/** One design entry in the grid — a style plus its Signature variant flag. */
+/** One design entry in the grid — a style plus its Signature variant flag.
+ *
+ *  [categoryOverride] — when non-null, this cell renders a Signature design
+ *  using the OVERRIDDEN category's background (that category's
+ *  signatureDesign) instead of the picked topic's own category. This lets
+ *  every per-category signature background be browsed and applied to any
+ *  topic. The topic name/fact/byline still come from the picked topic. */
 private data class HubDesign(
     val label: String,
     val style: ShareCardStyle,
-    val classic: Boolean = false
+    val classic: Boolean = false,
+    val categoryOverride: CategoryOverride? = null
 )
 
-/** Every share-card design, including both Signature variants. */
-private val HubDesigns = listOf(
-    HubDesign("Paper", ShareCardStyle.PAPER),
-    HubDesign("Vinyl", ShareCardStyle.VINYL),
-    HubDesign("Collage", ShareCardStyle.COLLAGE),
-    HubDesign("Clean", ShareCardStyle.NEUMORPHIC),
-    HubDesign("Editorial", ShareCardStyle.EDITORIAL),
-    HubDesign("Minimal", ShareCardStyle.MINIMAL),
-    HubDesign("Signature", ShareCardStyle.SIGNATURE),
-    HubDesign("Signature · Classic", ShareCardStyle.SIGNATURE, classic = true),
-    HubDesign("Custom", ShareCardStyle.CUSTOM)
+/** Category params to override the preview/share rendering with a specific
+ *  category's signature design, glyph, accent and family. */
+private data class CategoryOverride(
+    val displayName: String,
+    val glyph: String,
+    val accent: Color,
+    val family: CategoryFamily
 )
+
+/** Every share-card design, including both Signature variants and one cell
+ *  per category's signature background. */
+private val HubDesigns: List<HubDesign> = buildList {
+    // ── Base styles (available for every topic) ──
+    add(HubDesign("Paper", ShareCardStyle.PAPER))
+    add(HubDesign("Vinyl", ShareCardStyle.VINYL))
+    add(HubDesign("Collage", ShareCardStyle.COLLAGE))
+    add(HubDesign("Clean", ShareCardStyle.NEUMORPHIC))
+    add(HubDesign("Editorial", ShareCardStyle.EDITORIAL))
+    add(HubDesign("Minimal", ShareCardStyle.MINIMAL))
+    add(HubDesign("Signature", ShareCardStyle.SIGNATURE))
+    add(HubDesign("Signature · Classic", ShareCardStyle.SIGNATURE, classic = true))
+    add(HubDesign("Custom", ShareCardStyle.CUSTOM))
+    // ── Per-category Signature designs — every category's signature
+    //    background is browseable and pickable for any topic. Skips
+    //    coming-soon lanes (they'd just show the fallback). Wildcard is
+    //    first (it's the default Signature already, but included for
+    //    completeness), then alphabetical by display name.
+    CurioCategories.all
+        .filter { it.isReady }
+        .sortedWith(
+            compareBy<CurioCategory>({ it.id != CategoryId.WILDCARD }, { it.displayName.lowercase() })
+        )
+        .forEach { cat ->
+            add(HubDesign(
+                label = "${cat.displayName} signature",
+                style = ShareCardStyle.SIGNATURE,
+                categoryOverride = CategoryOverride(
+                    displayName = cat.displayName,
+                    glyph = cat.iconGlyph,
+                    accent = cat.themedAccent(),
+                    family = cat.family
+                )
+            ))
+        }
+}
