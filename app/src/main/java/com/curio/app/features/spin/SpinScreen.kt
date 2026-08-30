@@ -1401,8 +1401,23 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             onDismissRequest = { showCategoryPicker = false },
             sheetState = pickerSheetState,
             containerColor = deckCat.categoryBackgroundWash(),
-            dragHandle = { androidx.compose.material3.BottomSheetDefaults.DragHandle() },
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 4.dp)
+                        .width(36.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            lerp(
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                MaterialTheme.colorScheme.surfaceContainerHighest,
+                                0.5f
+                            ).copy(alpha = 0.6f)
+                        )
+                )
+            },
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         ) {
             com.curio.app.features.picker.CategoryPickerContent(
                 washCat = deckCat,

@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -59,7 +61,6 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.MorphEntrance
 
 import com.curio.app.ui.components.curioButtonColors
@@ -188,12 +189,29 @@ fun CategoryPickerScreen(navController: NavController) {
         onDispose { PetLandmarks.noteSheet("picker", false) }
     }
 
+    val sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ModalBottomSheet(
         onDismissRequest = { navController.popBackStack() },
         sheetState = sheetState,
         containerColor = washCat.categoryBackgroundWash(),
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        dragHandle = {
+            // Glass grabber pill
+            Box(
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 4.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        lerp(
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                            MaterialTheme.colorScheme.surfaceContainerHighest,
+                            0.5f
+                        ).copy(alpha = 0.6f)
+                    )
+            )
+        },
+        shape = sheetShape
     ) {
         CategoryPickerContent(
             washCat = washCat,
@@ -294,8 +312,8 @@ fun CategoryPickerContent(
         // contentAlignment takes a full Alignment, not Alignment.Horizontal
         // (CenterHorizontally) — Center also matches the vertical no-op
         // since the box wraps the sheet content's height.
-        contentAlignment = Alignment.Center
-    ) {
+        contentAlignment = Alignment.Center        ) {
+        val headerShape = RoundedCornerShape(50)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -303,19 +321,43 @@ fun CategoryPickerContent(
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp)
         ) {
+        // ── Glass header pill — a centered title with a glass close chip ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 0.dp),
+                .padding(top = 4.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            CurioBackButton(onClick = onDismiss)
+            // Spacer to balance the close chip on the right
+            Spacer(Modifier.width(36.dp))
             Text(
                 text = "What are we exploring?",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
+            // Glass close chip
+            Surface(
+                onClick = onDismiss,
+                shape = headerShape,
+                color = lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
+                    0.82f
+                ),
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .curioDarkGlow(2.dp, headerShape)
+                    .curioGlassEdge(headerShape)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Close,
+                    contentDescription = "Close",
+                    size = 18.dp,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(9.dp)
+                )
+            }
         }
 
         // ── v1 — Mode tabs: Curio / Knowledge / Mix. The redesigned picker
@@ -658,93 +700,91 @@ fun PickerIconTile(
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null
 ) {
-    val shape = RoundedCornerShape(16.dp)
-    val idleFill = lerp(
-        MaterialTheme.colorScheme.surfaceContainerHigh,
-        if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
-        0.82f
+ val shape = RoundedCornerShape(16.dp)
+ val catAccent = category.themedAccent()
+ val catInk = category.onAccent()
+ val idleFill = lerp(
+  MaterialTheme.colorScheme.surfaceContainerHigh,
+  if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
+  0.82f
+ )
+ val isWildcard = category.id == CategoryId.WILDCARD
+ Surface(
+  shape = shape,
+  color = when {
+   selected -> catAccent
+   else -> idleFill
+  },
+  shadowElevation = if (comingSoon) 0.dp else if (selected) 4.dp else 2.dp,
+  modifier = Modifier
+   .fillMaxWidth()
+   .height(92.dp)
+   .then(if (comingSoon) Modifier else Modifier.curioDarkGlow(2.dp, shape))
+   .then(if (comingSoon) Modifier else Modifier.curioGlassEdge(shape))
+   .then(if (selected) Modifier.curioInnerGlow(shape, catAccent, strength = 0.12f) else Modifier)
+   .then(
+    if (comingSoon) Modifier
+    else Modifier.combinedClickable(
+     enabled = !comingSoon,
+     onClick = onClick,
+     onLongClick = onLongClick
     )
-    val isWildcard = category.id == CategoryId.WILDCARD
-    Surface(
-        shape = shape,
-        color = when {
-            selected -> MaterialTheme.colorScheme.secondary
-            else -> idleFill
-        },
-        shadowElevation = if (comingSoon) 0.dp else 2.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(92.dp)
-            // v28 — soft glow + top-lit shine (only tappable tiles).
-            .then(if (comingSoon) Modifier else Modifier.curioDarkGlow(2.dp, shape))
-            .then(if (comingSoon) Modifier else Modifier.curioGlassEdge(shape))
-            // Tap opens; long-press enters multi-select (Mix mode). The M3
-            // Surface in this version has no onLongClick overload, so the
-            // press handling rides a combinedClickable (ripple + disabled
-            // state for coming-soon lanes).
-            .then(
-                if (comingSoon) Modifier
-                else Modifier.combinedClickable(
-                    enabled = !comingSoon,
-                    onClick = onClick,
-                    onLongClick = onLongClick
-                )
-            )
+   )
+ ) {
+  Box(
+   modifier = Modifier.fillMaxSize(),
+   contentAlignment = Alignment.Center
+  ) {
+   Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(6.dp)
+   ) {
+    Box(
+     modifier = Modifier
+      .size(38.dp)
+      .clip(CircleShape)
+      .background(
+       when {
+        selected -> catInk.copy(alpha = 0.18f)
+        else -> MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.7f)
+       }
+      ),
+     contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when {
-                                selected -> MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.18f)
-                                else -> MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.7f)
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CurioIcon(
-                        name = category.iconGlyph,
-                        contentDescription = null,
-                        size = 21.dp,
-                        tint = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (selected) {
-                        CurioIcon(
-                            name = CurioIcons.Check,
-                            contentDescription = "Selected",
-                            size = 12.dp,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.align(Alignment.BottomEnd)
-                        )
-                    }
-                }
-                Text(
-                    text = when {
-                        comingSoon -> "Coming soon"
-                        isWildcard -> "Surprise mix"
-                        else -> category.displayName
-                    },
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
-                    ),
-                    color = when {
-                        selected -> MaterialTheme.colorScheme.onSecondary
-                        comingSoon -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        else -> MaterialTheme.colorScheme.onSurface
-                    },
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
-            }
-        }
+     CurioIcon(
+      name = category.iconGlyph,
+      contentDescription = null,
+      size = 21.dp,
+      tint = if (selected) catInk else MaterialTheme.colorScheme.onSurfaceVariant
+     )
+     if (selected) {
+      CurioIcon(
+       name = CurioIcons.Check,
+       contentDescription = "Selected",
+       size = 12.dp,
+       tint = catInk,
+       modifier = Modifier.align(Alignment.BottomEnd)
+      )
+     }
     }
+    Text(
+     text = when {
+      comingSoon -> "Coming soon"
+      isWildcard -> "Surprise mix"
+      else -> category.displayName
+     },
+     style = MaterialTheme.typography.labelMedium.copy(
+      fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+     ),
+     color = when {
+      selected -> catInk
+      comingSoon -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+      else -> MaterialTheme.colorScheme.onSurface
+     },
+     maxLines = 1,
+     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+    )
+   }
+  }
+ }
 }

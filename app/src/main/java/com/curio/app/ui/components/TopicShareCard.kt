@@ -2613,55 +2613,43 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0CEB0).copy(alpha = 0.88f),
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFD9A05B).copy(alpha = 0.70f)
         )
-        // ═══ SERIES — TV playing a scene, episode chips, progress bar ═══
+        // ═══ SERIES — cinematic streaming poster: play motif, film strip, glow ═══
         cat == "SERIES" -> SignatureDesign(
-            bg = Color(0xFF1A0D12), cornerRadius = 6f,
+            bg = Color(0xFF0F0B14), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Deep maroon vignette
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF2E1420), Color(0xFF1A0D12), Color(0xFF0E070A))), size = Size(w, h))
-                // Soft red glow behind the TV
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE5484D).copy(alpha = 0.18f), Color.Transparent)), radius = w * 0.30f, center = Offset(w * 0.40f, h * 0.28f))
-                // TV frame with a scene on the screen
-                val tvx = w * 0.20f; val tvy = h * 0.16f; val tvw = w * 0.46f; val tvh = w * 0.30f
-                drawRoundRect(Color(0xFF2E1A22), Offset(tvx - w * 0.012f, tvy - w * 0.012f), Size(tvw + w * 0.024f, tvh + w * 0.024f), CornerRadius(6f))
-                // Screen — dusk gradient with a mountain silhouette
-                drawRoundRect(Brush.verticalGradient(listOf(Color(0xFFE56B4F), Color(0xFF7A2A4E), Color(0xFF2E0A2E)), startY = tvy), Offset(tvx, tvy), Size(tvw, tvh), CornerRadius(4f))
+                // Deep midnight gradient
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1A1220), Color(0xFF0F0B14), Color(0xFF06030A))), size = Size(w, h))
+                // Soft amber glow center-right (behind the play button)
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8A040).copy(alpha = 0.18f), Color.Transparent)), radius = w * 0.35f, center = Offset(w * 0.76f, h * 0.30f))
+                // Play button triangle — clean, iconic
+                val pcx = w * 0.76f; val pcy = h * 0.30f; val pr = w * 0.06f
+                drawCircle(Color.White.copy(alpha = 0.08f), pr * 1.6f, Offset(pcx, pcy))
+                drawCircle(Color.White.copy(alpha = 0.12f), pr, Offset(pcx, pcy), style = Stroke(1.5f))
                 drawPath(Path().apply {
-                    moveTo(tvx, tvy + tvh * 0.74f)
-                    lineTo(tvx + tvw * 0.20f, tvy + tvh * 0.52f)
-                    lineTo(tvx + tvw * 0.34f, tvy + tvh * 0.66f)
-                    lineTo(tvx + tvw * 0.52f, tvy + tvh * 0.44f)
-                    lineTo(tvx + tvw * 0.70f, tvy + tvh * 0.64f)
-                    lineTo(tvx + tvw * 0.86f, tvy + tvh * 0.50f)
-                    lineTo(tvx + tvw, tvy + tvh * 0.70f)
-                    lineTo(tvx + tvw, tvy + tvh)
-                    lineTo(tvx, tvy + tvh)
+                    moveTo(pcx - pr * 0.35f, pcy - pr * 0.5f)
+                    lineTo(pcx - pr * 0.35f, pcy + pr * 0.5f)
+                    lineTo(pcx + pr * 0.55f, pcy)
                     close()
-                }, Color(0xFF140A16))
-                drawCircle(Color(0xFFF2C879).copy(alpha = 0.85f), tvw * 0.055f, Offset(tvx + tvw * 0.76f, tvy + tvh * 0.26f))
-                // Progress bar at the bottom of the screen
-                drawRoundRect(Color(0xFF3A2A32), Offset(tvx + tvw * 0.05f, tvy + tvh * 0.90f), Size(tvw * 0.90f, tvh * 0.05f), CornerRadius(2f))
-                drawRoundRect(Color(0xFFFFC96B), Offset(tvx + tvw * 0.05f, tvy + tvh * 0.90f), Size(tvw * 0.42f, tvh * 0.05f), CornerRadius(2f))
-                // TV stand
-                drawLine(Color(0xFF2E1A22), Offset(tvx + tvw * 0.5f, tvy + tvh + w * 0.012f), Offset(tvx + tvw * 0.5f, tvy + tvh + w * 0.06f), strokeWidth = 2.4f)
-                drawLine(Color(0xFF2E1A22), Offset(tvx + tvw * 0.30f, tvy + tvh + w * 0.065f), Offset(tvx + tvw * 0.70f, tvy + tvh + w * 0.065f), strokeWidth = 2.4f)
-                // Episode chips floating right of the TV
-                listOf(Offset(w * 0.78f, h * 0.24f), Offset(w * 0.82f, h * 0.38f), Offset(w * 0.78f, h * 0.52f)).forEachIndexed { i, c ->
-                    drawRoundRect(Color(0xFF3A1E2A), Offset(c.x - w * 0.05f, c.y - w * 0.016f), Size(w * 0.10f, w * 0.032f), CornerRadius(6f))
-                    drawCircle(if (i == 0) Color(0xFFFFC96B) else Color(0xFFE5484D), w * 0.010f, Offset(c.x - w * 0.034f, c.y))
-                    drawLine(if (i == 0) Color(0xFFFFC96B).copy(alpha = 0.9f) else Color(0xFFE5A0A4).copy(alpha = 0.8f), Offset(c.x - w * 0.018f, c.y), Offset(c.x + w * 0.028f, c.y), strokeWidth = 1.4f)
+                }, Color.White.copy(alpha = 0.22f))
+                // Film strip down the left edge — thin, elegant
+                drawRect(Color(0xFFC8C4BC).copy(alpha = 0.18f), Offset(w * 0.015f, h * 0.04f), Size(w * 0.012f, h * 0.92f))
+                for (i in 0 until 10) {
+                    val y = h * 0.06f + i * h * 0.092f
+                    drawRect(Color(0xFF0F0B14), Offset(w * 0.017f, y), Size(w * 0.008f, h * 0.035f))
                 }
-                // Binge-tracker dots below the TV
-                for (i in 0 until 5) { drawCircle(if (i < 3) Color(0xFFFFC96B) else Color(0xFF6A4048).copy(alpha = 0.7f), 2.4f, Offset(w * 0.28f + i * w * 0.07f, h * 0.80f)) }
-                drawLine(Color(0xFFFFC96B).copy(alpha = 0.18f), Offset(w * 0.14f, h * 0.80f), Offset(w * 0.86f, h * 0.80f), strokeWidth = 0.6f)
+                // Subtle horizontal scanlines (TV screen feel)
+                for (i in 0 until 8) { drawLine(Color.White.copy(alpha = 0.015f), Offset(0f, h * 0.15f + i * h * 0.10f), Offset(w, h * 0.15f + i * h * 0.10f), strokeWidth = 0.5f) }
+                // Episode tally dots — small, bottom-right, like a progress tracker
+                for (i in 0 until 6) { drawCircle(if (i < 3) Color(0xFFE8A040).copy(alpha = 0.55f) else Color.White.copy(alpha = 0.12f), 1.8f, Offset(w * 0.50f + i * w * 0.05f, h * 0.88f)) }
+                drawLine(Color(0xFFE8A040).copy(alpha = 0.15f), Offset(w * 0.48f, h * 0.88f), Offset(w * 0.82f, h * 0.88f), strokeWidth = 0.5f)
             },
-            padding = PaddingValues(22.dp), badgeColor = Color(0xFFE5484D), badgeInk = Color.White,
-            badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
-            badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 16.dp,
-            titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFE8E2),
-            metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFFFC96B),
-            bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD8B8BE).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE5484D).copy(alpha = 0.70f)
+            padding = PaddingValues(22.dp), badgeColor = Color(0xFFE8A040), badgeInk = Color(0xFF0F0B14),
+            badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
+            badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
+            titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFFFF0E0),
+            metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE8A040),
+            bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD0C4D8).copy(alpha = 0.88f),
+            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE8A040).copy(alpha = 0.70f)
         )
         // ═══ ANIME — sakura petals, sunburst, lens flare ═══
         cat == "ANIME" -> SignatureDesign(
@@ -5733,9 +5721,9 @@ fun TopicShareSheet(
             // Photo picker for Collage — compact row below card
             if (currentStyle == ShareCardStyle.COLLAGE) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(34.dp)) {
+                    Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
                         Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                             Text(
                                 if (userPhoto != null) "Change" else "Photo",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -5746,10 +5734,11 @@ fun TopicShareSheet(
                     OutlinedTextField(
                         value = polaroidCaption,
                         onValueChange = { polaroidCaption = it.take(36) },
-                        placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.bodySmall) },
+                        placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium) },
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.weight(1f).height(34.dp)
+                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.weight(1f).height(40.dp)
                     )
                 }
             }
