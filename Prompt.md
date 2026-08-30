@@ -1,5 +1,36 @@
 # Prompt.md — current request log
 
+## Request: detailed signature card elements as an opt-in experiment (COMPLETE)
+
+- User: many categories lack elements/designs and some don't suit — make new
+  ones highly detailed, behind an opt-in Experiments toggle ("deepen").
+- Added AppPreferences.detailedSignatureElementsState (default OFF) + key +
+  is/set functions + loadPrefs wiring.
+- Added ExperimentsScreen toggle row under a new "Share cards" section.
+- SignatureCard dispatches: detailed set when toggle on, else the classic
+  per-category set. Films/Books/Games keep their classic designs in BOTH.
+- Wrote signatureDesignDetailed() in TopicShareCard.kt: 35 rich layered
+  scenes (gradient atmospheres, radial glows, vignettes, hand-drawn art) —
+  Artists twin spotlights, Albums turntable vinyl, Songs waveform/notes,
+  Directors clapperboard/reel, Animated Films rainbow swoosh, Authors
+  inkwell/manuscript, Painters palette/brush, Artworks gallery wall,
+  Scientists blueprint/molecule/beaker, Discoveries compass/trail,
+  Series TV/episode dots, Anime sakura/sunburst, Manga speedlines/
+  screentone, Manhwa pastel arch, Mythology meander/temple, Sports
+  floodlights/trophy, Food plate/bowl, Internet globe/nodes, Biology
+  glowing helix, Chemistry tiles/flask, Animals paw trail, Plants
+  botanical leaf, Technologies circuits/chip, Astronomy galaxy/planet,
+  History scroll/hourglass, Geology strata/crystals, Medicine EKG/
+  capsule, Psychology brain/bubbles, Mathematics golden spiral,
+  Economics bars/coins, Language bubbles/calligraphy, Engineering
+  blueprint/gear, Oceans rays/waves/fish, Quotes giant marks, Wildcard
+  comet/orb + quiet fallback.
+- Verified: 36 branches (+3 via early return = 38 total + fallback), 0
+  leftover markers, braces balanced (753/753 file-wide). Changelog bullet
+  added to 20260921.txt. Committed & pushed.
+
+---
+
 ## Request: per-category signature share-card redesign (COMPLETE)
 
 - User asked: every lane gets its OWN signature design (no shared layouts/
