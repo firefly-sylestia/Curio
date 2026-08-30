@@ -341,21 +341,22 @@ fun ShareHubScreen(navController: NavController) {
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 val canShare = selectedDesign != null && pickedTopic != null
+                // Resolve the override category's accent/glyph/family/name in
+                // the @Composable item scope (themedAccent is @Composable),
+                // then capture as locals for the non-composable onClick.
+                val resolvedTopic = pickedTopic
+                val resolvedCat = resolvedTopic?.let { CurioCategories.byId(it.categoryId) }
+                val ovCat = selectedDesign?.categoryOverrideId?.let { CurioCategories.byId(it) }
+                val exportCategoryName = ovCat?.displayName ?: resolvedCat?.displayName ?: wildcardCat.displayName
+                val exportGlyph = ovCat?.iconGlyph ?: resolvedCat?.iconGlyph ?: wildcardCat.iconGlyph
+                val exportAccent = ovCat?.themedAccent() ?: resolvedCat?.themedAccent() ?: wildcardCat.themedAccent()
+                val exportFamily = ovCat?.family ?: resolvedCat?.family ?: CategoryFamily.WILDCARD
                 Button(
                     onClick = {
                         val design = selectedDesign ?: return@Button
-                        val topic = pickedTopic ?: return@Button
+                        val topic = resolvedTopic ?: return@Button
                         val cat = CurioCategories.byId(topic.categoryId)
                         val isQuotes = cat.id == CategoryId.QUOTES
-                        // When the selected design has a category override
-                        // (a per-category signature cell), export with the
-                        // overridden category's params so the shared card
-                        // shows that category's signature design.
-                        val ov = design.categoryOverride
-                        val exportCategoryName = ov?.displayName ?: cat.displayName
-                        val exportGlyph = ov?.glyph ?: cat.iconGlyph
-                        val exportAccent = ov?.accent ?: cat.themedAccent()
-                        val exportFamily = ov?.family ?: cat.family
                         val pw = 280.dp
                         val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
                         shareComposableCard(
@@ -438,11 +439,11 @@ private fun HubDesignCell(
         // When a category override is set, the cell renders with the
         // overridden category's params — so the user sees that category's
         // signature design, not the picked topic's own category.
-        val ov = design.categoryOverride
-        val cellCategoryName = ov?.displayName ?: preview.categoryName
-        val cellGlyph = ov?.glyph ?: preview.glyph
-        val cellAccent = ov?.accent ?: preview.accent
-        val cellFamily = ov?.family ?: preview.family
+        val ovCat = design.categoryOverrideId?.let { CurioCategories.byId(it) }
+        val cellCategoryName = ovCat?.displayName ?: preview.categoryName
+        val cellGlyph = ovCat?.iconGlyph ?: preview.glyph
+        val cellAccent = ovCat?.themedAccent() ?: preview.accent
+        val cellFamily = ovCat?.family ?: preview.family
         val isQuotes = preview.categoryName == "Quotes"
         Surface(
             onClick = onSelect,
@@ -528,7 +529,7 @@ private data class ShareHubPreview(
 
 /** One design entry in the grid — a style plus its Signature variant flag.
  *
- *  [categoryOverride] — when non-null, this cell renders a Signature design
+ *  [categoryOverrideId] — when non-null, this cell renders a Signature design
  *  using the OVERRIDDEN category's background (that category's
  *  signatureDesign) instead of the picked topic's own category. This lets
  *  every per-category signature background be browsed and applied to any
@@ -537,16 +538,7 @@ private data class HubDesign(
     val label: String,
     val style: ShareCardStyle,
     val classic: Boolean = false,
-    val categoryOverride: CategoryOverride? = null
-)
-
-/** Category params to override the preview/share rendering with a specific
- *  category's signature design, glyph, accent and family. */
-private data class CategoryOverride(
-    val displayName: String,
-    val glyph: String,
-    val accent: Color,
-    val family: CategoryFamily
+    val categoryOverrideId: CategoryId? = null
 )
 
 /** Every share-card design, including both Signature variants and one cell
@@ -565,8 +557,7 @@ private val HubDesigns: List<HubDesign> = buildList {
     // ── Per-category Signature designs — every category's signature
     //    background is browseable and pickable for any topic. Skips
     //    coming-soon lanes (they'd just show the fallback). Wildcard is
-    //    first (it's the default Signature already, but included for
-    //    completeness), then alphabetical by display name.
+    //    first, then alphabetical by display name.
     CurioCategories.all
         .filter { it.isReady }
         .sortedWith(
@@ -576,12 +567,7 @@ private val HubDesigns: List<HubDesign> = buildList {
             add(HubDesign(
                 label = "${cat.displayName} signature",
                 style = ShareCardStyle.SIGNATURE,
-                categoryOverride = CategoryOverride(
-                    displayName = cat.displayName,
-                    glyph = cat.iconGlyph,
-                    accent = cat.themedAccent(),
-                    family = cat.family
-                )
+                categoryOverrideId = cat.id
             ))
         }
 }
