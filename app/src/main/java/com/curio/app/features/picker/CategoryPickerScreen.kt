@@ -1,6 +1,7 @@
 package com.curio.app.features.picker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -663,10 +664,7 @@ fun PickerIconTile(
     )
     val isWildcard = category.id == CategoryId.WILDCARD
     Surface(
-        onClick = onClick,
-        onLongClick = onLongClick,
         shape = shape,
-        enabled = !comingSoon,
         color = when {
             selected -> MaterialTheme.colorScheme.secondary
             else -> idleFill
@@ -678,6 +676,18 @@ fun PickerIconTile(
             // v28 — soft glow + top-lit shine (only tappable tiles).
             .then(if (comingSoon) Modifier else Modifier.curioDarkGlow(2.dp, shape))
             .then(if (comingSoon) Modifier else Modifier.curioGlassEdge(shape))
+            // Tap opens; long-press enters multi-select (Mix mode). The M3
+            // Surface in this version has no onLongClick overload, so the
+            // press handling rides a combinedClickable (ripple + disabled
+            // state for coming-soon lanes).
+            .then(
+                if (comingSoon) Modifier
+                else Modifier.combinedClickable(
+                    enabled = !comingSoon,
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                )
+            )
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
