@@ -65,6 +65,24 @@ import com.curio.app.ui.theme.themedAccent
  * little different") and the card pops to the full bright gradient only
  * when selected.
  */
+private fun expressiveCategorySurface(category: CurioCategory, base: Color): Color {
+    // Each lane gets its own material treatment instead of one generic tint.
+    // Books and Games intentionally retain their established surfaces.
+    val blend = when (category.id) {
+        CategoryId.FILMS, CategoryId.DIRECTORS, CategoryId.ANIMATED_MOVIES, CategoryId.SERIES -> 0.22f
+        CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS -> 0.16f
+        CategoryId.PAINTERS, CategoryId.ARTWORKS -> 0.19f
+        CategoryId.SCIENTISTS, CategoryId.DISCOVERIES, CategoryId.BIOLOGY, CategoryId.CHEMISTRY,
+        CategoryId.ASTRONOMY, CategoryId.GEOLOGY, CategoryId.MEDICINE, CategoryId.MATHEMATICS,
+        CategoryId.ENGINEERING, CategoryId.OCEANS -> 0.14f
+        CategoryId.MYTHOLOGY, CategoryId.QUOTES, CategoryId.HISTORY, CategoryId.LANGUAGE -> 0.24f
+        CategoryId.SPORTS, CategoryId.FOOD, CategoryId.INTERNET, CategoryId.TECHNOLOGIES -> 0.18f
+        CategoryId.BOOKS, CategoryId.AUTHORS, CategoryId.GAMES -> return category.categorySurface(base)
+        else -> 0.17f
+    }
+    return lerp(base, category.accent, blend)
+}
+
 @Composable
 fun CurioCategoryCard(
     category: CurioCategory,
@@ -113,7 +131,14 @@ fun CurioCategoryCard(
     // tints of their own color instead of shouting in full brightness.
     // v78 — light only (the AMOLED/Material/dark idle surfaces are gone
     // with dark mode).
-    val idleSurface = category.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val idleSurface = expressiveCategorySurface(
+        category,
+        MaterialTheme.colorScheme.surfaceContainerLow
+    )
+    val isFilmLane = category.id == CategoryId.FILMS ||
+        category.id == CategoryId.DIRECTORS ||
+        category.id == CategoryId.ANIMATED_MOVIES ||
+        category.id == CategoryId.SERIES
     val idleInk = category.categoryInk()
     // v27q — elevation is a flat 2dp in both states: the selected tile
     // already wears the full solid-accent gradient, so it never needs to
@@ -168,6 +193,24 @@ fun CurioCategoryCard(
                     enabled = !comingSoon
                 )
         ) {
+            if (isFilmLane) {
+                // Film lanes read as a framed contact sheet: opposing strips
+                // make the category identity visible even before selection.
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .fillMaxHeight()
+                        .width(10.dp)
+                        .background(category.accent.copy(alpha = 0.72f))
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                        .width(10.dp)
+                        .background(category.accent.copy(alpha = 0.72f))
+                )
+            }
             // ── Active-state sheen — soft white glow over the gradient so
             //    the selected tile reads as clearly raised, distinct from the
             //    idle tile (no check badge).

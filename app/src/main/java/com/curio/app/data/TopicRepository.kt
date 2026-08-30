@@ -208,6 +208,14 @@ object TopicRepository {
         return dao.getByCategory(categoryId.name).map { it.toCurioTopic() }
     }
 
+    /** Resolve a topic within its category so duplicate names cannot cross lanes. */
+    suspend fun findTopic(context: Context, categoryId: CategoryId, name: String): CurioTopic? {
+        val dao = CurioDatabase.getInstance(context).topicDao()
+        return dao.getByCategory(categoryId.name)
+            .firstOrNull { it.name == name || it.name.equals(name, ignoreCase = true) }
+            ?.toCurioTopic()
+    }
+
     /** Get a random topic for a category. */
     suspend fun getRandomTopic(context: Context, categoryId: CategoryId): CurioTopic? {
         val dao = CurioDatabase.getInstance(context).topicDao()

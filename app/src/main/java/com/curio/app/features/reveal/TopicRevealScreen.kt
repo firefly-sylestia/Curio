@@ -115,6 +115,7 @@ import com.curio.app.data.TourController
 import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicRepository
 import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreQuery
 import com.curio.app.data.buildExploreSearchUrl
@@ -228,23 +229,23 @@ fun TopicRevealScreen(
             ?: CurioCategories.byId(CategoryId.WILDCARD)
     }
 
-    // v8.50 — resolve the topic SYNCHRONOUSLY from the warm cache so the
-    // shared-element morph starts with the correct title on frame 1. The
-    // old produceState(initialValue=null) left the hero showing the raw
-    // route name for one frame, which caused a visible title flash during
-    // the morph (especially for QUOTES where the route name ≠ byline).
-    // TopicJsonLoader.cached() is always populated after splash warm-up;
-    // if the cache is cold (app restore after process death) we fall back
-    // to a best-effort global lookup — still better than null.
-    val resolved = remember(topicName, cat.id) {
-        TopicJsonLoader.cached(cat.id)
+    // Room is the source of truth. Resolve by category first, then use the
+    // warm loader only as a compatibility fallback while an older install is
+    // finishing its one-time import. Never use the global catalog here: a
+    // duplicate title in another category must not open the wrong topic.
+    val context = LocalContext.current
+    var resolved by remember(topicName, cat.id) { mutableStateOf<CurioTopic?>(null) }
+    LaunchedEffect(topicName, cat.id) {
+        // Wait for the guarded one-time import before resolving. Reading the
+        // cache during import was the source of intermittent blank reveals.
+        TopicRepository.init(context)
+        val roomTopic = TopicRepository.findTopic(context, cat.id, topicName)
+        resolved = roomTopic ?: TopicJsonLoader.cached(cat.id)
             ?.firstOrNull { it.matchesSavedNameStrict(topicName) }
             ?: TopicJsonLoader.cached(cat.id)
                 ?.firstOrNull { it.matchesSavedName(topicName) }
-            ?: TopicCatalog.findByName(topicName)
     }
 
-    val context = LocalContext.current
     // v29 — clipboard for the auto-copy on explore: the search query lands on
     // the clipboard so the user can paste it into an app's own search box
     // (Spotify / Apple Music don't always hand off an in-app search).
