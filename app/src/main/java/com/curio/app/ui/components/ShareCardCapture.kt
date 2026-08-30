@@ -172,7 +172,7 @@ private fun saveBitmapToGallery(context: Context, bitmap: Bitmap, fileName: Stri
                 )
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             }
-            val uri: Uri? = context.contentResolver.insert(
+            val uri = context.contentResolver.insert(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
             ) ?: return@runCatching null
             try {
