@@ -1,5 +1,44 @@
 # Prompt.md — current request log
 
+## Request: Share hub in Settings — design grid + topic search + share (COMPLETE)
+
+- User: "make a share hub in settings where all of the designs shows in
+  full preview grid and user can select that design and pick the topic by
+  search and share that topic with that design."
+- Added CurioRoutes.SHARE_HUB ("share-hub") + NavHost registration
+  (ShareHubScreen) + a Settings row in SettingsSections ("Share hub",
+  CurioIcons.Share, subtitle "Browse every design, pick a topic, share a
+  card") under Personalize next to Topic history.
+- New app/src/main/java/com/curio/app/features/settings/ShareHubScreen.kt:
+  - Settings-family hero (SettingsHeroHeader + glass backdrop + watermark
+    backdrop + heroPageBackground tint, sticky-hero scroll pattern).
+  - Topic search: CurioSearchField filtering the full topic index
+    (TopicJsonLoader.loadIndex) with the Topic-Database title-first
+    ranking; live results list (glyph, name, byline · category, pick
+    check) capped at 40; tapping a result picks the topic and clears
+    the query.
+  - Picked-topic chip: category-tinted capsule with glyph + name ·
+    category + clear (X).
+  - Design grid: LazyVerticalGrid (2 cols compact / adaptive wide) with
+    one HubDesignCell per design — a full mini TopicShareCard preview at
+    the chosen aspect, accent border on the selected cell, label below.
+    HubDesigns = Paper, Vinyl, Collage, Clean, Editorial, Minimal,
+    Signature, Signature·Classic, Custom (9 cells — Signature twice, the
+    classic variant via classicSignature=true).
+  - Preview renders the picked topic (or a sample "Curiosity" wildcard
+    card before any topic is chosen) so the grid always shows something.
+  - Aspect pills 9:16 / 3:4 + a Share button (enabled once a design AND
+    a topic are picked) that exports the full-size card through
+    shareComposableCard (280dp wide, 4x density) with the topic's
+    real accent/glyph/family/byline; Quotes category passes the quote
+    as quoteText + author.
+- Verified: stack brace/paren check balanced, all icons exist (Share,
+  Check, Close, ChevronRight), CategoryId.QUOTES handled, Surface(onClick)
+  pattern matches existing M3 usage, two-pane hub navigates the new row
+  like other non-section rows. Changelog bullet added. Committed & pushed.
+
+---
+
 ## Request: chemistry hexagon, thin song bars, FOOD rework + detailed Books/Films/Games (COMPLETE)
 
 - User follow-up: chemistry WITHOUT deepen still looked weird/broken;

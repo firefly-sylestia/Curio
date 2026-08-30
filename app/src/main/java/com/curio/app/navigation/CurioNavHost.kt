@@ -104,6 +104,7 @@ import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
+import com.curio.app.features.settings.ShareHubScreen
 import com.curio.app.features.topichistory.TopicHistoryScreen
 import com.curio.app.features.recent.RecentScreen
 import com.curio.app.features.recyclebin.RecycleBinScreen
@@ -871,6 +872,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.SETTINGS_DATA) {
                 BackupToolsScreen(navController = navController)
+            }
+            composable(CurioRoutes.SHARE_HUB) {
+                ShareHubScreen(navController = navController)
             }
             composable(CurioRoutes.EXPERIMENTS) {
                 ExperimentsScreen(navController = navController)
