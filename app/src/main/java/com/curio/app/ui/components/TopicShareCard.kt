@@ -1581,10 +1581,15 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                     drawCircle(Color.White.copy(alpha = 0.025f), 1.2f, Offset(x, y))
                 }
                 drawCircle(Color(0xFF6B1A1A).copy(alpha = 0.15f), w * 0.35f, Offset(w * 0.9f, -h * 0.05f))
+                // Equal-weight opposing film rails; the center remains deliberately quiet.
+                drawRect(Color(0xFF8B1A1A).copy(alpha = 0.32f), Offset(w * 0.045f, 0f), Size(w * 0.07f, h))
+                drawRect(Color(0xFF8B1A1A).copy(alpha = 0.32f), Offset(w * 0.885f, 0f), Size(w * 0.07f, h))
                 for (i in 0 until 8) {
                     val y = h * 0.05f + i * h * 0.12f
-                    drawRoundRect(Color.White.copy(alpha = 0.04f), Offset(w * 0.02f, y), Size(w * 0.025f, h * 0.06f), CornerRadius(2f))
+                    drawRoundRect(Color.White.copy(alpha = 0.12f), Offset(w * 0.06f, y), Size(w * 0.025f, h * 0.06f), CornerRadius(2f))
+                    drawRoundRect(Color.White.copy(alpha = 0.12f), Offset(w * 0.915f, y), Size(w * 0.025f, h * 0.06f), CornerRadius(2f))
                 }
+                drawRoundRect(Color.Black.copy(alpha = 0.16f), Offset(w * 0.16f, h * 0.08f), Size(w * 0.68f, h * 0.78f), CornerRadius(8f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF8B1A1A), badgeInk = Color.White,
             badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp,
@@ -1608,13 +1613,8 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                     drawRect(Color(0xFFC49A3C).copy(alpha = 0.55f), Offset(w * 0.01f, y), Size(w * 0.05f, h * 0.008f))
                     drawRect(Color(0xFFC49A3C).copy(alpha = 0.35f), Offset(w * 0.01f, y + h * 0.025f), Size(w * 0.05f, h * 0.004f))
                 }
-                // Ruled notebook lines
-                for (i in 0 until 20) {
-                    val y = h * 0.06f + i * h * 0.045f
-                    drawLine(Color(0xFFBFA882).copy(alpha = 0.30f), Offset(w * 0.10f, y), Offset(w * 0.92f, y), strokeWidth = 0.5f)
-                }
-                // Red margin line
-                drawLine(Color(0xFFCC4444).copy(alpha = 0.30f), Offset(w * 0.14f, h * 0.04f), Offset(w * 0.14f, h * 0.96f), strokeWidth = 1.2f)
+                // One quiet page edge keeps the editorial field legible.
+                drawLine(Color(0xFFCC4444).copy(alpha = 0.24f), Offset(w * 0.16f, h * 0.08f), Offset(w * 0.16f, h * 0.88f), strokeWidth = 1f)
                 // Page corner curl bottom-right
                 val cornerPath = Path().apply {
                     moveTo(w * 0.85f, h * 0.88f)
@@ -1623,9 +1623,6 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                     quadraticBezierTo(w * 0.86f, h * 0.93f, w * 0.85f, h * 0.88f)
                 }
                 drawPath(cornerPath, Color(0xFFD4C4A8).copy(alpha = 0.30f))
-                // Gold leaf ornament top-right
-                drawCircle(Color(0xFFC49A3C).copy(alpha = 0.18f), w * 0.06f, Offset(w * 0.88f, h * 0.08f), style = Stroke(1.5f))
-                drawCircle(Color(0xFFC49A3C).copy(alpha = 0.12f), w * 0.04f, Offset(w * 0.88f, h * 0.08f))
             },
             padding = PaddingValues(horizontal = 26.dp, vertical = 22.dp), badgeColor = Color(0xFF5C3317), badgeInk = Color(0xFFF5EDE0),
             badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
@@ -1683,16 +1680,15 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             bg = Color(0xFFF0F8F0), cornerRadius = 8f,
             drawBackground = { w, h ->
                 val s = (w * 1000 + h).toInt()
-                // DNA double helix - right side
-                for (i in 0 until 30) {
-                    val t = i / 30f
-                    val x1 = w * 0.82f + kotlin.math.sin(t * 6.28f * 2).toFloat() * w * 0.06f
-                    val x2 = w * 0.82f - kotlin.math.sin(t * 6.28f * 2).toFloat() * w * 0.06f
-                    val y = h * 0.05f + t * h * 0.90f
-                    drawCircle(Color(0xFF2E7D32).copy(alpha = 0.35f), 2.5f, Offset(x1, y))
-                    drawCircle(Color(0xFF388E3C).copy(alpha = 0.30f), 2.0f, Offset(x2, y))
-                    // Cross-links every few steps
-                    if (i % 3 == 0) drawLine(Color(0xFF4CAF50).copy(alpha = 0.18f), Offset(x1, y), Offset(x2, y), strokeWidth = 0.6f)
+                // DNA double helix — the focal object, centered in its own quiet zone.
+                for (i in 0 until 34) {
+                    val t = i / 33f
+                    val x1 = w * 0.68f + kotlin.math.sin(t * 6.28f * 2).toFloat() * w * 0.10f
+                    val x2 = w * 0.68f - kotlin.math.sin(t * 6.28f * 2).toFloat() * w * 0.10f
+                    val y = h * 0.08f + t * h * 0.72f
+                    drawCircle(Color(0xFF2E7D32).copy(alpha = 0.42f), 2.8f, Offset(x1, y))
+                    drawCircle(Color(0xFF388E3C).copy(alpha = 0.36f), 2.4f, Offset(x2, y))
+                    if (i % 2 == 0) drawLine(Color(0xFF4CAF50).copy(alpha = 0.28f), Offset(x1, y), Offset(x2, y), strokeWidth = 1f)
                 }
                 // Cell membrane circles - left side
                 for (i in 0 until 6) {
@@ -1996,10 +1992,10 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         family == CategoryFamily.VISUAL_ART || cat.contains("ART") || cat.contains("PAINT") -> SignatureDesign(
             bg = Color(0xFFF8F6F2), cornerRadius = 6f,
             drawBackground = { w, h ->
-                // Double gallery frame
-                val inset = w * 0.05f
-                drawRect(Color(0xFF8A7A68).copy(alpha = 0.30f), Offset(inset, inset), Size(w - inset * 2, h - inset * 2), style = Stroke(2.5f))
-                drawRect(Color(0xFF8A7A68).copy(alpha = 0.18f), Offset(inset + 5f, inset + 5f), Size(w - (inset + 5f) * 2, h - (inset + 5f) * 2), style = Stroke(0.7f))
+                // Explicitly inset canvas window; all marks stay inside the safe area.
+                val inset = minOf(w, h) * 0.11f
+                drawRect(Color(0xFF8A7A68).copy(alpha = 0.30f), Offset(inset, inset), Size(w - inset * 2, h - inset * 2), style = Stroke(2f))
+                drawRect(Color(0xFF8A7A68).copy(alpha = 0.14f), Offset(inset + 6f, inset + 6f), Size(w - (inset + 6f) * 2, h - (inset + 6f) * 2), style = Stroke(0.7f))
                 // Corner ornaments — small diamonds
                 listOf(Offset(inset, inset), Offset(w - inset, inset), Offset(inset, h - inset), Offset(w - inset, h - inset)).forEach { p ->
                     drawCircle(Color(0xFF8A7A68).copy(alpha = 0.25f), 3.5f, p)
