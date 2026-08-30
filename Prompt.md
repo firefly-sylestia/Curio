@@ -1,5 +1,33 @@
 # Prompt.md — current request log
 
+## Request: restore classic signature designs as an extra + fix collage caption (COMPLETE)
+
+- User pointed at commit f6dd7f19 (the 13-category family-based signature
+  redesign) and asked to restore those designs as an EXTRA beside the
+  current per-category ones, for ALL categories, selectable per card.
+- Chose (via ask_user): a "Design" pill row (Current / Classic) in the
+  share sheet, next to the Aspect picker; all categories get their classic
+  family design.
+- Extracted f6dd7f19's signatureDesign byte-identical into
+  signatureDesignClassic() (family-based branches + wildcard fallback),
+  verified every lane is covered by a branch.
+- TopicShareCard + SignatureCard gained classicSignature: Boolean = false;
+  SignatureCard dispatches Classic > Detailed-experiment > Current.
+- TopicShareSheet: classicDesign state + Design pill row (only when the
+  Signature style is active), threaded to all 4 card renders.
+- ShareHubBody: classicSignature/onClassicSignatureChange params + same
+  pill row; EntryShareSheet holds entryClassicSignature and passes it.
+- Collage caption fix: the handwritten polaroid credit used a Canvas +
+  unconstrained measure (long text clipped) with lineHeight possibly
+  smaller than fontSize (squished). Replaced with a width-constrained Text
+  (ellipsis) and lineHeight = 1.2 x fontSize; removed now-unused
+  drawText/rememberTextMeasurer imports.
+- Verified: classic body identical to f6dd7f19, braces balanced (raw
+  834/834), dispatcher + pickers in place, no leftover refs. Changelog
+  bullet added. Committed & pushed.
+
+---
+
 ## Request: refine deepened signature card scenes per user feedback (COMPLETE)
 
 - User feedback on the detailed (opt-in) signature designs: chemistry flask

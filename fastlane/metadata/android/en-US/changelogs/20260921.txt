@@ -1,6 +1,8 @@
 ADD: Every category gets its own signature share-card design - 35 unique researched palettes and hand-drawn backgrounds (stage spotlights for Artists, vinyl for Albums, sakura petals for Anime, gold Greek-key marble for Mythology, ocean light-rays for Oceans, golden spiral for Mathematics and more); Films, Books and Games keep their classic look.
 ADD: Deepen signature card elements - an opt-in Experiments toggle swaps signature share cards to richly detailed layered scenes: gradient atmospheres, glows, vignettes and hand-drawn art per category (spotlight stages, turntable vinyl, EKG traces, galaxy spirals and more); Films, Books and Games keep their classic look.
 FIX: Deepened signature card scenes refined - chemistry returns to a connected hexagon lattice (no more off-looking flask), gallery frames sit below the title so text stays readable, expedition trails lead into the compass, laurels anchor to the temple, and shapes keep their proportions on both 9:16 and 3:4 cards.
+ADD: Classic signature share-card designs restored - pick "Classic" beside "Current" in the share sheet to use the original family-based designs (vinyl for music, gallery frame for art, Greek columns for mythology and more) for any category; Films, Books and Games keep their classic look either way.
+FIX: Collage polaroid caption no longer squished or clipped - the handwritten credit ellipsizes cleanly with proper line height on any aspect ratio.
 FIX: Topic share card styles polished - Vinyl text is cleaner, Paper 9:16 facts fit better, Clean gets a category-depth poster, and Collage has a natural tear with editable polaroid credit.
 FIX: Room topic migration crash - repairs the topics table defaults and removes undeclared legacy indexes while preserving existing topic data.
 

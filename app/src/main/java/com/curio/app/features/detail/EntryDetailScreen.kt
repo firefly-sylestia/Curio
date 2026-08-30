@@ -4531,6 +4531,7 @@ private fun EntryShareSheet(
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
     var entryStyleIdx by rememberSaveable { mutableIntStateOf(0) }
+    var entryClassicSignature by rememberSaveable { mutableStateOf(false) }
     val entryStyles = com.curio.app.ui.components.availableStylesForFamily(category.family)
     val entrySafeIdx = entryStyleIdx.coerceIn(0, entryStyles.lastIndex)
     val entryCurrentStyle = entryStyles[entrySafeIdx]
@@ -4645,7 +4646,9 @@ private fun EntryShareSheet(
                 onCustomTextChange = { customText = it },
                 onShared = onDismiss,
                 categoryFamily = category.family,
-                topicByline = entry.topic.byline
+                topicByline = entry.topic.byline,
+                classicSignature = entryClassicSignature,
+                onClassicSignatureChange = { entryClassicSignature = it }
             )
 
             // Quiet secondary: plain-text share — quote mode shows quote + author only.
