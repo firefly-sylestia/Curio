@@ -1,5 +1,33 @@
 # Prompt.md — current request log
 
+## Request: refine deepened signature card scenes per user feedback (COMPLETE)
+
+- User feedback on the detailed (opt-in) signature designs: chemistry flask
+  looked wrong (preferred the hexagon style), art card text unreadable,
+  elements felt disconnected/random, and designs stretched between 9:16
+  and 3:4.
+- CHEMISTRY detailed: replaced flask + tiles with a CONNECTED hexagon
+  lattice — honeycomb of benzene rings sharing edges (3x3, alternating
+  colors, periodic double bonds), a hero benzene ring with glow, a bond
+  linking hero ring to the lattice, and a small water molecule. All
+  elements bond to each other; nothing floats.
+- ARTWORKS detailed: frames moved BELOW the title zone (h 0.66/0.70) and
+  darkened (0xFF1C1C1F interiors) so the light title always reads against
+  the dark wall; w-based frame sizing; dimmed spotlights.
+- ASPECT-SAFE sizing: converted every mixed w/h-sized shape in the
+  detailed set to w-based (TV, clapperboard, palette, arches, scroll,
+  beaker, capsule, browser bar, laurel, contour rings, film strip) so
+  proportions hold on both 9:16 (405x720) and 3:4 (450x600).
+- COHESION: Discoveries trail now leads INTO the compass rose; Mythology
+  laurel anchored at the temple base (with stylobate step); Manhwa heart
+  floats out of the arch with orbiting sparkles; Food plate + bowl + crumbs
+  share a table line.
+- Verified: braces 755/755, 36 branches, 0 markers, only full-card
+  gradient fills still use h (intentional). Changelog bullet added.
+  Committed & pushed.
+
+---
+
 ## Request: detailed signature card elements as an opt-in experiment (COMPLETE)
 
 - User: many categories lack elements/designs and some don't suit — make new
