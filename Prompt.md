@@ -1,5 +1,24 @@
 # Prompt.md — current request log
 
+## Request: revert 3a93fed1..HEAD — keep CurioCategoryCard, drop TopicShareCard (COMPLETE)
+
+- Discarded the half-finished conflicted `git revert 3a93fed1` that was in
+  the codespace (working tree + sequencer state).
+- Reset main to `7e2cef03` (3a93fed1's parent), removing 3a93fed1,
+  4c43ce85, and the merged PR block (c0e18b5c, c252b9a4, 9ba38f0b) from
+  history.
+- Re-applied CurioCategoryCard.kt from the old HEAD (9ba38f0b) as a new
+  commit (`2d50b395`) — the category signature card refinement is kept,
+  including the 4c43ce85 duplicate-annotation fix.
+- TopicShareCard.kt is back to its pre-3a93fed1 version (signature redesign
+  dropped).
+- Verified: diff vs old HEAD touches only TopicShareCard.kt; diff vs reset
+  base touches only CurioCategoryCard.kt.
+- Force-pushed to origin/main (user approved reset + push). Working tree
+  clean.
+
+---
+
 ## Request: v293 — category picker topic count removal + database restart fix (COMPLETE)
 
 - CATEGORY COUNT REMOVED: CurioCategoryCard no longer shows the "N topics"
