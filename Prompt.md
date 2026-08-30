@@ -1,5 +1,34 @@
 # Prompt.md — current request log
 
+## Request: chemistry hexagon, thin song bars, FOOD rework + detailed Books/Films/Games (COMPLETE)
+
+- User follow-up: chemistry WITHOUT deepen still looked weird/broken;
+  give Books (and etc.) the detailed look too; make the SONGS soundwave
+  bars thinner; ask/analyze which else needs changes.
+- ask_user answers: All three (Books, Films AND Games) get detailed
+  designs; also rework FOOD.
+- Base CHEMISTRY rebuilt: replaced the scattered periodic tiles + broken
+  flask with the CONNECTED hexagon lattice (honeycomb of benzene rings
+  sharing edges, hero benzene with double bonds + glow, bond to lattice,
+  water molecule) — same concept the user liked in the detailed set, in
+  the base line-art style with a deep indigo-blue gradient.
+- Base SONGS: waveform bars thinned w*0.016 → w*0.009.
+- Base FOOD: reworked into a cohesive overhead table — warm linen
+  gradient, hero plate centered-left with food + herbs, steaming bowl on
+  the same table, steam wisps, basil leaves, crumbs.
+- DETAILED set: removed the FILMS/BOOKS/GAMES early-return so all three
+  now get rich detailed designs when the experiment is ON:
+  - BOOKS: lamp-lit cozy library — stacked books with gold spine bands on
+    a shelf, open book on a desk, gold leaf ornament.
+  - FILMS: cinema — marquee light string, velvet curtain drapes, film
+    reel with sprocket holes, projector beam, film strip fragment.
+  - GAMES: neon arcade — perspective neon grid floor, glowing coin,
+    controller with buttons, floating pixel blocks.
+- Verified: stack brace/paren check OK, raw braces 861/861, detailed cat
+  branches 38, early-return gone. Changelog bullet added.
+
+---
+
 ## Request: audit + polish drawn signature-card designs (base first, then detailed) (COMPLETE)
 
 - User: many drawn designs are broken/random/not detailed enough in BOTH
