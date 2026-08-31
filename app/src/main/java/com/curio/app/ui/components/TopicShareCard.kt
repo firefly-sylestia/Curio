@@ -4029,40 +4029,65 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF1E160E), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF3A2A18), Color(0xFF1E160E), Color(0xFF0E0A05))), size = Size(w, h))
-                // Warm desk-lamp glow, top-left
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.22f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.42f, center = Offset(w * 0.20f, h * 0.14f))
-                // Bookshelf line
-                drawLine(Color(0xFF8A6B4A).copy(alpha = 0.40f), Offset(w * 0.06f, h * 0.30f), Offset(w * 0.94f, h * 0.30f), strokeWidth = 2f)
-                // Stacked books on the shelf — varied heights + spines
+                // Warm lamp glow, top-left — a reading nook
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.26f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.48f, center = Offset(w * 0.22f, h * 0.12f))
+                // Floor lamp — pole + shade with a warm halo, left
+                drawLine(Color(0xFF6A5638).copy(alpha = 0.7f), Offset(w * 0.10f, h * 0.10f), Offset(w * 0.10f, h * 0.62f), strokeWidth = 2f)
+                drawLine(Color(0xFF6A5638).copy(alpha = 0.5f), Offset(w * 0.07f, h * 0.62f), Offset(w * 0.13f, h * 0.62f), strokeWidth = 2f)
+                drawPath(Path().apply {
+                    moveTo(w * 0.06f, h * 0.10f)
+                    quadraticBezierTo(w * 0.10f, h * 0.05f, w * 0.14f, h * 0.10f)
+                    lineTo(w * 0.12f, h * 0.14f)
+                    lineTo(w * 0.08f, h * 0.14f)
+                    close()
+                }, Color(0xFFF2C879).copy(alpha = 0.85f))
+                // Top shelf line with books
+                drawLine(Color(0xFF8A6B4A).copy(alpha = 0.40f), Offset(w * 0.28f, h * 0.30f), Offset(w * 0.94f, h * 0.30f), strokeWidth = 2f)
                 val books = listOf(
-                    Triple(w * 0.10f, w * 0.11f, Color(0xFFC94F4F)), Triple(w * 0.22f, w * 0.09f, Color(0xFF4F7AC9)),
-                    Triple(w * 0.32f, w * 0.13f, Color(0xFF4FA86B)), Triple(w * 0.46f, w * 0.10f, Color(0xFFC9A24F)),
-                    Triple(w * 0.57f, w * 0.12f, Color(0xFF8A5AC9)), Triple(w * 0.70f, w * 0.09f, Color(0xFFC97A4F)),
-                    Triple(w * 0.80f, w * 0.14f, Color(0xFF4FA8A8)), Triple(w * 0.92f, w * 0.10f, Color(0xFFC94F8A))
+                    Triple(w * 0.32f, w * 0.10f, Color(0xFFC94F4F)), Triple(w * 0.43f, w * 0.08f, Color(0xFF4F7AC9)),
+                    Triple(w * 0.52f, w * 0.12f, Color(0xFF4FA86B)), Triple(w * 0.65f, w * 0.09f, Color(0xFFC9A24F)),
+                    Triple(w * 0.75f, w * 0.11f, Color(0xFF8A5AC9)), Triple(w * 0.87f, w * 0.08f, Color(0xFFC97A4F))
                 )
                 books.forEachIndexed { i, (bx, bw, col) ->
-                    val bh = h * 0.28f + (i % 3) * h * 0.03f
+                    val bh = h * 0.26f + (i % 3) * h * 0.03f
                     drawRoundRect(col.copy(alpha = 0.85f), Offset(bx, h * 0.30f - bh), Size(bw, bh), CornerRadius(1.5f))
-                    // Gold spine band near the top
                     drawLine(Color(0xFFF2C879).copy(alpha = 0.6f), Offset(bx + w * 0.004f, h * 0.30f - bh + w * 0.008f), Offset(bx + bw - w * 0.004f, h * 0.30f - bh + w * 0.008f), strokeWidth = 1.2f)
                 }
-                // Open book on the desk, bottom — page lines + spread
-                val obx = w * 0.50f; val oby = h * 0.78f
+                // Lower shelf — shorter books + a small stack
+                drawLine(Color(0xFF8A6B4A).copy(alpha = 0.35f), Offset(w * 0.28f, h * 0.52f), Offset(w * 0.94f, h * 0.52f), strokeWidth = 1.6f)
+                listOf(
+                    Triple(w * 0.34f, w * 0.09f, Color(0xFF4FA8A8)), Triple(w * 0.44f, w * 0.07f, Color(0xFFC94F8A)),
+                    Triple(w * 0.52f, w * 0.10f, Color(0xFF4F7AC9)), Triple(w * 0.63f, w * 0.08f, Color(0xFFC9A24F))
+                ).forEachIndexed { i, (bx, bw, col) ->
+                    val bh = h * 0.16f + (i % 2) * h * 0.02f
+                    drawRoundRect(col.copy(alpha = 0.80f), Offset(bx, h * 0.52f - bh), Size(bw, bh), CornerRadius(1.5f))
+                }
+                // Open book on the desk, bottom-right — page lines + spread
+                val obx = w * 0.66f; val oby = h * 0.80f
                 drawPath(Path().apply {
-                    moveTo(obx - w * 0.26f, oby)
-                    quadraticBezierTo(obx, oby - h * 0.06f, obx + w * 0.26f, oby)
-                    lineTo(obx + w * 0.24f, oby + h * 0.10f)
-                    quadraticBezierTo(obx, oby + h * 0.04f, obx - w * 0.24f, oby + h * 0.10f)
+                    moveTo(obx - w * 0.24f, oby)
+                    quadraticBezierTo(obx, oby - h * 0.05f, obx + w * 0.24f, oby)
+                    lineTo(obx + w * 0.22f, oby + h * 0.09f)
+                    quadraticBezierTo(obx, oby + h * 0.035f, obx - w * 0.22f, oby + h * 0.09f)
                     close()
                 }, Color(0xFFF2E4C8).copy(alpha = 0.30f))
-                drawLine(Color(0xFF8A6B4A).copy(alpha = 0.50f), Offset(obx, oby - h * 0.03f), Offset(obx, oby + h * 0.07f), strokeWidth = 1f)
-                for (i in 0 until 4) {
-                    drawLine(Color(0xFF8A6B4A).copy(alpha = 0.25f), Offset(obx - w * 0.20f, oby - h * 0.02f + i * h * 0.018f), Offset(obx - w * 0.02f, oby - h * 0.02f + i * h * 0.018f), strokeWidth = 0.7f)
-                    drawLine(Color(0xFF8A6B4A).copy(alpha = 0.25f), Offset(obx + w * 0.02f, oby - h * 0.02f + i * h * 0.018f), Offset(obx + w * 0.20f, oby - h * 0.02f + i * h * 0.018f), strokeWidth = 0.7f)
+                drawLine(Color(0xFF8A6B4A).copy(alpha = 0.50f), Offset(obx, oby - h * 0.025f), Offset(obx, oby + h * 0.06f), strokeWidth = 1f)
+                for (i in 0 until 3) {
+                    drawLine(Color(0xFF8A6B4A).copy(alpha = 0.25f), Offset(obx - w * 0.18f, oby - h * 0.015f + i * h * 0.016f), Offset(obx - w * 0.02f, oby - h * 0.015f + i * h * 0.016f), strokeWidth = 0.7f)
+                    drawLine(Color(0xFF8A6B4A).copy(alpha = 0.25f), Offset(obx + w * 0.02f, oby - h * 0.015f + i * h * 0.016f), Offset(obx + w * 0.18f, oby - h * 0.015f + i * h * 0.016f), strokeWidth = 0.7f)
                 }
+                // Armchair silhouette, bottom-left
+                drawPath(Path().apply {
+                    moveTo(w * 0.10f, h * 0.70f)
+                    quadraticBezierTo(w * 0.16f, h * 0.68f, w * 0.24f, h * 0.70f)
+                    lineTo(w * 0.27f, h * 0.82f)
+                    lineTo(w * 0.08f, h * 0.82f)
+                    close()
+                }, Color(0xFF8A4A3A).copy(alpha = 0.60f))
+                drawLine(Color(0xFF6A3A2E).copy(alpha = 0.55f), Offset(w * 0.08f, h * 0.82f), Offset(w * 0.27f, h * 0.82f), strokeWidth = 2f)
                 // Gold leaf ornament, top-right
-                drawCircle(Color(0xFFF2C879).copy(alpha = 0.18f), w * 0.05f, Offset(w * 0.84f, h * 0.10f), style = Stroke(1.2f))
-                drawCircle(Color(0xFFF2C879).copy(alpha = 0.12f), w * 0.03f, Offset(w * 0.84f, h * 0.10f))
+                drawCircle(Color(0xFFF2C879).copy(alpha = 0.18f), w * 0.05f, Offset(w * 0.90f, h * 0.08f), style = Stroke(1.2f))
+                drawCircle(Color(0xFFF2C879).copy(alpha = 0.12f), w * 0.03f, Offset(w * 0.90f, h * 0.08f))
                 drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF060402).copy(alpha = 0.5f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFF2C879), badgeInk = Color(0xFF1E160E),
@@ -4084,38 +4109,40 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                     drawCircle(if (i % 2 == 0) Color(0xFFFFD98A) else Color(0xFFFF6B6B), w * 0.008f, Offset(lx, h * 0.06f))
                 }
                 drawLine(Color(0xFF5E3A3A).copy(alpha = 0.6f), Offset(w * 0.04f, h * 0.055f), Offset(w * 0.96f, h * 0.055f), strokeWidth = 0.8f)
-                // Velvet curtain, bottom — two drapes with a center gap
-                drawPath(Path().apply {
-                    moveTo(0f, h * 0.80f)
-                    quadraticBezierTo(w * 0.30f, h * 0.74f, w * 0.44f, h * 0.82f)
-                    quadraticBezierTo(w * 0.50f, h * 0.86f, w * 0.56f, h * 0.82f)
-                    quadraticBezierTo(w * 0.70f, h * 0.74f, w, h * 0.80f)
-                    lineTo(w, h)
-                    lineTo(0f, h)
-                    close()
-                }, Color(0xFF6B1A22).copy(alpha = 0.55f))
-                drawLine(Color(0xFF8A2A30).copy(alpha = 0.5f), Offset(w * 0.50f, h * 0.80f), Offset(w * 0.50f, h), strokeWidth = 2f)
+                // Velvet curtains framing BOTH sides
+                listOf(0f, 1f).forEach { side ->
+                    val path = Path().apply {
+                        moveTo(side * w, 0f)
+                        quadraticBezierTo(side * w + (if (side == 0f) 1f else -1f) * w * 0.10f, h * 0.5f, side * w, h)
+                        lineTo(side * w, 0f)
+                        close()
+                    }
+                    drawPath(path, Color(0xFF6B1A22).copy(alpha = 0.55f))
+                    // Curtain seam highlight
+                    drawLine(Color(0xFF8A2A30).copy(alpha = 0.4f), Offset(side * w + (if (side == 0f) 1f else -1f) * w * 0.10f, h * 0.2f), Offset(side * w + (if (side == 0f) 1f else -1f) * w * 0.08f, h * 0.8f), strokeWidth = 1f)
+                }
+                // Screen glow, centre
+                drawRect(brush = Brush.verticalGradient(listOf(Color(0xFFFFE8B8).copy(alpha = 0.06f), Color(0xFF120A0E))), topLeft = Offset(w * 0.28f, h * 0.16f), size = Size(w * 0.44f, h * 0.40f))
+                drawRect(Color(0xFFD9B45B).copy(alpha = 0.12f), Offset(w * 0.28f, h * 0.16f), Size(w * 0.44f, h * 0.40f), style = Stroke(1f))
                 // Film reel, right — circle with sprocket holes
-                val rcx = w * 0.80f; val rcy = h * 0.38f
-                drawCircle(Color(0xFFD9B45B).copy(alpha = 0.40f), w * 0.09f, Offset(rcx, rcy), style = Stroke(1.6f))
-                drawCircle(Color(0xFFD9B45B).copy(alpha = 0.35f), w * 0.035f, Offset(rcx, rcy))
+                val rcx = w * 0.84f; val rcy = h * 0.68f
+                drawCircle(Color(0xFFD9B45B).copy(alpha = 0.40f), w * 0.08f, Offset(rcx, rcy), style = Stroke(1.6f))
+                drawCircle(Color(0xFFD9B45B).copy(alpha = 0.35f), w * 0.03f, Offset(rcx, rcy))
                 for (i in 0 until 8) {
                     val a = Math.toRadians(i * 45.0).toFloat()
-                    drawCircle(Color(0xFFD9B45B).copy(alpha = 0.45f), 2f, Offset(rcx + kotlin.math.cos(a) * w * 0.06f, rcy + kotlin.math.sin(a) * w * 0.06f))
+                    drawCircle(Color(0xFFD9B45B).copy(alpha = 0.45f), 1.8f, Offset(rcx + kotlin.math.cos(a) * w * 0.055f, rcy + kotlin.math.sin(a) * w * 0.055f))
                 }
                 // Projector beam from the left
                 drawPath(Path().apply {
-                    moveTo(w * 0.02f, h * 0.30f)
-                    lineTo(w * 0.34f, h * 0.12f)
-                    lineTo(w * 0.34f, h * 0.22f)
-                    lineTo(w * 0.02f, h * 0.40f)
+                    moveTo(w * 0.12f, h * 0.22f)
+                    lineTo(w * 0.40f, h * 0.10f)
+                    lineTo(w * 0.40f, h * 0.18f)
+                    lineTo(w * 0.12f, h * 0.30f)
                     close()
                 }, Color(0xFFFFE8B8).copy(alpha = 0.08f))
-                // Film strip fragment, left
-                drawRoundRect(Color(0xFFC8C4BC).copy(alpha = 0.30f), Offset(w * 0.10f, h * 0.50f), Size(w * 0.045f, h * 0.26f), CornerRadius(2f))
-                for (i in 0 until 4) {
-                    drawRoundRect(Color(0xFF120A0E), Offset(w * 0.115f, h * 0.53f + i * h * 0.055f), Size(w * 0.028f, h * 0.03f), CornerRadius(1.5f))
-                }
+                // Red carpet, bottom
+                drawRect(Color(0xFF8B1A1A).copy(alpha = 0.35f), Offset(0f, h * 0.88f), Size(w, h * 0.12f))
+                drawLine(Color(0xFFC94F4F).copy(alpha = 0.4f), Offset(0f, h * 0.88f), Offset(w, h * 0.88f), strokeWidth = 1f)
                 drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF040203).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF6B6B), badgeInk = Color(0xFF120A0E),
@@ -4146,15 +4173,73 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawCircle(Color(0xFFE8C84F), w * 0.045f, Offset(ccx, ccy), style = Stroke(1.6f))
                 drawCircle(Color(0xFFE8C84F), w * 0.03f, Offset(ccx, ccy))
                 drawLine(Color(0xFFFFF3C4).copy(alpha = 0.8f), Offset(ccx - w * 0.008f, ccy), Offset(ccx + w * 0.008f, ccy), strokeWidth = 0.8f)
-                // Controller, bottom-left
-                val gx = w * 0.26f; val gy = h * 0.62f
-                drawRoundRect(Color(0xFF3A3A6A).copy(alpha = 0.85f), Offset(gx - w * 0.16f, gy - w * 0.035f), Size(w * 0.32f, w * 0.07f), CornerRadius(6f))
-                drawCircle(Color(0xFF00FF88).copy(alpha = 0.9f), w * 0.016f, Offset(gx - w * 0.05f, gy))
-                drawCircle(Color(0xFFFF5FA2).copy(alpha = 0.9f), w * 0.016f, Offset(gx + w * 0.05f, gy))
-                drawLine(Color(0xFF00CCFF).copy(alpha = 0.7f), Offset(gx - w * 0.10f, gy), Offset(gx + w * 0.10f, gy), strokeWidth = 0.8f)
-                // Pixel-art hearts/blocks floating top-right
-                listOf(Offset(w * 0.72f, h * 0.20f), Offset(w * 0.84f, h * 0.30f), Offset(w * 0.74f, h * 0.44f)).forEach { p ->
-                    drawRoundRect(Color(0xFF00CCFF).copy(alpha = 0.45f), Offset(p.x - w * 0.016f, p.y - w * 0.016f), Size(w * 0.032f, w * 0.032f), CornerRadius(3f), style = Stroke(1.2f))
+                // Controller, bottom-left — body + D-pad + 4 buttons
+                val gx = w * 0.30f; val gy = h * 0.66f
+                drawRoundRect(Color(0xFF3A3A6A).copy(alpha = 0.85f), Offset(gx - w * 0.18f, gy - w * 0.035f), Size(w * 0.36f, w * 0.08f), CornerRadius(6f))
+                // D-pad cross
+                drawLine(Color(0xFF00CCFF).copy(alpha = 0.9f), Offset(gx - w * 0.12f, gy - w * 0.012f), Offset(gx - w * 0.12f, gy + w * 0.012f), strokeWidth = 1.6f)
+                drawLine(Color(0xFF00CCFF).copy(alpha = 0.9f), Offset(gx - w * 0.135f, gy), Offset(gx - w * 0.105f, gy), strokeWidth = 1.6f)
+                // Four action buttons (A/B/X/Y)
+                drawCircle(Color(0xFF00FF88).copy(alpha = 0.9f), w * 0.014f, Offset(gx - w * 0.02f, gy - w * 0.012f))
+                drawCircle(Color(0xFFFF5FA2).copy(alpha = 0.9f), w * 0.014f, Offset(gx + w * 0.02f, gy - w * 0.012f))
+                drawCircle(Color(0xFFF2C879).copy(alpha = 0.9f), w * 0.014f, Offset(gx - w * 0.02f, gy + w * 0.012f))
+                drawCircle(Color(0xFF8FD0FF).copy(alpha = 0.9f), w * 0.014f, Offset(gx + w * 0.02f, gy + w * 0.012f))
+                // Pixel easter eggs top-right: mushroom, star, ghost, heart
+                // Mushroom — red cap + white dots + cream stem
+                val mx = w * 0.72f; val my = h * 0.16f
+                drawPath(Path().apply {
+                    moveTo(mx, my - w * 0.022f)
+                    quadraticBezierTo(mx - w * 0.028f, my - w * 0.030f, mx - w * 0.022f, my - w * 0.012f)
+                    lineTo(mx - w * 0.022f, my - w * 0.008f)
+                    lineTo(mx + w * 0.022f, my - w * 0.008f)
+                    lineTo(mx + w * 0.022f, my - w * 0.012f)
+                    quadraticBezierTo(mx + w * 0.028f, my - w * 0.030f, mx, my - w * 0.022f)
+                    close()
+                }, Color(0xFFD93B3B).copy(alpha = 0.9f))
+                drawRect(Color(0xFFF2D9A8), Offset(mx - w * 0.008f, my - w * 0.008f), Size(w * 0.016f, w * 0.016f))
+                drawCircle(Color.White.copy(alpha = 0.8f), w * 0.005f, Offset(mx - w * 0.014f, my - w * 0.022f))
+                drawCircle(Color.White.copy(alpha = 0.8f), w * 0.005f, Offset(mx + w * 0.012f, my - w * 0.018f))
+                // Star — 4-point sparkle
+                val stx = w * 0.84f; val sty = h * 0.14f
+                drawPath(Path().apply {
+                    moveTo(stx, sty - w * 0.020f)
+                    lineTo(stx + w * 0.008f, sty - w * 0.008f)
+                    lineTo(stx + w * 0.020f, sty)
+                    lineTo(stx + w * 0.008f, sty + w * 0.008f)
+                    lineTo(stx, sty + w * 0.020f)
+                    lineTo(stx - w * 0.008f, sty + w * 0.008f)
+                    lineTo(stx - w * 0.020f, sty)
+                    lineTo(stx - w * 0.008f, sty - w * 0.008f)
+                    close()
+                }, Color(0xFFF2C879).copy(alpha = 0.9f))
+                // Ghost — white dome + eyes
+                val ghx = w * 0.76f; val ghy = h * 0.30f
+                drawPath(Path().apply {
+                    moveTo(ghx - w * 0.014f, ghy)
+                    quadraticBezierTo(ghx - w * 0.016f, ghy - w * 0.018f, ghx, ghy - w * 0.018f)
+                    quadraticBezierTo(ghx + w * 0.016f, ghy - w * 0.018f, ghx + w * 0.014f, ghy)
+                    lineTo(ghx + w * 0.014f, ghy + w * 0.016f)
+                    lineTo(ghx + w * 0.008f, ghy + w * 0.010f)
+                    lineTo(ghx, ghy + w * 0.016f)
+                    lineTo(ghx - w * 0.008f, ghy + w * 0.010f)
+                    lineTo(ghx - w * 0.014f, ghy + w * 0.016f)
+                    close()
+                }, Color.White.copy(alpha = 0.75f))
+                drawCircle(Color(0xFF0A0A1E), w * 0.0035f, Offset(ghx - w * 0.006f, ghy - w * 0.006f))
+                drawCircle(Color(0xFF0A0A1E), w * 0.0035f, Offset(ghx + w * 0.006f, ghy - w * 0.006f))
+                // Heart — two bumps
+                val hx = w * 0.88f; val hy = h * 0.26f
+                drawPath(Path().apply {
+                    moveTo(hx, hy + w * 0.012f)
+                    quadraticBezierTo(hx - w * 0.014f, hy - w * 0.004f, hx - w * 0.008f, hy - w * 0.012f)
+                    quadraticBezierTo(hx - w * 0.002f, hy - w * 0.014f, hx, hy - w * 0.008f)
+                    quadraticBezierTo(hx + w * 0.002f, hy - w * 0.014f, hx + w * 0.008f, hy - w * 0.012f)
+                    quadraticBezierTo(hx + w * 0.014f, hy - w * 0.004f, hx, hy + w * 0.012f)
+                    close()
+                }, Color(0xFFFF5FA2).copy(alpha = 0.85f))
+                // Floating pixel blocks between the easter eggs
+                listOf(Offset(w * 0.64f, h * 0.30f), Offset(w * 0.90f, h * 0.40f)).forEach { p ->
+                    drawRoundRect(Color(0xFF00CCFF).copy(alpha = 0.35f), Offset(p.x - w * 0.012f, p.y - w * 0.012f), Size(w * 0.024f, w * 0.024f), CornerRadius(3f), style = Stroke(1f))
                 }
                 drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF02020A).copy(alpha = 0.6f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
@@ -4170,75 +4255,120 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ARTISTS" -> SignatureDesign(
             bg = Color(0xFF120D2E), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Deep indigo stage, lit from above
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF2A1E5C), Color(0xFF120D2E), Color(0xFF0A0718))), size = Size(w, h))
-                // One big warm spotlight, slightly off-center
+                // Deep indigo concert hall, lit from above
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF2A1E5C), Color(0xFF141030), Color(0xFF0A0718))), size = Size(w, h))
+                // ── Light-rig truss with colored stage lights across the top ──
+                val rigY = h * 0.075f
+                drawLine(Color(0xFF6E5FA8).copy(alpha = 0.55f), Offset(w * 0.06f, rigY), Offset(w * 0.94f, rigY), strokeWidth = 2f)
+                val rigCols = listOf(Color(0xFFF2C879), Color(0xFF9C8BFF), Color(0xFFFF9AB8), Color(0xFF6FE3C1), Color(0xFF9C8BFF))
+                listOf(0.12f, 0.28f, 0.44f, 0.60f, 0.76f, 0.88f).forEachIndexed { i, fx ->
+                    val lx = w * fx
+                    val col = rigCols[i % rigCols.size]
+                    // faint beam cone from each fixture
+                    val beam = Path().apply {
+                        moveTo(lx, rigY)
+                        lineTo(lx - w * 0.07f, h * 0.55f)
+                        lineTo(lx + w * 0.07f, h * 0.55f)
+                        close()
+                    }
+                    drawPath(beam, col.copy(alpha = 0.05f))
+                    drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.55f), col.copy(alpha = 0f))), radius = w * 0.028f, center = Offset(lx, rigY))
+                    drawCircle(col.copy(alpha = 0.85f), w * 0.006f, Offset(lx, rigY))
+                }
+                // ── Main warm spotlight with a cool cross-beam ──
                 val lx = w * 0.50f
                 val beam = Path().apply {
                     moveTo(lx, -h * 0.02f)
-                    lineTo(lx - w * 0.20f, h * 0.66f)
-                    lineTo(lx + w * 0.22f, h * 0.66f)
+                    lineTo(lx - w * 0.22f, h * 0.68f)
+                    lineTo(lx + w * 0.24f, h * 0.68f)
                     close()
                 }
-                drawPath(beam, Color(0xFFF2C879).copy(alpha = 0.09f))
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.30f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.20f, center = Offset(lx, h * 0.58f))
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.12f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.34f, center = Offset(lx, h * 0.50f))
+                drawPath(beam, Color(0xFFF2C879).copy(alpha = 0.10f))
+                drawPath(Path().apply {
+                    moveTo(w * 0.30f, -h * 0.02f)
+                    lineTo(w * 0.08f, h * 0.62f)
+                    lineTo(w * 0.20f, h * 0.64f)
+                    close()
+                }, Color(0xFF9C8BFF).copy(alpha = 0.07f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.32f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.20f, center = Offset(lx, h * 0.58f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.13f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.36f, center = Offset(lx, h * 0.50f))
                 // Cool counter-glow from the left
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF9C8BFF).copy(alpha = 0.14f), Color(0xFF9C8BFF).copy(alpha = 0f))), radius = w * 0.28f, center = Offset(w * 0.16f, h * 0.40f))
-                // Stage floor
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF8F7BFF).copy(alpha = 0.0f), Color(0xFF8F7BFF).copy(alpha = 0.20f))), topLeft = Offset(0f, h * 0.86f), size = Size(w, h * 0.14f))
-                drawLine(Color(0xFFB9A8FF).copy(alpha = 0.45f), Offset(w * 0.04f, h * 0.86f), Offset(w * 0.96f, h * 0.86f), strokeWidth = 1.2f)
-                // Crowd silhouettes along the bottom
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 16) {
-                    val hx = w * 0.04f + i * w * 0.062f
-                    val r = w * 0.012f + (i % 3) * w * 0.002f
-                    drawCircle(Color(0xFF0A0718).copy(alpha = 0.85f), r, Offset(hx, h * 0.90f - r * 0.6f))
-                    drawRoundRect(Color(0xFF0A0718).copy(alpha = 0.85f), topLeft = Offset(hx - r * 0.7f, h * 0.90f - r * 0.4f), size = Size(r * 1.4f, r * 1.4f), cornerRadius = CornerRadius(2f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF9C8BFF).copy(alpha = 0.16f), Color(0xFF9C8BFF).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.16f, h * 0.38f))
+                // ── Stage floor with warm edge glow + sound-wave arcs ──
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF8F7BFF).copy(alpha = 0.0f), Color(0xFF8F7BFF).copy(alpha = 0.22f))), topLeft = Offset(0f, h * 0.84f), size = Size(w, h * 0.16f))
+                drawLine(Color(0xFFF2C879).copy(alpha = 0.18f), Offset(w * 0.04f, h * 0.84f), Offset(w * 0.96f, h * 0.84f), strokeWidth = 3f)
+                drawLine(Color(0xFFB9A8FF).copy(alpha = 0.50f), Offset(w * 0.04f, h * 0.84f), Offset(w * 0.96f, h * 0.84f), strokeWidth = 1.4f)
+                listOf(0.30f, 0.22f, 0.15f).forEachIndexed { i, r ->
+                    drawArc(Color(0xFF9C8BFF).copy(alpha = 0.16f - i * 0.04f), -70f, 60f, false, Offset(w * 0.16f - r * w * 0.5f, h * 0.70f), Size(w * r, w * r), style = Stroke(1f))
                 }
-                // Singer silhouette at the mic
-                val sx = w * 0.42f; val sy = h * 0.62f
-                drawCircle(Color(0xFF1A1238), w * 0.030f, Offset(sx, sy - h * 0.05f))
-                drawLine(Color(0xFF1A1238), Offset(sx, sy - h * 0.02f), Offset(sx, sy + h * 0.10f), strokeWidth = 3.4f)
-                drawLine(Color(0xFF1A1238), Offset(sx, sy - h * 0.01f), Offset(sx - w * 0.045f, sy + h * 0.03f), strokeWidth = 2.6f)
-                drawLine(Color(0xFF1A1238), Offset(sx, sy - h * 0.01f), Offset(sx + w * 0.045f, sy + h * 0.04f), strokeWidth = 2.6f)
-                // Mic stand with proper ball head + grill
+                // ── Crowd silhouettes, some with raised hands ──
+                val s = (w * 1000 + h).toInt()
+                for (i in 0 until 18) {
+                    val hx = w * 0.03f + i * w * 0.055f
+                    val r = w * 0.011f + (i % 3) * w * 0.002f
+                    drawCircle(Color(0xFF0A0718).copy(alpha = 0.88f), r, Offset(hx, h * 0.90f - r * 0.6f))
+                    drawRoundRect(Color(0xFF0A0718).copy(alpha = 0.88f), topLeft = Offset(hx - r * 0.7f, h * 0.90f - r * 0.4f), size = Size(r * 1.4f, r * 1.4f), cornerRadius = CornerRadius(2f))
+                    if (i % 4 == 1) {
+                        drawLine(Color(0xFF0A0718).copy(alpha = 0.80f), Offset(hx - r * 0.6f, h * 0.90f - r * 0.4f), Offset(hx - r * 0.9f, h * 0.90f - r * 1.5f), strokeWidth = 1.1f)
+                        drawCircle(Color(0xFF0A0718).copy(alpha = 0.80f), r * 0.30f, Offset(hx - r * 0.9f, h * 0.90f - r * 1.5f))
+                    }
+                    if (i % 5 == 2) {
+                        drawLine(Color(0xFF0A0718).copy(alpha = 0.80f), Offset(hx + r * 0.6f, h * 0.90f - r * 0.4f), Offset(hx + r * 1.0f, h * 0.90f - r * 1.6f), strokeWidth = 1.1f)
+                        drawCircle(Color(0xFF0A0718).copy(alpha = 0.80f), r * 0.30f, Offset(hx + r * 1.0f, h * 0.90f - r * 1.6f))
+                    }
+                }
+                // ── Singer with warm rim-light halo at the ball-head mic ──
+                val sx = w * 0.42f; val sy = h * 0.60f
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.35f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.09f, center = Offset(sx, sy - h * 0.05f))
+                drawCircle(Color(0xFF241A4A), w * 0.030f, Offset(sx, sy - h * 0.05f))
+                drawLine(Color(0xFF241A4A), Offset(sx, sy - h * 0.02f), Offset(sx, sy + h * 0.10f), strokeWidth = 3.4f)
+                drawLine(Color(0xFF241A4A), Offset(sx, sy - h * 0.01f), Offset(sx - w * 0.045f, sy + h * 0.03f), strokeWidth = 2.6f)
+                drawLine(Color(0xFF241A4A), Offset(sx, sy - h * 0.01f), Offset(sx + w * 0.045f, sy + h * 0.04f), strokeWidth = 2.6f)
+                // Mic stand
                 val mx = w * 0.56f
-                drawLine(Color(0xFFEAE4FF).copy(alpha = 0.75f), Offset(mx, sy - h * 0.07f), Offset(mx, h * 0.88f), strokeWidth = 1.6f)
-                drawLine(Color(0xFFEAE4FF).copy(alpha = 0.55f), Offset(mx - w * 0.020f, h * 0.88f), Offset(mx + w * 0.020f, h * 0.88f), strokeWidth = 1.6f)
-                drawLine(Color(0xFFEAE4FF).copy(alpha = 0.40f), Offset(mx - w * 0.014f, h * 0.90f), Offset(mx + w * 0.014f, h * 0.90f), strokeWidth = 1.2f)
-                drawCircle(Color(0xFFEAE4FF).copy(alpha = 0.85f), w * 0.020f, Offset(mx, sy - h * 0.09f))
+                drawLine(Color(0xFFEAE4FF).copy(alpha = 0.75f), Offset(mx, sy - h * 0.07f), Offset(mx, h * 0.86f), strokeWidth = 1.6f)
+                drawLine(Color(0xFFEAE4FF).copy(alpha = 0.55f), Offset(mx - w * 0.020f, h * 0.86f), Offset(mx + w * 0.020f, h * 0.86f), strokeWidth = 1.6f)
+                drawLine(Color(0xFFEAE4FF).copy(alpha = 0.40f), Offset(mx - w * 0.014f, h * 0.88f), Offset(mx + w * 0.014f, h * 0.88f), strokeWidth = 1.2f)
+                drawCircle(Color(0xFFEAE4FF).copy(alpha = 0.90f), w * 0.020f, Offset(mx, sy - h * 0.09f))
                 for (i in 0 until 4) {
                     val a = Math.toRadians((90.0 + i * 24)).toFloat()
                     drawLine(Color(0xFF120D2E).copy(alpha = 0.5f), Offset(mx + kotlin.math.cos(a) * w * 0.010f, sy - h * 0.09f + kotlin.math.sin(a) * w * 0.010f), Offset(mx + kotlin.math.cos(a) * w * 0.020f, sy - h * 0.09f + kotlin.math.sin(a) * w * 0.020f), strokeWidth = 0.8f)
                 }
-                // Confetti falling in the beam
+                // ── Confetti + sparkles in the beams ──
                 val cols = listOf(Color(0xFFF2C879), Color(0xFF9C8BFF), Color(0xFFFF9AB8), Color(0xFF6FE3C1))
-                for (i in 0 until 26) {
-                    val x = w * 0.24f + ((s * (i+1) * 7919) % 100) / 100f * w * 0.52f
-                    val y = h * 0.12f + ((s * (i+1) * 6271) % 100) / 100f * h * 0.6f
-                    drawCircle(cols[i % 4].copy(alpha = 0.40f), 1.2f + (i % 3) * 0.5f, Offset(x, y))
-                    if (i % 5 == 0) drawLine(cols[i % 4].copy(alpha = 0.22f), Offset(x, y - 3f), Offset(x + 2.5f, y + 1.5f), strokeWidth = 1f)
+                for (i in 0 until 30) {
+                    val x = w * 0.22f + ((s * (i+1) * 7919) % 100) / 100f * w * 0.56f
+                    val y = h * 0.10f + ((s * (i+1) * 6271) % 100) / 100f * h * 0.62f
+                    drawCircle(cols[i % 4].copy(alpha = 0.42f), 1.2f + (i % 3) * 0.5f, Offset(x, y))
+                    if (i % 5 == 0) drawLine(cols[i % 4].copy(alpha = 0.25f), Offset(x, y - 3f), Offset(x + 2.5f, y + 1.5f), strokeWidth = 1f)
+                    if (i % 7 == 3) {
+                        drawLine(Color.White.copy(alpha = 0.5f), Offset(x - 2.5f, y), Offset(x + 2.5f, y), strokeWidth = 0.8f)
+                        drawLine(Color.White.copy(alpha = 0.5f), Offset(x, y - 2.5f), Offset(x, y + 2.5f), strokeWidth = 0.8f)
+                    }
                 }
-                // Vignette
+                // Haze + vignette
                 drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF050308).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.42f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF9C8BFF), badgeInk = Color(0xFF120D2E),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
-            titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF3EFFF),
+            titleFont = BungeeFontFamily, titleSize = 27.sp, titleLineHeight = 30.sp, titleColor = Color(0xFFF3EFFF),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF9C8BFF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFDCD3FA).copy(alpha = 0.90f),
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF9C8BFF).copy(alpha = 0.72f)
         )
-        // ═══ ALBUMS — vinyl on a turntable under warm amber light ═══
+        // ═══ ALBUMS — vinyl spinning on a turntable under warm amber light ═══
         cat == "ALBUMS" -> SignatureDesign(
             bg = Color(0xFF171014), cornerRadius = 8f,
+            layout = SignatureLayout.BOTTOM,
             drawBackground = { w, h ->
-                drawRect(Brush.radialGradient(listOf(Color(0xFF3A2320), Color(0xFF171014), Color(0xFF0B0709)), center = Offset(w * 0.30f, h * 0.40f), radius = w * 0.85f), size = Size(w, h))
-                // Warm amber glow behind the record
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8A84C).copy(alpha = 0.28f), Color(0xFFE8A84C).copy(alpha = 0f))), radius = w * 0.42f, center = Offset(w * 0.30f, h * 0.40f))
-                val cx = w * 0.30f; val cy = h * 0.42f
+                drawRect(Brush.radialGradient(listOf(Color(0xFF3A2320), Color(0xFF171014), Color(0xFF0B0709)), center = Offset(w * 0.5f, h * 0.32f), radius = w * 0.9f), size = Size(w, h))
+                // Warm amber glow behind the deck
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8A84C).copy(alpha = 0.30f), Color(0xFFE8A84C).copy(alpha = 0f))), radius = w * 0.46f, center = Offset(w * 0.50f, h * 0.32f))
+                val cx = w * 0.50f; val cy = h * 0.32f
+                // ── Turntable plinth under the record ──
+                drawRoundRect(Brush.verticalGradient(listOf(Color(0xFF2E201C), Color(0xFF1A110E)), startY = cy - w * 0.24f), topLeft = Offset(cx - w * 0.30f, cy - w * 0.24f), size = Size(w * 0.60f, w * 0.40f), cornerRadius = CornerRadius(6f))
+                drawRoundRect(Color(0xFFE8A84C).copy(alpha = 0.25f), topLeft = Offset(cx - w * 0.30f, cy - w * 0.24f), size = Size(w * 0.60f, 1.5f), cornerRadius = CornerRadius(1f))
                 // Vinyl disc with sheen
                 drawCircle(Color(0xFF120C0E), w * 0.215f, Offset(cx, cy))
                 drawCircle(brush = Brush.linearGradient(listOf(Color(0xFF3A3234), Color(0xFF1A1416), Color(0xFF0D0A0B)), start = Offset(cx - w * 0.2f, cy - w * 0.2f), end = Offset(cx + w * 0.2f, cy + w * 0.2f)), radius = w * 0.205f, center = Offset(cx, cy))
@@ -4251,22 +4381,31 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawCircle(Color(0xFFB93B2C), w * 0.082f, Offset(cx, cy))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE2634F), Color(0xFFB93B2C), Color(0xFF6E1B14)), center = Offset(cx - w * 0.02f, cy - w * 0.02f), radius = w * 0.09f), radius = w * 0.078f, center = Offset(cx, cy))
                 drawCircle(Color(0xFFF2E4D0).copy(alpha = 0.50f), w * 0.013f, Offset(cx, cy))
+                // ── Tonearm pivoting from the plinth's top-right ──
+                val ax = cx + w * 0.26f; val ay = cy - w * 0.21f
+                drawCircle(Color(0xFFB9A48C).copy(alpha = 0.9f), w * 0.014f, Offset(ax, ay))
+                drawLine(Color(0xFFD9C4A8), Offset(ax, ay), Offset(cx - w * 0.10f, cy + w * 0.02f), strokeWidth = 2.2f)
+                drawLine(Color(0xFFD9C4A8), Offset(cx - w * 0.10f, cy + w * 0.02f), Offset(cx - w * 0.135f, cy + w * 0.075f), strokeWidth = 1.6f)
+                drawLine(Color(0xFF8F7B62), Offset(cx - w * 0.14f, cy + w * 0.085f), Offset(cx - w * 0.115f, cy + w * 0.075f), strokeWidth = 1.2f)
+                drawCircle(Color(0xFFE8A84C).copy(alpha = 0.6f), w * 0.006f, Offset(cx - w * 0.127f, cy + w * 0.08f))
                 // Echo arcs rippling to the right
                 listOf(0.34f, 0.27f, 0.21f).forEachIndexed { i, r ->
-                    drawArc(Color(0xFFE8A84C).copy(alpha = 0.14f - i * 0.03f), -50f, 85f, false, Offset(w * 0.55f + (0.03f * i) * w, h * 0.14f + (0.04f * i) * h), Size(w * r, w * r), style = Stroke(1.2f))
+                    drawArc(Color(0xFFE8A84C).copy(alpha = 0.14f - i * 0.03f), -50f, 85f, false, Offset(w * 0.72f + (0.03f * i) * w, h * 0.04f + (0.04f * i) * h), Size(w * r, w * r), style = Stroke(1.2f))
                 }
                 // Dust motes in the beam
-                for (i in 0 until 14) {
-                    val x = w * 0.62f + ((i * 3571) % 100) / 100f * w * 0.3f
-                    val y = h * 0.10f + ((i * 4201) % 100) / 100f * h * 0.4f
-                    drawCircle(Color(0xFFF2D9A8).copy(alpha = 0.18f), 0.8f + (i % 3) * 0.5f, Offset(x, y))
+                for (i in 0 until 16) {
+                    val x = w * 0.58f + ((i * 3571) % 100) / 100f * w * 0.36f
+                    val y = h * 0.04f + ((i * 4201) % 100) / 100f * h * 0.32f
+                    drawCircle(Color(0xFFF2D9A8).copy(alpha = 0.20f), 0.8f + (i % 3) * 0.5f, Offset(x, y))
                 }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF060304).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                // Warm reflection pool under the deck
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8A84C).copy(alpha = 0.08f), Color(0xFFE8A84C).copy(alpha = 0f))), radius = w * 0.14f, center = Offset(cx, cy + w * 0.18f))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF060304).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.38f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFB93B2C), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
-            titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF7E9E0),
+            titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF7E9E0),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE2634F),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE2D2C8).copy(alpha = 0.90f),
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFE8A84C).copy(alpha = 0.72f)

@@ -1,5 +1,30 @@
 # Prompt.md — current request log
 
+## Request: DETAILED (Deepen-experiment) scene upgrades — Books / Films / Games / Artists / Albums (COMPLETE)
+
+- User: "analyse the next 5 detailed" — the first five DETAILED (Deepen
+  toggle ON) scenes. ask_user picks: Books = redesign background; Films =
+  redesign background; Games = redesign background + more detail + easter
+  eggs; Artists = redesign background + typography + make it aesthetic and
+  detailed; Albums = redesign background + layout fit + typography +
+  refine decor.
+- BOOKS: fuller lamp-lit library — double bookshelf (two rows of books with
+  gold spine bands), floor lamp glow, armchair, open book on the desk.
+- FILMS: side velvet curtains, warm screen glow behind the reels, red
+  carpet strip along the bottom, marquee light string + reel.
+- GAMES: neon arcade with pixel-art easter eggs — mushroom, star, ghost,
+  heart blocks + extra bricks — plus the glowing coin and controller.
+- ARTISTS: aesthetic stage — light-rig truss with 6 colored stage lights
+  (each casting a faint beam cone), warm main spotlight + cool cross-beam,
+  sound-wave arcs, crowd with raised hands, rim-lit singer, confetti +
+  sparkles; title Changa -> Bungee 27sp.
+- ALBUMS: STANDARD -> BOTTOM layout (text moved to bottom so the deck is
+  clear); turntable plinth under the vinyl, tonearm with headshell
+  pivoting over the record, echo arcs + dust motes; title Changa -> Lora
+  serif 28sp.
+- All five are in signatureDesignDetailed(); balance-checked clean; CI
+  validating on push.
+
 ## Request: Signature per-category redesigns — Artists / Albums / Directors / Painters (COMPLETE)
 
 - User picks (ask_user): Artists = redesign background, change layout fit,
