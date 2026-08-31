@@ -5133,9 +5133,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF122A12), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF2E5E2E), Color(0xFF122A12), Color(0xFF081408))), size = Size(w, h))
-                // Sunbeams from top-left
-                for (i in 0 until 7) {
-                    val a = Math.toRadians((25.0 + i * 9)).toFloat()
+                // Sunbeams from top-left — three clean rays
+                for (i in 0 until 3) {
+                    val a = Math.toRadians((28.0 + i * 10)).toFloat()
                     drawLine(Color(0xFFF2F6C8).copy(alpha = 0.10f), Offset(w * 0.02f, h * 0.02f), Offset(w * 0.02f + kotlin.math.cos(a) * w * 0.8f, h * 0.02f + kotlin.math.sin(a) * w * 0.8f), strokeWidth = 1.6f)
                 }
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2F6C8).copy(alpha = 0.2f), Color(0xFFF2F6C8).copy(alpha = 0f))), radius = w * 0.12f, center = Offset(w * 0.04f, h * 0.04f))
@@ -5154,13 +5154,13 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                     close()
                 }, Color(0xFF8AE88A).copy(alpha = 0.7f), style = Stroke(1.4f))
                 drawLine(Color(0xFF8AE88A).copy(alpha = 0.65f), Offset(lx, ly - h * 0.15f), Offset(lx, ly + h * 0.16f), strokeWidth = 1.4f)
-                for (i in 0 until 6) {
-                    val ty = ly - h * 0.10f + i * h * 0.045f
+                for (i in 0 until 4) {
+                    val ty = ly - h * 0.08f + i * h * 0.05f
                     drawLine(Color(0xFF8AE88A).copy(alpha = 0.45f), Offset(lx, ty), Offset(lx - w * 0.08f - i * w * 0.006f, ty - h * 0.014f), strokeWidth = 0.9f)
                     drawLine(Color(0xFF8AE88A).copy(alpha = 0.45f), Offset(lx, ty), Offset(lx + w * 0.08f + i * w * 0.006f, ty - h * 0.014f), strokeWidth = 0.9f)
                 }
-                // Water droplets
-                listOf(Pair(Offset(w * 0.26f, h * 0.24f), 0.014f), Pair(Offset(w * 0.80f, h * 0.30f), 0.010f), Pair(Offset(w * 0.34f, h * 0.74f), 0.012f)).forEach { (c, r) ->
+                // Water droplets — two
+                listOf(Pair(Offset(w * 0.26f, h * 0.24f), 0.014f), Pair(Offset(w * 0.80f, h * 0.30f), 0.010f)).forEach { (c, r) ->
                     drawOval(Color(0xFFB8E8F2).copy(alpha = 0.65f), topLeft = Offset(c.x - w * r, c.y - w * r * 1.3f), size = Size(w * r * 2, w * r * 2.2f))
                     drawCircle(Color.White.copy(alpha = 0.7f), w * r * 0.4f, Offset(c.x - w * r * 0.3f, c.y - w * r * 0.8f))
                 }
