@@ -4843,14 +4843,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF1E1A14), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.radialGradient(listOf(Color(0xFF4A4030), Color(0xFF1E1A14), Color(0xFF0E0C08)), center = Offset(w * 0.5f, h * 0.30f), radius = w * 0.9f), size = Size(w, h))
-                // Marble veins
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 10) {
-                    val x0 = ((s * (i+1) * 3571) % 10000) / 10000f * w
-                    val y0 = ((s * (i+1) * 4201) % 10000) / 10000f * h
-                    drawLine(Color(0xFF8A8070).copy(alpha = 0.12f), Offset(x0, y0), Offset(x0 + w * 0.10f, y0 - h * 0.05f), strokeWidth = 0.8f)
-                }
-                // Gold glow behind the temple
+                // Gold glow behind the temple (no marble vein noise)
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE0C84F).copy(alpha = 0.22f), Color(0xFFE0C84F).copy(alpha = 0f))), radius = w * 0.36f, center = Offset(w * 0.30f, h * 0.38f))
                 // Greek meander border along the top
                 val my = h * 0.07f
@@ -4867,14 +4860,14 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                     drawLine(Color(0xFFF2E9D8).copy(alpha = 0.18f), Offset(cx - w * 0.012f, h * 0.72f), Offset(cx + w * 0.012f, h * 0.72f), strokeWidth = 1.4f)
                 }
                 drawLine(Color(0xFFF2E9D8).copy(alpha = 0.22f), Offset(w * 0.09f, h * 0.74f), Offset(w * 0.51f, h * 0.74f), strokeWidth = 1.2f)
-                // Laurel wreath at the temple base — part of the same scene
+                // Laurel wreath at the temple base — five even leaves
                 val lx = w * 0.30f; val ly = h * 0.84f
-                for (i in 0 until 10) {
-                    val a = Math.toRadians((180.0 * i / 9)).toFloat()
-                    drawOval(Color(0xFFC9A24F).copy(alpha = 0.55f), topLeft = Offset(lx + kotlin.math.cos(a) * w * 0.065f - w * 0.008f, ly + kotlin.math.sin(a) * w * 0.04f - w * 0.013f), size = Size(w * 0.016f, w * 0.018f))
+                for (i in 0 until 5) {
+                    val a = Math.toRadians((180.0 * i / 4)).toFloat()
+                    drawOval(Color(0xFFC9A24F).copy(alpha = 0.55f), topLeft = Offset(lx + kotlin.math.cos(a) * w * 0.060f - w * 0.008f, ly + kotlin.math.sin(a) * w * 0.035f - w * 0.013f), size = Size(w * 0.016f, w * 0.018f))
                 }
-                drawArc(Color(0xFFE0C84F).copy(alpha = 0.65f), 180f, 180f, false, Offset(lx - w * 0.065f, ly - w * 0.05f), Size(w * 0.13f, w * 0.075f), style = Stroke(1.4f))
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF080604).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawArc(Color(0xFFE0C84F).copy(alpha = 0.65f), 180f, 180f, false, Offset(lx - w * 0.060f, ly - w * 0.05f), Size(w * 0.12f, w * 0.070f), style = Stroke(1.4f))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF080604).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE0C84F), badgeInk = Color(0xFF1E1A14),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
