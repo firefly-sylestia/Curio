@@ -1,5 +1,27 @@
 # Prompt.md — current request log
 
+## Request: Editorial drop cap fix + Paper hold-to-edit now edits TEXT inline (COMMITTED, NOT PUSHED)
+
+- User: "the editorial design is good just that the first bigger letter
+  isnt right and the next 3rd should start from below, and that tap and
+  hold to edit isnt right its showing a differnt things. when i meant the
+  title and the quick fact in the card itself that to edit."
+- EDITORIAL: drop cap was Bungee with lineHeight < fontSize (clipped,
+  misaligned). Now a bold Lora serif initial (matches body), fontSize =
+  lineHeight = 3x body, baseline-aligned via alignByBaseline() with the
+  body — spans ~2 lines so the 3rd line starts full-width below.
+- PAPER EDIT: the drag/resize "arrange" overlay (DRAG TITLE / quick-fact
+  box + width handle) is REMOVED. Hold now toggles inline text editing:
+  the title and quick-fact text on the card become transparent BasicTextFields
+  in place (cursor = palette ink). Controls moved below the card: fact-size
+  +/−, Reset, Done. Edited title/fact flow into the card display AND the
+  Save/Share export (editedTitle/editedFact/bodyScale params on
+  TopicShareCard). ShareCardArrangement data class + overlay deleted;
+  ArrangeableCard long-press disabled while editing so taps hit the fields.
+- Quote cards: edit mode shows only the quote field (no duplicate title).
+- Balance-checked; unused imports (heightIn, IntOffset, roundToInt,
+  detectDragGestures) removed. Changelog + Prompt.md updated. PENDING PUSH.
+
 ## Request: DETAILED (Deepen) scenes batch 5 — minimal aesthetic pass: Internet / Biology / Chemistry / Animals / Plants (COMMITTED, NOT PUSHED)
 
 - INTERNET: 4-ellipse globe + 4 nodes with inter-links + 16 signal dots ->
