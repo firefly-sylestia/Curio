@@ -4483,34 +4483,21 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "ANIMATED MOVIES" -> SignatureDesign(
             bg = Color(0xFF2A1A3E), cornerRadius = 10f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF5B2A6E), Color(0xFF2A1A3E), Color(0xFF12101F))), size = Size(w, h))
-                // Dreamy color orbs — soft, diffused
-                listOf(Pair(Offset(w * 0.20f, h * 0.20f), Color(0xFFFF6B9D)), Pair(Offset(w * 0.85f, h * 0.25f), Color(0xFFFFB86B)), Pair(Offset(w * 0.75f, h * 0.80f), Color(0xFF6BCBFF))).forEach { (c, col) ->
-                    drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.26f), col.copy(alpha = 0f))), radius = w * 0.20f, center = c)
-                }
-                // Rainbow ribbon — one shared arc center, bands stacked tightly
-                val swooshColors = listOf(Color(0xFFFF6B9D), Color(0xFFFFB86B), Color(0xFFFFE66B), Color(0xFF6BE3A0), Color(0xFF6BCBFF), Color(0xFFB98BFF))
-                val arcCx = w * 0.50f; val arcCy = h * 0.42f; val arcR = w * 0.40f
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF4A245C), Color(0xFF241436), Color(0xFF12101F))), size = Size(w, h))
+                // One diffused orb, top-right
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFF6B9D).copy(alpha = 0.18f), Color(0xFFFF6B9D).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.80f, h * 0.18f))
+                // One elegant rainbow arc — thin even bands, shared center
+                val swooshColors = listOf(Color(0xFFFF6B9D), Color(0xFFFFB86B), Color(0xFFFFE66B), Color(0xFF6BE3A0), Color(0xFF6BCBFF))
+                val arcCx = w * 0.50f; val arcCy = h * 0.44f; val arcR = w * 0.42f
                 swooshColors.forEachIndexed { i, col ->
-                    val r = arcR - i * w * 0.012f
-                    drawArc(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.85f), col.copy(alpha = 0.25f)), center = Offset(arcCx, arcCy), radius = r), 185f, 150f, false, Offset(arcCx - r, arcCy - r), Size(r * 2, r * 2), style = Stroke(w * 0.013f))
+                    val r = arcR - i * w * 0.011f
+                    drawArc(col.copy(alpha = 0.85f - i * 0.06f), 190f, 140f, false, Offset(arcCx - r, arcCy - r), Size(r * 2, r * 2), style = Stroke(w * 0.010f))
                 }
-                // Comet trail arcing over the ribbon
-                for (i in 0 until 10) {
-                    val t = i / 9f
-                    val cx2 = w * 0.14f + t * w * 0.72f
-                    val cy2 = h * 0.52f - kotlin.math.sin(t * Math.PI.toFloat()) * h * 0.14f
-                    val sz = (3.0f - t * 2.2f) * (1f - t * 0.2f)
-                    drawCircle(Color(0xFFFFF3C4).copy(alpha = 0.75f - t * 0.55f), sz, Offset(cx2, cy2))
-                    drawCircle(Color(0xFFFFB86B).copy(alpha = 0.30f - t * 0.2f), sz * 1.6f, Offset(cx2, cy2))
-                }
-                drawStar(w * 0.14f, h * 0.52f, 3.0f, 1.4f, Color(0xFFFFF3C4))
-                // Tiny sparkles
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 16) {
-                    val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
-                    val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
-                    drawStar(x, y, 1.6f, 0.7f, Color(0xFFFFF3C4).copy(alpha = 0.30f))
+                // One star at the head of the arc
+                drawStar(w * 0.24f, h * 0.50f, 3.0f, 1.3f, Color(0xFFFFF3C4))
+                // Three tiny sparkles, placed, not scattered
+                listOf(Pair(w * 0.30f, h * 0.28f), Pair(w * 0.68f, h * 0.66f), Pair(w * 0.80f, h * 0.40f)).forEach { (x, y) ->
+                    drawStar(x, y, 1.4f, 0.6f, Color(0xFFFFF3C4).copy(alpha = 0.35f))
                 }
                 drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0B0813).copy(alpha = 0.5f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
