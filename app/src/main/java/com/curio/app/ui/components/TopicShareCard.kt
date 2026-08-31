@@ -3,10 +3,13 @@ package com.curio.app.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,9 +43,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -218,7 +223,6 @@ private fun quickFactFontSize34(length: Int): TextUnit = when {
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN DISPATCHER
 // ═══════════════════════════════════════════════════════════════════════
-@Composable
 /**
  * Free-position nudges (in dp) that move the title and the quick-fact box
  * on ANY share card. Dragged by hand on the preview; threaded so the
@@ -239,6 +243,7 @@ private fun Modifier.moveTitle(m: ShareCardMove): Modifier =
 private fun Modifier.moveFact(m: ShareCardMove): Modifier =
     if (m.factDx == 0f && m.factDy == 0f) this else this.offset(x = m.factDx.dp, y = m.factDy.dp)
 
+@Composable
 fun TopicShareCard(
     topicName: String,
     categoryName: String,
@@ -6506,7 +6511,7 @@ private fun BoxScope.MoveHandle(
     onDelta: (dx: Float, dy: Float) -> Unit
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
-    val latestDelta by androidx.compose.runtime.rememberUpdatedState(onDelta)
+    val latestDelta by rememberUpdatedState(onDelta)
     Box(
         modifier = Modifier
             .offset(x = x, y = y)
@@ -6516,7 +6521,7 @@ private fun BoxScope.MoveHandle(
             }
             .background(accent, CircleShape)
             .pointerInput(Unit) {
-                androidx.compose.foundation.gestures.detectDragGestures { _, dragAmount ->
+                detectDragGestures { _, dragAmount ->
                     val dx = with(density) { dragAmount.x.toDp().value }
                     val dy = with(density) { dragAmount.y.toDp().value }
                     latestDelta(dx, dy)
