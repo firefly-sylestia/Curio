@@ -124,6 +124,78 @@ val LoraFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * Cormorant Garamond — an elegant high-contrast display serif (OFL).
+ * Variable font (wght 300–700) bundled at `res/font/cormorant_garamond.ttf`.
+ * Used for literary/historical share-card titles needing a refined,
+ * museum-label feel. License at `app/third_party/cormorant_garamond_OFL.txt`.
+ */
+val CormorantGaramondFontFamily: FontFamily = FontFamily(
+    Font(R.font.cormorant_garamond, FontWeight.Normal),
+    Font(R.font.cormorant_garamond, FontWeight.Medium),
+    Font(R.font.cormorant_garamond, FontWeight.SemiBold),
+    Font(R.font.cormorant_garamond, FontWeight.Bold)
+)
+
+/**
+ * Bebas Neue — a tall condensed sans display face (OFL). Single Regular
+ * file (the glyphs are already uppercase-heavy). Used for poster-style
+ * share-card titles (Films, Directors, Wildcard). License at
+ * `app/third_party/bebas_neue_OFL.txt`.
+ */
+val BebasNeueFontFamily: FontFamily = FontFamily(
+    Font(R.font.bebas_neue)
+)
+
+/**
+ * Space Mono — a monospaced face (OFL) with a technical/code feel.
+ * Used for science/tech share-card titles and monospace body accents.
+ * License at `app/third_party/space_mono_OFL.txt`.
+ */
+val SpaceMonoFontFamily: FontFamily = FontFamily(
+    Font(R.font.space_mono)
+)
+
+/**
+ * DM Serif Display — a high-contrast didone serif (OFL). Used for
+ * editorial/fashion-style share-card titles. License at
+ * `app/third_party/dm_serif_display_OFL.txt`.
+ */
+val DMSerifDisplayFontFamily: FontFamily = FontFamily(
+    Font(R.font.dm_serif_display)
+)
+
+/**
+ * Sora — a clean geometric sans (OFL). Variable font; used for modern
+ * minimal share-card titles. License at `app/third_party/sora_OFL.txt`.
+ */
+val SoraFontFamily: FontFamily = FontFamily(
+    Font(R.font.sora, FontWeight.Normal),
+    Font(R.font.sora, FontWeight.Medium),
+    Font(R.font.sora, FontWeight.SemiBold),
+    Font(R.font.sora, FontWeight.Bold)
+)
+
+/**
+ * Corben — a rounded display serif (OFL). Single Regular file; used for
+ * playful/food share-card titles. License at `app/third_party/corben_OFL.txt`.
+ */
+val CorbenFontFamily: FontFamily = FontFamily(
+    Font(R.font.corben)
+)
+
+/**
+ * Maven Pro — a soft geometric sans (OFL). Variable font; used for
+ * modern UI-style share-card titles. License at
+ * `app/third_party/maven_pro_OFL.txt`.
+ */
+val MavenProFontFamily: FontFamily = FontFamily(
+    Font(R.font.maven_pro, FontWeight.Normal),
+    Font(R.font.maven_pro, FontWeight.Medium),
+    Font(R.font.maven_pro, FontWeight.SemiBold),
+    Font(R.font.maven_pro, FontWeight.Bold)
+)
+
+/**
  * The editorial body voice — Lora at a relaxed reading size/leading, for
  * quick-facts, instructions and long intro copy (v35). Slightly larger
  * than bodyLarge with zero tracking for the serif's natural rhythm.

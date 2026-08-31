@@ -1,6 +1,6 @@
 # Prompt.md — current request log
 
-## Request: Inline-on-card edit (all styles) + drag-move + size adjustments + Customise crash fix (COMMITTED, NOT PUSHED)
+## Request: 28 BASE signature redesigns from scratch + 7 new fonts + LANGUAGE multilingual text background (COMMITTED)
 
 - User references commit c0c851b: "the quick fact edit and title edit were
   better here it didn't open that box overlay". In that commit, hold-to-edit
@@ -38,34 +38,38 @@
   BOX size + shape adjustment: crop-style handles on the title + fact boxes
   (drag edges/corners to resize/change shape, like cropping a photo). Text
   auto-adjusts itself (BasicTextField wraps; existing font-size logic stays).
-- SHIPPED this commit:
-  - CRASH FIX: the Customise overlay's inner Column had a verticalScroll
-    nested inside the outer sheet Column(verticalScroll) — unbounded
-    height → IllegalStateException on open. Removed the inner verticalScroll;
-    the outer sheet scroll now carries the overlay content.
-  - INLINE EDIT REWORK: ArrangeableCard no longer renders a bottom Surface
-    panel with labelled Title/Quick-fact fields. Instead, when editMode is
-    on, two transparent BasicTextFields overlay the card itself (title near
-    the top, quick-fact near the bottom) — type and the card text updates
-    live (the card renders editedTitle/editedFact at its real positions).
-    This matches the c0c851b approach the user preferred, for ALL styles.
-  - DRAG-TO-MOVE: the T / F round MoveHandle circles are kept; dragging
-    them repositions the title + fact boxes (offsets thread through every
-    style via moveTitle/moveFact, so the export matches).
-  - CROP-STYLE RESIZE: new ResizeEdge composable + ResizeEdgeSide enum.
-    A draggable edge tab sits on the right side of each box; dragging it
-    changes the box width (fraction). ShareCardMove gained titleWidthFrac /
-    factWidthFrac; moveTitle/moveFact now apply fillMaxWidth(frac) so the
-    card's own title/fact boxes resize and the export matches.
-  - TEXT AUTO-FITS: the overlay fields use headlineMedium/bodyMedium with
-    maxLines so the typed text wraps; the card's existing length-based
-    quickFactFontSize logic stays, so the text adjusts itself.
-  - Edit hint now reads "Drag the T/F handles to move · drag the edge to
-    resize"; Reset still clears move + edits + bodyScale.
-- Balance-checked: braces 980/980, brackets 38/38 (parens raw count is
-  unreliable for Kotlin but matches the pre-existing HEAD pattern). No
-  new imports needed (width/fillMaxWidth/border/offset all already
-  imported). Changelog + Prompt.md updated. PENDING PUSH.
+- CRASH/CI: previous commit's CI passed (success); user said "fix this cl
+  error and push" — the error was already fixed by the prior commit
+  (de93a950). Pushed.
+- SHIPPED: 28 BASE signature categories fully rebuilt from scratch in
+  signatureDesign(). The old per-category branches (drawn art, heavy
+  scenes) are replaced with clean minimal aesthetic designs using
+  gradients + a few quiet shapes + NEW matching fonts:
+  - 7 NEW OFL fonts downloaded from google/fonts, bundled at
+    res/font/: cormorant_garamond, bebas_neue, space_mono,
+    dm_serif_display, sora, corben, maven_pro. Font families added to
+    CurioTypography.kt; imports added to TopicShareCard.kt. OFL license
+    texts added to app/third_party/.
+  - Per-category fonts: Artists=Bungee, Wildcard=BebasNeue,
+    Animals=Cormorant, AnimatedFilms=Playfair, Anime=Sora,
+    Artworks=DMSerifDisplay, Authors=Cormorant, Biology=SpaceMono
+    (improved DNA helix: anti-parallel strands, A-T pink / G-C gold
+    bonds), Books=Playfair, Chemistry=SpaceMono (hexagon lattice),
+    Directors=BebasNeue, Discoveries=PirataOne, Economics=Sora,
+    Films=BebasNeue, Food=Corben, Geology=Sora, History=Cormorant,
+    Internet=SpaceMono, Language=PatrickHand (multilingual words),
+    Manga=ChangaOne, Manhwa=Playfair, Mathematics=SpaceMono,
+    Mythology=PirataOne, Painters=Lora, Plants=Lora,
+    Psychology=Sora, Quotes=Playfair, Scientists=SpaceMono.
+  - LANGUAGE background: faint multilingual words (言語, Sprache, langue,
+    idioma, lingua, 語, زبان, भाषा) drawn via drawText+TextMeasurer layered
+    over the gradient for a premium polyglot feel.
+  - 11 unlisted categories (Albums, Songs, Series, Games, Sports,
+    Technologies, Astronomy, Medicine, Engineering, Oceans) RETAINED
+    their old designs (extracted from HEAD and re-inserted before the
+    else fallback) — user only asked to redesign the 28.
+- Balance-checked: braces 918/918, brackets 24/24. drawText +
+  rememberTextMeasurer imports added. Changelog + Prompt.md updated.
 
 ## Request: CI green check + Customise overlay rework (slider/chips/style-switch) + Signature fact-size fix (COMMITTED, NOT PUSHED)
 
