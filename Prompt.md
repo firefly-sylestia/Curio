@@ -1,5 +1,49 @@
 # Prompt.md — current request log
 
+## Request: CI green check + Customise overlay rework (slider/chips/style-switch) + Signature fact-size fix (COMMITTED, NOT PUSHED)
+
+- User: check the workflow succeeded; then complaints about the share
+  sheet: (1) hold-to-edit "got a box now" — text fields not clearly
+  labelled/visible, (2) want to MOVE/resize the title + fact on the card
+  directly by drag, (3) Customise −/+ steppers look bad → use slider +
+  chip rows, (4) open the Customise ABOVE and more transparent,
+  (5) fact size doesn't apply to more cards, (6) add style switching
+  inside the Customise panel.
+- ask_user answers (edit UX): "Drag directly on card; slide and chip
+  rows and that curioso explorer edit chnage it the text inside isnt
+  visible" → drag on card; Customise = sliders + chip rows; fix invisible
+  edited text.
+- CI: GREEN — build success 11m3s, lint passed, production-signed APK
+  (CN=Curio Minds), config cache stored, artifacts uploaded.
+- SHIPPED this commit:
+  - FIX fine the SignatureCard BodyText (line ~1125) DIDN'T apply
+    bodyScale — signed fact text never scaled; now
+    (bodySize * bodyScale) / (bodySize * bodyLineHeight * bodyScale).
+  - Customise overlay: removed all OptionStepperRow (−/+) usages and
+    deleted the composable; replaced with CustomiseLabel + chip rows
+    for Design (Portrait/Classic), Source, Style switching (every style
+    as a Pill → setStyle(i) via hoisted pagerState.animateScrollToPage),
+    and Current/Classic for Signature; Fact size now a continuous
+    androidx.compose.material3.Slider (0.5–1.8, 12 steps).
+  - Overlay panel anchored TopCenter (opens above the card), scrim
+    alpha 0.32→0.18, surface alpha 0.96→0.93, inner Column
+    verticalScroll so it never clips.
+  - Removed unused sourceLabel/sourceIdx; hoisted rememberPagerState +
+    rememberCoroutineScope + setStyle() at sheet scope (also used by the
+    carousel).
+  - Edit fields: added placeholders ("Edit title…" / "Edit the quick
+    fact…") so empty/default text is clearly visible.
+- NOT YET DONE: on-card DRAG-to-move/resize of the title + fact boxes that
+  matches the exported image — needs threading an arrangement (title
+  offset / fact offset / box size) through all 8 per-style composers
+  (Paper/MiddleContent, Vinyl, Collage, Neumorphic, Editorial, Minimal,
+  Signature layouts, Custom) which is high-risk without a local compile.
+  Deferred — offer to thread titleShift/factShift/bodySize next;
+  bodyScale (fact resize) already scales all 8 styles now.
+- Balance-checked (depth 0), no leftover OptionStepperRow/sourceLabel/
+  sourceIdx. Changelog + Prompt.md updated. PENDING PUSH (per standing
+  instruction to not push without user's go-ahead).
+
 ## Request: BASE Signature redesigns — 28 categories, minimal aesthetic pass (COMMITTED, NOT PUSHED)
 
 - User: redesign the listed 28 BASE (non-Deepen) signature categories — not

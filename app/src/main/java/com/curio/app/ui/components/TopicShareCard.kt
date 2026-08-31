@@ -1122,8 +1122,8 @@ private fun SignatureCard(
         @Composable
         fun BodyText(centered: Boolean = false) {
             Text(body, style = TextStyle(
-                fontFamily = LoraFontFamily, fontSize = bodySize.sp,
-                lineHeight = (bodySize * sig.bodyLineHeight).sp,
+                fontFamily = LoraFontFamily, fontSize = (bodySize * bodyScale).sp,
+                lineHeight = (bodySize * sig.bodyLineHeight * bodyScale).sp,
                 color = sig.bodyColor
             ), maxLines = bodyMaxLines, overflow = TextOverflow.Ellipsis,
                 textAlign = if (centered) TextAlign.Center else TextAlign.Start,
@@ -5994,6 +5994,7 @@ private fun ArrangeableCard(
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                             singleLine = false,
                             maxLines = 2,
+                            placeholder = { Text("Edit title…", style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))) },
                             modifier = Modifier.fillMaxWidth(),
                             decorationBox = { inner ->
                                 Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) { inner() }
@@ -6008,6 +6009,7 @@ private fun ArrangeableCard(
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = false,
                         maxLines = 4,
+                        placeholder = { Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))) },
                         modifier = Modifier.fillMaxWidth(),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) { inner() }
@@ -6087,12 +6089,14 @@ fun TopicShareSheet(
     // Inline-edit / Customise helpers
     val baseTitle = topicName.substringBeforeLast(" (")
     val sourceOptions = available.filter { !isQuotes || it.id != QUICK_FACT_ID }
-    val sourceIdx = sourceOptions.indexOfFirst { it.id == activeId }.let { if (it < 0) 0 else it }
-    val sourceLabel = if (sourceOptions.isNotEmpty()) {
-        val opt = sourceOptions[sourceIdx]
-        opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { r -> " \u00b7 " + "\u2605".repeat(r) } ?: "")
-    } else ""
     val factSizeLabel = (Math.round(bodyScale * 100f) / 100f).toString() + "\u00d7"
+    // Hoisted pager state so the Customise panel can switch style via its chips.
+    val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx.coerceIn(0, styles.lastIndex)) { styles.size }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    fun setStyle(i: Int) {
+        styleIdx = i.coerceIn(0, styles.lastIndex)
+        if (styles.size > 1) scope.launch { pagerState.animateScrollToPage(styleIdx) }
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -6106,7 +6110,6 @@ fun TopicShareSheet(
                     // Style label
                     Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     // Swipeable card carousel — the card IS the preview
-                    val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx) { styles.size }
                     androidx.compose.runtime.LaunchedEffect(pagerState.currentPage) { styleIdx = pagerState.currentPage }
                     androidx.compose.foundation.pager.HorizontalPager(
                         state = pagerState,
@@ -6179,31 +6182,63 @@ fun TopicShareSheet(
 
                 // Customise overlay — translucent panel over a light scrim
                 if (customizeOpen) {
-                    Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.32f))) {
+                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f))) {
                         Surface(
                             shape = RoundedCornerShape(18.dp),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.93f),
                             tonalElevation = 8.dp,
-                            modifier = Modifier.align(Alignment.Center).fillMaxWidth(0.92f)
+                            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(0.94f).padding(top = 10.dp)
                         ) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Column(Modifier.padding(16.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text("Customise", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
-                                OptionStepperRow("Aspect", aspect.label,
-                                    { aspect = if (aspect == ShareCardAspect.PORTRAIT) ShareCardAspect.CLASSIC else ShareCardAspect.PORTRAIT },
-                                    { aspect = if (aspect == ShareCardAspect.PORTRAIT) ShareCardAspect.CLASSIC else ShareCardAspect.PORTRAIT })
+
+                                // Style switcher — pick any card style from here
+                                if (styles.size > 1) {
+                                    CustomiseLabel("Design")
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
+                                        styles.forEachIndexed { i, st ->
+                                            Pill(st.label, CurioIcons.AutoAwesome, st == currentStyle) { setStyle(i) }
+                                        }
+                                    }
+                                }
+
+                                // Aspect — chip row
+                                CustomiseLabel("Aspect")
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Pill("Portrait", CurioIcons.Image, aspect == ShareCardAspect.PORTRAIT) { aspect = ShareCardAspect.PORTRAIT }
+                                    Pill("Classic", CurioIcons.Image, aspect == ShareCardAspect.CLASSIC) { aspect = ShareCardAspect.CLASSIC }
+                                }
+
+                                // Source — chip row
                                 if (sourceOptions.isNotEmpty()) {
-                                    OptionStepperRow("Source", sourceLabel,
-                                        { selectedId = sourceOptions[(sourceIdx - 1 + sourceOptions.size) % sourceOptions.size].id },
-                                        { selectedId = sourceOptions[(sourceIdx + 1) % sourceOptions.size].id })
+                                    CustomiseLabel("Source")
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())) {
+                                        sourceOptions.forEach { opt ->
+                                            Pill(opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "★".repeat(it) } ?: ""), CurioIcons.FormatText, opt.id == activeId) { selectedId = opt.id }
+                                        }
+                                    }
                                 }
-                                // Fact size — affects every card style
-                                OptionStepperRow("Fact size", factSizeLabel,
-                                    { bodyScale = (bodyScale - 0.15f).coerceIn(0.5f, 1.8f) },
-                                    { bodyScale = (bodyScale + 0.15f).coerceIn(0.5f, 1.8f) })
+
+                                // Fact size — continuous slider, affects every style
+                                CustomiseLabel("Quick-fact size — $factSizeLabel")
+                                androidx.compose.material3.Slider(
+                                    value = bodyScale,
+                                    onValueChange = { bodyScale = it },
+                                    valueRange = 0.5f..1.8f,
+                                    steps = 12,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                // Signature: Current vs Classic design
                                 if (currentStyle == ShareCardStyle.SIGNATURE) {
-                                    OptionStepperRow("Design", if (classicDesign) "Classic" else "Current",
-                                        { classicDesign = !classicDesign }, { classicDesign = !classicDesign })
+                                    CustomiseLabel("Design style")
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Pill("Current", CurioIcons.AutoAwesome, !classicDesign) { classicDesign = false }
+                                        Pill("Classic", CurioIcons.AutoAwesome, classicDesign) { classicDesign = true }
+                                    }
                                 }
+
+                                // Collage photo + caption
                                 if (currentStyle == ShareCardStyle.COLLAGE) {
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
@@ -6215,9 +6250,11 @@ fun TopicShareSheet(
                                         OutlinedTextField(value = polaroidCaption, onValueChange = { polaroidCaption = it.take(36) }, placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium) }, singleLine = true, textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface), shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(40.dp))
                                     }
                                 }
+                                // Custom fact field
                                 if (activeId == CUSTOM_FACT_ID) {
                                     OutlinedTextField(customText, { customText = it }, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
                                 }
+                                // Vinyl song
                                 if (currentStyle == ShareCardStyle.VINYL) {
                                     OutlinedTextField(
                                         value = AppPreferences.favoriteSongState,
@@ -6396,21 +6433,8 @@ fun ShareHubBody(
 }
 
 @Composable
-private fun OptionStepperRow(label: String, value: String, onDecrease: () -> Unit, onIncrease: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
-        Surface(onClick = onDecrease, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.size(34.dp)) {
-            Box(contentAlignment = Alignment.Center) {
-                Text("\u2212", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface))
-            }
-        }
-        Text("  $value  ", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
-        Surface(onClick = onIncrease, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.size(34.dp)) {
-            Box(contentAlignment = Alignment.Center) {
-                Text("\u002b", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface))
-            }
-        }
-    }
+private fun CustomiseLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable
