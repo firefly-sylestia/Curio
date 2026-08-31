@@ -4808,33 +4808,27 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFFE8E0F2), cornerRadius = 10f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFFFE8F2), Color(0xFFE8E0F2), Color(0xFFD4E4F5))), size = Size(w, h))
-                // Pastel clouds
-                listOf(Pair(Offset(w * 0.20f, h * 0.22f), Color(0xFFFFD9E8)), Pair(Offset(w * 0.72f, h * 0.30f), Color(0xFFD9E8FF))).forEach { (c, col) ->
-                    drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.9f), col.copy(alpha = 0f))), radius = w * 0.16f, center = c)
-                    drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.9f), col.copy(alpha = 0f))), radius = w * 0.11f, center = Offset(c.x + w * 0.05f, c.y - h * 0.03f))
-                }
-                // Dreamy arch (doorway) — the heart floats OUT of its glow
-                val ax = w * 0.62f; val ay = h * 0.80f
-                drawArc(Color(0xFF8A6BA8).copy(alpha = 0.30f), 180f, 180f, false, Offset(ax - w * 0.09f, ay - h * 0.22f), Size(w * 0.18f, w * 0.225f), style = Stroke(2.4f))
-                drawLine(Color(0xFF8A6BA8).copy(alpha = 0.30f), Offset(ax - w * 0.09f, ay - h * 0.08f), Offset(ax - w * 0.09f, ay), strokeWidth = 2.4f)
-                drawLine(Color(0xFF8A6BA8).copy(alpha = 0.30f), Offset(ax + w * 0.09f, ay - h * 0.08f), Offset(ax + w * 0.09f, ay), strokeWidth = 2.4f)
+                // One soft pastel cloud, top-left
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFD9E8).copy(alpha = 0.95f), Color(0xFFD9E8FF).copy(alpha = 0f))), radius = w * 0.14f, center = Offset(w * 0.18f, h * 0.20f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFD9E8).copy(alpha = 0.95f), Color(0xFFFFD9E8).copy(alpha = 0f))), radius = w * 0.10f, center = Offset(w * 0.24f, h * 0.16f))
+                // Dreamy arch — the focal piece
+                val ax = w * 0.60f; val ay = h * 0.82f
+                drawArc(Color(0xFF8A6BA8).copy(alpha = 0.32f), 180f, 180f, false, Offset(ax - w * 0.09f, ay - h * 0.22f), Size(w * 0.18f, w * 0.225f), style = Stroke(2.4f))
+                drawLine(Color(0xFF8A6BA8).copy(alpha = 0.32f), Offset(ax - w * 0.09f, ay - h * 0.08f), Offset(ax - w * 0.09f, ay), strokeWidth = 2.4f)
+                drawLine(Color(0xFF8A6BA8).copy(alpha = 0.32f), Offset(ax + w * 0.09f, ay - h * 0.08f), Offset(ax + w * 0.09f, ay), strokeWidth = 2.4f)
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFB8D8).copy(alpha = 0.6f), Color(0xFFFFB8D8).copy(alpha = 0f))), radius = w * 0.14f, center = Offset(ax, ay - h * 0.10f))
-                // Heart rising from the arch opening
+                // Heart rising from the arch
                 val hx = ax; val hy = ay - h * 0.34f
                 drawPath(Path().apply {
                     moveTo(hx, hy + w * 0.018f)
                     cubicTo(hx - w * 0.014f, hy - w * 0.012f, hx - w * 0.03f, hy - w * 0.002f, hx, hy + w * 0.020f)
                     cubicTo(hx + w * 0.03f, hy - w * 0.002f, hx + w * 0.014f, hy - w * 0.012f, hx, hy + w * 0.018f)
-                }, Color(0xFFFF7AB0).copy(alpha = 0.75f))
-                // Sparkles orbiting the heart
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 16) {
-                    val a = Math.toRadians((360.0 * i / 16)).toFloat()
-                    val x = hx + kotlin.math.cos(a) * w * 0.07f + ((s * (i+1) * 3571) % 100) / 100f * w * 0.02f
-                    val y = hy + kotlin.math.sin(a) * w * 0.05f + ((s * (i+1) * 4201) % 100) / 100f * w * 0.015f
-                    drawStar(x, y, 1.8f, 0.8f, Color(0xFFB98BFF).copy(alpha = 0.55f))
+                }, Color(0xFFFF7AB0).copy(alpha = 0.80f))
+                // Four soft sparkles, placed
+                listOf(Pair(w * 0.30f, h * 0.30f), Pair(w * 0.80f, h * 0.22f), Pair(w * 0.40f, h * 0.60f), Pair(w * 0.84f, h * 0.52f)).forEach { (x, y) ->
+                    drawStar(x, y, 1.4f, 0.6f, Color(0xFFB98BFF).copy(alpha = 0.50f))
                 }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF8A7A9A).copy(alpha = 0.25f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.9f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF8A7A9A).copy(alpha = 0.22f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.9f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFB98BFF), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
