@@ -80,28 +80,29 @@ class CurioThemeTransitionState {
     fun startTransition(center: Offset): Boolean {
         if (isAnimating) return false
         val view = captureView ?: return false
-        val bitmap = try {
+        val bitmap = captureFrame(view) ?: return false
+        // Recreate (rather than snapTo, which is suspend) so the reveal
+        // always begins from 0 on a new capture.
+        progress = Animatable(0f)
+        screenshotBitmap = bitmap
+        revealCenter = center
+        isAnimating = true
+        return true
+    }
+
+    /**
+     * Snapshot the current view, rejecting failures and blank/transparent
+     * captures. A blank frame (a device quirk where drawToBitmap "succeeds"
+     * but replays nothing) can't drive the wipe — treat it as a failure and
+     * fall back to the instant flip so we never freeze a see-through frame
+     * (v269 parity). Returns null to signal "bail out, apply instantly".
+     */
+    private fun captureFrame(view: View): Bitmap? {
+        return try {
             val bmp = view.drawToBitmap()
-            // A blank/transparent snapshot (all alpha 0) can't drive the wipe
-            // -> treat it as a failure and fall back to the instant flip so we
-            // never freeze a see-through frame on devices where drawToBitmap
-            // quietly returns nothing (v269 parity).
             if (bmp.isBlank()) null else bmp
         } catch (e: Exception) {
             null
-        } ?: return false
-        try {
-            // Recreate (rather than snapTo, which is suspend) so the reveal
-            // always begins from 0 on a new capture.
-            progress = Animatable(0f)
-            screenshotBitmap = bitmap
-            revealCenter = center
-            isAnimating = true
-            true
-        } catch (e: Exception) {
-            screenshotBitmap = null
-            isAnimating = false
-            false
         }
     }
 
@@ -118,7 +119,7 @@ class CurioThemeTransitionState {
                 if (alpha > 0) return false
             }
         }
-        true
+        return true
     }
 
     /** Clear the frozen frame and release its backing pixels after Compose detaches. */

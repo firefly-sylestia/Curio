@@ -86,6 +86,29 @@ val BungeeFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * Playfair Display — the literary serif voice (OFL). A variable font (wght
+ * 400–900) bundled at `res/font/playfair_display.ttf`; used for the BOOKS
+ * share-card title for a classic book-jacket feel. Single file, weight
+ * resolved via the wght axis. License at `app/third_party/playfair_display_OFL.txt`.
+ */
+val PlayfairDisplayFontFamily: FontFamily = FontFamily(
+    Font(R.font.playfair_display, FontWeight.Normal),
+    Font(R.font.playfair_display, FontWeight.Medium),
+    Font(R.font.playfair_display, FontWeight.SemiBold),
+    Font(R.font.playfair_display, FontWeight.Bold)
+)
+
+/**
+ * Pirata One — the adventure/treasure-map display face (OFL). Bundled at
+ * `res/font/pirata_one.ttf`; used for the DISCOVERIES share-card title for
+ * a nautical-map feel. Single-entry family (one Regular file) — callers
+ * pair it with `FontWeight.Normal`. License at `app/third_party/pirata_one_OFL.txt`.
+ */
+val PirataOneFontFamily: FontFamily = FontFamily(
+    Font(R.font.pirata_one)
+)
+
+/**
  * Lora — the editorial serif voice (OFL). A variable font (wght 400–700)
  * bundled at `res/font/lora.ttf` (v35). Used for long-form reading text —
  * the Topic Reveal teaser/quick-fact, action-card instructions, and intro
