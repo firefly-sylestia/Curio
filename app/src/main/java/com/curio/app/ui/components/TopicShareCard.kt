@@ -5098,9 +5098,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawLine(Color(0xFF0A140C), Offset(w * 0.86f, h * 0.30f), Offset(w * 0.86f, h * 0.90f), strokeWidth = 6f)
                 drawPath(Path().apply { moveTo(w * 0.86f, h * 0.34f); lineTo(w * 0.72f, h * 0.46f); lineTo(w * 0.86f, h * 0.42f); close() }, Color(0xFF0A140C))
                 drawPath(Path().apply { moveTo(w * 0.86f, h * 0.30f); lineTo(w * 0.74f, h * 0.34f); lineTo(w * 0.86f, h * 0.40f); close() }, Color(0xFF0A140C))
-                // Grass blades bottom
-                for (i in 0 until 20) {
-                    val gx = w * 0.04f + i * w * 0.048f
+                // Grass blades bottom — eight clean blades
+                for (i in 0 until 8) {
+                    val gx = w * 0.06f + i * w * 0.11f
                     drawLine(Color(0xFF3E8A4A).copy(alpha = 0.5f), Offset(gx, h * 0.90f), Offset(gx + w * 0.008f, h * 0.84f + (i % 3) * h * 0.01f), strokeWidth = 1.2f)
                 }
                 // Paw-print trail
@@ -5114,11 +5114,8 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 paw(w * 0.24f, h * 0.72f, w * 0.018f)
                 paw(w * 0.38f, h * 0.60f, w * 0.022f)
                 paw(w * 0.54f, h * 0.50f, w * 0.026f)
-                // Fireflies
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 12) {
-                    val x = ((s * (i+1) * 3571) % 10000) / 10000f * w
-                    val y = ((s * (i+1) * 4201) % 10000) / 10000f * h * 0.6f
+                // Fireflies — four, placed
+                listOf(Pair(w * 0.12f, h * 0.30f), Pair(w * 0.42f, h * 0.22f), Pair(w * 0.66f, h * 0.38f), Pair(w * 0.30f, h * 0.52f)).forEach { (x, y) ->
                     drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2E84F).copy(alpha = 0.5f), Color(0xFFF2E84F).copy(alpha = 0f))), radius = w * 0.014f, center = Offset(x, y))
                 }
                 drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF040A05).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
