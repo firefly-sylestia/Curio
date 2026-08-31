@@ -1135,7 +1135,7 @@ private fun SignatureCard(
                         langMeasurer,
                         word,
                         style = TextStyle(fontFamily = LoraFontFamily, fontSize = (11f + i % 3 * 2f).sp, color = tint),
-                        topLeft = Offset(size.width * pos.first, size.height * pos.second)
+                        topLeft = Offset(size.width * pos.x, size.height * pos.y)
                     )
                 }
             }
