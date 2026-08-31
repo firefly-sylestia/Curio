@@ -4,6 +4,17 @@
 
 A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 categories, then capture what you notice in a beautiful, personal offline library. Share your discoveries as stunning, topic-specific cards. No accounts. No feed. No ads. Just you, a topic, and the world.
 
+![Release](https://img.shields.io/github/v/release/firefly-sylestia/Curio?label=Release&logo=github)
+![Downloads](https://img.shields.io/github/downloads/firefly-sylestia/Curio/total?label=Downloads&logo=github)
+![Stars](https://img.shields.io/github/stars/firefly-sylestia/Curio?label=Stars&logo=github)
+![License](https://img.shields.io/github/license/firefly-sylestia/Curio?label=License)
+![Platform](https://img.shields.io/badge/Platform-Android_8.0%2B-3DDC84?logo=android&logoColor=white)
+![AI-assisted](https://img.shields.io/badge/AI--assisted-Codebuff-6C47FF)
+
+<!-- Future store badges: add Google Play / F-Droid download badges here when the store listings go live. -->
+
+[![Curio project statistics](https://github-readme-stats.vercel.app/api?username=firefly-sylestia&repo=Curio&show_icons=true&hide_border=true&count_private=true&title_color=6C47FF&icon_color=6C47FF&text_color=8a8a8a&bg_color=00000000)](https://github.com/firefly-sylestia/Curio)
+
 ---
 
 ## Screenshots
