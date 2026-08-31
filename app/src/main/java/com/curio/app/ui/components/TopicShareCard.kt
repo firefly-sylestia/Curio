@@ -4515,28 +4515,23 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF22355C), Color(0xFF131A2E), Color(0xFF0A0F1C))), size = Size(w, h))
                 // Warm desk-lamp glow from the corner
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.26f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.38f, center = Offset(w * 0.78f, h * 0.26f))
-                // Manuscript ruled lines
-                for (i in 0 until 12) {
-                    val y = h * 0.20f + i * h * 0.045f
-                    drawLine(Color(0xFF9FB4D8).copy(alpha = 0.14f), Offset(w * 0.08f, y), Offset(w * 0.60f, y), strokeWidth = 0.8f)
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.22f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.32f, center = Offset(w * 0.78f, h * 0.24f))
+                // Manuscript ruled lines — few, faint
+                for (i in 0 until 7) {
+                    val y = h * 0.22f + i * h * 0.05f
+                    drawLine(Color(0xFF9FB4D8).copy(alpha = 0.12f), Offset(w * 0.08f, y), Offset(w * 0.56f, y), strokeWidth = 0.8f)
                 }
                 // Red margin line
-                drawLine(Color(0xFFC94F4F).copy(alpha = 0.40f), Offset(w * 0.13f, h * 0.20f), Offset(w * 0.13f, h * 0.68f), strokeWidth = 1f)
-                // Inkwell with quill
-                val ix = w * 0.74f; val iy = h * 0.58f
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF2A3B66), Color(0xFF10182C)), center = Offset(ix, iy), radius = w * 0.10f), radius = w * 0.075f, center = Offset(ix, iy))
-                drawOval(Color(0xFF0B1020), Offset(ix - w * 0.05f, iy + w * 0.05f), Size(w * 0.10f, w * 0.028f))
-                drawLine(Color(0xFFF2E4C8).copy(alpha = 0.65f), Offset(ix + w * 0.02f, iy - w * 0.05f), Offset(ix + w * 0.16f, iy - w * 0.22f), strokeWidth = 1.6f)
-                drawLine(Color(0xFFF2E4C8).copy(alpha = 0.40f), Offset(ix + w * 0.16f, iy - w * 0.22f), Offset(ix + w * 0.24f, iy - w * 0.30f), strokeWidth = 1.1f)
-                // Ink splatter
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 18) {
-                    val x = ((s * (i+1) * 3571) % 10000) / 10000f * w * 0.5f + w * 0.20f
-                    val y = ((s * (i+1) * 4201) % 10000) / 10000f * h * 0.5f + h * 0.62f
-                    drawCircle(Color(0xFF3E4A6B).copy(alpha = 0.35f), 0.7f + (i % 4) * 0.7f, Offset(x, y))
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF060912).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawLine(Color(0xFFC94F4F).copy(alpha = 0.35f), Offset(w * 0.13f, h * 0.22f), Offset(w * 0.13f, h * 0.66f), strokeWidth = 1f)
+                // Refined inkwell with a gold rim
+                val ix = w * 0.76f; val iy = h * 0.56f
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF2A3B66), Color(0xFF10182C)), center = Offset(ix, iy - w * 0.01f), radius = w * 0.10f), radius = w * 0.062f, center = Offset(ix, iy))
+                drawCircle(Color(0xFFF2C879).copy(alpha = 0.55f), w * 0.062f, Offset(ix, iy), style = Stroke(1f))
+                drawOval(Color(0xFF0B1020), Offset(ix - w * 0.042f, iy + w * 0.042f), Size(w * 0.084f, w * 0.022f))
+                // One clean quill arc
+                drawPath(Path().apply { moveTo(ix + w * 0.02f, iy - w * 0.03f); cubicTo(ix + w * 0.10f, iy - w * 0.16f, ix + w * 0.18f, iy - w * 0.22f, ix + w * 0.24f, iy - w * 0.26f) }, Color(0xFFF2E4C8).copy(alpha = 0.60f), style = Stroke(1.6f))
+                drawLine(Color(0xFFF2E4C8).copy(alpha = 0.35f), Offset(ix + w * 0.16f, iy - w * 0.20f), Offset(ix + w * 0.26f, iy - w * 0.28f), strokeWidth = 1f)
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF060912).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFF2C879), badgeInk = Color(0xFF131A2E),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
