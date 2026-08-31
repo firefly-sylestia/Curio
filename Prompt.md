@@ -1,5 +1,27 @@
 # Prompt.md — current request log
 
+## Request: DETAILED (Deepen) scenes batch 2 — minimal aesthetic pass: Songs / Directors / Animated Movies / Authors / Painters (COMPLETE)
+
+- User: "continue the next and focus on more minimal and aesthetic looks
+  not messy, and lets do a bigger push just commit one after another dont
+  push yet." Direction: fewer elements, generous negative space, one clear
+  focal point, no scattered clutter. Committed one per card, pushed once at
+  the end.
+- SONGS: 3 orbs + 18 glowing bars + 3 notes -> one diffused orb, clean
+  12-bar waveform (no per-bar glow halos), quiet baseline, one floating
+  note.
+- DIRECTORS: reel + angled clapperboard + corner accents + film strip ->
+  one centered clapperboard, single gold diagonal, warm key glow + soft
+  top light cone.
+- ANIMATED MOVIES: 3 orbs + 6-band ribbon + 10-dot comet trail + 16
+  sparkles -> one orb, single 5-band even rainbow arc, one star at the
+  head, 3 placed sparkles.
+- AUTHORS: 12 manuscript lines + 18-dot ink splatter -> 7 faint lines,
+  gold-rimmed inkwell, one clean quill arc, no splatter.
+- PAINTERS: 5-well palette + paint drips + unpainted canvas corner ->
+  clean 3-well palette, simple sky-sun-hill abstract, one brush, no drips.
+- Balance-checked each commit; CI validates on the final push.
+
 ## Request: DETAILED (Deepen-experiment) scene upgrades — Books / Films / Games / Artists / Albums (COMPLETE)
 
 - User: "analyse the next 5 detailed" — the first five DETAILED (Deepen
