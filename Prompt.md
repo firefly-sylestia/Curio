@@ -1,5 +1,38 @@
 # Prompt.md — current request log
 
+## Request: Share sheet declutter — floating Customise overlay + cross-style fact size + universal hold-to-edit (COMMITTED, NOT PUSHED)
+
+- User: "the place where it says the dimension and the quote no fact etc
+  and the photo and text box current classic, make all of it into a new
+  floating customise button where the options are in when tapped they
+  show up in a transparent overlay look with arrow to change the styles
+  so its much better and clutter free, and also include the font size
+  chnager for quick facts in that and it will affect every style and same
+  for the tap and hold to edit that affects all style too."
+- SHARE SHEET: removed the scattered rows (Aspect Pills, Design
+  Current/Classic Pills, Sources Pills, custom-fact field, Vinyl
+  favorite-song field, fact-size +/− in edit mode). All controls now live
+  behind a floating Customise pill (CurioIcons.Tune, bottom-right over the
+  card) that opens a translucent overlay over a light scrim:
+  - OptionStepperRow (NEW private composable — label + −/+ round steppers)
+    for Aspect, Source, Fact size, and Design (Signature only).
+  - Photo + caption row (Collage only), favorite-song field (Vinyl only),
+    custom-fact field (Custom source only) moved INSIDE the overlay.
+- BODY SCALE: `bodyScale` threaded through every card style (Paper, Vinyl,
+  Collage, Clean, Editorial, Minimal, Signature, Quote) — the fact-size
+  stepper now scales the quick-fact text on EVERY style, not just Paper.
+- HOLD-TO-EDIT: the generic ArrangeableCard (long-press → inline
+  BasicTextFields on the card) now wraps every style; editMode is no
+  longer Paper-gated. Edit hint + Reset/Done row shown for all styles.
+- FIXED: Save button was missing classicSignature (pre-existing — saved
+  Classic-design signature cards exported Current); now passes
+  classicDesign. Edit-mode −/+ fact-size row removed (lives in overlay).
+- NEW OptionStepperRow defined next to Pill; CircleShape already imported;
+  CurioIcons.Tune verified to exist ("tune" sliders). arrangeActive
+  leftover reference removed. ShareHubBody (Entry share hub) left as-is.
+- Balance-checked (depth 0). Changelog + Prompt.md updated. PENDING PUSH
+  (await user's go-ahead per standing instruction).
+
 ## Request: Editorial drop cap fix + Paper hold-to-edit now edits TEXT inline (COMMITTED, NOT PUSHED)
 
 - User: "the editorial design is good just that the first bigger letter

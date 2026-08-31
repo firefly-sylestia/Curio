@@ -239,25 +239,27 @@ fun TopicShareCard(
     classicSignature: Boolean = false,
     onPhotoTap: (() -> Unit)? = null,
     bodyScale: Float = 1f,
-    editMode: Boolean = false,
     editedTitle: String? = null,
-    editedFact: String? = null,
-    onTitleEdit: ((String) -> Unit)? = null,
-    onFactEdit: ((String) -> Unit)? = null
+    editedFact: String? = null
 ) {
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent)
+    // Resolve per-share text edits once — every style renders the same values,
+    // and quote cards show the edited quote as both the body and the quote.
+    val shownDisplay = editedTitle ?: display
+    val shownFact = editedFact ?: factText
+    val shownQuote = quoteText?.let { shownFact }
     when (style) {
-        ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year, bodyScale, editMode, editedTitle, editedFact, onTitleEdit, onFactEdit)
-        ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap)
-        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.EDITORIAL -> EditorialCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.MINIMAL -> MinimalCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
-        ShareCardStyle.SIGNATURE -> SignatureCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year, classicSignature)
-        ShareCardStyle.CUSTOM -> CustomCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
+        ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale)
+        ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale)
+        ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale)
+        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale)
+        ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale)
+        ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale)
+        ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale)
+        ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale)
     }
 }
 
@@ -272,13 +274,9 @@ private fun PaperCard(
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
-    bodyScale: Float = 1f, editMode: Boolean = false,
-    editedTitle: String? = null, editedFact: String? = null,
-    onTitleEdit: ((String) -> Unit)? = null, onFactEdit: ((String) -> Unit)? = null
+    bodyScale: Float = 1f
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
-    val shownTitle = editedTitle ?: display
-    val shownFact = editedFact ?: factText
     Box(
         modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))
             .shadow(4.dp, RoundedCornerShape(6.dp))
@@ -300,71 +298,7 @@ private fun PaperCard(
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
-            if (editMode) {
-                // Inline text editing — the title + quick fact become editable
-                // right where they sit on the card (transparent fields).
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (quoteText != null) {
-                        CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
-                        BasicTextField(
-                            value = shownFact,
-                            onValueChange = { onFactEdit?.invoke(it) },
-                            textStyle = MaterialTheme.typography.titleLarge.copy(
-                                fontFamily = LoraFontFamily, fontSize = qSize,
-                                lineHeight = (qSize.value * 1.28f).sp, color = palette.ink),
-                            cursorBrush = SolidColor(palette.ink),
-                            singleLine = false,
-                            maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 8,
-                            modifier = Modifier.fillMaxWidth(),
-                            decorationBox = { inner -> Box(Modifier.fillMaxWidth()) { inner() } }
-                        )
-                    } else {
-                        // Title — editable in place, same font/placement as the static one
-                        BasicTextField(
-                            value = shownTitle,
-                            onValueChange = { onTitleEdit?.invoke(it) },
-                            textStyle = MaterialTheme.typography.headlineLarge.copy(
-                                fontFamily = ChangaOneFontFamily, lineHeight = 40.sp, color = palette.ink),
-                            cursorBrush = SolidColor(palette.ink),
-                            singleLine = false,
-                            maxLines = 3,
-                            modifier = Modifier.fillMaxWidth(),
-                            decorationBox = { inner -> Box(Modifier.fillMaxWidth()) { inner() } }
-                        )
-                        val metaParts = mutableListOf<String>()
-                        if (byline.isNotBlank()) metaParts.add(byline)
-                        if (year != null) metaParts.add(year)
-                        if (metaParts.isNotEmpty()) {
-                            Text(
-                                metaParts.joinToString(" \u2022 "),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
-                                color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
-                        FrostPane(palette) {
-                            val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(shownFact.length)
-                                     else quickFactFontSize(shownFact.length)
-                            val qfsScaled = (qfs.value * bodyScale).sp
-                            BasicTextField(
-                                value = shownFact,
-                                onValueChange = { onFactEdit?.invoke(it) },
-                                textStyle = MaterialTheme.typography.bodySmall.copy(
-                                    fontFamily = LoraFontFamily, fontSize = qfsScaled,
-                                    lineHeight = (qfsScaled.value * 1.4f).sp, color = palette.ink),
-                                cursorBrush = SolidColor(palette.ink),
-                                singleLine = false,
-                                maxLines = if (aspect == ShareCardAspect.PORTRAIT) 20 else 14,
-                                modifier = Modifier.fillMaxWidth(),
-                                decorationBox = { inner -> Box(Modifier.fillMaxWidth()) { inner() } }
-                            )
-                        }
-                    }
-                }
-            } else {
-                MiddleContent(shownTitle, shownFact, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale)
-            }
+            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale)
             Footer(sharerName, quoteText, quoteAuthor, palette)
         }
     }
@@ -380,7 +314,8 @@ private fun VinylCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -506,8 +441,8 @@ private fun VinylCard(
                 modifier = Modifier.widthIn(max = 220.dp)
             ) {
                 Text(body, style = TextStyle(
-                    fontFamily = LoraFontFamily, fontSize = bodySize,
-                    lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.88f),
+                    fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
+                    lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.88f),
                     fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
                 ), modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
             }
@@ -575,7 +510,8 @@ private fun CollageCard(
     userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
     byline: String = "", year: String? = null,
     polaroidCaption: String = "",
-    onPhotoTap: (() -> Unit)? = null
+    onPhotoTap: (() -> Unit)? = null,
+    bodyScale: Float = 1f
 ) {
     val topCream = Color(0xFFF5EDE0)
     val bottomSage = Color(0xFF6B7C65)
@@ -742,8 +678,8 @@ private fun CollageCard(
                 body.length > 280 -> 10.sp; body.length > 180 -> 11.sp; else -> 12.sp
             }
             Text(body, style = TextStyle(
-                fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.55f).sp, color = Color.White.copy(alpha = 0.92f),
+                fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
+                lineHeight = (bodySize.value * 1.55f * bodyScale).sp, color = Color.White.copy(alpha = 0.92f),
                 fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
             ), maxLines = 18, overflow = TextOverflow.Ellipsis)
 
@@ -778,7 +714,8 @@ private fun NeumorphicCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f
 ) {
     val ink = Color(0xFF101010)
     val paper = Color(0xFFF8F6EF)
@@ -854,7 +791,7 @@ private fun NeumorphicCard(
                 Text(body, style = TextStyle(
                     fontFamily = LoraFontFamily,
                     fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal,
-                    fontSize = bodySize, lineHeight = (bodySize.value * 1.40f).sp,
+                    fontSize = (bodySize.value * bodyScale).sp, lineHeight = (bodySize.value * 1.40f * bodyScale).sp,
                     color = Color.White.copy(alpha = 0.88f),
                     shadow = Shadow(Color.Black.copy(alpha = 0.62f), Offset(0f, 2f), 5f)
                 ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, overflow = TextOverflow.Ellipsis)
@@ -885,7 +822,8 @@ private fun EditorialCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f
 ) {
     val cream = Color(0xFFFAF7F0)
     val inkDark = Color(0xFF1C1814)
@@ -959,13 +897,13 @@ private fun EditorialCard(
                 if (initial.isNotEmpty()) {
                     Text(initial, style = TextStyle(
                         fontFamily = LoraFontFamily, fontWeight = FontWeight.Bold,
-                        fontSize = (bodySize.value * 3.0f).sp,
-                        lineHeight = (bodySize.value * 3.0f).sp, color = accentRule
+                        fontSize = (bodySize.value * 3.0f * bodyScale).sp,
+                        lineHeight = (bodySize.value * 3.0f * bodyScale).sp, color = accentRule
                     ), modifier = Modifier.alignByBaseline().padding(end = 5.dp))
                 }
                 Text(bodyRest, style = TextStyle(
-                    fontFamily = LoraFontFamily, fontSize = bodySize,
-                    lineHeight = (bodySize.value * 1.45f).sp, color = inkDark.copy(alpha = 0.82f),
+                    fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
+                    lineHeight = (bodySize.value * 1.45f * bodyScale).sp, color = inkDark.copy(alpha = 0.82f),
                     fontWeight = FontWeight.Medium
                 ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.alignByBaseline())
@@ -1005,7 +943,8 @@ private fun MinimalCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f
 ) {
     val bg = Color(0xFFFFFDF9)
     val inkDark = Color(0xFF1A1A1A)
@@ -1070,8 +1009,8 @@ private fun MinimalCard(
             // Body — serif, bottom-anchored
             val bodySize = when { body.length > 350 -> 8.5.sp; body.length > 260 -> 9.5.sp; body.length > 180 -> 10.5.sp; else -> 11.5.sp }
             Text(body, style = TextStyle(
-                fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.78f)
+                fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
+                lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.78f)
             ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, overflow = TextOverflow.Ellipsis)
 
             if (ratingStars != null && ratingStars > 0) {
@@ -1101,7 +1040,8 @@ private fun SignatureCard(
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
-    classicSignature: Boolean = false
+    classicSignature: Boolean = false,
+    bodyScale: Float = 1f
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -5777,7 +5717,8 @@ private fun CustomCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -5822,7 +5763,7 @@ private fun CustomCard(
                 body.length > 260 -> sig.bodySize - 1.5f
                 body.length > 180 -> sig.bodySize - 0.5f
                 else -> sig.bodySize
-            }.coerceAtLeast(7f)
+            }.coerceAtLeast(7f) * bodyScale
             Text(body, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize.sp,
                 lineHeight = (bodySize * sig.bodyLineHeight).sp,
@@ -6080,19 +6021,71 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
 // ═══════════════════════════════════════════════════════════════════════
 // SHARE SHEET
 // ═══════════════════════════════════════════════════════════════════════
-/** Wraps the preview card: tap-and-hold toggles inline text editing (Paper). */
+/**
+ * Wraps the preview card: tap-and-hold toggles inline text editing, which
+ * works on EVERY style. While editing, a translucent panel over the card's
+ * bottom lets you type the title and quick fact — the card behind updates
+ * live, and the saved/shared image matches.
+ */
 @Composable
 private fun ArrangeableCard(
     active: Boolean,
     editMode: Boolean,
+    quoteMode: Boolean,
+    editTitle: String,
+    editFact: String,
+    onTitleChange: (String) -> Unit,
+    onFactChange: (String) -> Unit,
     onToggleEdit: () -> Unit,
     card: @Composable () -> Unit
 ) {
     Box(modifier = Modifier.pointerInput(active, editMode) {
-        // While editing, the gesture is disabled so taps reach the inline fields.
+        // While editing, the gesture is disabled so taps reach the fields.
         if (active && !editMode) detectTapGestures(onLongPress = { onToggleEdit() })
     }) {
         card()
+        if (editMode) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+                tonalElevation = 6.dp,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (!quoteMode) {
+                        Text("Title", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                        BasicTextField(
+                            value = editTitle,
+                            onValueChange = onTitleChange,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            singleLine = false,
+                            maxLines = 2,
+                            modifier = Modifier.fillMaxWidth(),
+                            decorationBox = { inner ->
+                                Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) { inner() }
+                            }
+                        )
+                    }
+                    Text("Quick fact", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                    BasicTextField(
+                        value = editFact,
+                        onValueChange = onFactChange,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        singleLine = false,
+                        maxLines = 4,
+                        modifier = Modifier.fillMaxWidth(),
+                        decorationBox = { inner ->
+                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) { inner() }
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -6115,6 +6108,7 @@ fun TopicShareSheet(
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
     var editMode by remember { mutableStateOf(false) }
+    var customizeOpen by remember { mutableStateOf(false) }
     var bodyScale by remember { mutableStateOf(1f) }
     var editedTitle by remember { mutableStateOf<String?>(null) }
     var editedFact by remember { mutableStateOf<String?>(null) }
@@ -6160,8 +6154,15 @@ fun TopicShareSheet(
     val styles = availableStylesForFamily(categoryFamily, topicName)
     val safeIdx = styleIdx.coerceIn(0, styles.lastIndex)
     val currentStyle = styles[safeIdx]
-    val arrangeActive = currentStyle == ShareCardStyle.PAPER
-    val arrangeNow = arrangeActive && editMode
+    // Inline-edit / Customise helpers
+    val baseTitle = topicName.substringBeforeLast(" (")
+    val sourceOptions = available.filter { !isQuotes || it.id != QUICK_FACT_ID }
+    val sourceIdx = sourceOptions.indexOfFirst { it.id == activeId }.let { if (it < 0) 0 else it }
+    val sourceLabel = if (sourceOptions.isNotEmpty()) {
+        val opt = sourceOptions[sourceIdx]
+        opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { r -> " \u00b7 " + "\u2605".repeat(r) } ?: "")
+    } else ""
+    val factSizeLabel = (Math.round(bodyScale * 100f) / 100f).toString() + "\u00d7"
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -6169,7 +6170,8 @@ fun TopicShareSheet(
 
             // The card carousel IS the preview — no separate static card
             val pw = 280.dp
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Box {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (styles.size > 1) {
                     // Style label
                     Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -6180,7 +6182,7 @@ fun TopicShareSheet(
                         state = pagerState,
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 36.dp),
                         pageSpacing = 16.dp,
-                        userScrollEnabled = !editMode,
+                        userScrollEnabled = !(editMode || customizeOpen),
                         modifier = Modifier.fillMaxWidth()
                     ) { page ->
                         val isCenter = page == pagerState.currentPage
@@ -6197,15 +6199,19 @@ fun TopicShareSheet(
                                     alpha = 1f - 0.25f * kotlin.math.abs(pageOffset)
                                 }
                         ) {
-                                            val isEditingPage = arrangeNow && page == pagerState.currentPage
-                                            ArrangeableCard(
-                                                active = arrangeActive && page == pagerState.currentPage,
-                                                editMode = editMode,
-                                                onToggleEdit = { editMode = !editMode }
-                                            ) {
-                                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editMode = isEditingPage, editedTitle = editedTitle, editedFact = editedFact, onTitleEdit = { editedTitle = it }, onFactEdit = { editedFact = it })
-                                            }
-                                        }
+                            ArrangeableCard(
+                                active = page == pagerState.currentPage,
+                                editMode = editMode && page == pagerState.currentPage,
+                                quoteMode = isQuotes,
+                                editTitle = editedTitle ?: baseTitle,
+                                editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
+                                onTitleChange = { editedTitle = it },
+                                onFactChange = { editedFact = it },
+                                onToggleEdit = { editMode = !editMode }
+                            ) {
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact)
+                            }
+                        }
                     }
                     // Style dots
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -6226,103 +6232,108 @@ fun TopicShareSheet(
                             .clip(RoundedCornerShape(6.dp))
                     ) {
                         ArrangeableCard(
-                            active = arrangeActive,
+                            active = true,
                             editMode = editMode,
+                            quoteMode = isQuotes,
+                            editTitle = editedTitle ?: baseTitle,
+                            editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
+                            onTitleChange = { editedTitle = it },
+                            onFactChange = { editedFact = it },
                             onToggleEdit = { editMode = !editMode }
                         ) {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editMode = arrangeNow, editedTitle = editedTitle, editedFact = editedFact, onTitleEdit = { editedTitle = it }, onFactEdit = { editedFact = it })
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact)
                         }
                     }
                 }
             }
 
-            // Photo picker for Collage — compact row below card
-            if (currentStyle == ShareCardStyle.COLLAGE) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
-                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                            Text(
-                                if (userPhoto != null) "Change" else "Photo",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                }
+
+                // Customise overlay — translucent panel over a light scrim
+                if (customizeOpen) {
+                    Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.32f))) {
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                            tonalElevation = 8.dp,
+                            modifier = Modifier.align(Alignment.Center).fillMaxWidth(0.92f)
+                        ) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text("Customise", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
+                                OptionStepperRow("Aspect", aspect.label,
+                                    { aspect = if (aspect == ShareCardAspect.PORTRAIT) ShareCardAspect.CLASSIC else ShareCardAspect.PORTRAIT },
+                                    { aspect = if (aspect == ShareCardAspect.PORTRAIT) ShareCardAspect.CLASSIC else ShareCardAspect.PORTRAIT })
+                                if (sourceOptions.isNotEmpty()) {
+                                    OptionStepperRow("Source", sourceLabel,
+                                        { selectedId = sourceOptions[(sourceIdx - 1 + sourceOptions.size) % sourceOptions.size].id },
+                                        { selectedId = sourceOptions[(sourceIdx + 1) % sourceOptions.size].id })
+                                }
+                                // Fact size — affects every card style
+                                OptionStepperRow("Fact size", factSizeLabel,
+                                    { bodyScale = (bodyScale - 0.15f).coerceIn(0.5f, 1.8f) },
+                                    { bodyScale = (bodyScale + 0.15f).coerceIn(0.5f, 1.8f) })
+                                if (currentStyle == ShareCardStyle.SIGNATURE) {
+                                    OptionStepperRow("Design", if (classicDesign) "Classic" else "Current",
+                                        { classicDesign = !classicDesign }, { classicDesign = !classicDesign })
+                                }
+                                if (currentStyle == ShareCardStyle.COLLAGE) {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
+                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                                Text(if (userPhoto != null) "Change" else "Photo", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                        OutlinedTextField(value = polaroidCaption, onValueChange = { polaroidCaption = it.take(36) }, placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium) }, singleLine = true, textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface), shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(40.dp))
+                                    }
+                                }
+                                if (activeId == CUSTOM_FACT_ID) {
+                                    OutlinedTextField(customText, { customText = it }, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
+                                }
+                                if (currentStyle == ShareCardStyle.VINYL) {
+                                    OutlinedTextField(
+                                        value = AppPreferences.favoriteSongState,
+                                        onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
+                                        placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                        shape = RoundedCornerShape(50),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
                         }
                     }
-                    OutlinedTextField(
-                        value = polaroidCaption,
-                        onValueChange = { polaroidCaption = it.take(36) },
-                        placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium) },
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f).height(40.dp)
-                    )
                 }
-            }
 
-            // Favorite song — Vinyl corner chip (persisted to AppPreferences so
-            // it sticks across shares).
-            if (currentStyle == ShareCardStyle.VINYL) {
-                OutlinedTextField(
-                    value = AppPreferences.favoriteSongState,
-                    onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
-                    placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                // Floating Customise button — over the card, bottom-right
+                Surface(
+                    onClick = { customizeOpen = !customizeOpen },
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    color = if (customizeOpen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shadowElevation = 6.dp,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
+                ) {
+                    Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        CurioIcon(name = CurioIcons.Tune, tint = if (customizeOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                        Text(if (customizeOpen) "Close" else "Customise", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = if (customizeOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant))
+                    }
+                }
             }
 
-            // Edit hint (Paper) — tap & hold the card to edit its text inline
-            if (arrangeActive && !editMode) {
+            // Edit hint — tap & hold the card to edit its text inline
+            if (!editMode && !customizeOpen) {
                 Text("Hold the card to edit the title & quick fact",
                     style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
 
-            // Inline-edit controls (Paper) — fact-size +/−, Reset, Done
+            // Inline-edit controls — Reset + Done (fact size lives in Customise)
             if (editMode) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                    Surface(onClick = { bodyScale = (bodyScale - 0.15f).coerceIn(0.5f, 1.8f) },
-                        shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary) {
-                        Text("\u2212", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onPrimary), modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                    }
-                    Text("  Fact size  ", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface))
-                    Surface(onClick = { bodyScale = (bodyScale + 0.15f).coerceIn(0.5f, 1.8f) },
-                        shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary) {
-                        Text("\u002b", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onPrimary), modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                    }
-                    Spacer(Modifier.width(14.dp))
                     TextButton(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f }) { Text("Reset") }
+                    Spacer(Modifier.width(10.dp))
                     Button(onClick = { editMode = false }, shape = RoundedCornerShape(50)) { Text("Done") }
                 }
-            }
-
-            // Aspect
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Pill(ShareCardAspect.PORTRAIT.label, CurioIcons.Image, aspect == ShareCardAspect.PORTRAIT) { aspect = ShareCardAspect.PORTRAIT }
-                Pill(ShareCardAspect.CLASSIC.label, CurioIcons.Image, aspect == ShareCardAspect.CLASSIC) { aspect = ShareCardAspect.CLASSIC }
-            }
-
-            // Design variant — Classic signature designs restored from the
-            // f6dd7f19 redesign, available as an extra beside the current ones
-            if (currentStyle == ShareCardStyle.SIGNATURE) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Pill("Current", CurioIcons.AutoAwesome, !classicDesign) { classicDesign = false }
-                    Pill("Classic", CurioIcons.AutoAwesome, classicDesign) { classicDesign = true }
-                }
-            }
-
-            // Sources
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                available.filter { !isQuotes || it.id != QUICK_FACT_ID }.forEach { opt ->
-                    Pill(opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "★".repeat(it) } ?: ""), CurioIcons.FormatText, opt.id == activeSource.id) { selectedId = opt.id }
-                }
-            }
-
-            if (activeId == CUSTOM_FACT_ID) {
-                OutlinedTextField(customText, { customText = it }, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
             }
 
             Spacer(Modifier.height(4.dp))
@@ -6332,7 +6343,7 @@ fun TopicShareSheet(
                 // Save button
                 OutlinedButton(onClick = {
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact)
                     }, saveToGallery = true); onDismiss()
                 }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(50.dp)) {
                     Text("\u2B07", style = MaterialTheme.typography.titleMedium)
@@ -6451,6 +6462,25 @@ fun ShareHubBody(
                 }); onShared()
             }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.weight(1f).height(52.dp)) {
                 Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+            }
+        }
+    }
+}
+
+@Composable
+@Composable
+private fun OptionStepperRow(label: String, value: String, onDecrease: () -> Unit, onIncrease: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+        Surface(onClick = onDecrease, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.size(34.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Text("\u2212", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface))
+            }
+        }
+        Text("  $value  ", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+        Surface(onClick = onIncrease, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.size(34.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Text("\u002b", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface))
             }
         }
     }
