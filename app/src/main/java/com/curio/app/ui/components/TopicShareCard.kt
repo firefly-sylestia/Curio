@@ -5006,24 +5006,14 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 }
                 drawPath(strand1, Color(0xFF9FF0C0).copy(alpha = 0.85f), style = Stroke(2.2f))
                 drawPath(strand2, Color(0xFF4FA85E).copy(alpha = 0.85f), style = Stroke(2.2f))
-                // Cell-membrane circles, left side
-                listOf(Pair(Offset(w * 0.18f, h * 0.30f), 0.06f), Pair(Offset(w * 0.10f, h * 0.62f), 0.045f)).forEach { (c, r) ->
-                    drawCircle(Color(0xFF6BE3A0).copy(alpha = 0.35f), w * r, c, style = Stroke(1.2f))
-                    drawCircle(Color(0xFF9FF0C0).copy(alpha = 0.5f), w * r * 0.3f, c)
-                }
-                // Chromosome X silhouettes
-                listOf(Pair(Offset(w * 0.28f, h * 0.70f), 0.02f), Pair(Offset(w * 0.40f, h * 0.80f), 0.016f)).forEach { (c, r) ->
-                    drawLine(Color(0xFF9FF0C0).copy(alpha = 0.45f), Offset(c.x - w * r, c.y - w * r), Offset(c.x + w * r, c.y + w * r), strokeWidth = 1.6f)
-                    drawLine(Color(0xFF9FF0C0).copy(alpha = 0.45f), Offset(c.x - w * r, c.y + w * r), Offset(c.x + w * r, c.y - w * r), strokeWidth = 1.6f)
-                }
-                // Floating microbe dots
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 18) {
-                    val x = ((s * (i+1) * 3571) % 10000) / 10000f * w
-                    val y = ((s * (i+1) * 4201) % 10000) / 10000f * h
-                    drawCircle(Color(0xFF9FF0C0).copy(alpha = 0.2f), 0.8f + (i % 3) * 0.5f, Offset(x, y))
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF020A05).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                // One cell-membrane circle, left
+                drawCircle(Color(0xFF6BE3A0).copy(alpha = 0.35f), w * 0.06f, Offset(w * 0.16f, h * 0.34f), style = Stroke(1.2f))
+                drawCircle(Color(0xFF9FF0C0).copy(alpha = 0.5f), w * 0.06f * 0.3f, Offset(w * 0.16f, h * 0.34f))
+                // One chromosome X, bottom-left
+                val c = Offset(w * 0.30f, h * 0.72f); val r = w * 0.02f
+                drawLine(Color(0xFF9FF0C0).copy(alpha = 0.45f), Offset(c.x - w * r, c.y - w * r), Offset(c.x + w * r, c.y + w * r), strokeWidth = 1.6f)
+                drawLine(Color(0xFF9FF0C0).copy(alpha = 0.45f), Offset(c.x - w * r, c.y + w * r), Offset(c.x + w * r, c.y - w * r), strokeWidth = 1.6f)
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF020A05).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF6BE3A0), badgeInk = Color(0xFF0E2418),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
