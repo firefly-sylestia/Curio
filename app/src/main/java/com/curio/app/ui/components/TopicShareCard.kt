@@ -926,26 +926,41 @@ private fun MinimalCard(
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 24.dp)) {
-            // Tiny category dot + name
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Box(Modifier.size(6.dp).background(accent, CircleShape))
+        // Hairline inner frame — structure without clutter
+        Canvas(Modifier.fillMaxSize().padding(12.dp)) {
+            drawRoundRect(inkDark.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height),
+                CornerRadius(10.dp.toPx()), style = Stroke(1.dp.toPx()))
+        }
+
+        // Giant faint category initial — the signature placement, bottom-right
+        if (categoryName.isNotBlank()) {
+            Text(categoryName.take(1).uppercase(), style = TextStyle(
+                fontFamily = BungeeFontFamily, fontSize = 175.sp,
+                lineHeight = 150.sp, color = accent.copy(alpha = 0.10f)
+            ), modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .graphicsLayer { rotationZ = -6f }
+                .padding(end = 6.dp, bottom = -18.dp))
+        }
+
+        Column(modifier = Modifier.fillMaxSize().padding(start = 30.dp, end = 26.dp, top = 34.dp, bottom = 26.dp)) {
+            // Category — tiny uppercase Bungee beside a diamond accent
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                Box(Modifier.size(8.dp).graphicsLayer { rotationZ = 45f }.background(accent))
                 Text(categoryName.uppercase(), style = TextStyle(
-                    fontFamily = GeomFontFamily, fontSize = 7.sp,
-                    fontWeight = FontWeight.ExtraBold, letterSpacing = 2.sp,
-                    color = inkDark.copy(alpha = 0.45f)
-                ), maxLines = 1)
+                    fontFamily = BungeeFontFamily, fontSize = 10.sp, letterSpacing = 3.sp,
+                    color = inkDark.copy(alpha = 0.55f)
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(26.dp))
 
-            // Title — large, clean, lots of space
+            // Title — big retro Bungee
             Text(title, style = TextStyle(
-                fontFamily = ChangaOneFontFamily, fontSize = 30.sp,
-                lineHeight = 34.sp, color = inkDark
-            ), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                fontFamily = BungeeFontFamily, fontSize = 32.sp, lineHeight = 35.sp, color = inkDark
+            ), maxLines = 5, overflow = TextOverflow.Ellipsis)
 
-            // Byline
+            // Byline / year
             if (byline.isNotBlank()) {
                 Spacer(Modifier.height(6.dp))
                 Text(byline, style = TextStyle(
@@ -954,44 +969,34 @@ private fun MinimalCard(
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else if (year != null) {
                 Spacer(Modifier.height(6.dp))
-                Text(year, style = TextStyle(
-                    fontFamily = LoraFontFamily, fontSize = 12.sp,
-                    color = inkDark.copy(alpha = 0.40f)
-                ))
+                Text(year, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)))
             }
 
+            Spacer(Modifier.weight(1f))
+
+            // Thick accent rule above the body block — editorial anchor
+            Box(Modifier.width(56.dp).height(4.dp).background(accent))
             Spacer(Modifier.height(16.dp))
 
-            // Accent divider
-            Canvas(Modifier.width(40.dp).height(2.dp)) {
-                drawRoundRect(accent, cornerRadius = CornerRadius(1f))
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // Body text — generous spacing
-            val bodySize = when {
-                body.length > 350 -> 8.sp; body.length > 260 -> 9.sp
-                body.length > 180 -> 10.sp; else -> 11.sp
-            }
+            // Body — serif, bottom-anchored
+            val bodySize = when { body.length > 350 -> 8.5.sp; body.length > 260 -> 9.5.sp; body.length > 180 -> 10.5.sp; else -> 11.5.sp }
             Text(body, style = TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.60f).sp, color = inkDark.copy(alpha = 0.75f)
-            ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, overflow = TextOverflow.Ellipsis)
+                lineHeight = (bodySize.value * 1.50f).sp, color = inkDark.copy(alpha = 0.78f)
+            ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, overflow = TextOverflow.Ellipsis)
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(8.dp))
                 StarRow(ratingStars, palette)
             }
-
             Spacer(Modifier.height(14.dp))
 
-            // Minimal credit
+            // Credit — tiny, right-aligned for a deliberate off-balance
             Text(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 Curio" else "Curio",
                 style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
-                    fontWeight = FontWeight.SemiBold, color = inkDark.copy(alpha = 0.30f)),
-                maxLines = 1
+                    fontWeight = FontWeight.SemiBold, color = inkDark.copy(alpha = 0.35f)),
+                maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()
             )
         }
     }

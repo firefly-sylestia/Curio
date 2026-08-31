@@ -37,7 +37,17 @@
 - Verified: raw brace/paren counts match HEAD exactly (fixed an extra `}` the
   Vinyl chip introduced); removed a stray unused `.toPx()` line. No Gradle run
   (CI owns compilation). Changelog bullet added. Committed & pushed.
-- NEXT: ask the user about the remaining designs (the "next five").
+- Minimal (STYLE 5) redesigned after user: "redesign the whole card with
+  unique style font and placements". Now: hairline inner frame, giant faint
+  Bungee category-initial watermark bottom-right (rotated −6°), diamond accent
+  mark + tiny uppercase Bungee category, big Bungee title, thick accent rule
+  anchoring a bottom-shifted Lora body block, right-aligned tiny credit.
+  Verified balanced (Minimal 0,0; whole file == HEAD counts). Committed &
+  pushed.
+- NEXT (per user, deferred): handle Signature one-by-one — user wants me to
+  ASK about the "6 Signature style" variants (analyse what each has, same
+  question format) BEFORE touching Signature. Custom is deferred until after
+  Signature. Signature/Custom untouched in this pass.
 
 ---
 
