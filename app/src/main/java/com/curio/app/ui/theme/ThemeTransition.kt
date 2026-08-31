@@ -72,15 +72,25 @@ class CurioThemeTransitionState {
     /**
      * Freeze the current frame and arm a reveal expanding from [center].
      * Ignores a start while an animation is already in flight. If the
-     * snapshot fails (hardware-only view, recycled, etc.) we bail out
-     * silently so the theme switch still happens — the animation is
-     * pure polish and must never block it.
+     * snapshot fails (hardware-only view, recycled, etc.) or comes back
+     * blank (a device quirk where drawToBitmap "succeeds" but replays
+     * nothing) we bail out silently so the theme switch still happens —
+     * the animation is pure polish and must never block it.
      */
     fun startTransition(center: Offset): Boolean {
         if (isAnimating) return false
         val view = captureView ?: return false
-        return try {
-            val bitmap = view.drawToBitmap()
+        val bitmap = try {
+            val bmp = view.drawToBitmap()
+            // A blank/transparent snapshot (all alpha 0) can't drive the wipe
+            // -> treat it as a failure and fall back to the instant flip so we
+            // never freeze a see-through frame on devices where drawToBitmap
+            // quietly returns nothing (v269 parity).
+            if (bmp.isBlank()) null else bmp
+        } catch (e: Exception) {
+            null
+        } ?: return false
+        try {
             // Recreate (rather than snapTo, which is suspend) so the reveal
             // always begins from 0 on a new capture.
             progress = Animatable(0f)
@@ -93,6 +103,24 @@ class CurioThemeTransitionState {
             isAnimating = false
             false
         }
+    }
+
+    /** True when the bitmap is entirely transparent (no opaque pixels). */
+    private fun Bitmap.isBlank(): Boolean {
+        if (width == 0 || height == 0) return true
+        // Sample an 8x8 grid — cheap (sub-millisecond) and robust to a stray
+        // pixel at a single cell. The stride grid self-limits to ~64 probes.
+        val strideX = (width / 8).coerceAtLeast(1)
+        val strideY = (height / 8).coerceAtLeast(1)
+        for (y in 0 until height step strideY) {
+            for (x in 0 until width step strideX) {
+                val alpha = android.graphics.Color.alpha(
+                    androidx.core.graphics.BitmapCompat.getPixel(this, x, y)
+                )
+                if (alpha > 0) return false
+            }
+        }
+        true
     }
 
     /** Clear the frozen frame and release its backing pixels after Compose detaches. */

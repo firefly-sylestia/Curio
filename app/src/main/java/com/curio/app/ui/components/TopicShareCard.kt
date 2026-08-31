@@ -1006,7 +1006,8 @@ private fun MinimalCard(
             ), modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .graphicsLayer { rotationZ = -6f }
-                .padding(end = 6.dp, bottom = -18.dp))
+                .offset(y = 18.dp)
+                .padding(end = 6.dp))
         }
 
         Column(modifier = Modifier.fillMaxSize().padding(start = 30.dp, end = 26.dp, top = 34.dp, bottom = 26.dp)) {
