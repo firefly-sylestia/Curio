@@ -5048,17 +5048,16 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                     }
                     pts.forEach { p -> drawCircle(node, r * 0.09f, p) }
                 }
-                // Honeycomb lattice on the right — rings share edges, so the
-                // bonds visibly connect into one crystal sheet
+                // Honeycomb lattice on the right — a compact 2x2 sheet
                 val r = w * 0.038f
                 val dx = r * 1.732f; val dy = r * 1.5f
                 val lx = w * 0.56f; val ly = h * 0.30f
-                for (row in 0 until 3) {
-                    for (col in 0 until 3) {
+                for (row in 0 until 2) {
+                    for (col in 0 until 2) {
                         val cx = lx + col * dx + (if (row % 2 == 1) dx * 0.5f else 0f)
                         val cy = ly + row * dy
                         val colr = if ((row + col) % 2 == 0) Color(0xFF4FE8E8) else Color(0xFF4FA8E8)
-                        hexagon(cx, cy, r, colr.copy(alpha = 0.55f), colr.copy(alpha = 0.9f), doubleBond = (row + col) % 3 == 0)
+                        hexagon(cx, cy, r, colr.copy(alpha = 0.55f), colr.copy(alpha = 0.9f), doubleBond = (row + col) % 2 == 0)
                     }
                 }
                 // Hero benzene ring, left — with a glow and double bonds
