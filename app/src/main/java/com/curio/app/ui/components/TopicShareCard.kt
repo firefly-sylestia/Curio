@@ -6247,8 +6247,6 @@ fun TopicShareSheet(
                 }
             }
 
-                }
-
                 // Customise overlay — translucent panel over a light scrim
                 if (customizeOpen) {
                     Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.32f))) {
