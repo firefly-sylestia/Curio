@@ -2272,7 +2272,7 @@ private fun signatureDesignClassic(categoryName: String, family: CategoryFamily)
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFF3A3A3A).copy(alpha = 0.80f),
             footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFAAAAAA)
         )
-        // ═══ INTERNET — circuit board + WiFi + binary ═══
+        // ═══ INTERNET — circuit board + WiFi + binary ��══
         family == CategoryFamily.INTERNET || cat.contains("INTERNET") || cat.contains("TECH") || cat.contains("DISCOVER") -> SignatureDesign(
             bg = Color(0xFFF0F5FF), cornerRadius = 6f,
             drawBackground = { w, h ->
@@ -3893,7 +3893,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF3FB8E8).copy(alpha = 0.70f),
             layout = SignatureLayout.CENTERED
         )
-        // ═══ QUOTES — giant quote marks, gold rules, flourish ═══
+        // ═��═ QUOTES — giant quote marks, gold rules, flourish ═══
         cat == "QUOTES" -> SignatureDesign(
             bg = Color(0xFFFAF6EC), cornerRadius = 10f,
             drawBackground = { w, h ->
@@ -6020,7 +6020,7 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
 
 // ═══════════════════════════════════════════════════════════════════════
 // SHARE SHEET
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════���═══════════════
 /**
  * Wraps the preview card: tap-and-hold toggles inline text editing, which
  * works on EVERY style. While editing, a translucent panel over the card's
@@ -6465,7 +6465,6 @@ fun ShareHubBody(
     }
 }
 
-@Composable
 @Composable
 private fun OptionStepperRow(label: String, value: String, onDecrease: () -> Unit, onIncrease: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
