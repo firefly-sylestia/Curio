@@ -81,7 +81,9 @@ class CurioThemeTransitionState {
         val view = captureView ?: return false
         return try {
             val bitmap = view.drawToBitmap()
-            progress.snapTo(0f)
+            // Recreate (rather than snapTo, which is suspend) so the reveal
+            // always begins from 0 on a new capture.
+            progress = Animatable(0f)
             screenshotBitmap = bitmap
             revealCenter = center
             isAnimating = true
@@ -260,6 +262,7 @@ fun switchThemeWithReveal(
 ) {
     val currentlyDark = AppPreferences.isDarkTheme(context)
     val newDark = AppPreferences.isDarkMode(context, newMode)
+    val visuallyChanges = currentlyDark != newDark
     val t = when {
         !visuallyChanges -> null
         transition == null || transition.isAnimating -> null
