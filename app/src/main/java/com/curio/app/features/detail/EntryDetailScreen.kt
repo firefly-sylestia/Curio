@@ -4525,13 +4525,13 @@ private fun EntryShareSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var aspect by rememberSaveable { mutableStateOf(
+    var aspect by remember { mutableStateOf(
         com.curio.app.ui.components.ShareCardAspect.CLASSIC
     ) }
-    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedId by remember { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
-    var entryStyleIdx by rememberSaveable { mutableIntStateOf(0) }
-    var entryClassicSignature by rememberSaveable { mutableStateOf(false) }
+    var entryStyleIdx by remember { mutableIntStateOf(0) }
+    var entryClassicSignature by remember { mutableStateOf(false) }
     val entryStyles = com.curio.app.ui.components.availableStylesForFamily(category.family)
     val entrySafeIdx = entryStyleIdx.coerceIn(0, entryStyles.lastIndex)
     val entryCurrentStyle = entryStyles[entrySafeIdx]

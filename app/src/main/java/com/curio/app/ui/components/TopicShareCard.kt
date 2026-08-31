@@ -5635,12 +5635,15 @@ fun TopicShareSheet(
     topicByline: String = ""
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var aspect by rememberSaveable { mutableStateOf(ShareCardAspect.PORTRAIT) }
-    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    // Per-share state — plain remember (not Bundle-saveable): the modal
+    // resets these each time it opens, and enums/ImageBitmap aren't Bundle-
+    // saveable by default (crash on onSaveInstanceState).
+    var aspect by remember { mutableStateOf(ShareCardAspect.PORTRAIT) }
+    var selectedId by remember { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
     var polaroidCaption by rememberSaveable { mutableStateOf("") }
-    var styleIdx by rememberSaveable { mutableIntStateOf(0) }
-    var classicDesign by rememberSaveable { mutableStateOf(false) }
+    var styleIdx by remember { mutableIntStateOf(0) }
+    var classicDesign by remember { mutableStateOf(false) }
     // Inline edit mode (Paper) — per-share only; resets when the sheet closes.
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
@@ -5652,7 +5655,7 @@ fun TopicShareSheet(
     var editedFact by remember { mutableStateOf<String?>(null) }
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
     // Photo picker state — only used for Collage style
-    var userPhoto by rememberSaveable { mutableStateOf<ImageBitmap?>(null) }
+    var userPhoto by remember { mutableStateOf<ImageBitmap?>(null) }
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
