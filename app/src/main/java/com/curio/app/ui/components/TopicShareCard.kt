@@ -4931,11 +4931,10 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawCircle(Color(0xFFE8DCC4), pr * 0.82f, Offset(px, py))
                 drawCircle(Color(0xFFC94F3B), pr * 0.34f, Offset(px, py))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8743B), Color(0xFFC94F3B)), center = Offset(px - pr * 0.1f, py - pr * 0.1f), radius = pr * 0.34f), radius = pr * 0.30f, center = Offset(px, py))
-                // Basil leaves on the dish
-                listOf(Pair(Offset(px - pr * 0.30f, py - pr * 0.18f), -0.6f), Pair(Offset(px + pr * 0.28f, py + pr * 0.05f), 0.7f)).forEach { (c, rot) ->
-                    drawOval(Color(0xFF4FA84F).copy(alpha = 0.9f), topLeft = Offset(c.x - pr * 0.10f, c.y - pr * 0.05f), size = Size(pr * 0.2f, pr * 0.1f))
-                    drawLine(Color(0xFF2E6A2E), Offset(c.x - pr * 0.09f, c.y), Offset(c.x + pr * 0.09f, c.y), strokeWidth = 0.9f)
-                }
+                // One basil leaf on the dish
+                val lxx = px - pr * 0.10f; val lyy = py
+                drawOval(Color(0xFF4FA84F).copy(alpha = 0.9f), topLeft = Offset(lxx - pr * 0.09f, lyy - pr * 0.05f), size = Size(pr * 0.18f, pr * 0.09f))
+                drawLine(Color(0xFF2E6A2E), Offset(lxx - pr * 0.08f, lyy), Offset(lxx + pr * 0.08f, lyy), strokeWidth = 0.9f)
                 // Steaming bowl beside it, on the same table
                 val bx = w * 0.76f; val by = h * 0.58f
                 drawPath(Path().apply { moveTo(bx - w * 0.055f, by); lineTo(bx - w * 0.04f, by + w * 0.085f); lineTo(bx + w * 0.04f, by + w * 0.085f); lineTo(bx + w * 0.055f, by); close() }, Color(0xFFE8DCC4).copy(alpha = 0.85f))
@@ -4946,14 +4945,7 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                     val path = Path().apply { moveTo(c.x, c.y); cubicTo(c.x - w * 0.008f, c.y - w * 0.025f, c.x + w * 0.008f, c.y - w * 0.045f, c.x, c.y - w * 0.07f) }
                     drawPath(path, Color(0xFFFFF0E0).copy(alpha = 0.35f), style = Stroke(1.4f))
                 }
-                // Crumb dots scattered on the table between the dishes
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 14) {
-                    val x = w * 0.52f + ((s * (i+1) * 3571) % 100) / 100f * w * 0.20f
-                    val y = h * 0.76f + ((s * (i+1) * 4201) % 100) / 100f * w * 0.03f
-                    drawCircle(Color(0xFFE8C88F).copy(alpha = 0.45f), 0.9f + (i % 3) * 0.5f, Offset(x, y))
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0D0703).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0D0703).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFF2A84F), badgeInk = Color(0xFF2E1E12),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
