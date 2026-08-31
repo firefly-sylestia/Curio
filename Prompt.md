@@ -1,5 +1,40 @@
 # Prompt.md — current request log
 
+## Request: Signature per-category redesigns — Artists / Albums / Directors / Painters (COMPLETE)
+
+- User picks (ask_user): Artists = redesign background, change layout fit,
+  change typography, refine decor; Albums = layout fit + typography +
+  background; Directors = background + layout + typography; Painters =
+  background + layout + typography, keep the classic set as-is, rework the
+  painting board. Authors (asked separately) = full background redesign +
+  typography + simpler — done earlier (navy writing desk, real feather
+  quill, gold-rimmed inkwell, Changa One title).
+- Layout geometry read from SignatureCard: STANDARD (badge top-left, title
+  below, body bottom) / CENTERED / BOTTOM (badge top, art fills middle,
+  title+meta+body stacked at bottom) / SIDE (left text column + right body)
+  / OVERLAY (title centered over art) / POSTER (badge top, big centered
+  title, body+footer bottom).
+- ARTISTS: OVERLAY -> POSTER. Singer + mic moved LOW on the stage
+  (h 0.72) so the big centered title floats in the twin spotlight beams;
+  confetti confined to the upper half; Changa title 30sp.
+- ALBUMS: CENTERED -> STANDARD. Vinyl moved RIGHT (cx 0.80, bleeds off
+  edge) so the left title column is clear; warm dusk gradient; label sheen
+  arc; title -> Lora serif 30sp (album-cover feel), meta/footer Lora.
+- DIRECTORS: POSTER -> BOTTOM (title/meta/body read as film CREDITS).
+  Added velvet curtain drapes framing the sides, marquee glow from above;
+  clapperboard centre-top; reel bottom-right; title -> Changa 30sp.
+- PAINTERS: SIDE -> STANDARD. Easel + canvas shifted RIGHT (was centre-left,
+  colliding with the SIDE left title column); canvas is now a wood-framed
+  board with a real landscape (sky, sun, hills) instead of flat colour
+  rectangles; palette on the easel shelf; brush across it; drips under the
+  canvas; title -> Changa 30sp. Classic signature set untouched.
+- Verified: brace/paren/bracket counts balanced (973/973, 10827/10827,
+  42/42). No Gradle run (CI owns compilation). Changelog bullet added.
+- Remaining Signature work: none queued (Authors done earlier; Custom
+  designs still deferred per user).
+
+---
+
 ## Request: Share-card arrange mode (Paper) — drag/move/resize in the share sheet (COMPLETE)
 
 - User (after the Signature analysis): "add quick fact size adjuster small

@@ -2430,57 +2430,52 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 // Deep indigo stage with a soft gradient
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF241A4E), Color(0xFF171231), Color(0xFF0C091C))), size = Size(w, h))
-                // Spotlight cones from above, clearly visible
-                listOf(Offset(w * 0.30f, -h * 0.02f), Offset(w * 0.72f, -h * 0.02f)).forEachIndexed { i, c ->
+                // Twin spotlight cones converging onto the stage floor — the
+                // POSTER title floats in the beam, singer stands low on stage
+                listOf(Offset(w * 0.26f, -h * 0.02f), Offset(w * 0.74f, -h * 0.02f)).forEachIndexed { i, c ->
                     val cone = Path().apply {
                         moveTo(c.x, c.y)
-                        lineTo(c.x - w * 0.15f, h * 0.58f)
-                        lineTo(c.x + w * 0.17f, h * 0.58f)
+                        lineTo(c.x - w * 0.14f, h * 0.80f)
+                        lineTo(c.x + w * 0.16f, h * 0.80f)
                         close()
                     }
                     drawPath(cone, if (i == 0) Color(0xFFC9BFFF).copy(alpha = 0.10f) else Color(0xFFF2C879).copy(alpha = 0.08f))
                 }
-                // Light pool on the stage floor
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFC9BFFF).copy(alpha = 0.16f), Color.Transparent)), radius = w * 0.20f, center = Offset(w * 0.30f, h * 0.58f))
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.13f), Color.Transparent)), radius = w * 0.22f, center = Offset(w * 0.72f, h * 0.58f))
+                // Light pools on the stage floor
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFC9BFFF).copy(alpha = 0.16f), Color.Transparent)), radius = w * 0.22f, center = Offset(w * 0.26f, h * 0.80f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.13f), Color.Transparent)), radius = w * 0.24f, center = Offset(w * 0.74f, h * 0.80f))
                 // Stage floor edge
                 drawLine(Color(0xFF8F7BFF).copy(alpha = 0.40f), Offset(w * 0.05f, h * 0.90f), Offset(w * 0.95f, h * 0.90f), strokeWidth = 1.4f)
-                // Floor reflection of the light
-                drawLine(Color(0xFF8F7BFF).copy(alpha = 0.14f), Offset(w * 0.22f, h * 0.90f), Offset(w * 0.38f, h * 0.90f), strokeWidth = 1f)
-                drawLine(Color(0xFFF2C879).copy(alpha = 0.12f), Offset(w * 0.64f, h * 0.90f), Offset(w * 0.80f, h * 0.90f), strokeWidth = 1f)
-                // Singer silhouette at the mic
-                val sx = w * 0.40f; val sy = h * 0.60f
-                drawCircle(Color(0xFF0B0818), w * 0.028f, Offset(sx, sy - h * 0.055f))  // head
-                drawLine(Color(0xFF0B0818), Offset(sx, sy - h * 0.025f), Offset(sx, sy + h * 0.10f), strokeWidth = 3.2f)  // body
-                drawLine(Color(0xFF0B0818), Offset(sx, sy - h * 0.02f), Offset(sx - w * 0.045f, sy + h * 0.035f), strokeWidth = 2.2f)  // arm
-                drawLine(Color(0xFF0B0818), Offset(sx, sy - h * 0.02f), Offset(sx + w * 0.05f, sy + h * 0.02f), strokeWidth = 2.2f)  // arm to mic
-                // Mic stand with round head, angled toward the singer
-                val mx = w * 0.52f
-                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.55f), Offset(mx, sy - h * 0.06f), Offset(mx, h * 0.88f), strokeWidth = 1.5f)
-                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.45f), Offset(mx - w * 0.022f, h * 0.88f), Offset(mx + w * 0.022f, h * 0.88f), strokeWidth = 1.5f)
-                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.35f), Offset(mx - w * 0.015f, h * 0.90f), Offset(mx + w * 0.015f, h * 0.90f), strokeWidth = 1.1f)
-                drawCircle(Color(0xFFE9E3FF).copy(alpha = 0.65f), w * 0.022f, Offset(mx, sy - h * 0.07f))
+                // Singer silhouette + mic, small, left of centre on the stage
+                val sx = w * 0.40f; val sy = h * 0.72f
+                drawCircle(Color(0xFF0B0818), w * 0.024f, Offset(sx, sy - h * 0.05f))  // head
+                drawLine(Color(0xFF0B0818), Offset(sx, sy - h * 0.026f), Offset(sx, sy + h * 0.09f), strokeWidth = 3f)  // body
+                drawLine(Color(0xFF0B0818), Offset(sx, sy - h * 0.02f), Offset(sx - w * 0.04f, sy + h * 0.03f), strokeWidth = 2f)  // arm
+                drawLine(Color(0xFF0B0818), Offset(sx, sy - h * 0.02f), Offset(sx + w * 0.045f, sy + h * 0.02f), strokeWidth = 2f)  // arm to mic
+                // Mic stand with round head
+                val mx = w * 0.50f
+                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.55f), Offset(mx, sy - h * 0.055f), Offset(mx, h * 0.90f), strokeWidth = 1.5f)
+                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.45f), Offset(mx - w * 0.02f, h * 0.90f), Offset(mx + w * 0.02f, h * 0.90f), strokeWidth = 1.5f)
+                drawCircle(Color(0xFFE9E3FF).copy(alpha = 0.65f), w * 0.02f, Offset(mx, sy - h * 0.065f))
                 // Monitor speaker wedge on stage right
                 drawPath(Path().apply {
-                    moveTo(w * 0.82f, h * 0.82f)
-                    lineTo(w * 0.94f, h * 0.82f)
-                    lineTo(w * 0.90f, h * 0.90f)
-                    lineTo(w * 0.78f, h * 0.90f)
+                    moveTo(w * 0.84f, h * 0.84f)
+                    lineTo(w * 0.94f, h * 0.84f)
+                    lineTo(w * 0.91f, h * 0.90f)
+                    lineTo(w * 0.81f, h * 0.90f)
                     close()
                 }, Color(0xFF0B0818).copy(alpha = 0.55f))
-                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.18f), Offset(w * 0.84f, h * 0.83f), Offset(w * 0.84f, h * 0.89f), strokeWidth = 0.8f)
-                drawLine(Color(0xFFE9E3FF).copy(alpha = 0.18f), Offset(w * 0.88f, h * 0.83f), Offset(w * 0.88f, h * 0.89f), strokeWidth = 0.8f)
-                // Confetti — colourful flecks falling in the light
+                // Confetti — colourful flecks falling in the light, upper half
                 val s = (w * 1000 + h).toInt()
                 val cols = listOf(Color(0xFFF2C879), Color(0xFFC9BFFF), Color(0xFFFF9AB8), Color(0xFF6FE3C1))
-                for (i in 0 until 30) {
-                    val x = w * 0.08f + ((s * (i+1) * 7919) % 100) / 100f * w * 0.84f
-                    val y = h * 0.10f + ((s * (i+1) * 6271) % 100) / 100f * h * 0.72f
-                    drawCircle(cols[i % 4].copy(alpha = 0.38f), 1.5f + (i % 3) * 0.5f, Offset(x, y))
-                    if (i % 4 == 0) drawLine(cols[i % 4].copy(alpha = 0.25f), Offset(x - 3f, y), Offset(x + 3f, y), strokeWidth = 0.8f)
+                for (i in 0 until 26) {
+                    val x = w * 0.06f + ((s * (i+1) * 7919) % 100) / 100f * w * 0.88f
+                    val y = h * 0.08f + ((s * (i+1) * 6271) % 100) / 100f * h * 0.55f
+                    drawCircle(cols[i % 4].copy(alpha = 0.36f), 1.5f + (i % 3) * 0.5f, Offset(x, y))
+                    if (i % 4 == 0) drawLine(cols[i % 4].copy(alpha = 0.24f), Offset(x - 3f, y), Offset(x + 3f, y), strokeWidth = 0.8f)
                 }
                 // Music notes floating
-                listOf(Offset(w * 0.16f, h * 0.22f), Offset(w * 0.88f, h * 0.30f), Offset(w * 0.08f, h * 0.48f)).forEach { p ->
+                listOf(Offset(w * 0.14f, h * 0.20f), Offset(w * 0.88f, h * 0.26f), Offset(w * 0.09f, h * 0.44f)).forEach { p ->
                     drawCircle(Color(0xFFC9BFFF).copy(alpha = 0.45f), w * 0.016f, Offset(p.x, p.y))
                     drawLine(Color(0xFFC9BFFF).copy(alpha = 0.45f), Offset(p.x, p.y), Offset(p.x, p.y - h * 0.045f), strokeWidth = 1f)
                     drawArc(Color(0xFFC9BFFF).copy(alpha = 0.40f), 0f, 180f, false, Offset(p.x - w * 0.004f, p.y - h * 0.05f), Size(w * 0.024f, w * 0.024f), style = Stroke(0.9f))
@@ -2489,33 +2484,39 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF8F7BFF), badgeInk = Color(0xFF171231),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
-            titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFEFE9FF),
+            titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF2EEFF),
             metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFF8F7BFF),
             bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFD9D0F5).copy(alpha = 0.88f),
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFF8F7BFF).copy(alpha = 0.70f),
-            layout = SignatureLayout.OVERLAY
+            layout = SignatureLayout.POSTER
         )
-        // ═══ ALBUMS — vinyl record, grooves, crimson label ═══
+        // ═══ ALBUMS — vinyl record right, grooves, crimson label ═══
         cat == "ALBUMS" -> SignatureDesign(
             bg = Color(0xFF160F14), cornerRadius = 8f,
             drawBackground = { w, h ->
-                val cx = w * 0.34f; val cy = h * 0.47f
-                for (i in 0 until 18) { drawCircle(Color(0xFFE8D5B5).copy(alpha = 0.30f), w * 0.20f - i * w * 0.011f, Offset(cx, cy), style = Stroke(1f)) }
-                drawCircle(Color(0xFFE8D5B5).copy(alpha = 0.40f), w * 0.20f, Offset(cx, cy))
-                drawCircle(Color(0xFFC2402E), w * 0.075f, Offset(cx, cy))
-                drawCircle(Color(0xFF160F14).copy(alpha = 0.55f), w * 0.022f, Offset(cx, cy))
-                // Echo arcs sweeping right
-                drawArc(Color(0xFFE8D5B5).copy(alpha = 0.12f), -55f, 80f, false, Offset(w * 0.58f, h * 0.16f), Size(w * 0.30f, w * 0.30f), style = Stroke(1.2f))
-                drawArc(Color(0xFFC2402E).copy(alpha = 0.14f), -55f, 80f, false, Offset(w * 0.66f, h * 0.24f), Size(w * 0.22f, w * 0.22f), style = Stroke(1.2f))
+                // Warm dusk gradient — record-collection room mood
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF2A1B1E), Color(0xFF160F14), Color(0xFF0C0709))), size = Size(w, h))
+                // Echo arcs on the right
+                drawArc(Color(0xFFE8D5B5).copy(alpha = 0.10f), -55f, 80f, false, Offset(w * 0.72f, h * 0.10f), Size(w * 0.34f, w * 0.34f), style = Stroke(1.2f))
+                drawArc(Color(0xFFC2402E).copy(alpha = 0.12f), -55f, 80f, false, Offset(w * 0.80f, h * 0.18f), Size(w * 0.26f, w * 0.26f), style = Stroke(1.2f))
+                // Vinyl record bleeding off the right edge — STANDARD title
+                // column stays left, clear of the disc
+                val cx = w * 0.80f; val cy = h * 0.50f
+                for (i in 0 until 18) { drawCircle(Color(0xFFE8D5B5).copy(alpha = 0.30f), w * 0.24f - i * w * 0.013f, Offset(cx, cy), style = Stroke(1f)) }
+                drawCircle(Color(0xFFE8D5B5).copy(alpha = 0.40f), w * 0.24f, Offset(cx, cy))
+                drawCircle(Color(0xFFC2402E), w * 0.09f, Offset(cx, cy))
+                drawCircle(Color(0xFF160F14).copy(alpha = 0.55f), w * 0.026f, Offset(cx, cy))
+                // Label sheen — a soft highlight arc on the crimson label
+                drawArc(Color.White.copy(alpha = 0.10f), 200f, 60f, false, Offset(cx - w * 0.07f, cy - w * 0.07f), Size(w * 0.14f, w * 0.14f), style = Stroke(1f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFC2402E), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
-            titleFont = ChangaOneFontFamily, titleSize = 28.sp, titleLineHeight = 32.sp, titleColor = Color(0xFFF5E9E2),
-            metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFC2402E),
-            bodySize = 10f, bodyLineHeight = 1.55f, bodyColor = Color(0xFFE0D2CE).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFC2402E).copy(alpha = 0.70f),
-            layout = SignatureLayout.CENTERED
+            titleFont = LoraFontFamily, titleSize = 30.sp, titleLineHeight = 36.sp, titleColor = Color(0xFFF5E9E2),
+            metaSpacer = 5.dp, metaSeparator = " \u2022 ", metaSize = 10.sp, metaColor = Color(0xFFE8A5A0),
+            bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFE0D2CE).copy(alpha = 0.88f),
+            footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFC2402E).copy(alpha = 0.70f),
+            layout = SignatureLayout.STANDARD
         )
         // ═══ SONGS — thin glowing waveform bars + floating notes ═══
         cat == "SONGS" -> SignatureDesign(
@@ -2546,20 +2547,33 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = GeomFontFamily, footerColor = Color(0xFFFF8FA3).copy(alpha = 0.70f),
             layout = SignatureLayout.BOTTOM
         )
-        // ═══ DIRECTORS — clapperboard, film reels, gold auteur frame ═══
+        // ═══ DIRECTORS — velvet curtain, clapperboard, reel, gold accents ═══
         cat == "DIRECTORS" -> SignatureDesign(
             bg = Color(0xFF141416), cornerRadius = 6f,
             drawBackground = { w, h ->
-                // Clapperboard, angled top-right
-                val cb = Path().apply {
-                    moveTo(w * 0.56f, h * 0.14f); lineTo(w * 0.92f, h * 0.08f)
-                    lineTo(w * 0.84f, h * 0.30f); lineTo(w * 0.50f, h * 0.36f); close()
+                // Cinema dark with a warm marquee glow from above
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF2A1D18), Color(0xFF141416), Color(0xFF0B0B0D))), size = Size(w, h))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFD9B45B).copy(alpha = 0.10f), Color.Transparent)), radius = w * 0.40f, center = Offset(w * 0.50f, -h * 0.06f))
+                // Velvet curtain drapes framing the sides
+                listOf(0f, 1f).forEach { side ->
+                    val path = Path().apply {
+                        moveTo(side * w, 0f)
+                        quadraticBezierTo(side * w + (if (side == 0f) 1f else -1f) * w * 0.09f, h * 0.5f, side * w, h)
+                        lineTo(side * w, 0f)
+                        close()
+                    }
+                    drawPath(path, Color(0xFF8B1A1A).copy(alpha = 0.35f))
                 }
-                drawPath(cb, Color(0xFFE8E2D4).copy(alpha = 0.30f))
-                drawLine(Color(0xFF141416).copy(alpha = 0.9f), Offset(w * 0.55f, h * 0.18f), Offset(w * 0.88f, h * 0.12f), strokeWidth = 1.6f)
-                drawLine(Color(0xFF141416).copy(alpha = 0.9f), Offset(w * 0.53f, h * 0.25f), Offset(w * 0.86f, h * 0.19f), strokeWidth = 1.6f)
-                // Film reel bottom-left
-                val rcx = w * 0.16f; val rcy = h * 0.80f
+                // Clapperboard, angled centre-top
+                val cb = Path().apply {
+                    moveTo(w * 0.42f, h * 0.12f); lineTo(w * 0.76f, h * 0.07f)
+                    lineTo(w * 0.69f, h * 0.28f); lineTo(w * 0.36f, h * 0.33f); close()
+                }
+                drawPath(cb, Color(0xFFE8E2D4).copy(alpha = 0.28f))
+                drawLine(Color(0xFF141416).copy(alpha = 0.9f), Offset(w * 0.41f, h * 0.16f), Offset(w * 0.72f, h * 0.11f), strokeWidth = 1.6f)
+                drawLine(Color(0xFF141416).copy(alpha = 0.9f), Offset(w * 0.39f, h * 0.23f), Offset(w * 0.70f, h * 0.18f), strokeWidth = 1.6f)
+                // Film reel bottom-right
+                val rcx = w * 0.86f; val rcy = h * 0.78f
                 drawCircle(Color(0xFFD9B45B).copy(alpha = 0.35f), w * 0.09f, Offset(rcx, rcy), style = Stroke(1.5f))
                 drawCircle(Color(0xFFD9B45B).copy(alpha = 0.30f), w * 0.03f, Offset(rcx, rcy))
                 for (i in 0 until 8) {
@@ -2575,11 +2589,11 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFD9B45B), badgeInk = Color(0xFF141416),
             badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 16.dp,
-            titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE8E2D4),
+            titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF0E8DA),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD9B45B),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFCFC8BC).copy(alpha = 0.88f),
             footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD9B45B).copy(alpha = 0.60f),
-            layout = SignatureLayout.POSTER
+            layout = SignatureLayout.BOTTOM
         )
         // ═══ FILMS — dark cinematic, prominent film strips + sprocket holes ═══
         cat == "FILMS" -> SignatureDesign(
@@ -2743,29 +2757,34 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFF5C3317).copy(alpha = 0.55f),
             layout = SignatureLayout.BOTTOM
         )
-        // ═══ PAINTERS — easel, canvas, kidney palette, brush ═══
+        // ═══ PAINTERS — easel right, framed canvas, palette, brush ═══
         cat == "PAINTERS" -> SignatureDesign(
             bg = Color(0xFF26211D), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Warm studio gradient
+                // Warm studio gradient with a window-light glow top-left
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF3A322B), Color(0xFF26211D), Color(0xFF161310))), size = Size(w, h))
-                // Easel legs — A-frame
-                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.45f), Offset(w * 0.18f, h * 0.90f), Offset(w * 0.36f, h * 0.16f), strokeWidth = 2.2f)
-                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.45f), Offset(w * 0.52f, h * 0.90f), Offset(w * 0.36f, h * 0.16f), strokeWidth = 2.2f)
-                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.40f), Offset(w * 0.36f, h * 0.16f), Offset(w * 0.50f, h * 0.06f), strokeWidth = 2.2f)  // back leg
-                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.35f), Offset(w * 0.22f, h * 0.46f), Offset(w * 0.50f, h * 0.46f), strokeWidth = 1.4f)  // shelf
-                // Canvas on the easel
-                drawRect(Color(0xFFF2EEE6), Offset(w * 0.24f, h * 0.14f), Size(w * 0.24f, h * 0.32f))
-                // Colour field painting on the canvas
-                drawRect(Color(0xFFE67E22), Offset(w * 0.26f, h * 0.17f), Size(w * 0.10f, h * 0.10f))
-                drawRect(Color(0xFF2980B9), Offset(w * 0.36f, h * 0.22f), Size(w * 0.10f, h * 0.08f))
-                drawRect(Color(0xFFC0392B), Offset(w * 0.26f, h * 0.28f), Size(w * 0.20f, h * 0.10f))
-                drawRect(Color(0xFF27AE60), Offset(w * 0.28f, h * 0.38f), Size(w * 0.14f, h * 0.06f))
-                // Palette — kidney shape (two overlapping ovals + thumb hole).
-                // Lowered to h*0.72 so it sits BELOW the body text zone (the
-                // title+meta are top, body is bottom-pinned; the palette was at
-                // h*0.56 which collided with the body on long content).
-                val pcx = w * 0.74f; val pcy = h * 0.78f
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFD9A0).copy(alpha = 0.12f), Color.Transparent)), radius = w * 0.35f, center = Offset(w * 0.14f, h * 0.04f))
+                // Easel legs — A-frame, shifted RIGHT so the STANDARD title
+                // column (top-left) stays clear of the art
+                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.45f), Offset(w * 0.62f, h * 0.90f), Offset(w * 0.80f, h * 0.18f), strokeWidth = 2.2f)
+                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.45f), Offset(w * 0.96f, h * 0.90f), Offset(w * 0.80f, h * 0.18f), strokeWidth = 2.2f)
+                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.40f), Offset(w * 0.80f, h * 0.18f), Offset(w * 0.93f, h * 0.08f), strokeWidth = 2.2f)  // back leg
+                drawLine(Color(0xFF8A7A5C).copy(alpha = 0.35f), Offset(w * 0.66f, h * 0.46f), Offset(w * 0.94f, h * 0.46f), strokeWidth = 1.4f)  // shelf
+                // Canvas on the easel — wood frame + gesso board
+                val cx = w * 0.80f; val cy = h * 0.16f
+                drawRect(Color(0xFF6A5C42).copy(alpha = 0.65f), Offset(cx - w * 0.15f, cy - h * 0.012f), Size(w * 0.30f, h * 0.335f))
+                drawRect(Color(0xFFF2EEE6), Offset(cx - w * 0.135f, cy), Size(w * 0.27f, h * 0.31f))
+                // Landscape painting on the canvas — sky, sun, hills, foreground
+                drawRect(Color(0xFF9BC4E2).copy(alpha = 0.95f), Offset(cx - w * 0.135f, cy), Size(w * 0.27f, h * 0.155f))
+                drawCircle(Color(0xFFF2C879), w * 0.026f, Offset(cx - w * 0.07f, cy + h * 0.045f))
+                drawPath(Path().apply {
+                    moveTo(cx - w * 0.135f, cy + h * 0.19f)
+                    quadraticBezierTo(cx - w * 0.04f, cy + h * 0.14f, cx + w * 0.02f, cy + h * 0.19f)
+                    quadraticBezierTo(cx + w * 0.10f, cy + h * 0.14f, cx + w * 0.135f, cy + h * 0.19f)
+                    lineTo(cx + w * 0.135f, cy + h * 0.31f); lineTo(cx - w * 0.135f, cy + h * 0.31f); close()
+                }, Color(0xFF5E8C4E).copy(alpha = 0.95f))
+                // Palette — kidney shape on the easel shelf (right side)
+                val pcx = w * 0.62f; val pcy = h * 0.70f
                 drawOval(Color(0xFFE8E2D4).copy(alpha = 0.55f), Offset(pcx - w * 0.10f, pcy - w * 0.075f), Size(w * 0.20f, w * 0.15f))
                 drawOval(Color(0xFFE8E2D4).copy(alpha = 0.55f), Offset(pcx + w * 0.03f, pcy - w * 0.05f), Size(w * 0.13f, w * 0.12f))
                 // Thumb hole
@@ -2776,17 +2795,17 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
                 wellPos.forEachIndexed { i, (dx, dy) ->
                     drawCircle(wells[i].copy(alpha = 0.60f), w * 0.018f, Offset(pcx + dx * w, pcy + dy * w))
                 }
-                // Brush resting across the palette
-                drawLine(Color(0xFFC9BFA8).copy(alpha = 0.55f), Offset(w * 0.84f, h * 0.82f), Offset(w * 0.98f, h * 0.40f), strokeWidth = 2.2f)
-                drawLine(Color(0xFF6A5C42).copy(alpha = 0.55f), Offset(w * 0.98f, h * 0.40f), Offset(w * 0.995f, h * 0.35f), strokeWidth = 2.0f)  // ferrule
+                // Brush resting on the easel shelf
+                drawLine(Color(0xFFC9BFA8).copy(alpha = 0.55f), Offset(w * 0.70f, h * 0.56f), Offset(w * 0.99f, h * 0.26f), strokeWidth = 2.2f)
+                drawLine(Color(0xFF6A5C42).copy(alpha = 0.55f), Offset(w * 0.99f, h * 0.26f), Offset(w * 0.995f, h * 0.21f), strokeWidth = 2.0f)  // ferrule
                 // Bristles — short fan
                 for (i in 0 until 4) {
-                    val bx = w * 0.995f + i * 0.0f
-                    val by = h * 0.35f + i * h * 0.008f - h * 0.012f
+                    val bx = w * 0.995f
+                    val by = h * 0.21f + i * h * 0.008f - h * 0.012f
                     drawLine(Color(0xFFE67E22).copy(alpha = 0.55f), Offset(bx, by), Offset(bx + w * 0.014f, by - h * 0.004f), strokeWidth = 1.1f)
                 }
                 // Paint drips under the canvas
-                listOf(Offset(w * 0.28f, h * 0.48f), Offset(w * 0.33f, h * 0.52f), Offset(w * 0.40f, h * 0.50f)).forEachIndexed { i, p ->
+                listOf(Offset(w * 0.72f, h * 0.50f), Offset(w * 0.80f, h * 0.54f), Offset(w * 0.88f, h * 0.52f)).forEachIndexed { i, p ->
                     drawCircle(wells[i].copy(alpha = 0.85f), 2.2f, Offset(p.x, p.y))
                     drawLine(wells[i].copy(alpha = 0.70f), Offset(p.x, p.y), Offset(p.x, p.y + h * 0.025f), strokeWidth = 1.4f)
                 }
@@ -2794,11 +2813,11 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE67E22), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
-            titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF2EEE6),
+            titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF5EFE6),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFE67E22),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFD8D2C8).copy(alpha = 0.88f),
             footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFE67E22).copy(alpha = 0.65f),
-            layout = SignatureLayout.SIDE
+            layout = SignatureLayout.STANDARD
         )
         // ═══ ARTWORKS — museum gallery wall: spotlit framed paintings ═══
         cat == "ARTWORKS" -> SignatureDesign(
