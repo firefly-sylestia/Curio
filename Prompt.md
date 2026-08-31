@@ -1,5 +1,19 @@
 # Prompt.md — current request log
 
+## Request: DETAILED (Deepen) scenes batch 5 — minimal aesthetic pass: Internet / Biology / Chemistry / Animals / Plants (COMMITTED, NOT PUSHED)
+
+- INTERNET: 4-ellipse globe + 4 nodes with inter-links + 16 signal dots ->
+  circle + meridian + equator, 3 nodes linked from the globe, no dots.
+- BIOLOGY: helix + 2 cells + 2 chromosomes + 18 microbe dots -> helix
+  focal, 1 cell, 1 chromosome, no microbe dots.
+- CHEMISTRY: 3x3 honeycomb lattice -> compact 2x2 sheet; hero benzene,
+  bond and water molecule stay.
+- ANIMALS: 20 grass blades + 12 scattered fireflies -> 8 blades + 4 placed
+  fireflies; moonlit tree and paw trail as focal.
+- PLANTS: 7 sunbeams + 6 leaf veins + 3 droplets -> 3 sunbeams, 4 veins,
+  2 droplets.
+- Each commit balance-checked; changelog + Prompt.md updated. PENDING PUSH.
+
 ## Request: DETAILED (Deepen) scenes batch 4 — minimal aesthetic pass: Manga / Manhwa / Mythology / Sports / Food (COMMITTED, NOT PUSHED)
 
 - MANGA: 22 speed lines + 12-ray ink burst + 90-dot screentone -> one
