@@ -1,5 +1,46 @@
 # Prompt.md — current request log
 
+## Request: Share-card arrange mode (Paper) — drag/move/resize in the share sheet (COMPLETE)
+
+- User (after the Signature analysis): "add quick fact size adjuster small
+  button so its better, and let user move the title and quick fact box as
+  they want when they hold and move it, let them change the shape of the box
+  as well."
+- ask_user answers: controls live in the SHARE SHEET preview, visible only
+  when you TAP-AND-HOLD the card; per-share only (not persisted); "change
+  the shape" = resize the quick-fact box by dragging its edge/side.
+- Graph:
+  - `ShareCardArrangement` data class (fractions): titleX/titleY/bodyX/
+    bodyY/bodyWidthFrac/bodyScale (single source of truth incl. bodyScale
+    so the +/− fact-size control and the card stay in sync).
+  - Threaded through TopicShareCard → PaperCard → MiddleContent (body
+    text size = qfs * bodyScale; title/body offsets via arrangement).
+  - `TopicShareSheet` gained editMode + arrangement state (plain remember
+    — per-share, not Bundle-saveable so no rotation crash) gated by
+    arrangeActive = style == PAPER.
+  - `ArrangeableCard` wrapper: pointerInput + detectTapGestures(onLongPress)
+    toggles editMode; when editing, overlays `ShareCardArrangeOverlay`.
+  - `ShareCardArrangeOverlay`: draggable DRAG TITLE handle, draggable
+    quick-fact box, a right-edge handle to change box WIDTH (the "shape"),
+    +/− fact-size row, Reset + Done.
+  - Pager mode gates to current page; userScrollEnabled off while editing.
+  - Save + Share export calls pass arrangement/bodyScale so the PNG matches
+    the preview exactly. Hint text "Hold the card to move / resize…"
+    shown when arrangeActive && !editMode.
+- Fixed a bug: the +/− buttons read arrangement.bodyScale but wrote a
+  separate bodyScale var (displayed size would stick); unified onto
+  arrangement.bodyScale everywhere.
+- Verified: raw brace/paren counts balanced (969/969, 10782/10782,
+  42/42); all needed imports already present (BoxWithConstraints,
+  IntOffset, pointerInput, detectDragGestures, detectTapGestures,
+  roundToInt). No Gradle run (CI owns compilation). Changelog bullet
+  added.
+- NEXT (deferred, per user): Signature per-category redesigns (Artists /
+  Albums / Directors / Painters full redesign; Authors proper element
+  analysis first; keep Painters classic set) and Custom designs.
+
+---
+
 ## Request: Fix share card designs — first 5 (Paper/Vinyl/Collage/Clean/Editorial) (COMPLETE)
 
 - User: "lets fix the share card designs, pick first 5 analyse what they have i

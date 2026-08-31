@@ -81,7 +81,12 @@ import com.curio.app.ui.theme.GeomFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
 import kotlin.math.sin
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedButton
 
@@ -108,6 +113,22 @@ data class ShareCardContent(
     val label: String,
     val text: String,
     val rating: Int? = null
+)
+
+/**
+ * Optional per-share arrangement of the title + quick-fact body on a card.
+ * Positions are FRACTIONS of the card's width/height (0..1); bodyWidthFrac is
+ * the quick-fact box width as a fraction of the card width; bodyScale is the
+ * quick-fact text-size multiplier. When null the card uses its default layout.
+ */
+data class ShareCardArrangement(
+    val titleX: Float = 0.5f,
+    val titleY: Float = 0.34f,
+    val bodyX: Float = 0.1f,
+    val bodyY: Float = 0.62f,
+    val bodyWidthFrac: Float = 0.78f,
+    val bodyScale: Float = 1f,
+    val arranged: Boolean = false
 )
 
 // ─── Curated share-card palette (3-4 beautiful tones cycling through categories) ───
@@ -229,14 +250,16 @@ fun TopicShareCard(
     byline: String = "",
     polaroidCaption: String = "",
     classicSignature: Boolean = false,
-    onPhotoTap: (() -> Unit)? = null
+    onPhotoTap: (() -> Unit)? = null,
+    arrangement: ShareCardArrangement? = null,
+    bodyScale: Float = 1f
 ) {
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent)
     when (style) {
-        ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
+        ShareCardStyle.PAPER -> PaperCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year, bodyScale, arrangement)
         ShareCardStyle.VINYL -> VinylCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
         ShareCardStyle.COLLAGE -> CollageCard(display, topicName, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap)
         ShareCardStyle.NEUMORPHIC -> NeumorphicCard(display, categoryName, categoryGlyph, palette, factText, sharerName, aspect, modifier, ratingStars, categoryFamily, quoteText, quoteAuthor, byline, year)
@@ -257,9 +280,11 @@ private fun PaperCard(
     palette: ShareCardPalette, factText: String, sharerName: String,
     aspect: ShareCardAspect, modifier: Modifier, ratingStars: Int?,
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f, arrangement: ShareCardArrangement? = null
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
+    val arr = arrangement?.takeIf { it.arranged }
     Box(
         modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))
             .shadow(4.dp, RoundedCornerShape(6.dp))
@@ -278,10 +303,51 @@ private fun PaperCard(
         }
         Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
-        Column(modifier = Modifier.fillMaxSize().padding(28.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            HeaderRow(categoryName, categoryGlyph, palette)
-            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year)
-            Footer(sharerName, quoteText, quoteAuthor, palette)
+        if (arr != null) {
+            // Arrange mode — title + quick-fact box are free-positioned by the
+            // user; header row + footer stay pinned. Positions are fractions of
+            // the content box, offsets use the box's top-left as the anchor.
+            BoxWithConstraints(Modifier.fillMaxSize().padding(28.dp).zIndex(3f)) {
+                val cw = maxWidth.value; val ch = maxHeight.value - 0f
+                Column(Modifier.fillMaxWidth()) { HeaderRow(categoryName, categoryGlyph, palette) }
+                // Title — positioned by titleX/titleY
+                Box(
+                    Modifier
+                        .offset(x = (cw * arr.titleX).dp, y = (ch * arr.titleY).dp)
+                        .widthIn(max = (cw * 0.92f).dp)
+                ) {
+                    Text(display, style = MaterialTheme.typography.headlineLarge.copy(
+                        fontFamily = ChangaOneFontFamily, lineHeight = 40.sp, color = palette.ink),
+                        maxLines = 3, overflow = TextOverflow.Ellipsis)
+                }
+                // Quick-fact box — positioned by bodyX/bodyY, box width by bodyWidthFrac
+                Box(
+                    Modifier
+                        .offset(x = (cw * arr.bodyX).dp, y = (ch * arr.bodyY).dp)
+                        .width((cw * arr.bodyWidthFrac).dp)
+                ) {
+                    val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(factText.length)
+                             else quickFactFontSize(factText.length)
+                    val scaled = (qfs.value * bodyScale).sp
+                    FrostPane(palette) {
+                        Text(factText, style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = LoraFontFamily, fontSize = scaled,
+                            lineHeight = (scaled.value * 1.4f).sp),
+                            color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 20 else 14,
+                            overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
+                    Footer(sharerName, quoteText, quoteAuthor, palette)
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize().padding(28.dp),
+                verticalArrangement = Arrangement.SpaceBetween) {
+                HeaderRow(categoryName, categoryGlyph, palette)
+                MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale)
+                Footer(sharerName, quoteText, quoteAuthor, palette)
+            }
         }
     }
 }
@@ -5657,7 +5723,8 @@ private fun MiddleContent(
     display: String, factText: String, aspect: ShareCardAspect,
     palette: ShareCardPalette, ratingStars: Int?,
     quoteText: String?, qSize: TextUnit, quoteAuthor: String?,
-    byline: String = "", year: String? = null
+    byline: String = "", year: String? = null,
+    bodyScale: Float = 1f
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
@@ -5680,9 +5747,10 @@ private fun MiddleContent(
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             FrostPane(palette) {
                 val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(factText.length) else quickFactFontSize(factText.length)
+                val qfsScaled = (qfs.value * bodyScale).sp
                 Text(factText, style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = LoraFontFamily, fontSize = qfs,
-                    lineHeight = (qfs.value * 1.4f).sp
+                    fontFamily = LoraFontFamily, fontSize = qfsScaled,
+                    lineHeight = (qfsScaled.value * 1.4f).sp
                 ), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -5872,8 +5940,136 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// ARRANGE OVERLAY (Paper) — tap-and-hold edit mode
+// ═══════════════════════════════════════════════════════════════════════
+/**
+ * Overlays the Paper card in arrange mode: a draggable TITLE handle, a
+ * draggable + edge-resizable QUICK FACT box, and a small fact-size adjuster
+ * with Done / Reset. Positions are written back as fractions so the exported
+ * card matches exactly. Per-share state (driven by the sheet).
+ */
+@Composable
+private fun ShareCardArrangeOverlay(
+    arrangement: ShareCardArrangement,
+    onArrangementChange: (ShareCardArrangement) -> Unit,
+    onBodyScaleChange: (Float) -> Unit,
+    onDone: () -> Unit
+) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val cw = maxWidth.value; val ch = maxHeight.value
+        if (cw == 0f || ch == 0f) return@BoxWithConstraints
+
+        var titleOff by remember { mutableStateOf(IntOffset((cw * arrangement.titleX).toInt() + 4, (ch * arrangement.titleY).toInt() - 20)) }
+        var bodyOff by remember { mutableStateOf(IntOffset((cw * arrangement.bodyX).toInt(), (ch * arrangement.bodyY).toInt() - 6)) }
+        var bodyW by remember(arrangement.bodyWidthFrac) { mutableStateOf((cw * arrangement.bodyWidthFrac).coerceIn(0.15f * cw, 0.98f * cw)) }
+
+        // ── Title handle (drag to move) ──
+        Box(
+            Modifier
+                .offset { titleOff }
+                .width((cw * 0.46f).dp)
+                .padding(2.dp)
+                .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f), RoundedCornerShape(6.dp))
+                .pointerInput(Unit) {
+                    detectDragGestures { change, d ->
+                        change.consume(); titleOff += IntOffset(d.x.roundToInt(), d.y.roundToInt())
+                        onArrangementChange(arrangement.copy(
+                            titleX = (titleOff.x.toFloat() / cw).coerceIn(0f, 1f),
+                            titleY = (titleOff.y.toFloat() / ch).coerceIn(0f, 0.6f)
+                        ))
+                    }
+                }
+        ) {
+            Text("DRAG TITLE", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.padding(6.dp))
+        }
+
+        // ── Quick-fact box (drag to move) ──
+        Box(
+            Modifier
+                .offset { bodyOff }
+                .width(bodyW.dp)
+                .heightIn(min = 44.dp)
+                .padding(2.dp)
+                .border(2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.10f), RoundedCornerShape(10.dp))
+                .pointerInput(Unit) {
+                    detectDragGestures { change, d ->
+                        change.consume(); bodyOff += IntOffset(d.x.roundToInt(), d.y.roundToInt())
+                        onArrangementChange(arrangement.copy(
+                            bodyX = (bodyOff.x.toFloat() / cw).coerceIn(0f, 0.85f),
+                            bodyY = (bodyOff.y.toFloat() / ch).coerceIn(0f, 0.95f)
+                        ))
+                    }
+                }
+        ) { }
+
+        // ── Right-edge handle (drag to change box width/shape) ──
+        Box(
+            Modifier
+                .offset { IntOffset(bodyOff.x + bodyW.toInt() - 8, bodyOff.y) }
+                .size(18.dp)
+                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
+                .border(2.dp, Color.White, RoundedCornerShape(4.dp))
+                .pointerInput(Unit) {
+                    detectDragGestures { change, d ->
+                        change.consume()
+                        bodyW = (bodyW + d.x).coerceIn(cw * 0.15f, cw * 0.98f)
+                        onArrangementChange(arrangement.copy(bodyWidthFrac = (bodyW / cw).coerceIn(0.15f, 0.98f)))
+                    }
+                }
+        ) { }
+
+        // ── Controls: fact-size +/−, Done, Reset ──
+        Column(
+            Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(0.dp)) {
+                Surface(onClick = { onBodyScaleChange((arrangement.bodyScale - 0.15f).coerceIn(0.5f, 1.8f)) },
+                    shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary) {
+                    Text("\u2212", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onPrimary), modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                }
+                Text("  Fact size  ", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface))
+                Surface(onClick = { onBodyScaleChange((arrangement.bodyScale + 0.15f).coerceIn(0.5f, 1.8f)) },
+                    shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary) {
+                    Text("\u002b", style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onPrimary), modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                TextButton(onClick = { onArrangementChange(ShareCardArrangement()); onBodyScaleChange(1f) }) { Text("Reset") }
+                Button(onClick = onDone, shape = RoundedCornerShape(50)) { Text("Done") }
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // SHARE SHEET
 // ═══════════════════════════════════════════════════════════════════════
+/** Wraps the preview card with the tap-and-hold edit toggle + arrange overlay. */
+@Composable
+private fun ArrangeableCard(
+    active: Boolean,
+    arrangement: ShareCardArrangement,
+    onArrangementChange: (ShareCardArrangement) -> Unit,
+    onBodyScaleChange: (Float) -> Unit,
+    editMode: Boolean,
+    onToggleEdit: () -> Unit,
+    card: @Composable () -> Unit
+) {
+    Box(modifier = Modifier.pointerInput(active) {
+        if (active) detectTapGestures(onLongPress = { onToggleEdit() })
+    }) {
+        card()
+        if (active && editMode) {
+            ShareCardArrangeOverlay(arrangement, onArrangementChange, onBodyScaleChange, onToggleEdit)
+        }
+    }
+}
+
 @Composable
 fun TopicShareSheet(
     topicName: String, categoryName: String, categoryGlyph: String,
@@ -5889,6 +6085,13 @@ fun TopicShareSheet(
     var polaroidCaption by rememberSaveable { mutableStateOf("") }
     var styleIdx by rememberSaveable { mutableIntStateOf(0) }
     var classicDesign by rememberSaveable { mutableStateOf(false) }
+    // Arrange mode (Paper) — per-share only; resets when the sheet closes.
+    // Plain remember: the arrangement is a per-share tweak (not Bundle-saveable)
+    // and the modal resets it each time, so it should not survive a rotation.
+    var editMode by remember { mutableStateOf(false) }
+    // Single source of truth for the arranged layout — bodyScale lives on
+    // arrangement so the +/− fact-size control and the card stay in sync.
+    var arrangement by remember { mutableStateOf(ShareCardArrangement()) }
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
     // Photo picker state — only used for Collage style
     var userPhoto by rememberSaveable { mutableStateOf<ImageBitmap?>(null) }
@@ -5931,6 +6134,8 @@ fun TopicShareSheet(
     val styles = availableStylesForFamily(categoryFamily, topicName)
     val safeIdx = styleIdx.coerceIn(0, styles.lastIndex)
     val currentStyle = styles[safeIdx]
+    val arrangeActive = currentStyle == ShareCardStyle.PAPER
+    val arrangeNow = arrangeActive && editMode
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -5949,6 +6154,7 @@ fun TopicShareSheet(
                         state = pagerState,
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 36.dp),
                         pageSpacing = 16.dp,
+                        userScrollEnabled = !editMode,
                         modifier = Modifier.fillMaxWidth()
                     ) { page ->
                         val isCenter = page == pagerState.currentPage
@@ -5965,8 +6171,18 @@ fun TopicShareSheet(
                                     alpha = 1f - 0.25f * kotlin.math.abs(pageOffset)
                                 }
                         ) {
-                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") })
-                        }
+                                            val isArrangingPage = arrangeNow && page == pagerState.currentPage
+                                            ArrangeableCard(
+                                                active = arrangeActive && page == pagerState.currentPage,
+                                                arrangement = arrangement,
+                                                onArrangementChange = { arrangement = it },
+                                                onBodyScaleChange = { arrangement = arrangement.copy(bodyScale = it) },
+                                                editMode = editMode,
+                                                onToggleEdit = { editMode = !editMode }
+                                            ) {
+                                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, arrangement = if (isArrangingPage) arrangement else null, bodyScale = arrangement.bodyScale)
+                                            }
+                                        }
                     }
                     // Style dots
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -5986,7 +6202,16 @@ fun TopicShareSheet(
                             .shadow(4.dp, RoundedCornerShape(6.dp))
                             .clip(RoundedCornerShape(6.dp))
                     ) {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") })
+                        ArrangeableCard(
+                            active = arrangeActive,
+                            arrangement = arrangement,
+                            onArrangementChange = { arrangement = it },
+                            onBodyScaleChange = { arrangement = arrangement.copy(bodyScale = it) },
+                            editMode = editMode,
+                            onToggleEdit = { editMode = !editMode }
+                        ) {
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, arrangement = if (arrangeNow) arrangement else null, bodyScale = arrangement.bodyScale)
+                        }
                     }
                 }
             }
@@ -6030,6 +6255,12 @@ fun TopicShareSheet(
                 )
             }
 
+            // Arrange hint (Paper) — tap & hold the card to move/resize
+            if (arrangeActive && !editMode) {
+                Text("Hold the card to move / resize the title & quick fact",
+                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
+            }
+
             // Aspect
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Pill(ShareCardAspect.PORTRAIT.label, CurioIcons.Image, aspect == ShareCardAspect.PORTRAIT) { aspect = ShareCardAspect.PORTRAIT }
@@ -6063,7 +6294,7 @@ fun TopicShareSheet(
                 // Save button
                 OutlinedButton(onClick = {
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, arrangement = if (arrangeNow) arrangement else null, bodyScale = arrangement.bodyScale)
                     }, saveToGallery = true); onDismiss()
                 }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(50.dp)) {
                     Text("\u2B07", style = MaterialTheme.typography.titleMedium)
@@ -6073,7 +6304,7 @@ fun TopicShareSheet(
                 // Share button
                 Button(onClick = {
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, arrangement = if (arrangeNow) arrangement else null, bodyScale = arrangement.bodyScale)
                     }); onDismiss()
                 }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.weight(1f).height(50.dp)) {
                     Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
