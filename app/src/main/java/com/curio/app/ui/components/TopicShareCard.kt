@@ -4772,29 +4772,28 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFFE8E4DA), cornerRadius = 6f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFFFFFFF), Color(0xFFE8E4DA), Color(0xFFCFC8B8))), size = Size(w, h))
-                // Bold speed lines bursting from bottom-left
-                val bx = w * 0.14f; val by = h * 0.92f
-                for (i in 0 until 22) {
-                    val a = Math.toRadians((-12.0 + i * 2.2)).toFloat()
-                    val len = w * (0.35f + (i % 5) * 0.04f)
-                    drawLine(Color(0xFF1A1A1A).copy(alpha = 0.75f), Offset(bx + kotlin.math.cos(a) * w * 0.06f, by + kotlin.math.sin(a) * h * 0.05f), Offset(bx + kotlin.math.cos(a) * len, by + kotlin.math.sin(a) * len), strokeWidth = 2.2f)
-                }
-                // Ink burst
-                for (i in 0 until 12) {
-                    val a = Math.toRadians((360.0 * i / 12)).toFloat()
-                    drawLine(Color(0xFF1A1A1A).copy(alpha = 0.85f), Offset(bx, by), Offset(bx + kotlin.math.cos(a) * w * 0.16f, by + kotlin.math.sin(a) * h * 0.10f), strokeWidth = 3.4f)
-                }
-                drawCircle(Color(0xFF1A1A1A), w * 0.030f, Offset(bx, by))
-                // Screentone dots top-right
-                for (i in 0 until 90) {
-                    val dx = w * 0.58f + (i % 15) * w * 0.026f
-                    val dy = h * 0.06f + (i / 15) * h * 0.026f
+                // Compact screentone patch, top-right
+                for (i in 0 until 30) {
+                    val dx = w * 0.74f + (i % 8) * w * 0.022f
+                    val dy = h * 0.06f + (i / 8) * h * 0.024f
                     drawCircle(Color(0xFF4A4A4A).copy(alpha = 0.35f), 0.7f, Offset(dx, dy))
                 }
-                // Red diagonal slash
-                drawLine(Color(0xFFE8342E).copy(alpha = 0.85f), Offset(w * 0.78f, h * 0.06f), Offset(w * 0.56f, h * 0.34f), strokeWidth = 4f)
-                drawLine(Color(0xFFE8342E).copy(alpha = 0.35f), Offset(w * 0.83f, h * 0.06f), Offset(w * 0.61f, h * 0.34f), strokeWidth = 1.6f)
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF6A6454).copy(alpha = 0.28f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                // Ink burst base bottom-left — one focal point with crisp rays
+                val bx = w * 0.16f; val by = h * 0.86f
+                drawCircle(Color(0xFF1A1A1A), w * 0.026f, Offset(bx, by))
+                for (i in 0 until 8) {
+                    val a = Math.toRadians((360.0 * i / 8)).toFloat()
+                    drawLine(Color(0xFF1A1A1A).copy(alpha = 0.80f), Offset(bx, by), Offset(bx + kotlin.math.cos(a) * w * 0.12f, by + kotlin.math.sin(a) * h * 0.07f), strokeWidth = 2.6f)
+                }
+                // A few bold speed lines radiating up-right
+                for (i in 0 until 8) {
+                    val a = Math.toRadians((-35.0 + i * 10)).toFloat()
+                    val len = w * (0.30f + (i % 3) * 0.05f)
+                    drawLine(Color(0xFF1A1A1A).copy(alpha = 0.70f), Offset(bx, by), Offset(bx + kotlin.math.cos(a) * len, by + kotlin.math.sin(a) * len), strokeWidth = 2.2f)
+                }
+                // Red diagonal slash — the bold focal stroke
+                drawLine(Color(0xFFE8342E).copy(alpha = 0.85f), Offset(w * 0.80f, h * 0.06f), Offset(w * 0.56f, h * 0.30f), strokeWidth = 4f)
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF6A6454).copy(alpha = 0.26f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE8342E), badgeInk = Color.White,
             badgeRadius = 4.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
