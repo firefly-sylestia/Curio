@@ -31,6 +31,8 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -105,6 +107,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.OutlinedButton
 
 // ─── Style enum ────────────────────────────────────────────────────────
@@ -246,12 +249,15 @@ data class ShareCardMove(
      *  are scaled by these so the user can crop/resize the boxes on the card. */
     val titleWidthFrac: Float = 1f,
     val factWidthFrac: Float = 1f,
-    val factHeightFrac: Float = 1f
+    val factHeightFrac: Float = 1f,
+    /** Title text-size multiplier (1f = unchanged). */
+    val titleScale: Float = 1f
 )
 
-/** Modifier that shifts a card's TITLE by the move offset + box width (no-op when default). */
+/** Modifier that shifts a card's TITLE by the move offset + box width + scale (no-op when default). */
 private fun Modifier.moveTitle(m: ShareCardMove): Modifier {
     var mod = this
+    if (m.titleScale != 1f) mod = mod.graphicsLayer { scaleX = m.titleScale; scaleY = m.titleScale }
     if (m.titleDx != 0f || m.titleDy != 0f) mod = mod.offset(x = m.titleDx.dp, y = m.titleDy.dp)
     if (m.titleWidthFrac != 1f) mod = mod.fillMaxWidth(m.titleWidthFrac.coerceIn(0.2f, 1f))
     return mod
@@ -577,7 +583,19 @@ private fun CollageCard(
             val w = size.width; val h = size.height
             val tearY = h * 0.42f
             drawRect(bottomSage, Offset.Zero, Size(w, h))
-            drawRect(Brush.verticalGradient(listOf(bottomSage, bottomDark)), Offset(0f, h * 0.70f), Size(w, h * 0.30f))
+            // Bottom-dark gradient band — wavy top edge (not a straight line)
+            // so it blends naturally with the torn seam above.
+            val darkPath = Path().apply {
+                val bandY = h * 0.70f
+                moveTo(0f, bandY)
+                var x = 0f
+                while (x <= w) {
+                    val y = bandY + kotlin.math.sin(x * 0.03f + 1.5f) * 6f + kotlin.math.sin(x * 0.08f) * 3f
+                    lineTo(x, y); x += w / 40f
+                }
+                lineTo(w, h); lineTo(0f, h); close()
+            }
+            drawPath(darkPath, Brush.verticalGradient(listOf(bottomSage, bottomDark), startY = h * 0.70f, endY = h))
             drawNaturalTearPanel(tearY = tearY, top = topCream, edge = tornEdge, shadow = bottomDark.copy(alpha = 0.22f))
             val footerY = h * 0.86f
             drawPath(
@@ -805,12 +823,13 @@ private fun NeumorphicCard(
 
 
 
-        // Oversized category glyph — signature element of Clean card
+        // Oversized category glyph — signature element of Clean card.
+        // Offset left of the edge so the full glyph stays visible.
         CurioIcon(
             name = categoryGlyph,
             tint = Color.White.copy(alpha = 0.18f),
             size = 150.dp,
-            modifier = Modifier.align(Alignment.TopEnd).offset(x = 32.dp, y = 18.dp)
+            modifier = Modifier.align(Alignment.TopEnd).offset(x = 10.dp, y = 18.dp)
                 .graphicsLayer { rotationZ = -10f }
         )
 
@@ -5512,15 +5531,16 @@ private fun ArrangeableCard(
                 val cw = maxWidth.value; val ch = maxHeight.value
                 if (cw == 0f || ch == 0f) return@BoxWithConstraints
 
-                // Title box — transparent inline field overlaid on the card at
-                // the title's position. Width follows the crop fraction.
+                // Title — transparent inline field over the card's own title.
+                // No background/border so the card text shows through; the field
+                // is just an input surface that writes to editedTitle.
                 val titleW = (cw * 0.84f * move.titleWidthFrac).coerceIn(cw * 0.2f, cw)
                 if (!quoteMode) {
                     BasicTextField(
                         value = editTitle,
                         onValueChange = onTitleChange,
                         textStyle = MaterialTheme.typography.headlineMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = Color.Transparent,
                             fontWeight = FontWeight.Bold
                         ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -5532,8 +5552,6 @@ private fun ArrangeableCard(
                                 y = (ch * 0.06f + move.titleDy).dp
                             )
                             .width(titleW.dp)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), RoundedCornerShape(6.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), RoundedCornerShape(6.dp))
                             .padding(6.dp),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
@@ -5542,7 +5560,14 @@ private fun ArrangeableCard(
                             }
                         }
                     )
-                    // Crop edge — right side of the title box (drag to resize width)
+                    // Move handle for the title
+                    MoveHandle(
+                        label = "T", accent = MaterialTheme.colorScheme.primary,
+                        x = (cw * 0.08f + move.titleDx).dp,
+                        y = (ch * 0.06f + move.titleDy).dp,
+                        onDelta = { dx, dy -> onMove(move.copy(titleDx = move.titleDx + dx, titleDy = move.titleDy + dy)) }
+                    )
+                    // Resize edge for the title box width
                     ResizeEdge(
                         x = (cw * 0.08f + move.titleDx + titleW).dp,
                         y = (ch * 0.06f + move.titleDy).dp,
@@ -5553,21 +5578,14 @@ private fun ArrangeableCard(
                             onMove(move.copy(titleWidthFrac = next.coerceIn(0.2f, 1.2f)))
                         }
                     )
-                    // Move handle for the title
-                    MoveHandle(
-                        label = "T", accent = MaterialTheme.colorScheme.primary,
-                        x = (cw * 0.08f + move.titleDx).dp,
-                        y = (ch * 0.06f + move.titleDy).dp,
-                        onDelta = { dx, dy -> onMove(move.copy(titleDx = move.titleDx + dx, titleDy = move.titleDy + dy)) }
-                    )
                 }
 
-                // Quick-fact box — transparent inline field at the fact position
+                // Quick-fact — transparent inline field over the card's own fact
                 val factW = (cw * 0.84f * move.factWidthFrac).coerceIn(cw * 0.2f, cw)
                 BasicTextField(
                     value = editFact,
                     onValueChange = onFactChange,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Transparent),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.tertiary),
                     singleLine = false,
                     maxLines = 6,
@@ -5577,8 +5595,6 @@ private fun ArrangeableCard(
                             y = (ch * 0.62f + move.factDy).dp
                         )
                         .width(factW.dp)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), RoundedCornerShape(6.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f), RoundedCornerShape(6.dp))
                         .padding(6.dp),
                     decorationBox = { inner ->
                         Box(Modifier.fillMaxWidth()) {
@@ -5587,7 +5603,14 @@ private fun ArrangeableCard(
                         }
                     }
                 )
-                // Crop edge — right side of the fact box (drag to resize width)
+                // Move handle for the fact
+                MoveHandle(
+                    label = "F", accent = MaterialTheme.colorScheme.tertiary,
+                    x = (cw * 0.08f + move.factDx).dp,
+                    y = (ch * 0.62f + move.factDy).dp,
+                    onDelta = { dx, dy -> onMove(move.copy(factDx = move.factDx + dx, factDy = move.factDy + dy)) }
+                )
+                // Resize edge for the fact box width
                 ResizeEdge(
                     x = (cw * 0.08f + move.factDx + factW).dp,
                     y = (ch * 0.62f + move.factDy).dp,
@@ -5597,13 +5620,6 @@ private fun ArrangeableCard(
                         val next = move.factWidthFrac + dx / (cw * 0.84f)
                         onMove(move.copy(factWidthFrac = next.coerceIn(0.2f, 1.2f)))
                     }
-                )
-                // Move handle for the fact
-                MoveHandle(
-                    label = "F", accent = MaterialTheme.colorScheme.tertiary,
-                    x = (cw * 0.08f + move.factDx).dp,
-                    y = (ch * 0.62f + move.factDy).dp,
-                    onDelta = { dx, dy -> onMove(move.copy(factDx = move.factDx + dx, factDy = move.factDy + dy)) }
                 )
             }
         }
@@ -5713,13 +5729,13 @@ fun TopicShareSheet(
                             modifier = Modifier
                                 .width(pw)
                                 .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-                                .shadow(if (isCenter) 4.dp else 1.dp, RoundedCornerShape(6.dp))
                                 .clip(RoundedCornerShape(6.dp))
                                 .graphicsLayer {
                                     val pageOffset = (pagerState.currentPage - page + pagerState.currentPageOffsetFraction)
                                     val scale = 1f - 0.08f * kotlin.math.abs(pageOffset)
                                     scaleX = scale; scaleY = scale
                                     alpha = 1f - 0.25f * kotlin.math.abs(pageOffset)
+                                    shadowElevation = 0f
                                 }
                         ) {
                             ArrangeableCard(
@@ -5774,14 +5790,19 @@ fun TopicShareSheet(
                 }
             }
 
-                // Customise overlay — translucent panel over a light scrim
+                // Customise overlay — translucent panel at the top; tap
+                // outside (the scrim) dismisses it; Back also closes it
+                // instead of exiting the reveal screen.
                 if (customizeOpen) {
-                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f))) {
+                    BackHandler { customizeOpen = false }
+                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.08f)).pointerInput(Unit) {
+                        detectTapGestures(onTap = { customizeOpen = false })
+                    }) {
                         Surface(
                             shape = RoundedCornerShape(18.dp),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.93f),
-                            tonalElevation = 8.dp,
-                            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(0.94f).padding(top = 10.dp)
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
+                            tonalElevation = 4.dp,
+                            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(0.94f).padding(top = 6.dp).pointerInput(Unit) { detectTapGestures { } }
                         ) {
                             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text("Customise", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
@@ -5886,11 +5907,27 @@ fun TopicShareSheet(
                     style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
 
-            // Inline-edit controls — Reset + Done (fact size lives in Customise)
+            // Inline-edit controls — title-size dropdown + Reset + Done
             if (editMode) {
                 Text("Drag the T/F handles to move · drag the edge to resize",
                     style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                    // Title size dropdown
+                    var titleSizeMenu by remember { mutableStateOf(false) }
+                    Box {
+                        Surface(onClick = { titleSizeMenu = true }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
+                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                CurioIcon(name = CurioIcons.FormatText, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                Text("Title ${(Math.round(move.titleScale * 100f) / 100f).toString()}\u00d7", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        DropdownMenu(expanded = titleSizeMenu, onDismissRequest = { titleSizeMenu = false }) {
+                            listOf(0.75f, 0.9f, 1.0f, 1.15f, 1.3f, 1.5f).forEach { s ->
+                                DropdownMenuItem(text = { Text("${(Math.round(s * 100f) / 100f).toString()}\u00d7", style = MaterialTheme.typography.bodyMedium) }, onClick = { move = move.copy(titleScale = s); titleSizeMenu = false })
+                            }
+                        }
+                    }
+                    Spacer(Modifier.width(10.dp))
                     TextButton(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; move = ShareCardMove() }) { Text("Reset") }
                     Spacer(Modifier.width(10.dp))
                     Button(onClick = { editMode = false }, shape = RoundedCornerShape(50)) { Text("Done") }
@@ -5898,25 +5935,32 @@ fun TopicShareSheet(
             }
 
             Spacer(Modifier.height(4.dp))
-            // Save + Share buttons — side by side
+            // Save + Share buttons — side by side, theme-aware
             val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                // Save button
-                OutlinedButton(onClick = {
-                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
-                    }, saveToGallery = true); onDismiss()
-                }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(50.dp)) {
-                    Text("\u2B07", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Save", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                // Save button — theme-aware tonal container
+                Surface(
+                    onClick = {
+                        shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                        }, saveToGallery = true); onDismiss()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.weight(1f).height(50.dp)
+                ) {
+                    Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        CurioIcon(name = CurioIcons.Download, tint = MaterialTheme.colorScheme.onSecondaryContainer, size = 18.dp)
+                        Text("Save", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                    }
                 }
-                // Share button
+                // Share button — theme-aware primary
                 Button(onClick = {
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                     }); onDismiss()
-                }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.weight(1f).height(50.dp)) {
+                }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary), modifier = Modifier.weight(1f).height(50.dp)) {
                     Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                 }
             }
