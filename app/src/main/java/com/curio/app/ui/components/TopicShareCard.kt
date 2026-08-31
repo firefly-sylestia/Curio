@@ -2666,26 +2666,48 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
         cat == "AUTHORS" -> SignatureDesign(
             bg = Color(0xFF101C33), cornerRadius = 8f,
             drawBackground = { w, h ->
-                // Manuscript lines
-                for (i in 0 until 6) { drawLine(Color(0xFFE8DCC0).copy(alpha = 0.12f), Offset(w * 0.08f, h * 0.66f + i * h * 0.05f), Offset(w * 0.55f, h * 0.66f + i * h * 0.05f), strokeWidth = 0.6f) }
-                // Inkwell
-                drawPath(Path().apply { moveTo(w * 0.74f, h * 0.42f); lineTo(w * 0.80f, h * 0.62f); lineTo(w * 0.66f, h * 0.62f); close() }, Color(0xFF2A2A3E))
-                drawRect(Color(0xFF2A2A3E), Offset(w * 0.66f, h * 0.62f), Size(w * 0.14f, h * 0.02f))
-                // Ink pool + splatter
-                drawCircle(Color(0xFF1B2542), w * 0.05f, Offset(w * 0.73f, h * 0.62f))
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 12) {
-                    val x = w * 0.60f + ((s * (i+1) * 3571) % 100) / 100f * w * 0.30f
-                    val y = h * 0.68f + ((s * (i+1) * 4201) % 100) / 100f * h * 0.14f
-                    drawCircle(Color(0xFFE8DCC0).copy(alpha = 0.20f), 1.0f + (i % 2) * 0.8f, Offset(x, y))
+                // Simple navy gradient — calm writing desk backdrop
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF1A2A4C), Color(0xFF101C33), Color(0xFF0A1220))), size = Size(w, h))
+                // Manuscript lines spanning the card, faint and even
+                for (i in 0 until 7) {
+                    val y = h * 0.62f + i * h * 0.045f
+                    drawLine(Color(0xFFE8DCC0).copy(alpha = 0.09f), Offset(w * 0.08f, y), Offset(w * 0.92f, y), strokeWidth = 0.5f)
                 }
-                // Feather quill sweep
-                drawPath(Path().apply { moveTo(w * 0.80f, h * 0.18f); quadraticBezierTo(w * 0.90f, h * 0.30f, w * 0.78f, h * 0.42f) }, Color(0xFFE8DCC0).copy(alpha = 0.35f), style = Stroke(1.2f))
+                // Feather quill — a real spine with barbs, sweeping top-right
+                val qs = Offset(w * 0.70f, h * 0.10f); val qe = Offset(w * 0.88f, h * 0.34f)
+                drawPath(Path().apply {
+                    moveTo(qs.x, qs.y)
+                    quadraticBezierTo(w * 0.76f, h * 0.22f, qe.x, qe.y)
+                }, Color(0xFFE8DCC0).copy(alpha = 0.50f), style = Stroke(1.8f))
+                for (i in 0 until 7) {
+                    val t = i / 6f
+                    val bx = qs.x + (qe.x - qs.x) * t
+                    val by = qs.y + (qe.y - qs.y) * t
+                    drawLine(Color(0xFFE8DCC0).copy(alpha = 0.26f), Offset(bx, by), Offset(bx - w * 0.05f - t * w * 0.02f, by - h * 0.018f), strokeWidth = 0.7f)
+                }
+                // Inkwell — simple jar with a gold rim, bottom-right
+                val ix = w * 0.84f; val iy = h * 0.72f
+                drawPath(Path().apply {
+                    moveTo(ix - w * 0.06f, iy)
+                    lineTo(ix + w * 0.06f, iy)
+                    lineTo(ix + w * 0.05f, iy + h * 0.14f)
+                    lineTo(ix - w * 0.05f, iy + h * 0.14f)
+                    close()
+                }, Color(0xFF2A2A3E).copy(alpha = 0.85f))
+                drawLine(Color(0xFFD9C58A).copy(alpha = 0.50f), Offset(ix - w * 0.065f, iy), Offset(ix + w * 0.065f, iy), strokeWidth = 1.3f)
+                // Ink pool + a few splatter dots under the well
+                drawCircle(Color(0xFF0A1220), w * 0.042f, Offset(ix - w * 0.02f, iy + h * 0.16f))
+                val s = (w * 1000 + h).toInt()
+                for (i in 0 until 8) {
+                    val x = ix - w * 0.11f + ((s * (i+1) * 3571) % 100) / 100f * w * 0.20f
+                    val y = iy + h * 0.19f + ((s * (i+1) * 4201) % 100) / 100f * h * 0.10f
+                    drawCircle(Color(0xFFE8DCC0).copy(alpha = 0.16f), 1.0f + (i % 2) * 0.6f, Offset(x, y))
+                }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFD9C58A), badgeInk = Color(0xFF101C33),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
-            titleFont = LoraFontFamily, titleSize = 28.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFE8DCC0),
+            titleFont = ChangaOneFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFFF0E8D4),
             metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD9C58A),
             bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFC8D2E8).copy(alpha = 0.88f),
             footerSpacer = 8.dp, footerFont = LoraFontFamily, footerColor = Color(0xFFD9C58A).copy(alpha = 0.60f),
