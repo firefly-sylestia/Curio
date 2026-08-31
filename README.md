@@ -6,6 +6,20 @@ A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand
 
 ---
 
+## Screenshots
+
+| Home | Spin | Topic Reveal | Capture |
+|---|---|---|---|
+| ![Home screen](docs/screenshots/home.png) | ![Spin deck](docs/screenshots/spin.png) | ![Topic reveal](docs/screenshots/topic-reveal.png) | ![Capture editor](docs/screenshots/capture.png) |
+
+| Cabinet | Entry Detail | Quests | Share Card |
+|---|---|---|---|
+| ![Cabinet library](docs/screenshots/cabinet.png) | ![Entry detail](docs/screenshots/entry-detail.png) | ![Quests](docs/screenshots/quests.png) | ![Share card](docs/screenshots/share-card.png) |
+
+*Capture names and framing: see [`docs/screenshots/README.md`](docs/screenshots/README.md).*
+
+---
+
 ## About
 
 We scroll past interesting things every day and forget them. Curio turns passive scrolling into active, real-world exploration — and gives you a warm, tactile place to keep what you found. Six rich capture formats (voice notes, reviews, journals, mood boards, field notes, and more) live on a paper-textured editor with ruled lines, torn edges, and coffee stains. Everything stays on your device. Your journal is yours.
