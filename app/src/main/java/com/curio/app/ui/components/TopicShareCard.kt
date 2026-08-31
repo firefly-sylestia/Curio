@@ -4891,14 +4891,12 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 // Floodlight heads
                 drawCircle(Color(0xFFFFF3C4).copy(alpha = 0.9f), w * 0.016f, Offset(w * 0.10f, h * 0.06f))
                 drawCircle(Color(0xFFFFF3C4).copy(alpha = 0.9f), w * 0.016f, Offset(w * 0.90f, h * 0.06f))
-                // Field stripes
-                for (i in 0 until 8) {
-                    val y = h * 0.62f + i * h * 0.035f
+                // Field stripes — four clean lines
+                for (i in 0 until 4) {
+                    val y = h * 0.64f + i * h * 0.05f
                     drawLine(Color(0xFFFFFFFF).copy(alpha = 0.10f), Offset(w * 0.10f, y), Offset(w * 0.90f, y), strokeWidth = 1f)
                 }
-                drawLine(Color(0xFFF2E9D8).copy(alpha = 0.35f), Offset(w * 0.50f, h * 0.60f), Offset(w * 0.50f, h * 0.88f), strokeWidth = 1.6f)
-                // Center circle
-                drawCircle(Color(0xFFF2E9D8).copy(alpha = 0.25f), w * 0.06f, Offset(w * 0.50f, h * 0.74f), style = Stroke(1.4f))
+                drawLine(Color(0xFFF2E9D8).copy(alpha = 0.35f), Offset(w * 0.50f, h * 0.62f), Offset(w * 0.50f, h * 0.88f), strokeWidth = 1.6f)
                 // Trophy bottom-left
                 val tx = w * 0.20f; val ty = h * 0.68f
                 drawPath(Path().apply { moveTo(tx - w * 0.028f, ty + h * 0.10f); lineTo(tx + w * 0.028f, ty + h * 0.10f); lineTo(tx + w * 0.020f, ty + h * 0.14f); lineTo(tx - w * 0.020f, ty + h * 0.14f); close() }, Color(0xFFE0C84F).copy(alpha = 0.75f))
