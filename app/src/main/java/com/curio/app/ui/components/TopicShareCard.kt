@@ -4585,37 +4585,26 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF232327), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF3E3E44), Color(0xFF232327), Color(0xFF131316))), size = Size(w, h))
-                // Dim gallery spotlights — soft pools, never bright behind text
-                listOf(Offset(w * 0.28f, 0f), Offset(w * 0.74f, 0f)).forEach { c ->
-                    val cone = Path().apply { moveTo(c.x, c.y); lineTo(c.x - w * 0.09f, h * 0.58f); lineTo(c.x + w * 0.09f, h * 0.58f); close() }
-                    drawPath(cone, Color(0xFFFFF3C4).copy(alpha = 0.04f))
-                    drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFF3C4).copy(alpha = 0.10f), Color(0xFFFFF3C4).copy(alpha = 0f))), radius = w * 0.13f, center = Offset(c.x, h * 0.62f))
+                // One soft spotlight pool, center
+                val cone = Path().apply {
+                    moveTo(w * 0.42f, 0f)
+                    lineTo(w * 0.30f, h * 0.62f)
+                    lineTo(w * 0.70f, h * 0.62f)
+                    close()
                 }
-                // Framed pieces sit LOW (below the title) so the light text
-                // always reads against the dark wall. Dark frames, w-based size.
-                listOf(Pair(Offset(w * 0.24f, h * 0.66f), 1f), Pair(Offset(w * 0.70f, h * 0.70f), 2f)).forEach { (c, kind) ->
-                    val fw = w * 0.20f; val fh = w * 0.26f
-                    drawRoundRect(Color(0xFF8A8070), topLeft = Offset(c.x - fw / 2, c.y - fh / 2), size = Size(fw, fh), cornerRadius = CornerRadius(2f))
-                    drawRoundRect(Color(0xFF1C1C1F), topLeft = Offset(c.x - fw / 2 + w * 0.009f, c.y - fh / 2 + w * 0.009f), size = Size(fw - w * 0.018f, fh - w * 0.018f), cornerRadius = CornerRadius(1.5f))
-                    val mw = fw - w * 0.04f; val mh = fh - w * 0.04f
-                    if (kind == 1f) {
-                        drawCircle(Brush.radialGradient(listOf(Color(0xFFB86B4F), Color(0xFF4E2A1E)), center = Offset(c.x, c.y - mh * 0.18f), radius = mw * 0.5f), radius = mw * 0.24f, center = Offset(c.x, c.y - mh * 0.18f))
-                        drawOval(Color(0xFF2E4A5E), topLeft = Offset(c.x - mw * 0.26f, c.y + mh * 0.02f), size = Size(mw * 0.52f, mh * 0.30f))
-                        drawLine(Color(0xFF0E0E10), Offset(c.x - mw * 0.32f, c.y + mh * 0.40f), Offset(c.x + mw * 0.32f, c.y + mh * 0.40f), strokeWidth = 1.6f)
-                    } else {
-                        drawRect(Brush.verticalGradient(listOf(Color(0xFF2E4E6A), Color(0xFF16283C), Color(0xFF0C1622)), startY = c.y - mh / 2), topLeft = Offset(c.x - mw / 2, c.y - mh / 2), size = Size(mw, mh))
-                        drawCircle(Color(0xFFF2E4C8).copy(alpha = 0.8f), mw * 0.08f, Offset(c.x - mw * 0.16f, c.y - mh * 0.18f))
-                        for (i in 0 until 10) {
-                            val x = c.x - mw * 0.32f + i * mw * 0.07f
-                            val y = c.y + mh * 0.10f + kotlin.math.sin(i * 0.7f) * mh * 0.05f
-                            drawCircle(Color(0xFF6BB8E8).copy(alpha = 0.35f), 0.8f, Offset(x, y))
-                        }
-                    }
-                    drawCircle(Color(0xFFE0C88F).copy(alpha = 0.35f), w * 0.004f, Offset(c.x - fw / 2 + w * 0.012f, c.y - fh / 2 + w * 0.012f))
-                }
+                drawPath(cone, Color(0xFFFFF3C4).copy(alpha = 0.05f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFF3C4).copy(alpha = 0.12f), Color(0xFFFFF3C4).copy(alpha = 0f))), radius = w * 0.18f, center = Offset(w * 0.50f, h * 0.64f))
+                // One framed piece, centered — clean minimal abstract: sun + hill
+                val cx = w * 0.50f; val cy = h * 0.60f; val fw = w * 0.26f; val fh = w * 0.34f
+                drawRoundRect(Color(0xFF8A8070), topLeft = Offset(cx - fw / 2, cy - fh / 2), size = Size(fw, fh), cornerRadius = CornerRadius(2f))
+                drawRoundRect(Color(0xFF1C1C1F), topLeft = Offset(cx - fw / 2 + w * 0.010f, cy - fh / 2 + w * 0.010f), size = Size(fw - w * 0.020f, fh - w * 0.020f), cornerRadius = CornerRadius(1.5f))
+                val mw = fw - w * 0.045f; val mh = fh - w * 0.045f
+                drawRect(Brush.verticalGradient(listOf(Color(0xFFE86B4F), Color(0xFF7A2A5E)), startY = cy - mh / 2), topLeft = Offset(cx - mw / 2, cy - mh / 2), size = Size(mw, mh))
+                drawCircle(Color(0xFFF2C879).copy(alpha = 0.90f), mw * 0.10f, Offset(cx, cy - mh * 0.14f))
+                drawOval(Color(0xFF2E2E4A), topLeft = Offset(cx - mw * 0.30f, cy + mh * 0.08f), size = Size(mw * 0.60f, mh * 0.24f))
                 // Museum floor line
                 drawLine(Color(0xFF8A8070).copy(alpha = 0.30f), Offset(w * 0.04f, h * 0.90f), Offset(w * 0.96f, h * 0.90f), strokeWidth = 1.2f)
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0B0B0D).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0B0B0D).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE0C88F), badgeInk = Color(0xFF232327),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
