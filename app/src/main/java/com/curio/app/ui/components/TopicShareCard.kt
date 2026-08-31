@@ -4660,20 +4660,11 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF2B2416), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.radialGradient(listOf(Color(0xFF5E4C26), Color(0xFF2B2416), Color(0xFF161206)), center = Offset(w * 0.6f, h * 0.35f), radius = w * 0.95f), size = Size(w, h))
-                // Aged-map contour rings — w-sized so they don't squish on 3:4
-                for (i in 0 until 5) {
-                    drawOval(Color(0xFFC9A24F).copy(alpha = 0.10f), topLeft = Offset(w * 0.05f - i * w * 0.02f, h * 0.55f - i * w * 0.0225f), size = Size(w * 0.62f + i * w * 0.04f, w * 0.255f + i * w * 0.0225f), style = Stroke(1f))
-                }
-                // Dotted expedition trail — starts at the map edge and leads
-                // straight INTO the compass rose
-                val cx = w * 0.80f; val cy = h * 0.66f
-                for (i in 0 until 30) {
-                    val t = i / 29f
-                    val tx = w * 0.06f + t * (cx - w * 0.06f) + kotlin.math.sin(t * 4f) * w * 0.03f * (1f - t)
-                    val ty = h * 0.80f - kotlin.math.sin(t * 2.4f) * w * 0.10f * (1f - t)
-                    drawCircle(Color(0xFFE8C84F).copy(alpha = 0.55f), 1.5f, Offset(tx, ty))
-                }
-                // Compass rose — the trail terminates at its center
+                // Two aged-map contour rings, not five
+                drawOval(Color(0xFFC9A24F).copy(alpha = 0.12f), topLeft = Offset(w * 0.06f, h * 0.52f), size = Size(w * 0.60f, w * 0.24f), style = Stroke(1f))
+                drawOval(Color(0xFFC9A24F).copy(alpha = 0.08f), topLeft = Offset(w * 0.10f, h * 0.56f), size = Size(w * 0.52f, w * 0.20f), style = Stroke(1f))
+                // Compass rose — the focal piece, center-right
+                val cx = w * 0.78f; val cy = h * 0.64f
                 drawCircle(Color(0xFFE8D9A8).copy(alpha = 0.28f), w * 0.10f, Offset(cx, cy), style = Stroke(1.2f))
                 for (i in 0 until 8) {
                     val a = Math.toRadians((45.0 * i)).toFloat()
@@ -4683,12 +4674,19 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 }
                 drawCircle(Color(0xFFE8C84F), w * 0.014f, Offset(cx, cy))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8C84F).copy(alpha = 0.25f), Color(0xFFE8C84F).copy(alpha = 0f))), radius = w * 0.14f, center = Offset(cx, cy))
-                // Sun rays top-left
-                for (i in 0 until 8) {
-                    val a = Math.toRadians((360.0 * i / 8)).toFloat()
-                    drawLine(Color(0xFFF2D98A).copy(alpha = 0.14f), Offset(w * 0.12f, h * 0.10f), Offset(w * 0.12f + kotlin.math.cos(a) * w * 0.16f, h * 0.10f + kotlin.math.sin(a) * w * 0.16f), strokeWidth = 1.2f)
+                // Short dotted trail into the compass
+                for (i in 0 until 12) {
+                    val t = i / 11f
+                    val tx = w * 0.10f + t * (cx - w * 0.10f) + kotlin.math.sin(t * 3f) * w * 0.02f
+                    val ty = h * 0.80f - kotlin.math.sin(t * 2.0f) * w * 0.06f
+                    drawCircle(Color(0xFFE8C84F).copy(alpha = 0.55f), 1.5f, Offset(tx, ty))
                 }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0D0A03).copy(alpha = 0.5f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                // Four faint sun rays, top-left
+                for (i in 0 until 4) {
+                    val a = Math.toRadians((360.0 * i / 8)).toFloat()
+                    drawLine(Color(0xFFF2D98A).copy(alpha = 0.12f), Offset(w * 0.12f, h * 0.10f), Offset(w * 0.12f + kotlin.math.cos(a) * w * 0.14f, h * 0.10f + kotlin.math.sin(a) * w * 0.14f), strokeWidth = 1.2f)
+                }
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0D0A03).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE8C84F), badgeInk = Color(0xFF2B2416),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
