@@ -6466,7 +6466,6 @@ fun ShareHubBody(
 }
 
 @Composable
-@Composable
 private fun OptionStepperRow(label: String, value: String, onDecrease: () -> Unit, onIncrease: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
