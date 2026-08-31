@@ -4547,42 +4547,30 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             drawBackground = { w, h ->
                 drawRect(Brush.radialGradient(listOf(Color(0xFF4A3A26), Color(0xFF201A14), Color(0xFF0F0C08)), center = Offset(w * 0.5f, h * 0.30f), radius = w * 0.95f), size = Size(w, h))
                 // Warm north-light glow from above
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2E4C8).copy(alpha = 0.16f), Color(0xFFF2E4C8).copy(alpha = 0f))), radius = w * 0.45f, center = Offset(w * 0.5f, h * 0.24f))
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2E4C8).copy(alpha = 0.14f), Color(0xFFF2E4C8).copy(alpha = 0f))), radius = w * 0.42f, center = Offset(w * 0.5f, h * 0.22f))
                 // Easel frame, right — A-frame with crossbar
                 val ex = w * 0.70f
                 drawLine(Color(0xFF8A6B4A).copy(alpha = 0.70f), Offset(ex - w * 0.06f, h * 0.24f), Offset(ex + w * 0.005f, h * 0.80f), strokeWidth = 2.6f)
                 drawLine(Color(0xFF8A6B4A).copy(alpha = 0.70f), Offset(ex + w * 0.06f, h * 0.24f), Offset(ex + w * 0.005f, h * 0.80f), strokeWidth = 2.6f)
                 drawLine(Color(0xFF8A6B4A).copy(alpha = 0.55f), Offset(ex - w * 0.045f, h * 0.60f), Offset(ex + w * 0.045f, h * 0.60f), strokeWidth = 1.8f)
-                // Canvas resting on the easel — half-painted sunset scene
-                val cx = ex + w * 0.005f; val cy = h * 0.40f; val cw = w * 0.24f; val ch = w * 0.30f
+                // Canvas resting on the easel — clean minimal abstract: sky, sun, one hill band
+                val cx = ex + w * 0.005f; val cy = h * 0.40f; val cw = w * 0.22f; val ch = w * 0.28f
                 drawRoundRect(brush = Brush.verticalGradient(listOf(Color(0xFFF5F0E4), Color(0xFFD8CDB4)), startY = cy - ch / 2), topLeft = Offset(cx - cw / 2, cy - ch / 2), size = Size(cw, ch), cornerRadius = CornerRadius(2f))
-                // Painted sunset inside the canvas
-                drawRect(Brush.verticalGradient(listOf(Color(0xFFFF9A6B), Color(0xFFE86B4F), Color(0xFF4E2A5E)), startY = cy - ch / 2), topLeft = Offset(cx - cw / 2 + w * 0.012f, cy - ch / 2 + w * 0.012f), size = Size(cw - w * 0.024f, ch * 0.55f))
-                drawCircle(Color(0xFFF2C879).copy(alpha = 0.9f), cw * 0.09f, Offset(cx, cy - ch * 0.10f))
-                drawOval(Color(0xFF2E4A5E), topLeft = Offset(cx - cw * 0.32f, cy + ch * 0.08f), size = Size(cw * 0.64f, ch * 0.26f))
-                // Unpainted corner + palette thumb hole
-                drawRect(Color(0xFFD8CDB4), topLeft = Offset(cx + cw * 0.30f, cy + ch * 0.22f), size = Size(cw * 0.20f, ch * 0.28f))
-                // Palette, bottom-left — with thumb hole and fresh wells
+                drawRect(Brush.verticalGradient(listOf(Color(0xFFF2C879), Color(0xFFE86B4F)), startY = cy - ch / 2), topLeft = Offset(cx - cw / 2 + w * 0.010f, cy - ch / 2 + w * 0.010f), size = Size(cw - w * 0.020f, ch * 0.52f))
+                drawCircle(Color(0xFFF2E4C8).copy(alpha = 0.95f), cw * 0.075f, Offset(cx, cy - ch * 0.10f))
+                drawOval(Color(0xFF3A2E4A), topLeft = Offset(cx - cw * 0.30f, cy + ch * 0.06f), size = Size(cw * 0.60f, ch * 0.22f))
+                // Palette, bottom-left — clean, three wells
                 val px = w * 0.24f; val py = h * 0.70f
                 drawOval(brush = Brush.radialGradient(listOf(Color(0xFF8A6B4A), Color(0xFF5E452E)), center = Offset(px, py), radius = w * 0.13f), topLeft = Offset(px - w * 0.145f, py - w * 0.11f), size = Size(w * 0.30f, w * 0.16f))
-                drawCircle(Color(0xFF201A14), w * 0.020f, Offset(px + w * 0.115f, py + w * 0.035f))
-                val wells = listOf(Color(0xFFE8544F), Color(0xFF4FA8E8), Color(0xFFE8C84F), Color(0xFF4FE8A0), Color(0xFFB86BE8))
-                wells.forEachIndexed { i, col ->
-                    val wx = px - w * 0.085f + (i % 3) * w * 0.048f
-                    val wy = py - w * 0.045f + (i / 3) * w * 0.05f
-                    drawCircle(col.copy(alpha = 0.95f), w * 0.011f, Offset(wx, wy))
+                drawCircle(Color(0xFF201A14), w * 0.018f, Offset(px + w * 0.115f, py + w * 0.035f))
+                listOf(Color(0xFFE8544F), Color(0xFF4FA8E8), Color(0xFFE8C84F)).forEachIndexed { i, col ->
+                    drawCircle(col.copy(alpha = 0.95f), w * 0.010f, Offset(px - w * 0.075f + i * w * 0.045f, py - w * 0.03f))
                 }
-                // Brush leaning across the canvas — handle, ferrule, bristles
-                drawLine(Color(0xFFB08A4A), Offset(w * 0.50f, h * 0.30f), Offset(w * 0.66f, h * 0.46f), strokeWidth = 3.2f)
-                drawLine(Color(0xFF8A6B3A), Offset(w * 0.50f, h * 0.30f), Offset(w * 0.56f, h * 0.24f), strokeWidth = 2.4f)
+                // One clean brush across the canvas
+                drawLine(Color(0xFFB08A4A), Offset(w * 0.50f, h * 0.30f), Offset(w * 0.66f, h * 0.46f), strokeWidth = 3.0f)
                 drawLine(Color(0xFFC9B89A), Offset(w * 0.66f, h * 0.46f), Offset(w * 0.69f, h * 0.49f), strokeWidth = 2.0f)
                 drawPath(Path().apply { moveTo(w * 0.69f, h * 0.49f); lineTo(w * 0.72f, h * 0.53f); lineTo(w * 0.68f, h * 0.52f); close() }, Color(0xFFE8544F).copy(alpha = 0.85f))
-                // Paint drips
-                listOf(Pair(Offset(w * 0.50f, h * 0.34f), Color(0xFF4FA8E8)), Pair(Offset(w * 0.55f, h * 0.40f), Color(0xFFE8544F))).forEach { (c, col) ->
-                    drawCircle(col.copy(alpha = 0.55f), 1.6f, c)
-                    drawLine(col.copy(alpha = 0.35f), Offset(c.x, c.y + 2f), Offset(c.x, c.y + 8f), strokeWidth = 1.2f)
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF080603).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF080603).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE8C84F), badgeInk = Color(0xFF201A14),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
