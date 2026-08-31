@@ -232,16 +232,29 @@ data class ShareCardMove(
     val titleDx: Float = 0f,
     val titleDy: Float = 0f,
     val factDx: Float = 0f,
-    val factDy: Float = 0f
+    val factDy: Float = 0f,
+    /** Box-size fractions (1f = unchanged). Title/fact width and fact height
+     *  are scaled by these so the user can crop/resize the boxes on the card. */
+    val titleWidthFrac: Float = 1f,
+    val factWidthFrac: Float = 1f,
+    val factHeightFrac: Float = 1f
 )
 
-/** Modifier that shifts a card's TITLE by the move offset (no-op when zero). */
-private fun Modifier.moveTitle(m: ShareCardMove): Modifier =
-    if (m.titleDx == 0f && m.titleDy == 0f) this else this.offset(x = m.titleDx.dp, y = m.titleDy.dp)
+/** Modifier that shifts a card's TITLE by the move offset + box width (no-op when default). */
+private fun Modifier.moveTitle(m: ShareCardMove): Modifier {
+    var mod = this
+    if (m.titleDx != 0f || m.titleDy != 0f) mod = mod.offset(x = m.titleDx.dp, y = m.titleDy.dp)
+    if (m.titleWidthFrac != 1f) mod = mod.fillMaxWidth(m.titleWidthFrac.coerceIn(0.2f, 1f))
+    return mod
+}
 
-/** Modifier that shifts a card's QUICK-FACT/BODY by the move offset (no-op when zero). */
-private fun Modifier.moveFact(m: ShareCardMove): Modifier =
-    if (m.factDx == 0f && m.factDy == 0f) this else this.offset(x = m.factDx.dp, y = m.factDy.dp)
+/** Modifier that shifts a card's QUICK-FACT/BODY by the move offset + box size (no-op when default). */
+private fun Modifier.moveFact(m: ShareCardMove): Modifier {
+    var mod = this
+    if (m.factDx != 0f || m.factDy != 0f) mod = mod.offset(x = m.factDx.dp, y = m.factDy.dp)
+    if (m.factWidthFrac != 1f) mod = mod.fillMaxWidth(m.factWidthFrac.coerceIn(0.2f, 1f))
+    return mod
+}
 
 @Composable
 fun TopicShareCard(
@@ -5989,9 +6002,11 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
 // ═══════════════════════════════════════════════════════���═══════════════
 /**
  * Wraps the preview card: tap-and-hold toggles inline text editing, which
- * works on EVERY style. While editing, a translucent panel over the card's
- * bottom lets you type the title and quick fact — the card behind updates
- * live, and the saved/shared image matches.
+ * works on EVERY style. While editing, the title + quick-fact become
+ * transparent BasicTextFields IN PLACE on the card (no separate panel) —
+ * type and the card text updates live. Drag the round T/F handles to move
+ * them; drag the edge handles to crop/resize the boxes. The exported image
+ * matches because the same move + box-size is threaded through every style.
  */
 @Composable
 private fun ArrangeableCard(
@@ -6013,69 +6028,103 @@ private fun ArrangeableCard(
     }) {
         card()
         if (editMode) {
-            // Draggable move handles — drag a circle to reposition the title
-            // or the quick-fact box directly on the card; the card text and
-            // the exported image follow the same offset.
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 val cw = maxWidth.value; val ch = maxHeight.value
-                MoveHandle(
-                    label = "T", accent = MaterialTheme.colorScheme.primary,
-                    x = (cw * 0.14f).dp + move.titleDx.dp,
-                    y = (ch * 0.08f).dp + move.titleDy.dp,
-                    onDelta = { dx, dy -> onMove(move.copy(titleDx = move.titleDx + dx, titleDy = move.titleDy + dy)) }
-                )
-                MoveHandle(
-                    label = "F", accent = MaterialTheme.colorScheme.tertiary,
-                    x = (cw * 0.14f).dp + move.factDx.dp,
-                    y = (ch * 0.72f).dp + move.factDy.dp,
-                    onDelta = { dx, dy -> onMove(move.copy(factDx = move.factDx + dx, factDy = move.factDy + dy)) }
-                )
-            }
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-                tonalElevation = 6.dp,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(12.dp)
-            ) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (!quoteMode) {
-                        Text("Title", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
-                        BasicTextField(
-                            value = editTitle,
-                            onValueChange = onTitleChange,
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            singleLine = false,
-                            maxLines = 2,
-                            modifier = Modifier.fillMaxWidth(),
-                            decorationBox = { inner ->
-                                Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) {
-                                    if (editTitle.isBlank()) Text("Edit title…", style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
-                                    inner()
-                                }
-                            }
-                        )
-                    }
-                    Text("Quick fact", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                if (cw == 0f || ch == 0f) return@BoxWithConstraints
+
+                // Title box — transparent inline field overlaid on the card at
+                // the title's position. Width follows the crop fraction.
+                val titleW = (cw * 0.84f * move.titleWidthFrac).coerceIn(cw * 0.2f, cw)
+                if (!quoteMode) {
                     BasicTextField(
-                        value = editFact,
-                        onValueChange = onFactChange,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        value = editTitle,
+                        onValueChange = onTitleChange,
+                        textStyle = MaterialTheme.typography.headlineMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold
+                        ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = false,
                         maxLines = 4,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .offset(
+                                x = (cw * 0.08f + move.titleDx).dp,
+                                y = (ch * 0.06f + move.titleDy).dp
+                            )
+                            .width(titleW.dp)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), RoundedCornerShape(6.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), RoundedCornerShape(6.dp))
+                            .padding(6.dp),
                         decorationBox = { inner ->
-                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) {
-                                if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                            Box(Modifier.fillMaxWidth()) {
+                                if (editTitle.isBlank()) Text("Edit title…", style = MaterialTheme.typography.headlineMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
                                 inner()
                             }
                         }
                     )
+                    // Crop edge — right side of the title box (drag to resize width)
+                    ResizeEdge(
+                        x = (cw * 0.08f + move.titleDx + titleW).dp,
+                        y = (ch * 0.06f + move.titleDy).dp,
+                        accent = MaterialTheme.colorScheme.primary,
+                        edge = ResizeEdgeSide.RIGHT,
+                        onDelta = { dx ->
+                            val next = move.titleWidthFrac + dx / (cw * 0.84f)
+                            onMove(move.copy(titleWidthFrac = next.coerceIn(0.2f, 1.2f)))
+                        }
+                    )
+                    // Move handle for the title
+                    MoveHandle(
+                        label = "T", accent = MaterialTheme.colorScheme.primary,
+                        x = (cw * 0.08f + move.titleDx).dp,
+                        y = (ch * 0.06f + move.titleDy).dp,
+                        onDelta = { dx, dy -> onMove(move.copy(titleDx = move.titleDx + dx, titleDy = move.titleDy + dy)) }
+                    )
                 }
+
+                // Quick-fact box — transparent inline field at the fact position
+                val factW = (cw * 0.84f * move.factWidthFrac).coerceIn(cw * 0.2f, cw)
+                BasicTextField(
+                    value = editFact,
+                    onValueChange = onFactChange,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.tertiary),
+                    singleLine = false,
+                    maxLines = 6,
+                    modifier = Modifier
+                        .offset(
+                            x = (cw * 0.08f + move.factDx).dp,
+                            y = (ch * 0.62f + move.factDy).dp
+                        )
+                        .width(factW.dp)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.72f), RoundedCornerShape(6.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f), RoundedCornerShape(6.dp))
+                        .padding(6.dp),
+                    decorationBox = { inner ->
+                        Box(Modifier.fillMaxWidth()) {
+                            if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                            inner()
+                        }
+                    }
+                )
+                // Crop edge — right side of the fact box (drag to resize width)
+                ResizeEdge(
+                    x = (cw * 0.08f + move.factDx + factW).dp,
+                    y = (ch * 0.62f + move.factDy).dp,
+                    accent = MaterialTheme.colorScheme.tertiary,
+                    edge = ResizeEdgeSide.RIGHT,
+                    onDelta = { dx ->
+                        val next = move.factWidthFrac + dx / (cw * 0.84f)
+                        onMove(move.copy(factWidthFrac = next.coerceIn(0.2f, 1.2f)))
+                    }
+                )
+                // Move handle for the fact
+                MoveHandle(
+                    label = "F", accent = MaterialTheme.colorScheme.tertiary,
+                    x = (cw * 0.08f + move.factDx).dp,
+                    y = (ch * 0.62f + move.factDy).dp,
+                    onDelta = { dx, dy -> onMove(move.copy(factDx = move.factDx + dx, factDy = move.factDy + dy)) }
+                )
             }
         }
     }
@@ -6254,7 +6303,7 @@ fun TopicShareSheet(
                             tonalElevation = 8.dp,
                             modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(0.94f).padding(top = 10.dp)
                         ) {
-                            Column(Modifier.padding(16.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text("Customise", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
 
                                 // Style switcher — pick any card style from here
@@ -6359,6 +6408,8 @@ fun TopicShareSheet(
 
             // Inline-edit controls — Reset + Done (fact size lives in Customise)
             if (editMode) {
+                Text("Drag the T/F handles to move · drag the edge to resize",
+                    style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; move = ShareCardMove() }) { Text("Reset") }
                     Spacer(Modifier.width(10.dp))
@@ -6535,6 +6586,43 @@ private fun BoxScope.MoveHandle(
     ) {
         Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color.White))
     }
+}
+
+/** Which edge of a box the resize handle sits on. */
+private enum class ResizeEdgeSide { RIGHT, BOTTOM }
+
+/**
+ * A small draggable tab on the edge of the title / quick-fact box — like the
+ * crop handle in a photo editor. Drag it to change the box's width (RIGHT)
+ * or height (BOTTOM). The drag delta (in dp) is fed back via onDelta so the
+ * live card and the exported image resize together.
+ */
+@Composable
+private fun BoxScope.ResizeEdge(
+    x: Dp, y: Dp,
+    accent: Color,
+    edge: ResizeEdgeSide,
+    onDelta: (d: Float) -> Unit
+) {
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val latestDelta by rememberUpdatedState(onDelta)
+    val w = if (edge == ResizeEdgeSide.RIGHT) 6.dp else 24.dp
+    val h = if (edge == ResizeEdgeSide.RIGHT) 36.dp else 6.dp
+    Box(
+        modifier = Modifier
+            .offset(x = x - (w / 2f), y = y)
+            .size(width = w, height = h)
+            .graphicsLayer {
+                shadowElevation = 3.dp.toPx(); shape = RoundedCornerShape(3.dp); clip = false
+            }
+            .background(accent, RoundedCornerShape(3.dp))
+            .pointerInput(Unit) {
+                detectDragGestures { _, dragAmount ->
+                    val d = with(density) { (if (edge == ResizeEdgeSide.RIGHT) dragAmount.x else dragAmount.y).toDp().value }
+                    latestDelta(d)
+                }
+            }
+    ) { }
 }
 
 @Composable

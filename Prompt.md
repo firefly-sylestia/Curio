@@ -1,5 +1,72 @@
 # Prompt.md — current request log
 
+## Request: Inline-on-card edit (all styles) + drag-move + size adjustments + Customise crash fix (COMMITTED, NOT PUSHED)
+
+- User references commit c0c851b: "the quick fact edit and title edit were
+  better here it didn't open that box overlay". In that commit, hold-to-edit
+  turned the title + quick-fact TEXT into editable BasicTextFields IN PLACE on
+  the card (transparent fields at their exact spots) — NO separate bottom panel
+  with labelled fields. The current code re-added a bottom Surface panel with
+  Title/Quick-fact fields (the "box overlay" the user dislikes) PLUS draggable
+  MoveHandle circles.
+- User wants:
+  1. INLINE text editing on the card itself (like c0c851b) for ALL styles —
+     remove the bottom text-fields panel; type directly on the card.
+  2. KEEP the drag-to-move handles (reposition title + fact boxes).
+  3. ADD size adjustments (title size + fact size) — current fact-size slider
+     lives in Customise; user wants size control while editing on the card.
+  4. Text "adjusts itself" — auto-resize so edited text never clips.
+  5. FIX CRASH: opening the Customise menu crashes with
+     `IllegalStateException: Vertically scrollable component was measured
+     with an infinity maximum height constraints`. Root cause: the Customise
+     overlay's inner `Column(...verticalScroll())` is nested inside the outer
+     sheet `Column(...verticalScroll())` which gives it unbounded height.
+- Plan:
+  - Crash fix: remove the inner `verticalScroll` from the Customise overlay
+    Column (the outer sheet scroll already scrolls; the overlay panel content
+    is short enough). This is the surgical fix.
+  - Inline edit rework: replace the bottom Surface text-fields panel in
+    ArrangeableCard with on-card BasicTextFields. Thread editMode through
+    every card style so the title + fact become inline fields when editing.
+  - Keep MoveHandle drag circles (already present).
+  - Add size sliders/steppers in the edit-mode controls row (below card):
+    title size + fact size. Thread a titleScale through all styles.
+  - Auto-resize: keep the existing length-based quickFactFontSize logic but
+    let BasicTextField wrap content so the field grows with typed text.
+- User clarification (ask_user): NO text-size sliders on the card — text size
+  stays in the Customise menu (existing fact-size slider). The user wants
+  BOX size + shape adjustment: crop-style handles on the title + fact boxes
+  (drag edges/corners to resize/change shape, like cropping a photo). Text
+  auto-adjusts itself (BasicTextField wraps; existing font-size logic stays).
+- SHIPPED this commit:
+  - CRASH FIX: the Customise overlay's inner Column had a verticalScroll
+    nested inside the outer sheet Column(verticalScroll) — unbounded
+    height → IllegalStateException on open. Removed the inner verticalScroll;
+    the outer sheet scroll now carries the overlay content.
+  - INLINE EDIT REWORK: ArrangeableCard no longer renders a bottom Surface
+    panel with labelled Title/Quick-fact fields. Instead, when editMode is
+    on, two transparent BasicTextFields overlay the card itself (title near
+    the top, quick-fact near the bottom) — type and the card text updates
+    live (the card renders editedTitle/editedFact at its real positions).
+    This matches the c0c851b approach the user preferred, for ALL styles.
+  - DRAG-TO-MOVE: the T / F round MoveHandle circles are kept; dragging
+    them repositions the title + fact boxes (offsets thread through every
+    style via moveTitle/moveFact, so the export matches).
+  - CROP-STYLE RESIZE: new ResizeEdge composable + ResizeEdgeSide enum.
+    A draggable edge tab sits on the right side of each box; dragging it
+    changes the box width (fraction). ShareCardMove gained titleWidthFrac /
+    factWidthFrac; moveTitle/moveFact now apply fillMaxWidth(frac) so the
+    card's own title/fact boxes resize and the export matches.
+  - TEXT AUTO-FITS: the overlay fields use headlineMedium/bodyMedium with
+    maxLines so the typed text wraps; the card's existing length-based
+    quickFactFontSize logic stays, so the text adjusts itself.
+  - Edit hint now reads "Drag the T/F handles to move · drag the edge to
+    resize"; Reset still clears move + edits + bodyScale.
+- Balance-checked: braces 980/980, brackets 38/38 (parens raw count is
+  unreliable for Kotlin but matches the pre-existing HEAD pattern). No
+  new imports needed (width/fillMaxWidth/border/offset all already
+  imported). Changelog + Prompt.md updated. PENDING PUSH.
+
 ## Request: CI green check + Customise overlay rework (slider/chips/style-switch) + Signature fact-size fix (COMMITTED, NOT PUSHED)
 
 - User: check the workflow succeeded; then complaints about the share
