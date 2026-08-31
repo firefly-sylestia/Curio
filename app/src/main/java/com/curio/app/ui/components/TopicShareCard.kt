@@ -6050,10 +6050,12 @@ private fun ArrangeableCard(
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                             singleLine = false,
                             maxLines = 2,
-                            placeholder = { Text("Edit title…", style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))) },
                             modifier = Modifier.fillMaxWidth(),
                             decorationBox = { inner ->
-                                Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) { inner() }
+                                Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) {
+                                    if (editTitle.isBlank()) Text("Edit title…", style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                    inner()
+                                }
                             }
                         )
                     }
@@ -6065,10 +6067,12 @@ private fun ArrangeableCard(
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = false,
                         maxLines = 4,
-                        placeholder = { Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))) },
                         modifier = Modifier.fillMaxWidth(),
                         decorationBox = { inner ->
-                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) { inner() }
+                            Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp)) {
+                                if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                inner()
+                            }
                         }
                     )
                 }
