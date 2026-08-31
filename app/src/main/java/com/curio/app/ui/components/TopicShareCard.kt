@@ -4414,31 +4414,29 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "SONGS" -> SignatureDesign(
             bg = Color(0xFF261023), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF4A1638), Color(0xFF261023), Color(0xFF120811))), size = Size(w, h))
-                // Soft bokeh orbs
-                listOf(Pair(Offset(w * 0.18f, h * 0.22f), Color(0xFFFF9AB8)), Pair(Offset(w * 0.86f, h * 0.30f), Color(0xFFC084FC)), Pair(Offset(w * 0.72f, h * 0.80f), Color(0xFFFFB74D))).forEach { (c, col) ->
-                    drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.30f), col.copy(alpha = 0f))), radius = w * 0.16f, center = c)
-                }
-                // Glowing waveform bars rising from the bottom
-                val bars = intArrayOf(3, 8, 14, 6, 18, 10, 22, 12, 26, 15, 20, 9, 16, 6, 12, 4, 8, 3)
-                val bw = w * 0.032f
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF3A1230), Color(0xFF221022), Color(0xFF120811))), size = Size(w, h))
+                // One diffused orb, top-right — quiet, not busy
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFF5FA2).copy(alpha = 0.22f), Color(0xFFFF5FA2).copy(alpha = 0f))), radius = w * 0.34f, center = Offset(w * 0.82f, h * 0.16f))
+                // One clean waveform — 12 rounded bars, soft gradient, no glow halos
+                val bars = intArrayOf(4, 9, 14, 10, 20, 12, 24, 14, 18, 10, 8, 4)
+                val bw = w * 0.045f
+                val baseY = h * 0.80f
                 bars.forEachIndexed { i, v ->
-                    val x = w * 0.08f + i * (bw + w * 0.018f)
-                    val bh = h * 0.40f * (v / 26f)
-                    val top = h * 0.86f - bh
-                    drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFF5FA2).copy(alpha = 0.35f), Color(0xFFFF5FA2).copy(alpha = 0f))), radius = bh * 0.9f, center = Offset(x + bw / 2, top + bh / 2))
+                    val x = w * 0.10f + i * (bw + w * 0.020f)
+                    val bh = h * 0.28f * (v / 24f)
+                    val top = baseY - bh
                     drawRoundRect(brush = Brush.verticalGradient(listOf(Color(0xFFFF9AB8), Color(0xFFFF5FA2), Color(0xFFB32D6B)), startY = top), topLeft = Offset(x, top), size = Size(bw, bh), cornerRadius = CornerRadius(bw / 2))
                 }
-                // Floating musical notes
+                // Quiet baseline under the bars
+                drawLine(Color(0xFFFF9AB8).copy(alpha = 0.16f), Offset(w * 0.08f, baseY + h * 0.025f), Offset(w * 0.92f, baseY + h * 0.025f), strokeWidth = 1f)
+                // One floating note above the tallest bars
                 fun note(cx: Float, cy: Float, s: Float, a: Float) {
                     drawCircle(Color(0xFFF7D9E8).copy(alpha = a), s * 0.34f, Offset(cx - s * 0.10f, cy - s * 0.05f))
                     drawLine(Color(0xFFF7D9E8).copy(alpha = a), Offset(cx + s * 0.24f, cy - s * 0.34f), Offset(cx + s * 0.24f, cy + s * 0.62f), strokeWidth = 1.4f)
                     drawPath(Path().apply { moveTo(cx + s * 0.24f, cy + s * 0.62f); cubicTo(cx + s * 0.24f, cy + s * 0.72f, cx + s * 0.02f, cy + s * 0.78f, cx - s * 0.06f, cy + s * 0.60f); cubicTo(cx - s * 0.14f, cy + s * 0.42f, cx + s * 0.02f, cy + s * 0.36f, cx + s * 0.24f, cy + s * 0.46f) }, Color(0xFFF7D9E8).copy(alpha = a))
                 }
-                note(w * 0.80f, h * 0.20f, w * 0.045f, 0.55f)
-                note(w * 0.14f, h * 0.16f, w * 0.035f, 0.42f)
-                note(w * 0.90f, h * 0.48f, w * 0.030f, 0.34f)
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0A0409).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                note(w * 0.82f, h * 0.30f, w * 0.040f, 0.55f)
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0A0409).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF5FA2), badgeInk = Color(0xFF261023),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
