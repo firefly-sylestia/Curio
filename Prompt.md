@@ -1,5 +1,21 @@
 # Prompt.md — current request log
 
+## Request: DETAILED (Deepen) scenes batch 4 — minimal aesthetic pass: Manga / Manhwa / Mythology / Sports / Food (COMMITTED, NOT PUSHED)
+
+- MANGA: 22 speed lines + 12-ray ink burst + 90-dot screentone -> one
+  compact screentone patch (30), a crisp 8-ray ink burst, 8 speed lines,
+  one bold red slash.
+- MANHWA: 2 clouds + arch + heart + 16-sparkle orbit -> one pastel cloud,
+  arch + heart focal, 4 placed sparkles.
+- MYTHOLOGY: 10 random marble veins + meander + temple + 10-leaf laurel ->
+  veins removed, laurel trimmed to 5 even leaves; meander/pediment/columns
+  remain the focal composition.
+- SPORTS: 8 field stripes + center line + center circle + trophy -> 4
+  stripes, center circle removed; floodlights, pitch and trophy as focal.
+- FOOD: 2 basil leaves + plate + bowl + steam + 14 crumb dots -> 1 basil
+  leaf, crumbs removed.
+- Each commit balance-checked; changelog + Prompt.md updated. PENDING PUSH.
+
 ## Request: DETAILED (Deepen) scenes batch 3 — minimal aesthetic pass: Artworks / Scientists / Discoveries / Series / Anime (COMMITTED, NOT PUSHED)
 
 - User: "next time dont push without my permission and continue." → commit
