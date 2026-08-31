@@ -4740,29 +4740,24 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF3A1A4A), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF7A3A8A), Color(0xFF3A1A4A), Color(0xFF1A0E24))), size = Size(w, h))
-                // Sunburst from top-right
-                for (i in 0 until 12) {
-                    val a = Math.toRadians((360.0 * i / 12)).toFloat()
-                    drawLine(Color(0xFFFFF3C4).copy(alpha = 0.13f), Offset(w * 0.86f, h * 0.08f), Offset(w * 0.86f + kotlin.math.cos(a) * w * 0.30f, h * 0.08f + kotlin.math.sin(a) * w * 0.30f), strokeWidth = 1.4f)
+                // Soft sun glow top-right, with fewer fainter rays
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFF3C4).copy(alpha = 0.28f), Color(0xFFFFF3C4).copy(alpha = 0f))), radius = w * 0.20f, center = Offset(w * 0.86f, h * 0.10f))
+                for (i in 0 until 8) {
+                    val a = Math.toRadians((360.0 * i / 8)).toFloat()
+                    drawLine(Color(0xFFFFF3C4).copy(alpha = 0.12f), Offset(w * 0.86f, h * 0.10f), Offset(w * 0.86f + kotlin.math.cos(a) * w * 0.26f, h * 0.10f + kotlin.math.sin(a) * w * 0.26f), strokeWidth = 1.2f)
                 }
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFFF3C4).copy(alpha = 0.30f), Color(0xFFFFF3C4).copy(alpha = 0f))), radius = w * 0.20f, center = Offset(w * 0.86f, h * 0.08f))
-                // Lens flare cross
-                drawLine(Color(0xFFFFF3C4).copy(alpha = 0.35f), Offset(w * 0.78f, h * 0.08f), Offset(w * 0.94f, h * 0.08f), strokeWidth = 0.8f)
-                drawLine(Color(0xFFFFF3C4).copy(alpha = 0.35f), Offset(w * 0.86f, h * 0.0f), Offset(w * 0.86f, h * 0.16f), strokeWidth = 0.8f)
-                // Pink glow pockets
-                listOf(Pair(Offset(w * 0.20f, h * 0.30f), Color(0xFFFF6B9D)), Pair(Offset(w * 0.68f, h * 0.70f), Color(0xFFFF9AC0))).forEach { (c, col) ->
-                    drawCircle(brush = Brush.radialGradient(listOf(col.copy(alpha = 0.24f), col.copy(alpha = 0f))), radius = w * 0.24f, center = c)
-                }
-                // Falling sakura petals
+                // One pink glow pocket, bottom-left
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFFF6B9D).copy(alpha = 0.20f), Color(0xFFFF6B9D).copy(alpha = 0f))), radius = w * 0.26f, center = Offset(w * 0.18f, h * 0.34f))
+                // Gentle falling petals — fewer, flowing on one diagonal
                 val s = (w * 1000 + h).toInt()
-                for (i in 0 until 16) {
-                    val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
-                    val y = ((s * (i+1) * 6271) % 10000) / 10000f * h + ((s * (i+1) * 3571) % 100) / 100f * h * 0.15f
-                    val r = 1.6f + (i % 3) * 0.7f
-                    drawCircle(Color(0xFFFFC0D8).copy(alpha = 0.55f), r, Offset(x, y))
-                    drawPath(Path().apply { moveTo(x - r, y); lineTo(x, y - r * 0.7f); lineTo(x + r, y); lineTo(x, y + r * 0.7f); close() }, Color(0xFFFFC0D8).copy(alpha = 0.45f))
+                for (i in 0 until 8) {
+                    val t = i / 8f
+                    val x = w * 0.14f + t * w * 0.72f + ((s * (i+1) * 7919) % 100) / 100f * w * 0.06f
+                    val y = h * 0.14f + t * h * 0.62f
+                    val r = 1.6f + (i % 3) * 0.6f
+                    drawPath(Path().apply { moveTo(x - r, y); lineTo(x, y - r * 0.7f); lineTo(x + r, y); lineTo(x, y + r * 0.7f); close() }, Color(0xFFFFC0D8).copy(alpha = 0.55f))
                 }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF140718).copy(alpha = 0.5f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF140718).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFFF6B9D), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
