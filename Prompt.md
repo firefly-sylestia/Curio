@@ -1,5 +1,23 @@
 # Prompt.md — current request log
 
+## Request: DETAILED (Deepen) scenes batch 3 — minimal aesthetic pass: Artworks / Scientists / Discoveries / Series / Anime (COMMITTED, NOT PUSHED)
+
+- User: "next time dont push without my permission and continue." → commit
+  each redesign separately, DO NOT push; await user's go-ahead.
+- ARTWORKS: 2 spotlights + 2 frames (one with 10-star dot scatter) -> one
+  spotlight pool over a single centered frame with a clean sun-and-hill
+  abstract.
+- SCIENTISTS: 36-line blueprint grid + 5-atom molecule + 7 bubbles -> grid
+  removed, clean 4-atom molecule, 3-bubble beaker on a quiet teal glow.
+- DISCOVERIES: 5 contour rings + 30-dot trail + 8 sun rays -> 2 rings,
+  12-dot trail, 4 rays; compass rose stays the focal piece.
+- SERIES: TV + play overlay + 3 placeholder episode chips + 2 glows ->
+  clean TV, simpler 4-peak mountain scene, progress bar, no overlay/chips.
+- ANIME: 12 rays + lens flare cross + 2 glow pockets + 16 scattered
+  petal-circles -> soft sun with 8 fainter rays, one glow pocket, 8 petals
+  flowing on a single diagonal.
+- Each commit balance-checked; changelog + Prompt.md updated. PENDING PUSH.
+
 ## Request: DETAILED (Deepen) scenes batch 2 — minimal aesthetic pass: Songs / Directors / Animated Movies / Authors / Painters (COMPLETE)
 
 - User: "continue the next and focus on more minimal and aesthetic looks
