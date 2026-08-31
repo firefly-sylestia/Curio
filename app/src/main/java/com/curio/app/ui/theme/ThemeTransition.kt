@@ -114,9 +114,7 @@ class CurioThemeTransitionState {
         val strideY = (height / 8).coerceAtLeast(1)
         for (y in 0 until height step strideY) {
             for (x in 0 until width step strideX) {
-                val alpha = android.graphics.Color.alpha(
-                    androidx.core.graphics.BitmapCompat.getPixel(this, x, y)
-                )
+                val alpha = android.graphics.Color.alpha(getPixel(x, y))
                 if (alpha > 0) return false
             }
         }
