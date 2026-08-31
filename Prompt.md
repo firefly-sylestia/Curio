@@ -1,5 +1,79 @@
 # Prompt.md — current request log
 
+## Request: BASE Signature redesigns — 28 categories, minimal aesthetic pass (COMMITTED, NOT PUSHED)
+
+- User: redesign the listed 28 BASE (non-Deepen) signature categories — not
+  just backgrounds but typography/fonts/arrangements too; remove the current
+  draws; keep current color schemes; aesthetic + minimal ("focus on aesthetic
+  more and dont just make plain background"); use symbols/icons for accuracy;
+  "and before that fix this cl error and push and after you complete the
+  redesign just commit".
+- CI fix pushed first: the share-sheet refactor had an extra `}` closing the
+  card-carousel Box early (matchParentSize/align/pw errors) — removed it
+  (`a31df0b8`).
+- 28 categories redesigned in signatureDesign() (BASE only; DETAILED,
+  ALBUMS/SONGS/SERIES/GAMES/SPORTS/TECHNOLOGIES/ASTRONOMY/MEDICINE/
+  ENGINEERING/OCEANS untouched):
+  - ARTISTS: single spotlight + one singer/mic silhouette, 3 confetti flecks,
+    one note; title Changa -> Bungee. POSTER.
+  - ANIMATED FILMS: one 5-band rainbow arc, single 4-point star, 3 sparkles.
+    CENTERED.
+  - AUTHORS: 6 manuscript lines, one quill arc, gold-rimmed inkwell (no
+    splatter); title Changa -> Playfair Display. SIDE.
+  - BIOLOGY: scientifically-accurate helix — two smooth anti-parallel
+    backbone strands, A-T (2-bond pink) / G-C (3-bond gold) base-pair rungs,
+    nucleotide beads, 5'/3' arrows; title -> Geom. SIDE.
+  - ANIMALS: moon + one tree + 4-paw trail + 3 fireflies + 10 grass blades.
+    CENTERED.
+  - ARTWORKS: one spotlight pool, single framed sun-hill abstract, bench;
+    Geom. STANDARD.
+  - WILDCARD: one comet sweep, 3 sparkles, coral glow; title -> Bungee.
+    CENTERED.
+  - ANIME: soft sun with 8 faint rays, 8 petals on one diagonal, one
+    sparkle. OVERLAY.
+  - BOOKS: 5 varied books + gold bands + open book + lamp glow; Playfair.
+    STANDARD.
+  - CHEMISTRY: hero benzene + 2x2 honeycomb sheet + bond + water molecule;
+    title -> Geom. STANDARD.
+  - DIRECTORS: one clapperboard + gold diagonal + key-light cone + one reel;
+    Changa. BOTTOM.
+  - DISCOVERIES: compass rose focal + 2 contour rings + 12-dot trail + X;
+    Pirata One. POSTER.
+  - ECONOMICS: 3 rising bars + trend arrow + 2-coin stack; title -> Geom.
+    BOTTOM.
+  - FILMS: marquee glow + one bottom film strip + one reel + projector beam;
+    Bungee. POSTER.
+  - FOOD: plate + steaming bowl + one basil leaf, crumbs removed; title ->
+    Patrick Hand (menu feel). BOTTOM.
+  - GEOLOGY: 3 strata bands + one crystal + 2 contour arcs; Geom. CENTERED.
+  - HISTORY: scroll + hourglass + 4 timeline dots; title Lora -> Playfair.
+    BOTTOM.
+  - INTERNET: browser pill + globe wireframe + 3 linked nodes; title ->
+    Geom. SIDE.
+  - LANGUAGE: two chat bubbles with tails + text lines + one calligraphy
+    underline (talk-bubble style kept); title -> Patrick Hand. SIDE.
+  - MANGA: 8-ray ink burst + 10 speed lines + compact screentone + one red
+    slash; Changa. CENTERED.
+  - MANHWA: arch + heart + one cloud bokeh + 4 sparkles; title -> Playfair
+    Display. CENTERED.
+  - MATHEMATICS: golden spiral focal + grid + 2 geometry shapes; title ->
+    Geom. SIDE.
+  - MYTHOLOGY: meander borders + 2 columns + 5 laurel leaves + rays; title
+    Lora -> Pirata One. BOTTOM.
+  - PAINTERS: easel + framed landscape + 3-well palette + one brush, drips
+    removed; title -> Lora. STANDARD.
+  - PLANTS: one leaf (4 veins) + sprout + 2 droplets; Lora. SIDE.
+  - PSYCHOLOGY: mind profile + 5 neural nodes + 3-bubble thought cloud;
+    title -> Geom. CENTERED.
+  - QUOTES: cream gradient + quote marks + gold rules + flourish; title Lora
+    -> Playfair Display. CENTERED.
+  - SCIENTISTS: faint blueprint grid + 4-atom molecule + 2-tube rack +
+    graduated flask; title -> Geom. SIDE.
+- All palettes/layouts kept; only art + title fonts changed. No new font
+  files (7 existing families redistributed). Balance-checked (depth 0); all
+  font families already imported. Changelog + Prompt.md updated.
+  PENDING PUSH (await user's go-ahead per standing instruction).
+
 ## Request: Share sheet declutter — floating Customise overlay + cross-style fact size + universal hold-to-edit (COMMITTED, NOT PUSHED)
 
 - User: "the place where it says the dimension and the quote no fact etc
