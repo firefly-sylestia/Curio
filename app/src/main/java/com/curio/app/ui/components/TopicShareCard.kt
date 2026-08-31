@@ -4619,22 +4619,18 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF14202E), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF23405C), Color(0xFF14202E), Color(0xFF0B121B))), size = Size(w, h))
-                // Faint blueprint grid
-                for (i in 0 until 16) drawLine(Color(0xFF6BB8E8).copy(alpha = 0.06f), Offset(i * w / 15f, 0f), Offset(i * w / 15f, h), strokeWidth = 0.6f)
-                for (i in 0 until 20) drawLine(Color(0xFF6BB8E8).copy(alpha = 0.06f), Offset(0f, i * h / 19f), Offset(w, i * h / 19f), strokeWidth = 0.6f)
-                // Glow
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF4FD8C8).copy(alpha = 0.16f), Color(0xFF4FD8C8).copy(alpha = 0f))), radius = w * 0.35f, center = Offset(w * 0.68f, h * 0.40f))
-                // Molecule model — central atom + bonds
-                val cx = w * 0.30f; val cy = h * 0.28f
-                listOf(Offset(cx + w * 0.12f, cy + w * 0.06f), Offset(cx - w * 0.12f, cy + w * 0.05f), Offset(cx + w * 0.02f, cy - w * 0.11f), Offset(cx + w * 0.05f, cy + w * 0.12f), Offset(cx - w * 0.10f, cy - w * 0.07f)).forEach { p ->
-                    drawLine(Color(0xFF9FD8E8).copy(alpha = 0.55f), Offset(cx, cy), p, strokeWidth = 1.4f)
+                // Soft teal glow, center-right — no grid lines
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF4FD8C8).copy(alpha = 0.14f), Color(0xFF4FD8C8).copy(alpha = 0f))), radius = w * 0.34f, center = Offset(w * 0.68f, h * 0.42f))
+                // Molecule model — clean: central atom + 4 bonds
+                val cx = w * 0.30f; val cy = h * 0.30f
+                listOf(Offset(cx + w * 0.12f, cy + w * 0.05f), Offset(cx - w * 0.12f, cy + w * 0.04f), Offset(cx + w * 0.02f, cy - w * 0.11f), Offset(cx - w * 0.10f, cy - w * 0.06f)).forEach { p ->
+                    drawLine(Color(0xFF9FD8E8).copy(alpha = 0.50f), Offset(cx, cy), p, strokeWidth = 1.4f)
                 }
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8F8FF), Color(0xFF6BB8E8)), center = Offset(cx - w * 0.012f, cy - w * 0.012f), radius = w * 0.045f), radius = w * 0.032f, center = Offset(cx, cy))
-                listOf(Offset(cx + w * 0.12f, cy + w * 0.06f), Offset(cx - w * 0.12f, cy + w * 0.05f), Offset(cx + w * 0.02f, cy - w * 0.11f), Offset(cx + w * 0.05f, cy + w * 0.12f), Offset(cx - w * 0.10f, cy - w * 0.07f)).forEachIndexed { i, p ->
-                    drawCircle(Color(if (i % 2 == 0) 0xFFE8544F else 0xFF4FD8C8), w * 0.016f, p)
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8F8FF), Color(0xFF6BB8E8)), center = Offset(cx - w * 0.012f, cy - w * 0.012f), radius = w * 0.045f), radius = w * 0.030f, center = Offset(cx, cy))
+                listOf(Offset(cx + w * 0.12f, cy + w * 0.05f), Offset(cx - w * 0.12f, cy + w * 0.04f), Offset(cx + w * 0.02f, cy - w * 0.11f), Offset(cx - w * 0.10f, cy - w * 0.06f)).forEachIndexed { i, p ->
+                    drawCircle(Color(if (i % 2 == 0) 0xFFE8544F else 0xFF4FD8C8), w * 0.015f, p)
                 }
-                // Conical beaker with rising bubbles — w-sized so it keeps its
-                // proportions on both 9:16 and 3:4 cards
+                // Conical beaker — clean, three rising bubbles
                 val bx = w * 0.70f; val by = h * 0.52f
                 val beaker = Path().apply {
                     moveTo(bx - w * 0.06f, by - w * 0.15f)
@@ -4646,13 +4642,10 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 }
                 drawPath(beaker, Color(0xFFC9E8F2).copy(alpha = 0.35f), style = Stroke(1.6f))
                 drawPath(Path().apply { moveTo(bx - w * 0.065f, by + w * 0.09f); lineTo(bx + w * 0.065f, by + w * 0.09f); lineTo(bx + w * 0.075f, by + w * 0.165f); lineTo(bx - w * 0.075f, by + w * 0.165f); close() }, Color(0xFF4FD8C8).copy(alpha = 0.30f))
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 7) {
-                    val bx2 = bx - w * 0.04f + ((s * (i+1) * 3571) % 100) / 100f * w * 0.08f
-                    val by2 = by + w * 0.075f - i * w * 0.019f
-                    drawCircle(Color(0xFF9FE8E0).copy(alpha = 0.55f), 1.2f + (i % 3) * 0.5f, Offset(bx2, by2))
+                listOf(1, 3, 5).forEach { i ->
+                    drawCircle(Color(0xFF9FE8E0).copy(alpha = 0.55f), 1.3f, Offset(bx - w * 0.02f + i * w * 0.018f, by + w * 0.06f - i * w * 0.016f))
                 }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF070D14).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF070D14).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF4FD8C8), badgeInk = Color(0xFF0B121B),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
