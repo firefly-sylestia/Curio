@@ -4450,40 +4450,26 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
         cat == "DIRECTORS" -> SignatureDesign(
             bg = Color(0xFF1B1713), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.radialGradient(listOf(Color(0xFF3B3226), Color(0xFF1B1713), Color(0xFF0C0A08)), center = Offset(w * 0.55f, h * 0.35f), radius = w * 0.95f), size = Size(w, h))
-                // Warm key-light glow
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.22f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.40f, center = Offset(w * 0.55f, h * 0.35f))
-                // Film reel top-right
-                val rx = w * 0.84f; val ry = h * 0.18f
-                drawCircle(Color(0xFF2E2820), w * 0.085f, Offset(rx, ry))
-                drawCircle(Color(0xFF3E352A), w * 0.075f, Offset(rx, ry))
-                for (i in 0 until 8) {
-                    val a = Math.toRadians((45.0 * i)).toFloat()
-                    drawLine(Color(0xFF8A7A5F).copy(alpha = 0.55f), Offset(rx + kotlin.math.cos(a) * w * 0.06f, ry + kotlin.math.sin(a) * w * 0.06f), Offset(rx + kotlin.math.cos(a) * w * 0.075f, ry + kotlin.math.sin(a) * w * 0.075f), strokeWidth = 1.6f)
-                }
-                drawCircle(Color(0xFFE0C88F).copy(alpha = 0.60f), w * 0.014f, Offset(rx, ry))
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.30f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.14f, center = Offset(rx, ry))
-                // Clapperboard, angled
-                val cw = w * 0.52f; val ch = w * 0.195f; val cx = w * 0.30f; val cy = h * 0.62f
+                drawRect(Brush.radialGradient(listOf(Color(0xFF3B3226), Color(0xFF1B1713), Color(0xFF0C0A08)), center = Offset(w * 0.5f, h * 0.42f), radius = w * 0.9f), size = Size(w, h))
+                // Warm key glow behind the board
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.20f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.52f, h * 0.50f))
+                // Soft top light cone
+                drawPath(Path().apply {
+                    moveTo(w * 0.40f, -h * 0.02f)
+                    lineTo(w * 0.30f, h * 0.55f)
+                    lineTo(w * 0.74f, h * 0.55f)
+                    close()
+                }, Color(0xFFF2C879).copy(alpha = 0.05f))
+                // Clapperboard — one clean focal piece, centered
+                val cw = w * 0.40f; val ch = w * 0.15f; val cx = w * 0.52f; val cy = h * 0.52f
                 drawPath(Path().apply { moveTo(cx, cy); lineTo(cx + cw, cy - ch * 0.25f); lineTo(cx + cw, cy + ch * 0.20f); lineTo(cx, cy + ch * 0.55f); close() }, Color(0xFF4A3A2A))
                 drawPath(Path().apply { moveTo(cx, cy); lineTo(cx + cw, cy - ch * 0.25f); lineTo(cx + cw, cy - ch * 0.52f); lineTo(cx, cy - ch * 0.18f); close() }, Color(0xFF201812))
-                // Gold diagonal stripes on the top flap
-                for (i in 0 until 5) {
-                    val t = i / 5f
-                    drawLine(Color(0xFFE0C88F).copy(alpha = 0.75f), Offset(cx + t * cw * 0.9f, cy - ch * 0.18f - t * ch * 0.22f), Offset(cx + t * cw * 0.9f + cw * 0.14f, cy - ch * 0.18f - (t + 0.14f / 0.9f) * ch * 0.22f + ch * 0.30f), strokeWidth = 2.2f)
-                }
-                // Gold corner accents
-                listOf(Pair(Offset(w * 0.06f, h * 0.06f), 1f), Pair(Offset(w * 0.94f, h * 0.94f), -1f)).forEach { (c, dir) ->
-                    val s = w * 0.07f
-                    drawLine(Color(0xFFE0C88F).copy(alpha = 0.65f), c, Offset(c.x + dir * s, c.y), strokeWidth = 1.6f)
-                    drawLine(Color(0xFFE0C88F).copy(alpha = 0.65f), c, Offset(c.x, c.y + dir * s), strokeWidth = 1.6f)
-                }
-                // Film strip edge
-                drawRoundRect(Color(0xFF8A7A5F).copy(alpha = 0.18f), topLeft = Offset(w * 0.05f, h * 0.50f), size = Size(w * 0.02f, w * 0.24f), cornerRadius = CornerRadius(2f))
-                for (i in 0 until 8) {
-                    drawRoundRect(Color(0xFFE0C88F).copy(alpha = 0.30f), topLeft = Offset(w * 0.05f, h * 0.52f + i * w * 0.028f), size = Size(w * 0.02f, w * 0.011f), cornerRadius = CornerRadius(1.5f))
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF070503).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                // One clean gold diagonal on the flap
+                drawLine(Color(0xFFE0C88F).copy(alpha = 0.85f), Offset(cx + cw * 0.10f, cy - ch * 0.14f), Offset(cx + cw * 0.38f, cy - ch * 0.30f), strokeWidth = 3f)
+                // Faint board lines on the body
+                drawLine(Color(0xFFE0C88F).copy(alpha = 0.22f), Offset(cx + cw * 0.10f, cy + ch * 0.12f), Offset(cx + cw * 0.90f, cy - ch * 0.10f), strokeWidth = 1.2f)
+                drawLine(Color(0xFFE0C88F).copy(alpha = 0.22f), Offset(cx + cw * 0.10f, cy + ch * 0.28f), Offset(cx + cw * 0.90f, cy + ch * 0.06f), strokeWidth = 1.2f)
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF070503).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE0C88F), badgeInk = Color(0xFF1B1713),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
