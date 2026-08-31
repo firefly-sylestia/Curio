@@ -49,6 +49,7 @@ object AppPreferences {
 
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
+    private const val KEY_FAVORITE_SONG = "favorite_song"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -184,6 +185,17 @@ object AppPreferences {
     fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
         displayNameState = name
+    }
+
+    // ── Favorite song (v... — Vinyl share card) ───────────────────────
+    // The user's own favorite song, shown as a small corner element on the
+    // Vinyl share card. Empty = a gentle default line.
+    fun getFavoriteSong(context: Context): String =
+        prefs(context).getString(KEY_FAVORITE_SONG, "") ?: ""
+
+    fun setFavoriteSong(context: Context, song: String) {
+        prefs(context).edit().putString(KEY_FAVORITE_SONG, song).apply()
+        favoriteSongState = song
     }
 
     // ── Custom streak tagline (v53) ──────────────────────────────────
@@ -431,6 +443,8 @@ object AppPreferences {
     // / getProfileAvatarPath() functions read SharedPreferences once and
     // don't trigger recomposition.
     var displayNameState by mutableStateOf("Curious Explorer")
+        internal set
+    var favoriteSongState by mutableStateOf("")
         internal set
     var profileAvatarPathState by mutableStateOf("")
         internal set
@@ -759,6 +773,7 @@ object AppPreferences {
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
         displayNameState = getDisplayName(context)
+        favoriteSongState = getFavoriteSong(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)

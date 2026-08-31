@@ -74,6 +74,18 @@ val ChangaOneFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * Bungee — the bold retro display face (OFL), bundled at `res/font/bungee_regular.ttf`
+ * (v... — share-card redesign). Retro poster slab for the Collage "Curious Explorer"
+ * title and the Editorial broadsheet masthead/headline. Like Changa One, Google Fonts
+ * ships a single Regular file (the glyphs ARE the heavy display weight), so this is a
+ * single-entry family — callers pair it with `FontWeight.Normal`. License at
+ * `app/third_party/bungee_OFL.txt`.
+ */
+val BungeeFontFamily: FontFamily = FontFamily(
+    Font(R.font.bungee_regular)
+)
+
+/**
  * Lora — the editorial serif voice (OFL). A variable font (wght 400–700)
  * bundled at `res/font/lora.ttf` (v35). Used for long-form reading text —
  * the Topic Reveal teaser/quick-fact, action-card instructions, and intro

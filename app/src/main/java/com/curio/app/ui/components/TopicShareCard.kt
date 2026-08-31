@@ -73,6 +73,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.ui.theme.BungeeFontFamily
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -448,35 +449,34 @@ private fun VinylCard(
             }
         }
 
-        // ── Info copy — bottom-left, cream box like body text ──
+        // ── Favorite song — small user-set corner chip (replaces the old info box) ──
         val is34v = aspect == ShareCardAspect.CLASSIC
-        Surface(
-            shape = RoundedCornerShape(4.dp),
-            color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = if (is34v) 12.dp else 16.dp, bottom = if (is34v) 36.dp else 30.dp)
-                .widthIn(max = if (is34v) 150.dp else 180.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(if (is34v) 4.dp else 6.dp), modifier = Modifier.padding(horizontal = if (is34v) 6.dp else 8.dp, vertical = if (is34v) 4.dp else 6.dp)) {
-                listOf(
-                Triple("nightlight", "LATE-NIGHT", "Themes of reflection & memory"),
-                Triple("headphones", "TRACKS", "Curated picks to explore & discover"),
-                Triple("workspace_premium", "RECOGNITION", "Explore via Curio")
-            ).forEach { (icon, label, detail) ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (is34v) 5.dp else 7.dp)) {
-                    CurioIcon(name = icon, tint = roseDusty.copy(alpha = 0.92f), size = if (is34v) 10.dp else 12.dp)
+        val favSong = AppPreferences.favoriteSongState.trim()
+        if (favSong.isNotEmpty()) {
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = Color(0xFFFDF0EE).copy(alpha = 0.88f),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = if (is34v) 12.dp else 16.dp, bottom = if (is34v) 28.dp else 24.dp)
+                    .widthIn(max = if (is34v) 150.dp else 180.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp)
+                ) {
+                    CurioIcon(name = "headphones", tint = roseDusty.copy(alpha = 0.95f), size = if (is34v) 10.dp else 12.dp)
                     Column {
-                        Text(label, style = TextStyle(fontFamily = GeomFontFamily, fontSize = if (is34v) 5.sp else 6.sp,
-                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp, color = inkDark.copy(alpha = 0.78f)))
-                        Text(detail, style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = if (is34v) 5.5.sp else 7.sp, lineHeight = if (is34v) 7.5.sp else 9.5.sp,
-                            color = inkDark.copy(alpha = 0.54f)))
+                        Text("FAVORITE SONG", style = TextStyle(fontFamily = GeomFontFamily, fontSize = if (is34v) 5.sp else 6.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.1.sp, color = inkDark.copy(alpha = 0.78f)))
+                        Text(favSong, style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                            fontSize = if (is34v) 6.5.sp else 8.sp, lineHeight = if (is34v) 8.sp else 10.sp,
+                            color = inkDark.copy(alpha = 0.80f)), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
         }
-    }
     }
 }
 
@@ -590,6 +590,18 @@ private fun CollageCard(
                         ))
                     }
                 }
+                // Polaroid finish — inner hairline frame + a glassy sheen band
+                // over the photo so it reads as a real instant-print (v...)
+                Canvas(Modifier.fillMaxSize()) {
+                    val pws = size.width; val phs = size.height
+                    drawRoundRect(Color(0xFF70543A).copy(alpha = 0.30f), Offset(5f, 5f), Size(pws - 10f, phs - 10f), CornerRadius(2.dp.toPx()), style = Stroke(1.3.dp.toPx()))
+                    val sheen = Brush.verticalGradient(
+                        listOf(Color.White.copy(alpha = 0.0f), Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.0f)),
+                        startY = 5f, endY = phs * 0.68f
+                    )
+                    drawRect(sheen, Offset(5f, 5f), Size(pws - 10f, phs * 0.68f))
+                }
+
                 // Handwritten name below photo — constrained width + lineHeight
                 // >= fontSize so long captions ellipsize (not clip) and never squish.
                 val capFont = (pW * 0.065f).coerceIn(11f, 15f)
@@ -601,13 +613,14 @@ private fun CollageCard(
                     modifier = Modifier.offset(8.dp, (pH * 0.78f).dp).width((pW - 16).dp))
             }
 
-            // Title — large serif, dark green, top-left
-            Column(modifier = Modifier.offset(22.dp, (ch * 0.055f).dp).width((cw * 0.56f).dp)) {
+            // Title — retro Bungee, dark green, top-left (v... — retro face +
+            // tighter leading so long names like "Curious Explorer" never clip)
+            Column(modifier = Modifier.offset(22.dp, (ch * 0.05f).dp).width((cw * 0.60f).dp)) {
                 Text(if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display, style = TextStyle(
-                    fontFamily = ChangaOneFontFamily, fontSize = (cw * 0.08f).coerceIn(24f, 34f).sp,
-                    lineHeight = (cw * 0.09f).coerceIn(28f, 38f).sp,
+                    fontFamily = BungeeFontFamily, fontSize = (cw * 0.072f).coerceIn(19f, 30f).sp,
+                    lineHeight = (cw * 0.082f).coerceIn(22f, 34f).sp,
                     fontWeight = FontWeight.Normal, color = inkDark
-                ), maxLines = 4, overflow = TextOverflow.Ellipsis)
+                ), maxLines = 5, overflow = TextOverflow.Ellipsis)
 
                 Spacer(Modifier.height(6.dp))
 
@@ -695,10 +708,26 @@ private fun NeumorphicCard(
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             drawRect(Brush.verticalGradient(listOf(categoryGlow.copy(alpha = 0.95f), categoryDeep, ink)))
-            // Soft ambient glow top-left
-            drawCircle(Color.White.copy(alpha = 0.10f), w * 0.72f, Offset(w * 0.12f, h * 0.12f))
-            // Depth shadow bottom-right
-            drawCircle(Color.Black.copy(alpha = 0.20f), w * 0.74f, Offset(w * 0.95f, h * 0.72f))
+            // Soft ambient glow top-left — radial falloff so there's no hard edge
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.05f), Color.Transparent),
+                    center = Offset(w * 0.12f, h * 0.10f),
+                    radius = w * 0.72f
+                ),
+                radius = w * 0.72f,
+                center = Offset(w * 0.12f, h * 0.10f)
+            )
+            // Depth shadow bottom-right — radial falloff
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(categoryDeep.copy(alpha = 0.34f), Color.Black.copy(alpha = 0.26f), Color.Transparent),
+                    center = Offset(w * 0.96f, h * 0.74f),
+                    radius = w * 0.80f
+                ),
+                radius = w * 0.80f,
+                center = Offset(w * 0.96f, h * 0.74f)
+            )
         }
 
 
@@ -791,77 +820,90 @@ private fun EditorialCard(
             }
         }
 
-        // Left vertical accent rule — bold editorial line
-        Canvas(Modifier.padding(start = 22.dp).width(4.dp).fillMaxSize()) {
-            drawRect(accentRule.copy(alpha = 0.80f), Offset.Zero, Size(size.width, size.height))
-        }
+        // Broadsheet masthead + retro Bungee headline (v... redesign)
+        Column(modifier = Modifier.fillMaxSize().padding(start = 26.dp, end = 26.dp, top = 22.dp, bottom = 20.dp)) {
+            // Kicker — category in retro Bungee beside an accent slug
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.width(7.dp).height(15.dp).background(accentRule))
+                Text(categoryName.uppercase(), style = TextStyle(
+                    fontFamily = BungeeFontFamily, fontSize = 13.sp,
+                    letterSpacing = 2.4.sp, color = inkDark
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Spacer(Modifier.height(7.dp))
+            // Double masthead rule — thick flag + hairline
+            Canvas(Modifier.fillMaxWidth().height(3.dp)) { drawRect(inkDark.copy(alpha = 0.85f)) }
+            Canvas(Modifier.fillMaxWidth().height(1.dp)) { drawRect(inkDark.copy(alpha = 0.28f)) }
 
-        // Content — editorial layout
-        Column(modifier = Modifier.fillMaxSize().padding(start = 36.dp, end = 22.dp, top = 20.dp, bottom = 18.dp)) {
-            // Category tag — small caps
-            Text(categoryName.uppercase(), style = TextStyle(
-                fontFamily = GeomFontFamily, fontSize = 8.sp,
-                fontWeight = FontWeight.ExtraBold, letterSpacing = 2.sp,
-                color = accentRule
-            ), maxLines = 1)
+            Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(8.dp))
-
-            // Title — large serif
+            // Headline — retro Bungee, big
             Text(title, style = TextStyle(
-                fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
-                lineHeight = 32.sp, color = inkDark
-            ), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                fontFamily = BungeeFontFamily, fontSize = 30.sp,
+                lineHeight = 34.sp, color = inkDark
+            ), maxLines = 4, overflow = TextOverflow.Ellipsis)
 
-            // Byline + year
+            // Byline — year deck
             val metaParts = mutableListOf<String>()
             if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
             if (metaParts.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(7.dp))
                 Text(metaParts.joinToString(" \u2014 "), style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.55f)
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
 
-            Spacer(Modifier.height(14.dp))
-
-            // Horizontal divider
+            Spacer(Modifier.height(15.dp))
+            // Hairline under the deck
             Canvas(Modifier.fillMaxWidth().height(1.dp)) {
-                drawLine(inkDark.copy(alpha = 0.12f), Offset.Zero, Offset(size.width, 0f))
+                drawLine(inkDark.copy(alpha = 0.16f), Offset.Zero, Offset(size.width, 0f))
             }
-
             Spacer(Modifier.height(12.dp))
 
-            // Body text — clean serif
+            // Body — clean serif with a standing Bungee initial
             val bodySize = when {
                 body.length > 350 -> 8.5.sp; body.length > 260 -> 9.5.sp
                 body.length > 180 -> 10.sp; else -> 11.sp
             }
-            Text(body, style = TextStyle(
-                fontFamily = LoraFontFamily, fontSize = bodySize,
-                lineHeight = (bodySize.value * 1.55f).sp, color = inkDark.copy(alpha = 0.82f)
-            ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, overflow = TextOverflow.Ellipsis)
+            val initial = body.take(1)
+            val bodyRest = if (body.length > 1) body.drop(1) else ""
+            Row(Modifier.fillMaxWidth()) {
+                if (initial.isNotEmpty()) {
+                    Text(initial, style = TextStyle(
+                        fontFamily = BungeeFontFamily, fontSize = (bodySize.value * 2.9f).sp,
+                        lineHeight = (bodySize.value * 2.4f).sp, color = accentRule
+                    ), modifier = Modifier.padding(end = 5.dp, top = 2.dp))
+                }
+                Text(bodyRest, style = TextStyle(
+                    fontFamily = LoraFontFamily, fontSize = bodySize,
+                    lineHeight = (bodySize.value * 1.45f).sp, color = inkDark.copy(alpha = 0.82f),
+                    fontWeight = FontWeight.Medium
+                ), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, overflow = TextOverflow.Ellipsis)
+            }
 
             if (ratingStars != null && ratingStars > 0) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(7.dp))
                 StarRow(ratingStars, palette)
             }
 
             Spacer(Modifier.weight(1f))
 
-            // Bottom credit — editorial style
+            // Colophon — thin rule + italic credit with an accent slug
             Canvas(Modifier.fillMaxWidth().height(1.dp)) {
-                drawLine(inkDark.copy(alpha = 0.12f), Offset.Zero, Offset(size.width, 0f))
+                drawLine(inkDark.copy(alpha = 0.14f), Offset.Zero, Offset(size.width, 0f))
             }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                if (sharerName.isNotBlank()) "$sharerName \u2014 Curio" else "Curio",
-                style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 10.sp, color = inkDark.copy(alpha = 0.50f)),
-                maxLines = 1, overflow = TextOverflow.Ellipsis
-            )
+            Spacer(Modifier.height(7.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Box(Modifier.width(6.dp).height(10.dp).background(accentRule.copy(alpha = 0.85f)))
+                Text(
+                    if (sharerName.isNotBlank()) "$sharerName \u2014 Curio" else "Curio",
+                    style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 10.sp, color = inkDark.copy(alpha = 0.50f)),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
@@ -5686,19 +5728,19 @@ private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?,
 // ═══════════════════════════════════════════════════════════════════════
 private fun DrawScope.drawPaperTexture(palette: ShareCardPalette) {
     val w = size.width; val h = size.height; val s = (w * 1000 + h).toInt()
-    // Dense grain — many small dots at varying opacity
-    for (i in 0 until 120) {
+    // Dense grain — many small dots at varying opacity (v... — grain bumped up)
+    for (i in 0 until 220) {
         val x = ((s * (i + 1) * 7919) % 10000) / 10000f * w
         val y = ((s * (i + 1) * 6271) % 10000) / 10000f * h
-        val a = 0.035f + ((s * (i + 1) * 3571) % 100) / 100f * 0.05f
-        val r = 1f + ((s * (i + 1) * 4201) % 100) / 100f * 2f
+        val a = 0.05f + ((s * (i + 1) * 3571) % 100) / 100f * 0.10f
+        val r = 1.1f + ((s * (i + 1) * 4201) % 100) / 100f * 2.4f
         drawCircle(palette.ink.copy(alpha = a), r, Offset(x, y))
     }
     // Speckle — larger, sparser spots for paper fiber feel
-    for (i in 0 until 25) {
+    for (i in 0 until 46) {
         val x = ((s * (i + 1) * 9113) % 10000) / 10000f * w
         val y = ((s * (i + 1) * 5381) % 10000) / 10000f * h
-        drawCircle(palette.ink.copy(alpha = 0.07f), 3f + ((s * (i + 1) * 7727) % 100) / 100f * 3f, Offset(x, y))
+        drawCircle(palette.ink.copy(alpha = 0.10f), 3.2f + ((s * (i + 1) * 7727) % 100) / 100f * 3.2f, Offset(x, y))
     }
 }
 
@@ -5729,8 +5771,9 @@ private fun DrawScope.drawNaturalTearPanel(tearY: Float, top: Color, edge: Color
     val w = size.width
     fun yAt(x: Float): Float {
         val t = x / w
-        val tooth = ((t * 19f).toInt() % 3 - 1) * 2.7f
-        return tearY + sin(t * 8.2f + 0.8f) * 7.5f + sin(t * 31f + 1.9f) * 3.2f + tooth
+        val tooth = ((t * 23f).toInt() % 3 - 1) * 5.5f
+        return tearY + sin(t * 7.2f + 0.8f) * 11f + sin(t * 27f + 1.9f) * 5f +
+            sin(t * 73f + 3.1f) * 2f + tooth
     }
     val shadowPath = Path().apply {
         moveTo(0f, yAt(0f) + 7f)
@@ -5966,6 +6009,20 @@ fun TopicShareSheet(
                         modifier = Modifier.weight(1f).height(40.dp)
                     )
                 }
+            }
+
+            // Favorite song — Vinyl corner chip (persisted to AppPreferences so
+            // it sticks across shares).
+            if (currentStyle == ShareCardStyle.VINYL) {
+                OutlinedTextField(
+                    value = AppPreferences.favoriteSongState,
+                    onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
+                    placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             // Aspect
