@@ -162,6 +162,12 @@ object AppPreferences {
     // restart and nothing else in the app honored them.
     private const val KEY_HIDDEN_CATEGORIES = "hidden_categories"
     private const val KEY_CATEGORY_ORDER = "category_order"
+    // Pinned categories for the new picker — up to 5 comma-joined CategoryId
+    // names. Defaults to Wildcard + good-to-explore picks on first launch.
+    private const val KEY_PINNED_CATEGORIES = "pinned_categories"
+    // Recently spun categories (most-recent-first, capped at 8) for the
+    // "Continue exploring" section of the new picker.
+    private const val KEY_RECENT_CATEGORIES = "recent_categories"
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -2037,6 +2043,62 @@ object AppPreferences {
         if (names.isEmpty()) return
         prefs(context).edit().putString(KEY_LAST_SPIN_CATEGORIES, names.joinToString(",")).apply()
         setLastSpinCategory(context, ids.first())
+    }
+
+    /**
+     * Pinned categories for the new category picker (up to 5). Persists
+     * across restarts. Defaults to Wildcard + a few good-to-explore
+     * picks (Artists, Films, Books, Scientists) on first launch.
+     */
+    fun getPinnedCategories(context: Context): List<CategoryId> {
+        val raw = prefs(context).getString(KEY_PINNED_CATEGORIES, null)
+        val ids = raw
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.mapNotNull { name -> CategoryId.values().firstOrNull { it.name == name } }
+            .orEmpty()
+        return if (ids.isNotEmpty()) ids.take(5)
+            else listOf(CategoryId.WILDCARD, CategoryId.ARTISTS, CategoryId.FILMS, CategoryId.BOOKS, CategoryId.SCIENTISTS)
+    }
+
+    fun setPinnedCategories(context: Context, ids: List<CategoryId>) {
+        val names = ids.map { it.name }.distinct().take(5)
+        prefs(context).edit().putString(KEY_PINNED_CATEGORIES, names.joinToString(",")).apply()
+    }
+
+    /** Toggle a category in/out of the pinned set (max 5). */
+    fun togglePinnedCategory(context: Context, id: CategoryId): List<CategoryId> {
+        val current = getPinnedCategories(context).toMutableList()
+        if (current.contains(id)) current.remove(id) else {
+            if (current.size >= 5) current.removeAt(0)
+            current.add(id)
+        }
+        setPinnedCategories(context, current)
+        return current
+    }
+
+    /**
+     * Recently spun categories (most-recent-first, capped at 8). Used by
+     * the new picker's "Continue exploring" section. Call this when a
+     * spin lands on a topic.
+     */
+    fun getRecentCategories(context: Context): List<CategoryId> {
+        val raw = prefs(context).getString(KEY_RECENT_CATEGORIES, null)
+        return raw
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.mapNotNull { name -> CategoryId.values().firstOrNull { it.name == name } }
+            .orEmpty()
+    }
+
+    fun noteRecentCategory(context: Context, id: CategoryId) {
+        val current = getRecentCategories(context).toMutableList()
+        current.remove(id)
+        current.add(0, id)
+        val names = current.map { it.name }.take(8)
+        prefs(context).edit().putString(KEY_RECENT_CATEGORIES, names.joinToString(",")).apply()
     }
 
     // ── Custom pet design (v8.34 — Pet designer playground) ──────────
