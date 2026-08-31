@@ -4966,28 +4966,17 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRoundRect(Color(0xFF1A2E42), topLeft = Offset(w * 0.06f, h * 0.05f), size = Size(w * 0.88f, w * 0.0375f), cornerRadius = CornerRadius(4f))
                 drawCircle(Color(0xFF4FA8E8), w * 0.008f, Offset(w * 0.09f, h * 0.075f))
                 drawRoundRect(Color(0xFF2E4E6A).copy(alpha = 0.8f), topLeft = Offset(w * 0.13f, h * 0.066f), size = Size(w * 0.55f, w * 0.0135f), cornerRadius = CornerRadius(2f))
-                // Globe wireframe
+                // Globe wireframe — clean: circle, one meridian, one equator
                 val gx = w * 0.32f; val gy = h * 0.42f; val gr = w * 0.16f
                 drawCircle(Color(0xFF9FC8E8).copy(alpha = 0.5f), gr, Offset(gx, gy), style = Stroke(1.4f))
                 drawOval(Color(0xFF9FC8E8).copy(alpha = 0.35f), topLeft = Offset(gx - gr, gy - gr * 0.5f), size = Size(gr * 2, gr), style = Stroke(1f))
-                drawOval(Color(0xFF9FC8E8).copy(alpha = 0.35f), topLeft = Offset(gx - gr * 0.5f, gy - gr), size = Size(gr, gr * 2), style = Stroke(1f))
-                drawLine(Color(0xFF9FC8E8).copy(alpha = 0.4f), Offset(gx - gr, gy), Offset(gx + gr, gy), strokeWidth = 1f)
                 drawLine(Color(0xFF9FC8E8).copy(alpha = 0.4f), Offset(gx, gy - gr), Offset(gx, gy + gr), strokeWidth = 1f)
-                // Network nodes + links
-                val nodes = listOf(Offset(w * 0.72f, h * 0.30f), Offset(w * 0.84f, h * 0.50f), Offset(w * 0.68f, h * 0.62f), Offset(w * 0.80f, h * 0.78f))
-                nodes.forEachIndexed { i, n ->
+                // Three network nodes, linked from the globe
+                listOf(Offset(w * 0.72f, h * 0.30f), Offset(w * 0.84f, h * 0.52f), Offset(w * 0.68f, h * 0.66f)).forEach { n ->
                     drawLine(Color(0xFF4FA8E8).copy(alpha = 0.4f), Offset(gx, gy), n, strokeWidth = 1f)
                     drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF9FD8FF), Color(0xFF2E6A9E)), center = Offset(n.x, n.y), radius = w * 0.02f), radius = w * 0.013f, center = n)
-                    if (i < nodes.size - 1) drawLine(Color(0xFF4FA8E8).copy(alpha = 0.3f), n, nodes[i + 1], strokeWidth = 0.8f)
                 }
-                // Signal dots
-                val s = (w * 1000 + h).toInt()
-                for (i in 0 until 16) {
-                    val x = ((s * (i+1) * 7919) % 10000) / 10000f * w
-                    val y = ((s * (i+1) * 6271) % 10000) / 10000f * h
-                    drawCircle(Color(0xFF9FC8E8).copy(alpha = 0.22f), 0.8f, Offset(x, y))
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF030A12).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF030A12).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF4FA8E8), badgeInk = Color(0xFF060E18),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
