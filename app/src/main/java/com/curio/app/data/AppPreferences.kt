@@ -822,7 +822,11 @@ object AppPreferences {
 
     /** Whether the app renders dark right now — resolves "system" via the
      *  device night flag (non-composable twin of [isCurioDarkTheme]). */
-    fun isDarkTheme(context: Context): Boolean = when (getThemeMode(context)) {
+    fun isDarkTheme(context: Context): Boolean = isDarkMode(context, getThemeMode(context))
+
+    /** Whether a *given* [mode] (not the currently stored one) resolves dark —
+     *  used by the theme-switch reveal to detect a real light/dark change. */
+    fun isDarkMode(context: Context, mode: String): Boolean = when (mode) {
         THEME_DARK -> true
         THEME_SYSTEM -> (context.resources.configuration.uiMode and
             Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES

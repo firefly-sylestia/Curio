@@ -58,6 +58,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -73,6 +75,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
@@ -133,6 +137,8 @@ import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.theme.LocalCurioThemeTransition
+import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
@@ -2270,16 +2276,29 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     // is @Composable and can't run inside the clickable lambda
                     // (CI caught it at 2132).
                     val isDarkNow = isCurioDarkTheme()
+                    // v(theme switch) — the quick flip plays a Telegram-style
+                    // circular reveal from the sun/moon itself. The transition
+                    // + coroutine scope are resolved in composition (clickable
+                    // isn't @Composable); bounds give the window-space origin.
+                    val themeTransition = LocalCurioThemeTransition.current
+                    val transitionScope = rememberCoroutineScope()
+                    var sunMoonBounds by remember {
+                        mutableStateOf(androidx.compose.ui.geometry.Rect.Zero)
+                    }
                     Box(
                         modifier = Modifier
                             .offset(x = 268.8.dp - sunMoonTap / 2, y = 52.08.dp - sunMoonTap / 2)
                             .size(sunMoonTap)
+                            .onGloballyPositioned { coords -> sunMoonBounds = coords.boundsInWindow() }
                             .clip(CircleShape)
                             .clickable {
-                                AppPreferences.setThemeMode(
-                                    context,
-                                    if (isDarkNow) AppPreferences.THEME_LIGHT
-                                    else AppPreferences.THEME_DARK
+                                switchThemeWithReveal(
+                                    transition = themeTransition,
+                                    scope = transitionScope,
+                                    context = context,
+                                    center = sunMoonBounds.takeIf { it != Rect.Zero }?.center ?: Offset.Zero,
+                                    newMode = if (isDarkNow) AppPreferences.THEME_LIGHT
+                                              else AppPreferences.THEME_DARK,
                                 )
                             }
                     )

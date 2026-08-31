@@ -28,6 +28,7 @@ import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.ui.theme.CurioThemeTransitionHost
 
 /**
  * Curio's single Activity — see Curio design contract.
@@ -174,7 +175,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             CurioTheme {
-                CurioNavHost()
+                CurioThemeTransitionHost {
+                    CurioNavHost()
+                }
             }
         }
     }

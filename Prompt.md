@@ -1,5 +1,45 @@
 # Prompt.md — current request log
 
+## Request: Telegram/mpvRx-style theme switch reveal (COMPLETE)
+
+- User: "copy the dark light and theme switch animation from mpvRx
+  (Riteshp2001/mpvRx), maybe improving it even more, and also telegram have
+  it too beautifully."
+- Research: mpvRx `ui/theme/Theme.kt` implements a global `ThemeTransitionState`
+  (CompositionLocal + `drawToBitmap` snapshot + Animatable progress) whose
+  overlay peels the old frozen frame away with a feathered radial alpha mask
+  (DstIn over an offscreen layer) from the tapped point — the Telegram-style
+  blur-edge circular reveal. Ask-the-user answers: trigger = Home sun/moon +
+  Settings selector + Onboarding selector (all three); shipping = ALWAYS-ON
+  (matches the existing always-on sun/moon, no Settings gate).
+- NEW `app/ui/theme/ThemeTransition.kt`:
+  - `CurioThemeTransitionState` — isAnimating / revealCenter / screenshotBitmap
+    / progress Animatable; `startTransition(center): Boolean` snapshots the
+    current view synchronously (bails silently on failure so the flip never
+    blocks), `finishTransition()` releases the bitmap after a 96ms detach,
+    single-flight (ignores starts while animating).
+  - `LocalCurioThemeTransition` CompositionLocal + `CurioThemeTransitionHost`
+    (registers the host view, provides the state, stacks the reveal overlay).
+  - Overlay: 680ms FastOutSlowInEasing iris wipe, 34dp feather, smoothstep
+    radial mask (improvement over mpvRx's coarse 0.28 4-stop blend), swallows
+    input during the reveal.
+  - `switchThemeWithReveal(...)` helper — computes per-mode dark via the new
+    `AppPreferences.isDarkMode(context, mode)`, animates only on a real
+    light/dark change WITH a host present, else applies instantly (no visual
+    no-op animation).
+- Wired: `MainActivity` wraps `CurioNavHost` in `CurioThemeTransitionHost`;
+  Home drawer sun/moon reveals from the sun/moon centre; Settings Appearance
+  theme row reveals from the tapped segment (per-segment x by index);
+  Onboarding theme chips reveal from the tapped chip. Splash/widget-config
+  (no toggle) stay on the instant path.
+- `AppPreferences.isDarkTheme(context)` now delegates to the new `isDarkMode`.
+- Verified: each edited file's diff reviewed for balance (Home/MainActivity/
+  AppPreferences/Onboarding/Settings all clean; the naive stripper is
+  unreliable on raw strings so review was by diff). No Gradle run (CI owns
+  compilation per env rules). Changelog bullet added. Committed & pushed.
+
+---
+
 ## Request: Redesigned Category Picker (Curio/Knowledge/Mix) + README desktop removal (COMPLETE)
 
 - User: "fully redesigning" the category picker bottom sheet. New design
