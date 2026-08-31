@@ -4701,44 +4701,31 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             bg = Color(0xFF1E1226), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.radialGradient(listOf(Color(0xFF4A2A4A), Color(0xFF1E1226), Color(0xFF0D0812)), center = Offset(w * 0.55f, h * 0.35f), radius = w * 0.9f), size = Size(w, h))
-                // Crimson/amber glows
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE84F4F).copy(alpha = 0.20f), Color(0xFFE84F4F).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.30f, h * 0.30f))
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.14f), Color(0xFFF2C879).copy(alpha = 0f))), radius = w * 0.28f, center = Offset(w * 0.74f, h * 0.44f))
-                // TV with a real scene on screen
-                val tvx = w * 0.22f; val tvy = h * 0.24f; val tvw = w * 0.52f; val tvh = w * 0.36f
+                // Soft crimson glow behind the TV
+                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE84F4F).copy(alpha = 0.16f), Color(0xFFE84F4F).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.40f, h * 0.34f))
+                // TV with a clean scene on screen
+                val tvx = w * 0.24f; val tvy = h * 0.24f; val tvw = w * 0.52f; val tvh = w * 0.36f
                 drawRoundRect(brush = Brush.verticalGradient(listOf(Color(0xFF5E4A5E), Color(0xFF2E2230)), startY = tvy), topLeft = Offset(tvx - w * 0.014f, tvy - w * 0.014f), size = Size(tvw + w * 0.028f, tvh + w * 0.028f), cornerRadius = CornerRadius(6f))
-                // Screen: dusk gradient sky + mountain silhouettes
+                // Screen: dusk gradient sky + a simple mountain silhouette
                 drawRoundRect(Brush.verticalGradient(listOf(Color(0xFFE86B4F), Color(0xFF7A2A5E), Color(0xFF1E0A2E)), startY = tvy), topLeft = Offset(tvx, tvy), size = Size(tvw, tvh), cornerRadius = CornerRadius(4f))
                 drawPath(Path().apply {
-                    moveTo(tvx, tvy + tvh * 0.72f)
-                    lineTo(tvx + tvw * 0.18f, tvy + tvh * 0.52f)
-                    lineTo(tvx + tvw * 0.32f, tvy + tvh * 0.66f)
-                    lineTo(tvx + tvw * 0.50f, tvy + tvh * 0.44f)
-                    lineTo(tvx + tvw * 0.68f, tvy + tvh * 0.64f)
-                    lineTo(tvx + tvw * 0.84f, tvy + tvh * 0.50f)
-                    lineTo(tvx + tvw, tvy + tvh * 0.68f)
+                    moveTo(tvx, tvy + tvh * 0.74f)
+                    lineTo(tvx + tvw * 0.24f, tvy + tvh * 0.55f)
+                    lineTo(tvx + tvw * 0.50f, tvy + tvh * 0.70f)
+                    lineTo(tvx + tvw * 0.78f, tvy + tvh * 0.52f)
+                    lineTo(tvx + tvw, tvy + tvh * 0.66f)
                     lineTo(tvx + tvw, tvy + tvh)
                     lineTo(tvx, tvy + tvh)
                     close()
                 }, Color(0xFF140A1E))
-                drawCircle(Color(0xFFF2C879).copy(alpha = 0.85f), tvw * 0.06f, Offset(tvx + tvw * 0.74f, tvy + tvh * 0.26f))
-                // Play button in the screen
-                val pcx = tvx + tvw * 0.30f; val pcy = tvy + tvh * 0.38f
-                drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2C879).copy(alpha = 0.30f), Color(0xFFF2C879).copy(alpha = 0f))), radius = tvw * 0.20f, center = Offset(pcx, pcy))
-                drawPath(Path().apply { moveTo(pcx - tvw * 0.04f, pcy - tvh * 0.08f); lineTo(pcx + tvw * 0.06f, pcy); lineTo(pcx - tvw * 0.04f, pcy + tvh * 0.08f); close() }, Color(0xFFF2C879))
+                drawCircle(Color(0xFFF2C879).copy(alpha = 0.85f), tvw * 0.055f, Offset(tvx + tvw * 0.72f, tvy + tvh * 0.28f))
                 // Progress bar at the bottom of the screen
                 drawRoundRect(Color(0xFF3A2E4E), topLeft = Offset(tvx + tvw * 0.06f, tvy + tvh * 0.90f), size = Size(tvw * 0.88f, tvh * 0.045f), cornerRadius = CornerRadius(2f))
                 drawRoundRect(Color(0xFFE84F4F), topLeft = Offset(tvx + tvw * 0.06f, tvy + tvh * 0.90f), size = Size(tvw * 0.48f, tvh * 0.045f), cornerRadius = CornerRadius(2f))
                 // TV stand
                 drawLine(Color(0xFF3E3240), Offset(tvx + tvw * 0.5f, tvy + tvh + w * 0.014f), Offset(tvx + tvw * 0.5f, tvy + tvh + w * 0.07f), strokeWidth = 3f)
                 drawLine(Color(0xFF3E3240), Offset(tvx + tvw * 0.28f, tvy + tvh + w * 0.075f), Offset(tvx + tvw * 0.72f, tvy + tvh + w * 0.075f), strokeWidth = 3f)
-                // Episode chips floating right
-                listOf(Pair(Offset(w * 0.84f, h * 0.30f), "S1"), Pair(Offset(w * 0.86f, h * 0.46f), "E3"), Pair(Offset(w * 0.83f, h * 0.62f), "+")).forEach { (c, label) ->
-                    drawRoundRect(Color(0xFF2E1E3E), topLeft = Offset(c.x - w * 0.045f, c.y - w * 0.016f), size = Size(w * 0.09f, w * 0.032f), cornerRadius = CornerRadius(6f))
-                    drawCircle(if (label == "+") Color(0xFFF2C879) else Color(0xFFE84F4F), w * 0.008f, Offset(c.x - w * 0.030f, c.y))
-                    drawLine(Color(0xFFF2C879).copy(alpha = 0.9f), Offset(c.x - w * 0.016f, c.y), Offset(c.x + w * 0.026f, c.y), strokeWidth = 1.4f)
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF070408).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF070408).copy(alpha = 0.50f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE84F4F), badgeInk = Color.White,
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
