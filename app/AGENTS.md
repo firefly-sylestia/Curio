@@ -280,6 +280,27 @@ app/src/main/java/com/curio/app/
   `NewPickerTile`/`AddSuggestionTile` gained a `modifier` param,
   trailing `Spacer(weight(1f))` pads short rows). The grid-less rows are
   fine because the section caps at ≤11 tiles.
+- **v3xx6 — first-7 signature watermarks: tiny drawn crests → unique
+  icon glyphs + LANGUAGE bubbles scrapped.** Per user direction ("use
+  letter or symbol or icons instead of drawing things… don't just use a
+  letter in every design, be unique and creative per category"), the
+  tiny drawn crests (spotlight / paw / star / sun / frame / quill) on
+  the FIRST-7 categories (Animals, Animated Films, Anime, Artists,
+  Artworks, Astronomy, Authors) are replaced by a giant faint
+  Material-Symbols glyph watermark rendered over the background
+  (bottom-right, −6° tilt) — one UNIQUE icon per category, all verified
+  ligatures in the bundled font subset: brush (Artists), pets (Animals),
+  movie_filter (Animated Films), auto_awesome (Anime), museum
+  (Artworks), edit_note (Authors), nightlight (Astronomy). Implemented
+  as `SignatureDesign.watermark: String?` — a Minimal-style
+  giant-faint-glyph watermark, rendered by `SignatureCard` via
+  `CurioIcon` (not a drawn letter, so no two categories collide). The
+  same icon renders in BOTH normal and Deepen. LANGUAGE (normal +
+  Deepen) drops its chat bubbles / calligraphy strokes entirely for a
+  minimal gradient + hairline frame — its many-language words overlay
+  (言語/Sprache/langue/…) already renders at the composable level, so
+  that IS the background decoration now. Album and all other categories
+  untouched; classic untouched.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**

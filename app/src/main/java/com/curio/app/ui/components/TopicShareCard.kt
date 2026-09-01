@@ -1308,17 +1308,15 @@ private fun SignatureCard(
             }
         }
 
-        // Minimal-style giant faint initial watermark (letter/symbol) for the
-        // redesigned signature categories — a single character instead of a
-        // drawn scene, bottom-right like the Minimal card.
-        sig.watermark?.let { letter ->
-            Text(
-                letter,
-                style = TextStyle(
-                    fontFamily = sig.titleFont, fontSize = 150.sp,
-                    lineHeight = 130.sp, color = sig.titleColor.copy(alpha = 0.10f)
-                ),
-                maxLines = 1,
+        // Minimal-style giant faint glyph watermark (a Material Symbols icon
+        // or letter) for the redesigned signature categories — one unique
+        // symbol per category instead of a drawn scene, bottom-right like the
+        // Minimal card's giant faint initial.
+        sig.watermark?.let { glyph ->
+            CurioIcon(
+                name = glyph,
+                tint = sig.titleColor.copy(alpha = 0.12f),
+                size = 120.dp,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .graphicsLayer { rotationZ = -6f }
@@ -2679,11 +2677,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF241C14), Color(0xFF16120E), Color(0xFF0B0806))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color.White.copy(alpha = 0.14f))
-                // Tiny spotlight crest, top-right
-                drawPath(Path().apply { moveTo(w * 0.845f, h * 0.055f); lineTo(w * 0.825f, h * 0.115f); lineTo(w * 0.885f, h * 0.115f); close() }, Color(0xFFE8B878).copy(alpha = 0.55f))
-                drawCircle(Color(0xFFE8B878).copy(alpha = 0.8f), 2.2f, Offset(w * 0.86f, h * 0.045f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE8B878), badgeInk = Color(0xFF16120E),
+            watermark = "brush",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 16.dp,
             titleFont = BebasNeueFontFamily, titleSize = 42.sp, titleLineHeight = 44.sp, titleColor = Color(0xFFF5EAD8),
@@ -2717,13 +2713,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFF8FAF7), Color(0xFFEFF3F0), Color(0xFFE1E8E2))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color(0xFF2E3A2C).copy(alpha = 0.16f))
-                // Tiny paw crest, top-right
-                drawOval(Color(0xFF5E7A5A).copy(alpha = 0.6f), topLeft = Offset(w * 0.845f, h * 0.09f), size = Size(w * 0.03f, w * 0.02f))
-                listOf(Pair(w * 0.852f, h * 0.062f), Pair(w * 0.862f, h * 0.055f), Pair(w * 0.872f, h * 0.062f)).forEach { (x, y) ->
-                    drawCircle(Color(0xFF5E7A5A).copy(alpha = 0.6f), 1.3f, Offset(x, y))
-                }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF5E7A5A), badgeInk = Color(0xFFEFF3F0),
+            watermark = "pets",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 16.dp,
             titleFont = LoraFontFamily, titleSize = 30.sp, titleLineHeight = 36.sp, titleColor = Color(0xFF2E3A2C),
@@ -2738,10 +2730,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFFDF5F4), Color(0xFFF6EFF7), Color(0xFFEDEAF6))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color(0xFF3A2E3A).copy(alpha = 0.16f))
-                // Tiny star crest, top-right
-                drawStar(w * 0.86f, h * 0.09f, 3.4f, 1.5f, Color(0xFFA87BC0).copy(alpha = 0.7f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFA87BC0), badgeInk = Color.White,
+            watermark = "movie_filter",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 16.dp,
             titleFont = CorbenFontFamily, titleSize = 26.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2E3A),
@@ -2756,10 +2747,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFFCFCFD), Color(0xFFF5F6F8), Color(0xFFE8EAEF))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color(0xFF2A1E1E).copy(alpha = 0.16f))
-                // Tiny sun crest, top-right
-                drawCircle(Color(0xFFD84343).copy(alpha = 0.85f), w * 0.022f, Offset(w * 0.86f, h * 0.09f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFD84343), badgeInk = Color.White,
+            watermark = "auto_awesome",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 16.dp,
             titleFont = MavenProFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF2A1E1E),
@@ -2774,11 +2764,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFF6F7F9), Color(0xFFECEFF2), Color(0xFFDDE1E6))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color(0xFF2E2C28).copy(alpha = 0.16f))
-                // Tiny frame crest, top-right
-                drawRoundRect(Color(0xFF2E2C28).copy(alpha = 0.55f), topLeft = Offset(w * 0.845f, h * 0.065f), size = Size(w * 0.032f, w * 0.042f), cornerRadius = CornerRadius(2f), style = Stroke(1.2f))
-                drawCircle(Color(0xFFB8A06B).copy(alpha = 0.8f), 1.6f, Offset(w * 0.861f, h * 0.085f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF2E2C28), badgeInk = Color(0xFFECEFF2),
+            watermark = "museum",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
             titleFont = CormorantGaramondFontFamily, titleSize = 32.sp, titleLineHeight = 38.sp, titleColor = Color(0xFF1E1C18),
@@ -2793,11 +2781,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFF9FAFC), Color(0xFFF1F3F6), Color(0xFFE4E8EE))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color(0xFF2A241A).copy(alpha = 0.16f))
-                // Tiny quill crest, top-right
-                drawPath(Path().apply { moveTo(w * 0.85f, h * 0.10f); quadraticBezierTo(w * 0.87f, h * 0.06f, w * 0.89f, h * 0.07f) }, Color(0xFF7A3A2E).copy(alpha = 0.6f), style = Stroke(1.4f))
-                drawCircle(Color(0xFF7A3A2E).copy(alpha = 0.6f), 1.6f, Offset(w * 0.85f, h * 0.10f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF7A3A2E), badgeInk = Color(0xFFF1F3F6),
+            watermark = "edit_note",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
             titleFont = PlayfairDisplayFontFamily, titleSize = 30.sp, titleLineHeight = 36.sp, titleColor = Color(0xFF2A241A),
@@ -3021,19 +3007,12 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = SpaceMonoFontFamily, footerColor = Color(0xFF4A9BCC).copy(alpha = 0.65f),
             layout = SignatureLayout.SIDE
         )
-        // ═══ LANGUAGE — chat bubbles + speech marks, Patrick Hand title ═══
+        // ═══ LANGUAGE — minimal night ink: many-language texts overlay, Patrick Hand title ═══
         cat == "LANGUAGE" -> SignatureDesign(
             bg = Color(0xFF12101A), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF1A1828), Color(0xFF12101A), Color(0xFF08060E))), size = Size(w, h))
-                // Two chat bubbles + a calligraphy underline
-                val b1 = Path().apply { moveTo(w * 0.14f, h * 0.62f); lineTo(w * 0.14f, h * 0.74f); lineTo(w * 0.42f, h * 0.74f); lineTo(w * 0.42f, h * 0.66f); lineTo(w * 0.48f, h * 0.62f); lineTo(w * 0.42f, h * 0.62f); close() }
-                drawPath(b1, Color(0xFFC9B8E0).copy(alpha = 0.10f))
-                val b2 = Path().apply { moveTo(w * 0.52f, h * 0.70f); lineTo(w * 0.52f, h * 0.82f); lineTo(w * 0.80f, h * 0.82f); lineTo(w * 0.80f, h * 0.74f); lineTo(w * 0.86f, h * 0.70f); lineTo(w * 0.80f, h * 0.70f); close() }
-                drawPath(b2, Color(0xFF8B7AB0).copy(alpha = 0.12f))
-                // Text dots inside bubbles
-                listOf(0.20f, 0.28f, 0.36f).forEach { drawCircle(Color(0xFFC9B8E0).copy(alpha = 0.25f), 1.2f, Offset(w * it, h * 0.68f)) }
-                listOf(0.58f, 0.66f, 0.74f).forEach { drawCircle(Color(0xFF8B7AB0).copy(alpha = 0.30f), 1.2f, Offset(w * it, h * 0.76f)) }
+                signatureHairlineFrame(w, h, Color(0xFFC9B8E0).copy(alpha = 0.14f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF8B7AB0), badgeInk = Color(0xFF12101A),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
@@ -3438,10 +3417,9 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF121A30), Color(0xFF0B1020), Color(0xFF050812))), size = Size(w, h))
                 signatureHairlineFrame(w, h, Color.White.copy(alpha = 0.14f))
-                // Tiny star crest, top-right
-                drawStar(w * 0.86f, h * 0.09f, 3.0f, 1.3f, Color(0xFFD8C88F).copy(alpha = 0.7f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFD8C88F), badgeInk = Color(0xFF0B1020),
+            watermark = "nightlight",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 16.dp,
             titleFont = SpaceMonoFontFamily, titleSize = 22.sp, titleLineHeight = 28.sp, titleColor = Color(0xFFD8E4F0),
@@ -3753,11 +3731,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF241C14), Color(0xFF16120E), Color(0xFF0B0806))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFE8B878).copy(alpha = 0.10f), Color(0xFFE8B878).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color.White.copy(alpha = 0.14f))
-                // Tiny spotlight crest, top-right
-                drawPath(Path().apply { moveTo(w * 0.845f, h * 0.055f); lineTo(w * 0.825f, h * 0.115f); lineTo(w * 0.885f, h * 0.115f); close() }, Color(0xFFE8B878).copy(alpha = 0.55f))
-                drawCircle(Color(0xFFE8B878).copy(alpha = 0.8f), 2.2f, Offset(w * 0.86f, h * 0.045f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFE8B878), badgeInk = Color(0xFF16120E),
+            watermark = "brush",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 16.dp,
             titleFont = BebasNeueFontFamily, titleSize = 42.sp, titleLineHeight = 44.sp, titleColor = Color(0xFFF5EAD8),
@@ -3882,10 +3858,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFFDF5F4), Color(0xFFF6EFF7), Color(0xFFEDEAF6))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFA87BC0).copy(alpha = 0.10f), Color(0xFFA87BC0).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color(0xFF3A2E3A).copy(alpha = 0.16f))
-                // Tiny star crest, top-right
-                drawStar(w * 0.86f, h * 0.09f, 3.4f, 1.5f, Color(0xFFA87BC0).copy(alpha = 0.7f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFA87BC0), badgeInk = Color.White,
+            watermark = "movie_filter",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 16.dp,
             titleFont = CorbenFontFamily, titleSize = 26.sp, titleLineHeight = 32.sp, titleColor = Color(0xFF3A2E3A),
@@ -3901,11 +3876,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFF9FAFC), Color(0xFFF1F3F6), Color(0xFFE4E8EE))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF7A3A2E).copy(alpha = 0.10f), Color(0xFF7A3A2E).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color(0xFF2A241A).copy(alpha = 0.16f))
-                // Tiny quill crest, top-right
-                drawPath(Path().apply { moveTo(w * 0.85f, h * 0.10f); quadraticBezierTo(w * 0.87f, h * 0.06f, w * 0.89f, h * 0.07f) }, Color(0xFF7A3A2E).copy(alpha = 0.6f), style = Stroke(1.4f))
-                drawCircle(Color(0xFF7A3A2E).copy(alpha = 0.6f), 1.6f, Offset(w * 0.85f, h * 0.10f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF7A3A2E), badgeInk = Color(0xFFF1F3F6),
+            watermark = "edit_note",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
             titleFont = PlayfairDisplayFontFamily, titleSize = 30.sp, titleLineHeight = 36.sp, titleColor = Color(0xFF2A241A),
@@ -3960,11 +3933,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFF6F7F9), Color(0xFFECEFF2), Color(0xFFDDE1E6))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFB8A06B).copy(alpha = 0.10f), Color(0xFFB8A06B).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color(0xFF2E2C28).copy(alpha = 0.16f))
-                // Tiny frame crest, top-right
-                drawRoundRect(Color(0xFF2E2C28).copy(alpha = 0.55f), topLeft = Offset(w * 0.845f, h * 0.065f), size = Size(w * 0.032f, w * 0.042f), cornerRadius = CornerRadius(2f), style = Stroke(1.2f))
-                drawCircle(Color(0xFFB8A06B).copy(alpha = 0.8f), 1.6f, Offset(w * 0.861f, h * 0.085f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF2E2C28), badgeInk = Color(0xFFECEFF2),
+            watermark = "museum",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 14.dp,
             titleFont = CormorantGaramondFontFamily, titleSize = 32.sp, titleLineHeight = 38.sp, titleColor = Color(0xFF1E1C18),
@@ -4083,10 +4054,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFFCFCFD), Color(0xFFF5F6F8), Color(0xFFE8EAEF))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFD84343).copy(alpha = 0.08f), Color(0xFFD84343).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color(0xFF2A1E1E).copy(alpha = 0.16f))
-                // Tiny sun crest, top-right
-                drawCircle(Color(0xFFD84343).copy(alpha = 0.85f), w * 0.022f, Offset(w * 0.86f, h * 0.09f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFD84343), badgeInk = Color.White,
+            watermark = "auto_awesome",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 2.sp, titleTopSpacer = 16.dp,
             titleFont = MavenProFontFamily, titleSize = 30.sp, titleLineHeight = 34.sp, titleColor = Color(0xFF2A1E1E),
@@ -4362,13 +4332,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFFF8FAF7), Color(0xFFEFF3F0), Color(0xFFE1E8E2))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFF5E7A5A).copy(alpha = 0.08f), Color(0xFF5E7A5A).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color(0xFF2E3A2C).copy(alpha = 0.16f))
-                // Tiny paw crest, top-right
-                drawOval(Color(0xFF5E7A5A).copy(alpha = 0.6f), topLeft = Offset(w * 0.845f, h * 0.09f), size = Size(w * 0.03f, w * 0.02f))
-                listOf(Pair(w * 0.852f, h * 0.062f), Pair(w * 0.862f, h * 0.055f), Pair(w * 0.872f, h * 0.062f)).forEach { (x, y) ->
-                    drawCircle(Color(0xFF5E7A5A).copy(alpha = 0.6f), 1.3f, Offset(x, y))
-                }
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFF5E7A5A), badgeInk = Color(0xFFEFF3F0),
+            watermark = "pets",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 16.dp,
             titleFont = LoraFontFamily, titleSize = 30.sp, titleLineHeight = 36.sp, titleColor = Color(0xFF2E3A2C),
@@ -4472,10 +4438,9 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF121A30), Color(0xFF0B1020), Color(0xFF050812))), size = Size(w, h))
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFD8C88F).copy(alpha = 0.10f), Color(0xFFD8C88F).copy(alpha = 0f))), radius = w * 0.5f, center = Offset(w * 0.5f, h * 0.5f))
                 signatureHairlineFrame(w, h, Color.White.copy(alpha = 0.14f))
-                // Tiny star crest, top-right
-                drawStar(w * 0.86f, h * 0.09f, 3.0f, 1.3f, Color(0xFFD8C88F).copy(alpha = 0.7f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFD8C88F), badgeInk = Color(0xFF0B1020),
+            watermark = "nightlight",
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 16.dp,
             titleFont = SpaceMonoFontFamily, titleSize = 22.sp, titleLineHeight = 28.sp, titleColor = Color(0xFFD8E4F0),
@@ -4714,35 +4679,14 @@ private fun signatureDesignDetailed(categoryName: String, family: CategoryFamily
             footerSpacer = 8.dp, footerFont = SpaceGroteskFontFamily, footerColor = Color(0xFF4FE8C8).copy(alpha = 0.65f),
             layout = SignatureLayout.BOTTOM
         )
-        // ═══ LANGUAGE — speech bubbles, calligraphy strokes, warm terracotta ═══
+        // ═══ LANGUAGE — minimal terracotta: many-language texts overlay ═══
         cat == "LANGUAGE" -> SignatureDesign(
             bg = Color(0xFF2E1A12), cornerRadius = 8f,
             drawBackground = { w, h ->
                 drawRect(Brush.verticalGradient(listOf(Color(0xFF5E3820), Color(0xFF2E1A12), Color(0xFF180C06))), size = Size(w, h))
-                // Warm glow
+                // Soft warm glow
                 drawCircle(brush = Brush.radialGradient(listOf(Color(0xFFF2A84F).copy(alpha = 0.16f), Color(0xFFF2A84F).copy(alpha = 0f))), radius = w * 0.30f, center = Offset(w * 0.70f, h * 0.36f))
-                // Speech bubbles
-                listOf(Pair(Offset(w * 0.26f, h * 0.28f), 1f), Pair(Offset(w * 0.20f, h * 0.56f), 0.7f)).forEach { (c, s) ->
-                    val r = w * 0.075f * s
-                    drawRoundRect(Color(0xFFF5EAD8).copy(alpha = 0.9f), topLeft = Offset(c.x - r, c.y - r * 0.7f), size = Size(r * 2, r * 1.4f), cornerRadius = CornerRadius(4f * s))
-                    drawPath(Path().apply { moveTo(c.x - r * 0.3f, c.y + r * 0.65f); lineTo(c.x - r * 0.45f, c.y + r * 1.15f); lineTo(c.x + r * 0.15f, c.y + r * 0.7f); close() }, Color(0xFFF5EAD8).copy(alpha = 0.9f))
-                    // Three dots inside
-                    for (i in 0 until 3) drawCircle(Color(0xFF8A6A4A), r * 0.08f, Offset(c.x - r * 0.35f + i * r * 0.35f, c.y))
-                }
-                // Calligraphy brush strokes
-                listOf(Pair(Color(0xFFE8544F), 0.30f), Pair(Color(0xFF4FA8E8), 0.42f)).forEachIndexed { i, (col, y) ->
-                    val path = Path().apply {
-                        moveTo(w * 0.60f, h * y)
-                        cubicTo(w * 0.68f, h * (y - 0.04f), w * 0.74f, h * (y + 0.02f), w * 0.88f, h * (y - 0.06f))
-                        cubicTo(w * 0.86f, h * (y + 0.01f), w * 0.82f, h * (y + 0.03f), w * 0.92f, h * (y + 0.02f))
-                    }
-                    drawPath(path, col.copy(alpha = 0.6f), style = Stroke(2.4f))
-                }
-                // Accent dots between strokes
-                listOf(Offset(w * 0.70f, h * 0.50f), Offset(w * 0.76f, h * 0.56f), Offset(w * 0.82f, h * 0.46f)).forEach { c ->
-                    drawCircle(Color(0xFFF2A84F).copy(alpha = 0.5f), 1.6f, c)
-                }
-                drawRect(Brush.radialGradient(listOf(Color.Transparent, Color(0xFF0D0703).copy(alpha = 0.55f)), center = Offset(w * 0.5f, h * 0.45f), radius = w * 0.85f), size = Size(w, h))
+                signatureHairlineFrame(w, h, Color(0xFFF2A84F).copy(alpha = 0.16f))
             },
             padding = PaddingValues(22.dp), badgeColor = Color(0xFFF2A84F), badgeInk = Color(0xFF2E1A12),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,

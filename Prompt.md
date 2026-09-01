@@ -1,47 +1,41 @@
 # Prompt.md — current request log
 
-## Request: Scrap the scene-heavy signature designs for 14 categories → minimal Editorial-quality treatment + new fonts + picker crash fix
+## Request: Signature redesign follow-ups — icon watermarks (first 7), LANGUAGE minimal, picker crash fix, CI compile fix
 
-User direction (three follow-ups after the first signature redesign shipped):
-1. "for those 7 category redesign why u didnt used ne fonts cool fonts mathing the style, now the next 7 and this time properly research style and design and use new fonts download more maybe" → the first 7 categories only re-paired ALREADY-BUNDLED fonts; the next 7 (Biology, Books, Chemistry, Directors, Discoveries, Economics, Films) must get genuinely NEW downloaded fonts.
-2. "when i asked for a redesign you should have removed all of the desings etc and use editorial minimal etc for quality nd redesign without using so many things on the backgroud design" → the signature backgrounds are still too busy; scrap the scene-heavy designs entirely for Editorial/Minimal-level cleanliness.
-3. "by everything i ment scarp the current siganture design for the ones i asked entirely, also fix this crash too" (same infinite-height crash trace) → the crash is from the NEW category picker.
+User direction (in order):
+1. "minimal pass on the previous 7 category, and use this style where in backgrou u use letter or symbol or icons instead of drawing things, and for language just use many language texts that style"
+2. Asked which categories; answer: "first 7 letter crestes dont touch album design. and fix the cl error too" (CI: unresolved `BioRhymeFontFamily`/`FrauncesFontFamily`/etc. — the 7 new font imports were missing from TopicShareCard.kt).
+3. "fix this cl error and push it, then continue the task, and dont just use letter in every design bruh, be unique and creative per category"
 
 ### What shipped (this turn)
 
-- **7 new OFL fonts downloaded + licensed** — BioRhyme (Biology), Fraunces
-  (Books), Oxanium (Chemistry), Limelight (Directors), Rye (Discoveries),
-  Space Grotesk (Economics), Anton (Films). TTFs in `res/font/`,
-  `FontFamily` vals in `CurioTypography.kt` (single-entry for Rye/Anton/
-  Limelight, variable-weight entries for the rest), licenses in
-  `app/third_party/`. All verified as valid TrueType via `file`.
-- **Signature scenes SCRAPPED for all 14 categories** (first 7 + second 7)
-  in BOTH `signatureDesign` (normal) and `signatureDesignDetailed`
-  (Deepen) — `TopicShareCard.kt` lines ~2631–5965. Every branch is now:
-  flat vertical gradient + `signatureHairlineFrame` (NEW DrawScope helper:
-  inset 4.5% rounded-rect outline, 1f stroke — it was referenced but never
-  defined, now added beside `drawStar`) + ONE tiny category crest
-  top-right. Deepen differs only by a soft radial accent glow (no extra
-  objects). Normal and Deepen configs are now IDENTICAL per category
-  (bg/gradient/font/colors/layout/badge — fixed 11 drifting hex/size
-  mismatches, incl. FILMS titleSize 34→36).
-- **Category-picker crash fix** — `ContinueExploringSection` nested a
-  `LazyVerticalGrid` inside a `LazyColumn` item (lazy items are measured
-  with infinite max height → crash). Replaced with manual chunked rows
-  (3/4 cols, `NewPickerTile`/`AddSuggestionTile` gained a `modifier`
-  param, trailing `Spacer(weight(1f))` pads short rows). The earlier
-  pager/mix-editor `weight(1f, fill = false)` fixes stay.
-- Untouched: `signatureDesignClassic` (kept), Paper/Clean/Collage/
-  Editorial/Minimal/Vinyl, all non-target categories' existing scenes,
-  web/ + desktop/.
+- **CI compile fix pushed** (`52a460e1`) — added the 7 missing font-family
+  imports (`BioRhymeFontFamily` … `AntonFontFamily`) to TopicShareCard.kt,
+  resolving all `Unresolved reference` errors in compileDebug/ReleaseKotlin.
+- **Unique icon watermarks for the first-7 categories** (normal + Deepen):
+  the tiny drawn crests (spotlight / paw / star / sun / frame / quill) are
+  removed from `drawBackground`; instead each category renders a giant faint
+  Material-Symbols glyph watermark bottom-right via `CurioIcon` — one
+  UNIQUE icon per category (not a letter — all 7 start with "A" so letters
+  would collide), all verified ligatures in the bundled font subset:
+  Artists→brush, Animals→pets, Animated Films→movie_filter, Anime→
+  auto_awesome, Artworks→museum, Authors→edit_note, Astronomy→nightlight.
+  Implemented as `SignatureDesign.watermark: String?` (default null),
+  rendered in `SignatureCard` after the LANGUAGE polyglot overlay
+  (120.dp, bottom-end, −6° tilt, title-color tint at 12% alpha).
+- **LANGUAGE minimal (normal + Deepen)** — chat bubbles + calligraphy
+  strokes + dots scrapped; now flat gradient + hairline frame only (Deepen
+  keeps its soft warm glow). The many-language words overlay
+  (言語/Sprache/langue/idioma/lingua/… drawn via TextMeasurer at the
+  composable level) is the background decoration now, per user direction.
+- Album untouched (user: "dont touch album design"); classic + all other
+  categories untouched.
 
 ### Progress
-- [x] Download 7 new OFL fonts + declare FontFamily vals + licenses.
-- [x] Scrap scene backgrounds → minimal hairline treatment, 14 categories, normal + Deepen.
-- [x] Define missing `signatureHairlineFrame` helper.
-- [x] Align normal == Deepen configs (0 mismatches across font/colors/layout/badge).
-- [x] Fix picker crash (nested LazyVerticalGrid → chunked rows).
-- [x] Verify classic/base styles untouched (hunk-range check: none in 2034–2630).
-- [x] Syntax sanity (braces 0, brackets 0, parens ±1 pre-existing).
-- [x] DOX pass (AGENTS.md v3xx5 + v3xx5b, changelog, Prompt.md).
+- [x] Push CI font-import fix (`52a460e1`).
+- [x] Add `SignatureDesign.watermark` field + `CurioIcon` render site.
+- [x] First-7 normal + detailed: remove tiny crests, add unique icon watermarks (14 branches).
+- [x] LANGUAGE normal + detailed: strip bubbles/strokes → minimal gradient + hairline.
+- [x] Verify classic untouched, crest remnants = 0, brace/paren balance clean (parens ±1 pre-existing).
+- [x] DOX pass (AGENTS.md v3xx6, changelog, Prompt.md).
 - [ ] Commit & push.
