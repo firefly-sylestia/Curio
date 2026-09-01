@@ -109,6 +109,7 @@ import com.curio.app.ui.theme.DMSerifDisplayFontFamily
 import com.curio.app.ui.theme.SoraFontFamily
 import com.curio.app.ui.theme.CorbenFontFamily
 import com.curio.app.ui.theme.MavenProFontFamily
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
@@ -324,9 +325,13 @@ class EditBoundsCallbacks(
 )
 
 /** Scales maxLines with the user's height-crop frac so the text box truly
- *  grows (more lines show) or shrinks (fewer lines) instead of jumping. */
+ *  grows (more lines show) or shrinks (fewer lines) instead of jumping.
+ *  v229c — ROUNDS to the nearest line instead of flooring: maxLines is an
+ *  integer count, so flooring a partial drag (e.g. 2.5 lines -> 2) made the
+ *  height tab feel dead until the drag crossed a full extra line. Rounding
+ *  makes each half-line of travel change the visible count. */
 private fun lines(base: Int, frac: Float, max: Int = 28): Int =
-    (base * frac).toInt().coerceIn(1, max)
+    (base * frac).roundToInt().coerceIn(1, max)
 
 @Composable
 fun TopicShareCard(
@@ -567,8 +572,8 @@ private fun VinylCard(
 
             Spacer(Modifier.weight(1f))
 
-            // Footer — centered, subtle (info row: movable via M handle, not editable)
-            Column(modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }, horizontalAlignment = Alignment.CenterHorizontally) {
+            // Footer — centered, subtle (FIXED: only the author/year row moves)
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Canvas(Modifier.size(width = 60.dp, height = 1.dp)) {
                     drawLine(roseDusty.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
                 }
@@ -823,14 +828,14 @@ private fun CollageCard(
             // ── Footer area ──
             Spacer(Modifier.height(8.dp))
 
-            // Footer credit — info row: movable via M handle, not editable
+            // Footer credit — FIXED: does NOT move (only the author/year row moves)
             Text(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
                 style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Color.White.copy(alpha = 0.66f)),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -937,8 +942,7 @@ private fun NeumorphicCard(
                     if (quoteText != null && !quoteAuthor.isNullOrBlank()) "— $quoteAuthor" else if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio",
                     style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 0.8.sp, color = Color.White.copy(alpha = 0.72f)),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -1095,13 +1099,13 @@ private fun EditorialCard(
 
             Spacer(Modifier.weight(1f))
 
-            // Colophon — thin rule + italic credit with an accent slug (info
-            // row: movable via M handle, not editable)
+            // Colophon — thin rule + italic credit with an accent slug (FIXED:
+            // only the author/year row moves)
             Canvas(Modifier.fillMaxWidth().height(1.dp)) {
                 drawLine(inkDark.copy(alpha = 0.14f), Offset.Zero, Offset(size.width, 0f))
             }
             Spacer(Modifier.height(7.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Box(Modifier.width(6.dp).height(10.dp).background(accentRule.copy(alpha = 0.85f)))
                 Text(
                     if (sharerName.isNotBlank()) "$sharerName \u2014 Curio" else "Curio",
@@ -1203,12 +1207,12 @@ private fun MinimalCard(
             Spacer(Modifier.height(14.dp))
 
             // Credit — tiny, right-aligned for a deliberate off-balance
-            // (info row: movable via M handle, not editable)
+            // (FIXED: only the author/year row moves)
             Text(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 Curio" else "Curio",
                 style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
                     fontWeight = FontWeight.SemiBold, color = inkDark.copy(alpha = 0.35f)),
-                maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -1344,14 +1348,15 @@ private fun SignatureCard(
                 modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
         }
 
-        // ── Footer (shared) — info row: movable via M handle, not editable ──
+        // ── Footer (shared) — FIXED: never moves (only the author/year row
+        // reports + follows the M handle). ──
         @Composable
         fun FooterText(centered: Boolean = false) {
             Text(footerText, style = TextStyle(fontFamily = sig.footerFont, fontSize = 9.sp,
                 fontWeight = FontWeight.SemiBold, color = sig.footerColor),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                modifier = if (centered) Modifier.fillMaxWidth() else Modifier)
         }
 
         when (sig.layout) {
@@ -5369,8 +5374,7 @@ private fun CustomCard(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 Curio" else "Curio",
                 style = TextStyle(fontFamily = sig.footerFont, fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold, color = sig.footerColor),
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                maxLines = 1, overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -5433,7 +5437,12 @@ private fun MiddleContent(
 
 @Composable
 private fun FrostPane(palette: ShareCardPalette, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Box(modifier.fillMaxWidth().drawBehind {
+    // v229c — the CALLER's width-resize modifier (moveFact) is applied OUTSIDE
+    // the pane's own fillMaxWidth (Modifier.fillMaxWidth().then(modifier)):
+    // chaining fillMaxWidth AFTER it made the pane's full-width fill override
+    // the resized width, so the side (width) adjuster did nothing on Paper's
+    // fact pane. Now the pane fills, then the caller's fraction NARROWS it.
+    Box(Modifier.fillMaxWidth().then(modifier).drawBehind {
         val c = CornerRadius(18.dp.toPx())
         drawRoundRect(Color.Black.copy(alpha = 0.21f), Offset(0f, 3.dp.toPx()), Size(size.width, size.height), c)
         drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.35f), Color.White.copy(alpha = 0.35f))), Offset.Zero, Size(size.width, size.height), c)
@@ -5454,7 +5463,9 @@ private fun StarRow(rating: Int, palette: ShareCardPalette) {
 
 @Composable
 private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?, palette: ShareCardPalette, move: ShareCardMove = ShareCardMove(), callbacks: EditBoundsCallbacks = EditBoundsCallbacks()) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }) {
+    // FIXED footer: only the author/year row (MiddleContent's meta line)
+    // reports bounds and follows the M handle — the footer never moves.
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.30f), size = 14.dp)
         Spacer(Modifier.height(3.dp))
         if (quoteText != null && !quoteAuthor.isNullOrBlank()) {
@@ -5706,23 +5717,33 @@ private fun ArrangeableCard(
                             }
                         )
                         ResizeEdge(
-                            x = t.right.dp,
+                            x = t.right.dp.coerceAtMost((cw - 6f).dp),
                             y = (t.top + t.height / 2f).dp,
                             accent = MaterialTheme.colorScheme.primary,
                             edge = ResizeEdgeSide.RIGHT,
                             onDelta = { dx ->
-                                onMove(move.copy(titleWidthFrac = (move.titleWidthFrac + dx / t.width.coerceAtLeast(40f)).coerceIn(0.3f, 1.6f)))
+                                // v229c — card-relative delta + a clamp that
+                                // MATCHES the renderer (coerceIn 0.2..1f in
+                                // moveTitle): the old 0.3..1.6 range meant
+                                // drags past 1.0 did nothing (renderer cap),
+                                // so the side adjuster felt dead. The tab
+                                // itself stays ~6dp inside the card edge so it
+                                // can never be pushed out of reach.
+                                onMove(move.copy(titleWidthFrac = (move.titleWidthFrac + dx / cw.coerceAtLeast(200f)).coerceIn(0.3f, 1f)))
                             }
                         )
                         // Height tab — truly grows/shrinks the TEXT (its line
                         // count scales), so content extends instead of jumping.
+                        // The display clamps to the card bottom so a grown box
+                        // can never push the tab off-screen ("no way to fix
+                        // without reset" bug).
                         ResizeEdge(
                             x = (t.left + t.width / 2f).dp,
-                            y = t.bottom.dp,
+                            y = t.bottom.dp.coerceAtMost((ch - 6f).dp),
                             accent = MaterialTheme.colorScheme.primary,
                             edge = ResizeEdgeSide.BOTTOM,
                             onDelta = { dy ->
-                                onMove(move.copy(titleHeightFrac = (move.titleHeightFrac + dy / t.height.coerceAtLeast(30f)).coerceIn(0.35f, 2.5f)))
+                                onMove(move.copy(titleHeightFrac = (move.titleHeightFrac + dy / ch.coerceAtLeast(320f)).coerceIn(0.35f, 2.5f)))
                             }
                         )
                     }
@@ -5767,41 +5788,58 @@ private fun ArrangeableCard(
                         }
                     )
                     ResizeEdge(
-                        x = f.right.dp,
+                        x = f.right.dp.coerceAtMost((cw - 6f).dp),
                         y = (f.top + f.height / 2f).dp,
                         accent = MaterialTheme.colorScheme.tertiary,
                         edge = ResizeEdgeSide.RIGHT,
                         onDelta = { dx ->
-                            onMove(move.copy(factWidthFrac = (move.factWidthFrac + dx / f.width.coerceAtLeast(40f)).coerceIn(0.3f, 1.6f)))
+                            // v229c — card-relative delta + renderer-matching
+                            // clamp (moveFact coerces 0.2..1f), killing the
+                            // dead zone above 1.0.
+                            onMove(move.copy(factWidthFrac = (move.factWidthFrac + dx / cw.coerceAtLeast(200f)).coerceIn(0.3f, 1f)))
                         }
                     )
                     // Height tab — grows/shrinks the text's line count so it
-                    // truly extends instead of jumping.
+                    // truly extends instead of jumping. Display stays inside
+                    // the card so it can never leave the screen.
                     ResizeEdge(
                         x = (f.left + f.width / 2f).dp,
-                        y = f.bottom.dp,
+                        y = f.bottom.dp.coerceAtMost((ch - 6f).dp),
                         accent = MaterialTheme.colorScheme.tertiary,
                         edge = ResizeEdgeSide.BOTTOM,
                         onDelta = { dy ->
-                            onMove(move.copy(factHeightFrac = (move.factHeightFrac + dy / f.height.coerceAtLeast(30f)).coerceIn(0.35f, 2.5f)))
+                            onMove(move.copy(factHeightFrac = (move.factHeightFrac + dy / ch.coerceAtLeast(320f)).coerceIn(0.35f, 2.5f)))
                         }
                     )
                 }
 
-                // Info rows (author / byline / year / footer) — M handle: these
-                // MOVE with the drag but their text is never editable. The
-                // handle sits at the meta row's reported bounds and tracks the
-                // drag, clamped so it can never be dragged off the card.
+                // AUTHOR / YEAR info rows only — M handle: the author, byline
+                // and year rows MOVE with the drag but their text is never
+                // editable. Footers, colophons and credit lines are FIXED
+                // (they no longer report onMeta), so the M handle anchors here
+                // and dragging it never moves the footer. The handle sits at
+                // the reported bounds and is clamped to the card.
                 val m = local(metaRect.value)
                 val mPad = 18f
                 if (m.width > 0f && m.height > 0f) {
                     MoveHandle(
                         label = "M", accent = MaterialTheme.colorScheme.secondary,
-                        x = (m.right + mPad).dp,
-                        y = m.bottom.dp,
+                        // Display clamp: a full-width author row (m.right ~ cw)
+                        // would pin the handle beyond the card edge; keep it
+                        // ~16dp inside so it is always visible + reachable.
+                        x = (m.right + mPad).coerceAtMost(cw - 16f).dp,
+                        y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
                         onDelta = { dx, dy ->
-                            val nx = (move.metaDx + dx).coerceIn(-m.left + mPad, cw - m.right - mPad)
-                            val ny = (move.metaDy + dy).coerceIn(-m.top + mPad, ch - m.bottom - mPad)
+                            // v229c — SAFE clamps with a floor on the upper
+                            // bound: full-width meta rows (m.left ~ 0, m.right
+                            // ~ cw) previously made upper < lower, so
+                            // coerceIn() threw mid-drag and the handle stopped
+                            // responding. Each bound is now the true available
+                            // travel, never below its counterpart.
+                            val maxX = (cw - m.right - mPad).coerceAtLeast(-m.left + mPad)
+                            val maxY = (ch - m.bottom - mPad).coerceAtLeast(-m.top + mPad)
+                            val nx = (move.metaDx + dx).coerceIn(-m.left + mPad, maxX)
+                            val ny = (move.metaDy + dy).coerceIn(-m.top + mPad, maxY)
                             onMove(move.copy(metaDx = nx, metaDy = ny))
                         }
                     )
@@ -6337,16 +6375,24 @@ private fun BoxScope.ResizeEdge(
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val latestDelta by rememberUpdatedState(onDelta)
-    val w = if (edge == ResizeEdgeSide.RIGHT) 6.dp else 24.dp
-    val h = if (edge == ResizeEdgeSide.RIGHT) 36.dp else 6.dp
+    // v229c — BIGGER hit targets: the old 6dp tabs were only ~20px on a
+    // 3x screen — fingers missed them constantly ("side adjustment isnt
+    // working"). Width tabs are now 14dp thick x 46dp tall, height tabs
+    // 46dp wide x 14dp tall, so the drag area is actually grabbable.
+    val w = if (edge == ResizeEdgeSide.RIGHT) 14.dp else 46.dp
+    val h = if (edge == ResizeEdgeSide.RIGHT) 46.dp else 14.dp
+    // Light accents get dark ink; dark get white — same luminance rule as
+    // MoveHandle, so the tab is visible against every card fill.
+    val useDarkInk = accent.luminance() > 0.55f
     Box(
         modifier = Modifier
             .offset(x = x - (w / 2f), y = y - (h / 2f))
             .size(width = w, height = h)
             .graphicsLayer {
-                shadowElevation = 3.dp.toPx(); shape = RoundedCornerShape(3.dp); clip = false
+                shadowElevation = 3.dp.toPx(); shape = RoundedCornerShape(4.dp); clip = false
             }
-            .background(accent, RoundedCornerShape(3.dp))
+            .background(accent, RoundedCornerShape(4.dp))
+            .border(1.dp, if (useDarkInk) Color.Black.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.45f), RoundedCornerShape(4.dp))
             .pointerInput(Unit) {
                 detectDragGestures { _, dragAmount ->
                     val d = with(density) { (if (edge == ResizeEdgeSide.RIGHT) dragAmount.x else dragAmount.y).toDp().value }
