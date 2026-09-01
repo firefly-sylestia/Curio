@@ -1,6 +1,7 @@
 package com.curio.app.features.picker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -214,7 +215,7 @@ fun NewCategoryPickerSheet(
                             "Long-press a category anywhere to pin your favourites here.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
-                            modifier = Modifier.padding(vertical = 2.dp, bottom = 6.dp)
+                            modifier = Modifier.padding(top = 2.dp, bottom = 6.dp)
                         )
                     }
                 } else {
@@ -581,14 +582,17 @@ fun NewPickerTile(
                 )
             )
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Thin accent ring for selection, lighter ring for pin.
-            androidx.compose.foundation.border(
-                width = if (selected) 2.dp else if (pinned) 1.5.dp else 0.dp,
-                color = if (selected) catAccent.copy(alpha = 0.9f)
-                        else catAccent.copy(alpha = 0.45f),
-                shape = shape
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                // Thin accent ring for selection, lighter ring for pin.
+                .border(
+                    width = if (selected) 2.dp else if (pinned) 1.5.dp else 0.dp,
+                    color = if (selected) catAccent.copy(alpha = 0.9f)
+                            else catAccent.copy(alpha = 0.45f),
+                    shape = shape
+                )
+        ) {
             // Pin badge — top-end.
             if (pinned && !selected) {
                 Box(
@@ -677,7 +681,7 @@ fun NewPickerTile(
                         name = CurioIcons.Check,
                         contentDescription = "Selected",
                         size = 12.dp,
-                        tint = com.curio.app.ui.theme.onAccent(category)
+                        tint = category.onAccent()
                     )
                 }
             }
@@ -833,8 +837,8 @@ fun MixEditorSheet(
     ) {
         var name by remember { mutableStateOf(editMix?.name ?: "") }
         var selected by remember {
-            mutableStateOf(
-                editMix?.laneIds?.toMutableSet() ?: mutableSetOf()
+            mutableStateOf<MutableSet<CategoryId>>(
+                editMix?.laneIds?.toMutableSet() ?: mutableSetOf<CategoryId>()
             )
         }
         val wide = windowWidthSizeClass().isWide
