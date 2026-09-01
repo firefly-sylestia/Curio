@@ -1,4 +1,8 @@
 ADD: Category picker redesign — pinned lanes, saved named mixes, a Surprise me mix button, and a full-screen Browse page with bottom-nav tabs (Browse/Mixes/Pins); the old glass-pill picker stays one toggle away under Experiments.
+ADD: Share cards get MS Word-style text formats — pick a new font (Sans, Typewriter, Display, Elegant) and Left/Center/Right alignment for the quick fact in Customise, applied live on every style and baked into the saved image.
+ADD: Editorial share card gets a true drop cap — the first letter stands big and the text wraps around it for three lines, then continues full-width below.
+ADD: Hold-to-edit can now MOVE the author/year info rows too — drag the new M handle to shift the byline & footer (they stay read-only, never typed); the title box is now move/crop only with no typing.
+FIX: Single-style share sheets no longer ignore your edit adjustments — the preview now applies the same move/format as the exported image.
 FIX: Inline edit overlay no longer covers the card text — the title and quick-fact fields are now transparent so you type directly over the card's own text.
 FIX: Collage card straight seam between the lighter and darker green is now a natural wavy edge.
 FIX: Clean card category glyph is now fully visible (moved left from the edge).
