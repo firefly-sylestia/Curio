@@ -321,8 +321,8 @@ fun NewCategoryPickerSheet(
                 NewPrimaryCapsule(
                     label = "Surprise me",
                     glyph = CurioIcons.Shuffle,
-                    accent = washCat.themedAccent(),
-                    accentInk = washCat.onAccent(),
+                    accent = MaterialTheme.colorScheme.primary,
+                    accentInk = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val mix = surpriseMiniMix(categories)
@@ -438,7 +438,7 @@ fun NewMixRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .curioGlassEdge(shape)
+            
             .combinedClickable(
                 onClick = onApply,
                 onLongClick = onLongClick
@@ -455,7 +455,7 @@ fun NewMixRow(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat?.themedAccent() ?: MaterialTheme.colorScheme.primary, 0.10f)),
+                    .background(lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurfaceVariant, 0.10f)),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
@@ -484,12 +484,12 @@ fun NewMixRow(
             if (active) {
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 ) {
                     Text(
                         "Spinning",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = cat?.onAccent() ?: MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -559,11 +559,12 @@ fun NewPickerTile(
     onLongClick: (() -> Unit)? = null
 ) {
     val shape = RoundedCornerShape(20.dp)
-    val catAccent = category.themedAccent()
+    val catAccent = MaterialTheme.colorScheme.primary
     val isWildcard = category.id == CategoryId.WILDCARD
-    val fill = when {
-        selected -> lerp(MaterialTheme.colorScheme.surfaceContainerHigh, catAccent, 0.16f)
-        else -> MaterialTheme.colorScheme.surfaceContainerHigh
+    val fill = if (selected) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
     }
     Surface(
         shape = shape,
@@ -572,7 +573,7 @@ fun NewPickerTile(
         modifier = Modifier
             .fillMaxWidth()
             .height(88.dp)
-            .curioGlassEdge(shape)
+            
             .then(
                 if (comingSoon) Modifier
                 else Modifier.combinedClickable(
@@ -588,7 +589,7 @@ fun NewPickerTile(
                 // Thin accent ring for selection, lighter ring for pin.
                 .border(
                     width = if (selected) 2.dp else if (pinned) 1.5.dp else 0.dp,
-                    color = if (selected) catAccent.copy(alpha = 0.9f)
+                    color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.9f)
                             else catAccent.copy(alpha = 0.45f),
                     shape = shape
                 )
@@ -601,7 +602,7 @@ fun NewPickerTile(
                         .padding(top = 6.dp, end = 6.dp)
                         .size(20.dp)
                         .clip(RoundedCornerShape(7.dp))
-                        .background(lerp(fill, catAccent, 0.14f)),
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
@@ -638,7 +639,7 @@ fun NewPickerTile(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(lerp(fill, catAccent, if (selected) 0.20f else 0.08f)),
+                        .background(if (selected) MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
@@ -646,7 +647,7 @@ fun NewPickerTile(
                         contentDescription = null,
                         size = 22.dp,
                         tint = if (comingSoon) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                        else catAccent
+                        else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
@@ -659,7 +660,7 @@ fun NewPickerTile(
                         fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                     ),
                     color = when {
-                        selected -> catAccent
+                        selected -> MaterialTheme.colorScheme.onSecondaryContainer
                         comingSoon -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         else -> MaterialTheme.colorScheme.onSurface
                     },
@@ -674,14 +675,14 @@ fun NewPickerTile(
                         .padding(bottom = 6.dp, end = 6.dp)
                         .size(18.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(catAccent),
+                        .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
                         name = CurioIcons.Check,
                         contentDescription = "Selected",
                         size = 12.dp,
-                        tint = category.onAccent()
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -704,7 +705,7 @@ internal fun NewPickerChip(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 0.dp,
         modifier = Modifier
-            .curioGlassEdge(shape)
+            
             .then(
                 if (onClick != null) {
                     Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)
@@ -720,7 +721,7 @@ internal fun NewPickerChip(
                 name = category.iconGlyph,
                 contentDescription = null,
                 size = 15.dp,
-                tint = category.themedAccent()
+                tint = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = if (category.id == CategoryId.WILDCARD) "Surprise mix" else category.displayName,
@@ -733,7 +734,7 @@ internal fun NewPickerChip(
                     name = trailingGlyph,
                     contentDescription = "Pinned",
                     size = 13.dp,
-                    tint = category.themedAccent().copy(alpha = 0.8f)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                 )
             }
         }
@@ -759,7 +760,7 @@ internal fun NewPrimaryCapsule(
         shadowElevation = 0.dp,
         modifier = modifier
             .height(52.dp)
-            .curioGlassEdge(shape)
+            
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp),
@@ -800,7 +801,7 @@ internal fun NewPickerCircle(
         shadowElevation = 0.dp,
         modifier = modifier
             .size(52.dp)
-            .curioGlassEdge(shape)
+            
     ) {
         Box(contentAlignment = Alignment.Center) {
             CurioIcon(
@@ -832,7 +833,7 @@ fun MixEditorSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = washCat.categoryBackgroundWash(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = shape
     ) {
         var name by remember { mutableStateOf(editMix?.name ?: "") }

@@ -112,7 +112,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(washCat.categoryBackgroundWash())
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -334,8 +334,8 @@ private fun MixesTabContent(
             NewPrimaryCapsule(
                 label = "Create a mix",
                 glyph = CurioIcons.Add,
-                accent = washCat.themedButtonFill(),
-                accentInk = washCat.themedButtonInk(),
+                accent = MaterialTheme.colorScheme.primary,
+                accentInk = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.padding(bottom = 10.dp),
                 onClick = onNewMix
             )
@@ -400,7 +400,7 @@ private fun PinsTabContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        .curioGlassEdge(shape)
+                        
                         .combinedClickable(
                             onClick = { onSpinLane(cat) },
                             onLongClick = {
@@ -475,8 +475,8 @@ private fun NewPickerTabCapsule(
     backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     val shape = RoundedCornerShape(50)
-    val glassOn = backdrop != null && isLiquidGlassPillsActive()
-    val fill = if (selected) lerp(MaterialTheme.colorScheme.surfaceContainerHigh, accent, 0.22f)
+    val glassOn = false
+    val fill = if (selected) MaterialTheme.colorScheme.secondaryContainer
     else MaterialTheme.colorScheme.surfaceContainerHigh
     Surface(
         onClick = onClick,
@@ -485,16 +485,7 @@ private fun NewPickerTabCapsule(
         shadowElevation = 0.dp,
         modifier = modifier
             .height(46.dp)
-            .then(
-                if (glassOn) Modifier.liquidGlassCapsule(
-                    fill,
-                    backdrop = backdrop,
-                    shape = shape,
-                    compact = true
-                )
-                else Modifier
-            )
-            .curioGlassEdge(shape)
+            
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp),
@@ -505,14 +496,14 @@ private fun NewPickerTabCapsule(
                 name = glyph,
                 contentDescription = null,
                 size = 18.dp,
-                tint = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold
                 ),
-                color = if (selected) accent else MaterialTheme.colorScheme.onSurface,
+                color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 6.dp)
             )
         }
