@@ -1,64 +1,62 @@
 # Prompt.md — current request log
 
-## Request (ACTIVE): Hold-to-edit indicators still wrong; height resizes don't extend text
+## Request (ACTIVE): Polish the Curio pet — bugs, animations, games, dialogs
 
-User (repeat + more detail): "the tap to hold to edit in glitched the
-indicators are showing wrong and not properly also the height isnt even
-changing the text box height as the texts are not extending rather they
-are moving up and down. also when they gets out of the screen theres no
-way to fix it without reset, also use proper colors for them."
+User: "polish the curie pet even more, fix bugs if any, and add more
+animations, games for it too, and add more dialogs."
 
-### Real root causes found in TopicShareCard.kt
+> NOTE: the share-hub / detail-share / moodboard-quote feature from the
+> previous request is PARKED (user: "dont push this but push the cl fix").
+> Nothing for it was committed; design answers received (full swap +
+> share-as-text everywhere; hub Share button opens the sheet + floating
+> button; moodboard quote option in save + share) are recorded in the
+> conversation. Resume with TopicShareSheet work when asked.
 
-1. **Indicators in the wrong place**: the overlay drew its boxes at FIXED
-   card fractions (title at 0.08w/0.06h, fact at 0.62h, M at 0.88w/0.90h).
-   Only Paper roughly matched; Vinyl (body y≈214dp), Neumorphic
-   (bottom-anchored), Collage (title top-left) etc. never aligned → "showing
-   wrong and not properly".
-2. **Height didn't extend text**: `moveFact`/`moveTitle` applied height as
-   `fillMaxHeight(frac.coerceIn(0.2f, 1f)).clipToBounds()` — growth was
-   forbidden (cap 1f), and fillMaxHeight re-measures the parent Column
-   which re-arranges children → the visible text physically jumped up/down
-   instead of the box growing.
-3. **Off-screen loss**: no real way to pull a handle back had it been
-   dragged out (previous turn added clamps; the fundamental misalignment
-   remained).
+### What shipped (this turn)
 
-### Fixes (all in TopicShareCard.kt)
+**1. New game — POP!** (App: ui/pet/CurioFloatingPet.kt)
+- `PetGame.POP` joins HIDE_SEEK / CHAMELEON / SPARK. Game-mode cycles via
+  `PetGame.entries.size` so it's reachable by the long-press cycle; the
+  idle auto-flow still only picks hide/chameleon (short rounds only).
+- 10s round of bubbles floating UP across the lower half; tap one (or drag
+  the pet into it) → pet dashes over and pops it (squish+celebrate).
+  ~1 in 6 bubbles is PRICKLY (darker, white ×): popping it costs a point,
+  winces, and can say a line. 6+ pops → confetti + a delighted line.
+- New `BubbleView` (breathing translucent orb, shine) and `VictoryConfetti`
+  (keyed 1.2s burst of colored squares) composables.
 
-- **Bounds-driven overlay**: new `EditBoundsCallbacks` (onTitle/onFact/
-  onMeta) — every card style attaches `onGloballyPositioned` right where
-  its moveTitle/moveFact/moveMeta modifier lands and reports
-  `boundsInWindow()`. `ArrangeableCard` keeps a bounds hub (card origin +
-  3 rects) and the edit overlay draws the outline boxes, T/F/M handles,
-  edge tabs and the typing field EXACTLY on the reported rects — every
-  style, live. Since bounds already include the move offsets, dragging a
-  handle moves both the card text and its indicator with zero desync.
-- **Height now really extends text**: removed the fillMaxHeight/clip from
-  moveTitle/moveFact; added `lines(base, frac, max)` helper and scaled
-  every title/body `maxLines` (~20 sites) by titleHeightFrac/factHeightFrac
-  (0.35–2.5 → fewer or more lines show, text stays anchored).
-- **Resize tabs**: RIGHT/BOTTOM delta denominators use the box's CURRENT
-  reported bounds (width/height dp), so drag feel is scale-proportional;
-  fracs clamp 0.3–1.6 (width) / 0.35–2.5 (height); offsets clamp so boxes
-  and handles can never leave the card.
-- **M handle**: anchors to the meta row's real bounds (footer/colophon for
-  most styles, byline where no footer) and stays inside the card.
-- Colors: contrast-aware handle ink/ring (kept from prior pass).
+**2. Bug fix — stuck game state after navigation** (CurioFloatingPet.kt)
+- The interrupted-game self-heal reset offScreen/hide/chameleon flags but
+  NOT `gameActive`/`gameMode`; after a mid-game screen change the pet would
+  silently stop ever starting auto-games. Both flags now reset with the
+  heal (v263 note added).
+
+**3. More animations**
+- VictoryConfetti now pops on ALL big wins: hide-and-seek found, chameleon
+  found, star score > 0, bubble score ≥ 6 (`confettiKey++` at each win).
+- Bubbles breathe (wobble scale) so the round reads as alive.
+
+**4. More dialogs** (App: data/CurioPet.kt)
+- +~20 fresh lines across the first-evo game pools (spark chase, find-me,
+  found, caught-it, got-away, peek-win, missed).
+- 3 new per-stage line fns for POP!: `popPromptLine()`, `popNiceLine(count)`,
+  `popPrickleLine()` (BABY / FIRST_EVO / FINAL_EVO voices).
 
 ### Progress
-- [x] Helpers (EditBoundsCallbacks class, lines()), moveTitle/moveFact
-      height-clip removed.
-- [x] TopicShareCard + 9 style signatures thread `callbacks`; attaches at
-      every move anchor (36 sites); maxLines scaled everywhere.
-- [x] ArrangeableCard bounds hub + bounds-based overlay (title/fact/meta
-      zones, typing field over the real fact).
-- [x] Balance verified (parens +15/+15, braces +8/+8, brackets 0/0).
-- [x] Changelog bullet updated.
-- [ ] Prompt.md (this file).
+- [x] PetGame.POP + Bubble data + state + playBubbleGame + dispatch.
+- [x] BubbleView + VictoryConfetti composables + render blocks (bubbles,
+      confetti at the pet's spot).
+- [x] Win-path confetti bumps + bubble render/tap wiring.
+- [x] gameActive/gameMode heal bug fix.
+- [x] Dialogue pools extended + 3 new POP! line fns.
+- [x] Balance verified (CurioFloatingPet +163/+163 braces 52/52; CurioPet
+      +27/+27 braces 3/3, brackets 0/0) — fully matched vs HEAD.
+- [ ] Changelog bullets.
 - [ ] Commit & push (CI validates compile on push).
 
 ### Verification status
 CI validates compilation on push (this environment forbids Gradle builds) —
-watch the run. Code-balance vs HEAD verified clean; zero bare
-moveFact/moveTitle/moveMeta sites left.
+watch the run after pushing. String-stripped balance vs HEAD is exact on
+both files, and all new identifiers (popPromptLine/popNiceLine/
+popPrickleLine, PetGame.POP, playBubbleGame, BubbleView, VictoryConfetti)
+are defined and referenced.

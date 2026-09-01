@@ -2133,7 +2133,10 @@ object CurioPet {
                 "Faster!",
                 "Spark chase!",
                 "It can't escape me!",
-                "Hehe, come back, little spark!"
+                "Hehe, come back, little spark!",
+                "Left a trail of sparkle dust!",
+                "Sky snacks!",
+                "I'm the fastest spark catcher in town!"
             ))
         }
 
@@ -2156,7 +2159,9 @@ object CurioPet {
             "Where am I?",
             "I'm somewhere sneaky!",
             "Come find your little pet!",
-            "I picked a very good hiding spot."
+            "I picked a very good hiding spot.",
+            "Behind the screen edge! No, wait...",
+            "I am so sneaky right now."
         ))
     }
 
@@ -2174,7 +2179,9 @@ object CurioPet {
             "Okay, okay, you win!",
             "Sneaky! You saw me!",
             "Found! Nice one.",
-            "Hehe, I was trying to be sneaky."
+            "Hehe, I was trying to be sneaky.",
+            "A whole corner and you still found me!",
+            "Rematch! I'll be sneakier."
         ))
     }
 
@@ -2192,7 +2199,9 @@ object CurioPet {
             "Hehe, we got the spark!",
             "It didn't stand a chance against us!",
             "We caught it together!",
-            "Spark caught! High five!"
+            "Spark caught! High five!",
+            "Together we're unstoppable!",
+            "It never saw us coming!"
         ))
     }
 
@@ -2210,7 +2219,9 @@ object CurioPet {
             "We almost had it!",
             "Sneaky little spark.",
             "We'll get the next one.",
-            "Rematch?"
+            "Rematch?",
+            "It drifted off on purpose, I'm sure.",
+            "That one was extra wiggly!"
         ))
     }
 
@@ -2228,7 +2239,9 @@ object CurioPet {
             "Sneak interrupted!",
             "You found me mid-peek!",
             "Hehe! Nice timing.",
-            "Okay, you caught me."
+            "Okay, you caught me.",
+            "Busted! I was peeking.",
+            "My peek betrayed me!"
         ))
     }
 
@@ -2246,7 +2259,64 @@ object CurioPet {
             "Better luck next time!",
             "I even waved!",
             "Almost!",
-            "Hehe, you blinked!"
+            "Hehe, you blinked!",
+            "I was camouflaged! Well, sort of.",
+            "The edge hid me best!"
+        ))
+    }
+
+    /** The pet invites the user to pop rising bubbles (POP! round). */
+    fun popPromptLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Pop! Pop!", "Bubbles! Pop them!", "Up! Pop!") + babyCurieLines)
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "Bubbles are rising. Mind the prickly ones.",
+            "Shiny bubbles are rising; I could use a spare tap or two."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Bubbles! Pop them!",
+            "Pop pop pop!",
+            "Ooh, bubble round!",
+            "The shiny ones pop nicely!",
+            "Catch them before they float away!",
+            "I love a good bubble pop!",
+            "Pop the shiny ones — avoid the prickly!",
+            "Bubbles everywhere!",
+            "They tickle when they pop near me!"
+        ))
+    }
+
+    /** A BIG bubble round — the pet is delighted by the score. */
+    fun popNiceLine(count: Int): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Pop! Yay!", "So many pop!", "Hehe! Big round!") + babyCurieLines)
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "A fine round of popping. Well played.",
+            "You are a natural bubble popper."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Wheee! $count bubbles!",
+            "Pop-tastic! We got $count!",
+            "Look at all those pops! $count!",
+            "Best bubble day ever!",
+            "High five — $count pops!",
+            "Not a single bubble escaped us!",
+            "The bubbles never stood a chance!"
+        ))
+    }
+
+    /** A prickly bubble caught the pet (score penalty). */
+    fun popPrickleLine(): String = when (currentStage()) {
+        Stage.BABY -> pickLine(listOf("Ow! Spike!", "Hiss! Ouch!") + babyMishapLines + babyCurieLines)
+        Stage.FINAL_EVO -> pickLine(listOf(
+            "Prickly. I should have read the label.",
+            "Ow. That one was not friendly."
+        ))
+        Stage.FIRST_EVO -> pickLine(listOf(
+            "Ow! Prickly!",
+            "That one bit back!",
+            "Yikes — spike bubble!",
+            "No fair, it had spikes!",
+            "Ouch! My nose!",
+            "Spiky! I won't pop that one again."
         ))
     }
 
