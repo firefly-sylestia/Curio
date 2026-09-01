@@ -242,6 +242,44 @@ app/src/main/java/com/curio/app/
     paper) in BOTH normal and Deepen. Classic styles (Paper/Editorial/
     Minimal and `signatureDesignClassic`) keep their cream — the user
     likes those.
+- **v3xx5 — signature scenes SCRAPPED for 14 categories → quiet minimal
+  hairline treatment + 7 new fonts.** Per user direction ("use editorial
+  minimal for quality, redesign without so many things on the background"),
+  the scene-heavy signature backgrounds (lamp+bookshelf, marquee lights,
+  concert hall, forest clearing, nebula, etc.) were removed ENTIRELY for
+  the 14 redesign categories — the first 7 (Animals, Animated Films,
+  Anime, Artists, Artworks, Astronomy, Authors) and the second 7
+  (Biology, Books, Chemistry, Directors, Discoveries, Economics, Films):
+  - **Minimal treatment (normal + Deepen):** flat vertical gradient +
+    `signatureHairlineFrame` (new DrawScope helper: inset 4.5% rounded-
+    rect outline, 1f stroke) + ONE tiny category crest top-right
+    (spotlight / paw / star / sun / frame / quill / helix / open-book /
+    hexagon / clapperboard / compass / arrow / film-strip). Deepen keeps
+    the same layout and only adds a soft radial accent glow — no extra
+    objects.
+  - **Second batch fonts (new OFL downloads):** BioRhyme (Biology),
+    Fraunces (Books), Oxanium (Chemistry), Limelight (Directors),
+    Rye (Discoveries), Space Grotesk (Economics), Anton (Films) — TTFs in
+    `res/font/`, FontFamily vals in CurioTypography.kt, licenses in
+    `app/third_party/`. The first batch re-paired existing bundled fonts
+    (Bebas Neue, Lora, Corben, Maven Pro, Cormorant Garamond, Playfair
+    Display, Space Mono).
+  - **Normal == Deepen configs:** every one of the 14 categories now uses
+    the SAME bg/gradient/font/colors/layout/badge in both functions (was
+    drifting warm/cool hexes and sizes); the only difference is the glow.
+  - `signatureDesignClassic` (2034–2630) is untouched; non-target
+    categories (Food/Geology/History/Internet/Language/Manga/Manhwa/
+    Mathematics/Mythology/Painters/Plants/Psychology/Quotes/Scientists/
+    Albums/Songs/Series/Games/Sports/Technologies and topic variants)
+    keep their existing scene designs.
+- **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
+  crashed on open (same "infinity maximum height" message) —
+  `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a
+  `LazyColumn` item, and lazy items are measured with infinite max
+  height. Replaced with manual chunked rows (3/4 cols via `chunked`,
+  `NewPickerTile`/`AddSuggestionTile` gained a `modifier` param,
+  trailing `Spacer(weight(1f))` pads short rows). The grid-less rows are
+  fine because the section caps at ≤11 tiles.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**

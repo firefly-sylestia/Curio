@@ -536,24 +536,40 @@ private fun ContinueExploringSection(
         out.take(10)
     }
     val wide = windowWidthSizeClass().isWide
-    LazyVerticalGrid(
-        columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
-        contentPadding = PaddingValues(bottom = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        gridItems(combined) { id ->
-            val cat = categories.firstOrNull { it.id == id } ?: return@gridItems
-            NewPickerTile(
-                category = cat,
-                onClick = { onSpinLane(cat) },
-                onLongClick = { onOptionTarget(cat) }
-            )
-        }
-        // An "+ Add" tile.
-        item(key = "add-suggestion") {
-            AddSuggestionTile(onClick = onAdd)
+    // Manual chunked rows — NOT a nested LazyVerticalGrid. This section
+    // renders inside a LazyColumn item, and lazy items are measured with an
+    // INFINITE max height, so a nested lazy grid crashed the picker
+    // ("Vertically scrollable component was measured with an infinity
+    // maximum height constraints"). With ≤10 lanes + the Add tile it's
+    // small enough to lay out as plain rows, like the mixes grid.
+    val cols = if (wide) 4 else 3
+    val tiles: List<CategoryId?> = mutableListOf<CategoryId?>().apply {
+        addAll(combined)
+        add(null)  // null = the "+ Add" tile
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        tiles.chunked(cols).forEach { rowIds ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                rowIds.forEach { id ->
+                    if (id == null) {
+                        AddSuggestionTile(onClick = onAdd, modifier = Modifier.weight(1f))
+                    } else {
+                        val cat = categories.firstOrNull { it.id == id }
+                        if (cat != null) {
+                            NewPickerTile(
+                                category = cat,
+                                onClick = { onSpinLane(cat) },
+                                onLongClick = { onOptionTarget(cat) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+                repeat(cols - rowIds.size) { Spacer(Modifier.weight(1f)) }
+            }
         }
     }
 }
@@ -897,7 +913,8 @@ fun NewPickerTile(
     pinned: Boolean = false,
     comingSoon: Boolean = false,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(20.dp)
     val isWildcard = category.id == CategoryId.WILDCARD
@@ -912,7 +929,7 @@ fun NewPickerTile(
         shape = shape,
         color = fill,
         shadowElevation = 0.dp,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(88.dp)
             .then(
@@ -1167,13 +1184,13 @@ private fun CategoryOptionPill(
 /** An "+ Add" tile for the continue-exploring grid. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddSuggestionTile(onClick: () -> Unit) {
+private fun AddSuggestionTile(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(20.dp)
     Surface(
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shadowElevation = 0.dp,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(88.dp)
             .combinedClickable(onClick = onClick)

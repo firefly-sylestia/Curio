@@ -196,6 +196,88 @@ val MavenProFontFamily: FontFamily = FontFamily(
 )
 
 /**
+ * BioRhyme — an organic modern serif (OFL) with biomorphic double-story
+ * forms; the glyphs literally suggest cell biology. Variable font
+ * (wdth + wght axes) bundled at `res/font/biorhyme.ttf`; used for the
+ * BIOLOGY share-card title. License at `app/third_party/biorhyme_OFL.txt`.
+ */
+val BioRhymeFontFamily: FontFamily = FontFamily(
+    Font(R.font.biorhyme, FontWeight.Normal),
+    Font(R.font.biorhyme, FontWeight.Medium),
+    Font(R.font.biorhyme, FontWeight.SemiBold),
+    Font(R.font.biorhyme, FontWeight.Bold)
+)
+
+/**
+ * Fraunces — an old-style display serif (OFL) with wonky optical sizes and
+ * a distinctly literary voice (book-jacket DNA). Variable font
+ * (SOFT/WONK/opsz/wght) bundled at `res/font/fraunces.ttf`; used for the
+ * BOOKS share-card title. License at `app/third_party/fraunces_OFL.txt`.
+ */
+val FrauncesFontFamily: FontFamily = FontFamily(
+    Font(R.font.fraunces, FontWeight.Normal),
+    Font(R.font.fraunces, FontWeight.Medium),
+    Font(R.font.fraunces, FontWeight.SemiBold),
+    Font(R.font.fraunces, FontWeight.Bold)
+)
+
+/**
+ * Oxanium — a technical geometric sans (OFL) with sharp angular terminals,
+ * built for lab/engineering labelling. Variable font (wght) bundled at
+ * `res/font/oxanium.ttf`; used for the CHEMISTRY share-card title. License
+ * at `app/third_party/oxanium_OFL.txt`.
+ */
+val OxaniumFontFamily: FontFamily = FontFamily(
+    Font(R.font.oxanium, FontWeight.Normal),
+    Font(R.font.oxanium, FontWeight.Medium),
+    Font(R.font.oxanium, FontWeight.SemiBold),
+    Font(R.font.oxanium, FontWeight.Bold)
+)
+
+/**
+ * Rye — a chunky frontier slab serif (OFL) with a worn wood-print feel,
+ * made for expedition maps and aged signage. Single Regular file —
+ * single-entry family (callers pair it with `FontWeight.Normal`). Used for
+ * the DISCOVERIES share-card title. License at `app/third_party/rye_OFL.txt`.
+ */
+val RyeFontFamily: FontFamily = FontFamily(
+    Font(R.font.rye)
+)
+
+/**
+ * Space Grotesk — a modern grotesk (OFL) with techy detailing, the go-to
+ * face for data/finance UI. Variable font (wght) bundled at
+ * `res/font/space_grotesk.ttf`; used for the ECONOMICS share-card title.
+ * License at `app/third_party/space_grotesk_OFL.txt`.
+ */
+val SpaceGroteskFontFamily: FontFamily = FontFamily(
+    Font(R.font.space_grotesk, FontWeight.Normal),
+    Font(R.font.space_grotesk, FontWeight.Medium),
+    Font(R.font.space_grotesk, FontWeight.SemiBold),
+    Font(R.font.space_grotesk, FontWeight.Bold)
+)
+
+/**
+ * Anton — an ultra-condensed bold sans (OFL) used across classic movie
+ * posters. Single Regular file (the glyphs ARE the heavy weight) —
+ * single-entry family (callers pair it with `FontWeight.Normal`). Used for
+ * the FILMS share-card title. License at `app/third_party/anton_OFL.txt`.
+ */
+val AntonFontFamily: FontFamily = FontFamily(
+    Font(R.font.anton)
+)
+
+/**
+ * Limelight — an art-deco cinema-marquee face (OFL). Single Regular file —
+ * single-entry family (callers pair it with `FontWeight.Normal`). Used for
+ * the DIRECTORS share-card title (marquee neon). License at
+ * `app/third_party/limelight_OFL.txt`.
+ */
+val LimelightFontFamily: FontFamily = FontFamily(
+    Font(R.font.limelight)
+)
+
+/**
  * The editorial body voice — Lora at a relaxed reading size/leading, for
  * quick-facts, instructions and long intro copy (v35). Slightly larger
  * than bodyLarge with zero tracking for the serif's natural rhythm.
