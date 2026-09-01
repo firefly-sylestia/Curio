@@ -100,6 +100,44 @@ app/src/main/java/com/curio/app/
 - **v26 — Topic Browser & Recents:** the Topic Database (`features/database/TopicDatabaseScreen.kt`) DEFAULT sort is now **A–Z within each category** (`.sortedBy { nameKey }` in the DEFAULT branch, section headers kept; the A–Z chip still flattens globally). `CurioVerticalScrollIndicator` (`ui/components/CurioScrollIndicator.kt`) gained **speed-scroll** — dragging the knob ramps rate on cumulative travel (`speed = 1 + (|cum|/160).coerceAtMost(3)`, per-event cap 240px; reversing decays it) — plus an optional **A–Z fast-scroller**: tapping the knob toggles a 26dp letter rail (strip animates 28→54dp, knob stays in a fixed 28dp TopStart strip with TopEnd content alignment), `activeAlphabetIndex` highlights the letter at the top row, tapping a letter fires `onAlphabetSelect` (the browser scrolls to the first matching topic). Only the Topic Database passes `alphabet`; the other 8 indicator users are unchanged. The Recents page (`features/recent/RecentScreen.kt`) header was rebuilt in the settings-family torn-rose hero (`SettingsHeroHeader` + `SettingsHeroTotalHeight` + `ScreenEntrance`), replacing the plain back-button row — feed scrolls under the tear, indicator padded below the hero, empty state padded down. **Drag-gesture gotcha (v26):** the knob's `pointerInput` keys on `(state, hitHeightPx > 0f, alphabet != null)`; tap-vs-drag is distinguished by total travel < 24px (TapThresholdPx) — never add a second `detectTapGestures` pointerInput to the same target (the drag detector owns the strip).
 - **v26 — Recycle bin + sort dropdowns:** deleting a saved capture (Cabinet bulk or Entry Detail) now runs **double confirmation** (`ui/components/CurioTwoStepDialog.kt` — step 1 "Move to Recycle bin?" → step 2 final Delete, `step` resets on dismiss) and **soft-deletes** instead of erasing: `CaptureEntity.deletedAt` (nullable, Room v4→v5 `MIGRATION_4_5` ALTER TABLE), DAO live queries filter `deletedAt IS NULL`, new `softDeleteById(s)`/`getTrashedFlow`/`getTrashedById`/`restoreById`/`restoreAll`/`purgeById`/`purgeTrashed`/`countTrashed`, repository wrappers, `CurioEntry.deletedAt` (defaulted) threaded through `CaptureEntity.toEntry()`. Soft delete KEEPS audio/images; only the Recycle bin's permanent purge (`features/recyclebin/RecycleBinScreen.kt`, route `RECYCLE_BIN`, Settings → Safety & support row, pop-screen registered) removes media — Restore / Delete forever / Empty bin. `deleteById(s)` stays HARD delete (FieldMind import cleanup + purge). Sort controls are now the shared `ui/components/CurioSortDropdown.kt` (label zone opens the field dropdown, trailing arrow zone toggles ascending/descending universally): Cabinet (`cabinetSortField` DATE/TITLE/CATEGORY + `sortAscending`, replacing `sortNewestFirst`) and Topic Database (`tdSortField` DEFAULT/NAME/YEAR + `sortAscending` mapping to the existing `DatabaseSortMode`; the old `DatabaseSortChip` row is gone). Review gotcha: a top-level theme extension like `categorySurface()` must be imported per file — RecycleBinScreen's first draft missed it (compile error the reviewer caught); `options.first()` in the dropdown now null-safe.
 - **v26 — Settings & picks cleanup:** the "Card & deck experiments" row is GONE from the Settings hub — Experiments opens only via the five-tap version trick in Support & diagnostics; Manage categories + Topic history moved into the Personalize section (the old Explore section was deleted). Manage Categories (`features/managecategories/ManageCategoriesScreen.kt`) gained long-press drag-to-reorder: the ⋮ handle uses `detectDragGesturesAfterLongPress`, a draft `List` state + row-step `dragAccum` swaps, `Modifier.animateItem()`, persisted on release (`setCategoryOrder`) — plus a "Reset order" TextButton that restores `CurioCategories.all` order (hidden flags untouched; the old `moveCategory` helper was deleted). The Spin category sheet's "Browse all categories" link is now "Manage categories" → navigates `MANAGE_CATEGORIES`. The "What are we exploring?" sheet (SpinScreen `CategoryPickerSheet`) AND the full-screen picker (`features/picker/CategoryPickerScreen.kt`) seed `multiSelectMode` + `selectedSlugs` from the persisted `getLastSpinCategories` set (`persistedVisible`, hidden lanes filtered): a saved MIX reopens in multi-select with every lane pre-ticked so it can be reviewed and changed. Saved voice-note titles (detail `SoundBiteRender`) now render on their own `NotePaperCard` slip (`titleStyle`/`titleColor`/`noteSeed(entry.id, 30)`), hoisted OUTSIDE the `audioFilePath` gate so typed-only saves show them too.
+- **v3xx — NEW category picker ("Category Mix Studio") is the DEFAULT;
+  classic picker is a toggle.** The old glass-pill picker
+  (`CategoryPickerScreen` / `CategoryPickerContent` / `PickerIconTile` /
+  `PickerPageTab` / `PickerPresetChip`) is untouched but demoted behind
+  `AppPreferences.classicPickerEnabledState` (OFF = new unless enabled;
+  toggle lives in the visible Settings → Experiments screen under a
+  "Category picker" section — "Classic category picker"). New pieces (premium-minimal style, NO glow pills / NO
+  saturated fills; hairline liquid-glass edge everywhere, real
+  `liquidGlassCapsule` on action capsules when the Liquid glass experiment
+  is on):
+  - `NewCategoryPickerSheet` (Spin page's inline sheet + the PICKER
+    route's quick sheet): header "Pick your mix", Pinned row (long-press
+    to unpin, tap to spin that lane), Your mixes list (saved named mixes
+    with Spin/Spinning, long-press to delete), Now spinning deck summary,
+    bottom action row = **Surprise me** (shuffles a 4-6 lane random
+    mini-mix, ~1-in-4 chance of the full Wildcard surprise) + **+** (mix
+    editor) + **Browse** (opens the full page).
+  - `CategoryPickerBrowseScreen` (the PICKER route, full screen): top bar
+    + in-page bottom nav with three tabs — **Browse** (all-lanes grid, tap
+    to spin, long-press to pin), **Mixes** (create/apply/edit/delete named
+    mixes), **Pins** (pinned lanes, unpin / tap to spin).
+  - `MixEditorSheet` (nested bottom sheet): name field + multi-select
+    grid; saving also applies the mix to the deck (re-deal happens on
+    Spin). Edit/rename keeps the mix's stable `createdAtMillis` id.
+  - Persistence: `NamedMix(name, laneIds, createdAtMillis)` in
+    AppPreferences (`savedMixesState` + get/save/addOrReplace/delete,
+    JSON array); pinned lanes reuse the existing
+    `getPinnedCategories`/`togglePinnedCategory` (defaults Wildcard +
+    Artists/Films/Books/Scientists); starter mixes seeded ONCE from the
+    old `deckPresets` (Science/Entertainment/Arts & Stories/History &
+    Ideas) via `seedStarterMixes` + `pickerMixesSeededState`.
+  - **Icon font re-subset:** `material_symbols_outlined.ttf` regenerated
+    from `tools/fonts/material_symbols_outlined_full.ttf` adding ligature
+    glyphs `shuffle`, `grid_view`, `apps` (
+    --text-file + --unicodes-file merge of the old subset's rlig ligature
+    names + cmap codepoints; verified 0 lost codepoints and 0 lost rlig
+    names: 250→253 cps, 277→280 names). New constants in CurioIcons:
+    Shuffle / GridView / Apps / PushPin.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**

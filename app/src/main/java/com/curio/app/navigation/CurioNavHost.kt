@@ -112,6 +112,7 @@ import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
 import com.curio.app.features.petdesigner.PetDesignerScreen
+import com.curio.app.features.picker.CategoryPickerBrowseScreen
 import com.curio.app.features.picker.CategoryPickerScreen
 import com.curio.app.features.reveal.TopicRevealScreen
 import com.curio.app.features.spin.SpinScreen
@@ -754,7 +755,14 @@ fun CurioNavHost(
             composable(
                 route = CurioRoutes.PICKER,
             ) {
-                CategoryPickerScreen(navController = navController)
+                // v3xx — the NEW category picker (Browse page with bottom
+                // nav) is the default; the old glass-pill picker returns via
+                // Settings → Experiments → "Classic category picker".
+                if (AppPreferences.classicPickerEnabledState) {
+                    CategoryPickerScreen(navController = navController)
+                } else {
+                    CategoryPickerBrowseScreen(navController = navController)
+                }
             }
             composable(
                 route = CurioRoutes.SPIN_WITH_CATEGORY,

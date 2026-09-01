@@ -1,3 +1,4 @@
+ADD: Category picker redesign — pinned lanes, saved named mixes, a Surprise me mix button, and a full-screen Browse page with bottom-nav tabs (Browse/Mixes/Pins); the old glass-pill picker stays one toggle away under Experiments.
 FIX: Inline edit overlay no longer covers the card text — the title and quick-fact fields are now transparent so you type directly over the card's own text.
 FIX: Collage card straight seam between the lighter and darker green is now a natural wavy edge.
 FIX: Clean card category glyph is now fully visible (moved left from the edge).

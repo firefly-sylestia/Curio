@@ -1419,27 +1419,46 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             },
             shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         ) {
-            com.curio.app.features.picker.CategoryPickerContent(
-                washCat = deckCat,
-                categories = CurioCategories.visible,
-                onDismiss = { showCategoryPicker = false },
-                onCategorySelected = { c ->
-                    activeCatIds = listOf(c.id)
-                    AppPreferences.setLastSpinCategories(context, listOf(c.id))
-                    showCategoryPicker = false
-                },
-                onCategoriesMixed = { cats ->
-                    if (cats.isEmpty()) {
-                        val single = AppPreferences.getLastSpinCategory(context)
-                        activeCatIds = listOf(single)
-                        AppPreferences.setLastSpinCategories(context, listOf(single))
-                    } else {
-                        activeCatIds = cats.map { it.id }
-                        AppPreferences.setLastSpinCategories(context, cats.map { it.id })
-                    }
-                    showCategoryPicker = false
+            // v3xx — the NEW picker is the default; the old glass-pill
+            // picker returns via Settings → Experiments → "Classic category
+            // picker" (AppPreferences.classicPickerEnabledState).
+            val pickCategory: (CurioCategory) -> Unit = { c ->
+                activeCatIds = listOf(c.id)
+                AppPreferences.setLastSpinCategories(context, listOf(c.id))
+                showCategoryPicker = false
+            }
+            val mixCategories: (List<CurioCategory>) -> Unit = { cats ->
+                if (cats.isEmpty()) {
+                    val single = AppPreferences.getLastSpinCategory(context)
+                    activeCatIds = listOf(single)
+                    AppPreferences.setLastSpinCategories(context, listOf(single))
+                } else {
+                    activeCatIds = cats.map { it.id }
+                    AppPreferences.setLastSpinCategories(context, cats.map { it.id })
                 }
-            )
+                showCategoryPicker = false
+            }
+            if (AppPreferences.classicPickerEnabledState) {
+                com.curio.app.features.picker.CategoryPickerContent(
+                    washCat = deckCat,
+                    categories = CurioCategories.visible,
+                    onDismiss = { showCategoryPicker = false },
+                    onCategorySelected = pickCategory,
+                    onCategoriesMixed = mixCategories
+                )
+            } else {
+                com.curio.app.features.picker.NewCategoryPickerSheet(
+                    washCat = deckCat,
+                    categories = CurioCategories.visible,
+                    onDismiss = { showCategoryPicker = false },
+                    onCategorySelected = pickCategory,
+                    onCategoriesMixed = mixCategories,
+                    onBrowse = {
+                        showCategoryPicker = false
+                        navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
+                    }
+                )
+            }
         }
     }
 
