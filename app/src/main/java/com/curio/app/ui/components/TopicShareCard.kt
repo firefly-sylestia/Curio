@@ -109,6 +109,13 @@ import com.curio.app.ui.theme.DMSerifDisplayFontFamily
 import com.curio.app.ui.theme.SoraFontFamily
 import com.curio.app.ui.theme.CorbenFontFamily
 import com.curio.app.ui.theme.MavenProFontFamily
+import com.curio.app.ui.theme.BioRhymeFontFamily
+import com.curio.app.ui.theme.FrauncesFontFamily
+import com.curio.app.ui.theme.OxaniumFontFamily
+import com.curio.app.ui.theme.LimelightFontFamily
+import com.curio.app.ui.theme.RyeFontFamily
+import com.curio.app.ui.theme.SpaceGroteskFontFamily
+import com.curio.app.ui.theme.AntonFontFamily
 import kotlin.math.roundToInt
 import kotlin.math.sin
 import androidx.compose.foundation.rememberScrollState
@@ -1301,6 +1308,25 @@ private fun SignatureCard(
             }
         }
 
+        // Minimal-style giant faint initial watermark (letter/symbol) for the
+        // redesigned signature categories — a single character instead of a
+        // drawn scene, bottom-right like the Minimal card.
+        sig.watermark?.let { letter ->
+            Text(
+                letter,
+                style = TextStyle(
+                    fontFamily = sig.titleFont, fontSize = 150.sp,
+                    lineHeight = 130.sp, color = sig.titleColor.copy(alpha = 0.10f)
+                ),
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .graphicsLayer { rotationZ = -6f }
+                    .offset(y = 20.dp)
+                    .padding(end = 8.dp)
+            )
+        }
+
         // Meta parts (byline / year) shared across layouts
         val metaParts = mutableListOf<String>()
         if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
@@ -1536,7 +1562,10 @@ private data class SignatureDesign(
     val metaSpacer: Dp, val metaSeparator: String, val metaSize: TextUnit, val metaColor: Color,
     val bodySize: Float, val bodyLineHeight: Float, val bodyColor: Color,
     val footerSpacer: Dp, val footerFont: FontFamily, val footerColor: Color,
-    val layout: SignatureLayout = SignatureLayout.STANDARD
+    val layout: SignatureLayout = SignatureLayout.STANDARD,
+    // Minimal-style giant faint initial (a letter/symbol) — rendered by the
+    // SignatureCard composable over the background, instead of drawn scenes.
+    val watermark: String? = null
 )
 
 
