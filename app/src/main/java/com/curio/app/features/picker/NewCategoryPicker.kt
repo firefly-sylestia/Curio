@@ -619,11 +619,11 @@ private fun ClassicPickerPage(
                     onClick = {
                         if (preset.clearAll) {
                             multiSelectMode = true
-                            selectedSlugs = emptyList()
+                            selectedSlugs = emptySet()
                         } else {
                             val lanes = preset.lanes(categories)
                             if (lanes.isNotEmpty()) {
-                                val laneSlugs = lanes.map { it.id.routeSlug }
+                                val laneSlugs = lanes.map { it.id.routeSlug }.toSet()
                                 multiSelectMode = true
                                 selectedSlugs = if (active) selectedSlugs - laneSlugs else laneSlugs
                             }
@@ -681,7 +681,7 @@ private fun ClassicPickerPage(
                 )
                 TextButton(onClick = {
                     multiSelectMode = false
-                    selectedSlugs = emptyList()
+                    selectedSlugs = emptySet()
                 }) {
                     Text(
                         "Cancel",
@@ -1264,7 +1264,7 @@ private fun AddSuggestionSheet(
             "Add to Continue exploring",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
         )
         val wide = windowWidthSizeClass().isWide
         LazyVerticalGrid(

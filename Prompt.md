@@ -93,9 +93,9 @@ A large set of changes to the NEW category picker
 - [x] Ask clarifying questions.
 - [x] Implement (picker overhaul).
 - [x] DOX pass (AGENTS.md + changelog).
-- [ ] Commit & push.
+- [x] Commit & push (7a0dfed8).
 
-## Request (ACTIVE → DONE): theme reveal in liquid-glass + Material toggle + Editorial wrap
+## Request (DONE): theme reveal in liquid-glass + Material toggle + Editorial wrap
 
 User: "in liquid glass mode the theme switch transition animation
 doesnt work and also when turning on the material theme the animation

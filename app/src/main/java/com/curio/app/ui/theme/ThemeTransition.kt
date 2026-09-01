@@ -89,8 +89,11 @@ class CurioThemeTransitionState {
      * RenderEffect blurs), then falls back to [View.drawToBitmap]. If both
      * fail or come back blank we bail out silently so the theme switch
      * still happens — the animation is pure polish and must never block it.
+     *
+     * Suspending because [GraphicsLayer.toImageBitmap] may need to await a
+     * frame; callers run it in a coroutine.
      */
-    fun startTransition(center: Offset): Boolean {
+    suspend fun startTransition(center: Offset): Boolean {
         if (isAnimating) return false
         val bitmap = captureLayer?.let { captureLayerFrame(it) }
             ?: captureView?.let { captureViewFrame(it) }
@@ -110,7 +113,7 @@ class CurioThemeTransitionState {
      * RenderEffect / blur (liquid-glass) layers that [captureViewFrame]
      * would drop. Rejects blank readbacks.
      */
-    private fun captureLayerFrame(layer: GraphicsLayer): Bitmap? {
+    private suspend fun captureLayerFrame(layer: GraphicsLayer): Bitmap? {
         return try {
             val bmp = layer.toImageBitmap().asAndroidBitmap()
             if (bmp.isBlank()) null else bmp
@@ -346,12 +349,17 @@ fun switchThemeWithReveal(
         else -> transition
     }
 
-    if (t != null && t.startTransition(center)) {
+    if (t != null) {
         // Freeze the old frame first, then flip the theme underneath so the
-        // reveal overlays a fully-recomposed new scheme.
+        // reveal overlays a fully-recomposed new scheme. The capture runs
+        // in a coroutine (GraphicsLayer.toImageBitmap is suspend).
         scope.launch {
-            delay(THEME_FLIP_DELAY_MS)
-            AppPreferences.setThemeMode(context, newMode)
+            if (t.startTransition(center)) {
+                delay(THEME_FLIP_DELAY_MS)
+                AppPreferences.setThemeMode(context, newMode)
+            } else {
+                AppPreferences.setThemeMode(context, newMode)
+            }
         }
     } else {
         // No visual change, no host, or a reveal already in flight — apply instantly.
@@ -379,10 +387,14 @@ fun switchVisualThemeWithReveal(
         transition == null || transition.isAnimating -> null
         else -> transition
     }
-    if (t != null && t.startTransition(center)) {
+    if (t != null) {
         scope.launch {
-            delay(THEME_FLIP_DELAY_MS)
-            apply()
+            if (t.startTransition(center)) {
+                delay(THEME_FLIP_DELAY_MS)
+                apply()
+            } else {
+                apply()
+            }
         }
     } else {
         apply()
