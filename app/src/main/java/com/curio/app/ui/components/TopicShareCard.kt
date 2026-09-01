@@ -59,6 +59,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -276,17 +277,19 @@ private fun Modifier.moveTitle(m: ShareCardMove): Modifier {
     if (m.titleScale != 1f) mod = mod.graphicsLayer { scaleX = m.titleScale; scaleY = m.titleScale }
     if (m.titleDx != 0f || m.titleDy != 0f) mod = mod.offset(x = m.titleDx.dp, y = m.titleDy.dp)
     if (m.titleWidthFrac != 1f) mod = mod.fillMaxWidth(m.titleWidthFrac.coerceIn(0.2f, 1f))
-    if (m.titleHeightFrac != 1f) mod = mod.fillMaxHeight(m.titleHeightFrac.coerceIn(0.2f, 1f)).clipToBounds()
+    // Height is NOT applied as a fillMaxHeight clip: that re-measures the
+    // layout and physically shoves the text around. Height changes grow/
+    // shrink the text by scaling its maxLines instead (see `lines()`), so
+    // the text truly EXTENDS instead of jumping.
     return mod
 }
 
-/** Modifier that shifts a card's QUICK-FACT/BODY by the move offset + box size and
- *  CROPS it to the box height (no-op when default). */
+/** Modifier that shifts a card's QUICK-FACT/BODY by the move offset + box size.
+ *  Height behaves like [moveTitle]: it scales maxLines (no fillMaxHeight clamp). */
 private fun Modifier.moveFact(m: ShareCardMove): Modifier {
     var mod = this
     if (m.factDx != 0f || m.factDy != 0f) mod = mod.offset(x = m.factDx.dp, y = m.factDy.dp)
     if (m.factWidthFrac != 1f) mod = mod.fillMaxWidth(m.factWidthFrac.coerceIn(0.2f, 1f))
-    if (m.factHeightFrac != 1f) mod = mod.fillMaxHeight(m.factHeightFrac.coerceIn(0.2f, 1f)).clipToBounds()
     return mod
 }
 
@@ -305,6 +308,23 @@ private fun factBodyStyle(base: TextStyle, m: ShareCardMove): TextStyle {
     if (m.factAlign != null) s = s.copy(textAlign = m.factAlign)
     return s
 }
+
+/**
+ * Bounds callbacks every card style uses to REPORT where its title /
+ * quick-fact / info rows actually render (window coordinates, px). The
+ * inline-edit overlay reads these so its indicator boxes, handles and edge
+ * tabs sit EXACTLY on the real text of every style — no fixed fractions.
+ */
+class EditBoundsCallbacks(
+    val onTitle: (androidx.compose.ui.geometry.Rect) -> Unit = {},
+    val onFact: (androidx.compose.ui.geometry.Rect) -> Unit = {},
+    val onMeta: (androidx.compose.ui.geometry.Rect) -> Unit = {}
+)
+
+/** Scales maxLines with the user's height-crop frac so the text box truly
+ *  grows (more lines show) or shrinks (fewer lines) instead of jumping. */
+private fun lines(base: Int, frac: Float, max: Int = 28): Int =
+    (base * frac).toInt().coerceIn(1, max)
 
 @Composable
 fun TopicShareCard(
@@ -329,7 +349,8 @@ fun TopicShareCard(
     bodyScale: Float = 1f,
     editedTitle: String? = null,
     editedFact: String? = null,
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
@@ -341,14 +362,14 @@ fun TopicShareCard(
     val shownFact = editedFact ?: factText
     val shownQuote = quoteText?.let { shownFact }
     when (style) {
-        ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move)
-        ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move)
-        ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, move)
-        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move)
-        ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move)
-        ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move)
-        ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, move)
-        ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move)
+        ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move, callbacks)
+        ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move, callbacks)
+        ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, move, callbacks)
+        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move, callbacks)
+        ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move, callbacks)
+        ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move, callbacks)
+        ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, move, callbacks)
+        ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, move, callbacks)
     }
 }
 
@@ -364,6 +385,7 @@ private fun PaperCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
@@ -388,8 +410,8 @@ private fun PaperCard(
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette)
-            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, move)
-            Footer(sharerName, quoteText, quoteAuthor, palette, move)
+            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, move, callbacks)
+            Footer(sharerName, quoteText, quoteAuthor, palette, move, callbacks)
         }
     }
 }
@@ -406,6 +428,7 @@ private fun VinylCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val roseBg = Color(0xFFF5E6E0)
@@ -499,19 +522,19 @@ private fun VinylCard(
             Text(title, style = TextStyle(
                 fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
                 lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
-            ), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move))
+            ), maxLines = lines(2, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
 
             // Artist / byline — info row: movable via M handle, not editable
             if (quoteText == null && byline.isNotBlank()) {
                 Text(byline, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             } else if (year != null) {
                 Text(year, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             // Accent underline
@@ -529,13 +552,13 @@ private fun VinylCard(
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
-                modifier = Modifier.widthIn(max = 220.dp).moveFact(move)
+                modifier = Modifier.widthIn(max = 220.dp).moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) }
             ) {
                 Text(body, style = factBodyStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                     lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.88f),
                     fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
-                ), move), modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp), maxLines = 10, overflow = TextOverflow.Ellipsis)
+                ), move), modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp), maxLines = lines(10, move.factHeightFrac), overflow = TextOverflow.Ellipsis)
             }
 
             Spacer(Modifier.height(10.dp))
@@ -543,7 +566,7 @@ private fun VinylCard(
             Spacer(Modifier.weight(1f))
 
             // Footer — centered, subtle (info row: movable via M handle, not editable)
-            Column(modifier = Modifier.fillMaxWidth().moveMeta(move), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Canvas(Modifier.size(width = 60.dp, height = 1.dp)) {
                     drawLine(roseDusty.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
                 }
@@ -603,6 +626,7 @@ private fun CollageCard(
     polaroidCaption: String = "",
     onPhotoTap: (() -> Unit)? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val topCream = Color(0xFFF5EDE0)
@@ -739,12 +763,12 @@ private fun CollageCard(
 
             // Title — retro Bungee, dark green, top-left (v... — retro face +
             // tighter leading so long names like "Curious Explorer" never clip)
-            Column(modifier = Modifier.offset(22.dp, (ch * 0.05f).dp).width((cw * 0.60f).dp).moveTitle(move)) {
+            Column(modifier = Modifier.offset(22.dp, (ch * 0.05f).dp).width((cw * 0.60f).dp).moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) }) {
                 Text(if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display, style = TextStyle(
                     fontFamily = BungeeFontFamily, fontSize = (cw * 0.072f).coerceIn(19f, 30f).sp,
                     lineHeight = (cw * 0.082f).coerceIn(22f, 34f).sp,
                     fontWeight = FontWeight.Normal, color = inkDark
-                ), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                ), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis)
 
                 Spacer(Modifier.height(6.dp))
 
@@ -757,7 +781,7 @@ private fun CollageCard(
                         fontFamily = LoraFontFamily, fontSize = 9.sp,
                         letterSpacing = 2.sp, fontWeight = FontWeight.SemiBold,
                         color = inkDark.copy(alpha = 0.55f)
-                    ), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                    ), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
                 }
             }
         }
@@ -785,7 +809,7 @@ private fun CollageCard(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.55f * bodyScale).sp, color = Color.White.copy(alpha = 0.92f),
                 fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
-            ), move), maxLines = 18, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move))
+            ), move), maxLines = lines(18, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(6.dp))
@@ -804,7 +828,7 @@ private fun CollageCard(
                     fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Color.White.copy(alpha = 0.66f)),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().moveMeta(move)
+                modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
             )
         }
     }
@@ -820,6 +844,7 @@ private fun NeumorphicCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val ink = Color(0xFF101010)
@@ -879,7 +904,7 @@ private fun NeumorphicCard(
                 Text(title, style = TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = 31.sp, lineHeight = 33.sp,
                     fontWeight = FontWeight.Normal, color = Color.White
-                ), maxLines = 5, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.90f).moveTitle(move))
+                ), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.90f).moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
                 val metaParts = mutableListOf<String>()
                 if (byline.isNotBlank()) metaParts.add(byline.uppercase())
                 if (year != null) metaParts.add(year)
@@ -888,7 +913,7 @@ private fun NeumorphicCard(
                     Text(metaParts.joinToString("  /  "), style = TextStyle(
                         fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.3.sp, color = Color.White.copy(alpha = 0.56f)
-                    ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                    ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
                 }
             }
 
@@ -900,7 +925,7 @@ private fun NeumorphicCard(
                     fontSize = (bodySize.value * bodyScale).sp, lineHeight = (bodySize.value * 1.40f * bodyScale).sp,
                     color = Color.White.copy(alpha = 0.88f),
                     shadow = Shadow(Color.Black.copy(alpha = 0.62f), Offset(0f, 2f), 5f)
-                ), move), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move))
+                ), move), maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
                 if (ratingStars != null && ratingStars > 0) {
                     Spacer(Modifier.height(7.dp))
                     StarRow(ratingStars, palette.copy(accent = Color.White, ink = Color.White, inkFaint = Color.White.copy(alpha = 0.45f)))
@@ -911,7 +936,7 @@ private fun NeumorphicCard(
                     style = TextStyle(fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 0.8.sp, color = Color.White.copy(alpha = 0.72f)),
                     maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveMeta(move)
+                    modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
                 )
             }
         }
@@ -931,6 +956,7 @@ private fun EditorialCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val cream = Color(0xFFFAF7F0)
@@ -971,7 +997,7 @@ private fun EditorialCard(
             Text(title, style = TextStyle(
                 fontFamily = BungeeFontFamily, fontSize = 30.sp,
                 lineHeight = 34.sp, color = inkDark
-            ), maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move))
+            ), maxLines = lines(4, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
 
             // Byline — year deck (info row — movable via the M handle, not editable)
             val metaParts = mutableListOf<String>()
@@ -982,7 +1008,7 @@ private fun EditorialCard(
                 Text(metaParts.joinToString(" \u2014 "), style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.55f)
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             Spacer(Modifier.height(15.dp))
@@ -1009,10 +1035,10 @@ private fun EditorialCard(
             val bodyRest = if (body.length > 1) body.drop(1) else ""
             if (bodyRest.isEmpty()) {
                 Text(body, style = bodyStyle,
-                    maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveFact(move))
+                    maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
             } else {
-                BoxWithConstraints(Modifier.fillMaxWidth().moveFact(move)) {
+                BoxWithConstraints(Modifier.fillMaxWidth().moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) }) {
                     val density = androidx.compose.ui.platform.LocalDensity.current
                     val measurer = rememberTextMeasurer()
                     val contentW = with(density) { maxWidth.toPx() }
@@ -1057,7 +1083,7 @@ private fun EditorialCard(
                     if (restText.isNotEmpty()) {
                         Spacer(Modifier.height(2.dp))
                         Text(restText, style = bodyStyle,
-                            maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9,
+                            maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac),
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.fillMaxWidth())
                     }
@@ -1077,7 +1103,7 @@ private fun EditorialCard(
                 drawLine(inkDark.copy(alpha = 0.14f), Offset.Zero, Offset(size.width, 0f))
             }
             Spacer(Modifier.height(7.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.moveMeta(move)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }) {
                 Box(Modifier.width(6.dp).height(10.dp).background(accentRule.copy(alpha = 0.85f)))
                 Text(
                     if (sharerName.isNotBlank()) "$sharerName \u2014 Curio" else "Curio",
@@ -1101,6 +1127,7 @@ private fun MinimalCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val bg = Color(0xFFFFFDF9)
@@ -1143,7 +1170,7 @@ private fun MinimalCard(
             // Title — big retro Bungee
             Text(title, style = TextStyle(
                 fontFamily = BungeeFontFamily, fontSize = 32.sp, lineHeight = 35.sp, color = inkDark
-            ), maxLines = 5, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move))
+            ), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
 
             // Byline / year — info row: movable via M handle, not editable
             if (byline.isNotBlank()) {
@@ -1151,10 +1178,10 @@ private fun MinimalCard(
                 Text(byline, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.50f)
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             } else if (year != null) {
                 Spacer(Modifier.height(6.dp))
-                Text(year, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), modifier = Modifier.moveMeta(move))
+                Text(year, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             Spacer(Modifier.weight(1f))
@@ -1168,8 +1195,8 @@ private fun MinimalCard(
             Text(body, style = factBodyStyle(TextStyle(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.78f)
-            ), move), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.moveFact(move))
+            ), move), maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(8.dp))
@@ -1183,7 +1210,7 @@ private fun MinimalCard(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 Curio" else "Curio",
                 style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
                     fontWeight = FontWeight.SemiBold, color = inkDark.copy(alpha = 0.35f)),
-                maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().moveMeta(move)
+                maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
             )
         }
     }
@@ -1201,6 +1228,7 @@ private fun SignatureCard(
     byline: String = "", year: String? = null,
     classicSignature: Boolean = false,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val body = quoteText ?: factText
@@ -1285,9 +1313,9 @@ private fun SignatureCard(
             Text(title, style = TextStyle(
                 fontFamily = sig.titleFont, fontSize = sig.titleSize,
                 lineHeight = sig.titleLineHeight, color = sig.titleColor
-            ), maxLines = 4, overflow = TextOverflow.Ellipsis,
+            ), maxLines = lines(4, move.titleHeightFrac), overflow = TextOverflow.Ellipsis,
                 textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveTitle(move))
+                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
         }
 
         // ── Meta (shared) — info row: movable via M handle, not editable ──
@@ -1300,7 +1328,7 @@ private fun SignatureCard(
                     fontSize = sig.metaSize, color = sig.metaColor
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis,
                     textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveMeta(move))
+                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
         }
 
@@ -1314,8 +1342,8 @@ private fun SignatureCard(
                 fontFamily = LoraFontFamily, fontSize = (bodySize * bodyScale).sp,
                 lineHeight = (bodySize * sig.bodyLineHeight * bodyScale).sp,
                 color = sig.bodyColor
-            ), move).copy(textAlign = align), maxLines = bodyMaxLines, overflow = TextOverflow.Ellipsis,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveFact(move))
+            ), move).copy(textAlign = align), maxLines = lines(bodyMaxLines, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
+                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
         }
 
         // ── Footer (shared) — info row: movable via M handle, not editable ──
@@ -1325,7 +1353,7 @@ private fun SignatureCard(
                 fontWeight = FontWeight.SemiBold, color = sig.footerColor),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveMeta(move))
+                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
         }
 
         when (sig.layout) {
@@ -5282,6 +5310,7 @@ private fun CustomCard(
     family: CategoryFamily, quoteText: String?, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     val body = quoteText ?: factText
@@ -5310,7 +5339,7 @@ private fun CustomCard(
             Text(title, style = TextStyle(
                 fontFamily = sig.titleFont, fontSize = sig.titleSize,
                 lineHeight = sig.titleLineHeight, color = sig.titleColor
-            ), maxLines = 4, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move))
+            ), maxLines = lines(4, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
             val metaParts = mutableListOf<String>()
             if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
@@ -5319,7 +5348,7 @@ private fun CustomCard(
                 Text(metaParts.joinToString(sig.metaSeparator), style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = sig.metaSize, color = sig.metaColor
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move))
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
             Spacer(Modifier.weight(1f))
             val bodySize = when {
@@ -5332,7 +5361,7 @@ private fun CustomCard(
                 fontFamily = LoraFontFamily, fontSize = bodySize.sp,
                 lineHeight = (bodySize * sig.bodyLineHeight).sp,
                 color = sig.bodyColor
-            ), move), maxLines = if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move))
+            ), move), maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(6.dp))
                 StarRow(ratingStars, palette)
@@ -5343,7 +5372,7 @@ private fun CustomCard(
                 style = TextStyle(fontFamily = sig.footerFont, fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold, color = sig.footerColor),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.moveMeta(move)
+                modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
             )
         }
     }
@@ -5369,15 +5398,16 @@ private fun MiddleContent(
     quoteText: String?, qSize: TextUnit, quoteAuthor: String?,
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
+    callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
-            Text(quoteText, style = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move))
+            Text(quoteText, style = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move), color = palette.ink, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
         } else {
             // Title
-            Text(display, style = MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), color = palette.ink, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move))
+            Text(display, style = MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), color = palette.ink, maxLines = lines(3, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
             // Metadata line — byline • year (e.g. "GUNS N' ROSES • 1987") — info row: movable, not editable
             val metaParts = mutableListOf<String>()
             if (byline.isNotBlank()) metaParts.add(byline)
@@ -5387,17 +5417,17 @@ private fun MiddleContent(
                     metaParts.joinToString(" \u2022 "),
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
                     color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveMeta(move)
+                    modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
                 )
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
-            FrostPane(palette, Modifier.moveFact(move)) {
+            FrostPane(palette, Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) }) {
                 val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(factText.length) else quickFactFontSize(factText.length)
                 val qfsScaled = (qfs.value * bodyScale).sp
                 Text(factText, style = factBodyStyle(MaterialTheme.typography.bodySmall.copy(
                     fontFamily = LoraFontFamily, fontSize = qfsScaled,
                     lineHeight = (qfsScaled.value * 1.4f).sp
-                ), move), color = palette.ink, maxLines = if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, overflow = TextOverflow.Ellipsis)
+                ), move), color = palette.ink, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac), overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -5425,8 +5455,8 @@ private fun StarRow(rating: Int, palette: ShareCardPalette) {
 }
 
 @Composable
-private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?, palette: ShareCardPalette, move: ShareCardMove = ShareCardMove()) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().moveMeta(move)) {
+private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?, palette: ShareCardPalette, move: ShareCardMove = ShareCardMove(), callbacks: EditBoundsCallbacks = EditBoundsCallbacks()) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }) {
         CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.30f), size = 14.dp)
         Spacer(Modifier.height(3.dp))
         if (quoteText != null && !quoteAuthor.isNullOrBlank()) {
@@ -5609,156 +5639,175 @@ private fun ArrangeableCard(
     onToggleEdit: () -> Unit,
     move: ShareCardMove = ShareCardMove(),
     onMove: (ShareCardMove) -> Unit = {},
-    card: @Composable () -> Unit
+    card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
-    Box(modifier = Modifier.pointerInput(active, editMode) {
-        // While editing, the gesture is disabled so taps reach the fields.
-        if (active && !editMode) detectTapGestures(onLongPress = { onToggleEdit() })
-    }) {
-        card()
+    // Bounds hub — every style reports where its title / fact / meta text
+    // actually renders; the overlay below anchors its indicators to those
+    // exact bounds instead of guessing fixed card fractions.
+    val cardOrigin = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    val titleRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    val factRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    val metaRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    val boundsHub = androidx.compose.runtime.remember {
+        EditBoundsCallbacks(
+            onTitle = { r -> titleRect.value = r },
+            onFact = { r -> factRect.value = r },
+            onMeta = { r -> metaRect.value = r }
+        )
+    }
+    Box(
+        modifier = Modifier
+            .onGloballyPositioned { cardOrigin.value = it.positionInWindow() }
+            .pointerInput(active, editMode) {
+                // While editing, the gesture is disabled so taps reach the fields.
+                if (active && !editMode) detectTapGestures(onLongPress = { onToggleEdit() })
+            }
+    ) {
+        card(boundsHub)
         if (editMode) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 val cw = maxWidth.value; val ch = maxHeight.value
                 if (cw == 0f || ch == 0f) return@BoxWithConstraints
+                val editDensity = androidx.compose.ui.platform.LocalDensity.current
+                val origin = cardOrigin.value
+                // Style-reported window bounds → card-local dp floats.
+                fun local(r: androidx.compose.ui.geometry.Rect): androidx.compose.ui.geometry.Rect =
+                    with(editDensity) {
+                        androidx.compose.ui.geometry.Rect(
+                            (r.left - origin.x).toDp().value,
+                            (r.top - origin.y).toDp().value,
+                            (r.right - origin.x).toDp().value,
+                            (r.bottom - origin.y).toDp().value
+                        )
+                    }
 
-                // Title — NOT type-editable: the title is a move/resize-only
-                // crop box. A hairline outline marks the region (the card's own
-                // title text shows through beneath it) but there is no text
-                // field and no typing — edits stay visual (move / crop / scale).
-                val titleW = (cw * 0.84f * move.titleWidthFrac).coerceIn(cw * 0.2f, cw)
-                val titleH = (ch * 0.20f * move.titleHeightFrac).coerceIn(ch * 0.05f, ch * 0.55f)
+                // Title — NOT type-editable: the box outlines the card's ACTUAL
+                // title text (reported by the style), so the indicator always
+                // sits exactly where the title renders. No field, no typing.
                 if (!quoteMode) {
-                    Box(
+                    val t = local(titleRect.value)
+                    val tOk = t.width > 0f && t.height > 0f
+                    if (tOk) {
+                        Box(
+                            modifier = Modifier
+                                .offset(t.left.dp, t.top.dp)
+                                .width(t.width.dp)
+                                .height(t.height.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.60f), RoundedCornerShape(8.dp))
+                        )
+                        // Move handle for the title — clamped so the box never
+                        // leaves the card.
+                        MoveHandle(
+                            label = "T", accent = MaterialTheme.colorScheme.primary,
+                            x = t.left.dp,
+                            y = t.top.dp,
+                            onDelta = { dx, dy ->
+                                val nx = (move.titleDx + dx).coerceIn(-t.left, cw - t.left - t.width)
+                                val ny = (move.titleDy + dy).coerceIn(-t.top, ch - t.top - t.height)
+                                onMove(move.copy(titleDx = nx, titleDy = ny))
+                            }
+                        )
+                        ResizeEdge(
+                            x = t.right.dp,
+                            y = (t.top + t.height / 2f).dp,
+                            accent = MaterialTheme.colorScheme.primary,
+                            edge = ResizeEdgeSide.RIGHT,
+                            onDelta = { dx ->
+                                onMove(move.copy(titleWidthFrac = (move.titleWidthFrac + dx / t.width.coerceAtLeast(40f)).coerceIn(0.3f, 1.6f)))
+                            }
+                        )
+                        // Height tab — truly grows/shrinks the TEXT (its line
+                        // count scales), so content extends instead of jumping.
+                        ResizeEdge(
+                            x = (t.left + t.width / 2f).dp,
+                            y = t.bottom.dp,
+                            accent = MaterialTheme.colorScheme.primary,
+                            edge = ResizeEdgeSide.BOTTOM,
+                            onDelta = { dy ->
+                                onMove(move.copy(titleHeightFrac = (move.titleHeightFrac + dy / t.height.coerceAtLeast(30f)).coerceIn(0.35f, 2.5f)))
+                            }
+                        )
+                    }
+                }
+
+                // Quick-fact — transparent field laid EXACTLY over the card's own
+                // fact text (bounds reported by the style). Typing updates the
+                // card live; the field just captures keystrokes in place.
+                val f = local(factRect.value)
+                val fOk = f.width > 0f && f.height > 0f
+                if (fOk) {
+                    BasicTextField(
+                        value = editFact,
+                        onValueChange = onFactChange,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Transparent),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.tertiary),
+                        singleLine = false,
+                        maxLines = 12,
                         modifier = Modifier
-                            .offset(
-                                x = (cw * 0.08f + move.titleDx).dp,
-                                y = (ch * 0.06f + move.titleDy).dp
-                            )
-                            .width(titleW.dp)
-                            .height(titleH.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.60f), RoundedCornerShape(8.dp))
-                    )
-                    // Move handle for the title — clamped so the box (and this
-                    // handle) can never leave the card once dragged off-screen.
-                    MoveHandle(
-                        label = "T", accent = MaterialTheme.colorScheme.primary,
-                        x = (cw * 0.08f + move.titleDx).dp,
-                        y = (ch * 0.06f + move.titleDy).dp,
-                        onDelta = { dx, dy ->
-                            val nx = (move.titleDx + dx).coerceIn(-cw * 0.08f, cw * 0.92f - titleW)
-                            val ny = (move.titleDy + dy).coerceIn(-ch * 0.06f, ch * 0.94f - titleH)
-                            onMove(move.copy(titleDx = nx, titleDy = ny))
+                            .offset(f.left.dp, f.top.dp)
+                            .width(f.width.dp)
+                            .height(f.height.dp)
+                            .padding(6.dp)
+                            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.60f), RoundedCornerShape(8.dp)),
+                        decorationBox = { inner ->
+                            Box(Modifier.fillMaxWidth()) {
+                                if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                inner()
+                            }
                         }
                     )
-                    // Resize edge for the title box width
+                    // Move handle for the fact — clamped so the box never
+                    // leaves the card.
+                    MoveHandle(
+                        label = "F", accent = MaterialTheme.colorScheme.tertiary,
+                        x = f.left.dp,
+                        y = f.top.dp,
+                        onDelta = { dx, dy ->
+                            val nx = (move.factDx + dx).coerceIn(-f.left, cw - f.left - f.width)
+                            val ny = (move.factDy + dy).coerceIn(-f.top, ch - f.top - f.height)
+                            onMove(move.copy(factDx = nx, factDy = ny))
+                        }
+                    )
                     ResizeEdge(
-                        x = (cw * 0.08f + move.titleDx + titleW).dp,
-                        y = (ch * 0.06f + move.titleDy + titleH / 2f).dp,
-                        accent = MaterialTheme.colorScheme.primary,
+                        x = f.right.dp,
+                        y = (f.top + f.height / 2f).dp,
+                        accent = MaterialTheme.colorScheme.tertiary,
                         edge = ResizeEdgeSide.RIGHT,
                         onDelta = { dx ->
-                            val next = move.titleWidthFrac + dx / (cw * 0.84f)
-                            // Cap so the right edge of the box stays on-card.
-                            val maxW = (cw * 0.92f - move.titleDx) / (cw * 0.84f)
-                            onMove(move.copy(titleWidthFrac = next.coerceIn(0.2f, maxW)))
+                            onMove(move.copy(factWidthFrac = (move.factWidthFrac + dx / f.width.coerceAtLeast(40f)).coerceIn(0.3f, 1.6f)))
                         }
                     )
-                    // Resize edge for the title box height
+                    // Height tab — grows/shrinks the text's line count so it
+                    // truly extends instead of jumping.
                     ResizeEdge(
-                        x = (cw * 0.08f + move.titleDx + titleW / 2f).dp,
-                        y = (ch * 0.06f + move.titleDy + titleH).dp,
-                        accent = MaterialTheme.colorScheme.primary,
+                        x = (f.left + f.width / 2f).dp,
+                        y = f.bottom.dp,
+                        accent = MaterialTheme.colorScheme.tertiary,
                         edge = ResizeEdgeSide.BOTTOM,
                         onDelta = { dy ->
-                            val next = move.titleHeightFrac + dy / (ch * 0.20f)
-                            // Cap so the bottom edge of the box stays on-card.
-                            val maxH = (ch * 0.94f - move.titleDy) / (ch * 0.20f)
-                            onMove(move.copy(titleHeightFrac = next.coerceIn(0.2f, maxH)))
+                            onMove(move.copy(factHeightFrac = (move.factHeightFrac + dy / f.height.coerceAtLeast(30f)).coerceIn(0.35f, 2.5f)))
                         }
                     )
                 }
 
-                // Quick-fact — transparent inline field over the card's own fact
-                val factW = (cw * 0.84f * move.factWidthFrac).coerceIn(cw * 0.2f, cw)
-                val factH = (ch * 0.26f * move.factHeightFrac).coerceIn(ch * 0.08f, ch * 0.70f)
-                BasicTextField(
-                    value = editFact,
-                    onValueChange = onFactChange,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Transparent),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.tertiary),
-                    singleLine = false,
-                    maxLines = 6,
-                    modifier = Modifier
-                        .offset(
-                            x = (cw * 0.08f + move.factDx).dp,
-                            y = (ch * 0.62f + move.factDy).dp
-                        )
-                        .width(factW.dp)
-                        .height(factH.dp)
-                        .padding(6.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.60f), RoundedCornerShape(8.dp)),
-                    decorationBox = { inner ->
-                        Box(Modifier.fillMaxWidth()) {
-                            if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
-                            inner()
-                        }
-                    }
-                )
-                // Move handle for the fact — clamped so the box can never
-                // leave the card.
-                MoveHandle(
-                    label = "F", accent = MaterialTheme.colorScheme.tertiary,
-                    x = (cw * 0.08f + move.factDx).dp,
-                    y = (ch * 0.62f + move.factDy).dp,
-                    onDelta = { dx, dy ->
-                        val nx = (move.factDx + dx).coerceIn(-cw * 0.08f, cw * 0.92f - factW)
-                        val ny = (move.factDy + dy).coerceIn(-ch * 0.62f, ch * 0.38f - factH)
-                        onMove(move.copy(factDx = nx, factDy = ny))
-                    }
-                )
-                // Resize edge for the fact box width
-                ResizeEdge(
-                    x = (cw * 0.08f + move.factDx + factW).dp,
-                    y = (ch * 0.62f + move.factDy + factH / 2f).dp,
-                    accent = MaterialTheme.colorScheme.tertiary,
-                    edge = ResizeEdgeSide.RIGHT,
-                    onDelta = { dx ->
-                        val next = move.factWidthFrac + dx / (cw * 0.84f)
-                        // Cap so the right edge of the box stays on-card.
-                        val maxW = (cw * 0.92f - move.factDx) / (cw * 0.84f)
-                        onMove(move.copy(factWidthFrac = next.coerceIn(0.2f, maxW)))
-                    }
-                )
-                // Resize edge for the fact box height
-                ResizeEdge(
-                    x = (cw * 0.08f + move.factDx + factW / 2f).dp,
-                    y = (ch * 0.62f + move.factDy + factH).dp,
-                    accent = MaterialTheme.colorScheme.tertiary,
-                    edge = ResizeEdgeSide.BOTTOM,
-                    onDelta = { dy ->
-                        val next = move.factHeightFrac + dy / (ch * 0.26f)
-                        // Cap so the bottom edge of the box stays on-card.
-                        val maxH = (ch * 0.38f - move.factDy) / (ch * 0.26f)
-                        onMove(move.copy(factHeightFrac = next.coerceIn(0.2f, maxH)))
-                    }
-                )
-
                 // Info rows (author / byline / year / footer) — M handle: these
                 // MOVE with the drag but their text is never editable. The
-                // handle tracks the meta offset on BOTH axes and both are
-                // clamped, so the indicator stays glued to the info rows and
-                // can never be dragged off the card.
+                // handle sits at the meta row's reported bounds and tracks the
+                // drag, clamped so it can never be dragged off the card.
+                val m = local(metaRect.value)
                 val mPad = 18f
-                MoveHandle(
-                    label = "M", accent = MaterialTheme.colorScheme.secondary,
-                    x = (cw * 0.88f + move.metaDx).dp,
-                    y = (ch * 0.90f + move.metaDy).dp,
-                    onDelta = { dx, dy ->
-                        val nx = (move.metaDx + dx).coerceIn(-(cw * 0.88f - mPad), cw * 0.12f - mPad)
-                        val ny = (move.metaDy + dy).coerceIn(-(ch * 0.90f - mPad), ch * 0.10f - mPad)
-                        onMove(move.copy(metaDx = nx, metaDy = ny))
-                    }
-                )
+                if (m.width > 0f && m.height > 0f) {
+                    MoveHandle(
+                        label = "M", accent = MaterialTheme.colorScheme.secondary,
+                        x = (m.right + mPad).dp,
+                        y = m.bottom.dp,
+                        onDelta = { dx, dy ->
+                            val nx = (move.metaDx + dx).coerceIn(-m.left + mPad, cw - m.right - mPad)
+                            val ny = (move.metaDy + dy).coerceIn(-m.top + mPad, ch - m.bottom - mPad)
+                            onMove(move.copy(metaDx = nx, metaDy = ny))
+                        }
+                    )
+                }
             }
         }
     }
@@ -5887,8 +5936,8 @@ fun TopicShareSheet(
                                 onToggleEdit = { editMode = !editMode },
                                 move = move,
                                 onMove = { move = it }
-                            ) {
-                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                            ) { cb ->
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
                             }
                         }
                     }
@@ -5919,8 +5968,8 @@ fun TopicShareSheet(
                             onToggleEdit = { editMode = !editMode },
                             move = move,
                             onMove = { move = it }
-                        ) {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                        ) { cb ->
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
                         }
                     }
                 }

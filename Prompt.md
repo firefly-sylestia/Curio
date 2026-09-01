@@ -1,53 +1,64 @@
 # Prompt.md — current request log
 
-## Request (ACTIVE): Fix glitched hold-to-edit indicators on the share card
+## Request (ACTIVE): Hold-to-edit indicators still wrong; height resizes don't extend text
 
-User: "the tap to hold to edit in glitched the indicators are showing
-wrong and not properly also when they gets out of the screen theres no way
-to fix it without reset, also use proper colors for them"
+User (repeat + more detail): "the tap to hold to edit in glitched the
+indicators are showing wrong and not properly also the height isnt even
+changing the text box height as the texts are not extending rather they
+are moving up and down. also when they gets out of the screen theres no
+way to fix it without reset, also use proper colors for them."
 
-Three concrete bugs in the `ArrangeableCard` inline-edit overlay
-(app/src/main/java/com/curio/app/ui/components/TopicShareCard.kt):
+### Real root causes found in TopicShareCard.kt
 
-1. **M handle desync** — the handle's x was fixed at `0.88cw` and only y
-   tracked `metaDy`; dragging M horizontally moved the info rows but the
-   handle stayed put ("indicators showing wrong").
-2. **Unbounded drags** — T/F/M offsets and resize fracs had no bounds, so
-   boxes/handles could be pushed off the card and were unrecoverable
-   without Reset. Drags were also unclamped at the card edges.
-3. **Colors** — handle labels were hard-coded white (invisible on light
-   accents) and the edge tabs hung off the box corners instead of
-   centering on the edges; crop outlines were faint (0.45 alpha).
+1. **Indicators in the wrong place**: the overlay drew its boxes at FIXED
+   card fractions (title at 0.08w/0.06h, fact at 0.62h, M at 0.88w/0.90h).
+   Only Paper roughly matched; Vinyl (body y≈214dp), Neumorphic
+   (bottom-anchored), Collage (title top-left) etc. never aligned → "showing
+   wrong and not properly".
+2. **Height didn't extend text**: `moveFact`/`moveTitle` applied height as
+   `fillMaxHeight(frac.coerceIn(0.2f, 1f)).clipToBounds()` — growth was
+   forbidden (cap 1f), and fillMaxHeight re-measures the parent Column
+   which re-arranges children → the visible text physically jumped up/down
+   instead of the box growing.
+3. **Off-screen loss**: no real way to pull a handle back had it been
+   dragged out (previous turn added clamps; the fundamental misalignment
+   remained).
 
-### Fixes (TopicShareCard.kt)
+### Fixes (all in TopicShareCard.kt)
 
-- **Clamp every drag to the card**: T and F offsets clamp so the box stays
-  fully on-card (`coerceIn` on the Dx/Dy ranges computed from current
-  box size); resize fracs cap so the RIGHT/BOTTOM edge never leaves the
-  card (`maxW`/`maxH` derived from the live offset). Handles can no
-  longer be lost off-screen.
-- **M handle tracks both axes**: x = `0.88cw + metaDx`, y = `0.90ch +
-  metaDy`, clamped so the handle itself stays visible (18dp pad).
-- **Contrast-aware ink**: `MoveHandle` computes `accent.luminance()`; light
-  accents get dark ink (`0xFF1B1B1F`) + a soft black ring, dark accents
-  keep white ink + a white ring — letters always read against the card.
-- **Edge tabs centered**: `ResizeEdge` offsets by `y - h/2` too, and RIGHT
-  tabs now sit at the vertical middle of the box edge (`+ titleH/2` /
-  `+ factH/2`).
-- **Crop outlines stronger**: 0.45 → 0.60 alpha for the title + fact
-  boxes so the region reads clearly.
+- **Bounds-driven overlay**: new `EditBoundsCallbacks` (onTitle/onFact/
+  onMeta) — every card style attaches `onGloballyPositioned` right where
+  its moveTitle/moveFact/moveMeta modifier lands and reports
+  `boundsInWindow()`. `ArrangeableCard` keeps a bounds hub (card origin +
+  3 rects) and the edit overlay draws the outline boxes, T/F/M handles,
+  edge tabs and the typing field EXACTLY on the reported rects — every
+  style, live. Since bounds already include the move offsets, dragging a
+  handle moves both the card text and its indicator with zero desync.
+- **Height now really extends text**: removed the fillMaxHeight/clip from
+  moveTitle/moveFact; added `lines(base, frac, max)` helper and scaled
+  every title/body `maxLines` (~20 sites) by titleHeightFrac/factHeightFrac
+  (0.35–2.5 → fewer or more lines show, text stays anchored).
+- **Resize tabs**: RIGHT/BOTTOM delta denominators use the box's CURRENT
+  reported bounds (width/height dp), so drag feel is scale-proportional;
+  fracs clamp 0.3–1.6 (width) / 0.35–2.5 (height); offsets clamp so boxes
+  and handles can never leave the card.
+- **M handle**: anchors to the meta row's real bounds (footer/colophon for
+  most styles, byline where no footer) and stays inside the card.
+- Colors: contrast-aware handle ink/ring (kept from prior pass).
 
 ### Progress
-- [x] Imports: `androidx.compose.ui.graphics.luminance`.
-- [x] T/F/M drag clamping + M handle dual-axis tracking.
-- [x] Resize caps (width + height, title + fact).
-- [x] MoveHandle contrast ink + ring; ResizeEdge centering; outline alphas.
-- [x] Balance verified (code-balance delta 0/0/0 vs HEAD).
-- [x] Changelog FIX bullet added.
-- [ ] Prompt.md completion summary (this file).
+- [x] Helpers (EditBoundsCallbacks class, lines()), moveTitle/moveFact
+      height-clip removed.
+- [x] TopicShareCard + 9 style signatures thread `callbacks`; attaches at
+      every move anchor (36 sites); maxLines scaled everywhere.
+- [x] ArrangeableCard bounds hub + bounds-based overlay (title/fact/meta
+      zones, typing field over the real fact).
+- [x] Balance verified (parens +15/+15, braces +8/+8, brackets 0/0).
+- [x] Changelog bullet updated.
+- [ ] Prompt.md (this file).
 - [ ] Commit & push (CI validates compile on push).
 
 ### Verification status
 CI validates compilation on push (this environment forbids Gradle builds) —
-watch the run after pushing. Code-balance check vs HEAD passed (parens
-+30/+30, braces 0/0, brackets 0/0).
+watch the run. Code-balance vs HEAD verified clean; zero bare
+moveFact/moveTitle/moveMeta sites left.
