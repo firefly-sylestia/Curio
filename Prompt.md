@@ -1,53 +1,50 @@
 # Prompt.md — current request log
 
-## Request (DONE): Signature share cards — full redesign for 7 categories (normal + Deepen)
+## Request (DONE): Follow-up fixes — picker crash, Editorial overlap, mixes grid, no cream
 
-User: the classic share styles (Paper, Clean, Collage, Editorial, Minimal)
-are loved — keep them. The SIGNATURE cards for **Animals, Animated Films,
-Anime, Artists, Artworks, Astronomy, Authors** are bad ("some are just so
-bad") — scrap the current ones and fully redesign them with NEW fonts,
-creative style and a beautiful minimal look, researched properly. Redesign
-BOTH the normal variant AND the Deepen option. Keep the classic ones.
+User (after the signature redesign shipped): fix the crash when opening
+the category picker; fix the Editorial card quick-fact text still
+overlapping itself; fix the grid view of "Your mixes" (looks bad); and
+please don't use cream color (in the new signature designs).
 
 ### What shipped (this turn)
 
-- **TopicShareCard.kt — `signatureDesign` (normal) redesigned for the 7
-  categories** (classic `signatureDesignClassic` + base styles untouched):
-  - **Artists** — concert poster: single warm amber spotlight cone on a
-    dark stage, hairline floor + glow pools, **Bebas Neue** 42sp title,
-    POSTER layout.
-  - **Animals** — naturalist field note: sage botanical sprig + seed dots
-    on warm cream, **Lora** serif title, CENTERED.
-  - **Animated Films** — storybook pastel: thin five-band rainbow arc +
-    placed sparkles on lavender wash, **Corben** rounded display, CENTERED.
-  - **Anime** — rising-sun poster: vermilion sun + ground line + brush
-    stroke on paper white, **Maven Pro** title, CENTERED.
-  - **Artworks** — quiet gallery: one thin framed abstract + floor hairline
-    on warm gallery white, **Cormorant Garamond** title, STANDARD.
-  - **Authors** — literary manuscript: faint ruled lines + red margin +
-    flourish on cream paper, **Playfair Display** title, STANDARD.
-  - **Astronomy** — star chart: constellation + thin ringed planet +
-    coordinate ticks on deep navy, **Space Mono** title, BOTTOM.
-- **`signatureDesignDetailed` (Deepen) redesigned for the same 7** — richer
-  scenes in the SAME design language: Artists (light rig + crowd + sound
-  arcs), Animals (forest clearing: sprig cluster, paw trail, fireflies),
-  Animated Films (full rainbow + film-frame cel + confetti), Anime (sun rays
-  + torii gate + petals), Artworks (two spotlight cones + two pieces),
-  Authors (inkwell + quill under lamp glow), Astronomy (nebula + shooting
-  star). Layouts match their normal counterparts.
-- **Fix:** the detailed Animated-Films branch now matches
-  `"ANIMATED FILMS" || "ANIMATED MOVIES"` (was keyed only on the legacy
-  name → fell through to the fallback).
-- Design research: 2025 minimal-poster trends (bold typography as the
-  design, few elements, heavy emphasis) informed the per-category font/palette
-  choices; all fonts drawn from the existing bundled library (no new assets).
-- DOX: app/AGENTS.md v3xx3 bullet + fastlane changelog updated.
+- **Category-picker crash fix** (`NewCategoryPicker.kt`) — the crash
+  "Vertically scrollable component was measured with an infinity maximum
+  height constraints" came from `Modifier.weight(1f, fill = false)` on (a)
+  the sheet's classic/new `HorizontalPager` and (b) the `MixEditorSheet`
+  category grid: `weight(fill = false)` measures the child with an
+  INFINITE max height, which the pages' LazyColumn / LazyVerticalGrid
+  passed through and crashed on. Both now use `weight(1f)` (fill = true)
+  so the ModalBottomSheet's bounded height reaches the scrollables.
+- **Editorial card overlap fix** (`TopicShareCard.kt`) — the drop-cap body
+  rendered its wrap-row + full-width rest text as siblings in a
+  `BoxWithConstraints`, which STACKS children at the same slot, so the
+  rest text drew on top of the wrapped block. The pair now lives inside a
+  `Column` (top-to-bottom layout).
+- **Your mixes grid polish** (`NewCategoryPicker.kt`) — `NewMixCard` cells
+  are a uniform 122dp height with the Spin pill bottom-anchored (was
+  ragged per-teaser heights); the 3-dot menu is now an M3 `DropdownMenu`
+  popup (always on top, anchored in a Box) instead of the inline
+  `DropdownMenuSurface`/AnimatedVisibility that shoved the row when
+  expanded. The custom surface + now-unused animation imports + unused
+  `Color` import were deleted.
+- **No-cream signature backgrounds** (`TopicShareCard.kt`) — per user
+  direction, the new signature scenes swapped warm cream/beige fills for
+  cool paper-white tones in BOTH normal and Deepen: Animals `EFF3F0`
+  (cool sage paper), Anime `F5F6F8` (cool paper white), Artworks
+  `ECEFF2` (gallery white), Authors `F1F3F6` (manuscript paper). Classic
+  styles (Paper/Editorial/Minimal + `signatureDesignClassic`) keep their
+  cream — the user likes those.
+- DOX: app/AGENTS.md (v3xx3 color mentions + new v3xx4 bullet) + fastlane
+  changelog updated.
 
 ### Progress
-- [x] Research minimal design directions.
-- [x] Redesign `signatureDesign` branches (7 categories, normal).
-- [x] Redesign `signatureDesignDetailed` branches (7 categories, Deepen).
-- [x] Verify classic/base styles untouched; syntax sanity (brace balance ok,
-      paren delta pre-existing).
-- [x] DOX pass (AGENTS.md + changelog).
-- [ ] Commit & push (pending this turn).
+- [x] Fix picker crash (pager + mix-editor infinite-height scrollables).
+- [x] Fix Editorial drop-cap/rest-text overlap (Box stack → Column).
+- [x] Redesign mixes grid cards (uniform height, popup menu).
+- [x] Swap cream backgrounds → cool paper (normal + Deepen).
+- [x] DOX pass (AGENTS.md v3xx4 + changelog).
+- [x] Syntax sanity (brace/paren balance OK; TopicShareCard paren delta is
+      the pre-existing ±1, edits are paren-neutral).
+- [x] Commit & push.

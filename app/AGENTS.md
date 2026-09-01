@@ -188,22 +188,22 @@ app/src/main/java/com/curio/app/
     title (POSTER layout; detailed adds a light rig, crowd silhouettes,
     sound-wave arcs, sparkle dust).
   - **Animals** — naturalist field note: sage botanical sprig + seed dots
-    on warm cream, **Lora** serif title (CENTERED; detailed adds a forest
-    clearing with sprig cluster, paw-print trail, grass, fireflies).
+    on cool sage paper, **Lora** serif title (CENTERED; detailed adds a
+    forest clearing with sprig cluster, paw-print trail, grass, fireflies).
   - **Animated Films/Movies** — storybook pastel: thin five-band rainbow
     arc + placed sparkles on a soft lavender wash, **Corben** rounded
     display title (CENTERED; detailed adds a film-frame cel with sprocket
     dots, cloud puffs, confetti).
   - **Anime** — rising-sun poster: vermilion sun + ground line + brush
-    stroke on paper white, **Maven Pro** title (CENTERED; detailed adds
-    sun rays, a torii-gate silhouette, falling sakura petals).
+    stroke on cool paper white, **Maven Pro** title (CENTERED; detailed
+    adds sun rays, a torii-gate silhouette, falling sakura petals).
   - **Artworks** — quiet gallery: one thin framed abstract + floor
-    hairline on warm gallery white, **Cormorant Garamond** title
+    hairline on cool gallery white, **Cormorant Garamond** title
     (STANDARD; detailed adds two spotlight cones + a second ink-line
     piece).
   - **Authors** — literary manuscript: faint ruled lines + red margin +
-    flourish on cream paper, **Playfair Display** title (STANDARD;
-    detailed adds inkwell + quill under a desk-lamp glow).
+    flourish on cool manuscript paper, **Playfair Display** title
+    (STANDARD; detailed adds inkwell + quill under a desk-lamp glow).
   - **Astronomy** — star chart: constellation + thin ringed planet +
     coordinate ticks on deep navy, **Space Mono** title (BOTTOM; detailed
     adds nebula glows, sparse starfield, shooting star).
@@ -213,6 +213,35 @@ app/src/main/java/com/curio/app/
     legacy family designs. Note the detailed Animated-Films branch now
     matches `"ANIMATED FILMS" || "ANIMATED MOVIES"` (the old branch keyed
     only on the legacy name and fell through to the fallback).
+- **v3xx4 — picker crash fix, mixes grid polish, Editorial overlap fix,
+  no-cream signature backgrounds.** Follow-up to v3xx3 (user report):
+  - **Crash fix:** opening the category picker crashed with "Vertically
+    scrollable component was measured with an infinity maximum height
+    constraints" — the classic/new `HorizontalPager` in
+    `NewCategoryPickerSheet` and the `MixEditorSheet` category grid used
+    `Modifier.weight(1f, fill = false)`, which measures the child with an
+    INFINITE max height; the pages' LazyColumn / LazyVerticalGrid passed
+    it through and crashed. Both now use `weight(1f)` (fill = true) so
+    the sheet's bounded height reaches the scrollables.
+  - **Your mixes grid:** `NewMixCard` cells are a uniform 122dp height
+    with the Spin pill bottom-anchored (was ragged per-teaser heights),
+    and the 3-dot menu is an M3 `DropdownMenu` popup (always on top)
+    instead of the inline `DropdownMenuSurface`/AnimatedVisibility that
+    shoved the row when expanded — that surface + the now-unused
+    animation imports were deleted.
+  - **Editorial overlap fix:** the drop-cap body in `EditorialCard`
+    rendered its wrap-row + full-width rest text as siblings in a
+    `BoxWithConstraints`, which STACKS children at the same slot — the
+    rest text drew ON TOP of the wrapped block ("quick fact text
+    overlapping itself"). The pair now lives inside a `Column` so they
+    lay out top-to-bottom.
+  - **No-cream signature backgrounds:** per user direction, the v3xx3
+    signature scenes dropped their warm cream/beige fills for cool
+    paper-white tones (Animals `EFF3F0` sage paper, Anime `F5F6F8` cool
+    white, Artworks `ECEFF2` gallery white, Authors `F1F3F6` manuscript
+    paper) in BOTH normal and Deepen. Classic styles (Paper/Editorial/
+    Minimal and `signatureDesignClassic`) keep their cream — the user
+    likes those.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**

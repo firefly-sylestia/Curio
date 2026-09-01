@@ -1,10 +1,5 @@
 package com.curio.app.features.picker
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -51,7 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -211,11 +205,16 @@ fun NewCategoryPickerSheet(
             Spacer(Modifier.height(8.dp))
 
             // ── Pager: classic (0) / new (1) ───────────────────────────
+            // The pager MUST fill the remaining sheet height (weight fill =
+            // true): with fill = false the child is measured with an infinite
+            // max height, which the pages' LazyColumn / LazyVerticalGrid pass
+            // through and crash on ("Vertically scrollable component was
+            // measured with an infinity maximum height constraints").
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false),
+                    .weight(1f),
                 pageSpacing = 12.dp
             ) { page ->
                 if (page == 0) {
@@ -771,6 +770,11 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
 /**
  * One named mix CARD (grid cell): name + lane teaser, a Spin pill, and a
  * 3-dot menu (Edit / Delete). [active] marks the mix currently applied.
+ *
+ * v3xx3 — uniform cell height (every card in the 2-col grid reads alike), a
+ * bottom-anchored Spin pill, and the 3-dot menu now opens as an M3 popup
+ * (anchored overlay, always on top) instead of an inline surface that pushed
+ * the row's layout when expanded.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -790,122 +794,90 @@ private fun NewMixCard(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 0.dp,
         modifier = modifier
+            .height(122.dp)
             .combinedClickable(
                 onClick = onApply,
                 onLongClick = { menuOpen = true }
             )
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = mix.name,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Surface(
-                    onClick = { menuOpen = true },
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Box(
-                        modifier = Modifier.size(30.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.MoreVert,
-                            contentDescription = "Mix options",
-                            size = 16.dp,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Text(
+                        text = mix.name,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    // 3-dot → Edit / Delete (M3 popup, never pushes the row).
+                    Box {
+                        Surface(
+                            onClick = { menuOpen = true },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        ) {
+                            Box(
+                                modifier = Modifier.size(26.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.MoreVert,
+                                    contentDescription = "Mix options",
+                                    size = 15.dp,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        androidx.compose.material3.DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false }
+                        ) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Edit", color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = { menuOpen = false; onMore() }
+                            )
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                                onClick = { menuOpen = false; onDelete() }
+                            )
+                        }
                     }
                 }
-                DropdownMenuSurface(
-                    expanded = menuOpen,
-                    onDismiss = { menuOpen = false },
-                    onEdit = { menuOpen = false; onMore() },
-                    onDelete = { menuOpen = false; onDelete() }
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    text = mixTeaser(mix.laneIds, categories),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-            Text(
-                text = mixTeaser(mix.laneIds, categories),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            // Spin pill — bottom-end, so every cell's action sits in the same
+            // slot regardless of teaser length.
+            Surface(
+                onClick = onApply,
+                shape = RoundedCornerShape(50),
+                color = if (active) MaterialTheme.colorScheme.secondaryContainer
+                        else MaterialTheme.colorScheme.surfaceContainerHighest,
+                modifier = Modifier.align(Alignment.BottomEnd)
             ) {
-                Surface(
-                    onClick = onApply,
-                    shape = RoundedCornerShape(50),
-                    color = if (active) MaterialTheme.colorScheme.secondaryContainer
-                            else MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    Text(
-                        if (active) "Spinning" else "Spin",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (active) MaterialTheme.colorScheme.onSecondaryContainer
-                                else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** A tiny dropdown-ish surface for Edit/Delete (avoids M3 DropdownMenu quirks). */
-@Composable
-private fun DropdownMenuSurface(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
-) {
-    AnimatedVisibility(visible = expanded, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
-        Surface(
-            shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 4.dp,
-            modifier = Modifier.padding(top = 36.dp)
-        ) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                Surface(
-                    onClick = { onDismiss(); onEdit() },
-                    color = Color.Transparent,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        "Edit",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                }
-                Surface(
-                    onClick = { onDismiss(); onDelete() },
-                    color = Color.Transparent,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        "Delete",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                }
+                Text(
+                    if (active) "Spinning" else "Spin",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (active) MaterialTheme.colorScheme.onSecondaryContainer
+                            else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                )
             }
         }
     }
@@ -1459,8 +1431,11 @@ fun MixEditorSheet(
                 contentPadding = PaddingValues(top = 14.dp, bottom = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                // weight fill = true: fill=false would measure the grid with
+                // an infinite max height and crash (same issue as the sheet
+                // pager). The grid fills the remaining sheet height.
                 modifier = Modifier
-                    .weight(1f, fill = false)
+                    .weight(1f)
                     .fillMaxWidth()
             ) {
                 gridItems(categories) { cat ->
