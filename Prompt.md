@@ -38,4 +38,4 @@ User direction (in order):
 - [x] LANGUAGE normal + detailed: strip bubbles/strokes → minimal gradient + hairline.
 - [x] Verify classic untouched, crest remnants = 0, brace/paren balance clean (parens ±1 pre-existing).
 - [x] DOX pass (AGENTS.md v3xx6, changelog, Prompt.md).
-- [ ] Commit & push.
+- [x] Commit & push (`398ee9ea`).
