@@ -1048,23 +1048,19 @@ private fun EditorialCard(
                         lineHeight = (bodySize.value * 3.0f * bodyScale).sp, color = accentRule
                     )
                     val initialW = measurer.measure(
-                        androidx.compose.ui.text.TextLayoutInput(
-                            text = AnnotatedString(initial),
-                            style = initialStyle
-                        )
+                        text = AnnotatedString(initial),
+                        style = initialStyle
                     ).size.width.toFloat()
                     val gap = with(density) { 5.dp.toPx() }
                     val narrowW = (contentW - initialW - gap).toInt().coerceAtLeast(1)
                     // How much body text fits in the first 3 lines beside the initial.
                     val wrap = measurer.measure(
-                        androidx.compose.ui.text.TextLayoutInput(
-                            text = AnnotatedString(bodyRest),
-                            style = bodyStyle,
-                            overflow = TextOverflow.Clip,
-                            softWrap = true,
-                            maxLines = 3,
-                            constraints = Constraints(maxWidth = narrowW)
-                        )
+                        text = AnnotatedString(bodyRest),
+                        style = bodyStyle,
+                        overflow = TextOverflow.Clip,
+                        softWrap = true,
+                        maxLines = 3,
+                        constraints = Constraints(maxWidth = narrowW)
                     )
                     val wrapEnd = wrap.getLineEnd((wrap.lineCount - 1).coerceAtLeast(0))
                     val wrapText = bodyRest.take(wrapEnd)
