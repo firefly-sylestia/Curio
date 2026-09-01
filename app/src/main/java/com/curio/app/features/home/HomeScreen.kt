@@ -58,6 +58,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -73,6 +75,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
@@ -133,6 +137,8 @@ import com.curio.app.features.recent.buildRecentFeed
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.theme.LocalCurioThemeTransition
+import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
@@ -215,7 +221,9 @@ import java.util.Calendar
 /** The quest hero's solid body height — the torn banner. Tall enough for
  *  the greeting + the Streak · Cabinet · Recent bar (pinned just above the
  *  tear) and generous at large font scales. */
-private val HomeQuestHeroHeight = 300.dp
+private val HomeQuestHeroHeightPortrait = 300.dp
+/** Landscape hero — shorter to leave room for content below. */
+private val HomeQuestHeroHeightLandscape = 230.dp
 /** Extra layout space reserved for the white sheet below the torn banner. */
 private val HomeQuestSheetExtent = 24.dp
 /** Scroll distance (dp) before the menu + profile pills fully pin as
@@ -419,6 +427,8 @@ fun HomeScreen(navController: NavController) {
             val sheetShape = remember(HOME_TEAR_SEED) {
                 SoftTornSheetShape(HOME_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
             }
+            // Adaptive hero height — shorter in landscape to leave room for content
+            val homeHeroHeight = if (windowWidthSizeClass().isWide) HomeQuestHeroHeightLandscape else HomeQuestHeroHeightPortrait
             // The quest is always the wildcard Surprise now (the category
             // chip row is gone). The banner wears the muted rose-wood hero
             // accent — in pastel mode (the shipped default) it resolves to
@@ -430,7 +440,7 @@ fun HomeScreen(navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(HomeQuestHeroHeight + HomeQuestSheetExtent)
+                    .height(homeHeroHeight + HomeQuestSheetExtent)
             ) {
                 // ── White under-sheet — same as the detail hero's: the
                 // sheet's torn top hides behind the opaque banner while its
@@ -444,7 +454,7 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(42.dp)
-                        .offset(y = HomeQuestHeroHeight - 18.dp)
+                        .offset(y = homeHeroHeight - 18.dp)
                         .clip(sheetShape)
                         // v81 — dark: a subtle lighter lip under the tear so
                         // the paper seam still reads on the dark banner.
@@ -464,7 +474,7 @@ fun HomeScreen(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(HomeQuestHeroHeight)
+                        .height(homeHeroHeight)
                         .offset(y = 1.dp)
                         .clip(heroTornShape)
                         .background(Color.Black.copy(alpha = 0.20f))
@@ -478,7 +488,7 @@ fun HomeScreen(navController: NavController) {
                     shadowElevation = 0.dp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(HomeQuestHeroHeight)
+                        .height(homeHeroHeight)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         // v27 — experimental paper accents (OFF by default;
@@ -682,7 +692,8 @@ fun HomeScreen(navController: NavController) {
                                             label = "Streak",
                                             tint = questInk,
                                             ink = questInk,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
                                         )
                                         VerticalDivider(
                                             modifier = Modifier.height(34.dp),
@@ -694,7 +705,8 @@ fun HomeScreen(navController: NavController) {
                                             label = "Cabinet",
                                             tint = questInk,
                                             ink = questInk,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
                                         )
                                         VerticalDivider(
                                             modifier = Modifier.height(34.dp),
@@ -711,7 +723,8 @@ fun HomeScreen(navController: NavController) {
                                             label = "Topics",
                                             tint = questInk,
                                             ink = questInk,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
                                         )
                                     }
                                 }
@@ -1383,12 +1396,15 @@ private fun HeroStatSegment(
     label: String,
     tint: Color,
     ink: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     // Colored icon accent, extra-bold value, soft label — mirrors
     // EntryDetail's FrostedSegment, with the icon wearing the color accent.
     Column(
-        modifier = modifier,
+        modifier = modifier.then(
+            if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
@@ -2260,16 +2276,29 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                     // is @Composable and can't run inside the clickable lambda
                     // (CI caught it at 2132).
                     val isDarkNow = isCurioDarkTheme()
+                    // v(theme switch) — the quick flip plays a Telegram-style
+                    // circular reveal from the sun/moon itself. The transition
+                    // + coroutine scope are resolved in composition (clickable
+                    // isn't @Composable); bounds give the window-space origin.
+                    val themeTransition = LocalCurioThemeTransition.current
+                    val transitionScope = rememberCoroutineScope()
+                    var sunMoonBounds by remember {
+                        mutableStateOf(androidx.compose.ui.geometry.Rect.Zero)
+                    }
                     Box(
                         modifier = Modifier
                             .offset(x = 268.8.dp - sunMoonTap / 2, y = 52.08.dp - sunMoonTap / 2)
                             .size(sunMoonTap)
+                            .onGloballyPositioned { coords -> sunMoonBounds = coords.boundsInWindow() }
                             .clip(CircleShape)
                             .clickable {
-                                AppPreferences.setThemeMode(
-                                    context,
-                                    if (isDarkNow) AppPreferences.THEME_LIGHT
-                                    else AppPreferences.THEME_DARK
+                                switchThemeWithReveal(
+                                    transition = themeTransition,
+                                    scope = transitionScope,
+                                    context = context,
+                                    center = sunMoonBounds.takeIf { it != Rect.Zero }?.center ?: Offset.Zero,
+                                    newMode = if (isDarkNow) AppPreferences.THEME_LIGHT
+                                              else AppPreferences.THEME_DARK,
                                 )
                             }
                     )

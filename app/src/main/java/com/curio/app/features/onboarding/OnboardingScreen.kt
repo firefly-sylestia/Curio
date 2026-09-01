@@ -59,8 +59,14 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.lerp
 import com.curio.app.ui.theme.isCurioDarkTheme
+import com.curio.app.ui.theme.LocalCurioThemeTransition
+import com.curio.app.ui.theme.switchThemeWithReveal
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -1010,34 +1016,56 @@ private fun ThemeSlide() {
             Spacer(Modifier.height(if (compact) 16.dp else 22.dp))
 
             // ── Mode chips — Light / Dark / System ──
+            // v(theme switch) — each choice plays the Telegram-style circular
+            // reveal from that chip. Bounds/scope resolved in composition
+            // (the chip onClick lambdas aren't @Composable).
+            val themeTransition = LocalCurioThemeTransition.current
+            val transitionScope = rememberCoroutineScope()
+            var lightChipBounds by remember { mutableStateOf(Rect.Zero) }
+            var darkChipBounds by remember { mutableStateOf(Rect.Zero) }
+            var systemChipBounds by remember { mutableStateOf(Rect.Zero) }
+            fun chipCenter(bounds: Rect) =
+                if (bounds == Rect.Zero) Offset.Zero else bounds.center
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ThemeModeChip(
-                    label = "Light",
-                    glyph = CurioIcons.LightMode,
-                    selected = AppPreferences.themeModeState == AppPreferences.THEME_LIGHT,
-                    fill = fill,
-                    ink = ink,
-                    onClick = { AppPreferences.setThemeMode(context, AppPreferences.THEME_LIGHT) }
-                )
-                ThemeModeChip(
-                    label = "Dark",
-                    glyph = CurioIcons.DarkMode,
-                    selected = AppPreferences.themeModeState == AppPreferences.THEME_DARK,
-                    fill = fill,
-                    ink = ink,
-                    onClick = { AppPreferences.setThemeMode(context, AppPreferences.THEME_DARK) }
-                )
-                ThemeModeChip(
-                    label = "System",
-                    glyph = CurioIcons.Contrast,
-                    selected = AppPreferences.themeModeState == AppPreferences.THEME_SYSTEM,
-                    fill = fill,
-                    ink = ink,
-                    onClick = { AppPreferences.setThemeMode(context, AppPreferences.THEME_SYSTEM) }
-                )
+                Box(Modifier.onGloballyPositioned { lightChipBounds = it.boundsInWindow() }) {
+                    ThemeModeChip(
+                        label = "Light",
+                        glyph = CurioIcons.LightMode,
+                        selected = AppPreferences.themeModeState == AppPreferences.THEME_LIGHT,
+                        fill = fill,
+                        ink = ink,
+                        onClick = {
+                            switchThemeWithReveal(themeTransition, transitionScope, context, chipCenter(lightChipBounds), AppPreferences.THEME_LIGHT)
+                        }
+                    )
+                }
+                Box(Modifier.onGloballyPositioned { darkChipBounds = it.boundsInWindow() }) {
+                    ThemeModeChip(
+                        label = "Dark",
+                        glyph = CurioIcons.DarkMode,
+                        selected = AppPreferences.themeModeState == AppPreferences.THEME_DARK,
+                        fill = fill,
+                        ink = ink,
+                        onClick = {
+                            switchThemeWithReveal(themeTransition, transitionScope, context, chipCenter(darkChipBounds), AppPreferences.THEME_DARK)
+                        }
+                    )
+                }
+                Box(Modifier.onGloballyPositioned { systemChipBounds = it.boundsInWindow() }) {
+                    ThemeModeChip(
+                        label = "System",
+                        glyph = CurioIcons.Contrast,
+                        selected = AppPreferences.themeModeState == AppPreferences.THEME_SYSTEM,
+                        fill = fill,
+                        ink = ink,
+                        onClick = {
+                            switchThemeWithReveal(themeTransition, transitionScope, context, chipCenter(systemChipBounds), AppPreferences.THEME_SYSTEM)
+                        }
+                    )
+                }
             }
 
             Spacer(Modifier.height(if (compact) 12.dp else 16.dp))

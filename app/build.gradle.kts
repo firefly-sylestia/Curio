@@ -280,13 +280,18 @@ configurations.configureEach {
 // preBuild so a malformed entry fails the assemble. When the directory is
 // empty (placeholder UI ships), the task is a no-op and preBuild is not
 // affected.
-val topicsDir = file("src/main/assets/topics")
-val hasTopicFiles: Boolean = topicsDir.exists() &&
-    topicsDir.listFiles { f -> f.extension == "json" }?.isNotEmpty() == true
+val hasTopicFiles: Boolean = file("src/main/assets/topics").let { d ->
+    d.exists() && d.listFiles { f -> f.extension == "json" }?.isNotEmpty() == true
+}
 
 tasks.register("validateTopics") {
     group = "verification"
     description = "Validates assets/topics/*.json against the CurioTopic schema (CURIO_DATA_PLAN.md §2)."
+    // Resolve the directory as a task-local value (not a script property) so
+    // the doLast action captures a plain File and serializes cleanly into
+    // the configuration cache.
+    val topicsDir = file("src/main/assets/topics")
+    inputs.dir(topicsDir)
     doLast {
         if (!topicsDir.exists()) {
             logger.warn("topics/ directory missing — nothing to validate (OK for placeholder UI ships).")
@@ -376,3 +381,4 @@ if (hasTopicFiles) {
         dependsOn("validateTopics")
     }
 }
+

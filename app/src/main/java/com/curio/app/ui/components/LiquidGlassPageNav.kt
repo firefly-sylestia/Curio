@@ -1,12 +1,7 @@
 package com.curio.app.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 
 /**
@@ -84,38 +81,42 @@ fun LiquidGlassPageNav(
         label = "pageNavAlpha"
     )
 
+    // v292h — Row layout keeps prev/next CLOSE to the pill (12dp gap)
+    // instead of spread across the full screen width.
     Row(
         modifier = modifier
             .graphicsLayer { alpha = navAlpha; translationY = (1f - navAlpha) * 20f },
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Previous button — circular pill
-        AnimatedVisibility(
-            visible = currentPage > 0,
-            enter = fadeIn(tween(200)) + scaleIn(tween(200), initialScale = 0.7f),
-            exit = fadeOut(tween(150)) + scaleOut(tween(150), targetScale = 0.7f)
+        // Prev button — always takes 48dp space (pill stays centered),
+        // fades via graphicsLayer alpha when on page 1.
+        val prevAlpha by animateFloatAsState(
+            targetValue = if (currentPage > 0) 1f else 0f,
+            animationSpec = tween(200),
+            label = "prevAlpha"
+        )
+        Surface(
+            onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = if (currentPage > 0) 4.dp else 0.dp,
+            enabled = currentPage > 0,
+            modifier = Modifier
+                .size(48.dp)
+                .graphicsLayer { alpha = prevAlpha; scaleX = 0.7f + prevAlpha * 0.3f; scaleY = 0.7f + prevAlpha * 0.3f }
+                .then(
+                    if (glassBackdrop != null && isLiquidGlassPillsActive()) {
+                        Modifier.liquidGlassCapsule(
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            backdrop = glassBackdrop
+                        )
+                    } else Modifier
+                )
         ) {
-            Surface(
-                onClick = { onPageChange((currentPage - 1).coerceAtLeast(0)) },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shadowElevation = 4.dp,
-                modifier = Modifier
-                    .size(48.dp)
-                    .then(
-                        if (glassBackdrop != null && isLiquidGlassPillsActive()) {
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = glassBackdrop
-                            )
-                        } else Modifier
-                    )
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    CurioIcon(CurioIcons.ChevronLeft, null,
-                        tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
-                }
+            Box(contentAlignment = Alignment.Center) {
+                CurioIcon(CurioIcons.ChevronLeft, null,
+                    tint = MaterialTheme.colorScheme.onSurface, size = 22.dp)
             }
         }
 
@@ -157,7 +158,7 @@ fun LiquidGlassPageNav(
             }
         }
 
-        // Next button — circular pill
+        // Next button
         Surface(
             onClick = { onPageChange((currentPage + 1).coerceAtMost(totalPages - 1)) },
             shape = CircleShape,
@@ -200,7 +201,7 @@ fun LiquidGlassPageNav(
                 Spacer(Modifier.height(12.dp))
                 val cols = 5
                 LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.Fixed(cols),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(cols),
                     modifier = Modifier.heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)

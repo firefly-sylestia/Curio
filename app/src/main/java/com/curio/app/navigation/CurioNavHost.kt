@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -103,6 +104,7 @@ import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
+import com.curio.app.features.settings.ShareHubScreen
 import com.curio.app.features.topichistory.TopicHistoryScreen
 import com.curio.app.features.recent.RecentScreen
 import com.curio.app.features.recyclebin.RecycleBinScreen
@@ -110,6 +112,7 @@ import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
 import com.curio.app.features.petdesigner.PetDesignerScreen
+import com.curio.app.features.picker.CategoryPickerBrowseScreen
 import com.curio.app.features.picker.CategoryPickerScreen
 import com.curio.app.features.reveal.TopicRevealScreen
 import com.curio.app.features.spin.SpinScreen
@@ -506,12 +509,8 @@ fun CurioNavHost(
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             if (wide && showBottomBar) {
-                // Wide windows: the rail sits at the left edge, full height,
-                // and applies its own system-bar insets.
-                CurioNavigationRail(
-                    navController = navController,
-                    modifier = Modifier.fillMaxHeight()
-                )
+                // Wide windows: replaced side rail with bottom disappearing
+                // capsule — content fills full width, nav floats at bottom.
             }
             Box(
                 // v129 — no Scaffold: page content runs full-bleed and the
@@ -522,7 +521,7 @@ fun CurioNavHost(
                 // keeps the nav-bar inset the Scaffold's contentWindowInsets
                 // used to deliver.
                 modifier = Modifier
-                    .weight(1f)
+                    .then(if (wide) Modifier.fillMaxWidth() else Modifier.weight(1f))
                     .fillMaxHeight()
                     // v227 — the liquid-glass capture layer: pages only.
                     // The floating bar / sentiment pill / tour dock
@@ -756,7 +755,14 @@ fun CurioNavHost(
             composable(
                 route = CurioRoutes.PICKER,
             ) {
-                CategoryPickerScreen(navController = navController)
+                // v3xx — the NEW category picker (Browse page with bottom
+                // nav) is the default; the old glass-pill picker returns via
+                // Settings → Experiments → "Classic category picker".
+                if (AppPreferences.classicPickerEnabledState) {
+                    CategoryPickerScreen(navController = navController)
+                } else {
+                    CategoryPickerBrowseScreen(navController = navController)
+                }
             }
             composable(
                 route = CurioRoutes.SPIN_WITH_CATEGORY,
@@ -875,6 +881,9 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_DATA) {
                 BackupToolsScreen(navController = navController)
             }
+            composable(CurioRoutes.SHARE_HUB) {
+                ShareHubScreen(navController = navController)
+            }
             composable(CurioRoutes.EXPERIMENTS) {
                 ExperimentsScreen(navController = navController)
             }
@@ -944,7 +953,7 @@ fun CurioNavHost(
         // floating pill dock floats at the same bottom-center spot, and the
         // old opaque dock covered the bar anyway, so the bar must not show
         // behind/around the tour pill on tab stops.
-        if (!wide && barVisible && TourController.currentStep == null) {
+        if (barVisible && TourController.currentStep == null) {
             CurioFloatingNavBar(
                 navController = navController,
                 // While the bar lingers after leaving the tab set, force the

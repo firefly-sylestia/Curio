@@ -1,5 +1,6 @@
 package com.curio.app.features.database
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -141,6 +142,9 @@ import androidx.compose.foundation.layout.heightIn
 object TopicBrowserSession {
     var selectedSlug by mutableStateOf<String?>(null)
     var chipBarOpen by mutableStateOf(false)
+    var savedPage by mutableIntStateOf(0)
+    var savedScrollIndex by mutableIntStateOf(0)
+    var savedScrollOffset by mutableIntStateOf(0)
 }
 
 @Composable
@@ -169,6 +173,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // in the header instead of scrolling inside the list.
     var searchActive by rememberSaveable { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    // v292i — BackHandler: close search before exiting the page.
+    BackHandler(enabled = searchActive) {
+        searchActive = false
+        searchQuery = ""
+    }
     // v30 — the Category pill (second row under the hero pills) toggles the
     // sticky category chips; they also show while searching. Hidden by
     // default (matches the Cabinet), so the Category pill is the way in.
@@ -183,6 +192,11 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v30 — the chip-bar reservation only applies while the chips are
     // visible (the pill or search); collapsed, content starts right below
     // the (taller) hero.
+    // v301 — when search activates, auto-open the chip bar so
+    // category chips are immediately accessible.
+    LaunchedEffect(searchActive) {
+        if (searchActive) categoryFilterOpen = true
+    }
     val chipsVisible = categoryFilterOpen || searchActive
     // v36 — the Sort/Search pills live back INSIDE the hero (their top
     // row). v42 — the Category pill moved INSIDE the hero too (beside the
@@ -202,8 +216,8 @@ fun TopicDatabaseScreen(navController: NavController) {
     // clamped to 0 before the topics arrive — scrolling back to the top.
     // Saving the raw numbers and scrolling again once rows exist restores the
     // exact spot reliably.
-    var savedScrollIndex by rememberSaveable { mutableIntStateOf(0) }
-    var savedScrollOffset by rememberSaveable { mutableIntStateOf(0) }
+    var savedScrollIndex by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedScrollIndex) }
+    var savedScrollOffset by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedScrollOffset) }
     val listState = rememberLazyListState()
     // v245 — LOCAL GLASS CAPTURE for the floating category chip bar: the
     // scrolling list records into its own layer; the chips (a sibling
@@ -367,15 +381,18 @@ fun TopicDatabaseScreen(navController: NavController) {
                             year = topicYear(topic)
                         )
                     }
-                }
+                }.distinctBy { it.topic.id }
             }
         }
     }
     // v7.97 — the persisted filter can outlive its lane (a category hidden in
     // Manage Categories drops out of the catalog). Fall back to All instead
     // of leaving an invisible "no topics" state with no visible chip.
+    // v301 — category filter now works during search too (user can narrow
+    // results by category while searching).
     val effectiveCat = remember(catalog, selectedCat) {
-        if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null else selectedCat
+        if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null
+        else selectedCat
     }
 
     // Filtered rows — section headers while browsing All, topic rows always.
@@ -412,27 +429,43 @@ fun TopicDatabaseScreen(navController: NavController) {
     ) {
         value = withContext(Dispatchers.Default) {
             val indexById = indexedTopics.associateBy { it.topic.id }
-            // v105 — the sort control is removed; the browser always keeps
-            // its default per-lane A–Z order (stable sort: ties keep file
-            // order) with the category section headers grouping the lanes.
-            buildList {
+            // v292h — when searching, collect ALL matches globally, sort by
+            // name relevance, and render flat (no category sections). When
+            // browsing, keep the per-lane A–Z order with section headers.
+            if (needle.isNotEmpty()) {
+                // SEARCH MODE: flat global results sorted by name relevance.
+                val allMatches = mutableListOf<IndexedTopic>()
                 catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    val shown = topics.mapNotNull { indexById[it.id] }
-                        .filter(matches)
-                        .sortedWith(titleComparator)
-                    if (shown.isEmpty()) return@forEach
-                    if (effectiveCat == null) {
-                        add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
-                    }
-                    shown.forEach { indexed ->
-                        add(
-                            DatabaseRow(
-                                key = indexed.topic.id,
-                                topic = indexed.topic,
-                                done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                    allMatches += topics.mapNotNull { indexById[it.id] }.filter(matches)
+                }
+                allMatches.sortedWith(titleComparator).map { indexed ->
+                    DatabaseRow(
+                        key = indexed.topic.id,
+                        topic = indexed.topic,
+                        done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
+                    )
+                }
+            } else {
+                // BROWSE MODE: per-lane with section headers.
+                buildList {
+                    catalog.forEach { (cat, topics) ->
+                        if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                        val shown = topics.mapNotNull { indexById[it.id] }
+                            .filter(matches)
+                            .sortedWith(titleComparator)
+                        if (shown.isEmpty()) return@forEach
+                        if (effectiveCat == null) {
+                            add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
+                        }
+                        shown.forEach { indexed ->
+                            add(
+                                DatabaseRow(
+                                    key = indexed.topic.id,
+                                    topic = indexed.topic,
+                                    done = "${cat.id.name}::${indexed.topic.name}" in doneTopics
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -442,26 +475,47 @@ fun TopicDatabaseScreen(navController: NavController) {
     // ── v293 — PAGINATION (100 per page) ─────────────────────────────
     // The topic rows are paginated so only a manageable slice renders per
     // page. A floating nav bar at the bottom controls paging.
-    // Persistence: page number survives navigation via rememberSaveable.
-    var currentPage by rememberSaveable { mutableIntStateOf(0) }
+    // v301 — page lives in TopicBrowserSession (process-scoped singleton)
+    // so it survives navigation reliably. LaunchedEffect syncs user changes.
+    var currentPage by remember { mutableIntStateOf(TopicBrowserSession.savedPage) }
+    LaunchedEffect(currentPage) { TopicBrowserSession.savedPage = currentPage }
     // Topic-only rows (skip section headers for counting purposes).
     val topicOnlyRows = remember(rows) { rows.filter { it.topic != null } }
     val totalPages = ((topicOnlyRows.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
-    currentPage = currentPage.coerceIn(0, totalPages - 1)
+    // v311 — only coerce AFTER rows load: on return the async produceState
+    // starts with emptyList(), making totalPages=1 and clamping the saved
+    // page to 0 before the catalog arrives. Guarding on rows.isNotEmpty()
+    // preserves the saved page until the data is ready.
+    // v292i — only coerce AFTER rows AND topicOnlyRows load: on return
+    // the async produceState starts with emptyList(), making totalPages=1
+    // and clamping the saved page to 0. Guarding on topicOnlyRows.isNotEmpty()
+    // preserves the saved page until the data is ready.
+    if (topicOnlyRows.isNotEmpty()) {
+        currentPage = currentPage.coerceIn(0, totalPages - 1)
+    }
     // Slice the full rows list to only show the current page's topics,
     // but keep section headers that belong to this page's range.
-    val topicStart = currentPage * PAGE_SIZE
-    val topicEnd = (topicStart + PAGE_SIZE).coerceAtMost(topicOnlyRows.size)
+    // Guard: when topicOnlyRows is empty (async data hasn't loaded yet or
+    // filter removed all topics), clamp start to 0 so subList never gets
+    // fromIndex > toIndex — the persisted currentPage can exceed the new
+    // row count after a category switch or data reload.
+    val safeTopicCount = topicOnlyRows.size
+    val topicStart = if (safeTopicCount == 0) 0 else (currentPage * PAGE_SIZE).coerceAtMost(safeTopicCount)
+    val topicEnd = if (safeTopicCount == 0) 0 else (topicStart + PAGE_SIZE).coerceAtMost(safeTopicCount)
     val pageTopicKeys = remember(topicOnlyRows, topicStart, topicEnd) {
-        topicOnlyRows.subList(topicStart, topicEnd).map { it.key }.toSet()
+        if (topicStart < topicEnd) topicOnlyRows.subList(topicStart, topicEnd).map { it.key }.toSet()
+        else emptySet()
     }
     val paginatedRows = remember(rows, pageTopicKeys) {
         // Keep all section headers + the topic rows for this page.
         rows.filter { it.section != null || it.key in pageTopicKeys }
     }
-    // Only reset to page 0 when CATEGORY filter changes (not search).
+    // Preserve the session page on the first composition after navigation, then
+    // reset only when the category filter actually changes.
+    var categoryInitialized by remember { mutableStateOf(false) }
     LaunchedEffect(effectiveCat) {
-        currentPage = 0
+        if (categoryInitialized) currentPage = 0
+        else categoryInitialized = true
     }
     // Page nav visibility: hide when scrolling, show when stopped.
     var pageNavVisible by remember { mutableStateOf(true) }
@@ -499,6 +553,8 @@ fun TopicDatabaseScreen(navController: NavController) {
             .collect { index ->
                 savedScrollIndex = index
                 savedScrollOffset = 0
+                TopicBrowserSession.savedScrollIndex = index
+                TopicBrowserSession.savedScrollOffset = 0
             }
     }
     // v27r — switching the CATEGORY filter (or All) starts from the top,

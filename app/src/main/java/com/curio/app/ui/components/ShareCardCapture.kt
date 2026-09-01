@@ -1,8 +1,13 @@
 package com.curio.app.ui.components
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
@@ -43,6 +48,9 @@ import java.io.FileOutputStream
  * @param authority FileProvider authority string (usually `package.fileprovider`).
  * @param card      @Composable lambda that renders the self-contained share card.
  * @param onShared  Optional callback invoked after the chooser is launched.
+ * @param saveToGallery When true, writes the PNG to the gallery (MediaStore on
+ *                      API 29+, Pictures/Curio otherwise) instead of launching
+ *                      the share chooser.
  */
 fun shareComposableCard(
     context: Context,
@@ -50,7 +58,8 @@ fun shareComposableCard(
     authority: String,
     card: @Composable () -> Unit,
     onShared: () -> Unit = {},
-    exportDensity: Float? = null
+    exportDensity: Float? = null,
+    saveToGallery: Boolean = false
 ) {
     val density = exportDensity
         ?.coerceAtLeast(1f)
@@ -115,21 +124,23 @@ fun shareComposableCard(
             // ensures the exported PNG has no white corners or border.
             composeView.draw(canvas)
 
-            // Save PNG to share cache.
+            // Build and launch share intent (or save to gallery).
             val file = File(shareDir, "curio_share_${System.currentTimeMillis()}.png")
             FileOutputStream(file).use { fos ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
             }
-            bitmap.recycle()
-
-            // Build and launch share intent.
-            val uri = FileProvider.getUriForFile(context, authority, file)
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/png"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            if (saveToGallery) {
+                saveBitmapToGallery(context, bitmap, file.name)
+            } else {
+                val uri = FileProvider.getUriForFile(context, authority, file)
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "image/png"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(intent, "Share your Curio card"))
             }
-            context.startActivity(Intent.createChooser(intent, "Share your Curio card"))
+            bitmap.recycle()
             onShared()
         } finally {
             // Clean up the synthetic lifecycle + detach the invisible host so
@@ -142,6 +153,57 @@ fun shareComposableCard(
 
 private fun dpToExportPx(dp: Dp, density: Float): Int =
     (dp.value * density).toInt().coerceAtLeast(1)
+
+/**
+ * Writes [bitmap] to the gallery — MediaStore insert on API 29+ (no
+ * permission needed), app-external Pictures + media scan on 26–28 (the
+ * same ladder as MoodBoardExport's save). Returns the gallery Uri string
+ * (or file path) on success, null on failure.
+ */
+private fun saveBitmapToGallery(context: Context, bitmap: Bitmap, fileName: String): String? =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        runCatching {
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                put(
+                    MediaStore.Images.Media.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/Curio"
+                )
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+            val uri = context.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
+            ) ?: return@runCatching null
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+                values.clear()
+                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                context.contentResolver.update(uri, values, null, null)
+            } catch (t: Throwable) {
+                // Never leave a ghost IS_PENDING row hidden from the gallery.
+                runCatching { context.contentResolver.delete(uri, null, null) }
+                throw t
+            }
+            uri.toString()
+        }.getOrNull()
+    } else {
+        runCatching {
+            val dir = File(
+                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Curio"
+            ).apply { mkdirs() }
+            val file = File(dir, fileName)
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            android.media.MediaScannerConnection.scanFile(
+                context, arrayOf(file.absolutePath), arrayOf("image/png"), null
+            )
+            file.absolutePath
+        }.getOrNull()
+    }
 
 /**
  * Minimal [LifecycleOwner] for off-screen [ComposeView] instances.

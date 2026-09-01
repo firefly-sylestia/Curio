@@ -92,6 +92,12 @@ object CurioIcons {
     const val DragHandle  = "drag_handle"      // ⋮ — manage categories drag
     const val Info        = "info"
     const val Edit        = "edit"
+    // New category picker ("Category Mix Studio") — added to the bundled
+    // Material Symbols subset via fontTools (all verified ligatures).
+    const val Shuffle     = "shuffle"
+    const val GridView    = "grid_view"
+    const val Apps        = "apps"
+    const val PushPin     = "push_pin"
     // v115 — the avatar crop editor badge (glyph verified in the bundled
     // Material Symbols subset).
     const val Crop        = "crop"

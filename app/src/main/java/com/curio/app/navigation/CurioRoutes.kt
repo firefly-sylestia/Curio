@@ -216,6 +216,8 @@ object CurioRoutes {
     // v26 — recycle bin for soft-deleted captures (Settings entry).
     const val RECYCLE_BIN = "recycle-bin"
     const val DATABASE = "database"
+    // Share hub — browse every share-card design, pick a topic, share a card.
+    const val SHARE_HUB = "share-hub"
     const val FIELDMIND_OBSERVATION = "fieldmind-observation"
     // v8.34 — the Pet designer playground (custom pet look, Settings entry).
     const val PET_DESIGNER = "pet-designer"

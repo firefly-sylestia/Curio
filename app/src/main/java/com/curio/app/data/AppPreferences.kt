@@ -49,6 +49,7 @@ object AppPreferences {
 
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
+    private const val KEY_FAVORITE_SONG = "favorite_song"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -161,6 +162,22 @@ object AppPreferences {
     // restart and nothing else in the app honored them.
     private const val KEY_HIDDEN_CATEGORIES = "hidden_categories"
     private const val KEY_CATEGORY_ORDER = "category_order"
+    // Pinned categories for the new picker — up to 5 comma-joined CategoryId
+    // names. Defaults to Wildcard + good-to-explore picks on first launch.
+    private const val KEY_PINNED_CATEGORIES = "pinned_categories"
+    // Recently spun categories (most-recent-first, capped at 8) for the
+    // "Continue exploring" section of the new picker.
+    private const val KEY_RECENT_CATEGORIES = "recent_categories"
+    // New category picker ("Category Mix Studio"):
+    // - KEY_NAMED_MIXES — the named mixes the user creates/saves (JSON
+    //   array of NamedMix). Seeded from the old quick presets once.
+    // - KEY_CLASSIC_PICKER — ON restores the OLD glass-pill picker; the
+    //   new picker is the default (OFF).
+    // - KEY_PICKER_MIXES_SEEDED — the starter mixes were written once, so
+    //   deleting every mix doesn't resurrect them.
+    private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
+    private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
+    private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -184,6 +201,17 @@ object AppPreferences {
     fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
         displayNameState = name
+    }
+
+    // ── Favorite song (v... — Vinyl share card) ───────────────────────
+    // The user's own favorite song, shown as a small corner element on the
+    // Vinyl share card. Empty = a gentle default line.
+    fun getFavoriteSong(context: Context): String =
+        prefs(context).getString(KEY_FAVORITE_SONG, "") ?: ""
+
+    fun setFavoriteSong(context: Context, song: String) {
+        prefs(context).edit().putString(KEY_FAVORITE_SONG, song).apply()
+        favoriteSongState = song
     }
 
     // ── Custom streak tagline (v53) ──────────────────────────────────
@@ -432,6 +460,8 @@ object AppPreferences {
     // don't trigger recomposition.
     var displayNameState by mutableStateOf("Curious Explorer")
         internal set
+    var favoriteSongState by mutableStateOf("")
+        internal set
     var profileAvatarPathState by mutableStateOf("")
         internal set
 
@@ -467,6 +497,14 @@ object AppPreferences {
     // (the pre-v247 style) instead of the solid white/black pill. Needs
     // Liquid glass pills on.
     var glassClassicIndicatorState by mutableStateOf(false)
+        private set
+
+    // v30x — DEEPENED SIGNATURE CARD ELEMENTS (experiment, default OFF):
+    // the Signature share-card backgrounds render in their fully detailed
+    // form — layered gradient atmospheres, glows, vignettes and rich
+    // hand-drawn scenes per category — instead of the streamlined default
+    // line-art style.
+    var detailedSignatureElementsState by mutableStateOf(false)
         private set
 
     // v292 — NAV INDICATOR COLOR: what the liquid-glass tab bar's resting
@@ -681,6 +719,27 @@ object AppPreferences {
         private set
 
     /**
+     * Reactive saved-mixes state for the new category picker — the named
+     * mixes a user creates/saves. Seeded from the old quick presets once
+     * (first use of the new picker). Updated by [addOrReplaceMix] /
+     * [deleteMix]; seeded from prefs in [initThemeMode].
+     */
+    var savedMixesState by mutableStateOf<List<NamedMix>>(emptyList())
+        private set
+
+    /**
+     * Classic-picker toggle for the new category picker: OFF = the new
+     * default picker; ON = the old glass-pill picker. Seeded from prefs
+     * in [initThemeMode].
+     */
+    var classicPickerEnabledState by mutableStateOf(false)
+        private set
+
+    /** Whether the starter named mixes were already written once. */
+    var pickerMixesSeededState by mutableStateOf(false)
+        private set
+
+    /**
      * Reactive category ORDER state (v7.94) — set via Manage Categories.
      * Empty = the default order. [CurioCategories.visible] applies it, so
      * the Home/Cabinet chip rows and the pickers honor the user's reorder.
@@ -751,12 +810,14 @@ object AppPreferences {
         reminderEnabledState = isReminderEnabled(context)
         drawerConstellationState = isDrawerConstellationEnabled(context)
         displayNameState = getDisplayName(context)
+        favoriteSongState = getFavoriteSong(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
+        detailedSignatureElementsState = isDetailedSignatureElementsEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
@@ -791,6 +852,9 @@ object AppPreferences {
         topicSentimentsState = getTopicSentiments(context)
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
+        savedMixesState = getSavedMixes(context)
+        classicPickerEnabledState = isClassicPickerEnabled(context)
+        pickerMixesSeededState = isPickerMixesSeeded(context)
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
@@ -813,7 +877,11 @@ object AppPreferences {
 
     /** Whether the app renders dark right now — resolves "system" via the
      *  device night flag (non-composable twin of [isCurioDarkTheme]). */
-    fun isDarkTheme(context: Context): Boolean = when (getThemeMode(context)) {
+    fun isDarkTheme(context: Context): Boolean = isDarkMode(context, getThemeMode(context))
+
+    /** Whether a *given* [mode] (not the currently stored one) resolves dark —
+     *  used by the theme-switch reveal to detect a real light/dark change. */
+    fun isDarkMode(context: Context, mode: String): Boolean = when (mode) {
         THEME_DARK -> true
         THEME_SYSTEM -> (context.resources.configuration.uiMode and
             Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
@@ -1073,6 +1141,7 @@ object AppPreferences {
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
+    private const val KEY_DETAILED_SIGNATURE_ELEMENTS = "detailed_signature_elements"
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
     private const val KEY_NAV_INDICATOR_OPACITY = "nav_indicator_opacity"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
@@ -1310,6 +1379,15 @@ object AppPreferences {
     fun setGlassClassicIndicatorEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLASSIC_INDICATOR, enabled).apply()
         glassClassicIndicatorState = enabled
+    }
+
+    // Deepened signature share-card elements (experiment, default OFF).
+    fun isDetailedSignatureElementsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_DETAILED_SIGNATURE_ELEMENTS, false)
+
+    fun setDetailedSignatureElementsEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_DETAILED_SIGNATURE_ELEMENTS, enabled).apply()
+        detailedSignatureElementsState = enabled
     }
 
     // ── Clear-glass style (experiment, default OFF) ──────────────────
@@ -2001,6 +2079,148 @@ object AppPreferences {
         setLastSpinCategory(context, ids.first())
     }
 
+    /**
+     * Pinned categories for the new category picker (up to 5). Persists
+     * across restarts. Defaults to Wildcard + a few good-to-explore
+     * picks (Artists, Films, Books, Scientists) on first launch.
+     */
+    fun getPinnedCategories(context: Context): List<CategoryId> {
+        val raw = prefs(context).getString(KEY_PINNED_CATEGORIES, null)
+        val ids = raw
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.mapNotNull { name -> CategoryId.values().firstOrNull { it.name == name } }
+            .orEmpty()
+        return if (ids.isNotEmpty()) ids.take(5)
+            else listOf(CategoryId.WILDCARD, CategoryId.ARTISTS, CategoryId.FILMS, CategoryId.BOOKS, CategoryId.SCIENTISTS)
+    }
+
+    fun setPinnedCategories(context: Context, ids: List<CategoryId>) {
+        val names = ids.map { it.name }.distinct().take(5)
+        prefs(context).edit().putString(KEY_PINNED_CATEGORIES, names.joinToString(",")).apply()
+    }
+
+    /** Toggle a category in/out of the pinned set (max 5). */
+    fun togglePinnedCategory(context: Context, id: CategoryId): List<CategoryId> {
+        val current = getPinnedCategories(context).toMutableList()
+        if (current.contains(id)) current.remove(id) else {
+            if (current.size >= 5) current.removeAt(0)
+            current.add(id)
+        }
+        setPinnedCategories(context, current)
+        return current
+    }
+
+    /**
+     * Recently spun categories (most-recent-first, capped at 8). Used by
+     * the new picker's "Continue exploring" section. Call this when a
+     * spin lands on a topic.
+     */
+    fun getRecentCategories(context: Context): List<CategoryId> {
+        val raw = prefs(context).getString(KEY_RECENT_CATEGORIES, null)
+        return raw
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.mapNotNull { name -> CategoryId.values().firstOrNull { it.name == name } }
+            .orEmpty()
+    }
+
+    fun noteRecentCategory(context: Context, id: CategoryId) {
+        val current = getRecentCategories(context).toMutableList()
+        current.remove(id)
+        current.add(0, id)
+        val names = current.map { it.name }.take(8)
+        prefs(context).edit().putString(KEY_RECENT_CATEGORIES, names.joinToString(",")).apply()
+    }
+
+    // ── New picker: named mixes + classic toggle ──────────────────────
+    /**
+     * All saved named mixes, in creation order (newest first after
+     * [addOrReplaceMix]). Persisted as a JSON array (the [PinnedTopic]
+     * pattern) so mix names survive round-trips.
+     */
+    fun getSavedMixes(context: Context): List<NamedMix> {
+        val raw = prefs(context).getString(KEY_NAMED_MIXES, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { i ->
+                val obj = arr.getJSONObject(i)
+                val lanes = obj.optJSONArray("lanes") ?: return@List null
+                if (lanes.length() == 0) return@List null
+                val laneIds = List(lanes.length()) { j ->
+                    CategoryId.values().firstOrNull { it.name == lanes.optString(j) }
+                }.filterNotNull()
+                if (laneIds.isEmpty()) return@List null
+                NamedMix(
+                    name = obj.optString("name", "Mix").ifBlank { "Mix" },
+                    laneIds = laneIds,
+                    createdAtMillis = obj.optLong("createdAtMillis", System.currentTimeMillis())
+                )
+            }.filterNotNull()
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveSavedMixes(context: Context, mixes: List<NamedMix>) {
+        val arr = JSONArray()
+        mixes.forEach { mix ->
+            val lanes = JSONArray()
+            mix.laneIds.forEach { lanes.put(it.name) }
+            arr.put(
+                JSONObject()
+                    .put("name", mix.name)
+                    .put("lanes", lanes)
+                    .put("createdAtMillis", mix.createdAtMillis)
+            )
+        }
+        prefs(context).edit().putString(KEY_NAMED_MIXES, arr.toString()).apply()
+        savedMixesState = mixes
+    }
+
+    /**
+     * Adds a new mix, or replaces an EXISTING one matched by
+     * [NamedMix.createdAtMillis] (the stable id — editing/renaming keeps
+     * it). Returns the updated list.
+     */
+    fun addOrReplaceMix(context: Context, mix: NamedMix): List<NamedMix> {
+        val updated = getSavedMixes(context).toMutableList().apply {
+            val idx = indexOfFirst { it.createdAtMillis == mix.createdAtMillis }
+            if (idx >= 0) this[idx] = mix else add(0, mix)
+        }
+        saveSavedMixes(context, updated)
+        return updated
+    }
+
+    fun deleteMix(context: Context, createdAtMillis: Long): List<NamedMix> {
+        val updated = getSavedMixes(context).filterNot { it.createdAtMillis == createdAtMillis }
+        saveSavedMixes(context, updated)
+        return updated
+    }
+
+    /**
+     * Classic-picker toggle: false = the NEW picker is the default; true
+     * restores the OLD glass-pill picker (the A/B side of the redesign).
+     */
+    fun isClassicPickerEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CLASSIC_PICKER, false)
+
+    fun setClassicPickerEnabled(context: Context, on: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CLASSIC_PICKER, on).apply()
+        classicPickerEnabledState = on
+    }
+
+    /** Whether the starter mixes were already written once. */
+    fun isPickerMixesSeeded(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_PICKER_MIXES_SEEDED, false)
+
+    fun setPickerMixesSeeded(context: Context, on: Boolean) {
+        prefs(context).edit().putBoolean(KEY_PICKER_MIXES_SEEDED, on).apply()
+        pickerMixesSeededState = on
+    }
+
     // ── Custom pet design (v8.34 — Pet designer playground) ──────────
     /** The saved custom pet-design text, or null for the default look. */
     fun getPetDesign(context: Context): String? =
@@ -2171,6 +2391,18 @@ object AppPreferences {
     private fun prefs(context: Context) =
         context.applicationContext.getSharedPreferences(NAME, Context.MODE_PRIVATE)
 }
+
+/**
+ * One named category mix for the new category picker — a user-saved set of
+ * lanes with a friendly name (e.g. "Cosy night"). [createdAtMillis] acts as
+ * the stable id: editing/renaming keeps it, so mixes can be replaced in
+ * place, and [AppPreferences.addOrReplaceMix] matches on it.
+ */
+data class NamedMix(
+    val name: String,
+    val laneIds: List<CategoryId>,
+    val createdAtMillis: Long
+)
 
 /**
  * A topic the user pinned on the Topic Reveal screen so they can revisit it

@@ -1,24 +1,29 @@
 package com.curio.app.features.picker
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -35,12 +40,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
@@ -57,8 +61,6 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioBackButton
-import com.curio.app.ui.components.CurioCategoryCard
 import com.curio.app.ui.components.MorphEntrance
 
 import com.curio.app.ui.components.curioButtonColors
@@ -75,7 +77,6 @@ import com.curio.app.ui.theme.onAccent
 import com.curio.app.ui.theme.themedAccent
 import com.curio.app.ui.theme.themedButtonFill
 import com.curio.app.ui.theme.themedButtonInk
-import kotlinx.coroutines.launch
 
 /**
  * v27l — display rank for the expanded (new) lanes on the picker's New page.
@@ -83,32 +84,6 @@ import kotlinx.coroutines.launch
  * math, technology, then human sciences. Unknown ids fall back to a high
  * rank so they sort after every ranked lane (then alpha by display name).
  */
-private fun newLaneRank(id: CategoryId): Int = when (id) {
-    // Life sciences
-    CategoryId.BIOLOGY -> 0
-    CategoryId.ANIMALS -> 1
-    CategoryId.PLANTS -> 2
-    CategoryId.MEDICINE -> 3
-    // Chemistry
-    CategoryId.CHEMISTRY -> 4
-    // Earth & space
-    CategoryId.ASTRONOMY -> 5
-    CategoryId.GEOLOGY -> 6
-    CategoryId.OCEANS -> 7
-    // Mathematics
-    CategoryId.MATHEMATICS -> 8
-    // Technology
-    CategoryId.TECHNOLOGIES -> 9
-    CategoryId.ENGINEERING -> 10
-    // Human sciences
-    CategoryId.PSYCHOLOGY -> 11
-    CategoryId.LANGUAGE -> 12
-    CategoryId.HISTORY -> 13
-    CategoryId.ECONOMICS -> 14
-    CategoryId.QUOTES -> 15
-    else -> 100
-}
-
 /**
  * v44 — process-scoped draft of the category picker. The selection, the
  * multi-select mode, the Original/New page and BOTH grids' scroll offsets
@@ -122,22 +97,66 @@ private fun newLaneRank(id: CategoryId): Int = when (id) {
 object CategoryPickerDraft {
     var selected: List<String>? = null
     var multiSelect: Boolean = false
-    var page: Int = 0
-    var originalIndex: Int = 0
-    var originalOffset: Int = 0
-    var newIndex: Int = 0
-    var newOffset: Int = 0
 
     fun clear() {
         selected = null
         multiSelect = false
-        page = 0
-        originalIndex = 0
-        originalOffset = 0
-        newIndex = 0
-        newOffset = 0
     }
 }
+
+/**
+ * v1 — the redesigned picker's mode tabs. The old single flat deck is
+ * split into three ways to choose:
+ *
+ *  - **Curio** — a casual, culture-first deck (music, screen, stories, art,
+ *    comics, food) that needs zero background knowledge; grouped and
+ *    playful. Tap a lane to open it immediately.
+ *  - **Knowledge** — the discovery/learning lanes (sciences, history, maths,
+ *    technology, the human mind), grouped by theme; tap to open.
+ *  - **Mix** — everything, with multi-select + the Mix button (the classic
+ *    picker, Wildcard included).
+ *
+ * The lane sets are DECLARATIVE lists of [CategoryId] (resolved to visible
+ * categories at render), so future additions — like branch/daily discovery
+ * paths — are just more groups or a new mode added to the enum without
+ * touching the grid renderer.
+ */
+// Glyphs must exist in the bundled font subset (CurioIcon resolves them
+// by name); AutoAwesome (sparkle) / Science (flask) / Check are all in use.
+enum class PickerMode(val label: String, val glyph: String) {
+    CURIO("Curio", CurioIcons.AutoAwesome),
+    KNOWLEDGE("Knowledge", CurioIcons.Science),
+    MIX("Mix", CurioIcons.Check)
+}
+
+/** One labelled row-group of lanes inside a Curio/Knowledge mode. */
+private data class PickerGroup(val label: String, val lanes: List<CategoryId>)
+
+/**
+ * The Curio/Knowledge mode lanes, grouped by theme. Mix uses everything +
+ * Wildcard (declared separately in [mixModeLaneIds]). Kept as the single
+ * source of truth so the picker grid only iterates these groups.
+ */
+private val curioModeGroups = listOf(
+    PickerGroup("Music", listOf(CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS)),
+    PickerGroup("On screen", listOf(CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.ANIMATED_MOVIES, CategoryId.SERIES)),
+    PickerGroup("Stories", listOf(CategoryId.AUTHORS, CategoryId.BOOKS, CategoryId.MYTHOLOGY, CategoryId.QUOTES)),
+    PickerGroup("Art & artists", listOf(CategoryId.PAINTERS, CategoryId.ARTWORKS)),
+    PickerGroup("Comics & anime", listOf(CategoryId.ANIME, CategoryId.MANGA, CategoryId.MANHWA)),
+    PickerGroup("Play & taste", listOf(CategoryId.GAMES, CategoryId.SPORTS, CategoryId.FOOD, CategoryId.INTERNET))
+)
+
+private val knowledgeModeGroups = listOf(
+    PickerGroup("Life sciences", listOf(CategoryId.BIOLOGY, CategoryId.ANIMALS, CategoryId.PLANTS, CategoryId.MEDICINE)),
+    PickerGroup("Physical sciences", listOf(CategoryId.CHEMISTRY, CategoryId.GEOLOGY, CategoryId.ASTRONOMY, CategoryId.SCIENTISTS)),
+    PickerGroup("How things work", listOf(CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING, CategoryId.DISCOVERIES)),
+    PickerGroup("The human mind", listOf(CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS, CategoryId.ECONOMICS, CategoryId.LANGUAGE)),
+    PickerGroup("Our world", listOf(CategoryId.HISTORY, CategoryId.OCEANS))
+)
+
+/** The Mix mode shows every lane plus Wildcard (the surprise-mix lane). */
+private val mixModeLaneIds: List<CategoryId> =
+    CategoryId.values().toList()
 
 /**
  * Full-screen Category Picker.
@@ -158,54 +177,104 @@ object CategoryPickerDraft {
 @Composable
 fun CategoryPickerScreen(navController: NavController) {
     val context = LocalContext.current
-    // v7.94 — read the REACTIVE visible list directly (no remember): hidden
-    // lanes drop out and reordered lanes follow Manage Categories instantly.
-    // v27i — `visible` already excludes new lanes that haven't shipped, so the
-    // original page (and every other surface) never shows empty dead tiles.
     val categories = CurioCategories.visible
-    // v27i — the NEW-lanes page reads `all` directly so it can show the
-    // not-yet-shipped lanes as Coming soon tiles (they're filtered out of
-    // `visible` until their content ships).
-    // v27l — the New page groups the expanded lanes logically instead of
-    // creation order: life sciences, chemistry, earth & space, math, tech,
-    // then human sciences. Everything not in the rank falls back to alpha.
-    val newLanes = CurioCategories.all
-        .filter { it.id in CategoryId.newLanes && it.id !in AppPreferences.hiddenCategoriesState }
-        .sortedBy { cat -> newLaneRank(cat.id) }
-    val originalLanes = categories.filter { it.id !in CategoryId.newLanes }
-    // v26 — reopen with the persisted deck: a mixed selection comes back in
-    // multi-select with every lane ticked, so the user can SEE and CHANGE
-    // the mix instead of it collapsing to the single first category. Hidden
-    // lanes are filtered out so they never show as pre-selected.
-    val persistedVisible = remember {
-        AppPreferences.getLastSpinCategories(context)
-            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
-    }
-    // v44 — the picker draft restores your place: grid scroll offsets (and
-    // the page + selection below) survive leaving the picker until restart.
-    val draft = CategoryPickerDraft
-    val originalGridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = if (draft.selected != null) draft.originalIndex else 0,
-        initialFirstVisibleItemScrollOffset = if (draft.selected != null) draft.originalOffset else 0
-    )
-    val newGridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = if (draft.selected != null) draft.newIndex else 0,
-        initialFirstVisibleItemScrollOffset = if (draft.selected != null) draft.newOffset else 0
-    )
-    // Wide windows (tablet / landscape) spread the deck grid and cap the
-    // sheet's content width so the picker stays readable on large screens.
-    val wide = windowWidthSizeClass().isWide
-    // ── Category tint wash — this picker hands off straight to the Shuffle
-    //    tab, so it wears the last-used deck's color story (same wash as the
-    //    Spin page / Save / Cabinet) instead of a plain theme background.
     val washCat = remember {
         val id = AppPreferences.getLastSpinCategories(context).firstOrNull()
             ?: AppPreferences.getLastSpinCategory(context)
         CurioCategories.byId(id)
     }
-    // Null = not in multi-select mode (tap-to-open). Once set, cards toggle.
-    // v44 — seed from the process draft when one is staged (selection + mode
-    // restored), else from the persisted deck as before.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    LaunchedEffect(Unit) { PetLandmarks.noteSheet("picker", true) }
+    DisposableEffect(Unit) {
+        onDispose { PetLandmarks.noteSheet("picker", false) }
+    }
+
+    val sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ModalBottomSheet(
+        onDismissRequest = { navController.popBackStack() },
+        sheetState = sheetState,
+        containerColor = washCat.categoryBackgroundWash(),
+        dragHandle = {
+            // Glass grabber pill
+            Box(
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 4.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        lerp(
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                            MaterialTheme.colorScheme.surfaceContainerHighest,
+                            0.5f
+                        ).copy(alpha = 0.6f)
+                    )
+            )
+        },
+        shape = sheetShape
+    ) {
+        CategoryPickerContent(
+            washCat = washCat,
+            categories = categories,
+            onDismiss = { navController.popBackStack() },
+            onCategorySelected = { cat ->
+                AppPreferences.setLastSpinCategories(context, listOf(cat.id))
+                navController.navigateToTab(CurioRoutes.SPIN)
+            },
+            onCategoriesMixed = { cats ->
+                if (cats.isEmpty()) {
+                    val single = AppPreferences.getLastSpinCategory(context)
+                    AppPreferences.setLastSpinCategories(context, listOf(single))
+                } else {
+                    AppPreferences.setLastSpinCategories(context, cats.map { it.id })
+                }
+                navController.navigateToTab(CurioRoutes.SPIN)
+            }
+        )
+    }
+}
+
+/**
+ * The redesigned picker's inner content — the Curio/Knowledge/Mix mode tabs,
+ * preset chips, icon-tile grid and Mix/Cancel row. Shared by the full-screen
+ * [CategoryPickerScreen] (wrapped in its own ModalBottomSheet) and the Spin
+ * page's inline sheet (shown above the shuffle deck).
+ *
+ * @param washCat the category whose tint wash the picker wears.
+ * @param categories the visible category list (for preset resolution).
+ * @param onCategorySelected fired on tap-to-open (Curio/Knowledge mode, or
+ *   Mix single-tap). The caller persists the selection and dismisses.
+ * @param onCategoriesMixed fired on Mix (empty = cancelled mix → revert to
+ *   the last single category). The caller persists and dismisses.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryPickerContent(
+    washCat: CurioCategory,
+    categories: List<CurioCategory>,
+    onCategorySelected: (CurioCategory) -> Unit,
+    onCategoriesMixed: (List<CurioCategory>) -> Unit,
+    onDismiss: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    // v301 — Single flat grid. Uses ALL categories (not just visible) so
+    // Coming Soon tiles show for unready lanes. Hidden lanes filtered out.
+    val allUnhidden = remember {
+        CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
+    }
+    val sortedCategories = remember(allUnhidden) {
+        val wildcard = allUnhidden.filter { it.id == CategoryId.WILDCARD }
+        val rest = allUnhidden.filter { it.id != CategoryId.WILDCARD }
+            .sortedBy { it.displayName.lowercase() }
+        wildcard + rest
+    }
+    val draft = CategoryPickerDraft
+    val persistedVisible = remember {
+        AppPreferences.getLastSpinCategories(context)
+            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
+    }
+    val gridState = rememberLazyGridState()
+    val wide = windowWidthSizeClass().isWide
     var selectedSlugs by rememberSaveable {
         mutableStateOf(
             draft.selected ?: persistedVisible.map { it.id.routeSlug }
@@ -214,13 +283,13 @@ fun CategoryPickerScreen(navController: NavController) {
     var multiSelectMode by rememberSaveable {
         mutableStateOf(if (draft.selected != null) draft.multiSelect else persistedVisible.size > 1)
     }
+    var modeName by rememberSaveable { mutableStateOf(PickerMode.MIX.name) }
+    val mode = runCatching { PickerMode.valueOf(modeName) }.getOrDefault(PickerMode.MIX)
 
     val toggleSlug = { slug: String ->
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug
     }
 
-    // v27k — total topics across the ticked lanes (the Mix button shows the
-    // pool size, not the lane count).
     var selectedTopicCount by remember { mutableStateOf(0) }
     LaunchedEffect(selectedSlugs) {
         val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
@@ -231,69 +300,20 @@ fun CategoryPickerScreen(navController: NavController) {
         }
     }
 
-    // ── v27i — the two pages (Original / New) + a scope for tab jumps ──
-    // v44 — reopen on the page you left (draft.page), restored until restart.
-    val pagerState = rememberPagerState(
-        initialPage = if (draft.selected != null) draft.page else 0,
-        pageCount = { 2 }
-    )
-    val scope = rememberCoroutineScope()
-
-    // v44 — keep the draft live: every selection/mode/page/scroll change is
-    // mirrored into [CategoryPickerDraft] so leaving and reopening the
-    // picker restores exactly where you were (selection, preset mix, page
-    // and both grids' scroll offsets).
     LaunchedEffect(selectedSlugs, multiSelectMode) {
         draft.selected = selectedSlugs
         draft.multiSelect = multiSelectMode
     }
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect { draft.page = it }
-    }
-    LaunchedEffect(originalGridState) {
-        snapshotFlow {
-            originalGridState.firstVisibleItemIndex to originalGridState.firstVisibleItemScrollOffset
-        }.collect { (index, offset) ->
-            draft.originalIndex = index
-            draft.originalOffset = offset
-        }
-    }
-    LaunchedEffect(newGridState) {
-        snapshotFlow {
-            newGridState.firstVisibleItemIndex to newGridState.firstVisibleItemScrollOffset
-        }.collect { (index, offset) ->
-            draft.newIndex = index
-            draft.newOffset = offset
-        }
-    }
 
-    // Same full-screen + swipe-down-dismiss pattern as the filter page — a
-    // ModalBottomSheet expanded to full height with a drag handle.
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    // v8.21 — tell the pet a drawer is up so it comes over to peek.
-    LaunchedEffect(Unit) { PetLandmarks.noteSheet("picker", true) }
-    DisposableEffect(Unit) {
-        onDispose { PetLandmarks.noteSheet("picker", false) }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = { navController.popBackStack() },
-        sheetState = sheetState,
-        // Theme-aware category wash — deep accent over cream in light,
-        // pastel twin glow over midnight in dark.
-        containerColor = washCat.categoryBackgroundWash(),
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-    ) {
-        // The sheet spans the whole window; on wide windows the content is
-        // centered in the same max-width column as every other page.
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // contentAlignment takes a full Alignment, not Alignment.Horizontal
-            // (CenterHorizontally) — Center also matches the vertical no-op
-            // since the box wraps the sheet content's height.
-            contentAlignment = Alignment.Center
-        ) {
+    // The sheet spans the whole window; on wide windows the content is
+    // centered in the same max-width column as every other page.
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        // contentAlignment takes a full Alignment, not Alignment.Horizontal
+        // (CenterHorizontally) — Center also matches the vertical no-op
+        // since the box wraps the sheet content's height.
+        contentAlignment = Alignment.Center        ) {
+        val headerShape = RoundedCornerShape(50)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -301,33 +321,85 @@ fun CategoryPickerScreen(navController: NavController) {
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp)
         ) {
+        // ── Glass header pill — a centered title with a glass close chip ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 0.dp),
+                .padding(top = 4.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            CurioBackButton(onClick = { navController.popBackStack() })
+            // Spacer to balance the close chip on the right
+            Spacer(Modifier.width(36.dp))
             Text(
                 text = "What are we exploring?",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
+            // Glass close chip
+            Surface(
+                onClick = onDismiss,
+                shape = headerShape,
+                color = lerp(
+                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                    if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
+                    0.82f
+                ),
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .curioDarkGlow(2.dp, headerShape)
+                    .curioGlassEdge(headerShape)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Close,
+                    contentDescription = "Close",
+                    size = 18.dp,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(9.dp)
+                )
+            }
         }
 
-        // ── v27i — quick-mix preset chips (replaces the old subtitle; the
-        //    same row sits above BOTH pages). Tapping one enters multi-select
-        //    with exactly those lanes ticked so the mix can be adjusted
-        //    before Mix — it never silently launches a deck you can't see.
+        // ── v1 — Mode tabs: Curio / Knowledge / Mix. The redesigned picker
+        //    splits the old single flat deck into two curated tap-to-open
+        //    modes plus the classic Mix (multi-select + presets). The mode
+        //    drives which lanes / groups show below.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            PickerMode.entries.forEach { m ->
+                PickerPresetChip(
+                    label = m.label,
+                    glyph = m.glyph,
+                    selected = mode == m,
+                    accent = washCat.themedAccent(),
+                    accentInk = washCat.onAccent(),
+                    onClick = {
+                        modeName = m.name
+                        // Leaving Mix drops a transient multi-select.
+                        if (m != PickerMode.MIX) {
+                            multiSelectMode = false
+                            selectedSlugs = emptyList()
+                            CategoryPickerDraft.clear()
+                        }
+                    }
+                )
+            }
+        }
+
+        // ── Quick-mix preset chips — only in Mix mode (the original row) ──
+        if (mode == PickerMode.MIX) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                // v28 — the preset row hugs the Original/New tabs.
+                // v28 — the preset row hugs the tabs.
                 // v90 — unhugged a touch (4/1 → 8/2) so the fuller preset
                 // chips aren't squished against the tabs.
-                .padding(top = 8.dp, bottom = 2.dp),
+                .padding(top = 6.dp, bottom = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             deckPresets.forEach { preset ->
@@ -363,49 +435,22 @@ fun CategoryPickerScreen(navController: NavController) {
                         }
                     }
                 )
-            }
+            }        }
         }
 
-        // ── v27i — page tabs: Original vs the new lanes ─────────────
-        Row(
-            // v90 — a touch more room under the tabs (1/4 → 2/6) so the
-            // two rows breathe.
-            modifier = Modifier.padding(top = 2.dp, bottom = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PickerPageTab(
-                label = "Original",
-                count = originalLanes.size,
-                selected = pagerState.currentPage == 0,
-                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-                // v83 — dynamic: the selected tab wears the wash category's
-                // accent (deep same-hue in dark, never the pale rose).
-                accent = washCat.themedAccent(),
-                accentInk = washCat.onAccent()
-            )
-            PickerPageTab(
-                label = "New",
-                count = newLanes.size,
-                selected = pagerState.currentPage == 1,
-                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
-                accent = washCat.themedAccent(),
-                accentInk = washCat.onAccent()
-            )
-            Spacer(Modifier.weight(1f))
-            // v27i — the tap/hold hint moved here so the preset chips could
-            // take the subtitle slot; multi-select is still a long-press.
-            Text(
-                text = if (multiSelectMode) {
-                    "Tap to toggle decks"
-                } else {
-                    "Tap opens · hold to mix"
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                maxLines = 1
-            )
-        }
+        // Hint row — mode aware.
+        Text(
+            text = when {
+                mode == PickerMode.MIX && multiSelectMode -> "Tap to toggle decks"
+                mode == PickerMode.MIX -> "Tap opens · hold to mix"
+                mode == PickerMode.CURIO -> "A relaxed, culture-first deck — tap any lane to explore"
+                else -> "Dig into knowledge — tap any lane to explore"
+            },
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            maxLines = 2,
+            modifier = Modifier.padding(top = 2.dp, bottom = 6.dp)
+        )
 
         // v7.4 — the grid sits inside a WEIGHTED Box that is a DIRECT child
         // of the sheet Column. Weight inside the old MorphEntrance wrapper
@@ -421,87 +466,81 @@ fun CategoryPickerScreen(navController: NavController) {
             // overshoot read as a brief "more elevated" card shadow flash
             // before settling on the category page.
             MorphEntrance(bouncy = false) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize()
-                ) { page ->
-                    when (page) {
-                        0 -> LazyVerticalGrid(
-                            state = originalGridState,
-                            columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                            contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                        items(originalLanes) { cat ->
+                when (mode) {
+                    // ── Mix — classic full deck, everything + Wildcard ──
+                    PickerMode.MIX -> LazyVerticalGrid(
+                        state = gridState,
+                        columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
+                        contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(sortedCategories) { cat ->
                             val slug = cat.id.routeSlug
-                            CurioCategoryCard(
+                            PickerIconTile(
                                 category = cat,
-                                isSelected = multiSelectMode && slug in selectedSlugs,
+                                comingSoon = !cat.isReady,
+                                selected = multiSelectMode && slug in selectedSlugs,
                                 onClick = {
-                                    if (multiSelectMode) {
-                                        toggleSlug(slug)
-                                    } else {
-                                        // Default: tap opens this category on the
-                                        // persistent Shuffle tab (the plain "spin"
-                                        // route), not a separate spin/{slug} page.
-                                        // The selection is persisted so it survives
-                                        // back navigation, tab switches and relaunch.
-                                        AppPreferences.setLastSpinCategories(context, listOf(cat.id))
-                                        CategoryPickerDraft.clear()
-                                        navController.navigateToTab(CurioRoutes.SPIN)
-                                    }
+                                    if (!cat.isReady) return@PickerIconTile
+                                    if (multiSelectMode) toggleSlug(slug)
+                                    else onCategorySelected(cat)
                                 },
-                                onLongClick = {
-                                    // Enter multi-select mode and select this card.
-                                    multiSelectMode = true
-                                    if (slug !in selectedSlugs) toggleSlug(slug)
-                                }
-                            )
-                        }
-                        }
-                        else -> LazyVerticalGrid(
-                            state = newGridState,
-                            columns = if (wide) GridCells.Adaptive(minSize = 160.dp) else GridCells.Fixed(2),
-                            contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                        items(newLanes) { cat ->
-                            val slug = cat.id.routeSlug
-                            val comingSoon = !cat.isReady
-                            CurioCategoryCard(
-                                category = cat,
-                                comingSoon = comingSoon,
-                                isSelected = multiSelectMode && slug in selectedSlugs,
-                                onClick = {
-                                    if (!comingSoon) {
-                                        if (multiSelectMode) {
-                                            toggleSlug(slug)
-                                        } else {
-                                            AppPreferences.setLastSpinCategories(context, listOf(cat.id))
-                                            CategoryPickerDraft.clear()
-                                            navController.navigateToTab(CurioRoutes.SPIN)
-                                        }
-                                    }
-                                },
-                                onLongClick = if (comingSoon) null else {
+                                onLongClick = if (cat.isReady) {
                                     {
-                                        multiSelectMode = true
-                                        if (slug !in selectedSlugs) toggleSlug(slug)
+                                        if (!multiSelectMode) multiSelectMode = true
+                                        toggleSlug(slug)
                                     }
-                                }
+                                } else null
                             )
                         }
+                    }
+                    // ── Curio / Knowledge — grouped, tap-to-open ───────
+                    else -> {
+                        val groups = if (mode == PickerMode.CURIO) curioModeGroups else knowledgeModeGroups
+                        LazyVerticalGrid(
+                            state = gridState,
+                            columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
+                            contentPadding = PaddingValues(top = 4.dp, bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            groups.forEach { group ->
+                                val lanes = group.lanes.mapNotNull { id ->
+                                    // Union of all + visible so hidden lanes drop
+                                    // out but coming-soon (not-yet-ready) still
+                                    // show their disabled tile.
+                                    CurioCategories.all.firstOrNull { it.id == id }
+                                        ?.takeIf { it.id !in AppPreferences.hiddenCategoriesState }
+                                }.ifEmpty { return@forEach }
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    Text(
+                                        group.label,
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
+                                    )
+                                }
+                                items(lanes) { cat ->
+                                    PickerIconTile(
+                                        category = cat,
+                                        comingSoon = !cat.isReady,
+                                        selected = false,
+                                        onClick = {
+                                            if (!cat.isReady) return@PickerIconTile
+                                            onCategorySelected(cat)
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
+            }        }
 
-        if (multiSelectMode) {
+        if (multiSelectMode && mode == PickerMode.MIX) {
             // ── Mix row — only visible in multi-select mode ────────────
             Row(
                 modifier = Modifier
@@ -514,19 +553,10 @@ fun CategoryPickerScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (selectedSlugs.isEmpty()) return@Button
-                        // Resolve the chosen slugs and persist the FULL set
-                        // (single or mixed) so the Shuffle tab reopens the
-                        // same deck after back navigation, tab switches and
-                        // app restarts. navigateToTab drops the picker and
-                        // lands on the real Shuffle tab — not a separate
-                        // spin/{slug} instance.
-                        val ids = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it)?.id }
-                        if (ids.isEmpty()) return@Button
-                        AppPreferences.setLastSpinCategories(context, ids)
-                        // The mix is committed — drop the draft so the next
-                        // picker open shows the persisted deck fresh.
+                        val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
+                        if (cats.isEmpty()) return@Button
                         CategoryPickerDraft.clear()
-                        navController.navigateToTab(CurioRoutes.SPIN)
+                        onCategoriesMixed(cats)
                     },
                     enabled = selectedSlugs.isNotEmpty(),
                     shape = mixShape,
@@ -570,7 +600,6 @@ fun CategoryPickerScreen(navController: NavController) {
                 }
             }
         }
-    }
     }
     }
 }
@@ -653,4 +682,109 @@ fun PickerPageTab(
             )
         }
     }
+}
+
+/**
+ * v1 — the redesigned picker's compact lane tile: a small rounded square
+ * with the lane's glyph over its name, on a THEME-NEUTRAL surface (no
+ * per-category color wash / gradient) so the grid reads quiet and the icon
+ * leads. Used by every mode (Curio / Knowledge / Mix). Multi-select (Mix)
+ * shows the selected check state; tap opens the lane.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PickerIconTile(
+    category: CurioCategory,
+    comingSoon: Boolean,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null
+) {
+ val shape = RoundedCornerShape(16.dp)
+ val catAccent = category.themedAccent()
+ val catInk = category.onAccent()
+ val idleFill = lerp(
+  MaterialTheme.colorScheme.surfaceContainerHigh,
+  if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
+  0.82f
+ )
+ val isWildcard = category.id == CategoryId.WILDCARD
+ Surface(
+  shape = shape,
+  color = when {
+   selected -> catAccent
+   else -> idleFill
+  },
+  shadowElevation = if (comingSoon) 0.dp else if (selected) 4.dp else 2.dp,
+  modifier = Modifier
+   .fillMaxWidth()
+   .height(92.dp)
+   .then(if (comingSoon) Modifier else Modifier.curioDarkGlow(2.dp, shape))
+   .then(if (comingSoon) Modifier else Modifier.curioGlassEdge(shape))
+   .then(if (selected) Modifier.curioInnerGlow(shape, catAccent, strength = 0.12f) else Modifier)
+   .then(
+    if (comingSoon) Modifier
+    else Modifier.combinedClickable(
+     enabled = !comingSoon,
+     onClick = onClick,
+     onLongClick = onLongClick
+    )
+   )
+ ) {
+  Box(
+   modifier = Modifier.fillMaxSize(),
+   contentAlignment = Alignment.Center
+  ) {
+   Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(6.dp)
+   ) {
+    Box(
+     modifier = Modifier
+      .size(38.dp)
+      .clip(CircleShape)
+      .background(
+       when {
+        selected -> catInk.copy(alpha = 0.18f)
+        else -> MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.7f)
+       }
+      ),
+     contentAlignment = Alignment.Center
+    ) {
+     CurioIcon(
+      name = category.iconGlyph,
+      contentDescription = null,
+      size = 21.dp,
+      tint = if (selected) catInk else MaterialTheme.colorScheme.onSurfaceVariant
+     )
+     if (selected) {
+      CurioIcon(
+       name = CurioIcons.Check,
+       contentDescription = "Selected",
+       size = 12.dp,
+       tint = catInk,
+       modifier = Modifier.align(Alignment.BottomEnd)
+      )
+     }
+    }
+    Text(
+     text = when {
+      comingSoon -> "Coming soon"
+      isWildcard -> "Surprise mix"
+      else -> category.displayName
+     },
+     style = MaterialTheme.typography.labelMedium.copy(
+      fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+     ),
+     color = when {
+      selected -> catInk
+      comingSoon -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+      else -> MaterialTheme.colorScheme.onSurface
+     },
+     maxLines = 1,
+     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+    )
+   }
+  }
+ }
 }

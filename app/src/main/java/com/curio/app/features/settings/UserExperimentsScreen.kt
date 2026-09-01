@@ -144,6 +144,18 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // Category picker
+            item { CurioSectionLabel("Category picker") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow("Classic category picker", "The new picker is the default — turn this on to swap back to the old glass-pill picker view", AppPreferences.classicPickerEnabledState) {
+                        AppPreferences.setClassicPickerEnabled(context, it)
+                    }
+                }
+                }
+            }
+
             // Pet & explore
             item { CurioSectionLabel("Pet & explore") }
             item {

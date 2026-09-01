@@ -48,6 +48,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.offset
@@ -58,6 +61,7 @@ import com.curio.app.ui.components.liquidGlassCapsule
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,6 +98,8 @@ import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.formatHour
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.LocalCurioThemeTransition
+import com.curio.app.ui.theme.switchThemeWithReveal
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
@@ -216,23 +222,38 @@ private fun AppearanceSection(highlightKey: String? = null) {
     // the reimagined pitch-black + glow design (no AMOLED/Material styles).
     Column(modifier = Modifier.fillMaxWidth()) {
         SettingsRowPulse(highlightKey == "appearance-theme") {
-            CompactSegmentedRow(
-                "Theme",
-                listOf("Light", "Dark", "System"),
-                when (AppPreferences.themeModeState) {
-                    AppPreferences.THEME_DARK -> 1
-                    AppPreferences.THEME_SYSTEM -> 2
-                    else -> 0
-                }
-            ) { index ->
-                AppPreferences.setThemeMode(
-                    context,
-                    when (index) {
+            // v(theme switch) — selecting a theme plays the Telegram-style
+            // circular reveal from the tapped segment. Resolved in composition
+            // (the onSelected lambda isn't @Composable).
+            val themeTransition = LocalCurioThemeTransition.current
+            val transitionScope = rememberCoroutineScope()
+            var themeRowBounds by remember { mutableStateOf(Rect.Zero) }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { themeRowBounds = it.boundsInWindow() }
+            ) {
+                CompactSegmentedRow(
+                    "Theme",
+                    listOf("Light", "Dark", "System"),
+                    when (AppPreferences.themeModeState) {
+                        AppPreferences.THEME_DARK -> 1
+                        AppPreferences.THEME_SYSTEM -> 2
+                        else -> 0
+                    }
+                ) { index ->
+                    val mode = when (index) {
                         1 -> AppPreferences.THEME_DARK
                         2 -> AppPreferences.THEME_SYSTEM
                         else -> AppPreferences.THEME_LIGHT
                     }
-                )
+                    val center = if (themeRowBounds == Rect.Zero) Offset.Zero
+                        else Offset(
+                            themeRowBounds.left + (index + 0.5f) * themeRowBounds.width / 3f,
+                            themeRowBounds.center.y
+                        )
+                    switchThemeWithReveal(themeTransition, transitionScope, context, center, mode)
+                }
             }
         }
         CurioSettingsDivider()

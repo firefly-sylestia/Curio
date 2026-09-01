@@ -142,6 +142,20 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
+            item { CurioSectionLabel("Share cards") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExperimentSwitchRow(
+                        "Deepen signature card elements",
+                        "Signature share cards render richly detailed background scenes — layered gradients, glows and hand-drawn art per category — instead of the streamlined line-art style",
+                        AppPreferences.detailedSignatureElementsState
+                    ) {
+                        AppPreferences.setDetailedSignatureElementsEnabled(context, it)
+                    }
+                }
+                }
+            }
             // v293 — Pet behavior + explore options moved here from Preferences/Recording.
             item { CurioSectionLabel("Pet & explore") }
             item {

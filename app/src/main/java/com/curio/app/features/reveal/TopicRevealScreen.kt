@@ -60,7 +60,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -116,6 +115,7 @@ import com.curio.app.data.TourController
 import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicRepository
 import com.curio.app.data.buildEngineSearchUrl
 import com.curio.app.data.buildExploreQuery
 import com.curio.app.data.buildExploreSearchUrl
@@ -229,27 +229,23 @@ fun TopicRevealScreen(
             ?: CurioCategories.byId(CategoryId.WILDCARD)
     }
 
-    val topic by produceState<CurioTopic?>(initialValue = null, topicName, cat.id) {
-        // v199 — resolve WITHIN the route's own category FIRST. The old
-        // code asked the global TopicCatalog.findByName first, which scans
-        // every lane and returns the first tolerant match — "Flow" (the
-        // 2024 film) opened "Flower Boy" (an album) because ALBUMS scans
-        // before FILMS and "flower" contains "flow" (and even the full
-        // name "Flow (2024)" base-collided the same way). The category
-        // pool owns the match, TIERED exactly like findByName: strict
-        // (exact / base-name) hits before tolerant (containment) hits, so
-        // a loose match earlier in the file can't beat a precise one later
-        // in the same lane either. The global lookup stays only as the
-        // legacy saved-entry fallback (v135: an old entry whose lane
-        // changed must still resolve instead of hanging on "Loading…").
-        val pool = TopicJsonLoader.load(cat.id)
-        value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
-            ?: pool.firstOrNull { it.matchesSavedName(topicName) }
-            ?: TopicCatalog.findByName(topicName)
+    // Room is the source of truth. Resolve by category first, then use the
+    // warm loader only as a compatibility fallback while an older install is
+    // finishing its one-time import. Never use the global catalog here: a
+    // duplicate title in another category must not open the wrong topic.
+    val context = LocalContext.current
+    var resolved by remember(topicName, cat.id) { mutableStateOf<CurioTopic?>(null) }
+    LaunchedEffect(topicName, cat.id) {
+        // Wait for the guarded one-time import before resolving. Reading the
+        // cache during import was the source of intermittent blank reveals.
+        TopicRepository.init(context)
+        val roomTopic = TopicRepository.findTopic(context, cat.id, topicName)
+        resolved = roomTopic ?: TopicJsonLoader.cached(cat.id)
+            ?.firstOrNull { it.matchesSavedNameStrict(topicName) }
+            ?: TopicJsonLoader.cached(cat.id)
+                ?.firstOrNull { it.matchesSavedName(topicName) }
     }
 
-    val resolved = topic
-    val context = LocalContext.current
     // v29 — clipboard for the auto-copy on explore: the search query lands on
     // the clipboard so the user can paste it into an app's own search box
     // (Spotify / Apple Music don't always hand off an in-app search).
@@ -259,7 +255,7 @@ fun TopicRevealScreen(
     // Reads the REACTIVE pinnedTopicsState (not prefs) so the icon toggles
     // immediately when the user taps pin/unpin.
     val isPinned = resolved != null &&
-        AppPreferences.pinnedTopicsState.any { it.categoryId == cat.id && it.topicName == resolved.name }
+        AppPreferences.pinnedTopicsState.any { it.categoryId == cat.id && it.topicName == resolved?.name }
     // v7.92 — reactive done state: the "Already …" button flips to a filled
     // marked state once the topic is done, and the unwatch action appears.
     // Reads doneTopicsState inside composition, so it updates the moment
@@ -828,26 +824,28 @@ fun TopicRevealScreen(
                 // v135 — only rendered once the topic resolves: an
                 // unresolvable legacy topic shows its name + actions instead
                 // of a permanent "Loading topic…" placeholder.
-                if (resolved != null) {
+                val teaserTopic = resolved
+                if (teaserTopic != null) {
                     RevealContentEntrance(delayMillis = 160) {
                         TeaserCard(
                             cat = cat,
-                            teaser = resolved.teaser,
+                            teaser = teaserTopic.teaser,
                             modifier = Modifier.padding(top = 20.dp)
                         )
                     }
                 }
 
                 // ── 6. Action prompt card ──────────────────────────────────
-                if (resolved != null) {
+                val actionTopic = resolved
+                if (actionTopic != null) {
                     RevealContentEntrance(delayMillis = 210) {
                         ActionPromptCard(
                             cat = cat,
-                            action = resolved.exploreAction,
-                            subtype = resolved.subtype,
+                            action = actionTopic.exploreAction,
+                            subtype = actionTopic.subtype,
                             modifier = Modifier.padding(top = 14.dp),
                             // v221 — for QUOTES, show the full quote text.
-                            instructionOverride = if (resolved.categoryId == CategoryId.QUOTES) resolved.name else null
+                            instructionOverride = if (actionTopic.categoryId == CategoryId.QUOTES) actionTopic.name else null
                         )
                     }
                 }
@@ -864,8 +862,10 @@ fun TopicRevealScreen(
         // ── Floating Category + Favorite bar (v212) ──────────────────────
         // Replaces the old Like/Dislike pill: category icon + name on the
         // left (expands on favorite), favorite star on the right. Slides
-        // away on scroll-down, back on scroll-up. Hidden in Browse-Topics.
-        if (!browseMode && resolved != null) {
+        // away on scroll-down, back on scroll-up. Now also visible in
+        // Browse-Topics so users can favorite/share from the topic browser.
+        val floatingTopic = resolved
+        if (floatingTopic != null) {
             // v292 — TOPIC SHARE: tapping the Share pill in the floating
             // bar opens the customizable topic share card sheet.
             var showShareSheet by remember { mutableStateOf(false) }
@@ -889,7 +889,7 @@ fun TopicRevealScreen(
                             onShare = { showShareSheet = true },
                             onFavorite = {
                                 AppPreferences.setTopicSentiment(
-                                    context, cat.id, resolved.id,
+                                    context, cat.id, floatingTopic.id,
                                     if (sentiment == AppPreferences.SENTIMENT_LIKE)
                                         AppPreferences.SENTIMENT_NONE
                                     else AppPreferences.SENTIMENT_LIKE
@@ -904,14 +904,16 @@ fun TopicRevealScreen(
             }
             if (showShareSheet) {
                 com.curio.app.ui.components.TopicShareSheet(
-                    topicName = resolved.name,
+                    topicName = floatingTopic.name,
                     categoryName = cat.displayName,
                     categoryGlyph = cat.iconGlyph,
                     accent = cat.themedAccent(),
-                    quickFact = resolved.teaser,
+                    quickFact = if (cat.id.name == "QUOTES") floatingTopic.name else floatingTopic.teaser,
                     authority = "${context.packageName}.fileprovider",
                     context = context,
-                    onDismiss = { showShareSheet = false }
+                    onDismiss = { showShareSheet = false },
+                    categoryFamily = cat.family,
+                    topicByline = floatingTopic.byline
                 )
             }
         }
@@ -1070,7 +1072,7 @@ fun TopicRevealScreen(
     }
 
     if (showExploreDialog && resolved != null) {
-        val topic = resolved
+        val topic = resolved!!
         // v41 — the `action` val (verb/duration copy) was removed with the
         // dialog's helper paragraphs; the pills only need the service glyphs.
         // v27s — music topics (Album / Artist / Song) route the second pill
@@ -1673,7 +1675,9 @@ private fun RevealAlreadyButton(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** The reveal hero's resting height (matches the pre-v8.36 fixed size). */
-private val RevealHeroBaseHeight = 260.dp
+private val RevealHeroBaseHeightPortrait = 260.dp
+/** Landscape hero — shorter to leave room for content below. */
+private val RevealHeroBaseHeightLandscape = 180.dp
 
 @Composable
 private fun HeroCard(
@@ -1770,8 +1774,9 @@ private fun HeroCard(
         settledOverflowPx = titleOverflowPx
     }
     val density = LocalDensity.current
+    val revealHeroBase = if (windowWidthSizeClass().isWide) RevealHeroBaseHeightLandscape else RevealHeroBaseHeightPortrait
     val heroHeight by animateDpAsState(
-        targetValue = RevealHeroBaseHeight +
+        targetValue = revealHeroBase +
             with(density) { settledOverflowPx.toDp() },
         animationSpec = tween(240, easing = FastOutSlowInEasing),
         label = "revealHeroHeight"

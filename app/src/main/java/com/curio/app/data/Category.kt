@@ -79,7 +79,7 @@ enum class CategoryId {
          * v27i — the 15 lanes added in the content-expansion pass. The
          * category picker splits its deck grid into the original 21 lanes
          * and these new lanes (a swipeable second page). v200 —
-         * ANIMATED_MOVIES joins as a 16th new lane (the Animated Movies
+         * ANIMATED_MOVIES joins as a 16th new lane (the Animated Films
          * content-expansion pass).
          */
         val newLanes: Set<CategoryId> = setOf(
@@ -247,7 +247,9 @@ data class CurioCategory(
     val family: CategoryFamily,
     val defaultFormat: CaptureFormat,
     val isHidden: Boolean = false,
-    val isReady: Boolean = false,
+    // All categories currently included in the canonical catalog have shipped topic data.
+    // Keep this explicit at the model boundary so picker readiness matches the catalog.
+    val isReady: Boolean = true,
     // Kept LAST so positional constructions never shift the mid-constructor
     // defaults (all current call sites use named args; appending keeps that safe).
     val lightAccent: Color = accent
@@ -286,7 +288,8 @@ object CurioCategories {
             tint          = CurioColors.CategoryIndigoTint,
             iconGlyph     = "person",
             family        = CategoryFamily.MUSIC,
-            defaultFormat = CaptureFormat.SoundBite
+            defaultFormat = CaptureFormat.SoundBite,
+            isReady       = true
         ),
         CurioCategory(
             id            = CategoryId.ALBUMS,
@@ -325,7 +328,7 @@ object CurioCategories {
         //    is the Western/world animation side of the Movies domain.
         CurioCategory(
             id            = CategoryId.ANIMATED_MOVIES,
-            displayName   = "Animated Movies",
+            displayName   = "Animated Films",
             accent        = CurioColors.CategoryAnimation,
             lightAccent   = CurioColors.CategoryAnimationInk,
             tint          = CurioColors.CategoryAnimationTint,
@@ -376,7 +379,7 @@ object CurioCategories {
             family        = CategoryFamily.VISUAL_ART,
             defaultFormat = CaptureFormat.GalleryWall
         ),
-        // ── Science family (Sky) ────────────────────────────────────────
+        // ── Science family (Sky) ─────────────────────────────────────────
         CurioCategory(
             id            = CategoryId.SCIENTISTS,
             displayName   = "Scientists",

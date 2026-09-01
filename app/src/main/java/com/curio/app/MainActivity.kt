@@ -28,6 +28,7 @@ import com.curio.app.navigation.CurioNavHost
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.ui.theme.CurioThemeTransitionHost
 
 /**
  * Curio's single Activity — see Curio design contract.
@@ -95,9 +96,13 @@ class MainActivity : ComponentActivity() {
         // composition, before the splash coroutine has a chance to run.
         TopicJsonLoader.install(this)
 
-        // v294 — Initialize Room topic repository (populates from JSON on first launch).
-        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            com.curio.app.data.TopicRepository.init(this@MainActivity)
+        // Initialize Room once per process. The repository mutex also protects
+        // cold starts, while this guard prevents a fresh Activity from
+        // scheduling another import/read cycle.
+        if (!com.curio.app.data.TopicRepository.isInitialized()) {
+            lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                com.curio.app.data.TopicRepository.init(this@MainActivity)
+            }
         }
 
         // Initialize crash reporter before anything else
@@ -105,7 +110,7 @@ class MainActivity : ComponentActivity() {
 
         // Initialize Room database and repository singleton
         val db = CurioDatabase.getInstance(this)
-        CurioRepositoryHolder.init(db.captureDao())
+        CurioRepositoryHolder.init(db.captureDao(), db.cachedTopicDao())
         // v27 — auto-delete recycle-bin captures that passed their retention
         // window (runs again whenever the recycle bin opens).
         lifecycleScope.launch { RecycleBinExpiry.purgeExpired(this@MainActivity) }
@@ -170,7 +175,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             CurioTheme {
-                CurioNavHost()
+                CurioThemeTransitionHost {
+                    CurioNavHost()
+                }
             }
         }
     }

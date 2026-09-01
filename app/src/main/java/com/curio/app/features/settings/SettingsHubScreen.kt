@@ -351,6 +351,10 @@ fun SettingsHeroHeader(
                     // the tear (skipped with [titleAtTop], where the title
                     // sits at the top of the banner).
                     if (!titleAtTop) Spacer(Modifier.weight(1f))
+                    // v294 — when titleAtTop, add breathing room between
+                    // the top row (back + search/category pills) and the
+                    // title row so the pills don't touch.
+                    if (titleAtTop) Spacer(Modifier.height(8.dp))
 
                     // ── Title + subtitle OR the morph-open search field —
                     //    the search bar scales in from the pill's position
@@ -388,6 +392,7 @@ fun SettingsHeroHeader(
                                 // v108 — dark: the filter chips' near-black
                                 // raised glass instead of the mid-tone lift.
                                 fill = curioSearchFill(fill),
+                                onCancel = onCloseSearch,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .then(
@@ -1217,8 +1222,9 @@ private val SettingsSections = listOf(
                     // tap away next to Appearance.
                     SettingsRowEntry(CurioIcons.DragHandle, "Manage categories", "Show, hide, or reorder lanes", CurioRoutes.MANAGE_CATEGORIES),
                     SettingsRowEntry(CurioIcons.History, "Topic history", "Revisit what you explored", CurioRoutes.TOPIC_HISTORY),
-                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try features before they ship", CurioRoutes.USER_EXPERIMENTS),
-                    SettingsRowEntry(CurioIcons.AutoAwesome, "Dev page", "Experimental features and developer options", CurioRoutes.EXPERIMENTS)
+                    SettingsRowEntry(CurioIcons.Share, "Share hub", "Browse every design, pick a topic, share a card", CurioRoutes.SHARE_HUB),
+                    SettingsRowEntry(CurioIcons.AutoAwesome, "Experiments", "Try features before they ship", CurioRoutes.USER_EXPERIMENTS)
+                    // Dev page hidden — accessible via 5-tap version number in Support
                 )
             )
         )

@@ -109,8 +109,11 @@ object TopicJsonLoader {
      * attempted before [install].
      */
     @Volatile private var assets: android.content.res.AssetManager? = null
+    @Volatile private var appContext: Context? = null
     fun install(context: Context) {
-        assets = context.applicationContext.assets
+        val ctx = context.applicationContext
+        assets = ctx.assets
+        appContext = ctx
     }
 
     /**
@@ -127,6 +130,18 @@ object TopicJsonLoader {
     suspend fun load(id: CategoryId): List<CurioTopic> {
         // Fast path: already resident.
         cache[id]?.let { return it }
+        // v294 — Room fast path: if topics are in Room, use them (instant).
+        try {
+            // v294 — TopicRepository provides Room-backed instant access.
+            // On first launch Room is empty → falls through to JSON parse.
+            if (com.curio.app.data.TopicRepository.isInitialized()) {
+                val roomTopics = com.curio.app.data.TopicRepository.loadFromRoom(id)
+                if (roomTopics.isNotEmpty()) {
+                    synchronized(cacheWriteLock) { cache[id] = roomTopics }
+                    return roomTopics
+                }
+            }
+        } catch (_: Exception) { /* Room not ready yet, fall through to JSON */ }
         // Fast path: a cold-start prewarm (or another screen) is already
         // parsing this lane — share their parse instead of double-parsing
         // the asset.
@@ -192,6 +207,17 @@ object TopicJsonLoader {
         synchronized(cacheWriteLock) {
             if (cacheGeneration == generation) cache[id] = parsed
         }
+        // v294 — Also populate Room database for fast subsequent access.
+        try {
+            if (com.curio.app.data.TopicRepository.isInitialized() && parsed.isNotEmpty()) {
+                val appCtx = appContext
+                if (appCtx != null) {
+                    val db = com.curio.app.data.CurioDatabase.getInstance(appCtx)
+                    val entities = parsed.map { com.curio.app.data.TopicEntity.fromCurioTopic(it) }
+                    db.topicDao().insertAll(entities)
+                }
+            }
+        } catch (_: Exception) { /* Room population is best-effort */ }
         return parsed
     }
 
@@ -273,7 +299,7 @@ object TopicJsonLoader {
                 am.open("$ASSET_DIR/${id.routeSlug}.json").bufferedReader().use {
                     JSONArray(it.readText()).length()
                 }
-            }.getOrDefault(0)
+            }.getOrDefault(0) // returns 0 if JSON not in APK
         }
         countsCache[id] = count
         count
@@ -421,6 +447,27 @@ object TopicJsonLoader {
         }
     }
 
+    /**
+     * v294 — Pre-warm counts from Room so TopicJsonLoader doesn't need to
+     * re-parse JSON files on every process restart. Called from
+     * TopicRepository.init() after confirming Room has data.
+     */
+    fun warmCountsFromRoom(counts: Map<CategoryId, Int>) {
+        counts.forEach { (id, count) -> countsCache[id] = count }
+        canonicalTopicCount = counts.values.sum()
+    }
+
+    /**
+     * v294 — Pre-warm the topic cache from Room so cached() returns data
+     * immediately after a process restart. Called from TopicRepository.init()
+     * after confirming Room has data.
+     */
+    fun warmCacheFromRoom(categoryId: CategoryId, topics: List<CurioTopic>) {
+        if (topics.isNotEmpty()) {
+            synchronized(cacheWriteLock) { cache[categoryId] = topics }
+        }
+    }
+
     // ── Internal ───────────────────────────────────────────────────────────
 
     /**
@@ -437,13 +484,15 @@ object TopicJsonLoader {
     private fun parseAsset(path: String, id: CategoryId): List<CurioTopic> {
         val am = assets
             ?: throw TopicLoadException(path, id, "TopicJsonLoader.install(context) not called")
-        // v55 — the whole read+parse runs under the bounded gate: at most
-        // two files parse at once across prewarm, merges and screens.
+        // v294 — JSON files may not be in the APK (they live in data/topics/
+        // for CI builds). Return empty list instead of throwing so Room can
+        // serve topics as the primary data source.
         return gated {
             val raw = try {
                 am.open(path).bufferedReader().use { it.readText() }
-            } catch (t: Throwable) {
-                throw TopicLoadException(path, id, "open/read failed: ${t.message}", t)
+            } catch (_: Throwable) {
+                // JSON not in APK — Room is the primary source
+                return@gated emptyList()
             }
             try {
                 val array = JSONArray(raw)

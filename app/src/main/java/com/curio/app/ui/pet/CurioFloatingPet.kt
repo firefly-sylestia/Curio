@@ -93,15 +93,37 @@ private const val LONG_JUMP_FRACTION = 0.55f
 // scheduled rounds.
 private const val GAME_MIN_SPACING_MS = 25_000L
 private val SPARK_PX = 44.dp
+private val BUBBLE_PX = 42.dp
 // v120 — the poof burst shown where the pet teleports (hide-and-seek /
 // chameleon) so the vanish/reappear reads as a magic poof, not a jump.
 private val POOF_PX = 96.dp
 
-/** v120 — the games the pet can play (auto flow + game mode). */
-private enum class PetGame { HIDE_SEEK, CHAMELEON, SPARK }
+/** v120 — the games the pet can play (auto flow + game mode). v263 — POP!.
+ *  Game mode cycles through ALL members, so the new round joins in. */
+private enum class PetGame { HIDE_SEEK, CHAMELEON, SPARK, POP }
 
 /** v120 — one falling star in the star-catch round. */
 private data class FallingStar(val id: Int, val x: Float, val y: Float, val speed: Float)
+
+/** v263 — one rising bubble in the POP! round. [prickly] bubbles lose a
+ *  point when popped, so the round asks for a little judgement. */
+private data class Bubble(
+    val id: Int,
+    val x: Float,
+    val y: Float,
+    val vx: Float,
+    val vy: Float,
+    val prickly: Boolean
+)
+
+/** v263 — one colored square in the victory confetti burst. */
+private data class ConfettiBit(
+    val dx: Float,
+    val dy: Float,
+    val sway: Float,
+    val rot: Float,
+    val color: Color
+)
 private val AUTO_NAP_AFTER_MS = 8 * 60_000L
 // v8.13 — hearts rise in their own box ABOVE the pet (never over its face).
 // v8.21 — a smaller box so the hearts read as tiny, and they fade out fully.
@@ -272,6 +294,10 @@ fun CurioFloatingPet(
             poofKey++
         }
 
+        // v263 — a tiny confetti burst over the pet when it wins a round
+        // big (bubble score 6+, a full star catch, finding the hider...).
+        var confettiKey by remember { mutableIntStateOf(0) }
+
         // v121 — game mode picks games in a cycle (HIDE_SEEK → CHAMELEON →
         // SPARK → …) so all three get played evenly, instead of random.
         var cycleGameIndex by remember { mutableIntStateOf(-1) }
@@ -312,6 +338,13 @@ fun CurioFloatingPet(
         var stars by remember { mutableStateOf<List<FallingStar>>(emptyList()) }
         var starScore by remember { mutableIntStateOf(0) }
         var starCatchTarget by remember { mutableStateOf<Offset?>(null) }
+        // v263 — the 10s POP! round: bubbles float UP across the lower half;
+        // tap one (or drag the pet into it) to pop it. A few bubbles are
+        // PRICKLY (dark): popping those costs a point and earns a wince.
+        var bubbleRound by remember { mutableStateOf(false) }
+        var bubbles by remember { mutableStateOf<List<Bubble>>(emptyList()) }
+        var bubbleScore by remember { mutableIntStateOf(0) }
+        var bubbleTarget by remember { mutableStateOf<Offset?>(null) }
         var offScreen by remember { mutableStateOf(false) }
         var chameleonFindMe by remember { mutableStateOf(false) }
         var hideSeekActive by remember { mutableStateOf(false) }
@@ -772,6 +805,7 @@ fun CurioFloatingPet(
                     celebrateKey++
                     playTapAnimation("victory")
                     heartsKey++
+                    confettiKey++
                 } else if (CurioPet.awake && !dragged) {
                     // Not found: a sad face and a disappointed line.
                     reactionFace = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.O)
@@ -819,6 +853,7 @@ fun CurioFloatingPet(
                     celebrateKey++
                     playTapAnimation("victory")
                     heartsKey++
+                    confettiKey++
                     var winBeat = 0L
                     while (winBeat < 1400L && !dragged && CurioPet.awake) {
                         delay(120)
@@ -962,6 +997,124 @@ fun CurioFloatingPet(
                         }
                     )
                 }
+                if (starScore > 0) confettiKey++
+                windDownAfterGame()
+            }
+
+            /**
+             * v263 — POP!: a 10s round of bubbles floating UP across the
+             * lower half of the screen. Tap a shiny bubble (or drag the pet
+             * into one) to pop it — the pet hops to the spot and it bursts.
+             * Watch out: ~1 in 6 bubbles is PRICKLY (dark); popping it costs
+             * a point and earns a wince. Six or more pops → confetti.
+             */
+            suspend fun playBubbleGame() {
+                CurioPet.notePlay(context, react = false)
+                if (CurioPet.shouldSpeak(0.85f)) queueReaction(CurioPet.popPromptLine())
+                squishKey++
+                bubbleRound = true
+                bubbleScore = 0
+                bubbles = emptyList()
+                bubbleTarget = null
+                fun popBubble(b: Bubble) {
+                    bubbles = bubbles.filterNot { it.id == b.id }
+                    if (b.prickly) {
+                        bubbleScore = (bubbleScore - 1).coerceAtLeast(0)
+                        reactionFace = PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.O)
+                        reactionFaceKey++
+                        squishKey++
+                        if (CurioPet.shouldSpeak(0.35f)) queueReaction(CurioPet.popPrickleLine())
+                    } else {
+                        bubbleScore++
+                        squishKey++
+                        celebrateKey++
+                    }
+                }
+                val roundMs = 10_000L
+                val startedAt = System.currentTimeMillis()
+                var nextSpawnAt = startedAt + 200L
+                var bubbleId = 0
+                val bubPx = with(density) { BUBBLE_PX.toPx() }
+                while (System.currentTimeMillis() - startedAt < roundMs && CurioPet.awake) {
+                    val now = System.currentTimeMillis()
+                    if (now >= nextSpawnAt) {
+                        val bx = marginPx + Random.nextFloat() * (maxW - petPx - 2 * marginPx).coerceAtLeast(0f)
+                        val by = maxH * 0.68f + Random.nextFloat() * (maxH * 0.26f)
+                        bubbles = bubbles + Bubble(
+                            id = bubbleId++,
+                            x = bx,
+                            y = by,
+                            vx = (Random.nextFloat() - 0.5f) * 26f,
+                            vy = -(55f + Random.nextFloat() * 75f),
+                            prickly = Random.nextInt(6) == 0
+                        )
+                        nextSpawnAt = now + Random.nextLong(650, 1100)
+                    }
+                    // Bubbles rise with a little drift; drop the ones past
+                    // the top of the screen.
+                    bubbles = bubbles
+                        .map { it.copy(x = it.x + it.vx * 0.14f, y = it.y + it.vy * 0.14f) }
+                        .filter { it.y > -bubPx }
+                    // Dragging the pet into a bubble pops it.
+                    if (dragged && bubbles.isNotEmpty()) {
+                        val cx = pos.x + petPx / 2f
+                        val cy = pos.y + petPx / 2f
+                        val hit = bubbles.firstOrNull {
+                            val dx = it.x - cx
+                            val dy = it.y - cy
+                            dx * dx + dy * dy < (petPx * 0.95f) * (petPx * 0.95f)
+                        }
+                        if (hit != null) popBubble(hit)
+                    }
+                    // A tapped bubble: the pet dashes over and pops it.
+                    val target = bubbleTarget
+                    if (target != null) {
+                        val cx = pos.x + petPx / 2f
+                        val cy = pos.y + petPx / 2f
+                        val dx = target.x - cx
+                        val dy = target.y - cy
+                        val dist = hypot(dx, dy)
+                        if (dist < petPx * 0.85f) {
+                            // The tapped bubble drifted a little since the
+                            // tap — pop whichever is nearest the spot.
+                            val hit = bubbles.minByOrNull {
+                                val ddx = it.x - target.x
+                                val ddy = it.y - target.y
+                                ddx * ddx + ddy * ddy
+                            }
+                            bubbleTarget = null
+                            if (hit != null) popBubble(hit)
+                        } else {
+                            facing = if (dx >= 0f) 1f else -1f
+                            moving = true
+                            val step = 16f
+                            pos = Offset(
+                                (pos.x + dx / dist * step).coerceIn(
+                                    marginPx, (maxW - petPx - marginPx).coerceAtLeast(marginPx)
+                                ),
+                                (pos.y + dy / dist * step).coerceIn(
+                                    marginPx, (maxH - petPx - marginPx).coerceAtLeast(marginPx)
+                                )
+                            )
+                        }
+                    }
+                    delay(50)
+                }
+                moving = false
+                bubbleRound = false
+                bubbles = emptyList()
+                bubbleTarget = null
+                lastTouch = System.currentTimeMillis()
+                if (CurioPet.awake && !dragged) {
+                    speakNow(
+                        when {
+                            bubbleScore >= 6 -> CurioPet.popNiceLine(bubbleScore)
+                            bubbleScore > 0 -> "I popped $bubbleScore bubble${if (bubbleScore == 1) "" else "s"}!"
+                            else -> "Hehe, the bubbles floated away. Pop round two?"
+                        }
+                    )
+                }
+                if (bubbleScore >= 6) confettiKey++
                 windDownAfterGame()
             }
             while (CurioPet.awake) {
@@ -981,6 +1134,7 @@ fun CurioFloatingPet(
                         PetGame.HIDE_SEEK -> playHideSeek()
                         PetGame.CHAMELEON -> playChameleon()
                         PetGame.SPARK -> playStarGame()
+                        PetGame.POP -> playBubbleGame()
                     }
                     gameActive = false
                     gameMode = false
@@ -1001,6 +1155,11 @@ fun CurioFloatingPet(
                     chameleonFindMe = false
                     chameleonFound = false
                     peekCaught = false
+                    // v263 — a navigation mid-game also leaves gameActive /
+                    // gameMode stuck true, which would silently kill every
+                    // future auto-game. Reset both here with the other flags.
+                    gameActive = false
+                    gameMode = false
                     chameleonAlpha.snapTo(1f)
                 }
                 if (starRound) {
@@ -2054,6 +2213,38 @@ fun CurioFloatingPet(
             }
         }
 
+        // v263 — the POP! round: bubbles float UP across the lower half for
+        // 10 seconds. Tap a bubble and the pet dashes over to pop it; drag
+        // the pet into one to pop it that way. Prickly (dark) bubbles cost a
+        // point, so pop the shiny ones.
+        if (bubbleRound) {
+            bubbles.forEach { bubble ->
+                BubbleView(
+                    bubble = bubble,
+                    accent = accentColor,
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                (bubble.x - with(density) { BUBBLE_PX.toPx() } / 2f).roundToInt(),
+                                (bubble.y - with(density) { BUBBLE_PX.toPx() } / 2f).roundToInt()
+                            )
+                        }
+                        .size(BUBBLE_PX)
+                        .pointerInput(bubble.id) {
+                            detectTapGestures(onTap = {
+                                if (bubbleRound) {
+                                    val here = bubbles.firstOrNull { it.id == bubble.id }
+                                    if (here != null) {
+                                        bubbleTarget = Offset(here.x, here.y)
+                                        lastTouch = System.currentTimeMillis()
+                                    }
+                                }
+                            })
+                        }
+                )
+            }
+        }
+
         // v120 — a poof burst where the pet teleported (hide-and-seek /
         // chameleon). Rendered at the RECORDED spot: the pet has often moved
         // on by the time the burst shows.
@@ -2069,6 +2260,23 @@ fun CurioFloatingPet(
                         )
                     }
                     .size(POOF_PX)
+            )
+        }
+
+        // v263 — a tiny confetti burst over the pet when it wins a round
+        // big. Keyed so each win restarts it; rendered at the pet's spot.
+        if (confettiKey > 0) {
+            VictoryConfetti(
+                key = confettiKey,
+                accent = accentColor,
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            (pos.x + petPx / 2f - with(density) { 120.dp.toPx() } / 2f).roundToInt(),
+                            (pos.y + petPx / 2f).roundToInt()
+                        )
+                    }
+                    .size(120.dp, 150.dp)
             )
         }
 
@@ -2218,6 +2426,110 @@ fun CurioFloatingPet(
  * blinking caret) and a little hand that sweeps across the keys, lighting
  * them up as it taps. Calm, premium, readable — not the old flashing strip.
  */
+/**
+ * v263 — one rising bubble in the POP! round: a soft translucent orb with
+ * a shine that slowly breathes. PRICKLY bubbles render darker with a small
+ * white × (warning) instead of the shiny core, so they read at a glance.
+ */
+@Composable
+private fun BubbleView(bubble: Bubble, accent: Color, modifier: Modifier = Modifier) {
+    val wobble = rememberInfiniteTransition(label = "bubbleWobble")
+    val scale by wobble.animateFloat(
+        initialValue = 0.92f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            tween(900, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
+        label = "bubbleScale"
+    )
+    Canvas(modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale }) {
+        val c = center
+        val r = size.minDimension / 2f
+        val tint = if (bubble.prickly) Color(0xFF4A3A52) else accent
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    if (bubble.prickly) tint.copy(alpha = 0.80f) else tint.copy(alpha = 0.45f),
+                    tint.copy(alpha = 0.22f),
+                    Color.Transparent
+                ),
+                center = c,
+                radius = r
+            ),
+            radius = r,
+            center = c
+        )
+        if (bubble.prickly) {
+            // Warning × inside the dark bubble.
+            val s = r * 0.34f
+            rotate(45f, c) {
+                drawRect(Color.White.copy(alpha = 0.92f), topLeft = Offset(c.x - s * 0.14f, c.y - s), size = Size(s * 0.28f, s * 2f))
+            }
+            rotate(-45f, c) {
+                drawRect(Color.White.copy(alpha = 0.92f), topLeft = Offset(c.x - s * 0.14f, c.y - s), size = Size(s * 0.28f, s * 2f))
+            }
+        } else {
+            // Soft shine on the shiny bubble.
+            drawCircle(
+                Color.White.copy(alpha = 0.90f),
+                radius = r * 0.15f,
+                center = Offset(c.x - r * 0.32f, c.y - r * 0.32f)
+            )
+        }
+    }
+}
+
+/**
+ * v263 — a small confetti burst that pops over the pet when it wins a
+ * round big: a dozen colored squares burst upward, sway, then drift down
+ * and fade. Keyed so each win restarts it from the top.
+ */
+@Composable
+private fun VictoryConfetti(key: Int, accent: Color, modifier: Modifier = Modifier) {
+    if (key <= 0) return
+    val progress = remember(key) { Animatable(0f) }
+    LaunchedEffect(key) {
+        progress.snapTo(0f)
+        progress.animateTo(1f, tween(1200, easing = FastOutSlowInEasing))
+    }
+    val bits = remember(key) {
+        val seeded = Random(key * 31 + 7)
+        List(14) { i ->
+            ConfettiBit(
+                dx = seeded.nextFloat() * 120f - 60f,
+                dy = -46f - seeded.nextFloat() * 130f,
+                sway = seeded.nextFloat() * 46f - 23f,
+                rot = seeded.nextFloat() * 300f,
+                color = when (i % 4) {
+                    0 -> accent
+                    1 -> Color.White
+                    2 -> accent.copy(alpha = 0.72f)
+                    else -> Color(0xFFFFD75E)
+                }
+            )
+        }
+    }
+    val p = progress.value
+    Canvas(modifier = modifier) {
+        bits.forEach { b ->
+            // Up first (burst), then the pieces drift down and fade.
+            val up = minOf(1f, p / 0.45f)
+            val down = if (p >= 0.45f) (p - 0.45f) / 0.55f else 0f
+            val x = b.dx + b.sway * p
+            val y = b.dy * up + 80f * down
+            val alpha = (1f - p).coerceIn(0f, 1f)
+            rotate(b.rot * p, Offset(x, y)) {
+                drawRect(
+                    color = b.color.copy(alpha = alpha * 0.95f),
+                    topLeft = Offset(x - 3f, y - 3f),
+                    size = Size(6f, 6f)
+                )
+            }
+        }
+    }
+}
+
 /**
  * v16 — a pulsing four-point sparkle with a hot white core and a soft
  * accent halo. v120 — it is the falling star in the star-catch round

@@ -2,7 +2,32 @@
 
 > **Explore something. Notice more. Keep the discovery.**
 
-A curated discovery app for curious people. Spin a roulette deck of 5,838 hand-written topics across 11 lanes (500+ in every lane), then capture what you notice in a beautiful, personal offline library. No accounts. No feed. No ads. Just you, a topic, and the world.
+A curated discovery app for curious people. Spin a roulette deck of 16,000+ hand-written topics across 38 categories, then capture what you notice in a beautiful, personal offline library. Share your discoveries as stunning, topic-specific cards. No accounts. No feed. No ads. Just you, a topic, and the world.
+
+![Release](https://img.shields.io/github/v/release/firefly-sylestia/Curio?label=Release&logo=github)
+![Downloads](https://img.shields.io/github/downloads/firefly-sylestia/Curio/total?label=Downloads&logo=github)
+![Stars](https://img.shields.io/github/stars/firefly-sylestia/Curio?label=Stars&logo=github)
+![License](https://img.shields.io/github/license/firefly-sylestia/Curio?label=License)
+![Platform](https://img.shields.io/badge/Platform-Android_8.0%2B-3DDC84?logo=android&logoColor=white)
+![AI-assisted](https://img.shields.io/badge/AI--assisted-Codebuff-6C47FF)
+
+<!-- Future store badges: add Google Play / F-Droid download badges here when the store listings go live. -->
+
+[![Curio project statistics](https://github-readme-stats.vercel.app/api?username=firefly-sylestia&repo=Curio&show_icons=true&hide_border=true&count_private=true&title_color=6C47FF&icon_color=6C47FF&text_color=8a8a8a&bg_color=00000000)](https://github.com/firefly-sylestia/Curio)
+
+---
+
+## Screenshots
+
+| Home | Spin | Topic Reveal | Capture |
+|---|---|---|---|
+| ![Home screen](docs/screenshots/home.png) | ![Spin deck](docs/screenshots/spin.png) | ![Topic reveal](docs/screenshots/topic-reveal.png) | ![Capture editor](docs/screenshots/capture.png) |
+
+| Cabinet | Entry Detail | Quests | Share Card |
+|---|---|---|---|
+| ![Cabinet library](docs/screenshots/cabinet.png) | ![Entry detail](docs/screenshots/entry-detail.png) | ![Quests](docs/screenshots/quests.png) | ![Share card](docs/screenshots/share-card.png) |
+
+*Capture names and framing: see [`docs/screenshots/README.md`](docs/screenshots/README.md).*
 
 ---
 
@@ -17,7 +42,7 @@ Built with **Kotlin + Jetpack Compose** on Android 8.0+.
 ## ✨ Features
 
 ### 🎡 The Spin — Your Discovery Deck
-Pick from 11 curated lanes (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries, or Wildcard) — or blend 2–4 into a mixed deck. Curio shuffles a roulette of topics, each with a teaser, imagery, and a structured "go do this" explore action with a suggested time. The deck *feels* like a deck: stacked peek cards, category-tinted edges, shadows, and a satisfying shuffle. Anti-repeat history means you'll never see the same topic back-to-back.
+Pick from 38 curated categories (Music, Films, Books, Art, Science, Games, Anime, Food, History, Sports, Internet, Mythology, and more) — or blend into a mixed deck. Curio shuffles a roulette of topics, each with a teaser, imagery, and a structured "go do this" explore action with a suggested time. The deck *feels* like a deck: stacked peek cards, category-tinted edges, shadows, and a satisfying shuffle. Anti-repeat history means you'll never see the same topic back-to-back.
 
 ### 📝 Six Capture Formats on Paper-Textured Notes
 Whatever you discover, there's a format waiting: **SoundBite** (voice notes) · **ReelNotes** (reviews) · **Marginalia** (journals) · **Gallery Wall** (mood boards) · **Field Notes** (observations) · **Open Notebook** (wildcard). Every note lives on a rich, paper-styled editor with ruled lines, torn edges, coffee stains, and watermark paper. Full rich text, quotes, images, audio, and tags — all autosaving.
@@ -45,19 +70,6 @@ Everything lives on your device. No accounts. No analytics. No tracking. Open so
 3. Android will ask you to allow "install from unknown sources" for your browser — that's normal for sideloaded apps
 
 > **Google Play support is not planned.** v1.0 ships via GitHub Releases.
-
-### Install on Windows (Desktop App)
-
-Curio also ships as a **native Windows app** (the Compose Multiplatform desktop port) — no emulator or Android SDK needed.
-
-1. Open the [Releases page](https://github.com/firefly-sylestia/Curio/releases) and find the latest release
-2. Download **one** of the Windows files:
-   - **`Curio-Windows-<version>-portable.zip`** — *portable*: unzip it anywhere, then double-click `Curio.exe` to run. No installation.
-   - **`Curio-<version>.msi`** — *installer*: run it to add Curio to your Start menu, complete with an uninstaller.
-3. **Windows 10/11, 64-bit.** If SmartScreen shows "Windows protected your PC", click **More info → Run anyway** — the app isn't code-signed yet.
-4. Your window size, position, theme, saved discoveries, and last deck are remembered between runs (stored under `%USERPROFILE%\.curio`).
-
-> The desktop app mirrors the Android app (Home, Spin, Cabinet, Settings). Capture/sessions, quests, and the floating explore bubble aren't ported yet.
 
 ### Build from Source
 
@@ -95,8 +107,8 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 
 | | |
 |---|---|
-| **Platform** | Android (v1.0) · Windows desktop app |
-| **Minimum OS** | Android 8.0 (API 26) and up · Windows 10/11 64-bit |
+| **Platform** | Android (v1.0) |
+| **Minimum OS** | Android 8.0 (API 26) and up |
 | **Target OS** | Android 17 (API 37) |
 | **Permissions** | Microphone (voice notes + dictation) · Notifications (reminders) · "Display over other apps" (optional floating explore bubble) · Background service (explore timer) |
 | **Language** | English |
@@ -108,8 +120,8 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 ## 📚 Complete Feature List
 
 ### Discovery — The Spin
-- **11 curated lanes**: Artists · Albums · Directors · Films · Authors · Books · Painters · Artworks · Scientists · Discoveries · Wildcard
-- **5,838 topics** (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
+- **38 curated categories**: Music · Films · Books · Art · Science · Games · Anime · Food · History · Sports · Internet · Mythology · and more
+- **16,000+ topics** across 38 categories (500+ in every lane) — each with teaser, imagery, and structured explore action (verb, target, suggested duration, step-by-step guide)
 - Roulette deck with stacked cards, category-tinted edges, shadows, and satisfying shuffle
 - Single-lane or mixed decks (2–4 categories blended into one)
 - Anti-repeat history — never see the same topic twice in a row
@@ -133,6 +145,15 @@ Start with **"Today's Quest"** (Home → Today's Quest) for a one-tap random dis
 - Sessions survive reboots; pause, queue, and resume
 - Daily shuffle reminders (scheduled notifications)
 - Recently explored/unexplored topic tracking on Home
+
+### Share Cards
+- **8 share card styles** — Paper, Vinyl, Collage, Clean, Editorial, Minimal, Signature, and Custom
+- **Custom style** — 50+ unique topic-specific designs (Pokemon pokeball, Frozen snowflakes, Star Wars starfield, Marvel halftone, etc.) that only appear when a matching design exists
+- **Signature style** — 13 category-specific designs (music vinyl grooves, film grain, book spine, anime speed lines, etc.)
+- **Carousel picker** — swipe through full-size card previews to pick a style
+- 9:12 and 3:4 aspect ratios
+- Quick fact, custom fact, and no-fact options
+- Save as image or share directly
 
 ### The Cabinet (Library)
 - Browse all captures; filter by category or view All
@@ -227,7 +248,7 @@ We'd love contributions! Here's how:
 - Link to any related issues
 
 ### Topic Contributions
-The 5,838 curated topics are hand-picked. If you have topics to suggest for any lane (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries), open a **Feature Request** with specifics.
+The 16,000+ curated topics are hand-picked. If you have topics to suggest for any lane (Artists, Albums, Directors, Films, Authors, Books, Painters, Artworks, Scientists, Discoveries), open a **Feature Request** with specifics.
 
 ---
 
@@ -265,9 +286,25 @@ Found a bug? Have an idea? Want to request a topic?
 
 ---
 
+## 📊 Project Stats
+
+Live **stars over time** for this repository (updated automatically):
+
+[![Star History Chart](https://api.star-history.com/svg?repos=firefly-sylestia/Curio&type=Date)](https://star-history.com/#firefly-sylestia/Curio&Date)
+
+Live **release downloads** (every release ships a signed APK):
+
+[![Total downloads](https://img.shields.io/github/downloads/firefly-sylestia/Curio/total?label=Total+downloads&logo=github&color=6C47FF)](https://github.com/firefly-sylestia/Curio/releases)
+
+> 📶 Note: GitHub doesn't expose a downloads-over-time feed to any reliable hosted README chart service, so downloads is shown as a live total here while the stars history renders as a real timeline graph above.
+
+---
+
 ## 👋 Credits
 
 **Made by Firefly** — design, code, and curated topic catalog.
+
+> **Note:** Approximately 70% of this project's codebase was written and iterated on with AI assistance (Codebuff). Human direction, design decisions, product judgment, and curation drove every feature — AI handled the heavy lifting of implementation, debugging, and polish across thousands of commits.
 
 Special thanks to the early testers and people who shared topics and feedback.
 

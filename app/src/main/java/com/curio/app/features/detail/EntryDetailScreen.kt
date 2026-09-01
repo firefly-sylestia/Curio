@@ -1350,12 +1350,15 @@ private fun BoxScope.DetailStickyBar(
         // that fades the pill, so the handoff reads as one morphing surface.
         // A full-screen scrim behind it dismisses on any outside tap.
         if (detailGlassActive && morph > 0.01f) {
-            // v264 — the scrim was removed: a full-screen Box covered the
-            // back button and blocked its touch. BackHandler (line 1156)
-            // handles system-back; tapping the glass panel's own items
-            // dismisses via their onClick. A half-screen scrim below the
-            // panel still catches outside taps on the menu area.
-            Box(modifier = Modifier.fillMaxSize()) {
+            // v301 — tap-outside dismiss: the full-screen Box catches taps
+            // ANYWHERE that aren't on the glass panel itself, dismissing
+            // the menu. BackHandler still handles system-back.
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .clickable(interactionSource = null, indication = null) {
+                    menuExpanded = false
+                }
+            ) {
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Transparent,
@@ -1375,12 +1378,8 @@ private fun BoxScope.DetailStickyBar(
                     }
                     .liquidGlassCapsule(
                         heroFill,
-                        washAlpha = 0.35f,
+                        washAlpha = 0.45f,
                         backdrop = glassBackdrop,
-                        // v258 — the panel is BLURRY BY DEFAULT now: the old
-                        // alwaysClear flag ran the near-zero-blur recipe, so
-                        // the expanded menu read as bare transparent glass.
-                        // Dropping it gives the standard 8dp×scale frost.
                         shape = RoundedCornerShape(20.dp)
                     )
                     .width(MoreMenuWidth)
@@ -1452,16 +1451,57 @@ private fun BoxScope.DetailStickyBar(
         }
             }
 
-        // v149 — the share sheet (preview + Image/Text picker) opens from
-        // the More menu; it lives here so it survives the sticky bar's
-        // scroll-driven recompositions without re-arming.
+        // v149 + v229d — the share sheet opens from the More menu; it lives
+        // here so it survives the sticky bar's scroll-driven recompositions
+        // without re-arming. v229d — this is the EXACT SAME TopicShareSheet the
+        // Topic Reveal uses (style carousel, Customise, hold-to-edit, Share as
+        // text) — the old bespoke EntryShareSheet preview is gone. The saved
+        // quote / review / note from THIS entry's capture data feed its source
+        // pills instead of a quick fact only.
         if (showShareSheet) {
-            EntryShareSheet(
-                entry = resolvedEntry,
-                category = category,
-                context = context,
+            val detailData = resolvedEntry.captureData
+            val detailIsQuotes = resolvedEntry.topic.categoryId == com.curio.app.data.CategoryId.QUOTES
+            val firstQuote = when (detailData) {
+                is com.curio.app.data.CaptureData.ReelNotes -> detailData.quotes.firstOrNull { it.isNotBlank() }
+                is com.curio.app.data.CaptureData.Marginalia -> detailData.quotes.firstOrNull { it.isNotBlank() }
+                is com.curio.app.data.CaptureData.SoundBite -> detailData.quotes.firstOrNull { it.isNotBlank() }
+                // v229d — mood-board (Gallery Wall) captures contribute their
+                // saved quotes too, so a board's quotes surface as a Quote
+                // source on the entry share sheet.
+                is com.curio.app.data.CaptureData.GalleryWall -> detailData.quotes.firstOrNull { it.isNotBlank() }
+                else -> null
+            }
+            val reviewInfo = (detailData as? com.curio.app.data.CaptureData.ReelNotes)
+                ?.takeIf { it.reviewText.isNotBlank() }
+                ?.let { it.reviewText.trim() to it.rating }
+            val noteText = resolvedEntry.sessionNote?.trim().orEmpty()
+            // QUOTES topics: the byline prefaces the saved quote so the card
+            // reads "Author Name — quote" (same as the old EntryShareSheet).
+            val quoteText = if (detailIsQuotes && !firstQuote.isNullOrBlank() && resolvedEntry.topic.byline.isNotBlank()) {
+                "${resolvedEntry.topic.byline} — ${firstQuote}"
+            } else {
+                firstQuote
+            }
+            val savedSources = buildList {
+                if (!quoteText.isNullOrBlank()) add(com.curio.app.ui.components.ShareCardContent("quote", "Quote", quoteText))
+                if (reviewInfo != null) add(com.curio.app.ui.components.ShareCardContent("review", "Review", reviewInfo.first, rating = reviewInfo.second))
+                if (noteText.isNotEmpty()) add(com.curio.app.ui.components.ShareCardContent("note", "Note", noteText))
+            }
+            com.curio.app.ui.components.TopicShareSheet(
+                topicName = resolvedEntry.topic.name,
+                categoryName = category.displayName,
+                categoryGlyph = category.iconGlyph,
+                accent = category.themedAccent(),
+                quickFact = if (detailIsQuotes) resolvedEntry.topic.name else resolvedEntry.topic.teaser,
                 authority = authority,
-                onDismiss = { showShareSheet = false }
+                context = context,
+                savedSources = savedSources,
+                onDismiss = { showShareSheet = false },
+                categoryFamily = category.family,
+                topicByline = resolvedEntry.topic.byline,
+                // Detail's plain-text payload stays the entry-aware one —
+                // quote mode sends just the quote + author.
+                shareAsText = { entryShareText(resolvedEntry, category, isQuote = detailIsQuotes) }
             )
         }
     }
@@ -4499,182 +4539,34 @@ private fun CurioShareCard(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Share sheet (v149) — preview + Image/Text picker before sharing
+// Share — v229d: the entry detail now opens the EXACT SAME TopicShareSheet that
+// Topic Reveal uses (style carousel, Customise panel, hold-to-edit, aspect,
+// "Share as text"), fed with this entry's saved quote / review / note as its
+// source pills (see the call site above). The old bespoke EntryShareSheet and
+// its ShareFormatPill helper are gone — only the plain-text payload builder
+// remains, reused as the sheet's share-as-text override.
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * v292e — THE ENTRY SHARE HUB: the SAME customizable share hub as the topic
- * sheet ([com.curio.app.ui.components.TopicShareSheet]), fed with what THIS
- * entry actually saved. The content-source pills are built from the entry's
- * capture format:
- *  - Reel Notes → Quote (if any), Review with its star rating (the rating
- *    rides on the card as a star row), Note;
- *  - Marginalia / SoundBite → Quote (if any), Note;
- *  - every format → the session Note when one exists.
- * Quick fact and Custom fact are always offered too.
- *
- * The old square category card is replaced by this hub's gradient card so
- * detail-view shares look exactly like reveal shares; "Share as text" stays
- * below as a quiet secondary action.
+/** Plain-text share payload for an entry (the sheet's Text format).
+ *  When [isQuote] is true, the payload is just the quote + author.
  */
-@Composable
-private fun EntryShareSheet(
-    entry: CurioEntry,
-    category: CurioCategory,
-    context: Context,
-    authority: String,
-    onDismiss: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var aspect by rememberSaveable { mutableStateOf(
-        com.curio.app.ui.components.ShareCardAspect.CLASSIC
-    ) }
-    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
-    var customText by rememberSaveable { mutableStateOf("") }
-
-    // Build the SAVED sources from this entry's capture data — only what
-    // actually exists gets a pill.
-    val data = entry.captureData
-    val firstQuote = when (data) {
-        is com.curio.app.data.CaptureData.ReelNotes -> data.quotes.firstOrNull { it.isNotBlank() }
-        is com.curio.app.data.CaptureData.Marginalia -> data.quotes.firstOrNull { it.isNotBlank() }
-        is com.curio.app.data.CaptureData.SoundBite -> data.quotes.firstOrNull { it.isNotBlank() }
-        else -> null
-    }
-    val reviewInfo = (data as? com.curio.app.data.CaptureData.ReelNotes)
-        ?.takeIf { it.reviewText.isNotBlank() }
-        ?.let { it.reviewText.trim() to it.rating }
-    val noteText = entry.sessionNote?.trim().orEmpty()
-
-    val savedSources = buildList {
-        if (!firstQuote.isNullOrBlank()) {
-            add(com.curio.app.ui.components.ShareCardContent("quote", "Quote", firstQuote))
+private fun entryShareText(entry: CurioEntry, category: CurioCategory, isQuote: Boolean = false): String {
+    if (isQuote) {
+        val data = entry.captureData
+        val quote = when (data) {
+            is com.curio.app.data.CaptureData.ReelNotes -> data.quotes.firstOrNull { it.isNotBlank() }
+            is com.curio.app.data.CaptureData.Marginalia -> data.quotes.firstOrNull { it.isNotBlank() }
+            is com.curio.app.data.CaptureData.SoundBite -> data.quotes.firstOrNull { it.isNotBlank() }
+            // v229d — mood-board quotes ride the isQuote payload too.
+            is com.curio.app.data.CaptureData.GalleryWall -> data.quotes.firstOrNull { it.isNotBlank() }
+            else -> null
         }
-        if (reviewInfo != null) {
-            add(com.curio.app.ui.components.ShareCardContent(
-                "review", "Review", reviewInfo.first, rating = reviewInfo.second
-            ))
-        }
-        if (noteText.isNotEmpty()) {
-            add(com.curio.app.ui.components.ShareCardContent("note", "Note", noteText))
+        val author = entry.topic.byline.ifBlank { null }
+        return buildString {
+            append("\u201c${quote.orEmpty()}\u201d")
+            if (!author.isNullOrBlank()) append(" — $author")
         }
     }
-
-    val quickFact = entry.topic.teaser
-    val quick = com.curio.app.ui.components.ShareCardContent(
-        com.curio.app.ui.components.QUICK_FACT_ID, "Quick fact", quickFact
-    )
-    val custom = com.curio.app.ui.components.ShareCardContent(
-        com.curio.app.ui.components.CUSTOM_FACT_ID, "Custom fact", ""
-    )
-    val activeId = selectedId ?: quick.id
-    val activeSource = when (activeId) {
-        com.curio.app.ui.components.CUSTOM_FACT_ID ->
-            custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
-        else -> savedSources.firstOrNull { it.id == activeId } ?: quick
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = { BottomSheetDefaults.DragHandle() }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Text(
-                text = "Share this entry",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            // ── The shared hub: accurate preview + aspect/source pickers ──
-            com.curio.app.ui.components.ShareHubBody(
-                topicName = entry.topic.name,
-                categoryName = category.displayName,
-                categoryGlyph = category.iconGlyph,
-                accent = category.themedAccent(),
-                sharerName = AppPreferences.getDisplayName(context).ifBlank { "" },
-                authority = authority,
-                context = context,
-                aspect = aspect,
-                onAspectChange = { aspect = it },
-                sources = listOf(quick) + savedSources + listOf(custom),
-                activeSource = activeSource,
-                onSelectSource = { selectedId = it },
-                customEditing = activeId == com.curio.app.ui.components.CUSTOM_FACT_ID,
-                customText = customText,
-                onCustomTextChange = { customText = it },
-                onShared = onDismiss
-            )
-
-            // Quiet secondary: plain-text share (unchanged payload).
-            TextButton(onClick = {
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, entry.topic.name)
-                    putExtra(Intent.EXTRA_TEXT, entryShareText(entry, category))
-                }
-                context.startActivity(Intent.createChooser(intent, "Share entry"))
-                onDismiss()
-            }) {
-                Text(
-                    text = "Share as text instead",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-/** One Image/Text pill in the share sheet — selected wears the solid
- *  secondary fill (v131 contract), unselected sits on the container. */
-@Composable
-private fun ShareFormatPill(
-    label: String,
-    icon: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = if (selected) MaterialTheme.colorScheme.secondary
-                else MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.height(40.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            CurioIcon(
-                name = icon,
-                contentDescription = null,
-                tint = if (selected) MaterialTheme.colorScheme.onSecondary
-                       else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 16.dp
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (selected) MaterialTheme.colorScheme.onSecondary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/** Plain-text share payload for an entry (the sheet's Text format). */
-private fun entryShareText(entry: CurioEntry, category: CurioCategory): String {
     val formatLabel = entry.format.name.replace(Regex("([a-z])([A-Z])"), "$1 $2")
     val daysAgo = when (entry.capturedAtDaysAgo) {
         0 -> "today"
