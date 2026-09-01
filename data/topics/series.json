@@ -4339,28 +4339,6 @@
     "tier": 1
   },
   {
-    "id": "series-vera2011",
-    "categoryId": "SERIES",
-    "subtype": "Series",
-    "name": "Vera (2011)",
-    "teaser": "Based on Ann Cleeves novels, this ITV crime drama stars Brenda Blethyn as DCI Vera Stanhope, a shrewd detective investigating murders across Northumberland. The show ran thirteen series from 2011 to 2024 and made Vera one of the world's most recognizable British detectives, with Blethyn's performance earning multiple award nominations.",
-    "imageUrl": "",
-    "byline": "Ann Cleeves",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Vera (2011) end-to-end",
-      "durationMinutes": 90,
-      "instruction": "Start with the first episode — the show's tone and themes establish themselves immediately."
-    },
-    "tags": [
-      "Crime",
-      "Drama",
-      "British",
-      "2010s"
-    ],
-    "tier": 1
-  },
-  {
     "id": "series-gravityfalls2012",
     "categoryId": "SERIES",
     "subtype": "Series",
