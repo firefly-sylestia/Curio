@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -5635,24 +5636,31 @@ private fun ArrangeableCard(
                             )
                             .width(titleW.dp)
                             .height(titleH.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.60f), RoundedCornerShape(8.dp))
                     )
-                    // Move handle for the title
+                    // Move handle for the title — clamped so the box (and this
+                    // handle) can never leave the card once dragged off-screen.
                     MoveHandle(
                         label = "T", accent = MaterialTheme.colorScheme.primary,
                         x = (cw * 0.08f + move.titleDx).dp,
                         y = (ch * 0.06f + move.titleDy).dp,
-                        onDelta = { dx, dy -> onMove(move.copy(titleDx = move.titleDx + dx, titleDy = move.titleDy + dy)) }
+                        onDelta = { dx, dy ->
+                            val nx = (move.titleDx + dx).coerceIn(-cw * 0.08f, cw * 0.92f - titleW)
+                            val ny = (move.titleDy + dy).coerceIn(-ch * 0.06f, ch * 0.94f - titleH)
+                            onMove(move.copy(titleDx = nx, titleDy = ny))
+                        }
                     )
                     // Resize edge for the title box width
                     ResizeEdge(
                         x = (cw * 0.08f + move.titleDx + titleW).dp,
-                        y = (ch * 0.06f + move.titleDy).dp,
+                        y = (ch * 0.06f + move.titleDy + titleH / 2f).dp,
                         accent = MaterialTheme.colorScheme.primary,
                         edge = ResizeEdgeSide.RIGHT,
                         onDelta = { dx ->
                             val next = move.titleWidthFrac + dx / (cw * 0.84f)
-                            onMove(move.copy(titleWidthFrac = next.coerceIn(0.2f, 1.2f)))
+                            // Cap so the right edge of the box stays on-card.
+                            val maxW = (cw * 0.92f - move.titleDx) / (cw * 0.84f)
+                            onMove(move.copy(titleWidthFrac = next.coerceIn(0.2f, maxW)))
                         }
                     )
                     // Resize edge for the title box height
@@ -5663,7 +5671,9 @@ private fun ArrangeableCard(
                         edge = ResizeEdgeSide.BOTTOM,
                         onDelta = { dy ->
                             val next = move.titleHeightFrac + dy / (ch * 0.20f)
-                            onMove(move.copy(titleHeightFrac = next.coerceIn(0.2f, 1.6f)))
+                            // Cap so the bottom edge of the box stays on-card.
+                            val maxH = (ch * 0.94f - move.titleDy) / (ch * 0.20f)
+                            onMove(move.copy(titleHeightFrac = next.coerceIn(0.2f, maxH)))
                         }
                     )
                 }
@@ -5686,7 +5696,7 @@ private fun ArrangeableCard(
                         .width(factW.dp)
                         .height(factH.dp)
                         .padding(6.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f), RoundedCornerShape(8.dp)),
+                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.60f), RoundedCornerShape(8.dp)),
                     decorationBox = { inner ->
                         Box(Modifier.fillMaxWidth()) {
                             if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
@@ -5694,22 +5704,29 @@ private fun ArrangeableCard(
                         }
                     }
                 )
-                // Move handle for the fact
+                // Move handle for the fact — clamped so the box can never
+                // leave the card.
                 MoveHandle(
                     label = "F", accent = MaterialTheme.colorScheme.tertiary,
                     x = (cw * 0.08f + move.factDx).dp,
                     y = (ch * 0.62f + move.factDy).dp,
-                    onDelta = { dx, dy -> onMove(move.copy(factDx = move.factDx + dx, factDy = move.factDy + dy)) }
+                    onDelta = { dx, dy ->
+                        val nx = (move.factDx + dx).coerceIn(-cw * 0.08f, cw * 0.92f - factW)
+                        val ny = (move.factDy + dy).coerceIn(-ch * 0.62f, ch * 0.38f - factH)
+                        onMove(move.copy(factDx = nx, factDy = ny))
+                    }
                 )
                 // Resize edge for the fact box width
                 ResizeEdge(
                     x = (cw * 0.08f + move.factDx + factW).dp,
-                    y = (ch * 0.62f + move.factDy).dp,
+                    y = (ch * 0.62f + move.factDy + factH / 2f).dp,
                     accent = MaterialTheme.colorScheme.tertiary,
                     edge = ResizeEdgeSide.RIGHT,
                     onDelta = { dx ->
                         val next = move.factWidthFrac + dx / (cw * 0.84f)
-                        onMove(move.copy(factWidthFrac = next.coerceIn(0.2f, 1.2f)))
+                        // Cap so the right edge of the box stays on-card.
+                        val maxW = (cw * 0.92f - move.factDx) / (cw * 0.84f)
+                        onMove(move.copy(factWidthFrac = next.coerceIn(0.2f, maxW)))
                     }
                 )
                 // Resize edge for the fact box height
@@ -5720,17 +5737,27 @@ private fun ArrangeableCard(
                     edge = ResizeEdgeSide.BOTTOM,
                     onDelta = { dy ->
                         val next = move.factHeightFrac + dy / (ch * 0.26f)
-                        onMove(move.copy(factHeightFrac = next.coerceIn(0.2f, 1.6f)))
+                        // Cap so the bottom edge of the box stays on-card.
+                        val maxH = (ch * 0.38f - move.factDy) / (ch * 0.26f)
+                        onMove(move.copy(factHeightFrac = next.coerceIn(0.2f, maxH)))
                     }
                 )
 
                 // Info rows (author / byline / year / footer) — M handle: these
-                // MOVE with the drag but their text is never editable.
+                // MOVE with the drag but their text is never editable. The
+                // handle tracks the meta offset on BOTH axes and both are
+                // clamped, so the indicator stays glued to the info rows and
+                // can never be dragged off the card.
+                val mPad = 18f
                 MoveHandle(
                     label = "M", accent = MaterialTheme.colorScheme.secondary,
-                    x = (cw * 0.88f).dp,
+                    x = (cw * 0.88f + move.metaDx).dp,
                     y = (ch * 0.90f + move.metaDy).dp,
-                    onDelta = { dx, dy -> onMove(move.copy(metaDx = move.metaDx + dx, metaDy = move.metaDy + dy)) }
+                    onDelta = { dx, dy ->
+                        val nx = (move.metaDx + dx).coerceIn(-(cw * 0.88f - mPad), cw * 0.12f - mPad)
+                        val ny = (move.metaDy + dy).coerceIn(-(ch * 0.90f - mPad), ch * 0.10f - mPad)
+                        onMove(move.copy(metaDx = nx, metaDy = ny))
+                    }
                 )
             }
         }
@@ -6220,6 +6247,9 @@ private fun BoxScope.MoveHandle(
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val latestDelta by rememberUpdatedState(onDelta)
+    // Light accents get dark ink; dark accents get white — the letter on the
+    // handle must always read, regardless of the card's fill underneath.
+    val useDarkInk = accent.luminance() > 0.55f
     Box(
         modifier = Modifier
             .offset(x = x, y = y)
@@ -6228,6 +6258,7 @@ private fun BoxScope.MoveHandle(
                 shadowElevation = 3.dp.toPx(); shape = CircleShape; clip = false
             }
             .background(accent, CircleShape)
+            .border(1.dp, if (useDarkInk) Color.Black.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.45f), CircleShape)
             .pointerInput(Unit) {
                 detectDragGestures { _, dragAmount ->
                     val dx = with(density) { dragAmount.x.toDp().value }
@@ -6237,7 +6268,7 @@ private fun BoxScope.MoveHandle(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color.White))
+        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold, color = if (useDarkInk) Color(0xFF1B1B1F) else Color.White))
     }
 }
 
@@ -6263,7 +6294,7 @@ private fun BoxScope.ResizeEdge(
     val h = if (edge == ResizeEdgeSide.RIGHT) 36.dp else 6.dp
     Box(
         modifier = Modifier
-            .offset(x = x - (w / 2f), y = y)
+            .offset(x = x - (w / 2f), y = y - (h / 2f))
             .size(width = w, height = h)
             .graphicsLayer {
                 shadowElevation = 3.dp.toPx(); shape = RoundedCornerShape(3.dp); clip = false

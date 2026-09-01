@@ -1,3 +1,4 @@
+FIX: Inline edit indicators are glitch-free — the T/F/M move handles and edge tabs now track exactly what you drag (the M handle follows the author/year info on both axes), stay clamped inside the card so they can never be lost off-screen, and their letters/rings always read against the card fill (dark ink on light accents, white on dark).
 ADD: Category picker redesign — pinned lanes, saved named mixes, a Surprise me mix button, and a full-screen Browse page with bottom-nav tabs (Browse/Mixes/Pins); the old glass-pill picker stays one toggle away under Experiments.
 ADD: Share cards get MS Word-style text formats — pick a new font (Sans, Typewriter, Display, Elegant) and Left/Center/Right alignment for the quick fact in Customise, applied live on every style and baked into the saved image.
 ADD: Editorial share card gets a true drop cap — the first letter stands big and the text wraps around it for three lines, then continues full-width below.

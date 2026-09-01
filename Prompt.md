@@ -1,63 +1,53 @@
 # Prompt.md — current request log
 
-## Request (ACTIVE): Share-card text formats (Word-style), Editorial drop cap, info-row moves, title no-editing
+## Request (ACTIVE): Fix glitched hold-to-edit indicators on the share card
 
-User: "in ms words how text have different formats, well lets add that
-maybe" — add text formats to the quick-fact body; Editorial uses the
-first-letter-big format with wrap (~3 lines) then text below; add MOVE for
-the info rows (author name, year etc.) but NOT editing; title no longer
-type-editable (moving/resizing guests stay). Clarified via ask_user:
-- Formats: **Font family choices + Alignment** (not bold/italic, not
-  letter-spacing — those weren't picked).
-- Drop cap: **First letter** (classic single big initial, not first word).
-- Edit scope: **Yes, exactly that** — title move/resize only, quick fact
-  keeps typing, info rows movable but not editable.
-- Ship mode: **Always-on** (no Settings toggle).
+User: "the tap to hold to edit in glitched the indicators are showing
+wrong and not properly also when they gets out of the screen theres no way
+to fix it without reset, also use proper colors for them"
 
-### Implementation (app/src/main/java/com/curio/app/ui/components/TopicShareCard.kt)
+Three concrete bugs in the `ArrangeableCard` inline-edit overlay
+(app/src/main/java/com/curio/app/ui/components/TopicShareCard.kt):
 
-- **ShareCardMove** extended with `factFont: FontFamily?`, `factAlign:
-  TextAlign?`, `metaDx/metaDy` (info-row offset). Because `move` is already
-  threaded through TopicShareCard → every style → the export lambdas, the
-  format + info offset apply live to the preview AND bake into the saved
-  PNG for free (no extra plumbing).
-- New helpers: `factBodyStyle(base, move)` applies font+align over the
-  style; `moveMeta(m)` offsets the info rows.
-- **Text formats in Customise**: "Fact font" pills (Serif / Sans / Type /
-  Display / Elegant → null/Sora/SpaceMono/Playfair/DMSerif) and "Fact
-  alignment" pills (Left/Center/Right) under the quick-fact size slider.
-- **Formats applied to the fact body in all 8 styles** (Vinyl, Collage,
-  Neumorphic, Editorial, Minimal, Signature, Custom, Paper/MiddleContent).
-- **Editorial drop cap rework**: the old baseline-aligned 2-line initial is
-  replaced with a measured wrap — TextMeasurer (TextLayoutInput API) finds
-  how much body fits in the first 3 lines beside the 3x initial, that chunk
-  renders beside it, the remainder continues full-width below. Single-char
-  bodies fall back to plain text.
-- **Info rows movable (M handle, never editable)**: moveMeta applied to
-  byline/year/footer/colophon in every style; edit mode gained an "M"
-  MoveHandle (bottom-right) that drives metaDx/metaDy.
-- **Title no longer type-editable**: the title BasicTextField is replaced
-  by a move/crop outline box only (T handle + resize edges remain); the
-  quick-fact field keeps typing. ArrangeableCard dropped the editTitle/
-  onTitleChange params; reset still clears everything (move = ShareCardMove()).
-- **Fix**: the single-style preview branch didn't pass `move` — edit
-  adjustments were invisible in single-style categories; now passes move so
-  preview == export.
+1. **M handle desync** — the handle's x was fixed at `0.88cw` and only y
+   tracked `metaDy`; dragging M horizontally moved the info rows but the
+   handle stayed put ("indicators showing wrong").
+2. **Unbounded drags** — T/F/M offsets and resize fracs had no bounds, so
+   boxes/handles could be pushed off the card and were unrecoverable
+   without Reset. Drags were also unclamped at the card edges.
+3. **Colors** — handle labels were hard-coded white (invisible on light
+   accents) and the edge tabs hung off the box corners instead of
+   centering on the edges; crop outlines were faint (0.45 alpha).
+
+### Fixes (TopicShareCard.kt)
+
+- **Clamp every drag to the card**: T and F offsets clamp so the box stays
+  fully on-card (`coerceIn` on the Dx/Dy ranges computed from current
+  box size); resize fracs cap so the RIGHT/BOTTOM edge never leaves the
+  card (`maxW`/`maxH` derived from the live offset). Handles can no
+  longer be lost off-screen.
+- **M handle tracks both axes**: x = `0.88cw + metaDx`, y = `0.90ch +
+  metaDy`, clamped so the handle itself stays visible (18dp pad).
+- **Contrast-aware ink**: `MoveHandle` computes `accent.luminance()`; light
+  accents get dark ink (`0xFF1B1B1F`) + a soft black ring, dark accents
+  keep white ink + a white ring — letters always read against the card.
+- **Edge tabs centered**: `ResizeEdge` offsets by `y - h/2` too, and RIGHT
+  tabs now sit at the vertical middle of the box edge (`+ titleH/2` /
+  `+ factH/2`).
+- **Crop outlines stronger**: 0.45 → 0.60 alpha for the title + fact
+  boxes so the region reads clearly.
 
 ### Progress
-- [x] ShareCardMove fields + helpers; imports (AnnotatedString, Constraints).
-- [x] Editorial drop cap (TextLayoutInput-measured 3-line wrap).
-- [x] factBodyStyle applied at all 8 body render sites.
-- [x] moveMeta applied to all info rows; export-safe.
-- [x] Edit mode: title box (no typing), F field kept, M handle added;
-      hint texts updated.
-- [x] Customise panel font + alignment pills.
-- [x] Balance verified (code-balance delta 0/0/0 vs HEAD); single-style
-      preview move passthrough fixed.
-- [x] Prompt.md + changelog updated.
-- [ ] DOX note in app/AGENTS.md.
-- [ ] Commit & push.
+- [x] Imports: `androidx.compose.ui.graphics.luminance`.
+- [x] T/F/M drag clamping + M handle dual-axis tracking.
+- [x] Resize caps (width + height, title + fact).
+- [x] MoveHandle contrast ink + ring; ResizeEdge centering; outline alphas.
+- [x] Balance verified (code-balance delta 0/0/0 vs HEAD).
+- [x] Changelog FIX bullet added.
+- [ ] Prompt.md completion summary (this file).
+- [ ] Commit & push (CI validates compile on push).
 
 ### Verification status
 CI validates compilation on push (this environment forbids Gradle builds) —
-watch the run after pushing.
+watch the run after pushing. Code-balance check vs HEAD passed (parens
++30/+30, braces 0/0, brackets 0/0).
