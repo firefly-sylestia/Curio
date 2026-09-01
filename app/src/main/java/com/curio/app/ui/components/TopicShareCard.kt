@@ -5855,7 +5855,18 @@ fun TopicShareSheet(
     accent: Color, quickFact: String, authority: String,
     context: android.content.Context, savedSources: List<ShareCardContent> = emptyList(),
     onDismiss: () -> Unit, categoryFamily: CategoryFamily = CategoryFamily.WILDCARD,
-    topicByline: String = ""
+    topicByline: String = "",
+    // v229d — the sheet can open PRESELECTED: the Share Hub picks a design on
+    // the grid and hands its style index + classic-signature flag here, so the
+    // sheet opens on exactly the design the user picked (the reveal + detail
+    // screens keep the defaults: first style, current signature).
+    initialStyle: Int = 0,
+    initialClassicSignature: Boolean = false,
+    // v229d — "Share as text" lives IN the shared sheet (both reveal + detail
+    // get it). When set, the caller supplies its own payload (the detail view
+    // sends the entry's decorated text); otherwise the sheet builds a default
+    // topic + fact payload from its own params.
+    shareAsText: (() -> String)? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Per-share state — plain remember (not Bundle-saveable): the modal
@@ -5865,8 +5876,10 @@ fun TopicShareSheet(
     var selectedId by remember { mutableStateOf<String?>(null) }
     var customText by rememberSaveable { mutableStateOf("") }
     var polaroidCaption by rememberSaveable { mutableStateOf("") }
-    var styleIdx by remember { mutableIntStateOf(0) }
-    var classicDesign by remember { mutableStateOf(false) }
+    // v229d — seeded from [initialStyle] / [initialClassicSignature] so the
+    // Share Hub can open the sheet on the picked design.
+    var styleIdx by remember { mutableIntStateOf(initialStyle) }
+    var classicDesign by remember { mutableStateOf(initialClassicSignature) }
     // Inline edit mode (Paper) — per-share only; resets when the sheet closes.
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
@@ -6205,109 +6218,29 @@ fun TopicShareSheet(
                     Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                 }
             }
-        }
-    }
-}
 
-/** Hub body used by TopicShareSheet AND EntryShareSheet. */
-@Composable
-fun ShareHubBody(
-    topicName: String, categoryName: String, categoryGlyph: String, accent: Color,
-    sharerName: String, authority: String, context: android.content.Context,
-    aspect: ShareCardAspect, onAspectChange: (ShareCardAspect) -> Unit,
-    sources: List<ShareCardContent>, activeSource: ShareCardContent,
-    onSelectSource: (String) -> Unit, customEditing: Boolean, customText: String,
-    onCustomTextChange: (String) -> Unit, onShared: () -> Unit,
-    categoryFamily: CategoryFamily = CategoryFamily.WILDCARD, topicByline: String = "",
-    style: ShareCardStyle = ShareCardStyle.PAPER, onStyleChange: (Int) -> Unit = {},
-    classicSignature: Boolean = false, onClassicSignatureChange: (Boolean) -> Unit = {}
-) {
-    val pw = 280.dp
-    val isQ = activeSource.id == "quote"
-    val styles = availableStylesForFamily(categoryFamily, topicName)
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (styles.size > 1) {
-            // Multi-style: carousel IS the preview
-            val si = style.ordinal.coerceIn(0, styles.lastIndex)
-            val hubPagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = si) { styles.size }
-            androidx.compose.runtime.LaunchedEffect(hubPagerState.currentPage) { onStyleChange(hubPagerState.currentPage) }
-            Text(style.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            androidx.compose.foundation.pager.HorizontalPager(
-                state = hubPagerState,
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 48.dp),
-                pageSpacing = 12.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) { page ->
-                val isCenter = page == hubPagerState.currentPage
-                Box(
-                    modifier = Modifier
-                        .width(pw)
-                        .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-                        .shadow(if (isCenter) 4.dp else 1.dp, RoundedCornerShape(6.dp))
-                        .clip(RoundedCornerShape(6.dp))
-                        .graphicsLayer {
-                            val pageOffset = (hubPagerState.currentPage - page + hubPagerState.currentPageOffsetFraction)
-                            val scale = 1f - 0.10f * kotlin.math.abs(pageOffset)
-                            scaleX = scale; scaleY = scale
-                            alpha = 1f - 0.3f * kotlin.math.abs(pageOffset)
-                        }
-                ) {
-                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
+            // v229d — "Share as text" — a quiet secondary action every sheet
+            // (reveal, detail, hub) carries. The caller can supply its own
+            // payload; the default builds topic + current fact + credit.
+            TextButton(onClick = {
+                val text = shareAsText?.invoke() ?: buildString {
+                    append(topicName).append("\n")
+                    append(activeSource.text).append("\n\n")
+                    append(categoryName).append(" · via Curio — Stay curious")
                 }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                styles.forEachIndexed { i, _ ->
-                    Box(Modifier.size(if (i == hubPagerState.currentPage) 7.dp else 5.dp).background(
-                        if (i == hubPagerState.currentPage) MaterialTheme.colorScheme.secondary
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f), CircleShape
-                    ))
+                val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(android.content.Intent.EXTRA_SUBJECT, topicName)
+                    putExtra(android.content.Intent.EXTRA_TEXT, text)
                 }
-            }
-        } else {
-            // Single style: just show the card directly
-            Box(
-                modifier = Modifier
-                    .width(pw)
-                    .aspectRatio(aspect.widthDp.toFloat() / aspect.heightDp.toFloat())
-                    .shadow(4.dp, RoundedCornerShape(6.dp))
-                    .clip(RoundedCornerShape(6.dp))
-            ) {
-                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Pill(ShareCardAspect.PORTRAIT.label, CurioIcons.Image, aspect == ShareCardAspect.PORTRAIT) { onAspectChange(ShareCardAspect.PORTRAIT) }
-            Pill(ShareCardAspect.CLASSIC.label, CurioIcons.Image, aspect == ShareCardAspect.CLASSIC) { onAspectChange(ShareCardAspect.CLASSIC) }
-        }
-        if (style == ShareCardStyle.SIGNATURE) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Pill("Current", CurioIcons.AutoAwesome, !classicSignature) { onClassicSignatureChange(false) }
-                Pill("Classic", CurioIcons.AutoAwesome, classicSignature) { onClassicSignatureChange(true) }
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            sources.filter { !isQ || it.id != QUICK_FACT_ID }.forEach { opt ->
-                Pill(opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "★".repeat(it) } ?: ""), CurioIcons.FormatText, opt.id == activeSource.id) { onSelectSource(opt.id) }
-            }
-        }
-        if (customEditing) OutlinedTextField(customText, onCustomTextChange, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
-        val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
-        // Save + Share side by side — Save writes the PNG to the gallery,
-        // Share launches the chooser (the topic sheet's same two actions).
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            OutlinedButton(onClick = {
-                shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
-                }, saveToGallery = true); onShared()
-            }, shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(52.dp)) {
-                Text("Save", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
-            }
-            Button(onClick = {
-                shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                    TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharerName, aspect = aspect, style = style, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (isQ) activeSource.text else null, quoteAuthor = if (isQ) topicByline.ifBlank { null } else null, byline = topicByline, classicSignature = classicSignature)
-                }); onShared()
-            }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary), modifier = Modifier.weight(1f).height(52.dp)) {
-                Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
+                context.startActivity(android.content.Intent.createChooser(intent, "Share"))
+                onDismiss()
+            }) {
+                Text(
+                    text = "Share as text",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

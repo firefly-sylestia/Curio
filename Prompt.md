@@ -1,61 +1,61 @@
 # Prompt.md — current request log
 
-## Request (ACTIVE): Share-card hold-to-edit glitches — dead side adjuster, flaky height tab, footer moves
+## Request (ACTIVE → DONE this turn): Unify the share screen + mood-board quote option
 
-User: "sometimes the height adjuster for text and title doesnt work sometimes
-it works when maybe handle issue, and the side adjustment isnt working now it
-was working better previously, also dont let the footer move, just the author
-year move."
+User: "polish share hub, use the same share screen that used in topic reveal
+share, the exact same in detail screen too. we will be adding ability to add
+your quotes, or review etc instead of quick fact from detail view, not
+editing but using the same from the detail saved entries, and in moodboard
+save your entry, add the add quote option too, not inside the moodboard,
+outside of it, did u do it? do this please"
 
-> NOTE: the share-hub / detail-share / moodboard-quote feature from an
-> earlier request is PARKED (user: "dont push this but push the cl fix").
-> Nothing for it was committed; design answers received (full swap +
-> share-as-text everywhere; hub Share button opens the sheet + floating
-> button; moodboard quote option in save + share) are recorded in the
-> conversation. Resume with TopicShareSheet work when asked.
+Design answers already captured (from the earlier ask):
+- Full swap to the exact reveal sheet; "Share as text" in the sheet too.
+- Hub Share button opens the sheet + is a floating button (not bottom-of-grid).
+- Mood-board quote option appears in save (during editing/adding), outside
+  the board; saved board quotes feed the share sheet's Quote source.
 
-### What shipped (this turn) — all in `ui/components/TopicShareCard.kt`
+### What shipped (this turn) — 4 files, one coherent change
 
-**1. Side (width) adjuster fixed — root causes**
-- The scale tab clamped fractions to 0.3..1.6 while the renderer caps at
-  1.0 — drags past full width did nothing (dead zone). Tab clamps now match
-  the renderer (0.3..1f).
-- Delta divided by the box's OWN reported width, which re-measured mid-drag
-  and changed the feel; now card-relative (`dx / cw`, `dy / ch`) so drags
-  track the finger 1:1 across the card.
-- Paper's fact sits in `FrostPane`, whose internal `fillMaxWidth()` was
-  chained AFTER the resize modifier — it overrode the resized width entirely,
-  so the width adjuster did nothing on the MAIN style. FrostPane now applies
-  `Modifier.fillMaxWidth().then(modifier)` (caller's fraction narrows it).
+**1. TopicShareSheet is THE share sheet** (`ui/components/TopicShareCard.kt`)
+- New params: `initialStyle: Int = 0`, `initialClassicSignature: Boolean =
+  false` (hub opens on the picked design), `shareAsText: (() -> String)? =
+  null` (detail supplies its entry-aware payload; default = topic + fact).
+- "Share as text" TextButton added BELOW Save/Share — every caller (reveal,
+  detail, hub) gets it.
+- The old `ShareHubBody` (the reduced preview + pills used only by the old
+  EntryShareSheet) is deleted — dead code now.
 
-**2. Height adjuster fixed — root causes**
-- The bottom tab was only 6dp thick (~20px) — fingers missed it (the
-  "sometimes works" flakiness). Both tabs are now big luminous bars
-  (14 x 46 / 46 x 14 dp) with luminance-based contrast rings.
-- `lines()` FLOORED line counts: dragging 2.5 lines showed 2, so partial
-  drags looked dead. Now rounds to the nearest line — each half-line of
-  travel changes the visible count.
+**2. Detail screen uses the EXACT same sheet** (`features/detail/EntryDetailScreen.kt`)
+- The More-menu share now opens `TopicShareSheet` with savedSources built from
+  the entry's capture data: Quote (ReelNotes/Marginalia/SoundBite/**Gallery
+  Wall mood-board quotes**), Review (ReelNotes text + star rating), session
+  Note. QUOTES topics prepend the byline (same as before).
+- The old `EntryShareSheet` composable + `ShareFormatPill` helper are deleted;
+  `entryShareText` stays (used as the sheet's shareAsText payload, and its
+  isQuote branch now also reads GalleryWall quotes).
 
-**3. Footer is now FIXED — only author/year moves**
-- Every footer / colophon / credit row across all 9 styles used to ALSO call
-  `onMeta`, and since they render after the author/year row they overwrote
-  `metaRect` — the M handle anchored to and dragged the footer. All footer
-  rows now render without `moveMeta`/`onMeta`; only the byline / author /
-  year rows report bounds, so M moves exactly those and the "via Curio"
-  footer never budges.
+**3. Share Hub opens the sheet from a floating pill** (`features/settings/ShareHubScreen.kt`)
+- The long-grid bottom Share button is gone; a floating Share pill (bottom
+  end, nav-bars padded) opens `TopicShareSheet` with the picked topic + the
+  picked design preselected via `initialStyle`/`initialClassicSignature`
+  (style index mapped through `availableStylesForFamily`).
+- Aspect pills stay; removed now-unused imports (Button, ButtonDefaults,
+  DpSize, shareComposableCard).
 
-**4. Handles can never leave the card**
-- Resize tabs clamp their DISPLAY position ~6dp inside the card (a grown box
-  can't push a tab off-screen); the M handle clamps inside too.
-- M-handle drag clamps got a floor on the upper bound (full-width meta rows
-  made `coerceIn` throw mid-drag) — now safe in both axes.
+**4. Mood-board add-quote OUTSIDE the board** (`features/capture/formats/GalleryWallFormat.kt`)
+- The below-board `QuoteCardsSection` (its own Add button + paper-style
+  toggle) is ALWAYS shown again; the on-board floating-quote chip + canvas
+  cards stay hidden (they misbehaved on the canvas). Below-board cards save
+  into `CaptureData.GalleryWall.quotes` → surface as the Quote source pill on
+  the entry share sheet (wired in #2).
 
 ### Progress
-- [x] FrostPane modifier order fix (Paper width).
-- [x] Tab clamp ranges unified with renderer (side dead zone gone).
-- [x] Tab sizes + contrast rings (grabbable).
-- [x] `lines()` rounds instead of flooring (height visibly responds).
-- [x] Footers/colophons/credits no longer report onMeta (M = author/year only).
-- [x] Tab/handle display clamps + safe M drag bounds.
-- [x] Balance verified (0/0/0 vs HEAD), changelog bullet added.
-- [x] Commit; CI validates compile on push (this env forbids Gradle).
+- [x] TopicShareSheet: initialStyle/initialClassicSignature + shareAsText + UI.
+- [x] ShareHubBody removed.
+- [x] Detail screen swapped to TopicShareSheet; old sheet + pill removed.
+- [x] entryShareText gained GalleryWall quote support.
+- [x] Hub floating Share pill + sheet launch with preselect.
+- [x] GalleryWall below-board QuoteCardsSection restored; canvas chip stays hidden.
+- [x] Balance verified 0/0/0 on all four files; changelog + this log updated.
+- [ ] Commit & push (user asked for it: "do this please").

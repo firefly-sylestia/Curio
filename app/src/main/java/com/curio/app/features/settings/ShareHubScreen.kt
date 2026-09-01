@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -19,8 +20,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -59,7 +57,6 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ShareCardAspect
 import com.curio.app.ui.components.ShareCardStyle
 import com.curio.app.ui.components.TopicShareCard
-import com.curio.app.ui.components.shareComposableCard
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
@@ -90,6 +87,9 @@ fun ShareHubScreen(navController: NavController) {
     var pickedTopicId by rememberSaveable { mutableStateOf<String?>(null) }
     var pickedDesign by rememberSaveable { mutableStateOf<Int?>(null) }
     var aspect by rememberSaveable { mutableStateOf(ShareCardAspect.PORTRAIT) }
+    // v229d — the floating Share pill opens the full TopicShareSheet (not a
+    // one-shot export); this flag hosts it.
+    var hubShareOpen by rememberSaveable { mutableStateOf(false) }
 
     // Full catalog index — loaded once, reused by the search below.
     val index by produceState<List<TopicIndexEntry>?>(null) {
@@ -332,72 +332,11 @@ fun ShareHubScreen(navController: NavController) {
                 }
             }
 
-            // ── Aspect + Share ──────────────────────────────────────────
+            // ── Aspect ──────────────────────────────────────────────────
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HubPill("9:16", aspect == ShareCardAspect.PORTRAIT) { aspect = ShareCardAspect.PORTRAIT }
                     HubPill("3:4", aspect == ShareCardAspect.CLASSIC) { aspect = ShareCardAspect.CLASSIC }
-                }
-            }
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                val canShare = selectedDesign != null && pickedTopic != null
-                // Resolve the override category's accent/glyph/family/name in
-                // the @Composable item scope (themedAccent is @Composable),
-                // then capture as locals for the non-composable onClick.
-                val resolvedTopic = pickedTopic
-                val resolvedCat = resolvedTopic?.let { CurioCategories.byId(it.categoryId) }
-                val ovCat = selectedDesign?.categoryOverrideId?.let { CurioCategories.byId(it) }
-                val exportCategoryName = ovCat?.displayName ?: resolvedCat?.displayName ?: wildcardCat.displayName
-                val exportGlyph = ovCat?.iconGlyph ?: resolvedCat?.iconGlyph ?: wildcardCat.iconGlyph
-                val exportAccent = ovCat?.themedAccent() ?: resolvedCat?.themedAccent() ?: wildcardCat.themedAccent()
-                val exportFamily = ovCat?.family ?: resolvedCat?.family ?: CategoryFamily.WILDCARD
-                Button(
-                    onClick = {
-                        val design = selectedDesign ?: return@Button
-                        val topic = resolvedTopic ?: return@Button
-                        val cat = CurioCategories.byId(topic.categoryId)
-                        val isQuotes = cat.id == CategoryId.QUOTES
-                        val pw = 280.dp
-                        val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
-                        shareComposableCard(
-                            context = context,
-                            cardSize = DpSize(pw, eh),
-                            authority = authority,
-                            exportDensity = 4f,
-                            card = {
-                                TopicShareCard(
-                                    topicName = topic.name,
-                                    categoryName = exportCategoryName,
-                                    categoryGlyph = exportGlyph,
-                                    accent = exportAccent,
-                                    factText = if (isQuotes) topic.name else topic.teaser,
-                                    sharerName = sharer,
-                                    aspect = aspect,
-                                    style = design.style,
-                                    ratingStars = null,
-                                    categoryFamily = exportFamily,
-                                    quoteText = if (isQuotes) topic.name else null,
-                                    quoteAuthor = if (isQuotes) topic.byline.ifBlank { null } else null,
-                                    byline = topic.byline,
-                                    classicSignature = design.classic
-                                )
-                            }
-                        )
-                    },
-                    enabled = canShare,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
-                    ),
-                    modifier = Modifier.fillMaxWidth().height(52.dp)
-                ) {
-                    Text(
-                        if (selectedDesign == null) "Pick a design above"
-                        else if (pickedTopic == null) "Search and pick a topic"
-                        else "Share ${pickedTopic?.name ?: ""} · ${selectedDesign?.label ?: ""}",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                    )
                 }
             }
         }
@@ -416,6 +355,85 @@ fun ShareHubScreen(navController: NavController) {
             compact = wide,
             glassBackdrop = glassBackdrop
         )
+
+        // v229d — FLOATING Share pill: the old full-width button sat at the
+        // bottom of a long scroll ("all the way down in share hub"); the
+        // share action now floats above the grid edge so it's always in
+        // reach. Tapping it opens the EXACT TopicShareSheet with the picked
+        // topic + picked design preselected (Customise, hold-to-edit and
+        // Share-as-text all come along) instead of doing a silent one-shot
+        // export.
+        val canShare = selectedDesign != null && pickedTopic != null
+        val hubShareLabel = when {
+            selectedDesign == null -> "Pick a design"
+            pickedTopic == null -> "Pick a topic"
+            else -> "Share ${pickedTopic?.name ?: ""}"
+        }
+        Surface(
+            onClick = { if (canShare) hubShareOpen = true },
+            shape = RoundedCornerShape(50),
+            color = if (canShare) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = if (canShare) MaterialTheme.colorScheme.onSecondary
+                           else MaterialTheme.colorScheme.onSurfaceVariant,
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(end = 20.dp, bottom = 24.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Share,
+                    contentDescription = null,
+                    tint = if (canShare) MaterialTheme.colorScheme.onSecondary
+                           else MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 16.dp
+                )
+                Text(
+                    hubShareLabel,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        // ── The sheet — the exact same TopicShareSheet as Topic Reveal ──
+        if (hubShareOpen && selectedDesign != null && pickedTopic != null) {
+            val design = selectedDesign
+            val topic = pickedTopic
+            val resolvedCat = CurioCategories.byId(topic.categoryId)
+            val ovCat = design.categoryOverrideId?.let { CurioCategories.byId(it) }
+            val isQuotes = resolvedCat.id == CategoryId.QUOTES
+            val catName = ovCat?.displayName ?: resolvedCat.displayName
+            val glyph = ovCat?.iconGlyph ?: resolvedCat.iconGlyph
+            val theAccent = ovCat?.themedAccent() ?: resolvedCat.themedAccent()
+            val fam = ovCat?.family ?: resolvedCat.family
+            // The hub's design list is its own ordering — map the chosen
+            // style back into the sheet's per-family style index so the
+            // sheet opens on exactly the picked design.
+            val styleIndex = com.curio.app.ui.components.availableStylesForFamily(fam, topic.name)
+                .indexOf(design.style).coerceAtLeast(0)
+            com.curio.app.ui.components.TopicShareSheet(
+                topicName = topic.name,
+                categoryName = catName,
+                categoryGlyph = glyph,
+                accent = theAccent,
+                quickFact = if (isQuotes) topic.name else topic.teaser,
+                authority = authority,
+                context = context,
+                onDismiss = { hubShareOpen = false },
+                categoryFamily = fam,
+                topicByline = topic.byline,
+                initialStyle = styleIndex,
+                initialClassicSignature = design.classic
+            )
+        }
     }
 }
 
