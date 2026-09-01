@@ -178,6 +178,14 @@ object AppPreferences {
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
     private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
+    // v3xx — picker page default + curated suggestions (add/remove):
+    // - KEY_PICKER_DEFAULT_PAGE — 0 = classic picker opens first (default),
+    //   1 = new picker opens first.
+    // - KEY_PICKER_SUGGESTIONS — a JSON array of CategoryId names the user
+    //   curated as the "fun to explore" list below the mixes. Empty/missing
+    //   falls back to a curated default list.
+    private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
+    private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -740,6 +748,22 @@ object AppPreferences {
         private set
 
     /**
+     * v3xx — which picker page opens first in the sheet's pager.
+     * 0 = classic picker (default), 1 = new picker. Seeded from prefs in
+     * [initThemeMode].
+     */
+    var pickerDefaultPageState by mutableIntStateOf(0)
+        private set
+
+    /**
+     * v3xx — the user's curated "fun to explore" category ids shown below
+     * the mixes in the new picker. Empty = use the curated default list
+     * (see [defaultSuggestions]). Seeded from prefs in [initThemeMode].
+     */
+    var pickerSuggestionsState by mutableStateOf<List<CategoryId>>(emptyList())
+        private set
+
+    /**
      * Reactive category ORDER state (v7.94) — set via Manage Categories.
      * Empty = the default order. [CurioCategories.visible] applies it, so
      * the Home/Cabinet chip rows and the pickers honor the user's reorder.
@@ -855,6 +879,8 @@ object AppPreferences {
         savedMixesState = getSavedMixes(context)
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
+        pickerDefaultPageState = getPickerDefaultPage(context)
+        pickerSuggestionsState = getPickerSuggestions(context)
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
@@ -2219,6 +2245,56 @@ object AppPreferences {
     fun setPickerMixesSeeded(context: Context, on: Boolean) {
         prefs(context).edit().putBoolean(KEY_PICKER_MIXES_SEEDED, on).apply()
         pickerMixesSeededState = on
+    }
+
+    // ── Picker default page + curated suggestions (v3xx) ─────────────
+    /** The curated default "fun to explore" list (up to 10), in order. */
+    val defaultSuggestions: List<CategoryId> = listOf(
+        CategoryId.FILMS, CategoryId.BOOKS, CategoryId.ANIMALS,
+        CategoryId.SCIENTISTS, CategoryId.HISTORY, CategoryId.ARTISTS,
+        CategoryId.FOOD, CategoryId.GAMES, CategoryId.MYTHOLOGY,
+        CategoryId.ANIME
+    )
+
+    /** Which picker page opens first: 0 = classic, 1 = new. */
+    fun getPickerDefaultPage(context: Context): Int =
+        prefs(context).getInt(KEY_PICKER_DEFAULT_PAGE, 0)
+
+    fun setPickerDefaultPage(context: Context, page: Int) {
+        prefs(context).edit().putInt(KEY_PICKER_DEFAULT_PAGE, page).apply()
+        pickerDefaultPageState = page
+    }
+
+    /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */
+    fun getPickerSuggestions(context: Context): List<CategoryId> {
+        val raw = prefs(context).getString(KEY_PICKER_SUGGESTIONS, null) ?: return emptyList()
+        return runCatching {
+            JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i ->
+                    runCatching { CategoryId.valueOf(arr.getString(i)) }.getOrNull()
+                }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    fun setPickerSuggestions(context: Context, ids: List<CategoryId>) {
+        val arr = JSONArray()
+        ids.forEach { arr.put(it.name) }
+        prefs(context).edit().putString(KEY_PICKER_SUGGESTIONS, arr.toString()).apply()
+        pickerSuggestionsState = ids
+    }
+
+    /** Adds a category id to the curated suggestions (no-op if present). */
+    fun addPickerSuggestion(context: Context, id: CategoryId) {
+        val cur = getPickerSuggestions(context).toMutableList()
+        if (id !in cur) { cur.add(id); setPickerSuggestions(context, cur) }
+    }
+
+    /** Removes a category id from the curated suggestions. */
+    fun removePickerSuggestion(context: Context, id: CategoryId) {
+        val cur = getPickerSuggestions(context).toMutableList()
+        cur.remove(id)
+        setPickerSuggestions(context, cur)
     }
 
     // ── Custom pet design (v8.34 — Pet designer playground) ──────────

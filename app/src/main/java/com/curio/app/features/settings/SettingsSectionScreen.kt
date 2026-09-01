@@ -100,6 +100,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
+import com.curio.app.ui.theme.switchVisualThemeWithReveal
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
@@ -272,13 +273,31 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // v185 — the proper M3 Material theme system (opt-in, default OFF —
         // the current app look is untouched). The v185 "Material guidelines"
         // + "Material chrome" options were removed (user verdict: not good).
+        // v(theme reveal) — toggling Material repaints the whole scheme even
+        // at the same light/dark state, so the reveal is FORCED (not gated on
+        // a dark/light flip) so the user sees the circular animation.
         SettingsRowPulse(highlightKey == "appearance-material-theme") {
-            CompactSwitchRow(
-                "Material theme",
-                "Proper Material 3 colors: one primary, neutral surfaces, muted category families",
-                AppPreferences.materialThemeState
+            val materialTransition = LocalCurioThemeTransition.current
+            val materialScope = rememberCoroutineScope()
+            var materialRowBounds by remember { mutableStateOf(Rect.Zero) }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { materialRowBounds = it.boundsInWindow() }
             ) {
-                AppPreferences.setMaterialThemeEnabled(context, it)
+                CompactSwitchRow(
+                    "Material theme",
+                    "Proper Material 3 colors: one primary, neutral surfaces, muted category families",
+                    AppPreferences.materialThemeState
+                ) {
+                    val center = if (materialRowBounds == Rect.Zero) Offset.Zero
+                        else Offset(materialRowBounds.right, materialRowBounds.center.y)
+                    switchVisualThemeWithReveal(
+                        materialTransition, materialScope, center
+                    ) {
+                        AppPreferences.setMaterialThemeEnabled(context, it)
+                    }
+                }
             }
         }
         CurioSettingsDivider()
@@ -287,13 +306,28 @@ private fun AppearanceSection(highlightKey: String? = null) {
         // instead of the app-default rose/azure. Only meaningful while
         // Material theme is on — the row greys out otherwise.
         SettingsRowPulse(highlightKey == "appearance-material-hero-tears") {
-            CompactSwitchRow(
-                "Material hero tears",
-                "Torn heroes wear the theme's container color, not rose",
-                AppPreferences.materialHeroTearsState,
-                enabled = AppPreferences.materialThemeState
+            val heroTearTransition = LocalCurioThemeTransition.current
+            val heroTearScope = rememberCoroutineScope()
+            var heroTearRowBounds by remember { mutableStateOf(Rect.Zero) }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { heroTearRowBounds = it.boundsInWindow() }
             ) {
-                AppPreferences.setMaterialHeroTearsEnabled(context, it)
+                CompactSwitchRow(
+                    "Material hero tears",
+                    "Torn heroes wear the theme's container color, not rose",
+                    AppPreferences.materialHeroTearsState,
+                    enabled = AppPreferences.materialThemeState
+                ) {
+                    val center = if (heroTearRowBounds == Rect.Zero) Offset.Zero
+                        else Offset(heroTearRowBounds.right, heroTearRowBounds.center.y)
+                    switchVisualThemeWithReveal(
+                        heroTearTransition, heroTearScope, center
+                    ) {
+                        AppPreferences.setMaterialHeroTearsEnabled(context, it)
+                    }
+                }
             }
         }
         CurioSettingsDivider()

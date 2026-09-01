@@ -138,6 +138,44 @@ app/src/main/java/com/curio/app/
     names + cmap codepoints; verified 0 lost codepoints and 0 lost rlig
     names: 250→253 cps, 277→280 names). New constants in CurioIcons:
     Shuffle / GridView / Apps / PushPin.
+- **v3xx2 — category picker overhaul (neutral + tap-hold options +
+  pager).** The new picker drops category accents everywhere and adds a
+  classic/new pager:
+  - **NEUTRAL tiles:** `NewPickerTile` uses `surfaceContainerHigh` fills,
+    `onSurfaceVariant` icons, and a `secondaryContainer` selected fill +
+    `primary` check — NO category accent for fills, borders or icons in
+    EITHER theme. The same neutral treatment applies to `BrowseMixRow`,
+    the Pins tab rows, the Mixes 3-dot menu, and the in-page bottom-nav
+    capsules (`surfaceContainerHigh` idle / `secondaryContainer` selected,
+    hairline `curioGlassEdge` preserved — NEVER fully transparent, even in
+    liquid-glass mode).
+  - **Tap-and-hold → option pill:** holding a category (Browse grid,
+    Pinned row, Pins tab) surfaces a centered overlay with **Pin/Unpin** +
+    **Spin** instead of pinning directly. The pill is a SOLID surface (no
+    glass transparency). Pinned pills are taller/wider (12dp vertical
+    padding).
+  - **No close button:** the sheet has no cross — swipe down or back to
+    close.
+  - **HorizontalPager:** page 0 = a self-contained classic-style
+    multi-select grid (preset chips + Mix/Cancel row, neutral tiles),
+    page 1 = the new picker. The user's chosen page persists as the
+    default (`pickerDefaultPageState`, default 0 = classic). Both pages
+    share the bottom action row (Surprise me · Create mix · Browse).
+  - **Your mixes:** a 2-column grid, max 5 visible + Show all/Show less.
+  - **Continue exploring** replaces "Now spinning": the user's most-spun
+    categories (`CurioPassport.allProgress` spin counts) first, then
+    curated "fun to explore" lanes up to 10. The user can add/remove via a
+    tap-and-hold → remove and an "+ Add" tile → `AddSuggestionSheet`
+    (`pickerSuggestionsState`, falls back to `defaultSuggestions`).
+  - **Mix editor** shows a CLEAR neutral selected state on tiles
+    (`secondaryContainer` + `primary` check).
+  - **Back from Browse** (PICKER route) re-opens the Spin picker sheet via
+    `SpinPickerRequest.pending = true` (the Browse back button sets it;
+    SpinScreen's existing consumer reopens the sheet).
+  - **Mixes 3-dot** offers both Edit and Delete (was edit-only).
+  - Persistence: `pickerDefaultPageState` (Int) + `pickerSuggestionsState`
+    (List<CategoryId>) + `getPickerSuggestions`/`setPickerSuggestions`/
+    `addPickerSuggestion`/`removePickerSuggestion` + `defaultSuggestions`.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**

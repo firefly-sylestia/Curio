@@ -1048,18 +1048,26 @@ private fun EditorialCard(
                     val density = androidx.compose.ui.platform.LocalDensity.current
                     val measurer = rememberTextMeasurer()
                     val contentW = with(density) { maxWidth.toPx() }
+                    // The drop-cap initial spans ~3 body lines. Its lineHeight
+                    // is set to 3× one body line so the initial column height
+                    // EXACTLY matches the 3 wrap lines beside it — the old
+                    // baseline alignment left a height mismatch that made the
+                    // full-width rest text overlap the wrapped block.
+                    val bodyLineH = (bodySize.value * 1.45f * bodyScale).sp
                     val initialStyle = TextStyle(
                         fontFamily = LoraFontFamily, fontWeight = FontWeight.Bold,
                         fontSize = (bodySize.value * 3.0f * bodyScale).sp,
-                        lineHeight = (bodySize.value * 3.0f * bodyScale).sp, color = accentRule
+                        lineHeight = (bodyLineH.value * 3f).sp, color = accentRule
                     )
                     val initialW = measurer.measure(
                         text = AnnotatedString(initial),
                         style = initialStyle
                     ).size.width.toFloat()
-                    val gap = with(density) { 5.dp.toPx() }
+                    val gap = with(density) { 6.dp.toPx() }
                     val narrowW = (contentW - initialW - gap).toInt().coerceAtLeast(1)
-                    // How much body text fits in the first 3 lines beside the initial.
+                    // How much body text fits in the first 3 lines beside the
+                    // initial. Measure at the NARROW width so the rendered wrap
+                    // matches the split exactly (no overflow / overlap).
                     val wrap = measurer.measure(
                         text = AnnotatedString(bodyRest),
                         style = bodyStyle,
@@ -1071,19 +1079,28 @@ private fun EditorialCard(
                     val wrapEnd = wrap.getLineEnd((wrap.lineCount - 1).coerceAtLeast(0))
                     val wrapText = bodyRest.take(wrapEnd)
                     val restText = bodyRest.drop(wrapEnd)
+                    // Initial column: fixed width = initialW + gap, top-aligned
+                    // so the big letter sits at the top of the block and its 3-
+                    // line height matches the wrap column. Wrap column: the
+                    // narrow width, 3 lines, clipped (never overlapping the
+                    // initial because it's a sibling column, not baseline-
+                    // aligned behind the letter).
+                    val initColW = with(density) { (initialW + gap).toDp() }
                     Row(Modifier.fillMaxWidth()) {
                         if (initial.isNotEmpty()) {
                             Text(initial, style = initialStyle,
-                                modifier = Modifier.alignByBaseline().padding(end = 5.dp))
+                                modifier = Modifier
+                                    .width(initColW)
+                                    .padding(end = 6.dp))
                         }
                         if (wrapText.isNotEmpty()) {
                             Text(wrapText, style = bodyStyle, maxLines = 3,
                                 overflow = TextOverflow.Clip,
-                                modifier = Modifier.alignByBaseline().weight(1f))
+                                modifier = Modifier.weight(1f))
                         }
                     }
                     if (restText.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
+                        Spacer(Modifier.height(3.dp))
                         Text(restText, style = bodyStyle,
                             maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac),
                             overflow = TextOverflow.Ellipsis,
