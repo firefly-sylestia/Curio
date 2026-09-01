@@ -36,9 +36,24 @@ add the HEIGHT too.
 - [x] Verified ResizeEdgeSide.BOTTOM exists + ResizeEdge handles BOTTOM;
       verified Save/Share exports pass `move` so preview == export.
 - [x] Brace/paren balance check (delta clean vs HEAD baseline).
-- [ ] Prompt.md summary (this).
-- [ ] Commit & push.
+- [x] Committed + pushed (`da226d67`).
+  
+### CI fix (2fc58b51) — new picker compile errors
+CI flagged 9 errors in NewCategoryPicker.kt (all four root causes):
+1. `padding(vertical = 2.dp, bottom = 6.dp)` — invalid arg mix → split
+   into `padding(top = 2.dp, bottom = 6.dp)`.
+2. `androidx.compose.foundation.border(...)` called as a bare extension
+   (no receiver) inside Box scope → moved into the Modifier chain
+   (`.border(width, color, shape)`) + added the foundation border import.
+3. `com.curio.app.ui.theme.onAccent(category)` — onAccent is a
+   CurioCategory extension → `category.onAccent()`.
+4. Mix editor `selected` state: the elvis
+   `laneIds?.toMutableSet() ?: mutableSetOf()` inferred a projected
+   `MutableSet<out CategoryId>`, breaking the state delegate setValue and
+   cascading into unresolved add/remove/isEmpty/contains at lines
+   880–915 → explicit `mutableStateOf<MutableSet<CategoryId>>(...)`.
+Pushed — CI revalidates on the new push.
 
 ### Verification status
 CI validates compilation on push (this environment forbids Gradle builds) —
-watch the run after pushing.
+watch the run after pushing 2fc58b51.
