@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
@@ -245,29 +246,35 @@ data class ShareCardMove(
     val titleDy: Float = 0f,
     val factDx: Float = 0f,
     val factDy: Float = 0f,
-    /** Box-size fractions (1f = unchanged). Title/fact width and fact height
-     *  are scaled by these so the user can crop/resize the boxes on the card. */
+    /** Box-size fractions (1f = unchanged). Title/fact width AND height are
+     *  scaled by these so the user can crop/resize the boxes on the card. */
     val titleWidthFrac: Float = 1f,
+    val titleHeightFrac: Float = 1f,
     val factWidthFrac: Float = 1f,
     val factHeightFrac: Float = 1f,
     /** Title text-size multiplier (1f = unchanged). */
     val titleScale: Float = 1f
 )
 
-/** Modifier that shifts a card's TITLE by the move offset + box width + scale (no-op when default). */
+/** Modifier that shifts a card's TITLE by the move offset + box size + scale and
+ *  CROPS it to the box height (no-op when default). The crop uses
+ *  fillMaxHeight+clipToBounds so the preview and the exported image match. */
 private fun Modifier.moveTitle(m: ShareCardMove): Modifier {
     var mod = this
     if (m.titleScale != 1f) mod = mod.graphicsLayer { scaleX = m.titleScale; scaleY = m.titleScale }
     if (m.titleDx != 0f || m.titleDy != 0f) mod = mod.offset(x = m.titleDx.dp, y = m.titleDy.dp)
     if (m.titleWidthFrac != 1f) mod = mod.fillMaxWidth(m.titleWidthFrac.coerceIn(0.2f, 1f))
+    if (m.titleHeightFrac != 1f) mod = mod.fillMaxHeight(m.titleHeightFrac.coerceIn(0.2f, 1f)).clipToBounds()
     return mod
 }
 
-/** Modifier that shifts a card's QUICK-FACT/BODY by the move offset + box size (no-op when default). */
+/** Modifier that shifts a card's QUICK-FACT/BODY by the move offset + box size and
+ *  CROPS it to the box height (no-op when default). */
 private fun Modifier.moveFact(m: ShareCardMove): Modifier {
     var mod = this
     if (m.factDx != 0f || m.factDy != 0f) mod = mod.offset(x = m.factDx.dp, y = m.factDy.dp)
     if (m.factWidthFrac != 1f) mod = mod.fillMaxWidth(m.factWidthFrac.coerceIn(0.2f, 1f))
+    if (m.factHeightFrac != 1f) mod = mod.fillMaxHeight(m.factHeightFrac.coerceIn(0.2f, 1f)).clipToBounds()
     return mod
 }
 
@@ -5532,9 +5539,11 @@ private fun ArrangeableCard(
                 if (cw == 0f || ch == 0f) return@BoxWithConstraints
 
                 // Title — transparent inline field over the card's own title.
-                // No background/border so the card text shows through; the field
-                // is just an input surface that writes to editedTitle.
+                // No background so the card text shows through; the field is just
+                // an input surface that writes to editedTitle. A faint hairline
+                // outline marks the crop box while editing.
                 val titleW = (cw * 0.84f * move.titleWidthFrac).coerceIn(cw * 0.2f, cw)
+                val titleH = (ch * 0.20f * move.titleHeightFrac).coerceIn(ch * 0.05f, ch * 0.55f)
                 if (!quoteMode) {
                     BasicTextField(
                         value = editTitle,
@@ -5552,7 +5561,9 @@ private fun ArrangeableCard(
                                 y = (ch * 0.06f + move.titleDy).dp
                             )
                             .width(titleW.dp)
-                            .padding(6.dp),
+                            .height(titleH.dp)
+                            .padding(6.dp)
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
                                 if (editTitle.isBlank()) Text("Edit title…", style = MaterialTheme.typography.headlineMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
@@ -5578,10 +5589,22 @@ private fun ArrangeableCard(
                             onMove(move.copy(titleWidthFrac = next.coerceIn(0.2f, 1.2f)))
                         }
                     )
+                    // Resize edge for the title box height
+                    ResizeEdge(
+                        x = (cw * 0.08f + move.titleDx + titleW / 2f).dp,
+                        y = (ch * 0.06f + move.titleDy + titleH).dp,
+                        accent = MaterialTheme.colorScheme.primary,
+                        edge = ResizeEdgeSide.BOTTOM,
+                        onDelta = { dy ->
+                            val next = move.titleHeightFrac + dy / (ch * 0.20f)
+                            onMove(move.copy(titleHeightFrac = next.coerceIn(0.2f, 1.6f)))
+                        }
+                    )
                 }
 
                 // Quick-fact — transparent inline field over the card's own fact
                 val factW = (cw * 0.84f * move.factWidthFrac).coerceIn(cw * 0.2f, cw)
+                val factH = (ch * 0.26f * move.factHeightFrac).coerceIn(ch * 0.08f, ch * 0.70f)
                 BasicTextField(
                     value = editFact,
                     onValueChange = onFactChange,
@@ -5595,7 +5618,9 @@ private fun ArrangeableCard(
                             y = (ch * 0.62f + move.factDy).dp
                         )
                         .width(factW.dp)
-                        .padding(6.dp),
+                        .height(factH.dp)
+                        .padding(6.dp)
+                        .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f), RoundedCornerShape(8.dp)),
                     decorationBox = { inner ->
                         Box(Modifier.fillMaxWidth()) {
                             if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
@@ -5619,6 +5644,17 @@ private fun ArrangeableCard(
                     onDelta = { dx ->
                         val next = move.factWidthFrac + dx / (cw * 0.84f)
                         onMove(move.copy(factWidthFrac = next.coerceIn(0.2f, 1.2f)))
+                    }
+                )
+                // Resize edge for the fact box height
+                ResizeEdge(
+                    x = (cw * 0.08f + move.factDx + factW / 2f).dp,
+                    y = (ch * 0.62f + move.factDy + factH).dp,
+                    accent = MaterialTheme.colorScheme.tertiary,
+                    edge = ResizeEdgeSide.BOTTOM,
+                    onDelta = { dy ->
+                        val next = move.factHeightFrac + dy / (ch * 0.26f)
+                        onMove(move.copy(factHeightFrac = next.coerceIn(0.2f, 1.6f)))
                     }
                 )
             }
@@ -5865,7 +5901,9 @@ fun TopicShareSheet(
                                                 Text(if (userPhoto != null) "Change" else "Photo", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
-                                        OutlinedTextField(value = polaroidCaption, onValueChange = { polaroidCaption = it.take(36) }, placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium) }, singleLine = true, textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface), shape = RoundedCornerShape(50), modifier = Modifier.weight(1f).height(40.dp))
+                                        // No forced height: M3's outlined field needs its natural
+                                        // 56dp so the typed/placeholder text isn't clipped.
+                                        OutlinedTextField(value = polaroidCaption, onValueChange = { polaroidCaption = it.take(36) }, placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)) }, singleLine = true, textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface), shape = RoundedCornerShape(50), modifier = Modifier.weight(1f))
                                     }
                                 }
                                 // Custom fact field
@@ -5912,7 +5950,7 @@ fun TopicShareSheet(
 
             // Inline-edit controls — title-size dropdown + Reset + Done
             if (editMode) {
-                Text("Drag the T/F handles to move · drag the edge to resize",
+                Text("Drag the T/F handles to move · drag the edge tabs to crop width & height",
                     style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                     // Title size dropdown
