@@ -176,6 +176,43 @@ app/src/main/java/com/curio/app/
   - Persistence: `pickerDefaultPageState` (Int) + `pickerSuggestionsState`
     (List<CategoryId>) + `getPickerSuggestions`/`setPickerSuggestions`/
     `addPickerSuggestion`/`removePickerSuggestion` + `defaultSuggestions`.
+- **v3xx3 — signature share cards REDESIGNED for 7 categories (both normal
+  and Deepen).** The classic base styles (Paper/Clean/Collage/Editorial/
+  Minimal/Vinyl) and the `signatureDesignClassic` fallback are untouched;
+  the 7 categories the user called out (Animals, Animated Films, Anime,
+  Artists, Artworks, Astronomy, Authors) get fresh typographic identities
+  and cleaner minimal scenes in BOTH `signatureDesign` and
+  `signatureDesignDetailed`:
+  - **Artists** — warm concert-poster: single amber spotlight cone on a
+    dark stage, hairline floor + glow pools, tall **Bebas Neue** poster
+    title (POSTER layout; detailed adds a light rig, crowd silhouettes,
+    sound-wave arcs, sparkle dust).
+  - **Animals** — naturalist field note: sage botanical sprig + seed dots
+    on warm cream, **Lora** serif title (CENTERED; detailed adds a forest
+    clearing with sprig cluster, paw-print trail, grass, fireflies).
+  - **Animated Films/Movies** — storybook pastel: thin five-band rainbow
+    arc + placed sparkles on a soft lavender wash, **Corben** rounded
+    display title (CENTERED; detailed adds a film-frame cel with sprocket
+    dots, cloud puffs, confetti).
+  - **Anime** — rising-sun poster: vermilion sun + ground line + brush
+    stroke on paper white, **Maven Pro** title (CENTERED; detailed adds
+    sun rays, a torii-gate silhouette, falling sakura petals).
+  - **Artworks** — quiet gallery: one thin framed abstract + floor
+    hairline on warm gallery white, **Cormorant Garamond** title
+    (STANDARD; detailed adds two spotlight cones + a second ink-line
+    piece).
+  - **Authors** — literary manuscript: faint ruled lines + red margin +
+    flourish on cream paper, **Playfair Display** title (STANDARD;
+    detailed adds inkwell + quill under a desk-lamp glow).
+  - **Astronomy** — star chart: constellation + thin ringed planet +
+    coordinate ticks on deep navy, **Space Mono** title (BOTTOM; detailed
+    adds nebula glows, sparse starfield, shooting star).
+  - The old dark scenes for these categories (indigo spotlight, moonlit
+    forest, rainbow arc, sakura, gallery wall, writing desk, nebula
+    galaxy) were replaced outright; `signatureDesignClassic` keeps the
+    legacy family designs. Note the detailed Animated-Films branch now
+    matches `"ANIMATED FILMS" || "ANIMATED MOVIES"` (the old branch keyed
+    only on the legacy name and fell through to the fallback).
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**
