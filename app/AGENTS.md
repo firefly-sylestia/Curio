@@ -1391,6 +1391,34 @@ app/src/main/java/com/curio/app/
   categories selected OR entry's category in the set); single lane keeps
   the wash + subtitle, multi-select uses the neutral wash + "N categories".
   Dead `CabinetStickyChipBar`/`CabinetChipPop`/`FilterChipLite` deleted.
+- **v318 — picker/panel refinement batch (mix accent washout, per-tab
+  persistence, 2-col filter panels):** (1) **Cabinet** — the active-filter
+  chip row is now pixel-identical to the Topic Browser's row: same
+  `labelLarge` typography (the Bold weight was dropped) and the same
+  modifier order (padding → offset → horizontalScroll) so the removable
+  chips read as the same pill family; the Cabinet panel + Topic Database
+  panel both render their checkbox lists as a **TWO-column
+  `LazyVerticalGrid`** (same 260/276dp max-height footprint, roughly half
+  the scroll depth; the Cabinet keeps Legacy as a full-span
+  `GridItemSpan` row). (2) **New picker — mixes**: `NewMixCard` drops the
+  washed-out 16%-alpha lead plate (now a proper `lerp` accent blend) and
+  the tiny 16dp dots (16% alpha) for real **lane ICON chips** (20dp
+  accent tiles, up to 5 + "+N" for huge mixes), and the cell grows from
+  114 → 122dp so the icon row fits; Continue-exploring tiles now wear the
+  **category ACTIVE accent** when their lane is in the current deck.
+  (3) **Classic page (page 1)** — the Wildcard tile relabels
+  "Surprise mix" → "Mix" while multi-selecting (it toggles the lane, no
+  longer surprises), the SHARED bottom row's primary capsule swaps
+  "Surprise me" → "Mix · N" (applying the pending selection; the page
+  reports its count + an apply closure via `onMixStatus`), and the Mix
+  row's flat "Cancel" TextButton is now a FLOATING raised pill
+  (Close glyph + label). (4) **Persistence ("Curio and Knowledge stay
+  persistent too")** — page 0's mode TAB (Curio/Knowledge/Mix) survives
+  sheet closes + app restarts (`KEY_PICKER_PAGE0_MODE` +
+  `pickerPage0ModeState`, seeded in `initThemeMode`); each tab owns its
+  own `rememberLazyGridState` persisted debounced per-tab
+  (`KEY_PICKER_PAGE0_TAB_SCROLL_<tab>`), replacing the single page-0
+  scroll key (`getPickerPage0Scroll`/`setPickerPage0Scroll` deleted).
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

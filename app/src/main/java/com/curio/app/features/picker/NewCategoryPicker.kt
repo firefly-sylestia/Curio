@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
@@ -31,7 +30,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,8 +43,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -185,6 +185,12 @@ fun NewCategoryPickerSheet(
     // Tap-and-hold on a saved mix → Edit/Delete option pill overlay.
     var mixOptionTarget by remember { mutableStateOf<NamedMix?>(null) }
 
+    // v3xx14 — multi-select on page 0 flips the shared bottom row's primary
+    // capsule from "Surprise me" to "Mix · N": the classic page reports its
+    // pending selection count + an apply closure; the capsule applies it.
+    var page0MixCount by remember { mutableIntStateOf(0) }
+    var page0MixApply by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     // Pager: page 0 = classic picker, page 1 = new picker. Default from prefs.
     val initialPage = AppPreferences.pickerDefaultPageState.coerceIn(0, 1)
     val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { 2 })
@@ -198,34 +204,19 @@ fun NewCategoryPickerSheet(
         }
     }
 
-    // Per-page scroll persistence (v3xx13): each pager page's scroll state
-    // is hoisted here so flipping between pages keeps the position, and the
-    // index/offset are saved to prefs (debounced) so closing the sheet — or
-    // even restarting the app — returns you to where you were on both pages.
-    // Page 0 holds LazyVerticalGrids (LazyGridState); page 1 is a LazyColumn
-    // (LazyListState) — two different scroll primitives, saved identically.
-    val classicScroll = rememberLazyGridState()
+    // Per-page scroll persistence (v3xx13/v3xx14): each pager page's scroll
+    // state is hoisted here so flipping between pages keeps the position, and
+    // the index/offset are saved to prefs (debounced) so closing the sheet —
+    // or even restarting the app — returns you to where you were.
+    // Page 0 (ClassicPickerPage) keeps its OWN per-mode-tab grid states +
+    // persistence internally (v3xx14 — Curio/Knowledge/Mix each scroll
+    // separately); page 1 is a LazyColumn (LazyListState) saved here.
     val newScroll = rememberLazyListState()
     LaunchedEffect(Unit) {
         // runCatching: the saved index may exceed the item count if the
         // hidden lane set changed since the position was stored.
-        val p0 = AppPreferences.getPickerPage0Scroll(context)
-        runCatching { classicScroll.scrollToItem(p0.index, p0.offset) }
         val p1 = AppPreferences.getPickerPage1Scroll(context)
         runCatching { newScroll.scrollToItem(p1.index, p1.offset) }
-    }
-    LaunchedEffect(classicScroll) {
-        snapshotFlow {
-            classicScroll.firstVisibleItemIndex to classicScroll.firstVisibleItemScrollOffset
-        }
-            .drop(1)
-            .debounce(300)
-            .collect { (index, offset) ->
-                AppPreferences.setPickerPage0Scroll(
-                    context,
-                    AppPreferences.PickerScrollPos(index, offset)
-                )
-            }
     }
     LaunchedEffect(newScroll) {
         snapshotFlow {
@@ -292,9 +283,12 @@ fun NewCategoryPickerSheet(
                     // page cleanly (no nested weight conflict).
                     ClassicPickerPage(
                         washCat = washCat,
-                        scrollState = classicScroll,
                         onCategorySelected = onCategorySelected,
-                        onCategoriesMixed = onCategoriesMixed
+                        onCategoriesMixed = onCategoriesMixed,
+                        onMixStatus = { count, apply ->
+                            page0MixCount = count
+                            page0MixApply = apply
+                        }
                     )
                 } else {
                     NewPickerPage(
@@ -332,13 +326,21 @@ fun NewCategoryPickerSheet(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // v3xx14 — while page 0 is building a mix the primary capsule
+                // becomes "Mix · N" (and applies the pending selection);
+                // otherwise it stays "Surprise me".
+                val mixing = page0MixCount > 0
                 NewPrimaryCapsule(
-                    label = "Surprise me",
-                    glyph = CurioIcons.Shuffle,
+                    label = if (mixing) "Mix · $page0MixCount" else "Surprise me",
+                    glyph = if (mixing) CurioIcons.Check else CurioIcons.Shuffle,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        val mix = surpriseMiniMix(categories)
-                        if (mix.isNotEmpty()) onCategoriesMixed(mix)
+                        if (mixing) {
+                            page0MixApply?.invoke()
+                        } else {
+                            val mix = surpriseMiniMix(categories)
+                            if (mix.isNotEmpty()) onCategoriesMixed(mix)
+                        }
                     }
                 )
                 NewPickerCircle(
@@ -581,6 +583,7 @@ private fun NewPickerPage(
         item(key = "explore-grid") {
             ContinueExploringSection(
                 categories = categories,
+                deckIds = deckIds,
                 onSpinLane = onSpinLane,
                 onRemoveTarget = onRemoveTarget,
                 onAdd = onAddSuggestion
@@ -600,11 +603,13 @@ private fun NewPickerPage(
 @Composable
 private fun ContinueExploringSection(
     categories: List<CurioCategory>,
+    deckIds: List<CategoryId>,
     onSpinLane: (CurioCategory) -> Unit,
     onRemoveTarget: (CurioCategory) -> Unit,
     onAdd: () -> Unit
 ) {
     val context = LocalContext.current
+    val deckSet = remember(deckIds) { deckIds.toSet() }
     val visibleIds = remember { categories.map { it.id }.toSet() }
     // Most-spun (CurioPassport spin counts), desc, ready + visible only.
     val mostUsed = remember {
@@ -650,6 +655,10 @@ private fun ContinueExploringSection(
                         if (cat != null) {
                             NewPickerTile(
                                 category = cat,
+                                // v3xx14 — lanes already in the current deck
+                                // wear the category's ACTIVE accent in
+                                // Continue exploring too.
+                                selected = cat.id in deckSet,
                                 onClick = { onSpinLane(cat) },
                                 onLongClick = { onRemoveTarget(cat) },
                                 modifier = Modifier.weight(1f)
@@ -679,10 +688,13 @@ private fun ContinueExploringSection(
 @Composable
 private fun ClassicPickerPage(
     washCat: CurioCategory,
-    scrollState: LazyGridState,
     onCategorySelected: (CurioCategory) -> Unit,
-    onCategoriesMixed: (List<CurioCategory>) -> Unit
+    onCategoriesMixed: (List<CurioCategory>) -> Unit,
+    // v3xx14 — reports the pending multi-select (count + an apply closure)
+    // so the SHARED bottom row can swap "Surprise me" for "Mix · N".
+    onMixStatus: (Int, (() -> Unit)?) -> Unit
 ) {
+    val context = LocalContext.current
     val allUnhidden = remember {
         CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
     }
@@ -697,10 +709,65 @@ private fun ClassicPickerPage(
     // (replacing the deck); long-press is the ONLY way into multi-select.
     var multiSelectMode by remember { mutableStateOf(false) }
     var selectedSlugs by remember { mutableStateOf(emptySet<String>()) }
-    var modeName by remember { mutableStateOf(PickerMode.MIX.name) }
+    // v3xx14 — the mode TAB (Curio / Knowledge / Mix) persists across sheet
+    // closes and app restarts (seeded from prefs; saved on every switch).
+    var modeName by rememberSaveable {
+        mutableStateOf(
+            AppPreferences.pickerPage0ModeState.takeIf { it in PickerMode.entries.map { m -> m.name } }
+                ?: PickerMode.MIX.name
+        )
+    }
     val mode = runCatching { PickerMode.valueOf(modeName) }.getOrDefault(PickerMode.MIX)
+    LaunchedEffect(mode) {
+        AppPreferences.setPickerPage0Mode(context, mode.name)
+    }
+    // v3xx14 — ONE grid state per mode tab; each is persisted (debounced)
+    // under its own pref key so every tab returns to where it was.
+    val curioGrid = rememberLazyGridState()
+    val knowledgeGrid = rememberLazyGridState()
+    val mixGrid = rememberLazyGridState()
+    val gridStates = mapOf(
+        PickerMode.CURIO to curioGrid,
+        PickerMode.KNOWLEDGE to knowledgeGrid,
+        PickerMode.MIX to mixGrid
+    )
+    LaunchedEffect(Unit) {
+        // runCatching: a saved index may exceed the item count if the hidden
+        // lane set changed since the position was stored.
+        PickerMode.entries.forEach { m ->
+            val pos = AppPreferences.getPickerPage0TabScroll(context, m.name)
+            runCatching { gridStates.getValue(m).scrollToItem(pos.index, pos.offset) }
+        }
+    }
+    PickerMode.entries.forEach { m ->
+        val gridState = gridStates.getValue(m)
+        LaunchedEffect(gridState) {
+            snapshotFlow {
+                gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset
+            }
+                .drop(1)
+                .debounce(300)
+                .collect { (index, offset) ->
+                    AppPreferences.setPickerPage0TabScroll(
+                        context, m.name, AppPreferences.PickerScrollPos(index, offset)
+                    )
+                }
+        }
+    }
     val toggleSlug = { slug: String ->
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug
+    }
+    // Keep the shared bottom row in sync: while multi-selecting on Mix the
+    // capsule reports the count + an apply closure; otherwise it clears.
+    LaunchedEffect(multiSelectMode, selectedSlugs, mode) {
+        if (mode == PickerMode.MIX && multiSelectMode && selectedSlugs.isNotEmpty()) {
+            val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
+            onMixStatus(cats.size) {
+                if (cats.isNotEmpty()) onCategoriesMixed(cats)
+            }
+        } else {
+            onMixStatus(0, null)
+        }
     }
     val wide = windowWidthSizeClass().isWide
 
@@ -755,7 +822,7 @@ private fun ClassicPickerPage(
             when (mode) {
                 // ── Mix — full deck, multi-select via hold ────────────
                 PickerMode.MIX -> LazyVerticalGrid(
-                    state = scrollState,
+                    state = gridStates.getValue(PickerMode.MIX),
                     columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
                     contentPadding = PaddingValues(top = 2.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -768,6 +835,10 @@ private fun ClassicPickerPage(
                             category = cat,
                             comingSoon = !cat.isReady,
                             selected = multiSelectMode && slug in selectedSlugs,
+                            // v3xx14 — while multi-selecting the Wildcard tile
+                            // relabels itself "Mix" (it no longer surprises; it
+                            // toggles the lane into the pending mix).
+                            labelOverride = if (multiSelectMode && cat.id == CategoryId.WILDCARD) "Mix" else null,
                             onClick = {
                                 if (!cat.isReady) return@NewPickerTile
                                 if (multiSelectMode) toggleSlug(slug)
@@ -783,7 +854,7 @@ private fun ClassicPickerPage(
                 else -> {
                     val groups = if (mode == PickerMode.CURIO) curioModeGroups else knowledgeModeGroups
                     LazyVerticalGrid(
-                        state = scrollState,
+                        state = gridStates.getValue(mode),
                         columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
                         contentPadding = PaddingValues(top = 2.dp, bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -842,14 +913,36 @@ private fun ClassicPickerPage(
                         if (cats.isNotEmpty()) onCategoriesMixed(cats)
                     }
                 )
-                TextButton(onClick = {
-                    multiSelectMode = false
-                    selectedSlugs = emptySet()
-                }) {
-                    Text(
-                        "Cancel",
-                        style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    )
+                // v3xx14 — Cancel as a FLOATING pill (raised capsule) instead
+                // of a flat text button, so it reads as the mix row's escape
+                // hatch beside the primary Mix capsule.
+                Surface(
+                    onClick = {
+                        multiSelectMode = false
+                        selectedSlugs = emptySet()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = newPickerIdleFill(),
+                    shadowElevation = 3.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Close,
+                            contentDescription = null,
+                            size = 16.dp,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "Cancel",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -953,8 +1046,10 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
  *  - the lane-composition dots previewing the mix.
  * Tapping the card spins the mix; tap-and-hold opens the Edit/Delete
  * option pill (v3xx13 — no visible action buttons, no borders on the
- * card; the "Active" label alone marks the playing mix). Uniform 114dp
- * cells so the 2-col grid reads alike.
+ * card; the "Active" label alone marks the playing mix). Uniform 122dp
+ * cells so the 2-col grid reads alike; the footer wears each lane's
+ * category icon in its own accent chip (v3xx14 — no more washed-out
+ * dots / "+N" text).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -975,7 +1070,7 @@ private fun NewMixCard(
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = modifier
-            .height(114.dp)
+            .height(122.dp)
             .combinedClickable(onClick = onApply, onLongClick = onLongClick)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -994,8 +1089,15 @@ private fun NewMixCard(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(RoundedCornerShape(14.dp))
+                            // v3xx14 — the lead-lane cover was washed out at
+                            // 16% alpha; blend the accent in properly so the
+                            // mix keeps a real color identity.
                             .background(
-                                if (leadAccent != null) leadAccent.copy(alpha = 0.16f)
+                                if (leadAccent != null) lerp(
+                                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    leadAccent,
+                                    0.42f
+                                )
                                 else MaterialTheme.colorScheme.surfaceContainerHighest
                             ),
                         contentAlignment = Alignment.Center
@@ -1039,35 +1141,36 @@ private fun NewMixCard(
                         }
                     }
                 }
-                // ── Footer: lane-composition dots (v3xx13 — no Edit/Delete
-                // buttons here; those live behind tap-and-hold) ──────────
+                // ── Footer: lane-composition ICONS (v3xx14 — each saved
+                // lane shows its real category icon in an accent chip, up to
+                // 5 + "+N" for huge mixes; no Edit/Delete buttons here —
+                // those live behind tap-and-hold) ───────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 4-lane mixes show all four dots; beyond that, 3 dots + the
-                    // "+N" chip keeps the row inside the card's inner width.
-                    val dots = if (lanes.size > 4) lanes.take(3) else lanes
-                    dots.forEach { cat ->
+                    val shown = if (lanes.size > 6) lanes.take(5) else lanes
+                    shown.forEachIndexed { i, cat ->
                         val ink = cat.categoryInk()
                         Box(
                             modifier = Modifier
-                                .size(16.dp)
-                                .clip(CircleShape)
-                                .background(ink.copy(alpha = 0.16f)),
+                                .size(20.dp)
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(ink.copy(alpha = 0.22f)),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
                                 name = cat.iconGlyph,
                                 contentDescription = null,
-                                size = 8.dp,
+                                size = 12.dp,
                                 tint = ink
                             )
                         }
+                        if (i < shown.size - 1) Spacer(Modifier.width(5.dp))
                     }
-                    if (lanes.size > 4) {
+                    if (lanes.size > 6) {
                         Text(
-                            text = "+${lanes.size - 3}",
+                            text = "+${lanes.size - 5}",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 2.dp)
@@ -1098,6 +1201,7 @@ fun NewPickerTile(
     selected: Boolean = false,
     pinned: Boolean = false,
     comingSoon: Boolean = false,
+    labelOverride: String? = null,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -1185,11 +1289,12 @@ fun NewPickerTile(
                     )
                 }
                 Text(
-                    text = when {
-                        comingSoon -> "Coming soon"
-                        isWildcard -> "Surprise mix"
-                        else -> category.displayName
-                    },
+                    text = labelOverride
+                        ?: when {
+                            comingSoon -> "Coming soon"
+                            isWildcard -> "Surprise mix"
+                            else -> category.displayName
+                        },
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                     ),

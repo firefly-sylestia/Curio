@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -39,6 +38,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -1111,9 +1111,9 @@ private fun BoxScope.CabinetActiveFilterChips(
         modifier = Modifier
             .align(Alignment.TopStart)
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
             .offset(y = barTop + 4.dp)
+            .horizontalScroll(rememberScrollState())
     ) {
         categories.forEach { cat ->
             Surface(
@@ -1129,8 +1129,11 @@ private fun BoxScope.CabinetActiveFilterChips(
                 ) {
                     CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 14.dp)
                     Text(
+                        // v3xx14 — identical typography to the Topic Database
+                        // chip row (labelLarge, no bold): the Cabinet's chips
+                        // previously read heavier than the browser's.
                         cat.displayName,
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelLarge,
                         color = cat.categoryInk(),
                         maxLines = 1
                     )
@@ -1261,13 +1264,19 @@ private fun BoxScope.CabinetCategoryPanel(
                         .padding(vertical = 14.dp)
                 )
             } else {
-                Column(
+                // v3xx14 — TWO-column checkbox grid (was one long list); the
+                // fixed 260dp max-height keeps the panel the same footprint,
+                // now roughly half the scroll depth. Legacy stays a
+                // full-width row at the end.
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 260.dp)
-                        .verticalScroll(rememberScrollState())
                 ) {
-                    shown.forEach { cat ->
+                    items(shown) { cat ->
                         CabinetCategoryCheckboxRow(
                             cat = cat,
                             count = counts[cat.id] ?: 0,
@@ -1276,10 +1285,12 @@ private fun BoxScope.CabinetCategoryPanel(
                         )
                     }
                     if (legacyRowVisible) {
-                        CabinetLegacyCheckboxRow(
-                            checked = legacySelected,
-                            onToggle = onToggleLegacy
-                        )
+                        item(key = "legacy", span = { GridItemSpan(maxLineSpan) }) {
+                            CabinetLegacyCheckboxRow(
+                                checked = legacySelected,
+                                onToggle = onToggleLegacy
+                            )
+                        }
                     }
                 }
             }

@@ -183,8 +183,11 @@ object AppPreferences {
     //   falls back to a curated default list.
     private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
     private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
-    // v3xx13 — per-page scroll persistence for the sheet's classic/new pager.
-    private const val KEY_PICKER_PAGE0_SCROLL = "picker_page0_scroll"   // "index:offset" of page 0
+    // v3xx13 — per-page scroll persistence for the sheet's classic/new pager;
+    // v3xx14 — page 0 is now per-TAB: the Curio/Knowledge/Mix mode survives
+    // restarts, and each tab keeps its own "index:offset" scroll.
+    private const val KEY_PICKER_PAGE0_MODE = "picker_page0_mode"            // PickerMode.name
+    private const val KEY_PICKER_PAGE0_TAB_SCROLL = "picker_page0_tab_scroll_" // suffix = tab name
     private const val KEY_PICKER_PAGE1_SCROLL = "picker_page1_scroll"   // "index:offset" of page 1
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
@@ -773,6 +776,14 @@ object AppPreferences {
         private set
 
     /**
+     * v3xx14 — page 0's active mode tab (PickerMode.name: CURIO / KNOWLEDGE /
+     * MIX). Persisted so "Curio and Knowledge stay persistent too". Seeded
+     * from prefs in [initThemeMode].
+     */
+    var pickerPage0ModeState by mutableStateOf("MIX")
+        private set
+
+    /**
      * v3xx — the user's curated "fun to explore" category ids shown below
      * the mixes in the new picker. Empty = use the curated default list
      * (see [defaultSuggestions]). Seeded from prefs in [initThemeMode].
@@ -897,6 +908,7 @@ object AppPreferences {
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
+        pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
@@ -2297,8 +2309,8 @@ object AppPreferences {
         setPickerSuggestions(context, cur)
     }
 
-    // ── Picker page scroll persistence (v3xx13) ───────────────────────
-    /** Saved scroll position of one picker pager page. */
+    // ── Picker scroll + mode persistence (v3xx13 / v3xx14) ─────────────
+    /** Saved scroll position of one picker pager page (or mode tab). */
     data class PickerScrollPos(val index: Int = 0, val offset: Int = 0)
 
     private fun encodeScroll(pos: PickerScrollPos): String = "${pos.index}:${pos.offset}"
@@ -2309,12 +2321,21 @@ object AppPreferences {
                 .getOrDefault(PickerScrollPos())
         } ?: PickerScrollPos()
 
-    /** Saved scroll position of page 0 — the classic picker page. */
-    fun getPickerPage0Scroll(context: Context): PickerScrollPos =
-        decodeScroll(prefs(context).getString(KEY_PICKER_PAGE0_SCROLL, null))
+    /** Page 0's persisted mode tab name — "MIX" (default), "CURIO", "KNOWLEDGE". */
+    fun getPickerPage0Mode(context: Context): String =
+        prefs(context).getString(KEY_PICKER_PAGE0_MODE, "MIX") ?: "MIX"
 
-    fun setPickerPage0Scroll(context: Context, pos: PickerScrollPos) {
-        prefs(context).edit().putString(KEY_PICKER_PAGE0_SCROLL, encodeScroll(pos)).apply()
+    fun setPickerPage0Mode(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_PICKER_PAGE0_MODE, mode).apply()
+        pickerPage0ModeState = mode
+    }
+
+    /** Saved scroll position of one page-0 mode tab (tab = PickerMode.name). */
+    fun getPickerPage0TabScroll(context: Context, tab: String): PickerScrollPos =
+        decodeScroll(prefs(context).getString("$KEY_PICKER_PAGE0_TAB_SCROLL$tab", null))
+
+    fun setPickerPage0TabScroll(context: Context, tab: String, pos: PickerScrollPos) {
+        prefs(context).edit().putString("$KEY_PICKER_PAGE0_TAB_SCROLL$tab", encodeScroll(pos)).apply()
     }
 
     /** Saved scroll position of page 1 — the new picker page. */

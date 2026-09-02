@@ -15,7 +15,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
@@ -35,6 +34,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -1287,13 +1288,18 @@ private fun BoxScope.DatabaseCategoryPanel(
                     textAlign = TextAlign.Center
                 )
             } else {
-                Column(
+                // v3xx14 — TWO-column checkbox grid (was one long list); the
+                // fixed 276dp max-height keeps the panel the same footprint,
+                // now roughly half the scroll depth.
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 276.dp)
-                        .verticalScroll(rememberScrollState())
                 ) {
-                    shown.forEach { cat ->
+                    gridItems(shown) { cat ->
                         CategoryCheckboxRow(
                             cat = cat,
                             count = counts[cat.id] ?: 0,

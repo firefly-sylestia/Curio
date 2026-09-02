@@ -1,3 +1,7 @@
+FIX: Category mix & filters — the mix cards swap the washed-out colors and tiny dots for real category icons in full accent chips; Cabinet counts + Continue-exploring show the active accent; the Surprise tile/button become Mix while building a multi-lane mix, with a floating Cancel pill.
+ADD: Category picker stays where you left it — the Curio / Knowledge / Mix tab and each tab's scroll position now survive closing the sheet and restarting the app.
+ADD: Cabinet + Topic Browser — the category filter panel now lists categories in a two-column grid, so dozens of lanes are half the scroll.
+FIX: Cabinet — the active category chips now look exactly like Topic Browser's and show in every state.
 FIX: Topic Reveal — the synopsis on the page is now a tidy 5-line teaser; tap it for the full text in one tall sheet that also holds every chapter (Synopsis | Chapters tabs, switch in place).
 FIX: Topic Browser — searching from All now shows "Also in" pills so you can see and jump to which categories matched your search.
 FIX: Share card editor — editing takes over the whole sheet (no title overhead), the sliders tick as you snap through sizes, the quick-fact box grows as you type with the caret exactly on the text, and the old T/F/M/B handles are now one coffee-colored move grip.
