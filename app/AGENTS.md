@@ -1359,6 +1359,38 @@ app/src/main/java/com/curio/app/
   state, sheet instance persists). (4) **Page fixes** — the synopsis card's
   fixed-height inner `verticalScroll` box is gone (full text, card grows,
   poster top-aligned); chapter chips shrank 156→118dp (title 1 line).
+- **v316 — reveal instant for FIRST-time topics + Cabinet category-panel
+  multi-select (the Topic Database's v314 treatment).** (User: "still in
+  the new topics in topic reveal they are slow loading as well, so fix
+  them too … and apply the same category picker in cabinet screen as
+  well".) (1) **Reveal resolution is now indexed + parse-free where
+  possible:** `TopicDao.findByCategoryAndName` (SQL `WHERE categoryId = ?
+  AND name = ? [NOCASE] LIMIT 1`) replaces `findTopic`'s old whole-lane
+  fetch + Kotlin scan (every row mapped per reveal open); `resolved` is
+  SEEDED on the first frame from the warm lane cache AND the prewarmed
+  MERGED INDEX (`resolveRevealTopic`: lane cache → `cachedIndex()`, which
+  survives lane-cache trims and carries wildcard.json originals) — so ANY
+  topic that has ever been loaded renders instantly, and the index fallback
+  catches topics whose lane cache was shed. (2) **Stale-Room unmasking:**
+  topics added to the JSON between app updates are absent from Room, and
+  `TopicJsonLoader.load()`'s Room fast path would then NEVER see them (the
+  reveal fell through to a blank). New `TopicRepository.refreshLaneFromAssets`
+  parses the bundled asset DIRECTLY (bypassing the Room mask),
+  REPLACE-upserts the whole lane back into Room, and the reveal's fallback
+  uses it for canonical lanes (WILDCARD keeps the shared merged `load()`);
+  hydration of content-incomplete rows is also deduped once per id per
+  process (`hydratedIds`). (3) **Cabinet v314 picker** (`CabinetScreen`):
+  the sticky every-lane chip bar + its `CategoryIdSaver` single-select are
+  GONE — the hero Category pill toggles a collapsed-by-default PANEL
+  (`CabinetCategoryPanel` — tiny in-panel search filtering the category
+  list, accent `Checkbox` multi-select into a comma-joined enum-name
+  `Set<CategoryId>` via `commitFilters`, per-lane entry counts, a
+  tertiary-checkbox Legacy row, Clear all + Done); only the ACTIVE lanes
+  render as removable one-tap chips (`CabinetActiveFilterChips` + Legacy),
+  and searching alone shows NO category chips. Filtering = text AND (no
+  categories selected OR entry's category in the set); single lane keeps
+  the wash + subtitle, multi-select uses the neutral wash + "N categories".
+  Dead `CabinetStickyChipBar`/`CabinetChipPop`/`FilterChipLite` deleted.
 - **v142 — Manage Categories full-bleed bottom; Pet Designer floating
   pill bar + fade open; first-run "Pick a lane" wired to the Spin picker.**
   (1) **Manage Categories full-bleed** (per user, confirmed): the NavHost

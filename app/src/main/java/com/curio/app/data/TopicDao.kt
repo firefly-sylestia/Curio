@@ -109,6 +109,17 @@ interface TopicDao {
     @Query("SELECT * FROM topics WHERE name = :name LIMIT 1")
     suspend fun findByName(name: String): TopicEntity?
 
+    /** v316 — indexed SQL lookup within one lane (case-insensitive on the
+     *  display name): the reveal's resolution used to fetch the WHOLE lane
+     *  and scan it in Kotlin — a 10k-row mapping per open. LIMIT 1 at the
+     *  database means microseconds for any topic. */
+    @Query("""
+        SELECT * FROM topics
+        WHERE categoryId = :categoryId AND (name = :name OR name = :name COLLATE NOCASE)
+        LIMIT 1
+    """)
+    suspend fun findByCategoryAndName(categoryId: String, name: String): TopicEntity?
+
     /** Find topic by ID. */
     @Query("SELECT * FROM topics WHERE id = :id LIMIT 1")
     suspend fun findById(id: String): TopicEntity?
