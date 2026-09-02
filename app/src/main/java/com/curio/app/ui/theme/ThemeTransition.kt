@@ -1,7 +1,12 @@
 package com.curio.app.ui.theme
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.view.PixelCopy
 import android.view.View
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -21,13 +26,16 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -38,6 +46,7 @@ import com.curio.app.data.AppPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.math.hypot
 
 // ============================================================================
@@ -63,6 +72,16 @@ class CurioThemeTransitionState {
         private set
 
     private var captureView: View? = null
+    /**
+     * Optional Compose GraphicsLayer that mirrors the host content (recorded
+     * each frame via [captureLayerModifier]). Preferred over [captureView]
+     * because [GraphicsLayer.toImageBitmap] uses hardware rendering and
+     * preserves RenderEffect / blur (liquid-glass) layers, whereas
+     * `View.drawToBitmap` forces a software pass that drops those effects
+     * and can return a blank frame — the root cause of the theme reveal
+     * silently skipping in liquid-glass mode.
+     */
+    internal var captureLayer: GraphicsLayer? = null
 
     /** Attach the host view used to snapshot the old frame. Null detaches. */
     fun attachView(view: View?) {
@@ -71,16 +90,31 @@ class CurioThemeTransitionState {
 
     /**
      * Freeze the current frame and arm a reveal expanding from [center].
-     * Ignores a start while an animation is already in flight. If the
-     * snapshot fails (hardware-only view, recycled, etc.) or comes back
-     * blank (a device quirk where drawToBitmap "succeeds" but replays
-     * nothing) we bail out silently so the theme switch still happens —
-     * the animation is pure polish and must never block it.
+     * Ignores a start while an animation is already in flight. Captures the
+     * REAL window frame first via [PixelCopy] (works with liquid-glass
+     * RenderEffect blurs), then the hardware [GraphicsLayer], then falls
+     * back to [View.drawToBitmap]. If all fail or come back blank we bail
+     * out silently so the theme switch still happens — the animation is
+     * pure polish and must never block it.
+     *
+     * Suspending because [GraphicsLayer.toImageBitmap] may need to await a
+     * frame; callers run it in a coroutine.
      */
-    fun startTransition(center: Offset): Boolean {
+    suspend fun startTransition(center: Offset): Boolean {
         if (isAnimating) return false
-        val view = captureView ?: return false
-        val bitmap = captureFrame(view) ?: return false
+        // v3xx — REAL-FRAME capture first: PixelCopy reads the pixels the
+        // user actually sees (liquid-glass blur included) straight from the
+        // window surface, without re-running the Compose draw chain. The
+        // GraphicsLayer fallback below re-invokes the whole app draw (nested
+        // layer records over the kyant backdrop layer), which read back blank
+        // in liquid-glass mode on some devices — so the reveal silently
+        // skipped. Falls through to the view fallback, then bails to the
+        // instant flip.
+        val bitmap = windowFrame(captureView)
+            ?: captureLayer?.let { captureLayerFrame(it) }
+            ?: captureView?.let { captureViewFrame(it) }
+            ?: return false
+        if (bitmap.isBlank()) return false
         // Recreate (rather than snapTo, which is suspend) so the reveal
         // always begins from 0 on a new capture.
         progress = Animatable(0f)
@@ -91,16 +125,80 @@ class CurioThemeTransitionState {
     }
 
     /**
-     * Snapshot the current view, rejecting failures and blank/transparent
-     * captures. A blank frame (a device quirk where drawToBitmap "succeeds"
-     * but replays nothing) can't drive the wipe — treat it as a failure and
-     * fall back to the instant flip so we never freeze a see-through frame
-     * (v269 parity). Returns null to signal "bail out, apply instantly".
+     * Hardware snapshot via the Compose GraphicsLayer — preserves
+     * RenderEffect / blur (liquid-glass) layers that [captureViewFrame]
+     * would drop. Rejects blank readbacks.
      */
-    private fun captureFrame(view: View): Bitmap? {
+    private suspend fun captureLayerFrame(layer: GraphicsLayer): Bitmap? {
+        return try {
+            val bmp = layer.toImageBitmap().asAndroidBitmap()
+            if (bmp.isBlank()) null else bmp
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Software snapshot via [View.drawToBitmap] — the legacy fallback when
+     * no Compose GraphicsLayer is attached. Rejects failures and blank/
+     * transparent captures (a device quirk where drawToBitmap "succeeds"
+     * but replays nothing).
+     */
+    private fun captureViewFrame(view: View): Bitmap? {
         return try {
             val bmp = view.drawToBitmap()
             if (bmp.isBlank()) null else bmp
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * LIVE-FRAME capture via [PixelCopy]: a snapshot of the window's current
+     * surface — the exact pixels on screen, liquid-glass blur included —
+     * taken by the hardware compositor instead of re-running the Compose
+     * draw chain. This is the PREFERRED snapshot source for the frozen
+     * reveal frame; the GraphicsLayer / View paths below exist as fallbacks
+     * (API < 26 or a failed copy). A failed or blank copy is rejected so the
+     * caller falls back instead of freezing a see-through frame.
+     */
+    private suspend fun windowFrame(view: View?): Bitmap? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        val activity = view?.context as? Activity
+            ?: view?.rootView?.context as? Activity
+            ?: return null
+        val window = activity.window ?: return null
+        val decor = window.decorView
+        val width = decor.width
+        val height = decor.height
+        if (width <= 0 || height <= 0) return null
+        return try {
+            val dest = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val frame = suspendCancellableCoroutine<Bitmap?> { cont ->
+                // The callback always fires (PixelCopy has no cancellation
+                // API), so the continuation can never leak.
+                PixelCopy.request(
+                    window,
+                    dest,
+                    { status ->
+                        val result =
+                            if (status == PixelCopy.SUCCESS && !dest.isBlank()) dest else null
+                        if (!cont.isCancelled) {
+                            // resumeWith is the one Continuation member with a
+                            // stable signature (the resume(value, onCancellation)
+                            // extension made onCancellation required here).
+                            runCatching { cont.resumeWith(Result.success(result)) }
+                        } else {
+                            // Cancelled mid-copy: the continuation resumes
+                            // with CancellationException on its own — just
+                            // don't leak the allocation.
+                            dest.recycle()
+                        }
+                    },
+                    Handler(Looper.getMainLooper())
+                )
+            }
+            if (frame != null) frame else dest.recycle().let { null }
         } catch (e: Exception) {
             null
         }
@@ -167,10 +265,20 @@ private fun CurioThemeTransitionOverlay(
     val featherPx = with(LocalDensity.current) { THEME_REVEAL_FEATHER.toPx() }
     val bitmap = state.screenshotBitmap
     val progress = state.progress.value
+    // Hardware GraphicsLayer that mirrors the host content each frame. Used
+    // as the PREFERRED snapshot source so the reveal works in liquid-glass
+    // mode (View.drawToBitmap forces a software pass that drops RenderEffect
+    // blurs and can return a blank frame). Recorded via drawWithContent so
+    // it stays in sync with the live tree.
+    val captureLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
 
-    DisposableEffect(view, state) {
+    DisposableEffect(view, state, captureLayer) {
         state.attachView(view)
-        onDispose { state.attachView(null) }
+        state.captureLayer = captureLayer
+        onDispose {
+            state.attachView(null)
+            state.captureLayer = null
+        }
     }
 
     LaunchedEffect(state.isAnimating, bitmap) {
@@ -190,7 +298,19 @@ private fun CurioThemeTransitionOverlay(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        content()
+        // Record the live content into the GraphicsLayer every frame so a
+        // theme-switch snapshot captures the REAL (hardware-rendered, blur-
+        // preserving) pixels instead of a software drawToBitmap pass.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .drawWithContent {
+                    captureLayer.record { this@drawWithContent.drawContent() }
+                    drawContent()
+                }
+        ) {
+            content()
+        }
 
         if (bitmap != null && state.isAnimating) {
             val frozenFrame = remember(bitmap) { bitmap.asImageBitmap() }
@@ -296,15 +416,54 @@ fun switchThemeWithReveal(
         else -> transition
     }
 
-    if (t != null && t.startTransition(center)) {
+    if (t != null) {
         // Freeze the old frame first, then flip the theme underneath so the
-        // reveal overlays a fully-recomposed new scheme.
+        // reveal overlays a fully-recomposed new scheme. The capture runs
+        // in a coroutine (GraphicsLayer.toImageBitmap is suspend).
         scope.launch {
-            delay(THEME_FLIP_DELAY_MS)
-            AppPreferences.setThemeMode(context, newMode)
+            if (t.startTransition(center)) {
+                delay(THEME_FLIP_DELAY_MS)
+                AppPreferences.setThemeMode(context, newMode)
+            } else {
+                AppPreferences.setThemeMode(context, newMode)
+            }
         }
     } else {
         // No visual change, no host, or a reveal already in flight — apply instantly.
         AppPreferences.setThemeMode(context, newMode)
+    }
+}
+
+/**
+ * Flip a NON-mode visual theme change (Material theme on/off, hero-tear style,
+ * pastel toggle, etc.) with the SAME circular-reveal transition as
+ * [switchThemeWithReveal]. These changes repaint the whole color scheme even
+ * when the light/dark state stays the same, so the reveal is forced.
+ *
+ * [apply] is the pref write that triggers the recomposition (e.g.
+ * `AppPreferences.setMaterialThemeEnabled(context, true)`); it runs AFTER the
+ * old frame is frozen so the reveal overlays the recomposed new scheme.
+ */
+fun switchVisualThemeWithReveal(
+    transition: CurioThemeTransitionState?,
+    scope: CoroutineScope,
+    center: Offset,
+    apply: () -> Unit,
+) {
+    val t = when {
+        transition == null || transition.isAnimating -> null
+        else -> transition
+    }
+    if (t != null) {
+        scope.launch {
+            if (t.startTransition(center)) {
+                delay(THEME_FLIP_DELAY_MS)
+                apply()
+            } else {
+                apply()
+            }
+        }
+    } else {
+        apply()
     }
 }

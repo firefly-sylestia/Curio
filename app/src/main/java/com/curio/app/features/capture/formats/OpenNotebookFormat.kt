@@ -63,7 +63,10 @@ fun OpenNotebookFormat(
     onCanSaveChange: (Boolean) -> Unit,
     onDataChanged: (CaptureData?) -> Unit = {},
     initialData: CaptureData.OpenNotebook? = null,
-    boardSeed: Int? = null
+    boardSeed: Int? = null,
+    // Host wires this to the Lightbox — passed to the sub-formats that
+    // attach images (review / journal / field) so their thumbs open it.
+    onImageTap: ((String) -> Unit)? = null
 ) {
     // Edit mode: open the picker on the saved choice instead of VOICE, and
     // seed the sub-body with the saved data. Keyed on initialData so the
@@ -123,11 +126,13 @@ fun OpenNotebookFormat(
                 )
                 NotebookChoice.REVIEW -> ReelNotesFormat(
                     accent, tint, { subCanSave = it }, { subData = it },
-                    initialData = initialData?.subData as? CaptureData.ReelNotes
+                    initialData = initialData?.subData as? CaptureData.ReelNotes,
+                    onImageTap = onImageTap
                 )
                 NotebookChoice.JOURNAL -> MarginaliaFormat(
                     accent, tint, { subCanSave = it }, { subData = it },
-                    initialData = initialData?.subData as? CaptureData.Marginalia
+                    initialData = initialData?.subData as? CaptureData.Marginalia,
+                    onImageTap = onImageTap
                 )
                 NotebookChoice.MOODBOARD -> GalleryWallFormat(
                     accent, tint, { subCanSave = it }, { subData = it },
@@ -138,7 +143,8 @@ fun OpenNotebookFormat(
                 )
                 NotebookChoice.FIELD -> FieldNotesFormat(
                     accent, tint, { subCanSave = it }, { subData = it },
-                    initialData = initialData?.subData as? CaptureData.FieldNotes
+                    initialData = initialData?.subData as? CaptureData.FieldNotes,
+                    onImageTap = onImageTap
                 )
             }
         }

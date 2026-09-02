@@ -165,9 +165,6 @@ object AppPreferences {
     // Pinned categories for the new picker — up to 5 comma-joined CategoryId
     // names. Defaults to Wildcard + good-to-explore picks on first launch.
     private const val KEY_PINNED_CATEGORIES = "pinned_categories"
-    // Recently spun categories (most-recent-first, capped at 8) for the
-    // "Continue exploring" section of the new picker.
-    private const val KEY_RECENT_CATEGORIES = "recent_categories"
     // New category picker ("Category Mix Studio"):
     // - KEY_NAMED_MIXES — the named mixes the user creates/saves (JSON
     //   array of NamedMix). Seeded from the old quick presets once.
@@ -178,6 +175,17 @@ object AppPreferences {
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
     private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
+    // v3xx — picker page default + curated suggestions (add/remove):
+    // - KEY_PICKER_DEFAULT_PAGE — 0 = classic picker opens first (default),
+    //   1 = new picker opens first.
+    // - KEY_PICKER_SUGGESTIONS — a JSON array of CategoryId names the user
+    //   curated as the "fun to explore" list below the mixes. Empty/missing
+    //   falls back to a curated default list.
+    private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
+    private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
+    // v3xx13 — per-page scroll persistence for the sheet's classic/new pager.
+    private const val KEY_PICKER_PAGE0_SCROLL = "picker_page0_scroll"   // "index:offset" of page 0
+    private const val KEY_PICKER_PAGE1_SCROLL = "picker_page1_scroll"   // "index:offset" of page 1
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -193,6 +201,10 @@ object AppPreferences {
     private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
     // v9.3 — custom flower bed design (32×18 pixel rows).
     private const val KEY_BED_DESIGN = "bed_design_rows"
+    // Share card edit persistence — per-topic card customisations saved
+    // on share/save so they restore next time the same topic is shared.
+    private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
+    private const val KEY_SHARED_CARDS = "shared_cards"            // JSON array of shared card records
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -740,6 +752,22 @@ object AppPreferences {
         private set
 
     /**
+     * v3xx — which picker page opens first in the sheet's pager.
+     * 0 = classic picker (default), 1 = new picker. Seeded from prefs in
+     * [initThemeMode].
+     */
+    var pickerDefaultPageState by mutableIntStateOf(0)
+        private set
+
+    /**
+     * v3xx — the user's curated "fun to explore" category ids shown below
+     * the mixes in the new picker. Empty = use the curated default list
+     * (see [defaultSuggestions]). Seeded from prefs in [initThemeMode].
+     */
+    var pickerSuggestionsState by mutableStateOf<List<CategoryId>>(emptyList())
+        private set
+
+    /**
      * Reactive category ORDER state (v7.94) — set via Manage Categories.
      * Empty = the default order. [CurioCategories.visible] applies it, so
      * the Home/Cabinet chip rows and the pickers honor the user's reorder.
@@ -855,6 +883,8 @@ object AppPreferences {
         savedMixesState = getSavedMixes(context)
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
+        pickerDefaultPageState = getPickerDefaultPage(context)
+        pickerSuggestionsState = getPickerSuggestions(context)
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
@@ -2112,29 +2142,6 @@ object AppPreferences {
         return current
     }
 
-    /**
-     * Recently spun categories (most-recent-first, capped at 8). Used by
-     * the new picker's "Continue exploring" section. Call this when a
-     * spin lands on a topic.
-     */
-    fun getRecentCategories(context: Context): List<CategoryId> {
-        val raw = prefs(context).getString(KEY_RECENT_CATEGORIES, null)
-        return raw
-            ?.split(",")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            ?.mapNotNull { name -> CategoryId.values().firstOrNull { it.name == name } }
-            .orEmpty()
-    }
-
-    fun noteRecentCategory(context: Context, id: CategoryId) {
-        val current = getRecentCategories(context).toMutableList()
-        current.remove(id)
-        current.add(0, id)
-        val names = current.map { it.name }.take(8)
-        prefs(context).edit().putString(KEY_RECENT_CATEGORIES, names.joinToString(",")).apply()
-    }
-
     // ── New picker: named mixes + classic toggle ──────────────────────
     /**
      * All saved named mixes, in creation order (newest first after
@@ -2219,6 +2226,90 @@ object AppPreferences {
     fun setPickerMixesSeeded(context: Context, on: Boolean) {
         prefs(context).edit().putBoolean(KEY_PICKER_MIXES_SEEDED, on).apply()
         pickerMixesSeededState = on
+    }
+
+    // ── Picker default page + curated suggestions (v3xx) ─────────────
+    /** The curated default "fun to explore" list (up to 10), in order. */
+    val defaultSuggestions: List<CategoryId> = listOf(
+        CategoryId.FILMS, CategoryId.BOOKS, CategoryId.ANIMALS,
+        CategoryId.SCIENTISTS, CategoryId.HISTORY, CategoryId.ARTISTS,
+        CategoryId.FOOD, CategoryId.GAMES, CategoryId.MYTHOLOGY,
+        CategoryId.ANIME
+    )
+
+    /** Which picker page opens first: 0 = classic, 1 = new. */
+    fun getPickerDefaultPage(context: Context): Int =
+        prefs(context).getInt(KEY_PICKER_DEFAULT_PAGE, 0)
+
+    fun setPickerDefaultPage(context: Context, page: Int) {
+        prefs(context).edit().putInt(KEY_PICKER_DEFAULT_PAGE, page).apply()
+        pickerDefaultPageState = page
+    }
+
+    /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */
+    fun getPickerSuggestions(context: Context): List<CategoryId> {
+        val raw = prefs(context).getString(KEY_PICKER_SUGGESTIONS, null) ?: return emptyList()
+        return runCatching {
+            JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i ->
+                    runCatching { CategoryId.valueOf(arr.getString(i)) }.getOrNull()
+                }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    fun setPickerSuggestions(context: Context, ids: List<CategoryId>) {
+        val arr = JSONArray()
+        ids.forEach { arr.put(it.name) }
+        prefs(context).edit().putString(KEY_PICKER_SUGGESTIONS, arr.toString()).apply()
+        pickerSuggestionsState = ids
+    }
+
+    /** Adds a category id to the curated suggestions (no-op if present). */
+    fun addPickerSuggestion(context: Context, id: CategoryId) {
+        val cur = getPickerSuggestions(context).toMutableList()
+        if (id !in cur) { cur.add(id); setPickerSuggestions(context, cur) }
+    }
+
+    /** Removes a category id from the curated suggestions. */
+    fun removePickerSuggestion(context: Context, id: CategoryId) {
+        // Seed from the EFFECTIVE list (defaults when the user list is still
+        // empty) so removing a default suggestion actually removes it — the
+        // old write was a no-op against an empty user list, so the lane
+        // stayed in Continue exploring. An all-removed list is empty again,
+        // which simply falls back to the defaults.
+        val cur = getPickerSuggestions(context).toMutableList()
+            .ifEmpty { defaultSuggestions.toMutableList() }
+        cur.remove(id)
+        setPickerSuggestions(context, cur)
+    }
+
+    // ── Picker page scroll persistence (v3xx13) ───────────────────────
+    /** Saved scroll position of one picker pager page. */
+    data class PickerScrollPos(val index: Int = 0, val offset: Int = 0)
+
+    private fun encodeScroll(pos: PickerScrollPos): String = "${pos.index}:${pos.offset}"
+
+    private fun decodeScroll(raw: String?): PickerScrollPos =
+        raw?.split(":")?.let { parts ->
+            runCatching { PickerScrollPos(parts[0].toInt(), parts[1].toInt()) }
+                .getOrDefault(PickerScrollPos())
+        } ?: PickerScrollPos()
+
+    /** Saved scroll position of page 0 — the classic picker page. */
+    fun getPickerPage0Scroll(context: Context): PickerScrollPos =
+        decodeScroll(prefs(context).getString(KEY_PICKER_PAGE0_SCROLL, null))
+
+    fun setPickerPage0Scroll(context: Context, pos: PickerScrollPos) {
+        prefs(context).edit().putString(KEY_PICKER_PAGE0_SCROLL, encodeScroll(pos)).apply()
+    }
+
+    /** Saved scroll position of page 1 — the new picker page. */
+    fun getPickerPage1Scroll(context: Context): PickerScrollPos =
+        decodeScroll(prefs(context).getString(KEY_PICKER_PAGE1_SCROLL, null))
+
+    fun setPickerPage1Scroll(context: Context, pos: PickerScrollPos) {
+        prefs(context).edit().putString(KEY_PICKER_PAGE1_SCROLL, encodeScroll(pos)).apply()
     }
 
     // ── Custom pet design (v8.34 — Pet designer playground) ──────────
@@ -2386,6 +2477,77 @@ object AppPreferences {
     fun setAutoBackupLastAtMillis(context: Context, millis: Long) {
         prefs(context).edit().putLong(KEY_AUTO_BACKUP_LAST_AT, millis).apply()
     }
+
+    // ── Share card edit persistence ─────────────────────────────────
+    /** Save per-topic card customisations (move + text edits) so they
+     *  restore when the same topic is shared again. [topicName] is the
+     *  key; the value is a JSON object with move fields + editedTitle +
+     *  editedFact + bodyScale. */
+    fun saveShareCardEdits(context: Context, topicName: String,
+        titleDx: Float, titleDy: Float, factDx: Float, factDy: Float,
+        metaDx: Float, metaDy: Float, badgeDx: Float, badgeDy: Float,
+        titleWidthFrac: Float, titleHeightFrac: Float, factWidthFrac: Float, factHeightFrac: Float,
+        titleScale: Float, bodyScale: Float, editedTitle: String?, editedFact: String?) {
+        val json = try {
+            val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
+                ?.let { JSONObject(it) } ?: JSONObject()
+            val edit = JSONObject().apply {
+                put("titleDx", titleDx); put("titleDy", titleDy)
+                put("factDx", factDx); put("factDy", factDy)
+                put("metaDx", metaDx); put("metaDy", metaDy)
+                put("badgeDx", badgeDx); put("badgeDy", badgeDy)
+                put("titleWidthFrac", titleWidthFrac); put("titleHeightFrac", titleHeightFrac)
+                put("factWidthFrac", factWidthFrac); put("factHeightFrac", factHeightFrac)
+                put("titleScale", titleScale); put("bodyScale", bodyScale)
+                if (editedTitle != null) put("editedTitle", editedTitle)
+                if (editedFact != null) put("editedFact", editedFact)
+            }
+            raw.put(topicName, edit)
+            raw.toString()
+        } catch (_: Exception) { return }
+        prefs(context).edit().putString(KEY_SHARE_CARD_EDITS, json).apply()
+    }
+
+    /** Load saved card edits for [topicName], or null if none. */
+    fun loadShareCardEdits(context: Context, topicName: String): JSONObject? = try {
+        val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
+            ?.let { JSONObject(it) } ?: return null
+        raw.optJSONObject(topicName)
+    } catch (_: Exception) { null }
+
+    /** Record a shared card for the Share Hub gallery. */
+    fun recordSharedCard(context: Context, topicName: String, categoryName: String,
+        style: String, aspect: String) {
+        val json = try {
+            val arr = prefs(context).getString(KEY_SHARED_CARDS, null)
+                ?.let { JSONArray(it) } ?: JSONArray()
+            // Dedupe by topic + style
+            val existing = (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+            val deduped = JSONArray()
+            val seen = mutableSetOf<String>()
+            existing.forEach { obj ->
+                val key = "${obj.optString("topic")}:${obj.optString("style")}"
+                if (seen.add(key)) deduped.put(obj)
+            }
+            deduped.put(JSONObject().apply {
+                put("topic", topicName); put("category", categoryName)
+                put("style", style); put("aspect", aspect)
+                put("at", System.currentTimeMillis())
+            })
+            // Keep last 50
+            while (deduped.length() > 50) deduped.remove(0)
+            deduped.toString()
+        } catch (_: Exception) { return }
+        prefs(context).edit().putString(KEY_SHARED_CARDS, json).apply()
+    }
+
+    /** Load recent shared cards for the Share Hub. */
+    fun loadSharedCards(context: Context): List<JSONObject> = try {
+        val arr = prefs(context).getString(KEY_SHARED_CARDS, null)
+            ?.let { JSONArray(it) } ?: return emptyList()
+        (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+            .sortedByDescending { it.optLong("at", 0) }
+    } catch (_: Exception) { emptyList() }
 
     // ── Internal ─────────────────────────────────────────────────────
     private fun prefs(context: Context) =

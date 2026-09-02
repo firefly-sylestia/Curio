@@ -130,14 +130,15 @@ enum class PickerMode(val label: String, val glyph: String) {
 }
 
 /** One labelled row-group of lanes inside a Curio/Knowledge mode. */
-private data class PickerGroup(val label: String, val lanes: List<CategoryId>)
+internal data class PickerGroup(val label: String, val lanes: List<CategoryId>)
 
 /**
  * The Curio/Knowledge mode lanes, grouped by theme. Mix uses everything +
  * Wildcard (declared separately in [mixModeLaneIds]). Kept as the single
- * source of truth so the picker grid only iterates these groups.
+ * source of truth so the picker grid only iterates these groups. Shared
+ * with the new picker's classic page (page 1), which hosts the same tabs.
  */
-private val curioModeGroups = listOf(
+internal val curioModeGroups = listOf(
     PickerGroup("Music", listOf(CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS)),
     PickerGroup("On screen", listOf(CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.ANIMATED_MOVIES, CategoryId.SERIES)),
     PickerGroup("Stories", listOf(CategoryId.AUTHORS, CategoryId.BOOKS, CategoryId.MYTHOLOGY, CategoryId.QUOTES)),
@@ -146,7 +147,7 @@ private val curioModeGroups = listOf(
     PickerGroup("Play & taste", listOf(CategoryId.GAMES, CategoryId.SPORTS, CategoryId.FOOD, CategoryId.INTERNET))
 )
 
-private val knowledgeModeGroups = listOf(
+internal val knowledgeModeGroups = listOf(
     PickerGroup("Life sciences", listOf(CategoryId.BIOLOGY, CategoryId.ANIMALS, CategoryId.PLANTS, CategoryId.MEDICINE)),
     PickerGroup("Physical sciences", listOf(CategoryId.CHEMISTRY, CategoryId.GEOLOGY, CategoryId.ASTRONOMY, CategoryId.SCIENTISTS)),
     PickerGroup("How things work", listOf(CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING, CategoryId.DISCOVERIES)),
@@ -269,19 +270,18 @@ fun CategoryPickerContent(
         wildcard + rest
     }
     val draft = CategoryPickerDraft
-    val persistedVisible = remember {
-        AppPreferences.getLastSpinCategories(context)
-            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
-    }
     val gridState = rememberLazyGridState()
     val wide = windowWidthSizeClass().isWide
+    // v27 — fresh opens start CLEAN (v196 model): tap opens a lane, and
+    // tap-and-hold is the ONLY way into multi-select, so holding selects
+    // exactly ONE lane. The old seed-from-persisted-deck lit up the last
+    // deck's lanes too ("it auto-selects 2"). Mid-session draft state (the
+    // user left the picker mid-selection) still restores exactly as before.
     var selectedSlugs by rememberSaveable {
-        mutableStateOf(
-            draft.selected ?: persistedVisible.map { it.id.routeSlug }
-        )
+        mutableStateOf(draft.selected ?: emptyList())
     }
     var multiSelectMode by rememberSaveable {
-        mutableStateOf(if (draft.selected != null) draft.multiSelect else persistedVisible.size > 1)
+        mutableStateOf(draft.selected != null && draft.multiSelect)
     }
     var modeName by rememberSaveable { mutableStateOf(PickerMode.MIX.name) }
     val mode = runCatching { PickerMode.valueOf(modeName) }.getOrDefault(PickerMode.MIX)
@@ -609,80 +609,6 @@ fun CategoryPickerContent(
  * full-screen picker and the Spin page's inline sheet share the same mixes.
  */
 
-/**
- * Small page-tab pill for the Original / New pager.
- *
- * v83 — theme-aware + DYNAMIC colors: callers drive the selected fill and
- * content inks from their context — the category banner's ink/fill when the
- * tabs ride a tear hero, the category accent when they sit on the wash —
- * instead of the fixed rose primary (which glared pale in dark mode).
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PickerPageTab(
-    label: String,
-    count: Int,
-    selected: Boolean,
-    onClick: () -> Unit,
-    accent: Color = MaterialTheme.colorScheme.primary,
-    accentInk: Color = MaterialTheme.colorScheme.onPrimary,
-    idleInk: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    idleFill: Color? = null
-) {
-    val shape = RoundedCornerShape(50)
-    // v86 — DARK-aware default idle fill: the old default lifted toward
-    // curioPillLift() (WHITE in dark) → near-white idle tabs with light-
-    // grey text on the black sheet (washed out). Dark now stays a dark
-    // raised glass; light keeps the cream lift exactly as before.
-    val resolvedIdleFill = idleFill ?: lerp(
-        MaterialTheme.colorScheme.surfaceContainerHigh,
-        if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh else curioPillLift(),
-        0.82f
-    )
-    Surface(
-        onClick = onClick,
-        shape = shape,
-        // v27q — selection reads as a SOLID accent fill with its content ink.
-        // v33 — the UNselected tab is a proper raised pill that stands off
-        // the category wash: it lifts clearly toward the page background
-        // (cream in light, a lighter glass in dark) instead of the flat
-        // surfaceContainerHigh that blended into the tinted picker.
-        // v38 — the light lift rises to 0.82 (neutral cream) so the tabs
-        // separate from the pale pastel wash.
-        // v98 — elevation flattened 3 → 2dp (the v27q selectable-chip
-        // standard) so the halo no longer reads as a shadow above the pill.
-        color = if (selected) accent else resolvedIdleFill,
-        shadowElevation = 2.dp,
-        modifier = Modifier
-            // v28 — soft glow + top-lit shine.
-            // v114 — the dark-mode edge must match the filter-chip pill
-            // treatment: `categoryEdgeShine` painted a full-width band that
-            // peeked past the capsule's rounded ends — `curioGlassEdge` +
-            // `curioInnerGlow` hug the pill shape (same family as the Spin
-            // filter chips / reveal explore pills).
-            .curioDarkGlow(2.dp, shape)
-            .curioGlassEdge(shape)
-            .curioInnerGlow(shape, accent, strength = 0.12f)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = if (selected) accentInk else idleInk
-            )
-            Text(
-                text = "$count",
-                style = MaterialTheme.typography.labelMedium,
-                color = if (selected) accentInk.copy(alpha = 0.8f)
-                        else idleInk.copy(alpha = 0.7f)
-            )
-        }
-    }
-}
 
 /**
  * v1 — the redesigned picker's compact lane tile: a small rounded square

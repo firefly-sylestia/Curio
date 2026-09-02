@@ -1,6 +1,7 @@
 package com.curio.app.features.picker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -56,37 +58,30 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.isLiquidGlassPillsActive
-import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.categoryBackgroundWash
-import com.curio.app.ui.theme.themedAccent
-import com.curio.app.ui.theme.themedButtonFill
-import com.curio.app.ui.theme.themedButtonInk
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * The full "Browse" page of the new category picker — route CurioRoutes.PICKER.
  *
- * User direction: "sheet + full browse page where you can customise the
- * sheet, and use bottom nav style". So this page is a full screen with an
- * in-page BOTTOM NAV with three tabs:
- *   - Browse — every category grid (tap to spin, long-press to pin)
- *   - Mixes — your saved named mixes (apply / edit / delete / new)
- *   - Pins — the pinned quick-access lanes (unpin / tap to spin)
+ * User direction (v3xx2): a full screen with an in-page BOTTOM NAV with three
+ * tabs (Browse · Mixes · Pins). The in-page nav capsules are SOLID-filled
+ * (surfaceContainerHigh / secondaryContainer) with a hairline glass edge —
+ * never fully transparent, even in liquid-glass mode. Category tiles use
+ * NEUTRAL theme roles (no category accent for fill/border/icon). Tap-and-hold
+ * a category surfaces an option pill (Pin/Unpin · Spin) instead of direct pin.
  *
- * Changes made here customize the quick sheet (same prefs).
+ * Back from this page re-opens the Spin category picker sheet (via
+ * [com.curio.app.ui.components.SpinPickerRequest]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryPickerBrowseScreen(navController: NavController) {
     val context = LocalContext.current
     seedStarterMixes(context)
-    // Local glass capture: records ONLY the tab content area (the grid/
-    // list). The bottom-nav capsules below are SIBLINGS of that subtree, so
-    // they never sample their own pixels (v228 self-capture rule).
     val contentGlassBackdrop = rememberLayerBackdrop()
 
     val washCat = remember {
@@ -108,6 +103,8 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
     var showEditor by remember { mutableStateOf(false) }
     var editMix by remember { mutableStateOf<NamedMix?>(null) }
     var deleteMix by remember { mutableStateOf<NamedMix?>(null) }
+    // Tap-and-hold option pill target.
+    var optionTarget by remember { mutableStateOf<CurioCategory?>(null) }
 
     Box(
         modifier = Modifier
@@ -120,7 +117,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                 .widthIn(max = CurioContentMaxWidth)
                 .align(Alignment.TopCenter)
         ) {
-            // ── Top bar: back + title (nav-bar style) ─────────────────
+            // ── Top bar: back + title ──────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -132,7 +129,11 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                 NewPickerCircle(
                     glyph = CurioIcons.ChevronLeft,
                     contentDescription = "Back",
-                    onClick = { navController.popBackStack() },
+                    onClick = {
+                        // Back re-opens the Spin picker sheet.
+                        navController.popBackStack()
+                        com.curio.app.ui.components.SpinPickerRequest.pending = true
+                    },
                     modifier = Modifier.size(44.dp)
                 )
                 Column {
@@ -162,11 +163,11 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                         onSpinLane = { cat ->
                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
                             navController.navigateToTab(CurioRoutes.SPIN)
-                        }
+                        },
+                        onOptionTarget = { optionTarget = it }
                     )
                     BrowseTab.MIXES -> MixesTabContent(
                         deckIds = deckIds,
-                        washCat = washCat,
                         onApplyMix = { mix ->
                             val cats = mix.laneIds.mapNotNull { id ->
                                 CurioCategories.visible.firstOrNull { it.id == id }
@@ -185,16 +186,14 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                         onSpinLane = { cat ->
                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
                             navController.navigateToTab(CurioRoutes.SPIN)
-                        }
+                        },
+                        onOptionTarget = { optionTarget = it }
                     )
                 }
             }
-
         }
 
-        // ── In-page bottom nav (overlay, so the captured content above
-        //    extends underneath it and the glass capsules refract real
-        //    pixels — the v241 sibling-capture pattern).
+        // ── In-page bottom nav (SOLID-fill capsules, keep the glass edge) ──
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -209,7 +208,6 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                     label = t.label,
                     glyph = t.glyph,
                     selected = tab == t,
-                    accent = washCat.themedAccent(),
                     backdrop = contentGlassBackdrop,
                     modifier = Modifier.weight(1f),
                     onClick = { tabName = t.name }
@@ -218,7 +216,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
         }
     }
 
-    // ── Mix editor + delete confirm ──────────────────────────────────
+    // ── Mix editor + delete confirm + option pill ──────────────────────
     if (showEditor) {
         MixEditorSheet(
             washCat = washCat,
@@ -257,20 +255,40 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
             }
         )
     }
+    optionTarget?.let { target ->
+        val isPinned = target.id in AppPreferences.getPinnedCategories(context)
+        BrowseOptionPill(
+            category = target,
+            isPinned = isPinned,
+            onDismiss = { optionTarget = null },
+            onPinToggle = {
+                AppPreferences.togglePinnedCategory(context, target.id)
+                optionTarget = null
+            },
+            onSpin = {
+                optionTarget = null
+                if (target.isReady) {
+                    AppPreferences.setLastSpinCategories(context, listOf(target.id))
+                    navController.navigateToTab(CurioRoutes.SPIN)
+                }
+            }
+        )
+    }
 }
 
 /** The three in-page bottom-nav tabs. */
 internal enum class BrowseTab(val label: String, val glyph: String, val tagline: String) {
-    BROWSE("Browse", CurioIcons.GridView, "Tap to spin · long-press to pin"),
+    BROWSE("Browse", CurioIcons.GridView, "Tap to spin · hold for options"),
     MIXES("Mixes", CurioIcons.Tune, "Your saved lane mixes"),
     PINS("Pins", CurioIcons.PushPin, "Faster starts from pinned lanes")
 }
 
-/** Browse — every category in a grid. */
+/** Browse — every category in a NEUTRAL grid. Hold → option pill. */
 @Composable
 private fun BrowseTabContent(
     context: android.content.Context,
-    onSpinLane: (CurioCategory) -> Unit
+    onSpinLane: (CurioCategory) -> Unit,
+    onOptionTarget: (CurioCategory) -> Unit
 ) {
     val allUnhidden = remember {
         CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
@@ -288,7 +306,6 @@ private fun BrowseTabContent(
 
     LazyVerticalGrid(
         columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
-        // bottom clearance for the overlaid bottom nav.
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 104.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -299,13 +316,9 @@ private fun BrowseTabContent(
                 category = cat,
                 pinned = cat.id in pinnedSet,
                 comingSoon = !cat.isReady,
-                onClick = {
-                    if (cat.isReady) onSpinLane(cat)
-                },
+                onClick = { if (cat.isReady) onSpinLane(cat) },
                 onLongClick = if (cat.isReady) {
-                    {
-                        pinnedSet = AppPreferences.togglePinnedCategory(context, cat.id).toSet()
-                    }
+                    { onOptionTarget(cat) }
                 } else null
             )
         }
@@ -316,7 +329,6 @@ private fun BrowseTabContent(
 @Composable
 private fun MixesTabContent(
     deckIds: Set<CategoryId>,
-    washCat: CurioCategory,
     onApplyMix: (NamedMix) -> Unit,
     onEditMix: (NamedMix) -> Unit,
     onDeleteMix: (NamedMix) -> Unit,
@@ -326,7 +338,6 @@ private fun MixesTabContent(
     val categories = CurioCategories.visible
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        // bottom clearance for the overlaid bottom nav.
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 104.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
@@ -334,8 +345,6 @@ private fun MixesTabContent(
             NewPrimaryCapsule(
                 label = "Create a mix",
                 glyph = CurioIcons.Add,
-                accent = MaterialTheme.colorScheme.primary,
-                accentInk = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.padding(bottom = 10.dp),
                 onClick = onNewMix
             )
@@ -351,24 +360,25 @@ private fun MixesTabContent(
             }
         } else {
             items(mixes, key = { it.createdAtMillis }) { mix ->
-                NewMixRow(
+                BrowseMixRow(
                     mix = mix,
                     categories = categories,
                     active = mix.laneIds.toSet() == deckIds,
                     onApply = { onApplyMix(mix) },
-                    onLongClick = { onDeleteMix(mix) },
-                    onMore = { onEditMix(mix) }
+                    onEdit = { onEditMix(mix) },
+                    onDelete = { onDeleteMix(mix) }
                 )
             }
         }
     }
 }
 
-/** Pins — the pinned quick-access lanes. */
+/** Pins — the pinned quick-access lanes. Hold → option pill. */
 @Composable
 private fun PinsTabContent(
     context: android.content.Context,
-    onSpinLane: (CurioCategory) -> Unit
+    onSpinLane: (CurioCategory) -> Unit,
+    onOptionTarget: (CurioCategory) -> Unit
 ) {
     var pinnedCats by remember {
         mutableStateOf(
@@ -378,13 +388,12 @@ private fun PinsTabContent(
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        // bottom clearance for the overlaid bottom nav.
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 104.dp)
     ) {
         if (pinnedCats.isEmpty()) {
             item(key = "empty") {
                 Text(
-                    "Long-press a category in Browse to pin it here — the pinned row also sits at the top of the quick sheet.",
+                    "Hold a category in Browse to pin it here — the pinned row also sits at the top of the quick sheet.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
                     modifier = Modifier.padding(vertical = 12.dp)
@@ -393,20 +402,17 @@ private fun PinsTabContent(
         } else {
             items(pinnedCats, key = { it.id }) { cat ->
                 val shape = RoundedCornerShape(18.dp)
+                // NEUTRAL pin row — no category accent.
                 Surface(
                     shape = shape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = newPickerIdleFill(),
                     shadowElevation = 0.dp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        
                         .combinedClickable(
                             onClick = { onSpinLane(cat) },
-                            onLongClick = {
-                                pinnedCats = AppPreferences.togglePinnedCategory(context, cat.id)
-                                    .mapNotNull { id -> CurioCategories.all.firstOrNull { it.id == id } }
-                            }
+                            onLongClick = { onOptionTarget(cat) }
                         )
                 ) {
                     Row(
@@ -418,14 +424,14 @@ private fun PinsTabContent(
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(RoundedCornerShape(13.dp))
-                                .background(lerp(MaterialTheme.colorScheme.surfaceContainerHigh, cat.themedAccent(), 0.10f)),
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
                                 name = cat.iconGlyph,
                                 contentDescription = null,
                                 size = 21.dp,
-                                tint = cat.themedAccent()
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
@@ -433,11 +439,6 @@ private fun PinsTabContent(
                                 text = if (cat.id == CategoryId.WILDCARD) "Surprise mix" else cat.displayName,
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                "Long-press to unpin · tap to spin",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Surface(
@@ -462,30 +463,241 @@ private fun PinsTabContent(
     }
 }
 
-/** One capsule of the in-page bottom nav. */
+/**
+ * One named mix row for the Browse Mixes tab: name + lane teaser, a Spin
+ * pill, and an Edit / Delete menu behind TAP-AND-HOLD (v3xx13 — no visible
+ * 3-dot button; holding the row opens the options). [active] marks the mix
+ * currently applied as the deck.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BrowseMixRow(
+    mix: NamedMix,
+    categories: List<CurioCategory>,
+    active: Boolean,
+    onApply: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(18.dp)
+    Surface(
+        shape = shape,
+        color = newPickerIdleFill(),
+        shadowElevation = 0.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+            .combinedClickable(onClick = onApply, onLongClick = { menuOpen = true })
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // NEUTRAL leading glyph plate — no category accent.
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                contentAlignment = Alignment.Center
+            ) {
+                val first = mix.laneIds.firstOrNull()
+                val cat = first?.let { id -> categories.firstOrNull { c -> c.id == id } }
+                CurioIcon(
+                    name = cat?.iconGlyph ?: CurioIcons.Casino,
+                    contentDescription = null,
+                    size = 20.dp,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = mix.name,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = mixTeaser(mix.laneIds, categories),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (active) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Text(
+                        "Spinning",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
+            } else {
+                Surface(
+                    onClick = onApply,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                ) {
+                    Text(
+                        "Spin",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
+                }
+            }
+            // Edit / Delete — behind tap-and-hold only (the row's
+            // onLongClick opens this menu; no visible 3-dot button).
+            Box {
+                androidx.compose.material3.DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = { menuOpen = false }
+                ) {
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text("Edit", color = MaterialTheme.colorScheme.onSurface) },
+                        onClick = { menuOpen = false; onEdit() }
+                    )
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                        onClick = { menuOpen = false; onDelete() }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The tap-and-hold option pill on the Browse page — a centered overlay with
+ * Pin/Unpin + Spin. Solid surface (no liquid-glass transparency).
+ */
+@Composable
+private fun BrowseOptionPill(
+    category: CurioCategory,
+    isPinned: Boolean,
+    onDismiss: () -> Unit,
+    onPinToggle: () -> Unit,
+    onSpin: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f))
+            .combinedClickable(onClick = onDismiss)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(22.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shadowElevation = 6.dp,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 40.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    if (category.id == CategoryId.WILDCARD) "Surprise mix" else category.displayName,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        onClick = onPinToggle,
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.PushPin,
+                                contentDescription = null,
+                                size = 16.dp,
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Text(
+                                if (isPinned) "Unpin" else "Pin",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
+                    if (category.isReady) {
+                        Surface(
+                            onClick = onSpin,
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.primary
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Casino,
+                                    contentDescription = null,
+                                    size = 16.dp,
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                                Text(
+                                    "Spin",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * One SOLID-fill capsule of the in-page bottom nav. v3xx2 — the capsule is
+ * always SOLID (surfaceContainerHigh idle / secondaryContainer selected)
+ * with the hairline glass edge preserved; never fully transparent, even in
+ * liquid-glass mode.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewPickerTabCapsule(
     label: String,
     glyph: String,
     selected: Boolean,
-    accent: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     val shape = RoundedCornerShape(50)
-    val glassOn = false
+    // SOLID fill in both states — no transparency. Idle uses the picker's
+    // cream-lift neutral (light mode reads creamy, not dark tan).
     val fill = if (selected) MaterialTheme.colorScheme.secondaryContainer
-    else MaterialTheme.colorScheme.surfaceContainerHigh
+               else newPickerIdleFill()
     Surface(
         onClick = onClick,
         shape = shape,
-        color = if (glassOn) Color.Transparent else fill,
+        color = fill,
         shadowElevation = 0.dp,
         modifier = modifier
             .height(46.dp)
-            
+            .then(if (isLiquidGlassPillsActive()) Modifier.curioGlassEdge(shape) else Modifier)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp),
@@ -496,14 +708,16 @@ private fun NewPickerTabCapsule(
                 name = glyph,
                 contentDescription = null,
                 size = 18.dp,
-                tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                       else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold
                 ),
-                color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
+                color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                        else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 6.dp)
             )
         }

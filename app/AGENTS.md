@@ -75,7 +75,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.1.0"` (default; bumped to 1.1.0 in v113 for the cosmic-icon release — the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260920` (date-based, +1 over the previous 20260919; unchanged by tags)
+- `versionName = "1.1.0"` (default; bumped to 1.1.0 in v113 for the cosmic-icon release — the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260921` (date-based, +1 over the previous 20260920; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` + `lora.ttf` (v35 — the Lora editorial serif, OFL, variable wght 400–700, ~212KB) directly in `app/src/main/res/font/`; none depend on another module or source tree
@@ -138,6 +138,366 @@ app/src/main/java/com/curio/app/
     names + cmap codepoints; verified 0 lost codepoints and 0 lost rlig
     names: 250→253 cps, 277→280 names). New constants in CurioIcons:
     Shuffle / GridView / Apps / PushPin.
+- **v3xx2 — category picker overhaul (neutral + tap-hold options +
+  pager).** The new picker drops category accents everywhere and adds a
+  classic/new pager:
+  - **NEUTRAL tiles:** `NewPickerTile` uses `surfaceContainerHigh` fills,
+    `onSurfaceVariant` icons, and a `secondaryContainer` selected fill +
+    `primary` check — NO category accent for fills, borders or icons in
+    EITHER theme. The same neutral treatment applies to `BrowseMixRow`,
+    the Pins tab rows, the Mixes 3-dot menu, and the in-page bottom-nav
+    capsules (`surfaceContainerHigh` idle / `secondaryContainer` selected,
+    hairline `curioGlassEdge` preserved — NEVER fully transparent, even in
+    liquid-glass mode).
+  - **Tap-and-hold → option pill:** holding a category (Browse grid,
+    Pinned row, Pins tab) surfaces a centered overlay with **Pin/Unpin** +
+    **Spin** instead of pinning directly. The pill is a SOLID surface (no
+    glass transparency). Pinned pills are taller/wider (12dp vertical
+    padding).
+  - **No close button:** the sheet has no cross — swipe down or back to
+    close.
+  - **HorizontalPager:** page 0 = a self-contained classic-style
+    multi-select grid (preset chips + Mix/Cancel row, neutral tiles),
+    page 1 = the new picker. The user's chosen page persists as the
+    default (`pickerDefaultPageState`, default 0 = classic). Both pages
+    share the bottom action row (Surprise me · Create mix · Browse).
+  - **Your mixes:** a 2-column grid, max 5 visible + Show all/Show less.
+  - **Continue exploring** replaces "Now spinning": the user's most-spun
+    categories (`CurioPassport.allProgress` spin counts) first, then
+    curated "fun to explore" lanes up to 10. The user can add/remove via a
+    tap-and-hold → remove and an "+ Add" tile → `AddSuggestionSheet`
+    (`pickerSuggestionsState`, falls back to `defaultSuggestions`).
+  - **Mix editor** shows a CLEAR neutral selected state on tiles
+    (`secondaryContainer` + `primary` check).
+  - **Back from Browse** (PICKER route) re-opens the Spin picker sheet via
+    `SpinPickerRequest.pending = true` (the Browse back button sets it;
+    SpinScreen's existing consumer reopens the sheet).
+  - **Mixes 3-dot** offers both Edit and Delete (was edit-only).
+  - Persistence: `pickerDefaultPageState` (Int) + `pickerSuggestionsState`
+    (List<CategoryId>) + `getPickerSuggestions`/`setPickerSuggestions`/
+    `addPickerSuggestion`/`removePickerSuggestion` + `defaultSuggestions`.
+- **v3xx3 — signature share cards REDESIGNED for 7 categories (both normal
+  and Deepen).** The classic base styles (Paper/Clean/Collage/Editorial/
+  Minimal/Vinyl) and the `signatureDesignClassic` fallback are untouched;
+  the 7 categories the user called out (Animals, Animated Films, Anime,
+  Artists, Artworks, Astronomy, Authors) get fresh typographic identities
+  and cleaner minimal scenes in BOTH `signatureDesign` and
+  `signatureDesignDetailed`:
+  - **Artists** — warm concert-poster: single amber spotlight cone on a
+    dark stage, hairline floor + glow pools, tall **Bebas Neue** poster
+    title (POSTER layout; detailed adds a light rig, crowd silhouettes,
+    sound-wave arcs, sparkle dust).
+  - **Animals** — naturalist field note: sage botanical sprig + seed dots
+    on cool sage paper, **Lora** serif title (CENTERED; detailed adds a
+    forest clearing with sprig cluster, paw-print trail, grass, fireflies).
+  - **Animated Films/Movies** — storybook pastel: thin five-band rainbow
+    arc + placed sparkles on a soft lavender wash, **Corben** rounded
+    display title (CENTERED; detailed adds a film-frame cel with sprocket
+    dots, cloud puffs, confetti).
+  - **Anime** — rising-sun poster: vermilion sun + ground line + brush
+    stroke on cool paper white, **Maven Pro** title (CENTERED; detailed
+    adds sun rays, a torii-gate silhouette, falling sakura petals).
+  - **Artworks** — quiet gallery: one thin framed abstract + floor
+    hairline on cool gallery white, **Cormorant Garamond** title
+    (STANDARD; detailed adds two spotlight cones + a second ink-line
+    piece).
+  - **Authors** — literary manuscript: faint ruled lines + red margin +
+    flourish on cool manuscript paper, **Playfair Display** title
+    (STANDARD; detailed adds inkwell + quill under a desk-lamp glow).
+  - **Astronomy** — star chart: constellation + thin ringed planet +
+    coordinate ticks on deep navy, **Space Mono** title (BOTTOM; detailed
+    adds nebula glows, sparse starfield, shooting star).
+  - The old dark scenes for these categories (indigo spotlight, moonlit
+    forest, rainbow arc, sakura, gallery wall, writing desk, nebula
+    galaxy) were replaced outright; `signatureDesignClassic` keeps the
+    legacy family designs. Note the detailed Animated-Films branch now
+    matches `"ANIMATED FILMS" || "ANIMATED MOVIES"` (the old branch keyed
+    only on the legacy name and fell through to the fallback).
+- **v3xx4 — picker crash fix, mixes grid polish, Editorial overlap fix,
+  no-cream signature backgrounds.** Follow-up to v3xx3 (user report):
+  - **Crash fix:** opening the category picker crashed with "Vertically
+    scrollable component was measured with an infinity maximum height
+    constraints" — the classic/new `HorizontalPager` in
+    `NewCategoryPickerSheet` and the `MixEditorSheet` category grid used
+    `Modifier.weight(1f, fill = false)`, which measures the child with an
+    INFINITE max height; the pages' LazyColumn / LazyVerticalGrid passed
+    it through and crashed. Both now use `weight(1f)` (fill = true) so
+    the sheet's bounded height reaches the scrollables.
+  - **Your mixes grid:** `NewMixCard` cells are a uniform 122dp height
+    with the Spin pill bottom-anchored (was ragged per-teaser heights),
+    and the 3-dot menu is an M3 `DropdownMenu` popup (always on top)
+    instead of the inline `DropdownMenuSurface`/AnimatedVisibility that
+    shoved the row when expanded — that surface + the now-unused
+    animation imports were deleted.
+  - **Editorial overlap fix:** the drop-cap body in `EditorialCard`
+    rendered its wrap-row + full-width rest text as siblings in a
+    `BoxWithConstraints`, which STACKS children at the same slot — the
+    rest text drew ON TOP of the wrapped block ("quick fact text
+    overlapping itself"). The pair now lives inside a `Column` so they
+    lay out top-to-bottom.
+  - **No-cream signature backgrounds:** per user direction, the v3xx3
+    signature scenes dropped their warm cream/beige fills for cool
+    paper-white tones (Animals `EFF3F0` sage paper, Anime `F5F6F8` cool
+    white, Artworks `ECEFF2` gallery white, Authors `F1F3F6` manuscript
+    paper) in BOTH normal and Deepen. Classic styles (Paper/Editorial/
+    Minimal and `signatureDesignClassic`) keep their cream — the user
+    likes those.
+- **v3xx5 — signature scenes SCRAPPED for 14 categories → quiet minimal
+  hairline treatment + 7 new fonts.** Per user direction ("use editorial
+  minimal for quality, redesign without so many things on the background"),
+  the scene-heavy signature backgrounds (lamp+bookshelf, marquee lights,
+  concert hall, forest clearing, nebula, etc.) were removed ENTIRELY for
+  the 14 redesign categories — the first 7 (Animals, Animated Films,
+  Anime, Artists, Artworks, Astronomy, Authors) and the second 7
+  (Biology, Books, Chemistry, Directors, Discoveries, Economics, Films):
+  - **Minimal treatment (normal + Deepen):** flat vertical gradient +
+    `signatureHairlineFrame` (new DrawScope helper: inset 4.5% rounded-
+    rect outline, 1f stroke) + ONE tiny category crest top-right
+    (spotlight / paw / star / sun / frame / quill / helix / open-book /
+    hexagon / clapperboard / compass / arrow / film-strip). Deepen keeps
+    the same layout and only adds a soft radial accent glow — no extra
+    objects.
+  - **Second batch fonts (new OFL downloads):** BioRhyme (Biology),
+    Fraunces (Books), Oxanium (Chemistry), Limelight (Directors),
+    Rye (Discoveries), Space Grotesk (Economics), Anton (Films) — TTFs in
+    `res/font/`, FontFamily vals in CurioTypography.kt, licenses in
+    `app/third_party/`. The first batch re-paired existing bundled fonts
+    (Bebas Neue, Lora, Corben, Maven Pro, Cormorant Garamond, Playfair
+    Display, Space Mono).
+  - **Normal == Deepen configs:** every one of the 14 categories now uses
+    the SAME bg/gradient/font/colors/layout/badge in both functions (was
+    drifting warm/cool hexes and sizes); the only difference is the glow.
+  - `signatureDesignClassic` (2034–2630) is untouched; non-target
+    categories (Food/Geology/History/Internet/Language/Manga/Manhwa/
+    Mathematics/Mythology/Painters/Plants/Psychology/Quotes/Scientists/
+    Albums/Songs/Series/Games/Sports/Technologies and topic variants)
+    keep their existing scene designs.
+- **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
+  crashed on open (same "infinity maximum height" message) —
+  `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a
+  `LazyColumn` item, and lazy items are measured with infinite max
+  height. Replaced with manual chunked rows (3/4 cols via `chunked`,
+  `NewPickerTile`/`AddSuggestionTile` gained a `modifier` param,
+  trailing `Spacer(weight(1f))` pads short rows). The grid-less rows are
+  fine because the section caps at ≤11 tiles.
+- **v3xx6 — first-7 signature watermarks: tiny drawn crests → unique
+  icon glyphs + LANGUAGE bubbles scrapped.** Per user direction ("use
+  letter or symbol or icons instead of drawing things… don't just use a
+  letter in every design, be unique and creative per category"), the
+  tiny drawn crests (spotlight / paw / star / sun / frame / quill) on
+  the FIRST-7 categories (Animals, Animated Films, Anime, Artists,
+  Artworks, Astronomy, Authors) are replaced by a giant faint
+  Material-Symbols glyph watermark rendered over the background
+  (bottom-right, −6° tilt) — one UNIQUE icon per category, all verified
+  ligatures in the bundled font subset: brush (Artists), pets (Animals),
+  movie_filter (Animated Films), auto_awesome (Anime), museum
+  (Artworks), edit_note (Authors), nightlight (Astronomy). Implemented
+  as `SignatureDesign.watermark: String?` — a Minimal-style
+  giant-faint-glyph watermark, rendered by `SignatureCard` via
+  `CurioIcon` (not a drawn letter, so no two categories collide). The
+  same icon renders in BOTH normal and Deepen. LANGUAGE (normal +
+  Deepen) drops its chat bubbles / calligraphy strokes entirely for a
+  minimal gradient + hairline frame — its many-language words overlay
+  (言語/Sprache/langue/…) already renders at the composable level, so
+  that IS the background decoration now. Album and all other categories
+  untouched; classic untouched.
+- **v3xx7 — category picker UX refinement (overrides parts of v3xx2):**
+  user: "category picker … really bad user experience … holding to start a
+  mix it selects 2 … remove that presets of science etc from page 1 and
+  show the Curio Knowledge and Mix options … use the category tint style
+  when selecting … less dark creamy in light mode … instead of 5 show 6
+  your mixes … hold to remove remove that text, add tap and hold action …
+  when going to add and selecting or unselecting things it doesnt update …
+  when closing the picker and reopening thats when it updates, same in
+  when creating a mix".
+  - **Page 1 = Curio / Knowledge / Mix mode picker** (was preset chips +
+    flat grid). `ClassicPickerPage` now hosts the same `PickerMode` tabs
+    and grouped tap-to-open decks as the classic picker (the private
+    `PickerGroup` / `curioModeGroups` / `knowledgeModeGroups` became
+    internal to share them); the Science/Entertainment/Arts & Stories/
+    History & Ideas preset chips are GONE from the new picker (the classic
+    picker's `CategoryPickerContent` keeps them). Mix mode holds the
+    multi-select grid + Mix/Cancel row.
+  - **Clean start (kills "it auto-selects 2"):** page 1 opens with
+    `multiSelectMode = false` and an EMPTY selection — the old seeding
+    from `getLastSpinCategories` lit up the previous deck's lanes the
+    moment you held a tile to start a mix (e.g. the persisted single lane
+    + the held lane = 2). The v196 model (tap opens a lane; hold is the
+    ONLY way into multi-select) is now applied to page 1 AND to the
+    classic `CategoryPickerContent` (draft mid-session restore kept); the
+    legacy Spin `CategoryPickerSheet` already had it. `CategoriesPicker-
+    Draft` seeding changed accordingly.
+  - **Selection = classic category tint:** `NewPickerTile` selected state
+    is now `themedAccent()` fill + `onAccent()` ink (icon, label, check
+    badge, accent-ink ring + icon-plate tint) — the classic `PickerIcon-
+    Tile` style — instead of the neutral secondaryContainer. Applies
+    everywhere selection renders (page-1 Mix, mix editor, Add sheets).
+  - **Cream light mode:** new `newPickerIdleFill()` helper (classic
+    cream-pill recipe: `lerp(base, curioPillLift(), 0.82f)` in light,
+    unchanged in dark) is the idle fill for every new-picker tile/pill/
+    panel — `NewPickerTile`, `NewPinnedPill`, `NewMixCard`, `AddSuggestion-
+    Tile` (from surfaceContainerLow), `NewPickerCircle`, `NewSecondary-
+    Outline`, the mixes "New" pill, `NewPickerTabCapsule`, `BrowseMixRow`,
+    Pins rows — so the picker reads creamy in light mode, not dark tan.
+  - **Your mixes: 6 visible** then "Show all" (was 5).
+  - **Continue exploring:** the "hold to remove" hint text is REMOVED and
+    holding a lane now opens a Remove pill (`CategoryOptionPill` gained an
+    optional `onRemove` — errorContainer Remove action) that actually
+    removes the lane live. The section reads `pickerSuggestionsState`
+    REACTIVELY (no remember snapshot) so every change shows instantly.
+  - **Live updates everywhere (stale-state fixes):** (1) `MixEditorSheet`
+    selection is now an IMMUTABLE `Set<CategoryId>` — the old in-place
+    `MutableSet` toggle wrote the SAME instance back, so structural
+    equality never triggered recomposition and ticks only appeared when
+    the editor reopened (the batch-show was the "auto-select 2" the user
+    saw); (2) `AddSuggestionSheet` reads the reactive state and toggles
+    against the EFFECTIVE list (defaults seeded), so adding AND unchecking
+    work instantly; (3) `AppPreferences.removePickerSuggestion` seeds from
+    the effective list so removing a default suggestion actually removes
+    it (was a no-op against an empty user list); mix save/delete already
+    recomposed via `savedMixesState`.
+- **v3xx12 — Your-mixes cards refined (colour identity + explicit actions).** User:
+  "the your mixes options can be much more refined". `NewMixCard` upgrades:
+  (1) **Lead-lane cover** — the 42dp plate is tinted with the mix's first lane's
+  `themedAccent()` (16% wash + accent glyph), so every mix has a colour identity
+  instead of identical grey plates. (2) **Active indicator** — the mix whose
+  `laneIds` equal the current deck (`deckIds` at the call site) gets a 1.5dp ring
+  in the lead accent (never outlineVariant — no dark-mode white ring) + an
+  "Active" label on the teaser line. (3) **Explicit Edit/Delete buttons** — the
+  hidden 3-dot dropdown is GONE; footer now has a 28dp Edit (neutral) + Delete
+  (error-tint) pair, with the lane dots capped (≤4 lanes: all four 16dp dots,
+  >4: three dots + "+N") so the row fits the narrowest 2-col cell (~136dp inner
+  on a 360dp phone). Card tap = spin only (no long-press menu). Height 114dp (was
+  112) + 12dp air. (4) **Section polish** — header shows "Your mixes · N"; empty
+  state is now a "Build your first mix" CTA (`NewSecondaryOutline`) instead of
+  bare text (with zero mixes there was previously no visible way to create one
+  on page 2).
+- **v3xx13 — picker: borders GONE entirely, mix actions behind hold, page +
+  scroll persistence.** User: "in dark mode the continue-exploring / browse /
+  page-1 categories all have that white border — remove it, I don't want any
+  border at all"; "in your mixes don't show any 3-dot or edit/delete button,
+  only on tap and hold, and remove that New button (there's one at the bottom
+  already)"; "make page 1/2 remember state persistent, and even the scroll —
+  page should stay default when the user switches it just as it is now".
+  (1) **Borders removed in BOTH themes:** `NewPickerTile` drops the
+  selected/pinned ring, `AddSuggestionTile` drops its outline ring, and
+  `NewMixCard` drops the Active ring — selection now reads ONLY through the
+  solid category-tint fill, pinned through the pin badge, and the playing mix
+  through the "Active" label; the `androidx.compose.foundation.border` import
+  is gone from `NewCategoryPicker.kt`. (v3xx10/v3xx11 had already killed the
+  DARK-mode outlines — the user wanted zero borders anywhere.) (2) **Mix
+  actions behind tap-and-hold:** `NewMixCard` loses its explicit Edit/Delete
+  footer buttons (REVERSES v3xx12) and gains `onLongClick` → a new centered
+  `MixOptionPill` overlay (Edit · Delete, styled like `CategoryOptionPill`)
+  wired through `NewPickerPage.onMixOption` + a sheet-level
+  `mixOptionTarget`; `BrowseMixRow` (Browse Mixes tab) drops its always-
+  visible 3-dot trigger too (its long-press DropdownMenu was already wired).
+  (3) **Header "New" pill removed** from the Your mixes label row — the
+  bottom action row's + already creates mixes; the zero-mixes "Build your
+  first mix" empty-state CTA stays (user picked "keep it"). (4) **Page +
+  scroll persistence:** the `pickerDefaultPageState` default-page behavior is
+  UNCHANGED (intended feature); NEW — each pager page's scroll persists:
+  `classicScroll` / `newScroll` `LazyListState`s are hoisted into
+  `NewCategoryPickerSheet` (page flips keep position live), restored on open
+  via `runCatching { scrollToItem(...) }` (saved index may exceed item count
+  after hidden-lane changes), and saved debounced (300ms `snapshotFlow` +
+  `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
+  ("index:offset") behind `AppPreferences.PickerScrollPos`
+  get/set helpers — survives closing the picker AND app restarts.
+- **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
+  chips, one-category browse.** User: "in topic browser let user change
+  category and act that category as filters for the search, so it doesn't
+  always stay on and show all categories when one category is selected;
+  show smart suggestion in a small pill if a result has from another
+  category; make the category chips dynamic — the number shows if it has
+  that search result and if it doesn't have that the category should
+  hide; in the list when changing category not in search the old category
+  gets shown in the list too — only 1 should be shown with a button like
+  an arrow, and then that category at the top only". Clarified via
+  ask_user: browse list = one category + top arrow bar; suggestions = pill
+  row above results, tap switches the filter; dynamic chips = search-only
+  (browse keeps totals); pill action = switch to that category. (1)
+  **Search respects the lane filter** — the SEARCH-mode rows builder in
+  `features/database/TopicDatabaseScreen.kt` now skips lanes that aren't
+  `effectiveCat` (it used to return EVERY lane's matches regardless of the
+  active chip). (2) **Dynamic chips** — new off-thread `catHitCounts`
+  produceState (over `catalog` + hoisted `indexById` + `matches`) feeds
+  `chips`/`allChipsCount`; the sticky chip bar takes precomputed chips now
+  (was `catalog` passthrough + `totalTopics`); while searching, chips show
+  live hit counts and zero-hit lanes HIDE; browsing keeps full per-lane
+  totals; the "All" chip always shows (count = total matches while
+  searching). (3) **One category + top arrow bar (browse)** — with a lane
+  active (not searching) the list renders ONLY that lane, topped by a new
+  `DatabaseCategoryTopBar` ("← Films · 342 topics", whole pill = back-to-
+  All); section headers only appear while All is selected. (4) **"Also
+  in" suggestion pills (search)** — searching inside a lane adds a
+  `SearchSuggestionRow` of small per-lane pills above the results (and
+  above the empty state when the lane has no matches); tapping a pill
+  switches `selectedCat` to that lane keeping the query. The section-
+  header count rows, empty-state copy and pagination are untouched.
+- **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
+  User: "remove the tick when selecting … in dark mode the category options still have
+  white borders … in new picker the pinned ones doesn't show tap and hold actions".
+  (1) **Check tick removed** — `NewPickerTile` no longer draws the 18dp `catInk` check
+  badge on selected tiles; the classic category-tint fill + bold label alone carry
+  selection. In dark mode that pastel circle was exactly the "white dot/border" still
+  visible on selected tiles. (2) **Option-pill overlay placement fixed** — in
+  `NewCategoryPickerSheet` the `CategoryOptionPill` overlays were COLUMN SIBLINGS of
+  the picker content inside the bottom sheet, so their `.fillMaxSize()` scrim only
+  filled the leftover space BELOW the picker (≈0 when the sheet was full-height) and
+  holding a Pinned pill (or any hold → option/remove pill) could show nothing. Both
+  overlays now render INSIDE the picker Box (last children), covering the whole sheet.
+  (3) dark-mode tile borders stay light-only (v3xx10); no other stroke/ring renderers
+  exist in the picker files (verified: no `drawRoundRect`/`Stroke`/`borderTint`).
+- **v3xx10 — theme reveal in liquid-glass mode + mix-card Spin pill + dark-mode borders.**
+  User: "in liquid glass toggle on, switching between theme doesn't play that transition
+  animation; also in the new picker your mixes remove the spin and spinning pill; in dark
+  mode remove that weird white border around category options, in both page 1 and 2".
+  (1) **Theme reveal now plays with Liquid glass ON** — `CurioThemeTransitionState.startTransition`
+  captures the REAL window frame FIRST via `PixelCopy` (`windowFrame()` in
+  `ui/theme/ThemeTransition.kt`, API 26+): it reads the hardware-composited pixels
+  (glass blur included) instead of re-running the Compose draw chain. The old first path
+  (`captureLayer.record { drawContent() }` → `GraphicsLayer.toImageBitmap`) re-invoked the
+  whole app draw every frame, NESTED inside the kyant `layerBackdrop` record pass; over the
+  glass backdrop it read back blank on some devices and the reveal silently skipped to the
+  instant flip (the v269 blank guard). Fallback chain unchanged: PixelCopy → layer → view →
+  instant. (2) **Your-mixes Spin/Spinning pill removed** — `NewMixCard` drops the inline
+  pill; the whole card is the spin target (tap applies the mix); the now-unused `active`
+  param and its call-site expression removed. (3) **Dark-mode tile borders dropped** —
+  `outlineVariant` in the dark scheme is a pale cream (`EDE7DC` @10%) and the 1.5dp rings
+  read as whitish edges on the near-black tiles; `NewPickerTile` (idle/pinned/selected ring)
+  and `AddSuggestionTile` now draw their border in LIGHT mode only (selection still reads
+  via the solid category-tint fill + check — classic tint style untouched).
+- **v3xx9 — capture image thumbs open the Lightbox + dead-picker cleanup.**
+  Audit follow-up ("fix 1 and 2"): (1) **Dead image tap fixed** —
+  `ImageThumb` taps in ReelNotes / Marginalia / FieldNotes (hosted by
+  `SaveCaptureScreen` and `OpenNotebookFormat`'s sub-formats) now navigate
+  to the full-screen LIGHTBOX via a new `onImageTap` hook threaded from
+  `SaveCaptureScreen` (`navController.navigate(CurioRoutes.lightbox(url))`
+  with `launchSingleTop`; photo-picker URIs ride `LightboxTarget`
+  byte-for-byte). The three dead/empty onClick lambdas (one a literal
+  "TODO Phase 4") are gone; null-placeholder slots skip. (2) **Dead code
+  deleted:** the unused legacy `CategoryPickerSheet` (~480 lines) in
+  SpinScreen, the unused `PickerPageTab` in CategoryPickerScreen, and
+  the orphaned `getRecentCategories`/`noteRecentCategory` +
+  `KEY_RECENT_CATEGORIES` in AppPreferences (Continue Exploring uses
+  `CurioPassport.allProgress`, not the recent list — the API had zero
+  callers). NOTE: the historical v26/v196 entries describing the legacy
+  Spin `CategoryPickerSheet` describe REMOVED code — the live picker
+  surfaces are the new picker (default) and the classic toggle
+  (`CategoryPickerContent`).
+- **v3xx8 — page-2 mixes cards redesigned + pinned hints removed.** User:
+  "remove the hold for options hint for pinned … redesign the your mixes
+  cards looks they are bad". (1) The Pinned section label hint ("hold
+  for options") is gone, and the Browse Pins tab row subtitle ("Hold for
+  options · tap to spin") is gone too — holding still opens the option
+  pill, the hint text is just removed. (2) `NewMixCard` is redesigned as
+  a compact "mix stamp" (112dp, was 122dp slabs): a leading 38dp lane
+  plate (first lane's glyph, Tune fallback), name (ExtraBold) + one-line
+  `mixTeaser`, a footer row of up to four 18dp lane-composition dots
+  (tinted per lane via `categoryInk()` at 16% alpha + glyph) with a
+  "+N" overflow chip, and an INLINE Spin pill (no more floating
+  bottom-anchored pill). 3-dot menu (Edit/Delete) unchanged.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**
