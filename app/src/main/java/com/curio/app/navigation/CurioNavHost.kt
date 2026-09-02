@@ -99,6 +99,7 @@ import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
 import com.curio.app.features.settings.BackupToolsScreen
+import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
@@ -880,6 +881,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.SETTINGS_DATA) {
                 BackupToolsScreen(navController = navController)
+            }
+            composable(CurioRoutes.SETTINGS_BOOK_COVER) {
+                BookCoverHubScreen(navController = navController)
             }
             composable(CurioRoutes.SHARE_HUB) {
                 ShareHubScreen(navController = navController)

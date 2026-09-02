@@ -160,7 +160,20 @@ fun UserExperimentsScreen(navController: NavController) {
             item { CurioSectionLabel("Content tools") }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
-                    BookCoverFetchRow()
+                    // v320 — the book-cover fetch is now a HUB of its own
+                    // (provider picker, retry-failed, keyless ratings).
+                    CurioSettingsRow(
+                        CurioIcons.MenuBook,
+                        "Book covers & ratings",
+                        if (AppPreferences.bookCoverFailedState.isNotEmpty())
+                            "Open the hub · ${AppPreferences.bookCoverFailedState.size} failed covers to retry"
+                        else "Open the hub · pick a source · fetch covers & ratings",
+                        onClick = {
+                            navController.navigate(com.curio.app.navigation.CurioRoutes.SETTINGS_BOOK_COVER) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
             }
 

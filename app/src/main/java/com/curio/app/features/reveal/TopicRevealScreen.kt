@@ -2288,6 +2288,34 @@ private fun BookSynopsisCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                // v320 — a keyless-fetched average rating (from the Settings
+                // book hub) rides this header as a compact star chip.
+                val fetchedRating = AppPreferences.bookRatingsState[bookTitle]
+                if (fetchedRating != null && fetchedRating > 0.0) {
+                    if (pageCount != null) Spacer(Modifier.width(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFF6B23B),
+                                size = 12.dp
+                            )
+                            Text(
+                                text = String.format("%.1f", fetchedRating),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
             }
             
             Spacer(Modifier.height(12.dp))
@@ -2416,9 +2444,9 @@ private fun BookChapterChip(
             modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Chapter number
+            // Chapter number — v320: compact "CH 3" (was "Ch. 3")
             Text(
-                text = "Ch. ${chapter.number}",
+                text = "CH ${chapter.number}",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -2595,12 +2623,35 @@ private fun BookNotesSheet(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    // v320 — the fetched keyless rating rides under the
+                    // author in the sheet header.
+                    val fetchedRating = AppPreferences.bookRatingsState[topic.name]
+                    if (fetchedRating != null && fetchedRating > 0.0) {
+                        Spacer(Modifier.height(3.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFF6B23B),
+                                size = 13.dp
+                            )
+                            Text(
+                                text = String.format("%.1f", fetchedRating) +
+                                    " · keyless Google Books rating",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                     if (effectiveTab == BookNotesMode.CHAPTERS && currentChapter != null) {
                         Spacer(Modifier.height(4.dp))
                         val pages = if (currentChapter.pageStart > 0 && currentChapter.pageEnd > 0)
                             " · pp. ${currentChapter.pageStart}–${currentChapter.pageEnd}" else ""
                         Text(
-                            "Ch. ${currentChapter.number}$pages",
+                            "CH ${currentChapter.number}$pages",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = cat.categoryInk()
                         )
@@ -2745,7 +2796,7 @@ private fun BookNotesSheet(
                                         shadowElevation = if (selected) 0.dp else 1.dp
                                     ) {
                                         Text(
-                                            text = "Ch. ${ch.number} · ${ch.title}",
+                                            text = "CH ${ch.number} · ${ch.title}",
                                             style = MaterialTheme.typography.labelLarge,
                                             color = if (selected) cat.onAccent()
                                                     else MaterialTheme.colorScheme.onSurfaceVariant,

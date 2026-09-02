@@ -190,6 +190,12 @@ object AppPreferences {
     private const val KEY_PICKER_PAGE0_MODE = "picker_page0_mode"            // PickerMode.name
     private const val KEY_PICKER_PAGE0_TAB_SCROLL = "picker_page0_tab_scroll_" // suffix = tab name
     private const val KEY_PICKER_PAGE1_SCROLL = "picker_page1_scroll"   // "index:offset" of page 1
+    // v320 — book-cover hub: which provider the bulk fetch uses, the books
+    // whose covers failed (survive restarts so "Retry failed" works), and
+    // the keyless-fetched average ratings (book name → Google Books rating).
+    private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
+    private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
+    private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -778,6 +784,20 @@ object AppPreferences {
         private set
 
     /**
+     * v320 — the book-cover hub's state: the SELECTED provider (a
+     * BookCoverProvider enum name), the list of book names whose covers
+     * failed the last fetch (survives restarts for "Retry failed"), and the
+     * keyless-fetched Google Books average ratings (book name → rating),
+     * which the reveal shows as star chips on book topics.
+     */
+    var bookCoverProviderState by mutableStateOf("OPEN_LIBRARY")
+        private set
+    var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
+        private set
+    var bookRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
+        private set
+
+    /**
      * v3xx — which picker page opens first in the sheet's pager.
      * 0 = classic picker (default), 1 = new picker. Seeded from prefs in
      * [initThemeMode].
@@ -918,6 +938,9 @@ object AppPreferences {
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
+        bookCoverProviderState = getBookCoverProvider(context)
+        bookCoverFailedState = getBookCoverFailed(context)
+        bookRatingsState = getBookRatings(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
@@ -2289,6 +2312,53 @@ object AppPreferences {
     fun setLastMixName(context: Context, name: String?) {
         prefs(context).edit().putString(KEY_LAST_MIX_NAME, name).apply()
         lastMixNameState = name
+    }
+
+    // ── Book-cover hub (v320) ────────────────────────────────────────
+    /** The selected cover provider (a BookCoverProvider enum name). */
+    fun getBookCoverProvider(context: Context): String =
+        prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "OPEN_LIBRARY") ?: "OPEN_LIBRARY"
+
+    fun setBookCoverProvider(context: Context, name: String) {
+        prefs(context).edit().putString(KEY_BOOK_COVER_PROVIDER, name).apply()
+        bookCoverProviderState = name
+    }
+
+    /** The book names whose covers failed the last bulk fetch. */
+    fun getBookCoverFailed(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_BOOK_COVER_FAILED, null) ?: return emptyList()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    fun setBookCoverFailed(context: Context, names: List<String>) {
+        prefs(context).edit().putString(KEY_BOOK_COVER_FAILED, org.json.JSONArray(names).toString()).apply()
+        bookCoverFailedState = names
+    }
+
+    /** The keyless-fetched average ratings: book name → Google Books average. */
+    fun getBookRatings(context: Context): Map<String, Double> {
+        val raw = prefs(context).getString(KEY_BOOK_RATINGS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Double>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optDouble(k, 0.0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    fun setBookRating(context: Context, name: String, rating: Double) {
+        val cur = getBookRatings(context).toMutableMap()
+        cur[name] = rating
+        prefs(context).edit().putString(KEY_BOOK_RATINGS, org.json.JSONObject(cur).toString()).apply()
+        bookRatingsState = cur
     }
 
     /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */

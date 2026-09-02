@@ -1447,6 +1447,29 @@ app/src/main/java/com/curio/app/
   DROPDOWN + `BrowseOptionPill` dialog are replaced with the same pill
   (mix rows hoist a `mixHoldTarget` to the screen for the full-screen
   scrim).
+- **v320 — compact CH chips + book covers & ratings HUB.** (1) **Chapter
+  chips** — the reveal page chip, the book-notes sheet header, and the
+  in-sheet chapter pills all read compact `CH N` (was "Ch. N").
+  (2) **Book covers & ratings hub** — the Experiments "Book covers" row
+  now OPENS a dedicated screen (`CurioRoutes.SETTINGS_BOOK_COVER` →
+  `BookCoverHubScreen`, registered in `CurioNavHost`): a provider picker
+  (`BookCoverFetch.BookCoverProvider` — Open Library title covers or a
+  KEYLESS Google Books title+author lookup), a stats card (books / failed
+  covers / rated), actions for "Fetch all covers", "Retry failed (N)"
+  and "Fetch ratings (keyless)", a live progress bar + Cancel, and a
+  failed-books list with per-row Retry. `BookCoverFetch` is now the
+  engine: `resolveCoverUrl` (topic imageUrl first, then the provider),
+  `fetchAll(context, provider, onlyFailed, onProgress)` persists the
+  failed book names (`KEY_BOOK_COVER_FAILED`/`bookCoverFailedState`, so
+  retries survive restarts), and `fetchRatings(context, onProgress)` hits
+  the keyless Google Books JSON endpoint (averageRating from
+  `volumeInfo`) storing a name→rating map (`KEY_BOOK_RATINGS`/
+  `bookRatingsState`). The provider choice persists
+  (`KEY_BOOK_COVER_PROVIDER`). The old inline `BookCoverFetchRow` is
+  gone (replaced by a `CurioSettingsRow` that navigates to the hub).
+  (3) **Reveal ratings** — the synopsis card header and the book-notes
+  sheet header show a compact ★ rating chip when the hub's keyless
+  Google Books rating exists for that book.
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

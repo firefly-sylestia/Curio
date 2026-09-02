@@ -1,3 +1,4 @@
+ADD: Book covers & ratings hub in Settings — pick a cover source (Open Library or Google Books), fetch every cover into the offline cache, retry only the failed ones, and fetch ratings with no API key; the reveal now shows a ★ rating chip on books. Chapter chips are compact "CH 1 · CH 2…" everywhere.
 FIX: Share card editor — the quick-fact Height and Width sliders now actually resize the box: every tick visibly grows or shrinks it (no more dead-feeling drags or the box hopping around).
 ADD: Topic Browser — the floating arrow scrolls smoothly to the top, and flipping a page jumps back to the top too; the "Also in" pills now SWITCH to that category in one tap instead of stacking another filter.
 FIX: Spin — the Categories pill shows your mix's actual NAME when you apply a saved mix (no more generic "Mixed").

@@ -3,95 +3,127 @@ package com.curio.app.features.settings
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import coil.Coil
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.TopicJsonLoader
-import com.curio.app.ui.theme.CurioIcon
-import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlin.coroutines.resume
 
+private typealias BookTopic = com.curio.app.data.CurioTopic
+
 /**
- * v314 — one-by-one "fetch all book covers" action for Settings.
- *
- * The reveal's book poster already resolves each cover to a URL (the topic's
- * own `imageUrl`, else an Open Library title-cover fallback) and Coil serves
- * it from the shared disk cache installed in `MainActivity`. Tapping the
- * Settings row pre-fetches EVERY unique book cover into that disk cache so
- * posters render instantly (and offline) — one at a time, with a live
- * "12 / 301" counter on the row.
+ * v320 — the book-cover hub engine. The reveal's poster still prefers the
+ * topic's OWN `imageUrl` and falls back to Open Library's title cover; this
+ * object powers the Settings hub: MULTIPLE providers (user-selectable), a
+ * one-by-one bulk fetch that RECORDS WHICH BOOKS FAILED (persisted, so
+ * "Retry failed" survives restarts), and — without any API key — a Google
+ * Books RATINGS fetch (averageRating from the keyless JSON endpoint).
  */
 object BookCoverFetch {
 
-    const val TITLE = "Book covers"
-    const val IDLE_SUBTITLE = "Tap to fetch cover images so books show offline"
+    val TITLE = "Book covers & ratings"
 
-    /** The URL the reveal would show for this book (authored URL, else the
-     *  same Open Library title-cover fallback the reveal uses). */
+    /** Cover providers the hub offers. Open Library = the reveal's own
+     *  title-cover fallback; Google Books = keyless volume search. */
+    enum class BookCoverProvider(val label: String, val description: String) {
+        OPEN_LIBRARY("Open Library", "Title covers · keyless"),
+        GOOGLE_BOOKS("Google Books", "Keyless title+author search")
+    }
+
+    /** The Open Library title-cover fallback the reveal also uses. */
     fun coverUrlFor(bookName: String, imageUrl: String): String =
         imageUrl.takeIf { it.isNotBlank() }
             ?: "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
 
     /**
+     * Resolve ONE book's cover URL with the given provider (the topic's OWN
+     * imageUrl always wins — it's an authored, curated cover). Google Books
+     * needs a look-up; Open Library is the pure title fallback.
+     */
+    suspend fun resolveCoverUrl(
+        context: Context,
+        bookName: String,
+        author: String?,
+        imageUrl: String,
+        provider: BookCoverProvider
+    ): String? = withContext(Dispatchers.IO) {
+        imageUrl.takeIf { it.isNotBlank() }
+            ?: when (provider) {
+                BookCoverProvider.OPEN_LIBRARY ->
+                    "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
+                BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(bookName, author)
+            }
+    }
+
+    /** Keyless Google Books volume search → the first match's cover thumbnail. */
+    private fun googleThumbnail(title: String, author: String?): String? {
+        val q = buildString {
+            append("intitle:${Uri.encode(title)}")
+            if (!author.isNullOrBlank()) append("+inauthor:${Uri.encode(author)}")
+        }
+        val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+            ?: return null
+        return runCatching {
+            val items = org.json.JSONObject(json).optJSONArray("items") ?: return null
+            for (i in 0 until items.length()) {
+                val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                val img = vi.optJSONObject("imageLinks")?.optString("thumbnail") ?: continue
+                return img.replace("http://", "https://")
+            }
+            null
+        }.getOrNull()
+    }
+
+    /**
      * Fetch every unique book cover into the shared Coil disk cache, one by
-     * one. [onProgress] fires after each book with (done, total, failed).
+     * one. [onProgress] fires per book with (done, total, failed). Books
+     * whose cover could NOT be fetched are persisted to the prefs failed
+     * list so the hub can retry just them later. When [onlyFailed] is true,
+     * only the previously-failed books are retried and successes are dropped
+     * from the failed list.
      */
     suspend fun fetchAll(
         context: Context,
+        provider: BookCoverProvider,
+        onlyFailed: Boolean = false,
         onProgress: (done: Int, total: Int, failed: Int) -> Unit
     ) {
         val books = withContext(Dispatchers.Default) {
             runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.getOrNull().orEmpty()
         }
-        val urls = books.map { coverUrlFor(it.name, it.imageUrl) }.distinct()
-        val loader = Coil.imageLoader(context)
-        val total = urls.size
+        val failedBefore = AppPreferences.bookCoverFailedState.toMutableSet()
+        var targets: List<BookTopic> = books
+        if (onlyFailed) {
+            targets = books.filter { it.name in failedBefore }
+            if (targets.isEmpty()) {
+                onProgress(0, 0, 0)
+                AppPreferences.setBookCoverFailed(context, emptyList())
+                return
+            }
+        }
+        val loader = com.coil.Coil.imageLoader(context)
+        val total = targets.size
         var done = 0
         var failed = 0
+        val stillFailed = mutableListOf<String>()
         onProgress(0, total, 0)
-        for (url in urls) {
+        for (book in targets) {
             val started = SystemClock.elapsedRealtime()
-            val ok = runCatching {
+            val url = resolveCoverUrl(context, book.name, book.byline, book.imageUrl, provider)
+            val ok = if (url == null) false else runCatching {
                 suspendCancellableCoroutine<Boolean> { cont ->
-                    val request = ImageRequest.Builder(context)
+                    val request = com.coil.request.ImageRequest.Builder(context)
                         .data(url)
                         // Bulk pass: skip the memory cache (300 decoded covers
                         // would bloat heap) — the disk cache is what we're
-                        // filling, and the reveal re-decodes from it on demand.
-                        .memoryCachePolicy(CachePolicy.DISABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
+                        // filling; the reveal re-decodes from it on demand.
+                        .memoryCachePolicy(com.coil.request.CachePolicy.DISABLED)
+                        .diskCachePolicy(com.coil.request.CachePolicy.ENABLED)
                         .listener(
                             onSuccess = { _, _ -> cont.resume(true) },
                             onError = { _, _ -> cont.resume(false) }
@@ -101,115 +133,78 @@ object BookCoverFetch {
                     cont.invokeOnCancellation { disposable.dispose() }
                 }
             }.getOrDefault(false)
-            if (ok) done++ else failed++
+            if (ok) {
+                done++
+                failedBefore.remove(book.name)
+            } else {
+                failed++
+                stillFailed.add(book.name)
+            }
             onProgress(done, total, failed)
-            // Be polite: at least ~150ms between fetches, so already-cached
-            // covers (instant) don't blast through all 300 URLs in one burst.
             val took = SystemClock.elapsedRealtime() - started
             if (took < 150L) delay(150L - took)
         }
-    }
-}
-
-/** The Settings row (rendered in Experiments) — tap to start the one-by-one
- *  fetch; live counter + progress bar while it runs, and a Cancel pill to
- *  stop it early (whatever was already cached stays cached). */
-@Composable
-fun BookCoverFetchRow() {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var job by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-    var running by remember { mutableStateOf(false) }
-    var stopped by remember { mutableStateOf(false) }
-    var done by remember { mutableIntStateOf(0) }
-    var total by remember { mutableIntStateOf(0) }
-    var failed by remember { mutableIntStateOf(0) }
-
-    val subtitle = when {
-        running -> if (total > 0) "Fetching $done / $total…" else "Fetching covers…"
-        stopped -> if (failed > 0) "Stopped · $done cached · $failed failed"
-            else "Stopped · $done covers cached"
-        done > 0 -> if (failed > 0) "✓ $done covers cached · $failed failed"
-            else "✓ $done covers cached"
-        else -> BookCoverFetch.IDLE_SUBTITLE
+        AppPreferences.setBookCoverFailed(
+            context,
+            if (onlyFailed) stillFailed else failedBefore.toList() + stillFailed
+        )
     }
 
-    Surface(
-        onClick = {
-            if (running) return@Surface
-            stopped = false
-            running = true
-            done = 0
-            total = 0
-            failed = 0
-            job = scope.launch {
-                try {
-                    BookCoverFetch.fetchAll(context) { d, t, f ->
-                        done = d; total = t; failed = f
-                    }
-                } catch (_: kotlinx.coroutines.CancellationException) {
-                    stopped = true
-                } finally {
-                    running = false
-                    job = null
-                }
-            }
-        },
-        color = Color.Transparent,
-        shape = RoundedCornerShape(18.dp),
-        modifier = Modifier.fillMaxWidth()
+    /**
+     * Keyless Google Books RATINGS fetch: for every book, query
+     * "intitle:<name> inauthor:<byline>" and store the first hit's
+     * averageRating. [onProgress] fires per book with (done, total).
+     */
+    suspend fun fetchRatings(
+        context: Context,
+        onProgress: (done: Int, total: Int) -> Unit
     ) {
-        Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 13.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                CurioIcon(
-                    CurioIcons.Image, null,
-                    tint = settingsCardAccentInk(),
-                    size = 21.dp
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(BookCoverFetch.TITLE, style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+        val books = withContext(Dispatchers.Default) {
+            runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.getOrNull().orEmpty()
+        }
+        val total = books.size
+        if (total == 0) { onProgress(0, 0); return }
+        var done = 0
+        onProgress(0, total)
+        for (book in books) {
+            val rating = runCatching {
+                val q = buildString {
+                    append("intitle:${Uri.encode(book.name)}")
+                    if (!book.byline.isNullOrBlank()) append("+inauthor:${Uri.encode(book.byline)}")
                 }
-                if (running) {
-                    // v316b — cancel the in-flight fetch early; whatever was
-                    // already cached stays on disk (tap again to continue).
-                    Surface(
-                        onClick = { job?.cancel() },
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
-                    ) {
-                        Text(
-                            "Cancel",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
-                        )
+                val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+                json?.let {
+                    val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
+                    for (i in 0 until items.length()) {
+                        val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                        if (vi.has("averageRating")) {
+                            val r = vi.optDouble("averageRating", 0.0)
+                            return@runCatching if (r > 0.0) r else null
+                        }
                     }
-                } else if (done > 0) {
-                    Text(
-                        "$done cached",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    null
                 }
-            }
-
-            if (running && total > 0) {
-                Spacer(Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { done.toFloat() / total },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            }.getOrNull()
+            if (rating != null) AppPreferences.setBookRating(context, book.name, rating)
+            done++
+            onProgress(done, total)
+            delay(120L)  // stay inside the keyless quota
         }
     }
+
+    /** Minimal keyless GET — 8s timeout, best-effort. */
+    private fun httpGet(urlString: String): String? = runCatching {
+        val conn = URL(urlString).openConnection() as HttpURLConnection
+        try {
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 8000
+            conn.readTimeout = 8000
+            conn.setRequestProperty("User-Agent", "Curio/1.0")
+            val code = conn.responseCode
+            if (code != 200) return null
+            conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+        } finally {
+            conn.disconnect()
+        }
+    }.getOrNull()
 }

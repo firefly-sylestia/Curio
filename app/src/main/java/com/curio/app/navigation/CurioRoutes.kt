@@ -198,6 +198,7 @@ object CurioRoutes {
     const val SETTINGS_PREFERENCES = "settings/preferences"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
+    const val SETTINGS_BOOK_COVER = "settings/book-cover"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).
