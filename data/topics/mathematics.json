@@ -1,1804 +1,2428 @@
 [
- {
-  "id": "mathematics-pythagorean-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Pythagorean Theorem",
-  "teaser": "a² + b² = c²: the relationship between the sides of a right triangle. Known to Babylonians 1,000 years before Pythagoras, it's the foundation of trigonometry, navigation, and GPS.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "geometry",
-   "triangles"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Proofs of the Pythagorean theorem",
-   "durationMinutes": 8,
-   "instruction": "Learn at least two proofs (algebraic and geometric), then find one real-world application beyond textbook triangles."
+  {
+    "id": "mathematics-pythagorean-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Pythagorean Theorem",
+    "teaser": "a² + b² = c²: the relationship between the sides of a right triangle. Known to Babylonians 1,000 years before Pythagoras, it's the foundation of trigonometry, navigation, and GPS.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "geometry",
+      "triangles"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Proofs of the Pythagorean theorem",
+      "durationMinutes": 8,
+      "instruction": "Learn at least two proofs (algebraic and geometric), then find one real-world application beyond textbook triangles."
+    }
+  },
+  {
+    "id": "mathematics-pi",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "Pi (π)",
+    "teaser": "The ratio of a circle's circumference to its diameter: 3.14159265358979... Pi is irrational, transcendental, and appears everywhere — from geometry to probability to quantum physics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "constants",
+      "geometry"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why pi appears everywhere",
+      "durationMinutes": 7,
+      "instruction": "Learn about pi's appearance in geometry, probability (Buffon's needle), and Euler's identity, then calculate pi using the Monte Carlo method."
+    }
+  },
+  {
+    "id": "mathematics-euler-identity",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Euler's Identity",
+    "teaser": "e^(iπ) + 1 = 0: five fundamental constants (e, i, π, 1, 0) united in one equation. Called the 'most beautiful equation in mathematics' — it connects algebra, geometry, and analysis in a single stroke.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "analysis",
+      "beauty"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why Euler's identity is beautiful",
+      "durationMinutes": 8,
+      "instruction": "Learn how Euler's formula (e^(ix) = cos x + i sin x) leads to the identity, then explain why mathematicians call it the most elegant equation ever written."
+    }
+  },
+  {
+    "id": "mathematics-zero",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "The Invention of Zero",
+    "teaser": "Zero isn't nothing — it's a number that revolutionized mathematics. Invented in India by Brahmagupta (628 AD), it enabled positional notation, calculus, and modern computing. The West resisted it for centuries.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "history",
+      "India"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How zero was invented and why it mattered",
+      "durationMinutes": 8,
+      "instruction": "Learn about Brahmagupta's rules for zero, then explain why the Roman numeral system couldn't represent zero."
+    }
+  },
+  {
+    "id": "mathematics-infinity",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Infinity",
+    "teaser": "Georg Cantor proved that some infinities are bigger than others: the infinity of real numbers is larger than the infinity of natural numbers. Infinity isn't a number — it's a concept that broke mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "set-theory",
+      "philosophy"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cantor's different sizes of infinity",
+      "durationMinutes": 10,
+      "instruction": "Learn about countable vs uncountable infinity and the diagonal argument, then explain why there are more real numbers than natural numbers."
+    }
+  },
+  {
+    "id": "mathematics-prime-numbers",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "Prime Numbers",
+    "teaser": "Numbers divisible only by 1 and themselves: 2, 3, 5, 7, 11... Primes are the atoms of arithmetic — every number is a unique product of primes. Finding them gets harder as numbers grow.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "primes"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The importance of prime numbers",
+      "durationMinutes": 8,
+      "instruction": "Learn about the fundamental theorem of arithmetic, then explain why primes are essential for RSA encryption."
+    }
+  },
+  {
+    "id": "mathematics-fibonacci",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "The Fibonacci Sequence",
+    "teaser": "0, 1, 1, 2, 3, 5, 8, 13... each number is the sum of the previous two. Fibonacci appears in sunflower spirals, rabbit populations, and the golden ratio — nature's favorite pattern.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "sequences",
+      "nature"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Where Fibonacci appears in nature",
+      "durationMinutes": 7,
+      "instruction": "Find Fibonacci numbers in pinecone spirals, sunflower heads, and nautilus shells, then explain the connection to the golden ratio."
+    }
+  },
+  {
+    "id": "mathematics-golden-ratio",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "The Golden Ratio (φ)",
+    "teaser": "φ = 1.6180339887...: the ratio that appears in pentagons, the Parthenon, and nautilus shells. Two quantities are in the golden ratio if their ratio equals the ratio of their sum to the larger quantity.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "geometry",
+      "nature"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The golden ratio in mathematics and nature",
+      "durationMinutes": 8,
+      "instruction": "Learn about φ's connection to the Fibonacci sequence and pentagon geometry, then find one example of the golden ratio in art or architecture."
+    }
+  },
+  {
+    "id": "mathematics-calculus",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Calculus",
+    "teaser": "The mathematics of change: derivatives measure how fast things change; integrals measure accumulated change. Newton and Leibniz independently invented it — and fought bitterly over who did it first.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "calculus",
+      "analysis"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The fundamental theorem of calculus",
+      "durationMinutes": 10,
+      "instruction": "Learn how differentiation and integration are inverse operations, then find one real-world application of calculus (physics, economics, or biology)."
+    }
+  },
+  {
+    "id": "mathematics-probability",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Probability Theory",
+    "teaser": "Mathematics of uncertainty: from coin flips to quantum mechanics, probability quantifies what we don't know. Bayes' theorem, expected value, and the law of large numbers govern chance.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "probability",
+      "statistics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bayes' theorem and its applications",
+      "durationMinutes": 8,
+      "instruction": "Learn Bayes' theorem, then apply it to the classic medical testing problem (99% accurate test, 1% prevalence — what's the probability you actually have the disease?)."
+    }
+  },
+  {
+    "id": "mathematics-fundamental-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Fundamental Theorem of Arithmetic",
+    "teaser": "Every integer greater than 1 is either prime or a unique product of primes. 12 = 2² × 3, and no other combination of primes gives 12. Uniqueness is the key — it's what makes primes atoms.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "primes"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why unique factorization matters",
+      "durationMinutes": 7,
+      "instruction": "Learn the fundamental theorem of arithmetic, then explain why unique factorization fails in some number systems (like Z[√-5])."
+    }
+  },
+  {
+    "id": "mathematics-euler-characteristic",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Euler's Polyhedron Formula",
+    "teaser": "V - E + F = 2: vertices minus edges plus faces equals 2 for any convex polyhedron. This simple formula connects geometry to topology and was the gateway to a new branch of mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "topology",
+      "geometry"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Euler's formula for polyhedra",
+      "durationMinutes": 7,
+      "instruction": "Verify V - E + F = 2 for a cube, tetrahedron, and dodecahedron, then explain why it led to the Euler characteristic in topology."
+    }
+  },
+  {
+    "id": "mathematics-godel-incompleteness",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Gödel's Incompleteness Theorems",
+    "teaser": "In any consistent formal system powerful enough to describe arithmetic, there are true statements that cannot be proved. Mathematics is fundamentally incomplete — and Hilbert's dream of proving everything is dead.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "logic",
+      "philosophy"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "What Gödel's theorems mean",
+      "durationMinutes": 10,
+      "instruction": "Learn the two incompleteness theorems in plain language, then explain why they shattered Hilbert's program for a complete foundation of mathematics."
+    }
+  },
+  {
+    "id": "mathematics-four-color-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Four Color Theorem",
+    "teaser": "Any map can be colored with just four colors so that no adjacent regions share a color. It took 100 years to prove — and the proof required a computer, sparking a debate about what counts as mathematical proof.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "graph-theory",
+      "proof"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The controversial computer proof",
+      "durationMinutes": 8,
+      "instruction": "Learn about Appel and Haken's 1976 computer-assisted proof, then debate whether a proof that requires a computer is really a proof."
+    }
+  },
+  {
+    "id": "mathematics-pigeonhole-principle",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Pigeonhole Principle",
+    "teaser": "If you put 10 pigeons in 9 holes, at least one hole has 2 pigeons. This 'obvious' principle proves surprisingly deep results: two people in London have the same number of hairs on their head.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "combinatorics",
+      "proof"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Surprising applications of the pigeonhole principle",
+      "durationMinutes": 7,
+      "instruction": "Learn the principle, then find three surprising applications (same birthday in a room, same number of hairs, matching socks)."
+    }
+  },
+  {
+    "id": "mathematics-chaos-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Chaos Theory",
+    "teaser": "Lorenz's butterfly effect: tiny changes in initial conditions produce wildly different outcomes. Chaos theory shows that deterministic systems can be unpredictable — weather, heart rhythms, stock markets.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "dynamics",
+      "complexity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The butterfly effect and strange attractors",
+      "durationMinutes": 8,
+      "instruction": "Learn about Lorenz's weather model and sensitive dependence on initial conditions, then explain why long-term weather prediction is fundamentally limited."
+    }
+  },
+  {
+    "id": "mathematics-topology",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Topology",
+    "teaser": "The mathematics of rubber-sheet geometry: a coffee mug and a donut are the same shape (both have one hole). Topology studies properties that survive continuous deformation — stretching, bending, not tearing.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "topology",
+      "geometry"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "What makes topology different from geometry",
+      "durationMinutes": 7,
+      "instruction": "Learn about topological invariants (Euler characteristic, genus), then explain why a donut and a coffee mug are topologically equivalent."
+    }
+  },
+  {
+    "id": "mathematics-graph-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Graph Theory",
+    "teaser": "Nodes and edges: graph theory models networks, from social connections to airline routes. The bridges of Königsberg problem launched the field — and today it powers Google's search and Facebook's friend recommendations.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "networks",
+      "discrete"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The bridges of Königsberg problem",
+      "durationMinutes": 7,
+      "instruction": "Learn about Euler's 1736 solution to the Königsberg bridge problem, then find one modern application of graph theory."
+    }
+  },
+  {
+    "id": "mathematics-group-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Group Theory",
+    "teaser": "The mathematics of symmetry: groups capture the essence of rotations, reflections, and permutations. From crystal structures to particle physics, group theory reveals the hidden symmetries of the universe.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "algebra",
+      "symmetry"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How groups capture symmetry",
+      "durationMinutes": 8,
+      "instruction": "Learn the four group axioms (closure, associativity, identity, inverse), then find one example of group theory in physics or chemistry."
+    }
+  },
+  {
+    "id": "mathematics-fractal-geometry",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Fractals",
+    "teaser": "Infinite complexity from simple rules: the Mandelbrot set, Koch snowflake, and Sierpinski triangle repeat their pattern at every scale. Fractals model coastlines, blood vessels, and stock market fluctuations.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "fractals",
+      "complexity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How fractals are generated",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Mandelbrot set (z → z² + c), then find one natural fractal (fern, coastline, cloud) and explain why it looks similar at every scale."
+    }
+  },
+  {
+    "id": "mathematics-np-complete",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "P vs NP Problem",
+    "teaser": "The million-dollar question: if you can verify a solution quickly, can you also find it quickly? P = NP would revolutionize cryptography, optimization, and artificial intelligence. Most mathematicians believe P ≠ NP.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "complexity",
+      "computing"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "What P vs NP means in plain language",
+      "durationMinutes": 10,
+      "instruction": "Learn the difference between P (easy to solve) and NP (easy to verify), then explain why P = NP would break modern encryption."
+    }
+  },
+  {
+    "id": "mathematics-riemann-hypothesis",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Riemann Hypothesis",
+    "teaser": "The most famous unsolved problem in mathematics: all non-trivial zeros of the Riemann zeta function have real part 1/2. If true, it would reveal deep truths about the distribution of prime numbers.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "unsolved"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Riemann zeta function and prime distribution",
+      "durationMinutes": 10,
+      "instruction": "Learn what the Riemann zeta function is and why its zeros matter for prime numbers, then explain why a $1 million prize awaits its proof."
+    }
+  },
+  {
+    "id": "mathematics-collatz-conjecture",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Collatz Conjecture",
+    "teaser": "Pick any number: if even, divide by 2; if odd, multiply by 3 and add 1. Repeat. Every number tested eventually reaches 1 — but nobody can prove it always does. Simple to state, impossible to prove.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "unsolved",
+      "sequences"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Try the Collatz conjecture yourself",
+      "durationMinutes": 5,
+      "instruction": "Trace the Collatz sequence starting from 27 (it takes 111 steps to reach 1), then explain why this 'simple' problem has resisted proof for 80 years."
+    }
+  },
+  {
+    "id": "mathematics-prime-number-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Prime Number Theorem",
+    "teaser": "Primes thin out logarithmically: the probability that a random number near n is prime is about 1/ln(n). This elegant law governs the distribution of primes — and underpins modern cryptography.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "primes"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How primes are distributed",
+      "durationMinutes": 8,
+      "instruction": "Learn the prime number theorem, then use it to estimate how many primes exist below 1,000,000."
+    }
+  },
+  {
+    "id": "mathematics-bayes-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Bayes' Theorem",
+    "teaser": "P(A|B) = P(B|A) × P(A) / P(B): updating beliefs with evidence. Bayes' theorem is the mathematical engine behind spam filters, medical diagnosis, and the scientific method itself.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "probability",
+      "statistics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Applying Bayes' theorem",
+      "durationMinutes": 8,
+      "instruction": "Solve the classic problem: a disease affects 1 in 1000 people; a test is 99% accurate. If you test positive, what's the actual probability you have the disease?"
+    }
+  },
+  {
+    "id": "mathematics-complexity-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Computational Complexity",
+    "teaser": "Not all problems are equally hard: sorting a list is O(n log n); factoring large numbers is (probably) exponential. Complexity theory classifies problems by the resources needed to solve them.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "computing",
+      "algorithms"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Big O notation and problem difficulty",
+      "durationMinutes": 8,
+      "instruction": "Learn about O(1), O(log n), O(n), O(n²), and O(2ⁿ), then classify the time complexity of three everyday algorithms."
+    }
+  },
+  {
+    "id": "mathematics-euler-product",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Euler Product Formula",
+    "teaser": "The zeta function equals an infinite product over all primes: ζ(s) = Π(1 - p^(-s))^(-1). This formula connects the continuous world of analysis with the discrete world of primes — the bridge that Riemann built on.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "analysis"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Euler connected primes to infinite series",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Basel problem (Σ1/n² = π²/6) and Euler's product formula, then explain why connecting primes to analysis was revolutionary."
+    }
+  },
+  {
+    "id": "mathematics-algebraic-geometry",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Algebraic Geometry",
+    "teaser": "Solving polynomial equations with geometric tools: from conic sections to the proof of Fermat's Last Theorem. Algebraic geometry is one of the deepest and most active areas of modern mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "geometry",
+      "algebra"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How algebra and geometry merge",
+      "durationMinutes": 8,
+      "instruction": "Learn about algebraic curves (circle: x² + y² = r²) and how they connect to number theory, then find one application of algebraic geometry in physics."
+    }
+  },
+  {
+    "id": "mathematics-fourier-transform",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Fourier Transform",
+    "teaser": "Any signal can be decomposed into sine waves: Fourier's insight underlies music compression, image processing, medical imaging, and quantum mechanics. It's the most widely used transform in engineering.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "analysis",
+      "signal-processing"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How the Fourier transform decomposes signals",
+      "durationMinutes": 8,
+      "instruction": "Learn about frequency decomposition and the FFT algorithm, then find one everyday technology that depends on the Fourier transform."
+    }
+  },
+  {
+    "id": "mathematics-euclidean-geometry",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Euclidean Geometry",
+    "teaser": "Points, lines, angles, circles: Euclid's axioms formed the model of mathematical reasoning for 2,000 years. His five postulates seemed self-evident — until the fifth one spawned non-Euclidean geometry.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "geometry",
+      "axioms"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Euclid's five postulates",
+      "durationMinutes": 7,
+      "instruction": "Learn the five postulates, then explain why the fifth (parallel postulate) led to the discovery of hyperbolic and elliptic geometry."
+    }
+  },
+  {
+    "id": "mathematics-number-systems",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "The Number System",
+    "teaser": "Natural numbers → integers → rationals → reals → complex numbers: each extension solved problems the previous system couldn't. Imaginary numbers were called 'impossible' — now they're essential for electrical engineering.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "numbers",
+      "foundations"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How the number system evolved",
+      "durationMinutes": 8,
+      "instruction": "Trace the expansion from natural numbers to complex numbers, then explain why each extension was resisted and what problem it solved."
+    }
+  },
+  {
+    "id": "mathematics-imaginary-numbers",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "Imaginary Numbers",
+    "teaser": "i² = -1: a number whose square is negative. Cardano called them 'as subtle as they are useless'; now they're essential for quantum mechanics, signal processing, and every electrical engineer's toolkit.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "complex-numbers",
+      "algebra"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why imaginary numbers aren't imaginary",
+      "durationMinutes": 7,
+      "instruction": "Learn about the complex plane and how imaginary numbers represent rotation, then find one application of complex numbers in physics or engineering."
+    }
+  },
+  {
+    "id": "mathematics-statistics",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Statistics",
+    "teaser": "The science of data: mean, median, standard deviation, regression, hypothesis testing. Statistics turns raw numbers into knowledge — and when misused, into misinformation.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "statistics",
+      "data"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How statistics can mislead",
+      "durationMinutes": 7,
+      "instruction": "Learn about Simpson's paradox, p-hacking, and the misuse of correlation, then find one example of statistics being used to deceive."
+    }
+  },
+  {
+    "id": "mathematics-fermat-last-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Fermat's Last Theorem",
+    "teaser": "x^n + y^n = z^n has no solutions for n > 2. Fermat claimed he had a proof in 1637; Andrew Wiles proved it in 1995 after 358 years. The longest-standing major theorem in mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "history"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The 358-year journey to prove Fermat",
+      "durationMinutes": 10,
+      "instruction": "Learn about Wiles's proof using elliptic curves and modular forms, then explain why Fermat's margin note (too narrow to contain his proof) was probably wrong."
+    }
+  },
+  {
+    "id": "mathematics-trigonometry",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Trigonometry",
+    "teaser": "The mathematics of triangles and angles: sine, cosine, tangent. From ancient astronomy to modern GPS, trigonometry bridges geometry and algebra — and it's the language of waves, sound, and light.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "trigonometry",
+      "geometry"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The unit circle and trig functions",
+      "durationMinutes": 7,
+      "instruction": "Learn sine, cosine, and tangent from the unit circle, then find one real-world application of trigonometry beyond triangles."
+    }
+  },
+  {
+    "id": "mathematics-logarithm",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Logarithms",
+    "teaser": "The inverse of exponentiation: log₁₀(1000) = 3. Logarithms compress enormous ranges into manageable numbers — which is why we measure earthquakes (Richter), sound (decibels), and acidity (pH) on log scales.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "exponents",
+      "scales"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why logarithmic scales exist",
+      "durationMinutes": 7,
+      "instruction": "Learn about the Richter scale, decibels, and pH scale, then explain why logarithmic scales are used for quantities that span many orders of magnitude."
+    }
+  },
+  {
+    "id": "mathematics-linear-algebra",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Linear Algebra",
+    "teaser": "Vectors, matrices, and transformations: linear algebra is the mathematics of data. Google's PageRank, machine learning, computer graphics, and quantum mechanics all run on matrix operations.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "algebra",
+      "data"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why linear algebra is everywhere",
+      "durationMinutes": 8,
+      "instruction": "Learn about eigenvectors and eigenvalues, then find one application of linear algebra in machine learning or computer graphics."
+    }
+  },
+  {
+    "id": "mathematics-combinatorics",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Combinatorics",
+    "teaser": "Counting, arranging, and selecting: from lottery odds to password strength to scheduling problems. Combinatorics answers 'how many ways?' — and the answers are often surprisingly large.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "counting",
+      "discrete"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Permutations, combinations, and the birthday problem",
+      "durationMinutes": 7,
+      "instruction": "Learn the difference between permutations and combinations, then solve the birthday problem (how many people for a 50% chance of a shared birthday?)."
+    }
+  },
+  {
+    "id": "mathematics-paradox",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "Mathematical Paradoxes",
+    "teaser": "Zeno's paradox (motion is impossible), the Monty Hall problem (switch doors), the Banach-Tarski paradox (split a sphere into two identical spheres): paradoxes reveal gaps in our intuition and foundations.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "logic",
+      "paradox"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Three famous mathematical paradoxes",
+      "durationMinutes": 8,
+      "instruction": "Learn the Monty Hall problem, Zeno's paradox of Achilles and the tortoise, and the Banach-Tarski paradox, then explain why each one feels wrong."
+    }
+  },
+  {
+    "id": "mathematics-monty-hall",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Monty Hall Problem",
+    "teaser": "Three doors: one has a car, two have goats. You pick a door; the host opens a goat door. Should you switch? Yes — switching gives you a 2/3 chance. Most people refuse to believe it.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "probability",
+      "puzzles"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why switching wins",
+      "durationMinutes": 6,
+      "instruction": "Solve the Monty Hall problem three ways (intuition, conditional probability, simulation), then explain why even mathematicians initially got it wrong."
+    }
+  },
+  {
+    "id": "mathematics-dimensional-analysis",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Dimensional Analysis",
+    "teaser": "Checking equations by units: if the units don't match, the equation is wrong. Dimensional analysis is a physicist's most powerful sanity check — and it can solve problems without understanding the physics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "physics",
+      "method"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Using dimensional analysis to check equations",
+      "durationMinutes": 6,
+      "instruction": "Learn how to check an equation by dimensional analysis, then use it to derive the period of a pendulum without solving any differential equation."
+    }
+  },
+  {
+    "id": "mathematics-mathematical-induction",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Mathematical Induction",
+    "teaser": "If it works for 1, and if n→n+1 works whenever n works, it works for all natural numbers. Induction is the domino principle of mathematics — the proof technique behind countless theorems.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "proof",
+      "logic"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How induction proofs work",
+      "durationMinutes": 7,
+      "instruction": "Learn the structure of an induction proof (base case + inductive step), then prove that 1 + 2 + ... + n = n(n+1)/2."
+    }
+  },
+  {
+    "id": "mathematics-complexity-nature",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Mathematics of Nature",
+    "teaser": "Fibonacci spirals, fractal coastlines, branching trees: nature is full of mathematical patterns. The question is whether nature 'does math' or whether math is just a good description of nature.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "nature",
+      "patterns"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Mathematical patterns in nature",
+      "durationMinutes": 7,
+      "instruction": "Find five mathematical patterns in nature (spirals, branching, tessellation, fractals, symmetry), then explain whether nature 'knows' math."
+    }
+  },
+  {
+    "id": "mathematics-cryptography",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Mathematics of Cryptography",
+    "teaser": "RSA encryption protects your bank account using prime number factorization: multiplying two large primes is easy; factoring the product back is (practically) impossible. Math keeps secrets.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "cryptography",
+      "security"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How RSA encryption works",
+      "durationMinutes": 10,
+      "instruction": "Learn the RSA algorithm (key generation, encryption, decryption), then explain why quantum computing threatens current encryption."
+    }
+  },
+  {
+    "id": "mathematics-measure-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Measure Theory",
+    "teaser": "How do you define 'length' for a set of numbers that's all rational? Measure theory makes probability rigorous — and reveals that the real line has stranger structure than you'd think.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "analysis",
+      "foundations"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why measure theory matters for probability",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Lebesgue integral and why it's better than the Riemann integral, then explain why measure theory is the foundation of modern probability."
+    }
+  },
+  {
+    "id": "mathematics-fibonacci-in-nature",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "The Fibonacci Spiral",
+    "teaser": "Spirals in sunflowers, pinecones, and hurricanes follow the Fibonacci sequence: each quarter turn is approximately the golden ratio. Nature packs things efficiently using this spiral — and it looks beautiful doing it.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "Fibonacci",
+      "nature"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why nature uses Fibonacci spirals",
+      "durationMinutes": 7,
+      "instruction": "Learn about phyllotaxis (leaf arrangement), then find three examples of Fibonacci spirals in the natural world."
+    }
+  },
+  {
+    "id": "mathematics-fundamental-theorem-calculus",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Fundamental Theorem of Calculus",
+    "teaser": "Differentiation and integration are inverse operations. This single insight unified two branches of mathematics and enabled everything from physics to financial modeling.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "calculus",
+      "analysis"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How differentiation and integration connect",
+      "durationMinutes": 8,
+      "instruction": "Learn both parts of the fundamental theorem, then find one application where integrating a rate gives you a total."
+    }
+  },
+  {
+    "id": "mathematics-set-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Set Theory",
+    "teaser": "The foundation of all modern mathematics: sets, unions, intersections, and cardinality. Cantor's set theory revealed different sizes of infinity — and produced paradoxes that shook mathematics to its core.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "logic",
+      "foundations"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The basics of set theory",
+      "durationMinutes": 7,
+      "instruction": "Learn about sets, subsets, power sets, and cardinality, then explain why the set of all sets leads to Russell's paradox."
+    }
+  },
+  {
+    "id": "mathematics-russell-paradox",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "Russell's Paradox",
+    "teaser": "Does the set of all sets that don't contain themselves contain itself? This question demolished naive set theory and forced mathematicians to rebuild the foundations of mathematics from scratch.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "logic",
+      "paradox"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The barber paradox and its implications",
+      "durationMinutes": 7,
+      "instruction": "Learn the barber paradox version of Russell's paradox, then explain how ZFC set theory resolved the contradiction."
+    }
+  },
+  {
+    "id": "mathematics-manifold",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Manifolds",
+    "teaser": "Surfaces that look flat up close: the Earth is a sphere, but locally it feels like a plane. Manifolds generalize this idea to any dimension — and they're the language of general relativity.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "geometry",
+      "physics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "What a manifold is and why it matters",
+      "durationMinutes": 8,
+      "instruction": "Learn how manifolds generalize curves and surfaces to higher dimensions, then explain why Einstein needed manifolds for general relativity."
+    }
+  },
+  {
+    "id": "mathematics-cantor-diagonal",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Cantor's Diagonal Argument",
+    "teaser": "A proof that the real numbers are uncountable: list all real numbers between 0 and 1, then construct a new number that differs from each listed number in at least one digit. The list can never be complete.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "set-theory",
+      "infinity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The diagonal argument step by step",
+      "durationMinutes": 8,
+      "instruction": "Work through Cantor's diagonal argument, then explain why it proves the reals are 'more infinite' than the naturals."
+    }
+  },
+  {
+    "id": "mathematics-binary",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "Binary Numbers",
+    "teaser": "0 and 1: the language of computers. Binary arithmetic is how every computer stores data, processes instructions, and runs software. Leibniz invented it in 1703 — 250 years before the first computer.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "computing",
+      "numbers"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How binary works",
+      "durationMinutes": 6,
+      "instruction": "Learn how to count in binary and convert between binary and decimal, then explain why computers use binary instead of decimal."
+    }
+  },
+  {
+    "id": "mathematics-continued-fractions",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Continued Fractions",
+    "teaser": "Any real number can be written as a nested fraction: the golden ratio's continued fraction is [1; 1, 1, 1, ...] — the 'most irrational' number. Continued fractions reveal the hidden structure of numbers.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "approximation"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How continued fractions approximate numbers",
+      "durationMinutes": 7,
+      "instruction": "Compute the continued fraction for √2, then explain why continued fractions give the best rational approximations to irrational numbers."
+    }
+  },
+  {
+    "id": "mathematics-math-anxiety",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Math Anxiety",
+    "teaser": "The fear of math is real and measurable: math anxiety activates the same brain regions as physical pain. It's not about intelligence — it's about negative experiences, stereotype threat, and teaching methods.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "education",
+      "psychology"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why math anxiety happens and how to overcome it",
+      "durationMinutes": 7,
+      "instruction": "Learn about the neuroscience of math anxiety, then find one evidence-based strategy for reducing it."
+    }
+  },
+  {
+    "id": "mathematics-infinity-hotel",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Hilbert's Hotel",
+    "teaser": "A hotel with infinitely many rooms can always accommodate more guests — even infinitely many. Hilbert's Hotel is a thought experiment that shows how infinity defies everyday intuition.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "infinity",
+      "paradox"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Hilbert's Hotel works",
+      "durationMinutes": 6,
+      "instruction": "Solve three Hilbert's Hotel puzzles (one new guest, infinitely many new guests, infinitely many buses of infinitely many guests), then explain why infinite sets behave differently from finite ones."
+    }
+  },
+  {
+    "id": "mathematics-mandelbrot-set",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "The Mandelbrot Set",
+    "teaser": "The most famous fractal: a set of complex numbers that stays bounded under iteration z → z² + c. Its boundary is infinitely complex — zoom in and you find new patterns forever.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "fractals",
+      "complexity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How the Mandelbrot set is generated",
+      "durationMinutes": 8,
+      "instruction": "Learn the iteration rule and how coloring works, then find an online Mandelbrot explorer and zoom into the boundary."
+    }
+  },
+  {
+    "id": "mathematics-golden-angle",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "The Golden Angle",
+    "teaser": "137.5°: the angle that divides a circle in the golden ratio. Plants use it to arrange leaves and seeds for maximum sunlight exposure — it's nature's most efficient packing angle.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "nature",
+      "geometry"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why plants use the golden angle",
+      "durationMinutes": 6,
+      "instruction": "Learn about phyllotaxis and how the golden angle minimizes overlap, then find three plants that demonstrate this pattern."
+    }
+  },
+  {
+    "id": "mathematics-zero-sum",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Zero-Sum Games",
+    "teaser": "One person's gain is another's loss: chess, poker, and most board games are zero-sum. But most real-world situations are positive-sum — trade, cooperation, and learning create value for everyone.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "game-theory",
+      "strategy"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why zero-sum thinking is wrong most of the time",
+      "durationMinutes": 6,
+      "instruction": "Learn about Nash equilibrium in zero-sum games, then find one situation where people mistakenly apply zero-sum thinking to a positive-sum situation."
+    }
+  },
+  {
+    "id": "mathematics-fibonacci-recursion",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Recursion",
+    "teaser": "A function that calls itself: Fibonacci is recursive (F(n) = F(n-1) + F(n-2)). Recursion powers algorithms, fractals, and data structures — but poorly implemented recursion can crash your stack.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "algorithms",
+      "computing"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How recursion works",
+      "durationMinutes": 7,
+      "instruction": "Implement Fibonacci recursively, then explain why memoization (caching results) makes it efficient."
+    }
+  },
+  {
+    "id": "mathematics-mersenne-primes",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "Mersenne Primes",
+    "teaser": "Primes of the form 2^p - 1: 3, 7, 31, 127... The largest known prime is always a Mersenne prime — discovered by the GIMPS distributed computing project. The current record has 41 million digits.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "primes",
+      "computing"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The hunt for large prime numbers",
+      "durationMinutes": 7,
+      "instruction": "Learn about the Lucas-Lehmer test for Mersenne primes, then check how many digits the largest known prime has."
+    }
+  },
+  {
+    "id": "mathematics-twin-prime",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Twin Prime Conjecture",
+    "teaser": "Are there infinitely many pairs of primes that differ by 2 (11 and 13, 41 and 43)? Nobody knows. Yitang Zhang proved there are infinitely many prime pairs within 246 of each other — progress, but not the full answer.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "primes",
+      "unsolved"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The status of twin prime research",
+      "durationMinutes": 7,
+      "instruction": "Learn about Zhang's 2013 breakthrough and the Polymath project's improvements, then explain why the full conjecture remains open."
+    }
+  },
+  {
+    "id": "mathematics-wallis-product",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Wallis Product",
+    "teaser": "π/2 = (2/1)(2/3)(4/3)(4/5)(6/5)(6/7)...: an infinite product for pi discovered by Wallis in 1655. It connects pi to the integers in a surprisingly elegant way — and led to Stirling's approximation.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "pi",
+      "analysis"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How Wallis discovered his product for pi",
+      "durationMinutes": 8,
+      "instruction": "Learn about Wallis's derivation using integrals, then compute the first 10 terms of the product to see it converge to π/2."
+    }
+  },
+  {
+    "id": "mathematics-eulers-number",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Euler's Number (e)",
+    "teaser": "e = 2.71828... — the base of natural logarithms, appearing wherever growth or compound interest is involved. If you compound 100% interest infinitely often, you get e. Euler called it the most beautiful number.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "calculus",
+      "constants"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The significance of e",
+      "durationMinutes": 7,
+      "instruction": "Learn about compound interest approaching e, then find one natural phenomenon described by exponential growth using e."
+    }
+  },
+  {
+    "id": "mathematics-basel-problem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Basel Problem",
+    "teaser": "Euler solved it in 1734: the sum of all reciprocals of perfect squares (1/1 + 1/4 + 1/9 + ...) equals exactly pi squared divided by six. No one had cracked it for 90 years — it announced Euler as a mathematical genius.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "series",
+      "pi"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Euler's Basel solution",
+      "durationMinutes": 8,
+      "instruction": "Learn about Euler's proof using sine function factorisation, then compute the first 10 terms to see convergence toward pi^2/6."
+    }
+  },
+  {
+    "id": "mathematics-ramanujan",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Srinivasa Ramanujan",
+    "teaser": "A self-taught Indian mathematician who sent 120 theorems to Cambridge without proof — Hardy recognised genius. Ramanujan produced 3,900 results in his short life, many still unproven, including infinite series for pi that power modern computing.",
+    "imageUrl": "",
+    "byline": "Srinivasa Ramanujan",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "history",
+      "genius"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Ramanujan's mathematical legacy",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Hardy-Ramanujan number 1729, then find one Ramanujan result used in modern physics or computing."
+    }
+  },
+  {
+    "id": "mathematics-fermat-little",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "Fermat's Little Theorem",
+    "teaser": "If p is prime, then a^p minus a is divisible by p for any integer a — a simple statement that's the backbone of RSA encryption. Every time you bank online, Fermat's 300-year-old theorem is protecting your data.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "primes",
+      "cryptography"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fermat's Little Theorem",
+      "durationMinutes": 7,
+      "instruction": "Learn about Fermat's Little Theorem with a worked example, then find one way it's used in RSA encryption."
+    }
+  },
+  {
+    "id": "mathematics-chinese-remainder",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Chinese Remainder Theorem",
+    "teaser": "A 3rd-century problem about counting soldiers: if a number leaves specific remainders when divided by several values, you can find it exactly. It's now fundamental in error-correcting codes and RSA cryptography.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "cryptography"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Chinese Remainder Theorem",
+      "durationMinutes": 7,
+      "instruction": "Learn about Sun Zi's original soldier-counting problem, then find one modern application in computer science."
+    }
+  },
+  {
+    "id": "mathematics-non-euclidean",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Non-Euclidean Geometry",
+    "teaser": "Euclid's parallel postulate — that exactly one line can be drawn parallel to another through a point — can be replaced: in hyperbolic geometry there are infinite parallels; in spherical geometry none. Einstein showed spacetime is non-Euclidean.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "geometry",
+      "space"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "What happens without Euclid's parallel postulate",
+      "durationMinutes": 8,
+      "instruction": "Learn the difference between hyperbolic, spherical, and Euclidean geometry, then find one example of each in the real world."
+    }
+  },
+  {
+    "id": "mathematics-banach-tarski",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Banach-Tarski Paradox",
+    "teaser": "A solid sphere can be decomposed into five pieces and reassembled into two identical spheres — same size as the original. It sounds impossible but it's mathematically valid: the 'pieces' are infinitely scattered point sets that can't have a defined volume.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "paradox",
+      "set-theory"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Banach-Tarski Paradox",
+      "durationMinutes": 7,
+      "instruction": "Learn about the role of the Axiom of Choice in the paradox, then explain why the pieces can't be measured."
+    }
+  },
+  {
+    "id": "mathematics-axiom-of-choice",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "The Axiom of Choice",
+    "teaser": "The most controversial axiom in mathematics — it says you can always pick one element from each set in an infinite collection, even when you can't define a rule for choosing. It enables Banach-Tarski and well-ordering, but some mathematicians refuse to use it.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "set-theory",
+      "logic"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Axiom of Choice debate",
+      "durationMinutes": 8,
+      "instruction": "Learn what the Axiom of Choice actually states, then find one theorem that requires it and one that doesn't."
+    }
+  },
+  {
+    "id": "mathematics-knot-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Knot Theory",
+    "teaser": "In mathematics a knot is a closed loop that can't be untangled — knot theory classifies them using polynomials that can distinguish knots too subtle for visual inspection. It's now used in studying how DNA knots and unknots during replication.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "topology",
+      "knots"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Knot theory basics",
+      "durationMinutes": 7,
+      "instruction": "Learn about the Jones polynomial, then find one biological process that involves knotting or unknotting DNA."
+    }
+  },
+  {
+    "id": "mathematics-ramsey-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Ramsey Theory",
+    "teaser": "Complete disorder is impossible — in any group of six people, there are either three mutual friends or three mutual strangers. Ramsey theory proves that structure is always hiding in large enough systems, no matter how random they look.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "combinatorics",
+      "structure"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why complete disorder is impossible",
+      "durationMinutes": 7,
+      "instruction": "Learn about the party problem (six people), then find one application of Ramsey theory in computer science."
+    }
+  },
+  {
+    "id": "mathematics-modular-arithmetic",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Modular Arithmetic",
+    "teaser": "When clocks hit 12 they go back to 1 — that's modular arithmetic, the mathematics of cycles. A clock runs mod 12; weekdays run mod 7. Gauss called it 'arithmetic modulo m' and it underpins all of modern cryptography.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "cycles"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Modular arithmetic in daily life",
+      "durationMinutes": 6,
+      "instruction": "Learn about clock arithmetic, then find one example where modular arithmetic is essential to computer security."
+    }
+  },
+  {
+    "id": "mathematics-perfect-numbers",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Number",
+    "name": "Perfect Numbers",
+    "teaser": "A number equals the sum of its divisors: 6 = 1+2+3, 28 = 1+2+4+7+14. Perfect numbers are rare — only 51 are known, all even. Whether an odd perfect number exists is one of the oldest unsolved questions in mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "number-theory",
+      "divisors"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Perfect numbers and their rarity",
+      "durationMinutes": 7,
+      "instruction": "Learn about the Euclid-Euler theorem for even perfect numbers, then find one conjecture about odd perfect numbers."
+    }
+  },
+  {
+    "id": "mathematics-riemann-zeta",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "The Riemann Zeta Function",
+    "teaser": "Zeta(s) = 1/1^s + 1/2^s + 1/3^s + ... — when s=2 it equals pi squared over six. Riemann showed its zeros encode the distribution of prime numbers, and proving where they all sit is the most important unsolved problem in mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "primes",
+      "analysis"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The zeta function and primes",
+      "durationMinutes": 8,
+      "instruction": "Learn about the Euler product formula linking zeta to primes, then find one consequence if the Riemann Hypothesis is proven."
+    }
+  },
+  {
+    "id": "mathematics-hilbert-problems",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "Hilbert's Problems",
+    "teaser": "In 1900 David Hilbert listed 23 unsolved problems to guide mathematics into the next century — several were solved, some are still open, and Hilbert's 'physics has nothing left for us to do' quote about the Riemann Hypothesis proved spectacularly premature.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "history",
+      "unsolved"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hilbert's 23 problems",
+      "durationMinutes": 8,
+      "instruction": "Learn which of Hilbert's problems remain unsolved, then find one whose solution changed mathematics."
+    }
+  },
+  {
+    "id": "mathematics-poincare-conjecture",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Poincare Conjecture",
+    "teaser": "Every simply connected 3D surface is topologically a sphere — Poincare proposed this in 1904, and it took a century to prove. Perelman proved it in 2003, declined the Fields Medal and the million-dollar prize, and said the money was irrelevant.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "topology",
+      "proof"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Perelman's proof",
+      "durationMinutes": 8,
+      "instruction": "Learn about Perelman's Ricci flow proof, then find one reason he turned down the Millennium Prize."
+    }
+  },
+  {
+    "id": "mathematics-fermi-estimates",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Fermi Estimates",
+    "teaser": "Enrico Fermi could estimate the number of piano tuners in Chicago to within a factor of two using nothing but logic and rough arithmetic — Fermi estimation is the art of answering impossible questions with reasonable approximations.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "estimation",
+      "problem-solving"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fermi estimation",
+      "durationMinutes": 6,
+      "instruction": "Learn Fermi estimation technique, then try one yourself: how many piano tuners are in your city?"
+    }
+  },
+  {
+    "id": "mathematics-benfords-law",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Benford's Law",
+    "teaser": "In real-world data, the digit 1 appears as the first digit 30% of the time, while 9 appears less than 5% — accounting fraudsters who fabricate numbers usually distribute first digits evenly, and Benford's Law catches them.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "statistics",
+      "fraud"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Benford's Law",
+      "durationMinutes": 7,
+      "instruction": "Learn why Benford's Law works for naturally occurring data, then find one example where forensic accountants used it to detect fraud."
+    }
+  },
+  {
+    "id": "mathematics-birthday-paradox",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "The Birthday Paradox",
+    "teaser": "In a room of 23 people, there's a 50% chance two share a birthday — in 70 people it's 99.9%. It's counterintuitive because we think about matching our own birthday, not any pair among the group.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "probability",
+      "intuition"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why 23 people suffice",
+      "durationMinutes": 6,
+      "instruction": "Learn about the combinatorial calculation behind the birthday problem, then find one real-world application in hash collisions."
+    }
+  },
+  {
+    "id": "mathematics-simpsons-paradox",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Simpson's Paradox",
+    "teaser": "A treatment can appear better for men AND women individually while being worse overall — Simpson's Paradox occurs when aggregated data reverses the trend seen in subgroups, making statistics dangerously misleading.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "statistics",
+      "paradox"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "How aggregated data can lie",
+      "durationMinutes": 7,
+      "instruction": "Learn about the kidney stone treatment paradox, then find one example of Simpson's Paradox in public health data."
+    }
+  },
+  {
+    "id": "mathematics-central-limit-theorem",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Central Limit Theorem",
+    "teaser": "No matter how weird the original distribution, the average of enough samples follows a bell curve — this is why the normal distribution appears everywhere in nature and makes polling work with just 1,000 people.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "statistics",
+      "probability"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Why averages form bell curves",
+      "durationMinutes": 8,
+      "instruction": "Learn about the CLT's implications for polling and measurement, then find one distribution where the CLT fails to converge."
+    }
+  },
+  {
+    "id": "mathematics-markov-chains",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Markov Chains",
+    "teaser": "A system where the next state depends only on the current state, not the path that got there — Google's PageRank, stock price models, and predictive text all use Markov chains. They're the simplest model of randomness that's still useful.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "probability",
+      "models"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Markov chains explained",
+      "durationMinutes": 7,
+      "instruction": "Learn about the weather example (sunny/cloudy states), then find one way Markov chains are used in natural language processing."
+    }
+  },
+  {
+    "id": "mathematics-game-theory",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Branch",
+    "name": "Game Theory",
+    "teaser": "The mathematics of strategic decision-making — von Neumann and Morgenstern formalised it in 1944. It explains why oligopolies keep prices high, why nuclear deterrence works, and why cooperation evolves among selfish agents.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "strategy",
+      "economics"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Game theory basics",
+      "durationMinutes": 7,
+      "instruction": "Learn about zero-sum vs non-zero-sum games, then find one way the Prisoner's Dilemma models real-world conflicts."
+    }
+  },
+  {
+    "id": "mathematics-nash-equilibrium",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Nash Equilibrium",
+    "teaser": "A state where no player can improve their outcome by changing strategy alone — Nash proved every game has at least one. It explains why drivers stay on the right, why arms races persist, and why restaurants cluster together.",
+    "imageUrl": "",
+    "byline": "John Nash",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "strategy",
+      "equilibrium"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Nash Equilibrium in practice",
+      "durationMinutes": 7,
+      "instruction": "Learn about the Nash Equilibrium in the Prisoner's Dilemma, then find one real market that settles into a Nash Equilibrium."
+    }
+  },
+  {
+    "id": "mathematics-traveling-salesman",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "The Traveling Salesman Problem",
+    "teaser": "Visit every city exactly once and return home with the shortest route — with just 25 cities there are more possible routes than atoms in the universe. No efficient algorithm exists; finding one would earn a million dollars.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "optimization",
+      "NP"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The hardest route-planning problem",
+      "durationMinutes": 8,
+      "instruction": "Learn about the P vs NP connection to TSP, then find one heuristic that gets close to optimal in practice."
+    }
+  },
+  {
+    "id": "mathematics-big-o",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "Big O Notation",
+    "teaser": "Big O describes how an algorithm scales: O(n) means time grows linearly, O(n squared) grows quadratically — an O(n squared) sort on 1 million items takes 1 trillion operations while O(n log n) takes 20 million. Algorithm choice is the difference between seconds and years.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "computer-science",
+      "complexity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Big O notation",
+      "durationMinutes": 7,
+      "instruction": "Learn the difference between O(1), O(log n), O(n), and O(n squared), then find one sorting algorithm for each complexity class."
+    }
+  },
+  {
+    "id": "mathematics-zenos-paradoxes",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Problem",
+    "name": "Zeno's Paradoxes",
+    "teaser": "Zeno argued motion is impossible: to cross a room you must cross half, then half of half, then half of half of half — an infinite number of steps. It took 2,000 years for calculus and convergent series to fully resolve the paradox.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "paradox",
+      "infinity"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Zeno's Dichotomy Paradox",
+      "durationMinutes": 7,
+      "instruction": "Learn all four of Zeno's paradoxes, then find one that was fully resolved by calculus."
+    }
+  },
+  {
+    "id": "mathematics-quadratic-formula",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Theorem",
+    "name": "The Quadratic Formula",
+    "teaser": "x = (-b +/- sqrt(b squared - 4ac)) / 2a — the universal solution to any quadratic equation. Known to Babylonians in 2000 BCE, it was the first algebraic formula to solve a general class of problems.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "algebra",
+      "equations"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The quadratic formula and its history",
+      "durationMinutes": 6,
+      "instruction": "Learn the quadratic formula and its derivation, then find one historical civilisation that solved quadratics without our notation."
+    }
+  },
+  {
+    "id": "mathematics-harmonic-series",
+    "categoryId": "MATHEMATICS",
+    "subtype": "Concept",
+    "name": "The Harmonic Series",
+    "teaser": "1 + 1/2 + 1/3 + 1/4 + ... grows to infinity, but so slowly you need 22,876,792,454,961 terms to reach 100. The paradox is that while the terms approach zero, the sum diverges — one of the most mind-bending facts in mathematics.",
+    "imageUrl": "",
+    "tier": 1,
+    "tags": [
+      "mathematics",
+      "series",
+      "divergence"
+    ],
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The diverging harmonic series",
+      "durationMinutes": 7,
+      "instruction": "Learn about Nicole Oresme's 14th-century proof, then compare the harmonic series to the convergent p-series (1/n squared)."
+    }
+  },
+  {
+    "name": "Fermat's Last Theorem (1637-1995)",
+    "teaser": "For 358 years, the simplest-sounding impossible problem tormented mathematicians. Pierre de Fermat claimed he had a proof too large for the margin. Andrew Wiles finally proved it in 1995 using modular forms and elliptic curves.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "theorem",
+    "tags": [
+      "theorem",
+      "history",
+      "famous"
+    ],
+    "id": "math-fermats-last-theorem-1637-1995",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Riemann Hypothesis (1859)",
+    "teaser": "A $1 million Millennium Prize problem — all non-trivial zeros of the Riemann zeta function lie on the critical line. It would revolutionize prime number theory if proven. It remains unproven after 167 years.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "conjecture",
+    "tags": [
+      "conjecture",
+      "primes",
+      "unsolved"
+    ],
+    "id": "math-the-riemann-hypothesis-1859",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Gödel's Incompleteness Theorems (1931)",
+    "teaser": "Any consistent formal system powerful enough to describe arithmetic contains true statements it cannot prove. Mathematics can never be both complete and consistent. Gödel's result shook the foundations of logic.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "logic",
+    "tags": [
+      "logic",
+      "philosophy",
+      "foundations"
+    ],
+    "id": "math-gödels-incompleteness-theorems-1931",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Four Color Theorem (1976)",
+    "teaser": "Any map can be colored with just four colors without adjacent regions sharing a color. It was the first major theorem proved by computer — controversial at the time because no human could verify all 1,936 cases.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "theorem",
+    "tags": [
+      "theorem",
+      "graph-theory",
+      "computer-proof"
+    ],
+    "id": "math-the-four-color-theorem-1976",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Euler's Identity (e^iπ + 1 = 0)",
+    "teaser": "Five fundamental constants — e, i, π, 1, and 0 — united in one elegant equation. Richard Feynman called it 'the most remarkable formula in mathematics.' It connects algebra, geometry, and analysis.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "formula",
+    "tags": [
+      "formula",
+      "elegance",
+      "constants"
+    ],
+    "id": "math-eulers-identity-e^ipi-+-1-=-0",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Banach-Tarski Paradox (1924)",
+    "teaser": "A sphere can be decomposed into 5 pieces and reassembled into 2 identical spheres. It violates conservation of volume but is mathematically valid — exploiting the infinite points in a sphere and the Axiom of Choice.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "paradox",
+    "tags": [
+      "paradox",
+      "set-theory",
+      "infinity"
+    ],
+    "id": "math-the-banach-tarski-paradox-1924",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Monty Hall Problem (1975)",
+    "teaser": "You pick a door, the host opens a losing door, and asks if you want to switch. Should you? Yes — switching gives 2/3 probability. Marilyn vos Savant's answer was rejected by 1,000 PhDs. She was right.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "probability",
+    "tags": [
+      "probability",
+      "puzzle",
+      "counterintuitive"
+    ],
+    "id": "math-the-monty-hall-problem-1975",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Golden Ratio (φ ≈ 1.618)",
+    "teaser": "Appears in flowers, galaxies, DNA, and art — but its ubiquity is overstated. The ratio of consecutive Fibonacci numbers approaches φ, and it appears in pentagons and continued fractions. Nature uses it for efficient packing.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "number-theory",
+    "tags": [
+      "number-theory",
+      "geometry",
+      "nature"
+    ],
+    "id": "math-the-golden-ratio-phi--1618",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Pi Day (March 14)",
+    "teaser": "3.14159... — the ratio of a circle's circumference to its diameter. Pi is irrational, transcendental, and has been calculated to 105 trillion digits. March 14 (3/14) is also Einstein's birthday.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "constants",
+    "tags": [
+      "constants",
+      "celebration",
+      "geometry"
+    ],
+    "id": "math-pi-day-march-14",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Infinite Hotel (Hilbert's Hotel)",
+    "teaser": "A hotel with infinitely many rooms can always accommodate more guests — even when full. Move each guest from room N to N+1. It illustrates how infinity breaks arithmetic: ∞+1=∞.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "paradox",
+    "tags": [
+      "paradox",
+      "infinity",
+      "thought-experiment"
+    ],
+    "id": "math-the-infinite-hotel-hilberts-hotel",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Poincaré Conjecture (1904-2003)",
+    "teaser": "Proved by Grigori Perelman after a century of failed attempts — every simply connected 3-manifold is homeomorphic to a 3-sphere. Perelman declined the $1 million Fields Medal and Millennium Prize.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "theorem",
+    "tags": [
+      "theorem",
+      "topology",
+      "unsolved"
+    ],
+    "id": "math-the-poincaré-conjecture-1904-2003",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Catalan Conjecture (1844-2002)",
+    "teaser": "The only consecutive perfect powers are 8 and 9 (2^3 and 3^2). Proved by Preda Mihăilescu after 158 years. It sounds simple but required revolutionary techniques in cyclotomic fields.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "theorem",
+    "tags": [
+      "theorem",
+      "number-theory",
+      "solved"
+    ],
+    "id": "math-the-catalan-conjecture-1844-2002",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Chaos Theory (Lorenz, 1963)",
+    "teaser": "Tiny changes in initial conditions produce wildly different outcomes — the butterfly effect. Edward Lorenz discovered it accidentally by rounding a weather variable. Long-term prediction is fundamentally impossible.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "dynamical-systems",
+    "tags": [
+      "dynamical-systems",
+      "chaos",
+      "weather"
+    ],
+    "id": "math-chaos-theory-lorenz-1963",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Fractals (Mandelbrot, 1975)",
+    "teaser": "Self-similar patterns at every scale — coastlines, blood vessels, lightning. Benoît Mandelbrot showed that nature is full of fractional dimensions. The Mandelbrot set is the most famous fractal.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "geometry",
+    "tags": [
+      "geometry",
+      "chaos",
+      "nature"
+    ],
+    "id": "math-fractals-mandelbrot-1975",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Game Theory (Nash, 1950)",
+    "teaser": "John Nash proved every game has an equilibrium where no player benefits from changing strategy alone. It underpins economics, biology, and poker. The Nash Equilibrium won a Nobel Prize.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "game-theory",
+    "tags": [
+      "game-theory",
+      "economics",
+      "strategy"
+    ],
+    "id": "math-game-theory-nash-1950",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Basel Problem (Euler, 1735)",
+    "teaser": "The sum of all reciprocal squares equals π²/6 — a shock connecting π to a series of integers. Euler's solution stunned mathematicians and opened the door to analytic number theory.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "series",
+    "tags": [
+      "series",
+      "analysis",
+      "history"
+    ],
+    "id": "math-the-basel-problem-euler-1735",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Gaussian Distribution (Bell Curve)",
+    "teaser": "The normal distribution — heights, test scores, errors — all follow this bell-shaped curve. Carl Friedrich Gauss used it for astronomical errors. The Central Limit Theorem explains why it appears everywhere.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "statistics",
+    "tags": [
+      "statistics",
+      "probability",
+      "data"
+    ],
+    "id": "math-the-gaussian-distribution-bell-curve",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Monster Group (1973)",
+    "teaser": "The largest sporadic simple group — with 8×10^53 elements. Its structure connects modular functions, string theory, and the Leech lattice. It's called 'the alphabet of mathematics' for its role in classification.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "group-theory",
+    "tags": [
+      "group-theory",
+      "algebra",
+      "monstrous"
+    ],
+    "id": "math-the-monster-group-1973",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The ABC Conjecture (1985)",
+    "teaser": "A relationship between additive and multiplicative number theory. If a+b=c, how many prime factors does c have? Shinichi Mochizuki claimed a proof in 2012 — it remains controversial and unverified.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "conjecture",
+    "tags": [
+      "conjecture",
+      "number-theory",
+      "unsolved"
+    ],
+    "id": "math-the-abc-conjecture-1985",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Erdős Number",
+    "teaser": "Paul Erdős co-authored papers with 511 people. Your Erdős number is how many co-authorship links separate you from him. Most mathematicians are within 6. The Bacon number works the same way for film.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "collaboration",
+      "graph-theory"
+    ],
+    "id": "math-the-erdős-number",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Galois Theory (1830)",
+    "teaser": "Évariste Galois proved that polynomial equations of degree 5+ have no general solution — and died in a duel at 20. His last night's notes became one of mathematics' most important contributions.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "algebra",
+    "tags": [
+      "algebra",
+      "history",
+      "tragedy"
+    ],
+    "id": "math-galois-theory-1830",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Isoperimetric Inequality",
+    "teaser": "Of all shapes with a given perimeter, the circle encloses the most area. The proof is ancient (Zenodorus, 200 BCE) but elegant. It explains why bubbles are spherical and soap films minimize surface area.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "geometry",
+    "tags": [
+      "geometry",
+      "optimization",
+      "nature"
+    ],
+    "id": "math-the-isoperimetric-inequality",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Epsilon-Delta Definition of Limits",
+    "teaser": "Weierstrass made calculus rigorous by defining limits without intuition — for every ε > 0, there exists δ > 0 such that... It replaced infinite smalls with precise inequalities and ended 200 years of criticism.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "analysis",
+    "tags": [
+      "analysis",
+      "rigor",
+      "foundations"
+    ],
+    "id": "math-the-epsilon-delta-definition-of-limits",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Halting Problem (Turing, 1936)",
+    "teaser": "No algorithm can determine whether any program will halt or run forever. Alan Turing proved this by diagonalization — the same trick Cantor used. It sets the boundary of what computers can ever know.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "computability",
+    "tags": [
+      "computability",
+      "computer-science",
+      "limits"
+    ],
+    "id": "math-the-halting-problem-turing-1936",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Existence of Transcendental Numbers (1882)",
+    "teaser": "π and e are transcendental — not roots of any polynomial with integer coefficients. Ferdinand von Lindemann proved π's transcendence, which also proved you can't square the circle.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "number-theory",
+    "tags": [
+      "number-theory",
+      "proof",
+      "geometry"
+    ],
+    "id": "math-the-existence-of-transcendental-numbers-1882",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Logistic Map (Population Dynamics)",
+    "teaser": "x(n+1) = r·x(n)·(1-x(n)) — a simple equation that produces chaos. Robert May showed in 1976 that this one-liner generates period-doubling bifurcations and deterministic chaos. Biology and math merged.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "dynamical-systems",
+    "tags": [
+      "dynamical-systems",
+      "chaos",
+      "biology"
+    ],
+    "id": "math-the-logistic-map-population-dynamics",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Cantor Set (1883)",
+    "teaser": "Remove the middle third of [0,1], then the middle third of what's left, infinitely. The result has zero length but uncountably many points. It broke intuitions about size and dimension.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "set-theory",
+    "tags": [
+      "set-theory",
+      "fractals",
+      "infinity"
+    ],
+    "id": "math-the-cantor-set-1883",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Existence of Non-Measurable Sets (Vitali, 1905)",
+    "teaser": "Sets that can't be assigned a consistent volume exist — using the Axiom of Choice. Vitali's construction created sets that break all intuition about measure and length.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "set-theory",
+    "tags": [
+      "set-theory",
+      "measure-theory",
+      "paradox"
+    ],
+    "id": "math-the-existence-of-non-measurable-sets-vitali-1905",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Cantor Diagonal Argument (1891)",
+    "teaser": "Proof that some infinities are bigger than others. The real numbers are uncountable — no list can contain them all. Cantor's diagonalization created the foundation of modern set theory.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "set-theory",
+    "tags": [
+      "set-theory",
+      "infinity",
+      "proof"
+    ],
+    "id": "math-the-cantor-diagonal-argument-1891",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Law of Large Numbers",
+    "teaser": "The average of many trials approaches the expected value. Flip a coin enough times and heads approaches 50%. Jacob Bernoulli proved it in 1713 — it's why casinos always win and why polling works.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "probability",
+    "tags": [
+      "probability",
+      "statistics",
+      "proof"
+    ],
+    "id": "math-the-law-of-large-numbers",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Pythagorean Theorem (Proof by Rearrangement)",
+    "teaser": "a² + b² = c² — the most proved theorem in history. Over 370 proofs exist, including one by President James Garfield. The simplest proof rearranges 4 right triangles to show the equality visually.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "geometry",
+    "tags": [
+      "geometry",
+      "proof",
+      "ancient"
+    ],
+    "id": "math-the-pythagorean-theorem-proof-by-rearrangement",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Lebesgue Integral (1901)",
+    "teaser": "Henri Lebesgue redefined integration by slicing the range instead of the domain. It handled pathological functions that Riemann couldn't — functions with infinitely many discontinuities. Real analysis was born.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "analysis",
+    "tags": [
+      "analysis",
+      "measure-theory",
+      "rigor"
+    ],
+    "id": "math-the-lebesgue-integral-1901",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Ramsey Number R(3,3) = 6",
+    "teaser": "Among 6 people, at least 3 are mutual friends or 3 are mutual strangers. This is Ramsey theory — order is unavoidable in large enough systems. Ramsey numbers grow so fast that most are unknown.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "combinatorics",
+    "tags": [
+      "combinatorics",
+      "graph-theory",
+      "social"
+    ],
+    "id": "math-the-ramsey-number-r33-=-6",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Seven Bridges of Königsberg (1736)",
+    "teaser": "Euler proved you can't cross all 7 bridges exactly once — founding graph theory. It's the simplest example of a proof that changed mathematics: topology was born from a city's bridge problem.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "graph-theory",
+    "tags": [
+      "graph-theory",
+      "topology",
+      "history"
+    ],
+    "id": "math-the-seven-bridges-of-königsberg-1736",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Fundamental Theorem of Algebra",
+    "teaser": "Every polynomial with complex coefficients has exactly n roots in the complex numbers. First proved by Gauss at 21, it connects algebra and complex analysis in a beautiful synthesis.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "algebra",
+    "tags": [
+      "algebra",
+      "complex-analysis",
+      "proof"
+    ],
+    "id": "math-the-fundamental-theorem-of-algebra",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Linearity of Expectation",
+    "teaser": "The expected value of a sum equals the sum of expected values — even when the events are dependent. It's the most useful trick in probability: complex problems become simple arithmetic.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "probability",
+    "tags": [
+      "probability",
+      "expectation",
+      "trick"
+    ],
+    "id": "math-the-linearity-of-expectation",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Stone-Weierstrass Theorem (1893)",
+    "teaser": "Polynomials can approximate any continuous function on a compact interval to arbitrary precision. It justified Fourier analysis and underpins modern numerical methods — from signal processing to machine learning.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "analysis",
+    "tags": [
+      "analysis",
+      "approximation",
+      "applied"
+    ],
+    "id": "math-the-stone-weierstrass-theorem-1893",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Hairy Ball Theorem",
+    "teaser": "You can't comb a hairy ball flat without a cowlick. Mathematically: every continuous tangent vector field on an even-dimensional sphere has a zero. It explains why there's always at least one point on Earth with no wind.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "topology",
+    "tags": [
+      "topology",
+      "intuition",
+      "nature"
+    ],
+    "id": "math-the-hairy-ball-theorem",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Borsuk-Ulam Theorem (1933)",
+    "teaser": "At every moment, two opposite points on Earth have exactly the same temperature and pressure. More generally: any continuous function from a sphere to a plane maps some antipodal points to the same value.",
+    "categoryId": "MATHEMATICS",
+    "subtype": "topology",
+    "tags": [
+      "topology",
+      "fixed-point",
+      "nature"
+    ],
+    "id": "math-the-borsuk-ulam-theorem-1933",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
   }
- },
- {
-  "id": "mathematics-pi",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "Pi (π)",
-  "teaser": "The ratio of a circle's circumference to its diameter: 3.14159265358979... Pi is irrational, transcendental, and appears everywhere — from geometry to probability to quantum physics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "constants",
-   "geometry"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why pi appears everywhere",
-   "durationMinutes": 7,
-   "instruction": "Learn about pi's appearance in geometry, probability (Buffon's needle), and Euler's identity, then calculate pi using the Monte Carlo method."
-  }
- },
- {
-  "id": "mathematics-euler-identity",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Euler's Identity",
-  "teaser": "e^(iπ) + 1 = 0: five fundamental constants (e, i, π, 1, 0) united in one equation. Called the 'most beautiful equation in mathematics' — it connects algebra, geometry, and analysis in a single stroke.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "analysis",
-   "beauty"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why Euler's identity is beautiful",
-   "durationMinutes": 8,
-   "instruction": "Learn how Euler's formula (e^(ix) = cos x + i sin x) leads to the identity, then explain why mathematicians call it the most elegant equation ever written."
-  }
- },
- {
-  "id": "mathematics-zero",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "The Invention of Zero",
-  "teaser": "Zero isn't nothing — it's a number that revolutionized mathematics. Invented in India by Brahmagupta (628 AD), it enabled positional notation, calculus, and modern computing. The West resisted it for centuries.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "history",
-   "India"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How zero was invented and why it mattered",
-   "durationMinutes": 8,
-   "instruction": "Learn about Brahmagupta's rules for zero, then explain why the Roman numeral system couldn't represent zero."
-  }
- },
- {
-  "id": "mathematics-infinity",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Infinity",
-  "teaser": "Georg Cantor proved that some infinities are bigger than others: the infinity of real numbers is larger than the infinity of natural numbers. Infinity isn't a number — it's a concept that broke mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "set-theory",
-   "philosophy"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Cantor's different sizes of infinity",
-   "durationMinutes": 10,
-   "instruction": "Learn about countable vs uncountable infinity and the diagonal argument, then explain why there are more real numbers than natural numbers."
-  }
- },
- {
-  "id": "mathematics-prime-numbers",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "Prime Numbers",
-  "teaser": "Numbers divisible only by 1 and themselves: 2, 3, 5, 7, 11... Primes are the atoms of arithmetic — every number is a unique product of primes. Finding them gets harder as numbers grow.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "primes"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The importance of prime numbers",
-   "durationMinutes": 8,
-   "instruction": "Learn about the fundamental theorem of arithmetic, then explain why primes are essential for RSA encryption."
-  }
- },
- {
-  "id": "mathematics-fibonacci",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "The Fibonacci Sequence",
-  "teaser": "0, 1, 1, 2, 3, 5, 8, 13... each number is the sum of the previous two. Fibonacci appears in sunflower spirals, rabbit populations, and the golden ratio — nature's favorite pattern.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "sequences",
-   "nature"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Where Fibonacci appears in nature",
-   "durationMinutes": 7,
-   "instruction": "Find Fibonacci numbers in pinecone spirals, sunflower heads, and nautilus shells, then explain the connection to the golden ratio."
-  }
- },
- {
-  "id": "mathematics-golden-ratio",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "The Golden Ratio (φ)",
-  "teaser": "φ = 1.6180339887...: the ratio that appears in pentagons, the Parthenon, and nautilus shells. Two quantities are in the golden ratio if their ratio equals the ratio of their sum to the larger quantity.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "geometry",
-   "nature"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The golden ratio in mathematics and nature",
-   "durationMinutes": 8,
-   "instruction": "Learn about φ's connection to the Fibonacci sequence and pentagon geometry, then find one example of the golden ratio in art or architecture."
-  }
- },
- {
-  "id": "mathematics-calculus",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Calculus",
-  "teaser": "The mathematics of change: derivatives measure how fast things change; integrals measure accumulated change. Newton and Leibniz independently invented it — and fought bitterly over who did it first.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "calculus",
-   "analysis"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The fundamental theorem of calculus",
-   "durationMinutes": 10,
-   "instruction": "Learn how differentiation and integration are inverse operations, then find one real-world application of calculus (physics, economics, or biology)."
-  }
- },
- {
-  "id": "mathematics-probability",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Probability Theory",
-  "teaser": "Mathematics of uncertainty: from coin flips to quantum mechanics, probability quantifies what we don't know. Bayes' theorem, expected value, and the law of large numbers govern chance.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "probability",
-   "statistics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Bayes' theorem and its applications",
-   "durationMinutes": 8,
-   "instruction": "Learn Bayes' theorem, then apply it to the classic medical testing problem (99% accurate test, 1% prevalence — what's the probability you actually have the disease?)."
-  }
- },
- {
-  "id": "mathematics-fundamental-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Fundamental Theorem of Arithmetic",
-  "teaser": "Every integer greater than 1 is either prime or a unique product of primes. 12 = 2² × 3, and no other combination of primes gives 12. Uniqueness is the key — it's what makes primes atoms.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "primes"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why unique factorization matters",
-   "durationMinutes": 7,
-   "instruction": "Learn the fundamental theorem of arithmetic, then explain why unique factorization fails in some number systems (like Z[√-5])."
-  }
- },
- {
-  "id": "mathematics-euler-characteristic",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Euler's Polyhedron Formula",
-  "teaser": "V - E + F = 2: vertices minus edges plus faces equals 2 for any convex polyhedron. This simple formula connects geometry to topology and was the gateway to a new branch of mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "topology",
-   "geometry"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Euler's formula for polyhedra",
-   "durationMinutes": 7,
-   "instruction": "Verify V - E + F = 2 for a cube, tetrahedron, and dodecahedron, then explain why it led to the Euler characteristic in topology."
-  }
- },
- {
-  "id": "mathematics-godel-incompleteness",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Gödel's Incompleteness Theorems",
-  "teaser": "In any consistent formal system powerful enough to describe arithmetic, there are true statements that cannot be proved. Mathematics is fundamentally incomplete — and Hilbert's dream of proving everything is dead.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "logic",
-   "philosophy"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "What Gödel's theorems mean",
-   "durationMinutes": 10,
-   "instruction": "Learn the two incompleteness theorems in plain language, then explain why they shattered Hilbert's program for a complete foundation of mathematics."
-  }
- },
- {
-  "id": "mathematics-four-color-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Four Color Theorem",
-  "teaser": "Any map can be colored with just four colors so that no adjacent regions share a color. It took 100 years to prove — and the proof required a computer, sparking a debate about what counts as mathematical proof.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "graph-theory",
-   "proof"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The controversial computer proof",
-   "durationMinutes": 8,
-   "instruction": "Learn about Appel and Haken's 1976 computer-assisted proof, then debate whether a proof that requires a computer is really a proof."
-  }
- },
- {
-  "id": "mathematics-pigeonhole-principle",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Pigeonhole Principle",
-  "teaser": "If you put 10 pigeons in 9 holes, at least one hole has 2 pigeons. This 'obvious' principle proves surprisingly deep results: two people in London have the same number of hairs on their head.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "combinatorics",
-   "proof"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Surprising applications of the pigeonhole principle",
-   "durationMinutes": 7,
-   "instruction": "Learn the principle, then find three surprising applications (same birthday in a room, same number of hairs, matching socks)."
-  }
- },
- {
-  "id": "mathematics-chaos-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Chaos Theory",
-  "teaser": "Lorenz's butterfly effect: tiny changes in initial conditions produce wildly different outcomes. Chaos theory shows that deterministic systems can be unpredictable — weather, heart rhythms, stock markets.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "dynamics",
-   "complexity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The butterfly effect and strange attractors",
-   "durationMinutes": 8,
-   "instruction": "Learn about Lorenz's weather model and sensitive dependence on initial conditions, then explain why long-term weather prediction is fundamentally limited."
-  }
- },
- {
-  "id": "mathematics-topology",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Topology",
-  "teaser": "The mathematics of rubber-sheet geometry: a coffee mug and a donut are the same shape (both have one hole). Topology studies properties that survive continuous deformation — stretching, bending, not tearing.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "topology",
-   "geometry"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "What makes topology different from geometry",
-   "durationMinutes": 7,
-   "instruction": "Learn about topological invariants (Euler characteristic, genus), then explain why a donut and a coffee mug are topologically equivalent."
-  }
- },
- {
-  "id": "mathematics-graph-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Graph Theory",
-  "teaser": "Nodes and edges: graph theory models networks, from social connections to airline routes. The bridges of Königsberg problem launched the field — and today it powers Google's search and Facebook's friend recommendations.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "networks",
-   "discrete"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The bridges of Königsberg problem",
-   "durationMinutes": 7,
-   "instruction": "Learn about Euler's 1736 solution to the Königsberg bridge problem, then find one modern application of graph theory."
-  }
- },
- {
-  "id": "mathematics-group-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Group Theory",
-  "teaser": "The mathematics of symmetry: groups capture the essence of rotations, reflections, and permutations. From crystal structures to particle physics, group theory reveals the hidden symmetries of the universe.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "algebra",
-   "symmetry"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How groups capture symmetry",
-   "durationMinutes": 8,
-   "instruction": "Learn the four group axioms (closure, associativity, identity, inverse), then find one example of group theory in physics or chemistry."
-  }
- },
- {
-  "id": "mathematics-fractal-geometry",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Fractals",
-  "teaser": "Infinite complexity from simple rules: the Mandelbrot set, Koch snowflake, and Sierpinski triangle repeat their pattern at every scale. Fractals model coastlines, blood vessels, and stock market fluctuations.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "fractals",
-   "complexity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How fractals are generated",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Mandelbrot set (z → z² + c), then find one natural fractal (fern, coastline, cloud) and explain why it looks similar at every scale."
-  }
- },
- {
-  "id": "mathematics-np-complete",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "P vs NP Problem",
-  "teaser": "The million-dollar question: if you can verify a solution quickly, can you also find it quickly? P = NP would revolutionize cryptography, optimization, and artificial intelligence. Most mathematicians believe P ≠ NP.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "complexity",
-   "computing"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "What P vs NP means in plain language",
-   "durationMinutes": 10,
-   "instruction": "Learn the difference between P (easy to solve) and NP (easy to verify), then explain why P = NP would break modern encryption."
-  }
- },
- {
-  "id": "mathematics-riemann-hypothesis",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Riemann Hypothesis",
-  "teaser": "The most famous unsolved problem in mathematics: all non-trivial zeros of the Riemann zeta function have real part 1/2. If true, it would reveal deep truths about the distribution of prime numbers.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "unsolved"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Riemann zeta function and prime distribution",
-   "durationMinutes": 10,
-   "instruction": "Learn what the Riemann zeta function is and why its zeros matter for prime numbers, then explain why a $1 million prize awaits its proof."
-  }
- },
- {
-  "id": "mathematics-collatz-conjecture",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Collatz Conjecture",
-  "teaser": "Pick any number: if even, divide by 2; if odd, multiply by 3 and add 1. Repeat. Every number tested eventually reaches 1 — but nobody can prove it always does. Simple to state, impossible to prove.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "unsolved",
-   "sequences"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Try the Collatz conjecture yourself",
-   "durationMinutes": 5,
-   "instruction": "Trace the Collatz sequence starting from 27 (it takes 111 steps to reach 1), then explain why this 'simple' problem has resisted proof for 80 years."
-  }
- },
- {
-  "id": "mathematics-prime-number-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Prime Number Theorem",
-  "teaser": "Primes thin out logarithmically: the probability that a random number near n is prime is about 1/ln(n). This elegant law governs the distribution of primes — and underpins modern cryptography.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "primes"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How primes are distributed",
-   "durationMinutes": 8,
-   "instruction": "Learn the prime number theorem, then use it to estimate how many primes exist below 1,000,000."
-  }
- },
- {
-  "id": "mathematics-bayes-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Bayes' Theorem",
-  "teaser": "P(A|B) = P(B|A) × P(A) / P(B): updating beliefs with evidence. Bayes' theorem is the mathematical engine behind spam filters, medical diagnosis, and the scientific method itself.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "probability",
-   "statistics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Applying Bayes' theorem",
-   "durationMinutes": 8,
-   "instruction": "Solve the classic problem: a disease affects 1 in 1000 people; a test is 99% accurate. If you test positive, what's the actual probability you have the disease?"
-  }
- },
- {
-  "id": "mathematics-complexity-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Computational Complexity",
-  "teaser": "Not all problems are equally hard: sorting a list is O(n log n); factoring large numbers is (probably) exponential. Complexity theory classifies problems by the resources needed to solve them.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "computing",
-   "algorithms"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Big O notation and problem difficulty",
-   "durationMinutes": 8,
-   "instruction": "Learn about O(1), O(log n), O(n), O(n²), and O(2ⁿ), then classify the time complexity of three everyday algorithms."
-  }
- },
- {
-  "id": "mathematics-euler-product",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Euler Product Formula",
-  "teaser": "The zeta function equals an infinite product over all primes: ζ(s) = Π(1 - p^(-s))^(-1). This formula connects the continuous world of analysis with the discrete world of primes — the bridge that Riemann built on.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "analysis"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Euler connected primes to infinite series",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Basel problem (Σ1/n² = π²/6) and Euler's product formula, then explain why connecting primes to analysis was revolutionary."
-  }
- },
- {
-  "id": "mathematics-algebraic-geometry",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Algebraic Geometry",
-  "teaser": "Solving polynomial equations with geometric tools: from conic sections to the proof of Fermat's Last Theorem. Algebraic geometry is one of the deepest and most active areas of modern mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "geometry",
-   "algebra"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How algebra and geometry merge",
-   "durationMinutes": 8,
-   "instruction": "Learn about algebraic curves (circle: x² + y² = r²) and how they connect to number theory, then find one application of algebraic geometry in physics."
-  }
- },
- {
-  "id": "mathematics-fourier-transform",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Fourier Transform",
-  "teaser": "Any signal can be decomposed into sine waves: Fourier's insight underlies music compression, image processing, medical imaging, and quantum mechanics. It's the most widely used transform in engineering.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "analysis",
-   "signal-processing"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How the Fourier transform decomposes signals",
-   "durationMinutes": 8,
-   "instruction": "Learn about frequency decomposition and the FFT algorithm, then find one everyday technology that depends on the Fourier transform."
-  }
- },
- {
-  "id": "mathematics-euclidean-geometry",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Euclidean Geometry",
-  "teaser": "Points, lines, angles, circles: Euclid's axioms formed the model of mathematical reasoning for 2,000 years. His five postulates seemed self-evident — until the fifth one spawned non-Euclidean geometry.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "geometry",
-   "axioms"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Euclid's five postulates",
-   "durationMinutes": 7,
-   "instruction": "Learn the five postulates, then explain why the fifth (parallel postulate) led to the discovery of hyperbolic and elliptic geometry."
-  }
- },
- {
-  "id": "mathematics-number-systems",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "The Number System",
-  "teaser": "Natural numbers → integers → rationals → reals → complex numbers: each extension solved problems the previous system couldn't. Imaginary numbers were called 'impossible' — now they're essential for electrical engineering.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "numbers",
-   "foundations"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How the number system evolved",
-   "durationMinutes": 8,
-   "instruction": "Trace the expansion from natural numbers to complex numbers, then explain why each extension was resisted and what problem it solved."
-  }
- },
- {
-  "id": "mathematics-imaginary-numbers",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "Imaginary Numbers",
-  "teaser": "i² = -1: a number whose square is negative. Cardano called them 'as subtle as they are useless'; now they're essential for quantum mechanics, signal processing, and every electrical engineer's toolkit.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "complex-numbers",
-   "algebra"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why imaginary numbers aren't imaginary",
-   "durationMinutes": 7,
-   "instruction": "Learn about the complex plane and how imaginary numbers represent rotation, then find one application of complex numbers in physics or engineering."
-  }
- },
- {
-  "id": "mathematics-statistics",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Statistics",
-  "teaser": "The science of data: mean, median, standard deviation, regression, hypothesis testing. Statistics turns raw numbers into knowledge — and when misused, into misinformation.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "statistics",
-   "data"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How statistics can mislead",
-   "durationMinutes": 7,
-   "instruction": "Learn about Simpson's paradox, p-hacking, and the misuse of correlation, then find one example of statistics being used to deceive."
-  }
- },
- {
-  "id": "mathematics-fermat-last-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Fermat's Last Theorem",
-  "teaser": "x^n + y^n = z^n has no solutions for n > 2. Fermat claimed he had a proof in 1637; Andrew Wiles proved it in 1995 after 358 years. The longest-standing major theorem in mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "history"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The 358-year journey to prove Fermat",
-   "durationMinutes": 10,
-   "instruction": "Learn about Wiles's proof using elliptic curves and modular forms, then explain why Fermat's margin note (too narrow to contain his proof) was probably wrong."
-  }
- },
- {
-  "id": "mathematics-trigonometry",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Trigonometry",
-  "teaser": "The mathematics of triangles and angles: sine, cosine, tangent. From ancient astronomy to modern GPS, trigonometry bridges geometry and algebra — and it's the language of waves, sound, and light.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "trigonometry",
-   "geometry"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The unit circle and trig functions",
-   "durationMinutes": 7,
-   "instruction": "Learn sine, cosine, and tangent from the unit circle, then find one real-world application of trigonometry beyond triangles."
-  }
- },
- {
-  "id": "mathematics-logarithm",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Logarithms",
-  "teaser": "The inverse of exponentiation: log₁₀(1000) = 3. Logarithms compress enormous ranges into manageable numbers — which is why we measure earthquakes (Richter), sound (decibels), and acidity (pH) on log scales.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "exponents",
-   "scales"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why logarithmic scales exist",
-   "durationMinutes": 7,
-   "instruction": "Learn about the Richter scale, decibels, and pH scale, then explain why logarithmic scales are used for quantities that span many orders of magnitude."
-  }
- },
- {
-  "id": "mathematics-linear-algebra",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Linear Algebra",
-  "teaser": "Vectors, matrices, and transformations: linear algebra is the mathematics of data. Google's PageRank, machine learning, computer graphics, and quantum mechanics all run on matrix operations.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "algebra",
-   "data"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why linear algebra is everywhere",
-   "durationMinutes": 8,
-   "instruction": "Learn about eigenvectors and eigenvalues, then find one application of linear algebra in machine learning or computer graphics."
-  }
- },
- {
-  "id": "mathematics-combinatorics",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Combinatorics",
-  "teaser": "Counting, arranging, and selecting: from lottery odds to password strength to scheduling problems. Combinatorics answers 'how many ways?' — and the answers are often surprisingly large.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "counting",
-   "discrete"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Permutations, combinations, and the birthday problem",
-   "durationMinutes": 7,
-   "instruction": "Learn the difference between permutations and combinations, then solve the birthday problem (how many people for a 50% chance of a shared birthday?)."
-  }
- },
- {
-  "id": "mathematics-paradox",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "Mathematical Paradoxes",
-  "teaser": "Zeno's paradox (motion is impossible), the Monty Hall problem (switch doors), the Banach-Tarski paradox (split a sphere into two identical spheres): paradoxes reveal gaps in our intuition and foundations.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "logic",
-   "paradox"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Three famous mathematical paradoxes",
-   "durationMinutes": 8,
-   "instruction": "Learn the Monty Hall problem, Zeno's paradox of Achilles and the tortoise, and the Banach-Tarski paradox, then explain why each one feels wrong."
-  }
- },
- {
-  "id": "mathematics-monty-hall",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Monty Hall Problem",
-  "teaser": "Three doors: one has a car, two have goats. You pick a door; the host opens a goat door. Should you switch? Yes — switching gives you a 2/3 chance. Most people refuse to believe it.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "probability",
-   "puzzles"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why switching wins",
-   "durationMinutes": 6,
-   "instruction": "Solve the Monty Hall problem three ways (intuition, conditional probability, simulation), then explain why even mathematicians initially got it wrong."
-  }
- },
- {
-  "id": "mathematics-dimensional-analysis",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Dimensional Analysis",
-  "teaser": "Checking equations by units: if the units don't match, the equation is wrong. Dimensional analysis is a physicist's most powerful sanity check — and it can solve problems without understanding the physics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "physics",
-   "method"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Using dimensional analysis to check equations",
-   "durationMinutes": 6,
-   "instruction": "Learn how to check an equation by dimensional analysis, then use it to derive the period of a pendulum without solving any differential equation."
-  }
- },
- {
-  "id": "mathematics-mathematical-induction",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Mathematical Induction",
-  "teaser": "If it works for 1, and if n→n+1 works whenever n works, it works for all natural numbers. Induction is the domino principle of mathematics — the proof technique behind countless theorems.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "proof",
-   "logic"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How induction proofs work",
-   "durationMinutes": 7,
-   "instruction": "Learn the structure of an induction proof (base case + inductive step), then prove that 1 + 2 + ... + n = n(n+1)/2."
-  }
- },
- {
-  "id": "mathematics-complexity-nature",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Mathematics of Nature",
-  "teaser": "Fibonacci spirals, fractal coastlines, branching trees: nature is full of mathematical patterns. The question is whether nature 'does math' or whether math is just a good description of nature.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "nature",
-   "patterns"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Mathematical patterns in nature",
-   "durationMinutes": 7,
-   "instruction": "Find five mathematical patterns in nature (spirals, branching, tessellation, fractals, symmetry), then explain whether nature 'knows' math."
-  }
- },
- {
-  "id": "mathematics-cryptography",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Mathematics of Cryptography",
-  "teaser": "RSA encryption protects your bank account using prime number factorization: multiplying two large primes is easy; factoring the product back is (practically) impossible. Math keeps secrets.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "cryptography",
-   "security"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How RSA encryption works",
-   "durationMinutes": 10,
-   "instruction": "Learn the RSA algorithm (key generation, encryption, decryption), then explain why quantum computing threatens current encryption."
-  }
- },
- {
-  "id": "mathematics-measure-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Measure Theory",
-  "teaser": "How do you define 'length' for a set of numbers that's all rational? Measure theory makes probability rigorous — and reveals that the real line has stranger structure than you'd think.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "analysis",
-   "foundations"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why measure theory matters for probability",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Lebesgue integral and why it's better than the Riemann integral, then explain why measure theory is the foundation of modern probability."
-  }
- },
- {
-  "id": "mathematics-fibonacci-in-nature",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "The Fibonacci Spiral",
-  "teaser": "Spirals in sunflowers, pinecones, and hurricanes follow the Fibonacci sequence: each quarter turn is approximately the golden ratio. Nature packs things efficiently using this spiral — and it looks beautiful doing it.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "Fibonacci",
-   "nature"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why nature uses Fibonacci spirals",
-   "durationMinutes": 7,
-   "instruction": "Learn about phyllotaxis (leaf arrangement), then find three examples of Fibonacci spirals in the natural world."
-  }
- },
- {
-  "id": "mathematics-fundamental-theorem-calculus",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Fundamental Theorem of Calculus",
-  "teaser": "Differentiation and integration are inverse operations. This single insight unified two branches of mathematics and enabled everything from physics to financial modeling.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "calculus",
-   "analysis"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How differentiation and integration connect",
-   "durationMinutes": 8,
-   "instruction": "Learn both parts of the fundamental theorem, then find one application where integrating a rate gives you a total."
-  }
- },
- {
-  "id": "mathematics-set-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Set Theory",
-  "teaser": "The foundation of all modern mathematics: sets, unions, intersections, and cardinality. Cantor's set theory revealed different sizes of infinity — and produced paradoxes that shook mathematics to its core.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "logic",
-   "foundations"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The basics of set theory",
-   "durationMinutes": 7,
-   "instruction": "Learn about sets, subsets, power sets, and cardinality, then explain why the set of all sets leads to Russell's paradox."
-  }
- },
- {
-  "id": "mathematics-russell-paradox",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "Russell's Paradox",
-  "teaser": "Does the set of all sets that don't contain themselves contain itself? This question demolished naive set theory and forced mathematicians to rebuild the foundations of mathematics from scratch.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "logic",
-   "paradox"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The barber paradox and its implications",
-   "durationMinutes": 7,
-   "instruction": "Learn the barber paradox version of Russell's paradox, then explain how ZFC set theory resolved the contradiction."
-  }
- },
- {
-  "id": "mathematics-manifold",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Manifolds",
-  "teaser": "Surfaces that look flat up close: the Earth is a sphere, but locally it feels like a plane. Manifolds generalize this idea to any dimension — and they're the language of general relativity.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "geometry",
-   "physics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "What a manifold is and why it matters",
-   "durationMinutes": 8,
-   "instruction": "Learn how manifolds generalize curves and surfaces to higher dimensions, then explain why Einstein needed manifolds for general relativity."
-  }
- },
- {
-  "id": "mathematics-cantor-diagonal",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Cantor's Diagonal Argument",
-  "teaser": "A proof that the real numbers are uncountable: list all real numbers between 0 and 1, then construct a new number that differs from each listed number in at least one digit. The list can never be complete.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "set-theory",
-   "infinity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The diagonal argument step by step",
-   "durationMinutes": 8,
-   "instruction": "Work through Cantor's diagonal argument, then explain why it proves the reals are 'more infinite' than the naturals."
-  }
- },
- {
-  "id": "mathematics-binary",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "Binary Numbers",
-  "teaser": "0 and 1: the language of computers. Binary arithmetic is how every computer stores data, processes instructions, and runs software. Leibniz invented it in 1703 — 250 years before the first computer.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "computing",
-   "numbers"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How binary works",
-   "durationMinutes": 6,
-   "instruction": "Learn how to count in binary and convert between binary and decimal, then explain why computers use binary instead of decimal."
-  }
- },
- {
-  "id": "mathematics-continued-fractions",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Continued Fractions",
-  "teaser": "Any real number can be written as a nested fraction: the golden ratio's continued fraction is [1; 1, 1, 1, ...] — the 'most irrational' number. Continued fractions reveal the hidden structure of numbers.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "approximation"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How continued fractions approximate numbers",
-   "durationMinutes": 7,
-   "instruction": "Compute the continued fraction for √2, then explain why continued fractions give the best rational approximations to irrational numbers."
-  }
- },
- {
-  "id": "mathematics-math-anxiety",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Math Anxiety",
-  "teaser": "The fear of math is real and measurable: math anxiety activates the same brain regions as physical pain. It's not about intelligence — it's about negative experiences, stereotype threat, and teaching methods.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "education",
-   "psychology"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why math anxiety happens and how to overcome it",
-   "durationMinutes": 7,
-   "instruction": "Learn about the neuroscience of math anxiety, then find one evidence-based strategy for reducing it."
-  }
- },
- {
-  "id": "mathematics-infinity-hotel",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Hilbert's Hotel",
-  "teaser": "A hotel with infinitely many rooms can always accommodate more guests — even infinitely many. Hilbert's Hotel is a thought experiment that shows how infinity defies everyday intuition.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "infinity",
-   "paradox"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Hilbert's Hotel works",
-   "durationMinutes": 6,
-   "instruction": "Solve three Hilbert's Hotel puzzles (one new guest, infinitely many new guests, infinitely many buses of infinitely many guests), then explain why infinite sets behave differently from finite ones."
-  }
- },
- {
-  "id": "mathematics-mandelbrot-set",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "The Mandelbrot Set",
-  "teaser": "The most famous fractal: a set of complex numbers that stays bounded under iteration z → z² + c. Its boundary is infinitely complex — zoom in and you find new patterns forever.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "fractals",
-   "complexity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How the Mandelbrot set is generated",
-   "durationMinutes": 8,
-   "instruction": "Learn the iteration rule and how coloring works, then find an online Mandelbrot explorer and zoom into the boundary."
-  }
- },
- {
-  "id": "mathematics-golden-angle",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "The Golden Angle",
-  "teaser": "137.5°: the angle that divides a circle in the golden ratio. Plants use it to arrange leaves and seeds for maximum sunlight exposure — it's nature's most efficient packing angle.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "nature",
-   "geometry"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why plants use the golden angle",
-   "durationMinutes": 6,
-   "instruction": "Learn about phyllotaxis and how the golden angle minimizes overlap, then find three plants that demonstrate this pattern."
-  }
- },
- {
-  "id": "mathematics-zero-sum",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Zero-Sum Games",
-  "teaser": "One person's gain is another's loss: chess, poker, and most board games are zero-sum. But most real-world situations are positive-sum — trade, cooperation, and learning create value for everyone.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "game-theory",
-   "strategy"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why zero-sum thinking is wrong most of the time",
-   "durationMinutes": 6,
-   "instruction": "Learn about Nash equilibrium in zero-sum games, then find one situation where people mistakenly apply zero-sum thinking to a positive-sum situation."
-  }
- },
- {
-  "id": "mathematics-fibonacci-recursion",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Recursion",
-  "teaser": "A function that calls itself: Fibonacci is recursive (F(n) = F(n-1) + F(n-2)). Recursion powers algorithms, fractals, and data structures — but poorly implemented recursion can crash your stack.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "algorithms",
-   "computing"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How recursion works",
-   "durationMinutes": 7,
-   "instruction": "Implement Fibonacci recursively, then explain why memoization (caching results) makes it efficient."
-  }
- },
- {
-  "id": "mathematics-mersenne-primes",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "Mersenne Primes",
-  "teaser": "Primes of the form 2^p - 1: 3, 7, 31, 127... The largest known prime is always a Mersenne prime — discovered by the GIMPS distributed computing project. The current record has 41 million digits.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "primes",
-   "computing"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The hunt for large prime numbers",
-   "durationMinutes": 7,
-   "instruction": "Learn about the Lucas-Lehmer test for Mersenne primes, then check how many digits the largest known prime has."
-  }
- },
- {
-  "id": "mathematics-twin-prime",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Twin Prime Conjecture",
-  "teaser": "Are there infinitely many pairs of primes that differ by 2 (11 and 13, 41 and 43)? Nobody knows. Yitang Zhang proved there are infinitely many prime pairs within 246 of each other — progress, but not the full answer.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "primes",
-   "unsolved"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The status of twin prime research",
-   "durationMinutes": 7,
-   "instruction": "Learn about Zhang's 2013 breakthrough and the Polymath project's improvements, then explain why the full conjecture remains open."
-  }
- },
- {
-  "id": "mathematics-wallis-product",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Wallis Product",
-  "teaser": "π/2 = (2/1)(2/3)(4/3)(4/5)(6/5)(6/7)...: an infinite product for pi discovered by Wallis in 1655. It connects pi to the integers in a surprisingly elegant way — and led to Stirling's approximation.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "pi",
-   "analysis"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How Wallis discovered his product for pi",
-   "durationMinutes": 8,
-   "instruction": "Learn about Wallis's derivation using integrals, then compute the first 10 terms of the product to see it converge to π/2."
-  }
- },
- {
-  "id": "mathematics-eulers-number",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Euler's Number (e)",
-  "teaser": "e = 2.71828... — the base of natural logarithms, appearing wherever growth or compound interest is involved. If you compound 100% interest infinitely often, you get e. Euler called it the most beautiful number.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "calculus",
-   "constants"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The significance of e",
-   "durationMinutes": 7,
-   "instruction": "Learn about compound interest approaching e, then find one natural phenomenon described by exponential growth using e."
-  }
- },
- {
-  "id": "mathematics-basel-problem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Basel Problem",
-  "teaser": "Euler solved it in 1734: the sum of all reciprocals of perfect squares (1/1 + 1/4 + 1/9 + ...) equals exactly pi squared divided by six. No one had cracked it for 90 years — it announced Euler as a mathematical genius.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "series",
-   "pi"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Euler's Basel solution",
-   "durationMinutes": 8,
-   "instruction": "Learn about Euler's proof using sine function factorisation, then compute the first 10 terms to see convergence toward pi^2/6."
-  }
- },
- {
-  "id": "mathematics-ramanujan",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Srinivasa Ramanujan",
-  "teaser": "A self-taught Indian mathematician who sent 120 theorems to Cambridge without proof — Hardy recognised genius. Ramanujan produced 3,900 results in his short life, many still unproven, including infinite series for pi that power modern computing.",
-  "imageUrl": "",
-  "byline": "Srinivasa Ramanujan",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "history",
-   "genius"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Ramanujan's mathematical legacy",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Hardy-Ramanujan number 1729, then find one Ramanujan result used in modern physics or computing."
-  }
- },
- {
-  "id": "mathematics-fermat-little",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "Fermat's Little Theorem",
-  "teaser": "If p is prime, then a^p minus a is divisible by p for any integer a — a simple statement that's the backbone of RSA encryption. Every time you bank online, Fermat's 300-year-old theorem is protecting your data.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "primes",
-   "cryptography"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Fermat's Little Theorem",
-   "durationMinutes": 7,
-   "instruction": "Learn about Fermat's Little Theorem with a worked example, then find one way it's used in RSA encryption."
-  }
- },
- {
-  "id": "mathematics-chinese-remainder",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Chinese Remainder Theorem",
-  "teaser": "A 3rd-century problem about counting soldiers: if a number leaves specific remainders when divided by several values, you can find it exactly. It's now fundamental in error-correcting codes and RSA cryptography.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "cryptography"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Chinese Remainder Theorem",
-   "durationMinutes": 7,
-   "instruction": "Learn about Sun Zi's original soldier-counting problem, then find one modern application in computer science."
-  }
- },
- {
-  "id": "mathematics-non-euclidean",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Non-Euclidean Geometry",
-  "teaser": "Euclid's parallel postulate — that exactly one line can be drawn parallel to another through a point — can be replaced: in hyperbolic geometry there are infinite parallels; in spherical geometry none. Einstein showed spacetime is non-Euclidean.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "geometry",
-   "space"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "What happens without Euclid's parallel postulate",
-   "durationMinutes": 8,
-   "instruction": "Learn the difference between hyperbolic, spherical, and Euclidean geometry, then find one example of each in the real world."
-  }
- },
- {
-  "id": "mathematics-banach-tarski",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Banach-Tarski Paradox",
-  "teaser": "A solid sphere can be decomposed into five pieces and reassembled into two identical spheres — same size as the original. It sounds impossible but it's mathematically valid: the 'pieces' are infinitely scattered point sets that can't have a defined volume.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "paradox",
-   "set-theory"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Banach-Tarski Paradox",
-   "durationMinutes": 7,
-   "instruction": "Learn about the role of the Axiom of Choice in the paradox, then explain why the pieces can't be measured."
-  }
- },
- {
-  "id": "mathematics-axiom-of-choice",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "The Axiom of Choice",
-  "teaser": "The most controversial axiom in mathematics — it says you can always pick one element from each set in an infinite collection, even when you can't define a rule for choosing. It enables Banach-Tarski and well-ordering, but some mathematicians refuse to use it.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "set-theory",
-   "logic"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The Axiom of Choice debate",
-   "durationMinutes": 8,
-   "instruction": "Learn what the Axiom of Choice actually states, then find one theorem that requires it and one that doesn't."
-  }
- },
- {
-  "id": "mathematics-knot-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Knot Theory",
-  "teaser": "In mathematics a knot is a closed loop that can't be untangled — knot theory classifies them using polynomials that can distinguish knots too subtle for visual inspection. It's now used in studying how DNA knots and unknots during replication.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "topology",
-   "knots"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Knot theory basics",
-   "durationMinutes": 7,
-   "instruction": "Learn about the Jones polynomial, then find one biological process that involves knotting or unknotting DNA."
-  }
- },
- {
-  "id": "mathematics-ramsey-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Ramsey Theory",
-  "teaser": "Complete disorder is impossible — in any group of six people, there are either three mutual friends or three mutual strangers. Ramsey theory proves that structure is always hiding in large enough systems, no matter how random they look.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "combinatorics",
-   "structure"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why complete disorder is impossible",
-   "durationMinutes": 7,
-   "instruction": "Learn about the party problem (six people), then find one application of Ramsey theory in computer science."
-  }
- },
- {
-  "id": "mathematics-modular-arithmetic",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Modular Arithmetic",
-  "teaser": "When clocks hit 12 they go back to 1 — that's modular arithmetic, the mathematics of cycles. A clock runs mod 12; weekdays run mod 7. Gauss called it 'arithmetic modulo m' and it underpins all of modern cryptography.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "cycles"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Modular arithmetic in daily life",
-   "durationMinutes": 6,
-   "instruction": "Learn about clock arithmetic, then find one example where modular arithmetic is essential to computer security."
-  }
- },
- {
-  "id": "mathematics-perfect-numbers",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Number",
-  "name": "Perfect Numbers",
-  "teaser": "A number equals the sum of its divisors: 6 = 1+2+3, 28 = 1+2+4+7+14. Perfect numbers are rare — only 51 are known, all even. Whether an odd perfect number exists is one of the oldest unsolved questions in mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "number-theory",
-   "divisors"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Perfect numbers and their rarity",
-   "durationMinutes": 7,
-   "instruction": "Learn about the Euclid-Euler theorem for even perfect numbers, then find one conjecture about odd perfect numbers."
-  }
- },
- {
-  "id": "mathematics-riemann-zeta",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "The Riemann Zeta Function",
-  "teaser": "Zeta(s) = 1/1^s + 1/2^s + 1/3^s + ... — when s=2 it equals pi squared over six. Riemann showed its zeros encode the distribution of prime numbers, and proving where they all sit is the most important unsolved problem in mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "primes",
-   "analysis"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The zeta function and primes",
-   "durationMinutes": 8,
-   "instruction": "Learn about the Euler product formula linking zeta to primes, then find one consequence if the Riemann Hypothesis is proven."
-  }
- },
- {
-  "id": "mathematics-hilbert-problems",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "Hilbert's Problems",
-  "teaser": "In 1900 David Hilbert listed 23 unsolved problems to guide mathematics into the next century — several were solved, some are still open, and Hilbert's 'physics has nothing left for us to do' quote about the Riemann Hypothesis proved spectacularly premature.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "history",
-   "unsolved"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Hilbert's 23 problems",
-   "durationMinutes": 8,
-   "instruction": "Learn which of Hilbert's problems remain unsolved, then find one whose solution changed mathematics."
-  }
- },
- {
-  "id": "mathematics-poincare-conjecture",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Poincare Conjecture",
-  "teaser": "Every simply connected 3D surface is topologically a sphere — Poincare proposed this in 1904, and it took a century to prove. Perelman proved it in 2003, declined the Fields Medal and the million-dollar prize, and said the money was irrelevant.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "topology",
-   "proof"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Perelman's proof",
-   "durationMinutes": 8,
-   "instruction": "Learn about Perelman's Ricci flow proof, then find one reason he turned down the Millennium Prize."
-  }
- },
- {
-  "id": "mathematics-fermi-estimates",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Fermi Estimates",
-  "teaser": "Enrico Fermi could estimate the number of piano tuners in Chicago to within a factor of two using nothing but logic and rough arithmetic — Fermi estimation is the art of answering impossible questions with reasonable approximations.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "estimation",
-   "problem-solving"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Fermi estimation",
-   "durationMinutes": 6,
-   "instruction": "Learn Fermi estimation technique, then try one yourself: how many piano tuners are in your city?"
-  }
- },
- {
-  "id": "mathematics-benfords-law",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Benford's Law",
-  "teaser": "In real-world data, the digit 1 appears as the first digit 30% of the time, while 9 appears less than 5% — accounting fraudsters who fabricate numbers usually distribute first digits evenly, and Benford's Law catches them.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "statistics",
-   "fraud"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Benford's Law",
-   "durationMinutes": 7,
-   "instruction": "Learn why Benford's Law works for naturally occurring data, then find one example where forensic accountants used it to detect fraud."
-  }
- },
- {
-  "id": "mathematics-birthday-paradox",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "The Birthday Paradox",
-  "teaser": "In a room of 23 people, there's a 50% chance two share a birthday — in 70 people it's 99.9%. It's counterintuitive because we think about matching our own birthday, not any pair among the group.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "probability",
-   "intuition"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why 23 people suffice",
-   "durationMinutes": 6,
-   "instruction": "Learn about the combinatorial calculation behind the birthday problem, then find one real-world application in hash collisions."
-  }
- },
- {
-  "id": "mathematics-simpsons-paradox",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Simpson's Paradox",
-  "teaser": "A treatment can appear better for men AND women individually while being worse overall — Simpson's Paradox occurs when aggregated data reverses the trend seen in subgroups, making statistics dangerously misleading.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "statistics",
-   "paradox"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "How aggregated data can lie",
-   "durationMinutes": 7,
-   "instruction": "Learn about the kidney stone treatment paradox, then find one example of Simpson's Paradox in public health data."
-  }
- },
- {
-  "id": "mathematics-central-limit-theorem",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Central Limit Theorem",
-  "teaser": "No matter how weird the original distribution, the average of enough samples follows a bell curve — this is why the normal distribution appears everywhere in nature and makes polling work with just 1,000 people.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "statistics",
-   "probability"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Why averages form bell curves",
-   "durationMinutes": 8,
-   "instruction": "Learn about the CLT's implications for polling and measurement, then find one distribution where the CLT fails to converge."
-  }
- },
- {
-  "id": "mathematics-markov-chains",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Markov Chains",
-  "teaser": "A system where the next state depends only on the current state, not the path that got there — Google's PageRank, stock price models, and predictive text all use Markov chains. They're the simplest model of randomness that's still useful.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "probability",
-   "models"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Markov chains explained",
-   "durationMinutes": 7,
-   "instruction": "Learn about the weather example (sunny/cloudy states), then find one way Markov chains are used in natural language processing."
-  }
- },
- {
-  "id": "mathematics-game-theory",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Branch",
-  "name": "Game Theory",
-  "teaser": "The mathematics of strategic decision-making — von Neumann and Morgenstern formalised it in 1944. It explains why oligopolies keep prices high, why nuclear deterrence works, and why cooperation evolves among selfish agents.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "strategy",
-   "economics"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Game theory basics",
-   "durationMinutes": 7,
-   "instruction": "Learn about zero-sum vs non-zero-sum games, then find one way the Prisoner's Dilemma models real-world conflicts."
-  }
- },
- {
-  "id": "mathematics-nash-equilibrium",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Nash Equilibrium",
-  "teaser": "A state where no player can improve their outcome by changing strategy alone — Nash proved every game has at least one. It explains why drivers stay on the right, why arms races persist, and why restaurants cluster together.",
-  "imageUrl": "",
-  "byline": "John Nash",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "strategy",
-   "equilibrium"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Nash Equilibrium in practice",
-   "durationMinutes": 7,
-   "instruction": "Learn about the Nash Equilibrium in the Prisoner's Dilemma, then find one real market that settles into a Nash Equilibrium."
-  }
- },
- {
-  "id": "mathematics-traveling-salesman",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "The Traveling Salesman Problem",
-  "teaser": "Visit every city exactly once and return home with the shortest route — with just 25 cities there are more possible routes than atoms in the universe. No efficient algorithm exists; finding one would earn a million dollars.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "optimization",
-   "NP"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The hardest route-planning problem",
-   "durationMinutes": 8,
-   "instruction": "Learn about the P vs NP connection to TSP, then find one heuristic that gets close to optimal in practice."
-  }
- },
- {
-  "id": "mathematics-big-o",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "Big O Notation",
-  "teaser": "Big O describes how an algorithm scales: O(n) means time grows linearly, O(n squared) grows quadratically — an O(n squared) sort on 1 million items takes 1 trillion operations while O(n log n) takes 20 million. Algorithm choice is the difference between seconds and years.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "computer-science",
-   "complexity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Big O notation",
-   "durationMinutes": 7,
-   "instruction": "Learn the difference between O(1), O(log n), O(n), and O(n squared), then find one sorting algorithm for each complexity class."
-  }
- },
- {
-  "id": "mathematics-zenos-paradoxes",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Problem",
-  "name": "Zeno's Paradoxes",
-  "teaser": "Zeno argued motion is impossible: to cross a room you must cross half, then half of half, then half of half of half — an infinite number of steps. It took 2,000 years for calculus and convergent series to fully resolve the paradox.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "paradox",
-   "infinity"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "Zeno's Dichotomy Paradox",
-   "durationMinutes": 7,
-   "instruction": "Learn all four of Zeno's paradoxes, then find one that was fully resolved by calculus."
-  }
- },
- {
-  "id": "mathematics-quadratic-formula",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Theorem",
-  "name": "The Quadratic Formula",
-  "teaser": "x = (-b +/- sqrt(b squared - 4ac)) / 2a — the universal solution to any quadratic equation. Known to Babylonians in 2000 BCE, it was the first algebraic formula to solve a general class of problems.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "algebra",
-   "equations"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The quadratic formula and its history",
-   "durationMinutes": 6,
-   "instruction": "Learn the quadratic formula and its derivation, then find one historical civilisation that solved quadratics without our notation."
-  }
- },
- {
-  "id": "mathematics-harmonic-series",
-  "categoryId": "MATHEMATICS",
-  "subtype": "Concept",
-  "name": "The Harmonic Series",
-  "teaser": "1 + 1/2 + 1/3 + 1/4 + ... grows to infinity, but so slowly you need 22,876,792,454,961 terms to reach 100. The paradox is that while the terms approach zero, the sum diverges — one of the most mind-bending facts in mathematics.",
-  "imageUrl": "",
-  "tier": 1,
-  "tags": [
-   "mathematics",
-   "series",
-   "divergence"
-  ],
-  "exploreAction": {
-   "verb": "Explore",
-   "targetName": "The diverging harmonic series",
-   "durationMinutes": 7,
-   "instruction": "Learn about Nicole Oresme's 14th-century proof, then compare the harmonic series to the convergent p-series (1/n squared)."
-  }
- }
 ]
