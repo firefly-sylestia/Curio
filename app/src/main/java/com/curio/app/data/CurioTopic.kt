@@ -75,7 +75,17 @@ data class CurioTopic(
      */
     val altPageCount: Int? = null,
     /** Short edition label for [altPageCount], e.g. "Penguin Classics". */
-    val altPageLabel: String = ""
+    val altPageLabel: String = "",
+    /**
+     * Books only: a detailed narrative synopsis of the book. Null for
+     * non-book topics and legacy JSON without the field.
+     */
+    val synopsis: String? = null,
+    /**
+     * Books only: chapter-by-chapter breakdown with page ranges and
+     * summaries. Null for non-book topics and legacy JSON without the field.
+     */
+    val chapters: List<BookChapter>? = null
 ) {
     /**
      * Progress target for this topic: pages for books, episodes for anime/
@@ -275,6 +285,24 @@ fun CurioTopic.titleAndYearQualifier(): Pair<String, String?> {
         .trim().removeSuffix(")").trim()
     return cut to qualifier.ifBlank { null }
 }
+
+/**
+ * One chapter of a book topic — page ranges + summary for the
+ * book-detail overlay on TopicRevealScreen.
+ *
+ * @property number Chapter number (1-based).
+ * @property title Chapter title (e.g. "Book I — The Quarrel").
+ * @property pageStart First page of this chapter.
+ * @property pageEnd Last page of this chapter.
+ * @property summary One-line summary of the chapter's content.
+ */
+data class BookChapter(
+    val number: Int,
+    val title: String,
+    val pageStart: Int,
+    val pageEnd: Int,
+    val summary: String
+)
 
 /**
  * v135 — the reveal's decade tag chip: "1941" → "1940s". Null when no

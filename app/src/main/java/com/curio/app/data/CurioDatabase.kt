@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CaptureEntity::class, TopicEntity::class, CachedTopicEntity::class],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -192,6 +192,16 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /** v10 → v11: add synopsis + chapters columns for book topics. */
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE topics ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE topics ADD COLUMN chapters TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE cached_topics ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE cached_topics ADD COLUMN chapters TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -206,7 +216,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }
