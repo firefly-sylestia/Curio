@@ -40,26 +40,6 @@
     "tier": 3
   },
   {
-    "id": "wildcard-antikythera-mechanism",
-    "categoryId": "WILDCARD",
-    "subtype": "Artifact",
-    "name": "Antikythera Mechanism",
-    "teaser": "Greek divers in 1902 found a bronze box covered in coral, dated to 60BC. It turned out to be a mechanical computer that modeled the solar system, eclipse cycles and the Olympic calendar. Nothing similar was built again for 1500 years.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "National Archaeological Museum of Athens, Antikythera Mechanism gallery",
-      "durationMinutes": 60,
-      "instruction": "Start with the three main gear fragments under glass. The smallest preserved gear has 23 teeth. Twenty-three. That's the Saros cycle for predicting eclipses, which the Greeks used. The number isn't obvious from outside."
-    },
-    "tags": [
-      "Ancient",
-      "Greek",
-      "Mechanical"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wildcard-bio-luminescent-bays",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -96,26 +76,6 @@
       "Ecology",
       "British",
       "Winter"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-mole-rico",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Mole Negro",
-    "teaser": "Oaxacan sauce with 32 ingredients including three types of dried chile, chocolate, and burnt banana leaf. The dish has its own festival (the Festival of the Mole) every July in Oaxaca.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Casa Sierra Norte, Oaxaca — mole tasting menu",
-      "durationMinutes": 60,
-      "instruction": "Read about mole negro — how Oaxaca layers smoky, herbal, and citrus-sweet flavors, and why the green and yellow moles are served alongside it."
-    },
-    "tags": [
-      "Food",
-      "Mexican",
-      "Oaxacan"
     ],
     "tier": 2
   },
@@ -920,86 +880,6 @@
     "tier": 2
   },
   {
-    "id": "wild-the-great-wall-of-125",
-    "categoryId": "WILDCARD",
-    "subtype": "Site",
-    "name": "The Great Wall of China",
-    "teaser": "The Great Wall isn't one wall — it's a 2,000-year patchwork of walls, trenches, and natural barriers stretching over 21,000 km when all dynasties are counted. The myth that it's visible from the moon is false; from low Earth orbit it's visible but barely, and only in the right conditions.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "A Ming-dynasty watchtower section — Badaling vs. the rammed-earth frontier walls",
-      "durationMinutes": 23,
-      "instruction": "Compare a Ming-dynasty brick section (like Badaling) with the earlier rammed-earth walls on a map — the 'wall' is really a network. Then find the story of the beacon towers: smoke by day, fire by night, signals relayed from tower to tower at up to 700 km/h in ideal conditions."
-    },
-    "tags": [
-      "History",
-      "China",
-      "Architecture"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-the-forbidden-city-126",
-    "categoryId": "WILDCARD",
-    "subtype": "Site",
-    "name": "The Forbidden City",
-    "teaser": "Beijing's Forbidden City is a 72-hectare walled palace with 980 surviving buildings, built in 15 years starting 1406 — construction used a million laborers and logs floated from forests 1,000 km away. Legend says it has 9,999 rooms: one short of heaven's 10,000, because only the Jade Emperor could have 10,000.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The Hall of Supreme Harmony, Forbidden City central axis (virtual tour)",
-      "durationMinutes": 23,
-      "instruction": "Walk the central axis from the Meridian Gate to the Hall of Supreme Harmony in a virtual tour and count the courtyards — the design deliberately hides the throne from the entrance. Then look at the roof ridge animals on the Hall of Supreme Harmony: ten beasts, the maximum, reserved for the emperor alone."
-    },
-    "tags": [
-      "History",
-      "China",
-      "Architecture"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-sagrada-família-127",
-    "categoryId": "WILDCARD",
-    "subtype": "Structure",
-    "name": "Sagrada Família",
-    "teaser": "Antoni Gaudí's Sagrada Família has been under construction since 1882 — longer than the pyramids took to build — with completion now targeted for 2026, the centenary of his death. It's financed entirely by ticket sales and private donations, and Gaudí is buried in the crypt he designed.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The Passion vs. Nativity façades of the Sagrada Família, Barcelona",
-      "durationMinutes": 9,
-      "instruction": "Single out the Passion façade — designed by Gaudí but carved in the 1980s from his drawings, in sharp angular contrast to the organic Nativity façade he completed himself. The difference between the two facades is a masterclass in how much of the building is the original architect's versus his successors'."
-    },
-    "tags": [
-      "Architecture",
-      "Spain",
-      "Art Nouveau"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-the-golden-gate-bridge-128",
-    "categoryId": "WILDCARD",
-    "subtype": "Structure",
-    "name": "The Golden Gate Bridge",
-    "teaser": "When the Golden Gate Bridge opened in 1937 it was the longest suspension span in the world, and its 'International Orange' color was chosen because it's the most visible shade in San Francisco's fog. A safety net beneath the deck saved 19 workers — who formed the 'Halfway to Hell Club.'.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "1930s construction photos of the Golden Gate Bridge towers",
-      "durationMinutes": 21,
-      "instruction": "Look at archival photos of the 1930s construction: workers riveted the towers without harnesses above the net, and the towers rose from the water with no crane tall enough — they were built as a self-climbing rig. Then find the wind-tunnel test footage that reshaped the deck in 1951, an engineering first."
-    },
-    "tags": [
-      "Engineering",
-      "USA",
-      "Architecture"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wild-the-northern-lights-129",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -1300,26 +1180,6 @@
     "tier": 2
   },
   {
-    "id": "wild-the-butterfly-effect-144",
-    "categoryId": "WILDCARD",
-    "subtype": "Concept",
-    "name": "The Butterfly Effect",
-    "teaser": "The butterfly effect was born from a rounding error: in 1961 meteorologist Edward Lorenz re-ran a weather simulation with 0.506 instead of 0.506127 and got a completely different forecast. His 1972 talk title asked whether a butterfly flapping in Brazil could set off a tornado in Texas — and chaos theory was named.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The Lorenz attractor simulation (butterfly-shaped chaos plot)",
-      "durationMinutes": 27,
-      "instruction": "Watch the famous double-pendulum or Lorenz attractor simulation — two systems starting a hair apart diverge into entirely different paths. Lorenz's real discovery is in the shapes: the 'attractor' plots show order inside the chaos, which is why weather can be predicted days, not weeks, ahead."
-    },
-    "tags": [
-      "Science",
-      "Chaos",
-      "Mathematics"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wild-the-placebo-effect-145",
     "categoryId": "WILDCARD",
     "subtype": "Concept",
@@ -1416,26 +1276,6 @@
       "History",
       "Ancient",
       "Books"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-atlantis-150",
-    "categoryId": "WILDCARD",
-    "subtype": "Legend",
-    "name": "Atlantis",
-    "teaser": "Atlantis appears in exactly two texts — Plato's Timaeus and Critias, written around 360 BC — as a cautionary tale of an island empire that sank in a day and night for growing corrupt. Most scholars read it as a philosophical invention: Plato invented a state to contrast with his ideal one.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "Plato's Timaeus 24e–25d — the Atlantis passage itself",
-      "durationMinutes": 13,
-      "instruction": "Read the Atlantis passage in the Timaeus and notice the frame: Plato says the story came from Egyptian priests via Solon — a claim made, conveniently, 9,000 years too far back to verify. Then trace the modern mythology: Atlantis mania began in the 19th century with Ignatius Donnelly, not with Plato."
-    },
-    "tags": [
-      "Myth",
-      "Philosophy",
-      "Ancient"
     ],
     "tier": 2
   },
@@ -2040,26 +1880,6 @@
     "tier": 2
   },
   {
-    "id": "wild-the-antikythera-mechanism-181",
-    "categoryId": "WILDCARD",
-    "subtype": "Artifact",
-    "name": "The Antikythera Mechanism",
-    "teaser": "In 1900, sponge divers off the Greek island of Antikythera found a shipwreck 45 meters down — and among the statues and coins, a corroded lump that proved to be a bronze gearbox from around 60 BC. It predicted eclipses, tracked the planets, and timed the Olympic games: a device of that complexity would not appear again in Europe for over a thousand years.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The 2005 X-ray tomography of the Antikythera Mechanism's gears",
-      "durationMinutes": 6,
-      "instruction": "Read the discovery story, then the 2005 X-ray breakthrough that revealed 30+ interlocking gears inside the corrosion. The device's front dial showed the Sun and Moon against the zodiac; the back dial predicted eclipses using the Saros cycle. No other object like it survives from antiquity — which is its own question: was it unique, or the tip of a lost tradition?"
-    },
-    "tags": [
-      "Ancient",
-      "Greek",
-      "Mechanical"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wild-machu-picchu-182",
     "categoryId": "WILDCARD",
     "subtype": "Site",
@@ -2120,46 +1940,6 @@
     "tier": 2
   },
   {
-    "id": "wild-the-colosseum-185",
-    "categoryId": "WILDCARD",
-    "subtype": "Site",
-    "name": "The Colosseum",
-    "teaser": "Rome's Colosseum, completed in AD 80, held 50,000 to 80,000 spectators who entered through 80 numbered arches and were out of the building in minutes — crowd engineering that stadiums still copy. Under the arena floor was a five-story hypogeum of cages, ramps, and elevators that raised gladiators and animals into the light as if from nowhere.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The Colosseum hypogeum cross-section — the arena's underground machinery",
-      "durationMinutes": 3,
-      "instruction": "Notice a cross-section of the hypogeum — the trapdoors and lifts below the sand floor, operated by a system of pulleys and counterweights. Then count the arches and imagine the ticketing: 80 entrances, each with a number, letting a crowd the size of a modern soccer stadium enter and exit without a crush."
-    },
-    "tags": [
-      "Rome",
-      "Ancient",
-      "Architecture"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-the-taj-mahal-186",
-    "categoryId": "WILDCARD",
-    "subtype": "Structure",
-    "name": "The Taj Mahal",
-    "teaser": "The Taj Mahal was built by Mughal emperor Shah Jahan for his wife Mumtaz Mahal, who died in childbirth in 1631 — the mausoleum took 22 years and some 20,000 artisans. Its white marble appears to change color through the day, and the four minarets lean slightly outward: if they fell, they'd fall away from the tomb.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The Taj Mahal's minaret tilt + graded calligraphy on the great gate",
-      "durationMinutes": 21,
-      "instruction": "Read the design logic: the minarets' outward tilt is structural insurance, and the marble's color shift comes from inlaid semi-precious stone catching different light. Then find the calligraphy bands on the gate — the letters are graded in size so the whole inscription appears uniform from ground level, an optical illusion built into the stone."
-    },
-    "tags": [
-      "India",
-      "Mughal",
-      "Architecture"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wild-mont-saint-michel-187",
     "categoryId": "WILDCARD",
     "subtype": "Site",
@@ -2176,46 +1956,6 @@
       "France",
       "Medieval",
       "Architecture"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-the-sydney-opera-house-188",
-    "categoryId": "WILDCARD",
-    "subtype": "Structure",
-    "name": "The Sydney Opera House",
-    "teaser": "Danish architect Jørn Utzon won the Sydney Opera House competition in 1957 with a sketch of overlapping shells — which engineers initially said couldn't be built. The project ran 10 years late and 14 times over budget, and Utzon resigned in 1966, never returning to see it finished or to collect the Pritzker Prize awarded for it in 2003.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The sphere-based geometry of the Opera House shells + Swedish tiles",
-      "durationMinutes": 27,
-      "instruction": "Watch the construction documentary footage: the shells were solved by treating them as sections of the same sphere — every shell rib is part of one imaginary ball, which is why the roof looks organic but was buildable. Then notice the tiles: over a million white and cream ceramic tiles, self-cleaning by rain, made in Sweden."
-    },
-    "tags": [
-      "Australia",
-      "Architecture",
-      "Modern"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-the-eiffel-tower-189",
-    "categoryId": "WILDCARD",
-    "subtype": "Structure",
-    "name": "The Eiffel Tower",
-    "teaser": "The Eiffel Tower was built for the 1889 World's Fair as a temporary structure meant to stand 20 years — and Parisian artists signed a public protest against it, calling it a 'gigantic black smokestack.' It survives today because Gustave Eiffel added a radio antenna, making the tower too useful to demolish.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The 1889 artists' protest letter + Eiffel's radio-antenna rescue",
-      "durationMinutes": 7,
-      "instruction": "Read the 1889 protest letter — the signatories included Guy de Maupassant, who reportedly ate lunch in the tower's restaurant because it was the one place in Paris he couldn't see it. Then find the wind-tunnel connection: Eiffel's later aerodynamic experiments on the tower's shape helped pioneer the wind tunnel itself."
-    },
-    "tags": [
-      "France",
-      "Engineering",
-      "History"
     ],
     "tier": 2
   },
@@ -2820,26 +2560,6 @@
     "tier": 2
   },
   {
-    "id": "wild-savants-220",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Savants",
-    "teaser": "Savant syndrome — remarkable ability in a narrow domain, often memory, music, or calendar calculation, alongside significant disability — was described by physician Darold Treffert, who studied Kim Peek, the man who inspired 'Rain Man.' Peek could read two book pages at once and memorize thousands of books, yet couldn't button his own shirt.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "Kim Peek's dual-page reading + Treffert's savant studies",
-      "durationMinutes": 28,
-      "instruction": "Read about Peek's abilities and limits together: he read with both eyes on facing pages and retained essentially everything, but his cognitive profile was uneven enough that he needed help with everyday tasks. Then compare with 'acquired savant' cases — people who developed abilities after brain injury, which is why savantism is a window into how the brain reorganizes."
-    },
-    "tags": [
-      "Psychology",
-      "Memory",
-      "Neuroscience"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wild-synesthetes-221",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -3036,26 +2756,6 @@
       "China",
       "Geology",
       "Nature"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wild-antelope-canyon-231",
-    "categoryId": "WILDCARD",
-    "subtype": "Place",
-    "name": "Antelope Canyon",
-    "teaser": "Antelope Canyon in Arizona is a slot canyon so narrow that in places you can touch both walls at once — carved by flash floods over hundreds of thousands of years from Navajo sandstone. Its walls glow orange and pink when sunlight angles in, and the famous 'light beams' appear only at midday, when the sun is nearly overhead and dust hangs in the air.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "The midday light beams of Antelope Canyon + the 1997 flood",
-      "durationMinutes": 28,
-      "instruction": "Pause on the canyon from inside, where the light shafts are most visible around noon — the beams are dust and air, not the rock, which is why guides kick up sand to 'create' them for photos. Then read the 1997 flash-flood disaster: eleven hikers died when a storm miles away sent a wall of water through the narrow canyon with no warning."
-    },
-    "tags": [
-      "USA",
-      "Geology",
-      "Photography"
     ],
     "tier": 2
   },
@@ -3360,166 +3060,6 @@
     "tier": 3
   },
   {
-    "id": "wildcard-royal-ghost-orchid",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Ghost Orchid",
-    "teaser": "A leafless, rootless orchid that lives entirely inside other plants, blooming for a few days once a year — or not at all. It has no chlorophyll and no leaves, only a pale flower that floats in the dark Florida swamp like a spirit.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Seek",
-      "targetName": "The ghost orchid's swamp habitat",
-      "durationMinutes": 45,
-      "instruction": "Learn how the ghost orchid survives by parasitizing tree bark fungi for nutrition. Reflect on why poachers and habitat loss threaten it, and what it means to preserve an organism you may never see bloom."
-    },
-    "tags": [
-      "Nature",
-      "Botany",
-      "Rare"
-    ],
-    "tier": 3
-  },
-  {
-    "id": "wildcard-corpses-flower-plant",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Corpse Flower",
-    "teaser": "Amorphophallus titanum grows a bloom taller than a person, reeks of rotting flesh to attract flies, heats itself to 37°C, and flowers for barely 48 hours every few years. Crowds line up to smell a flower that smells like death.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Smell",
-      "targetName": "A blooming titan arum at a botanic garden",
-      "durationMinutes": 45,
-      "instruction": "Find a botanic garden with a titan arum and track its bloom alerts. When it opens, note the heat and the smell, the way the spathe unfurls, and how flies — not bees — are the intended visitors. Reflect on why evolution chose rot."
-    },
-    "tags": [
-      "Botany",
-      "Rare",
-      "Nature"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-venus-flytrap",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Venus Flytrap",
-    "teaser": "A plant that eats animals, native to a single 100-kilometer strip of Carolina bog. Its trap snaps shut in a tenth of a second, but only if two hairs trip within 20 seconds — the plant counts, so it won't waste a meal on a raindrop.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Feed",
-      "targetName": "A Venus flytrap up close",
-      "durationMinutes": 30,
-      "instruction": "Observe a flytrap's leaves and trigger hairs. Read how the plant counts stimuli before closing, then digests prey with enzymes over days. Consider why it eats insects: the bogs it lives in are nutrient-starved."
-    },
-    "tags": [
-      "Botany",
-      "Carnivorous",
-      "Nature"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-baobab-tree",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Baobab Tree",
-    "teaser": "The 'upside-down tree' of Africa, with a trunk like a swollen barrel that stores thousands of liters of water and a canopy that looks like roots reaching for the sky. Some baobabs are 2,000 years old — living monuments older than Rome.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Touch",
-      "targetName": "A giant baobab",
-      "durationMinutes": 30,
-      "instruction": "Look at photos or visit a baobab and note the trunk's smooth, water-swollen bark and the way its branches fork upward. Read how baobabs survive drought, feed people with their fruit, and how the oldest ones are now dying from climate change."
-    },
-    "tags": [
-      "Botany",
-      "Africa",
-      "Ancient"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-giant-sequoia",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Giant Sequoia",
-    "teaser": "The largest living things on Earth by volume — a single sequoia can outweigh 10 blue whales and has a crown visible from space. The General Sherman tree is about 2,200 years old and still growing. They need fire to reproduce, yet fire now threatens them.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Stand",
-      "targetName": "Giant sequoia groves, Sierra Nevada",
-      "durationMinutes": 60,
-      "instruction": "Visit a sequoia grove or study photos, then stand beneath the scale of the trunk. Read how sequoia seeds need fire-cleared soil and how modern fire suppression and megafires put them at risk. Measure how small you feel."
-    },
-    "tags": [
-      "Botany",
-      "Trees",
-      "Giant"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-bristlecone-pines",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Bristlecone Pines",
-    "teaser": "On wind-scoured mountain ridges live the oldest individual organisms on Earth — bristlecone pines over 4,800 years old. Twisted and half-dead, they grow a millimeter a year in stone, outliving empires while barely seeming to live at all.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Age",
-      "targetName": "Bristlecone pines in the White Mountains",
-      "durationMinutes": 45,
-      "instruction": "Learn how dendrochronologists dated bristlecones to nearly 5,000 years and used their rings to calibrate the radiocarbon clock. Reflect on what a tree that predates the pyramids has witnessed — and what it takes to live that long."
-    },
-    "tags": [
-      "Botany",
-      "Ancient",
-      "USA"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-ginkgo-tree",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Ginkgo Biloba",
-    "teaser": "A living fossil unchanged for 200 million years — the only tree that survived the asteroid that killed the dinosaurs. Its fan-shaped leaves, once eaten by dinosaurs, now line city streets. Hiroshima's ginkgoes were among the few trees that survived the blast.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Leaf",
-      "targetName": "A ginkgo tree in autumn",
-      "durationMinutes": 30,
-      "instruction": "Find a ginkgo and study its fan-shaped, veined leaves that fall all at once in a golden carpet. Read why it is called a living fossil, how it survived ice ages in China, and why it is famously resilient in cities."
-    },
-    "tags": [
-      "Botany",
-      "Ancient",
-      "Living Fossil"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-dragon-blood-tree",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Dragon's Blood Tree",
-    "teaser": "On Yemen's Socotra Island grows a tree shaped like an upturned umbrella, bleeding red sap called 'dragon's blood.' It exists nowhere else on Earth — an island that holds a third of all plant species found on it, and nowhere else.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Explore",
-      "targetName": "Socotra's dragon's blood trees",
-      "durationMinutes": 45,
-      "instruction": "Read why Socotra's isolation produced so many endemic species, and how the dragon's blood tree's canopy catches fog in a dry climate. Reflect on how the red resin was used for medicine and dye for millennia."
-    },
-    "tags": [
-      "Botany",
-      "Socotra",
-      "Endemic"
-    ],
-    "tier": 3
-  },
-  {
     "id": "wildcard-iceberg-calving",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -3698,26 +3238,6 @@
       "Physics"
     ],
     "tier": 2
-  },
-  {
-    "id": "wildcard-gregorian-chant",
-    "categoryId": "WILDCARD",
-    "subtype": "Music",
-    "name": "Gregorian Chant",
-    "teaser": "A thousand years of monks singing in unison without instruments — a single flowing melody line that medieval Europeans believed opened a door to the divine. Its plainchant is still sung today and its 'one voice' sound has influenced modern music.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Chant",
-      "targetName": "Gregorian chant tradition",
-      "durationMinutes": 30,
-      "instruction": "Learn how Gregorian chant developed, how it was notated (the ancestor of modern notation), and how modes give it its ancient feel. Write what makes it monophonic and how it is still performed."
-    },
-    "tags": [
-      "Music",
-      "History",
-      "Chant"
-    ],
-    "tier": 1
   },
   {
     "id": "wildcard-fugue",
@@ -4100,106 +3620,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-beekeeping-hives",
-    "categoryId": "WILDCARD",
-    "subtype": "Craft",
-    "name": "Beekeeping",
-    "teaser": "Opening a hive is stepping into a society of 50,000 — a queen, workers, and drones, all cooperating with chemical signals. Beekeepers learn to read the hive's mood from its buzz and its behavior, and to handle the bees without fear.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Hive",
-      "targetName": "Beekeeping basics",
-      "durationMinutes": 45,
-      "instruction": "Learn how a hive is organized, how the queen's pheromones hold it together, and what beekeepers check on inspection. Write why bees matter for pollination and how modern hives work."
-    },
-    "tags": [
-      "Craft",
-      "Bees",
-      "Nature"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-rainbow-eucalyptus",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Rainbow Eucalyptus",
-    "teaser": "A tree with bark that peels in ribbons to reveal stripes of green, blue, purple, orange, and maroon — like a living paint swatch. The colors come from the bark shedding at different times, exposing fresh layers as they age.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Strip",
-      "targetName": "Rainbow eucalyptus bark",
-      "durationMinutes": 30,
-      "instruction": "Learn why the rainbow eucalyptus's bark peels in patches and how each color marks a stage of aging. Write where it grows, how the peeling works, and why the effect looks painted."
-    },
-    "tags": [
-      "Botany",
-      "Trees",
-      "Color"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-saguaro-bloom",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Saguaro Cactus",
-    "teaser": "The towering cactus of the American Southwest — it can live 200 years, grow arms only after decades, and weigh more than a car. In spring it blooms white flowers for a single night, opening at dusk and closing forever by the next afternoon.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Bloom",
-      "targetName": "Saguaro life cycle",
-      "durationMinutes": 30,
-      "instruction": "Learn how saguaros grow, store water, and develop arms over decades, and how their night blooms are pollinated. Write how long they live, why they are protected, and what the flowers mean to the Tohono O'odham people."
-    },
-    "tags": [
-      "Botany",
-      "Desert",
-      "Cactus"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-welwitschia",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Welwitschia",
-    "teaser": "A plant that looks like a pile of tangled straps on the Namib desert floor — and is one of the strangest living things on Earth. It has only two true leaves, which grow continuously for up to 2,000 years, splitting and curling as the desert shreds them.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Age",
-      "targetName": "Welwitschia's two leaves",
-      "durationMinutes": 30,
-      "instruction": "Learn how welwitschia survives on coastal fog with just two ever-growing leaves, and how radiocarbon dating found individuals over a millennium old. Write how its leaf tips die while the base keeps growing, and where it lives."
-    },
-    "tags": [
-      "Botany",
-      "Desert",
-      "Ancient"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-victoria-amazonica",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Victoria Amazonica Lily",
-    "teaser": "The giant water lily of the Amazon — leaves up to 3 meters across with upturned rims, strong enough to hold a small child. It grows from a single seed into a raft of living geometry in weeks, and its night-blooming flowers change color as they open.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Float",
-      "targetName": "Victoria amazonica",
-      "durationMinutes": 30,
-      "instruction": "Learn how the lily's ribbed underside supports enormous weight and how its flowers warm themselves to attract beetles for pollination. Write the stages of its growth and why it was named for Queen Victoria."
-    },
-    "tags": [
-      "Botany",
-      "Amazon",
-      "Lily"
-    ],
-    "tier": 1
-  },
-  {
     "id": "wildcard-lobster-molt",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -4280,26 +3700,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-box-jellyfish",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "The Box Jellyfish",
-    "teaser": "The most venomous animal known — a transparent box with tentacles up to 3 meters long, carrying millions of stinging cells. It also has 24 eyes and can swim, unlike most jellyfish, and it hunts rather than drifts.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Avoid",
-      "targetName": "Box jellyfish biology",
-      "durationMinutes": 30,
-      "instruction": "Learn how box jellyfish venom works, where they live, and why they can swim and see. Write what the 24 eyes are for, how their stingers fire, and why they are feared in Australian waters."
-    },
-    "tags": [
-      "Animal",
-      "Jellyfish",
-      "Venom"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wildcard-king-cobra",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -4376,26 +3776,6 @@
       "Nature",
       "Restoration",
       "Ecology"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-coral-restoration",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Coral Reef Restoration",
-    "teaser": "Divers now farm coral in underwater nurseries, growing fragments on frames and replanting them on damaged reefs. Some teams even breed heat-tolerant corals, hoping to outpace the bleaching that threatens the world's reefs.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Replant",
-      "targetName": "Coral nurseries",
-      "durationMinutes": 45,
-      "instruction": "Learn how coral fragments are grown in nurseries and transplanted, and how researchers select for resilience to warm water. Write what causes bleaching and why restoration alone cannot save reefs without climate action."
-    },
-    "tags": [
-      "Nature",
-      "Ocean",
-      "Restoration"
     ],
     "tier": 2
   },
@@ -4720,26 +4100,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-cosy-dozen",
-    "categoryId": "WILDCARD",
-    "subtype": "Concept",
-    "name": "The Danish Jante Law",
-    "teaser": "A set of ten unwritten rules from a 1933 Danish-Norwegian novel, mocking a village culture that says 'don't think you are anyone special.' 'You're not to think you are anything at all' — janteloven is the modest heart of Nordic social culture.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Modest",
-      "targetName": "Jante law in Nordic culture",
-      "durationMinutes": 30,
-      "instruction": "Learn the ten rules of janteloven and how they shape Nordic humility, equality, and workplace culture. Write what it protects and what it might suppress, and how it compares to your own culture's norms."
-    },
-    "tags": [
-      "Concept",
-      "Denmark",
-      "Culture"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wildcard-dolce-far-niente",
     "categoryId": "WILDCARD",
     "subtype": "Concept",
@@ -4818,26 +4178,6 @@
       "Relaxation"
     ],
     "tier": 1
-  },
-  {
-    "id": "wildcard-savant-now",
-    "categoryId": "WILDCARD",
-    "subtype": "Concept",
-    "name": "Savant Syndrome",
-    "teaser": "Some people with developmental conditions show islands of extraordinary ability — calendar calculating, perfect pitch, instant arithmetic, photographic drawing. How such skills emerge is still mysterious, and a few appear after brain injury in ordinary people.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Amaze",
-      "targetName": "Savant abilities",
-      "durationMinutes": 30,
-      "instruction": "Learn about savants like Kim Peek, the inspiration for Rain Man, and how savant skills are studied. Write the theories — compensation, enhanced memory, altered brain wiring — and why the phenomenon is so rare."
-    },
-    "tags": [
-      "Concept",
-      "Brain",
-      "Ability"
-    ],
-    "tier": 2
   },
   {
     "id": "wildcard-retrocognition",
@@ -5540,46 +4880,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-whales-grind",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Orca Matrilines",
-    "teaser": "Orcas live in families led by the oldest female, and each family teaches its own dialect, hunting style, and even prey preference — some orcas eat only fish, others hunt seals and whales. The culture is passed down like a human language.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Orca",
-      "targetName": "Orca cultural traditions",
-      "durationMinutes": 30,
-      "instruction": "Learn how resident, transient, and offshore orcas differ in language and diet, and how calves inherit culture. Write how researchers study their dialects and why each population is treated as distinct."
-    },
-    "tags": [
-      "Animal",
-      "Orcas",
-      "Culture"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-elephant-memory",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Elephant Memory and Matriarchy",
-    "teaser": "Elephant herds are led by the oldest female, whose memory of droughts, routes, and dangers can save the whole family. Elephants recognize voices, mourn their dead, and can remember a scent decades later — 'an elephant never forgets' is close to true.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Remember",
-      "targetName": "Elephant social memory",
-      "durationMinutes": 45,
-      "instruction": "Learn how matriarchal elephant families pass knowledge and how studies proved they recognize calls and faces. Write what the research on elephant mourning and memory reveals about their minds."
-    },
-    "tags": [
-      "Animal",
-      "Elephants",
-      "Memory"
-    ],
-    "tier": 1
-  },
-  {
     "id": "wildcard-papercrane-senba",
     "categoryId": "WILDCARD",
     "subtype": "Tradition",
@@ -5960,46 +5260,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-crown-of-thorns",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Crown-of-Thorns Starfish",
-    "teaser": "A spiny starfish that eats living coral and can devastate reefs when its numbers explode — a natural part of the reef's balance that human activity can tip into plague. Divers now hunt them by hand to give the corals a chance.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Balance",
-      "targetName": "Crown-of-thorns outbreaks",
-      "durationMinutes": 30,
-      "instruction": "Learn how crown-of-thorns starfish feed on coral and why outbreaks happen — nutrient runoff, overfishing of predators. Write how the reef recovers and how culling programs help, and the ethical debate about intervening."
-    },
-    "tags": [
-      "Phenomenon",
-      "Reef",
-      "Ecology"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-sea-sponge",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Sea Sponges",
-    "teaser": "The simplest animals on Earth — no brain, no heart, no muscles — yet they can live for thousands of years and filter their own body volume of water every few seconds. Sponges have been on Earth for 600 million years and shaped the seafloor before fish existed.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Filter",
-      "targetName": "Sponge biology",
-      "durationMinutes": 30,
-      "instruction": "Learn how sponges feed by pumping water through pores and how their glass or collagen skeletons support them. Write why they are considered animals, how old some deep-sea sponges grow, and how they anchor reef ecosystems."
-    },
-    "tags": [
-      "Phenomenon",
-      "Ocean",
-      "Animals"
-    ],
-    "tier": 1
-  },
-  {
     "id": "wildcard-glacier-ice-cores",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -6078,26 +5338,6 @@
       "Geology"
     ],
     "tier": 2
-  },
-  {
-    "id": "wildcard-giant-causeway",
-    "categoryId": "WILDCARD",
-    "subtype": "Place",
-    "name": "Giant's Causeway",
-    "teaser": "Forty thousand interlocking basalt columns step into the Irish Sea like a bridge built by giants. Legend says a giant built it to fight a rival in Scotland; geology says a lava lake cooled and cracked into perfect hexagons 60 million years ago.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Step",
-      "targetName": "The Giant's Causeway, County Antrim",
-      "durationMinutes": 90,
-      "instruction": "Walk down onto the columns and check their shapes: mostly hexagonal, with a few pentagons and heptagons. Read how slow, even cooling made the cracks meet at 120° angles, and how the same rock continues underwater to Staffa in Scotland."
-    },
-    "tags": [
-      "Place",
-      "Ireland",
-      "Geology"
-    ],
-    "tier": 1
   },
   {
     "id": "wildcard-ayers-rock-uluru",
@@ -6218,26 +5458,6 @@
       "Silk Road"
     ],
     "tier": 2
-  },
-  {
-    "id": "wildcard-leshan-buddha",
-    "categoryId": "WILDCARD",
-    "subtype": "Place",
-    "name": "Leshan Giant Buddha",
-    "teaser": "A 71-meter stone Buddha carved into a cliff where three rivers meet in Sichuan, begun in 713 AD to calm the waters and finished 90 years later. Its shoulders are as wide as a football field, and its toenails could seat a family.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Look",
-      "targetName": "The Leshan Giant Buddha",
-      "durationMinutes": 60,
-      "instruction": "Descend the cliff stairs to stand at the Buddha's feet and look up. Read how monks carved the statue to pacify the river's currents, and how a hidden drainage system in the rock has kept the colossus dry for 1,300 years."
-    },
-    "tags": [
-      "Place",
-      "China",
-      "Statue"
-    ],
-    "tier": 1
   },
   {
     "id": "wildcard-meteora-monasteries",
@@ -6380,26 +5600,6 @@
     "tier": 2
   },
   {
-    "id": "wildcard-antelope-canyon-light",
-    "categoryId": "WILDCARD",
-    "subtype": "Place",
-    "name": "Antelope Canyon Light Beams",
-    "teaser": "In the narrow sandstone slot of Antelope Canyon, beams of sunlight fall like solid gold pillars at midday — dust in the air making the light visible. The Navajo call it 'the place where water runs through rocks,' and the walls glow in impossible oranges and purples.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Enter",
-      "targetName": "Antelope Canyon, Arizona",
-      "durationMinutes": 60,
-      "instruction": "Enter the slot canyon and watch how the light changes with the hour. Read how flash floods carved the smooth curves and why the beams appear only when the sun is high. Reflect on the Navajo guides who steward this place."
-    },
-    "tags": [
-      "Place",
-      "USA",
-      "Canyon"
-    ],
-    "tier": 1
-  },
-  {
     "id": "wildcard-horseshoe-bend",
     "categoryId": "WILDCARD",
     "subtype": "Place",
@@ -6540,366 +5740,6 @@
     "tier": 2
   },
   {
-    "id": "wildcard-axolotl",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Axolotl",
-    "teaser": "A Mexican salamander that never grows up — keeping its gills, fins, and baby face for life, and regrowing lost limbs, hearts, and even parts of its brain. It was sacred to the Aztecs and is now nearly extinct in the wild.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Regrow",
-      "targetName": "The axolotl's regeneration",
-      "durationMinutes": 45,
-      "instruction": "Learn how the axolotl stays in its larval form (neoteny) and regenerates limbs, spinal cord, and heart tissue without scarring. Write why scientists study it for human medicine and why it is endangered in its only home, Lake Xochimilco."
-    },
-    "tags": [
-      "Animal",
-      "Regeneration",
-      "Mexico"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-tardigrade",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Tardigrade (Water Bear)",
-    "teaser": "A microscopic eight-legged animal that can survive boiling, freezing, the vacuum of space, and years without water by shriveling into a glassy tun. They live in moss and gutters everywhere — the toughest animal on Earth.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Survive",
-      "targetName": "Tardigrades under a microscope",
-      "durationMinutes": 45,
-      "instruction": "Learn how tardigrades enter cryptobiosis — drying into a tun and slowing metabolism to almost nothing — then revive with water. Write the extremes they survived on the outside of spacecraft, and how their DNA repair works."
-    },
-    "tags": [
-      "Animal",
-      "Extremophile",
-      "Microscopic"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-immortal-jellyfish",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Immortal Jellyfish",
-    "teaser": "Turritopsis dohrnii can reverse its own aging — when stressed or old, it folds back into a polyp and starts its life cycle again, potentially forever. The only known animal that cheats death.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Reverse",
-      "targetName": "The immortal jellyfish's life cycle",
-      "durationMinutes": 30,
-      "instruction": "Learn how Turritopsis dohrnii transdifferentiates its cells to return from medusa to polyp. Write the steps of the reversal and what it could mean for aging research — and why it is not truly immortal in practice."
-    },
-    "tags": [
-      "Animal",
-      "Jellyfish",
-      "Immortality"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-mantis-shrimp",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Mantis Shrimp",
-    "teaser": "A crustacean with punches faster than a bullet, eyes that see twelve color channels (we see three), and claws that can crack aquarium glass. Its strike creates a flash of heat as hot as the sun's surface — underwater.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Punch",
-      "targetName": "Mantis shrimp vision and strikes",
-      "durationMinutes": 45,
-      "instruction": "Learn about the mantis shrimp's two claw types (smashers and spearers), its cavitation-bubble punches, and its twelve-photoreceptor eyes. Write how its eyes process color differently from human eyes and why the strike is so powerful."
-    },
-    "tags": [
-      "Animal",
-      "Vision",
-      "Ocean"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-dumbo-octopus",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Dumbo Octopus",
-    "teaser": "A deep-sea octopus with ear-like fins that flap like a cartoon elephant's, hovering over the abyssal plain at depths where sunlight never reaches. It is one of the deepest-living octopuses ever filmed.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Hover",
-      "targetName": "Dumbo octopus deep-sea footage",
-      "durationMinutes": 30,
-      "instruction": "Watch footage of the dumbo octopus swimming with its ear fins and study how it lives on the abyssal floor. Write how deep it lives, what it eats, and how its fins help it glide without jet propulsion."
-    },
-    "tags": [
-      "Animal",
-      "Deep Sea",
-      "Octopus"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-goblin-shark",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Goblin Shark",
-    "teaser": "A living fossil shark with a translucent snout and jaws that shoot forward like a spring-loaded trap to grab prey in the deep. It is so rare that most people only know it from a single famous photograph.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Lunge",
-      "targetName": "Goblin shark feeding videos",
-      "durationMinutes": 30,
-      "instruction": "Watch how the goblin shark extends its jaws at high speed to snatch prey. Write why its pinkish skin and long snout suit the deep sea, and how the 'living fossil' label applies to its ancient lineage."
-    },
-    "tags": [
-      "Animal",
-      "Shark",
-      "Deep Sea"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-okapi",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Okapi",
-    "teaser": "A striped forest animal that looks like a zebra-horse hybrid but is the giraffe's only living relative — with a long blue-black tongue and a neck shorter than its cousin's. It was unknown to science until 1901, hidden in the Congo's rainforest.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Compare",
-      "targetName": "Okapi anatomy and habitat",
-      "durationMinutes": 30,
-      "instruction": "Learn why the okapi is classified with giraffes despite its stripes, and how it uses its prehensile tongue. Write how it was discovered late, why it is endangered, and what the Congo Basin's forest means to it."
-    },
-    "tags": [
-      "Animal",
-      "Giraffe",
-      "Congo"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-saola",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Saola",
-    "teaser": "Called the 'Asian unicorn,' the saola is a forest antelope discovered in 1992 from antlers in a hunter's home — and still never photographed wild until 2013. It lives in the mountains of Vietnam and Laos, and scientists know almost nothing about it.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Rare",
-      "targetName": "Saola conservation efforts",
-      "durationMinutes": 30,
-      "instruction": "Learn how the saola was discovered from horns and how it was finally filmed. Write why it is critically endangered, how snares threaten it, and what conservationists are doing to save a species almost no one has seen."
-    },
-    "tags": [
-      "Animal",
-      "Rare",
-      "Vietnam"
-    ],
-    "tier": 3
-  },
-  {
-    "id": "wildcard-quokka",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Quokka",
-    "teaser": "A small wallaby on Rottnest Island, Australia, famous for its seemingly permanent smile — the 'happiest animal in the world.' It is fearless around humans and has become a selfie icon, though it is a real marsupial with a pouch and a tough life.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Smile",
-      "targetName": "Quokkas on Rottnest Island",
-      "durationMinutes": 30,
-      "instruction": "Learn why quokkas look like they smile (a natural facial structure) and why they are unafraid of people. Write how Rottnest's island environment shaped them, how they survive drought, and why feeding them is forbidden."
-    },
-    "tags": [
-      "Animal",
-      "Marsupial",
-      "Australia"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-aye-aye",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Aye-Aye",
-    "teaser": "A lemur with a long, thin middle finger that taps wood like a drum to find grubs, then hooks them out — the only primate using echolocation-style tapping. In Madagascar it was feared as an omen and killed on sight.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Tap",
-      "targetName": "Aye-aye foraging behavior",
-      "durationMinutes": 30,
-      "instruction": "Learn how the aye-aye uses percussive foraging — tapping branches to hear hollow chambers — and its elongated finger for extracting larvae. Write how this niche works and how superstition once threatened the species."
-    },
-    "tags": [
-      "Animal",
-      "Lemur",
-      "Madagascar"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-fennec-fox",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Fennec Fox",
-    "teaser": "The smallest wild fox in the world, with ears as big as its body that radiate heat and hear prey moving underground in the Sahara. Its sandy coat reflects sunlight and its paws are furry like snowshoes on hot sand.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Fennec fox desert adaptations",
-      "durationMinutes": 30,
-      "instruction": "Learn how the fennec fox's huge ears keep it cool and detect prey beneath the sand. Write its other desert adaptations — pale fur, furry feet, water-efficient kidneys — and how it lives in family burrows."
-    },
-    "tags": [
-      "Animal",
-      "Desert",
-      "Fox"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-maned-wolf",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Maned Wolf",
-    "teaser": "A long-legged fox-like canid from South American grasslands that looks like a fox on stilts — and is neither fox nor wolf. It walks like a deer, barks like a dog, and marks territory with a smell like hops.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Stride",
-      "targetName": "Maned wolf behavior and habitat",
-      "durationMinutes": 30,
-      "instruction": "Learn why the maned wolf has such long legs (to see over tall grass) and why it is in its own genus. Write about its diet of fruit and small animals, its distinctive urine odor, and its solitary lifestyle."
-    },
-    "tags": [
-      "Animal",
-      "South America",
-      "Canid"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-sloth-three-toed",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Three-Toed Sloth",
-    "teaser": "The slowest mammal on Earth, moving about 40 meters a day, sleeping 15 hours, and descending from the trees about once a week to poop. Algae grow in its fur, giving it a greenish camouflage — and a whole ecosystem rides on its back.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Slow",
-      "targetName": "Sloth life in the canopy",
-      "durationMinutes": 30,
-      "instruction": "Learn how sloths' slow metabolism, low body temperature, and algae-covered fur suit a life of hanging upside down. Write about their weekly ground visit, why they swim surprisingly well, and how moths live in their fur."
-    },
-    "tags": [
-      "Animal",
-      "Rainforest",
-      "Slow"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-narwhal",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Narwhal",
-    "teaser": "The 'unicorn of the sea' — an Arctic whale with a spiraled tusk that is actually an elongated tooth, up to 3 meters long, with millions of nerve endings. No one fully agrees what the tusk is for.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Tusk",
-      "targetName": "Narwhal tusks and Arctic life",
-      "durationMinutes": 30,
-      "instruction": "Learn about the narwhal's tusk — a tooth with sensory nerves, possibly used for sensing, display, or sparring. Write how narwhals dive deep for fish under sea ice and how climate change affects their Arctic habitat."
-    },
-    "tags": [
-      "Animal",
-      "Arctic",
-      "Whale"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-beluga-whale",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Beluga Whale",
-    "teaser": "The 'canary of the sea' — a white, melon-headed whale that sings, clicks, and chirps with a huge range of sounds and a flexible face that seems to smile. It can even mimic human speech.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Sing",
-      "targetName": "Beluga vocalizations",
-      "durationMinutes": 30,
-      "instruction": "Listen to beluga calls and learn how the melon organ focuses their echolocation. Write why they are so vocal, how they navigate under Arctic ice, and how a beluga once reportedly imitated human words."
-    },
-    "tags": [
-      "Animal",
-      "Arctic",
-      "Whale"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-vampire-squid",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Vampire Squid",
-    "teaser": "Not a vampire and not a squid, but a deep-sea cephalopod that lives in the oxygen-starved zone where almost nothing else survives. When threatened, it turns itself inside out like a spiky cloak — 'vampire' only in name.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Cloak",
-      "targetName": "Vampire squid deep-sea adaptations",
-      "durationMinutes": 30,
-      "instruction": "Learn how the vampire squid survives in the oxygen minimum zone, using its blue blood and low metabolism. Write how it wraps its arms into a cloak when alarmed and how it feeds on marine snow instead of blood."
-    },
-    "tags": [
-      "Animal",
-      "Deep Sea",
-      "Cephalopod"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-pistol-shrimp",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Pistol Shrimp",
-    "teaser": "A tiny shrimp that snaps its claw so fast it fires a bubble that collapses with a shockwave as hot as the sun's surface — the loudest sound in the ocean, loud enough to stun fish. The snap also makes a flash of light.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Snap",
-      "targetName": "Pistol shrimp cavitation",
-      "durationMinutes": 30,
-      "instruction": "Learn how the pistol shrimp's claw snap creates a cavitation bubble that collapses into a shockwave and sonoluminescence flash. Write how this stuns prey, why it is so loud, and how snapping shrimp colonies can interfere with sonar."
-    },
-    "tags": [
-      "Animal",
-      "Shrimp",
-      "Ocean"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-archerfish",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Archerfish",
-    "teaser": "A fish that shoots down insects with a jet of water — calculating the refraction of light at the water's surface to hit prey above the surface. It can even learn to distinguish human faces.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Shoot",
-      "targetName": "Archerfish water-jet hunting",
-      "durationMinutes": 30,
-      "instruction": "Learn how archerfish adjust their aim for light refraction and gravity to knock insects into the water. Write about their predictive water jets, their intelligence tests, and how they snap up the prey before rivals do."
-    },
-    "tags": [
-      "Animal",
-      "Fish",
-      "Hunting"
-    ],
-    "tier": 1
-  },
-  {
     "id": "wildcard-cleaning-station",
     "categoryId": "WILDCARD",
     "subtype": "Phenomenon",
@@ -6916,106 +5756,6 @@
       "Animal",
       "Reef",
       "Mutualism"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-leafcutter-ants",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Leafcutter Ants",
-    "teaser": "Ants that cut leaves and carry them underground — but they do not eat the leaves. They feed them to a fungus garden, and the fungus feeds them: one of the oldest farming relationships on Earth, 50 million years old.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Farm",
-      "targetName": "Leafcutter ant fungus farms",
-      "durationMinutes": "45",
-      "instruction": "Learn how leafcutter ants cultivate fungus on cut leaves in vast underground chambers. Write the full symbiosis — ant, fungus, and the bacteria that protect the fungus — and how a single colony can strip a whole tree overnight."
-    },
-    "tags": [
-      "Animal",
-      "Ants",
-      "Farming"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-army-ants",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Army Ants",
-    "teaser": "Nomadic ants with no permanent home — millions march in a swarm that clears the forest floor of insects, and they bivouac by linking their own bodies into a living nest. Their raids send wildlife fleeing.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "March",
-      "targetName": "Army ant swarm raids",
-      "durationMinutes": 30,
-      "instruction": "Learn how army ants form living bridges and bivouacs, and how their swarm raids flush out prey. Write how they cycle between nomadic and stationary phases, and which birds follow their raids to catch fleeing insects."
-    },
-    "tags": [
-      "Animal",
-      "Ants",
-      "Rainforest"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-bombardier-beetle",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Bombardier Beetle",
-    "teaser": "A beetle that defends itself by firing a boiling, explosive spray of chemicals from its rear — combining hydrogen peroxide and hydroquinone in a reaction chamber at 100°C, aimed like a turret with a 270° range.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Spray",
-      "targetName": "Bombardier beetle defense",
-      "durationMinutes": 30,
-      "instruction": "Learn how the bombardier beetle mixes chemicals in a special chamber and ejects the hot spray as a pulsed jet. Write how the reaction is controlled, how it deters predators, and how its mechanism has inspired engineering."
-    },
-    "tags": [
-      "Animal",
-      "Beetle",
-      "Defense"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-dung-beetle",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Dung Beetle",
-    "teaser": "A beetle that navigates by the Milky Way — rolling balls of dung in a straight line using the stars and the polarized light of the sun. The strongest animal relative to its size, some species push balls 1,000 times their own weight.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Roll",
-      "targetName": "Dung beetle navigation",
-      "durationMinutes": 30,
-      "instruction": "Learn how dung beetles roll dung balls and navigate by the Milky Way's band of light. Write about their strength, how they use celestial cues, and the ecological role they play by burying dung."
-    },
-    "tags": [
-      "Animal",
-      "Beetle",
-      "Navigation"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-monarch-butterfly",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Monarch Migration",
-    "teaser": "A butterfly weighing half a gram that flies up to 4,800 kilometers to Mexican mountaintops it has never seen — great-great-grandchildren of the ones that left the previous year. Millions gather in trees so thick they bend branches.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Migrate",
-      "targetName": "Monarch butterfly migration",
-      "durationMinutes": "45",
-      "instruction": "Learn how monarchs navigate to Mexico using the sun and a magnetic compass, and how multiple generations complete a single round trip. Write why they cluster in oyamel forests, and how milkweed loss affects them."
-    },
-    "tags": [
-      "Animal",
-      "Migration",
-      "Butterfly"
     ],
     "tier": 1
   },
@@ -7058,366 +5798,6 @@
       "Sound"
     ],
     "tier": 2
-  },
-  {
-    "id": "wildcard-natto",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Natto",
-    "teaser": "Fermented soybeans bound in a web of sticky strings — a Japanese breakfast staple with a smell some love and many fear. The fermentation is done by Bacillus subtilis, which produces the strings and a deep, umami funk.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Stir",
-      "targetName": "Natto preparation and fermentation",
-      "durationMinutes": 30,
-      "instruction": "Learn how natto is made by steaming soybeans and fermenting them with Bacillus subtilis. Write how the stirring develops its strings, what makes its flavor, and why it is praised for its health benefits."
-    },
-    "tags": [
-      "Food",
-      "Japan",
-      "Fermentation"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-umami",
-    "categoryId": "WILDCARD",
-    "subtype": "Concept",
-    "name": "Umami",
-    "teaser": "The 'fifth taste' — savory, brothy, meaty — discovered by Japanese chemist Kikunae Ikeda in 1908, who isolated glutamate from seaweed broth. Your tongue has receptors for it, and it is why tomatoes, aged cheese, and soy sauce are irresistible.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Taste",
-      "targetName": "Umami foods and the science of taste",
-      "durationMinutes": "45",
-      "instruction": "Learn how Ikeda discovered umami in kombu broth and how the taste works through glutamate receptors. Write a list of umami-rich foods you can find, and how chefs combine them to deepen flavor."
-    },
-    "tags": [
-      "Food",
-      "Taste",
-      "Science"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-kombucha",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Kombucha",
-    "teaser": "A fizzy fermented tea, alive with a rubbery culture called a SCOBY — a community of yeast and bacteria. It has been brewed for centuries, possibly in ancient China, and every batch grows a new SCOBY like a living heirloom.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Brew",
-      "targetName": "Kombucha fermentation",
-      "durationMinutes": 30,
-      "instruction": "Learn how a SCOBY ferments sweet tea into tangy, fizzy kombucha over a week or two. Write the roles of yeast and bacteria, why a pellicle forms on top, and how flavors are added in a second fermentation."
-    },
-    "tags": [
-      "Food",
-      "Fermentation",
-      "Drink"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-miso",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Miso",
-    "teaser": "A fermented soybean paste aged in cedar barrels for months or years — the soul of Japanese soup. Its flavor deepens with age, and a good miso maker tends their barrels like a sommelier tends wine.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Age",
-      "targetName": "Miso fermentation process",
-      "durationMinutes": 30,
-      "instruction": "Learn how miso is made from soybeans, koji (rice inoculated with mold), and salt, then aged. Write how the aging time changes color and flavor from white to red, and how miso is used beyond soup."
-    },
-    "tags": [
-      "Food",
-      "Japan",
-      "Fermentation"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-charcoal-grilling-yakitori",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Yakitori",
-    "teaser": "Skewered chicken grilled over binchotan — a white-hot charcoal made from oak that burns clean and evenly — with nothing but salt or tare sauce. In Japan, a yakitori master may cook one cut for decades before perfecting it.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Grill",
-      "targetName": "Yakitori and binchotan charcoal",
-      "durationMinutes": 30,
-      "instruction": "Learn what binchotan charcoal is and why it grills so evenly. Write about the cuts of yakitori from thigh to skin, the role of tare sauce, and why the skewers are turned with such care."
-    },
-    "tags": [
-      "Food",
-      "Japan",
-      "Grilling"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-charcuterie",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Charcuterie",
-    "teaser": "The art of preserving and curing meat — from prosciutto hung in mountain air to pâtés and terrines — born of a time before refrigeration. It turns humble pork into works of craft, geography, and patience.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Cure",
-      "targetName": "Charcuterie traditions",
-      "durationMinutes": "45",
-      "instruction": "Learn how salami, prosciutto, and other cured meats are made and how salt, fermentation, and drying preserve them. Write the difference between cured and fermented sausage, and how local climates shape each region's charcuterie."
-    },
-    "tags": [
-      "Food",
-      "Preservation",
-      "Craft"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-paella",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Paella",
-    "teaser": "A saffron-tinted rice dish cooked in a wide, shallow pan over open fire in Valencia — originally a farmer's meal of rice, rabbit, and snails. The socarrat, the caramelized crust at the bottom, is the prize of the pan.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Paella in a wide pan",
-      "durationMinutes": 45,
-      "instruction": "Learn the traditional Valencian paella method — toast the rice, add broth, and let it cook without stirring until a crust forms. Write what socarrat is, why the pan must be wide, and how seafood paella differs from the original."
-    },
-    "tags": [
-      "Food",
-      "Spain",
-      "Rice"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-tagine",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Tagine",
-    "teaser": "A conical clay pot that braises slowly, capturing steam and letting it drip back down — a low-fuel, low-water way to cook in the desert. In Morocco, the tagine is both the pot and the slow-cooked stew within it.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Simmer",
-      "targetName": "Tagine cooking in Morocco",
-      "durationMinutes": 30,
-      "instruction": "Learn how the tagine's cone shape condenses steam and returns moisture to the dish, requiring little water. Write about the classic combinations — lamb with apricots, chicken with preserved lemon — and how it is eaten from the pot."
-    },
-    "tags": [
-      "Food",
-      "Morocco",
-      "Slow Cooking"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-mole-poblano",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Mole Poblano",
-    "teaser": "Mexico's most complex sauce — a dark, velvety blend of dozens of ingredients: chiles, chocolate, nuts, seeds, spices, and stale bread — simmered for hours. Legend says a convent invented it for a visiting archbishop.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Blend",
-      "targetName": "Mole poblano ingredients",
-      "durationMinutes": "45",
-      "instruction": "Learn how mole poblano layers dried chiles, chocolate, nuts, and spices, and why the sauce must simmer long to marry its flavors. Write the legend of its invention and why every mole family recipe is a guarded secret."
-    },
-    "tags": [
-      "Food",
-      "Mexico",
-      "Sauce"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-tamales",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Tamales",
-    "teaser": "Masa steamed in corn husks or banana leaves — a Mesoamerican dish so old it appears in Aztec codexes, and so communal that making them is a party called a tamalada. Every region wraps a different filling and a different leaf.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Wrap",
-      "targetName": "Tamales across Latin America",
-      "durationMinutes": "45",
-      "instruction": "Learn how tamales are made — nixtamalized corn masa, fillings, wrapping, and steaming — and how the tamalada tradition brings families together. Write how tamales differ from Mexico to Guatemala to Venezuela."
-    },
-    "tags": [
-      "Food",
-      "Mexico",
-      "Tradition"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-sourdough",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Sourdough",
-    "teaser": "Bread leavened not by commercial yeast but by a living culture of wild yeast and bacteria — some starters are kept alive for decades, passed down like family heirlooms. Each culture gives its bread a distinct tang and character.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Feed",
-      "targetName": "A sourdough starter",
-      "durationMinutes": 45,
-      "instruction": "Learn how a sourdough starter is fed flour and water daily to keep its wild yeast and lactobacilli alive. Write what creates the sour tang, why the dough rises slowly, and how long a well-kept starter can live."
-    },
-    "tags": [
-      "Food",
-      "Bread",
-      "Fermentation"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-ramen-soup",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Ramen",
-    "teaser": "A bowl of wheat noodles in rich broth — tonkotsu simmered for days until milky, or shoyu clear and sharp — born from Chinese noodle soups and perfected in Japan. Each bowl is a geography of broths, noodles, and toppings.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Slurp",
-      "targetName": "Ramen styles across Japan",
-      "durationMinutes": 45,
-      "instruction": "Learn the four main ramen broths — tonkotsu, shoyu, shio, and miso — and how each region specializes. Write what makes noodles springy (kansui), why ramen is eaten fast, and how the dish came to Japan from China."
-    },
-    "tags": [
-      "Food",
-      "Japan",
-      "Noodles"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-dim-sum",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Dim Sum",
-    "teaser": "A Cantonese brunch of small dishes wheeled past your table on carts — har gow, siu mai, bao, and a hundred more — shared with tea and chatter. It began along the Silk Road as teahouse snacks for travelers.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Share",
-      "targetName": "Dim sum carts and classics",
-      "durationMinutes": 30,
-      "instruction": "Learn the classic dim sum dishes and how the tradition of yum cha (drinking tea) pairs with small plates. Write what har gow and siu mai are made of, and how the cart tradition works at a busy teahouse."
-    },
-    "tags": [
-      "Food",
-      "China",
-      "Brunch"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-cacao-origins",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Cacao and Chocolate",
-    "teaser": "Before it was candy, cacao was a Mesoamerican drink so valued that the Aztecs used beans as money and served it frothed with chili. Fermenting, roasting, and grinding the bean is a craft older than Europe's first taste of it.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Bean",
-      "targetName": "From cacao pod to chocolate",
-      "durationMinutes": 45,
-      "instruction": "Learn how cacao pods are fermented, dried, roasted, and ground into chocolate. Write how the Aztecs and Maya used cacao, why beans were currency, and how modern chocolate is made from the same bean."
-    },
-    "tags": [
-      "Food",
-      "Chocolate",
-      "History"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-bee-foraging",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Honey and Bees",
-    "teaser": "Honey never spoils — sealed pots of it found in Egyptian tombs are still edible after 3,000 years. A single bee makes a twelfth of a teaspoon in its life, and the hive's waggle dance tells sisters exactly where the flowers are.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Taste",
-      "targetName": "How bees make honey",
-      "durationMinutes": 30,
-      "instruction": "Learn how bees turn nectar into honey — by adding enzymes and evaporating water until it is too dry for microbes. Write why honey lasts forever, how the waggle dance works, and what makes different floral honeys taste different."
-    },
-    "tags": [
-      "Food",
-      "Bees",
-      "Nature"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-maple-syrup",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Maple Syrup",
-    "teaser": "Forty liters of maple sap boil down to one liter of syrup — a spring ritual in cold northern forests where trees wake up and push sweet sap through their trunks. Sugar maples, tapped by hand, give their gift for over a century.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Tap",
-      "targetName": "Maple sugaring season",
-      "durationMinutes": 30,
-      "instruction": "Learn how the freeze-thaw cycle of early spring makes sap flow, and how it is collected and boiled down. Write why it takes so much sap for syrup, how the grade system works, and why maple trees can be tapped for decades."
-    },
-    "tags": [
-      "Food",
-      "Canada",
-      "Spring"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-olive-oil",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Olive Oil",
-    "teaser": "Liquid gold pressed from olives — some trees in the Mediterranean are over 2,000 years old and still fruiting. Extra virgin means cold-pressed, unrefined, and full of the polyphenols that make it a health legend.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Press",
-      "targetName": "Extra virgin olive oil production",
-      "durationMinutes": 30,
-      "instruction": "Learn how olives are harvested and cold-pressed within hours to make extra virgin oil. Write what 'extra virgin' actually means, how to taste olive oil properly, and how ancient trees still produce today."
-    },
-    "tags": [
-      "Food",
-      "Mediterranean",
-      "Oil"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-coffee-origins",
-    "categoryId": "WILDCARD",
-    "subtype": "Tradition",
-    "name": "Coffee",
-    "teaser": "From a goat herder who noticed his goats dancing after eating red berries, coffee spread through Sufi monasteries, Ottoman courts, and European cafés. The bean's flavor depends on altitude, soil, processing, and roast — a world in a cup.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Brew",
-      "targetName": "Coffee from cherry to cup",
-      "durationMinutes": 45,
-      "instruction": "Learn how coffee cherries are processed (washed, natural, honey), roasted, and brewed. Write the legend of Kaldi and the goats, how the drink spread, and why origin and altitude shape the flavor."
-    },
-    "tags": [
-      "Food",
-      "Coffee",
-      "History"
-    ],
-    "tier": 1
   },
   {
     "id": "wildcard-tea-ceremony-chanoyu",
@@ -7840,26 +6220,6 @@
     "tier": 2
   },
   {
-    "id": "wildcard-butterfly-weather",
-    "categoryId": "WILDCARD",
-    "subtype": "Concept",
-    "name": "Butterfly Effect in Weather",
-    "teaser": "A butterfly flapping in Brazil can set off a tornado in Texas — chaos theory's most famous image. Tiny differences in the atmosphere grow exponentially, which is why weather forecasts lose accuracy after about ten days.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Flap",
-      "targetName": "Chaos in weather prediction",
-      "durationMinutes": 30,
-      "instruction": "Learn how Edward Lorenz discovered that rounding a number changed a whole forecast, and how sensitive dependence on initial conditions limits prediction. Write why the butterfly metaphor is misleading but the math is real."
-    },
-    "tags": [
-      "Concept",
-      "Chaos",
-      "Weather"
-    ],
-    "tier": 1
-  },
-  {
     "id": "wildcard-schrodinger-thought",
     "categoryId": "WILDCARD",
     "subtype": "Concept",
@@ -7891,26 +6251,6 @@
       "targetName": "Double-slit experiment",
       "durationMinutes": 30,
       "instruction": "Learn the double-slit experiment and how detectors collapse the interference pattern. Write the difference between the observer effect in quantum mechanics and the Heisenberg uncertainty principle, and what 'measurement' really means."
-    },
-    "tags": [
-      "Concept",
-      "Quantum",
-      "Physics"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-entanglement",
-    "categoryId": "WILDCARD",
-    "subtype": "Concept",
-    "name": "Quantum Entanglement",
-    "teaser": "Two particles can share a fate: measure one and the other instantly 'knows,' even across the galaxy. Einstein called it 'spooky action at a distance' — but experiments prove it, and it is already the basis of secure quantum communication.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Entangle",
-      "targetName": "Entanglement experiments",
-      "durationMinutes": 45,
-      "instruction": "Learn how entangled particles correlate and how Bell's theorem tests the spookiness. Write what entanglement does and does not allow (no faster-than-light communication), and how it powers quantum cryptography."
     },
     "tags": [
       "Concept",
@@ -8200,26 +6540,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-nubian-pyramids",
-    "categoryId": "WILDCARD",
-    "subtype": "Place",
-    "name": "Nubian Pyramids of Meroë",
-    "teaser": "More pyramids than Egypt, hidden in the Sudanese desert: over 200 steep, narrow pyramids of the Kingdom of Kush. Once a rival empire that even ruled Egypt, Kush left a royal necropolis still standing in golden sand.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Count",
-      "targetName": "The pyramids of Meroë",
-      "durationMinutes": 45,
-      "instruction": "Learn how the Kingdom of Kush built its pyramids at Meroë and why they are steeper than Egypt's. Write about the Kushite pharaohs who ruled Egypt, the 19th-century explorer who wrecked some tops, and what remains today."
-    },
-    "tags": [
-      "Place",
-      "Sudan",
-      "Pyramids"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wildcard-lalibela",
     "categoryId": "WILDCARD",
     "subtype": "Place",
@@ -8476,26 +6796,6 @@
       "Place",
       "Australia",
       "Sandstone"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-avenue-baobabs",
-    "categoryId": "WILDCARD",
-    "subtype": "Place",
-    "name": "Avenue of the Baobabs",
-    "teaser": "A dirt road in Madagascar lined with towering, trunk-swollen baobabs, some 800 years old — a natural cathedral of the island's most iconic trees. The trees once drew in the landscape's last trees as forests fell to farming.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Stand",
-      "targetName": "The Avenue of the Baobabs",
-      "durationMinutes": 30,
-      "instruction": "Learn why baobabs grow such massive trunks and how the avenue formed as forest gave way to fields. Write what the trees mean to Madagascar's ecology and culture, and how the site is protected and restored."
-    },
-    "tags": [
-      "Place",
-      "Madagascar",
-      "Trees"
     ],
     "tier": 2
   },
@@ -9056,26 +7356,6 @@
       "Animal",
       "Whales",
       "Hunting"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-whale-song",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "Whale Song",
-    "teaser": "Humpback whales sing long, evolving songs — males within a population all sing the same song, and the song changes each year like a hit single spreading across the ocean. The songs travel for thousands of kilometers through the sea.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Humpback whale songs",
-      "durationMinutes": 30,
-      "instruction": "Listen to recordings of humpback song and learn how it is structured in themes and phrases that change over time. Write why males sing, how the song spreads between populations, and what whale song meant to the anti-whaling movement."
-    },
-    "tags": [
-      "Animal",
-      "Whales",
-      "Sound"
     ],
     "tier": 1
   },
@@ -9800,126 +8080,6 @@
     "tier": 1
   },
   {
-    "id": "wildcard-wollemia-pine",
-    "categoryId": "WILDCARD",
-    "subtype": "History",
-    "name": "The Wollemi Pine",
-    "teaser": "A living dinosaur of a tree — known only from 120-million-year-old fossils until 1994, when hikers stumbled on a grove of living ones in an Australian canyon. Its location is a guarded secret, and every Wollemi pine in the world descends from that grove.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Discover",
-      "targetName": "The Wollemi pine discovery",
-      "durationMinutes": 30,
-      "instruction": "Learn how the Wollemi pine was discovered and how it survived unchanged for millions of years. Write why its location is secret, how conservationists protect it from fire and theft, and how it was propagated worldwide."
-    },
-    "tags": [
-      "History",
-      "Botany",
-      "Living Fossil"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-coelacanth",
-    "categoryId": "WILDCARD",
-    "subtype": "History",
-    "name": "The Coelacanth",
-    "teaser": "Thought extinct for 66 million years, a living coelacanth — a lobe-finned fish older than the dinosaurs — was caught off South Africa in 1938. It is the closest living relative to the fish that crawled onto land, and it still swims in deep caves.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Swim",
-      "targetName": "Coelacanth discovery and biology",
-      "durationMinutes": 30,
-      "instruction": "Learn how Marjorie Courtenay-Latimer found the first coelacanth and how more were found in the Comoros and Indonesia. Write what its lobe fins reveal about the fish-to-tetrapod transition and how it lives at depth."
-    },
-    "tags": [
-      "History",
-      "Fish",
-      "Living Fossil"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-megamouth-shark",
-    "categoryId": "WILDCARD",
-    "subtype": "History",
-    "name": "The Megamouth Shark",
-    "teaser": "A shark with a gaping mouth that filters plankton, discovered only in 1976 when one tangled in a US Navy anchor. Fewer than 300 have ever been seen — a giant predator that ate plankton and hid in the deep for millions of years.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Discover",
-      "targetName": "The megamouth shark",
-      "durationMinutes": 30,
-      "instruction": "Learn how the megamouth was discovered and why it is so rarely seen — deep water, filter feeding, and solitary habits. Write how it feeds, where it has been found, and what its discovery says about the ocean's unknowns."
-    },
-    "tags": [
-      "History",
-      "Shark",
-      "Discovery"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-kraken-architeuthis",
-    "categoryId": "WILDCARD",
-    "subtype": "History",
-    "name": "The Giant Squid",
-    "teaser": "A predator with eyes the size of dinner plates and tentacles 10 meters long — the source of the kraken legend. No one photographed a live giant squid until 2004, and the first video came in 2012. The deep still keeps its giants.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Glimpse",
-      "targetName": "Giant squid encounters",
-      "durationMinutes": 45,
-      "instruction": "Learn how the giant squid's existence was proven from beached specimens and whale scars, and how it was finally filmed in its own habitat. Write its size, its predators (sperm whales), and what remains unknown about its life."
-    },
-    "tags": [
-      "History",
-      "Ocean",
-      "Mystery"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "wildcard-colossal-squid",
-    "categoryId": "WILDCARD",
-    "subtype": "History",
-    "name": "The Colossal Squid",
-    "teaser": "Bigger and heavier than the giant squid, with hooks that swivel on its tentacles — the largest invertebrate known. Only a handful have ever been seen, all from Antarctic waters, and it may weigh half a tonne.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Measure",
-      "targetName": "Colossal squid specimens",
-      "durationMinutes": 30,
-      "instruction": "Learn the differences between the colossal and giant squid — size, hooks, habitat — and how specimens are studied. Write where it lives, what ate it (sperm whales again), and what its huge eyes are for."
-    },
-    "tags": [
-      "History",
-      "Ocean",
-      "Mystery"
-    ],
-    "tier": 2
-  },
-  {
-    "id": "wildcard-deep-sea-anglerfish",
-    "categoryId": "WILDCARD",
-    "subtype": "Phenomenon",
-    "name": "The Anglerfish and Sexual Parasitism",
-    "teaser": "In the deep sea's darkness, a male anglerfish is tiny — and when he finds a female, he bites into her and fuses to her body, sharing her blood for life. It is nature's strangest marriage, and scientists once thought the males were parasites.",
-    "imageUrl": "",
-    "exploreAction": {
-      "verb": "Fuse",
-      "targetName": "Anglerfish mating",
-      "durationMinutes": 30,
-      "instruction": "Learn how deep-sea anglerfish females lure prey with a glowing esca and how dwarf males fuse to them permanently. Write why this strategy evolved in the vast, empty deep and how the two share circulation."
-    },
-    "tags": [
-      "Phenomenon",
-      "Deep Sea",
-      "Mating"
-    ],
-    "tier": 2
-  },
-  {
     "id": "wildcard-hero-engine",
     "categoryId": "WILDCARD",
     "subtype": "History",
@@ -10058,5 +8218,574 @@
       "Prehistoric"
     ],
     "tier": 1
+  },
+  {
+    "name": "The Wow Signal (1977)",
+    "teaser": "A 72-second radio signal from the constellation Sagittarius detected by Big Ear telescope has never been explained. astronomer Jerry Ehman circled the printout and wrote 'Wow!' — it remains the strongest candidate for extraterrestrial contact.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "space",
+      "mystery",
+      "science"
+    ],
+    "id": "wildcard-the-wow-signal-1977",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Dyatlov Pass Incident (1959)",
+    "teaser": "Nine experienced hikers died mysteriously in the Ural Mountains, their tent found slashed open from inside. Bodies showed unexplained injuries — cracked skulls, missing tongues — and radioactive clothing. Avalanches, infrasound, and indigenous Mansi involvement have all been proposed.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "history",
+      "survival"
+    ],
+    "id": "wildcard-the-dyatlov-pass-incident-1959",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Somerton Man (1948)",
+    "teaser": "An unidentified man was found dead on an Australian beach with a scrap of paper reading 'Tamam Shud' — Persian for 'it is finished.' The book it came from was found in a nearby car, with a cipher code never broken. His identity remains unknown.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "history",
+      "code"
+    ],
+    "id": "wildcard-the-somerton-man-1948",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Lead Masks Case (1966)",
+    "teaser": "Two electronic technicians were found dead on a Brazilian hilltop wearing crude lead eye masks and formal suits. A note instructed them to wear the masks and wait for a 'signal.' No cause of death was ever determined, and the case remains Brazil's most baffling mystery.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "unexplained"
+    ],
+    "id": "wildcard-the-lead-masks-case-1966",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Mary Celeste (1872)",
+    "teaser": "A merchant ship found adrift in the Atlantic with its lifeboat gone, cargo intact, and crew's meals still on the table. No one was ever found, and theories from mutiny to underwater earthquakes have never explained why an experienced captain abandoned a perfectly seaworthy ship.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "maritime",
+      "history"
+    ],
+    "id": "wildcard-the-mary-celeste-1872",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "D.B. Cooper (1971)",
+    "teaser": "A man hijacked a Northwest Orient flight, collected $200,000 in ransom, and parachuted into a thunderstorm over the Pacific Northwest — never to be found. The FBI's longest unsolved case, it inspired countless copycats and a cultural mythology around the perfect crime.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "crime",
+      "history"
+    ],
+    "id": "wildcard-db-cooper-1971",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Zodiac Killer (1968-69)",
+    "teaser": "A serial killer who taunted San Francisco police with cryptic ciphers, claiming 37 victims. Two of his four ciphers remain unsolved 50+ years later. The case inspired films, books, and amateur sleuths who continue decoding his messages.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "crime",
+      "code"
+    ],
+    "id": "wildcard-the-zodiac-killer-1968-69",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Oak Island Money Pit (1795)",
+    "teaser": "A mysterious shaft on a Nova Scotia island has lured treasure hunters for over 200 years. Layers of oak platforms, flooded tunnels, and a stone with encoded writing have defied every excavation. Theories range from pirate gold to the Holy Grail.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "treasure",
+      "history"
+    ],
+    "id": "wildcard-oak-island-money-pit-1795",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Isdal Woman (1970)",
+    "teaser": "An unidentified woman was found charred in a Norwegian valley with labels removed from her clothing and multiple passports. She had visited Oslo, Bergen, and Stavanger under different names. Norwegian intelligence files remain classified, fueling espionage theories.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "cold war",
+      "identity"
+    ],
+    "id": "wildcard-the-isdal-woman-1970",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Dunning-Kruger Effect",
+    "teaser": "People with low ability at a task overestimate their competence, while experts underestimate theirs. Named after Cornell psychologists David Dunning and Justin Kruger's 1999 study, it explains why the least skilled are often the most confident — and why self-assessment is fundamentally unreliable.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "bias",
+      "awareness"
+    ],
+    "id": "wildcard-the-dunning-kruger-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Baader-Meinhof Phenomenon",
+    "teaser": "After learning a new word, you suddenly see it everywhere. This frequency illusion — coined by a St. Paul newspaper commenter in 1994 — isn't the universe sending signs. Your reticular activating system is simply filtering for information you've recently primed your brain to notice.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "bias",
+      "awareness"
+    ],
+    "id": "wildcard-the-baader-meinhof-phenomenon",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Ship of Theseus",
+    "teaser": "If you replace every plank of a ship one by one, is it the same ship? And if you build a new ship from the old planks, which is the real one? This 2,500-year-old paradox explores identity, change, and what makes something 'itself' — from cells replacing in your body to companies evolving.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "identity",
+      "thought-experiment"
+    ],
+    "id": "wildcard-the-ship-of-theseus",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Pascal's Wager",
+    "teaser": "Blaise Pascal argued you should bet on God's existence because the potential payoff is infinite while the cost is minimal. Critics note it assumes a single binary God — what if the wrong god punishes you? It's the original expected-value argument applied to faith.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "religion",
+      "probability"
+    ],
+    "id": "wildcard-pascals-wager",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Chinese Room Argument",
+    "teaser": "John Searle imagined a person following rulebooks to produce perfect Chinese responses without understanding Chinese. His 1980 thought experiment argues that computers manipulating symbols don't truly 'understand' — they simulate understanding. No AI has refuted this.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "AI",
+      "consciousness"
+    ],
+    "id": "wildcard-the-chinese-room-argument",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Veil of Tears",
+    "teaser": "In Hindu philosophy, Maya is the illusion that the material world is real. We mistake the veil for the truth — chasing wealth, status, and pleasure while ignoring the eternal self (Atman) behind it. The goal of moksha is to see through the illusion and unite with Brahman.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "hinduism",
+      "consciousness"
+    ],
+    "id": "wildcard-the-veil-of-tears",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Quantum Entanglement",
+    "teaser": "Two particles can be linked so that measuring one instantly determines the state of the other — regardless of distance. Einstein called it 'spooky action at a distance' and refused to believe it. Experiments have confirmed entanglement across 1,200 kilometers.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "quantum",
+      "physics"
+    ],
+    "id": "wildcard-quantum-entanglement",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Butterfly Effect",
+    "teaser": "Edward Lorenz discovered that rounding a weather variable from 0.506127 to 0.506 produced a completely different forecast. Chaos theory shows tiny changes in initial conditions create vastly different outcomes — making long-term prediction fundamentally impossible.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "chaos",
+      "math"
+    ],
+    "id": "wildcard-the-butterfly-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Mpemba Effect",
+    "teaser": "Hot water can freeze faster than cold water. First documented by Aristotle, rediscovered by Tanzanian student Erasto Mpemba in 1963, and still not fully explained. Evaporation, convection currents, and dissolved gases all play roles, but no single theory accounts for all observations.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "physics",
+      "counterintuitive"
+    ],
+    "id": "wildcard-the-mpemba-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Goldilocks Zone",
+    "teaser": "Earth sits at the perfect distance from the Sun — not too hot, not too cold — for liquid water. This habitable zone varies by star type. Kepler has found 50+ planets in their star's Goldilocks zone, but none with Earth's combination of atmosphere, magnetic field, and plate tectonics.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "astronomy",
+      "life"
+    ],
+    "id": "wildcard-the-goldilocks-zone",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Cosmological Constant Problem",
+    "teaser": "Einstein's biggest blunder may be his biggest puzzle. The vacuum energy of empty space should be 10^120 times stronger than observed — the largest discrepancy in physics. Nobody knows why the universe's energy is so precisely tuned to near-zero.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "physics",
+      "cosmology"
+    ],
+    "id": "wildcard-the-cosmological-constant-problem",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Grandfather Paradox",
+    "teaser": "If you travel back and kill your grandfather before your parent is conceived, you were never born — so you couldn't travel back. Physicists propose Novikov self-consistency (you can't change the past) or branching timelines (you create a new universe). Neither is proven.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "time",
+      "physics"
+    ],
+    "id": "wildcard-the-grandfather-paradox",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Olbers' Paradox",
+    "teaser": "If the universe is infinite with infinite stars, why is the night sky dark? Heinrich Olbers asked in 1823. The answer: the universe has a finite age, and light from distant stars hasn't reached us yet. The expansion of space also redshifts their light below visibility.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "astronomy",
+      "cosmology"
+    ],
+    "id": "wildcard-olbers-paradox",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Svalbard Global Seed Vault",
+    "teaser": "Deep inside an Arctic mountain sits the backup for civilization's food supply — 1.1 million seed samples from every country. Built permafrost-proof in 2008, it can withstand nuclear war and has already been accessed when Syrian seed stocks were damaged by civil war.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "agriculture",
+      "survival"
+    ],
+    "id": "wildcard-svalbard-global-seed-vault",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Pripyat, Chernobyl",
+    "teaser": "A Soviet city of 50,000 frozen in time since April 26, 1986. The world's worst nuclear disaster turned Pripyat into a ghost town — amusement park rides rust in the square, textbooks lie open in classrooms, and nature has reclaimed buildings. Radiation levels vary from lethal to surprisingly low.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "history",
+      "disaster",
+      "abandoned"
+    ],
+    "id": "wildcard-pripyat-chernobyl",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Danakil Depression",
+    "teaser": "At 125 meters below sea level, it's one of the hottest places on Earth — averaging 34°C with temperatures exceeding 55°C. Colorful sulfur springs, acid pools, and active volcanoes make it look alien. The Afar people mine salt here as they have for centuries.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geography",
+      "extreme",
+      "geology"
+    ],
+    "id": "wildcard-the-danakil-depression",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Centralia, Pennsylvania",
+    "teaser": "An underground coal mine fire has been burning beneath this Pennsylvania town since 1962. The ground cracked open, releasing toxic gas, and the population dropped from 1,500 to 5. highways buckled, buildings were demolished, and the town was erased from most maps.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "disaster",
+      "abandoned",
+      "environment"
+    ],
+    "id": "wildcard-centralia-pennsylvania",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Hashima Island (Gunkanjima)",
+    "teaser": "Japan's concrete island — once the most densely populated place on Earth with 5,259 people per 6.3 hectares. Mitsubishi mined coal here from 1887 until 1974, when the mine closed and everyone left overnight. Now a UNESCO site, it's a concrete ghost town surrounded by crashing waves.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "history",
+      "abandoned",
+      "japan"
+    ],
+    "id": "wildcard-hashima-island-gunkanjima",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Door to Hell, Turkmenistan",
+    "teaser": "A 70-meter crater has been burning continuously since 1971 when Soviet engineers set it on fire to prevent methane spread, expecting it to burn out in weeks. It's still burning 50+ years later. The Darvaza gas crater glows orange in the desert night, visible for miles.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geology",
+      "extreme",
+      "fire"
+    ],
+    "id": "wildcard-the-door-to-hell-turkmenistan",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Lake Natron, Tanzania",
+    "teaser": "A lake so alkaline (pH 10.5) it calcifies animals that die in it — turning them to stone. The caustic water preserves bodies in lifelike poses. Yet flamingos breed here because the extreme conditions keep predators away. Photographer Nick Brandt captured the eerie calcified creatures.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "nature",
+      "extreme",
+      "chemistry"
+    ],
+    "id": "wildcard-lake-natron-tanzania",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Antikythera Mechanism",
+    "teaser": "A 2,000-year-old Greek bronze computer recovered from a shipwreck in 1901. With 30+ interlocking gears, it predicted eclipses and tracked the Olympic Games. Its complexity wouldn't be seen again for 1,500 years — proving ancient technology was far more advanced than we assumed.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "technology",
+      "ancient"
+    ],
+    "id": "wildcard-the-antikythera-mechanism",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Roman Concrete (Opus Caementicium)",
+    "teaser": "Roman harbors have survived 2,000 years of saltwater — while modern concrete crumbles in decades. The secret: volcanic ash (pozzolana) mixed with seawater creates aluminum tobermorite crystals that strengthen over time. Scientists are still reverse-engineering the formula.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "history",
+      "engineering"
+    ],
+    "id": "wildcard-roman-concrete-opus-caementicium",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The House of Wisdom (Baghdad)",
+    "teaser": "A 9th-century Abbasid institution where scholars translated Greek, Persian, and Indian texts into Arabic — preserving knowledge that would have been lost. Algebra, algorithms, and the concept of zero all emerged here. Mongol invaders threw its books into the Tigris in 1258.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "knowledge",
+      "islamic-golden-age"
+    ],
+    "id": "wildcard-the-house-of-wisdom-baghdad",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Phoenician Alphabet",
+    "teaser": "The Phoenicians invented the first alphabet — 22 consonant letters that could represent any language. Greeks added vowels, Romans added serifs, and every Western alphabet traces back to Phoenician traders. It's arguably the most important invention in human communication.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "language",
+      "writing"
+    ],
+    "id": "wildcard-the-phoenician-alphabet",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Red Rain of Kerala (2001)",
+    "teaser": "Blood-red rain fell for two months in Kerala, India — staining clothes and killing fish. Initial analysis found no dust or pollen, just unknown red cells. A 2009 paper proposed extraterrestrial origin, but most scientists attribute it to algal spores from nearby desert blooms.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "mystery",
+      "weather",
+      "biology"
+    ],
+    "id": "wildcard-the-red-rain-of-kerala-2001",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Hessdalen Lights",
+    "teaser": "Mysterious glowing orbs appear over this Norwegian valley — sometimes for hours, sometimes in formation. Scientists installed permanent monitoring stations in 1983. The lights may be plasma sustained by a natural battery of minerals, but no theory fully explains their behavior.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "mystery",
+      "physics",
+      "light"
+    ],
+    "id": "wildcard-the-hessdalen-lights",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Green Flash",
+    "teaser": "For 1-2 seconds after sunset, a bright green spot appears on the upper rim of the sun. Caused by atmospheric refraction separating light wavelengths, it was once considered a sailor's superstition. Clear tropical horizons offer the best viewing — and it's real.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "nature",
+      "optics",
+      "atmosphere"
+    ],
+    "id": "wildcard-the-green-flash",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Brinicle (Ice Finger of Death)",
+    "teaser": "A finger of supercooled brine sinks from sea ice and freezes everything it touches — creating an underwater ice stalactheet that grows toward the seafloor. BBC's Frozen Planet captured one killing starfish and sea urchins on the ocean floor in real-time.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "nature",
+      "ocean",
+      "physics"
+    ],
+    "id": "wildcard-brinicle-ice-finger-of-death",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Via Negativa",
+    "teaser": "Nassim Taleb's principle that you learn more from what DOESN'T work than what does. Removing bad habits outperforms adding good ones. Subtracting ingredients improves recipes. Medical knowledge advanced more from knowing what's toxic than what's therapeutic.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "wisdom",
+      "decision-making"
+    ],
+    "id": "wildcard-the-via-negativa",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
   }
 ]
