@@ -1,0 +1,31 @@
+Share Card Improvements — Request Summary
+==========================================
+
+1. VINYL STYLE
+   - Make the button corner info smaller
+   - Button is too large and overflows at the bottom — reduce it so it doesn't push past the bottom edge
+   - In 3:4 aspect ratio, make it even smaller than 1:1
+
+2. CLEAN CARD
+   - Remove the background icon (NOT the category bigger icon — the smaller one above it)
+   - The title isn't inside the white card — the white card feels out of place. Fix it so the title sits properly within the card
+
+3. COLLAGE
+   - The button design is boring — redesign it to be more interesting
+
+4. POLAROID
+   - "Import photo" should be part of the polaroid card itself — tapping the card should trigger the photo picker, no extra button below
+   - Move the polaroid text a little further below (more breathing room)
+
+5. PAPER CARD (9:12 aspect ratio)
+   - Reduce font size when there's a lot of text
+   - Otherwise, make the text size dynamic/adjustable based on the amount of text
+
+6. STYLE SELECTION
+   - Instead of style buttons, show the styles visually in a carousel/scrollable row that you can swipe through and tap to pick
+
+7. CUSTOM FACT BOX
+   - Add the custom fact box back — but NOT for the quotes style
+
+8. DETAIL VIEW — SHARE
+   - Enable the share functionality for ALL styles, not just one

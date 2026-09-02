@@ -19,7 +19,8 @@
       "British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-radiohead",
@@ -40,7 +41,8 @@
       "British",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nirvana",
@@ -62,7 +64,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pink-floyd",
@@ -84,7 +87,8 @@
       "British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-beatles",
@@ -106,7 +110,8 @@
       "British",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kendrick-lamar",
@@ -128,7 +133,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mf-doom",
@@ -150,7 +156,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-outkast",
@@ -172,7 +179,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-stevie-wonder",
@@ -194,7 +202,8 @@
       "American",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-marvin-gaye",
@@ -215,7 +224,8 @@
       "American",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-aretha-franklin",
@@ -236,7 +246,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-miles-davis",
@@ -258,7 +269,8 @@
       "American",
       "1950s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-john-coltrane",
@@ -280,7 +292,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-billie-holiday",
@@ -301,7 +314,8 @@
       "American",
       "1930s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-aphex-twin",
@@ -323,7 +337,8 @@
       "British",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-daft-punk",
@@ -344,7 +359,8 @@
       "French",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kraftwerk",
@@ -365,7 +381,8 @@
       "German",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-prince",
@@ -388,7 +405,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-beyonce",
@@ -409,7 +427,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bjork",
@@ -431,7 +450,8 @@
       "Icelandic",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-johnny-cash",
@@ -453,7 +473,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dolly-parton",
@@ -473,7 +494,8 @@
       "American",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bob-dylan",
@@ -495,7 +517,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-black-sabbath",
@@ -516,7 +539,8 @@
       "British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-metallica",
@@ -537,7 +561,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fela-kuti",
@@ -558,7 +583,8 @@
       "Nigerian",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bob-marley",
@@ -579,7 +605,8 @@
       "Jamaican",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-johann-sebastian-bach",
@@ -600,7 +627,8 @@
       "German",
       "1720s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ludwig-van-beethoven",
@@ -621,7 +649,8 @@
       "German",
       "1800s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-robert-johnson",
@@ -642,7 +671,8 @@
       "American",
       "1930s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-muddy-waters",
@@ -664,7 +694,8 @@
       "American",
       "1950s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-they-might-be-giants",
@@ -686,7 +717,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-weird-al",
@@ -708,7 +740,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ok-go",
@@ -729,7 +762,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-b52s",
@@ -750,7 +784,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-devo",
@@ -772,7 +807,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-talking-heads",
@@ -793,7 +829,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tenacious-d",
@@ -814,7 +851,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-flight-of-the-conchords",
@@ -835,7 +873,8 @@
       "New Zealand",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-presidents-of-usa",
@@ -856,7 +895,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-lemon-demon",
@@ -878,7 +918,8 @@
       "American",
       "2000s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-tally-hall",
@@ -900,7 +941,8 @@
       "American",
       "2000s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-jack-stauber",
@@ -922,7 +964,8 @@
       "American",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-lonely-island",
@@ -943,7 +986,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sparks",
@@ -965,7 +1009,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-strokes",
@@ -986,7 +1031,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-arctic-monkeys",
@@ -1006,7 +1052,8 @@
       "British",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-arcade-fire",
@@ -1027,7 +1074,8 @@
       "Canadian",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-shins",
@@ -1048,7 +1096,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-modest-mouse",
@@ -1069,7 +1118,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-death-cab-for-cutie",
@@ -1090,7 +1140,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-postal-service",
@@ -1111,7 +1162,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-wilco",
@@ -1132,7 +1184,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-decemberists",
@@ -1153,7 +1206,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-vampire-weekend",
@@ -1174,7 +1228,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tame-impala",
@@ -1195,7 +1250,8 @@
       "Australian",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mgmt",
@@ -1217,7 +1273,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-phoenix",
@@ -1238,7 +1295,8 @@
       "French",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-yeah-yeah-yeahs",
@@ -1259,7 +1317,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-interpol",
@@ -1280,7 +1339,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-national",
@@ -1301,7 +1361,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-king-gizzard",
@@ -1322,7 +1383,8 @@
       "Australian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-foster-the-people",
@@ -1343,7 +1405,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bon-iver",
@@ -1364,7 +1427,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fleet-foxes",
@@ -1385,7 +1449,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sufjan-stevens",
@@ -1407,7 +1472,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-elliott-smith",
@@ -1429,7 +1495,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-neutral-milk-hotel",
@@ -1451,7 +1518,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bright-eyes",
@@ -1472,7 +1540,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mountain-goats",
@@ -1494,7 +1563,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-daniel-johnston",
@@ -1516,7 +1586,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mac-demarco",
@@ -1538,7 +1609,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-father-john-misty",
@@ -1559,7 +1631,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-phoebe-bridgers",
@@ -1580,7 +1653,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mitski",
@@ -1601,7 +1675,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-clairo",
@@ -1622,7 +1697,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-snail-mail",
@@ -1643,7 +1719,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-soccer-mommy",
@@ -1664,7 +1741,8 @@
       "American",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-boygenius",
@@ -1685,7 +1763,8 @@
       "American",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-st-vincent",
@@ -1706,7 +1785,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-grimes",
@@ -1728,7 +1808,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-beach-house",
@@ -1749,7 +1830,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-alex-g",
@@ -1770,7 +1852,8 @@
       "American",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-lorde",
@@ -1791,7 +1874,8 @@
       "New Zealand",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-billie-eilish",
@@ -1812,7 +1896,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-vulfpeck",
@@ -1833,7 +1918,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-khruangbin",
@@ -1854,7 +1940,8 @@
       "Thai",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-thundercat",
@@ -1876,7 +1963,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-flying-lotus",
@@ -1898,7 +1986,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-badbadnotgood",
@@ -1919,7 +2008,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-men-i-trust",
@@ -1940,7 +2030,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-crumb",
@@ -1962,7 +2053,8 @@
       "American",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-still-woozy",
@@ -1984,7 +2076,8 @@
       "American",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-nas",
@@ -2005,7 +2098,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tupac",
@@ -2027,7 +2121,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-biggie",
@@ -2049,7 +2144,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jay-z",
@@ -2070,7 +2166,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-eminem",
@@ -2091,7 +2188,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-drake",
@@ -2111,7 +2209,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kanye-west",
@@ -2132,7 +2231,8 @@
       "American",
       "2000s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tribe-called-quest",
@@ -2154,7 +2254,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-wu-tang-clan",
@@ -2176,7 +2277,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-run-dmc",
@@ -2197,7 +2299,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-public-enemy",
@@ -2219,7 +2322,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-snoop-dogg",
@@ -2241,7 +2345,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dr-dre",
@@ -2263,7 +2368,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tyler-the-creator",
@@ -2284,7 +2390,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-j-cole",
@@ -2305,7 +2412,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-childish-gambino",
@@ -2326,7 +2434,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-frank-ocean",
@@ -2347,7 +2456,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-burial",
@@ -2369,7 +2479,8 @@
       "British",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-four-tet",
@@ -2390,7 +2501,8 @@
       "British",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-boards-of-canada",
@@ -2412,7 +2524,8 @@
       "Scottish",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-brian-eno",
@@ -2433,7 +2546,8 @@
       "British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-massive-attack",
@@ -2454,7 +2568,8 @@
       "British",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-portishead",
@@ -2475,7 +2590,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-chemical-brothers",
@@ -2496,7 +2612,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-prodigy",
@@ -2518,7 +2635,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-fatboy-slim",
@@ -2539,7 +2657,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-moby",
@@ -2560,7 +2679,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-justice",
@@ -2581,7 +2701,8 @@
       "French",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-caribou",
@@ -2602,7 +2723,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-jon-hopkins",
@@ -2624,7 +2746,8 @@
       "British",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-charlie-parker",
@@ -2645,7 +2768,8 @@
       "American",
       "1940s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-duke-ellington",
@@ -2666,7 +2790,8 @@
       "American",
       "1930s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-louis-armstrong",
@@ -2687,7 +2812,8 @@
       "American",
       "1920s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-thelonious-monk",
@@ -2708,7 +2834,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-charles-mingus",
@@ -2729,7 +2856,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-herbie-hancock",
@@ -2750,7 +2878,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nina-simone",
@@ -2772,7 +2901,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ella-fitzgerald",
@@ -2793,7 +2923,8 @@
       "American",
       "1940s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chet-baker",
@@ -2814,7 +2945,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bill-evans",
@@ -2836,7 +2968,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-wes-montgomery",
@@ -2857,7 +2990,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ravi-shankar",
@@ -2878,7 +3012,8 @@
       "Indian",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ali-farka-toure",
@@ -2899,7 +3034,8 @@
       "Malian",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-youssou-ndour",
@@ -2920,7 +3056,8 @@
       "Senegalese",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cesaria-evora",
@@ -2941,7 +3078,8 @@
       "Cape Verdean",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-peter-tosh",
@@ -2962,7 +3100,8 @@
       "Jamaican",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-lee-scratch-perry",
@@ -2983,7 +3122,8 @@
       "Jamaican",
       "1970s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-mulatu-astatke",
@@ -3004,7 +3144,8 @@
       "Ethiopian",
       "1970s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-oumou-sangare",
@@ -3025,7 +3166,8 @@
       "Malian",
       "1990s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-jorge-ben",
@@ -3046,7 +3188,8 @@
       "Brazilian",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-milton-nascimento",
@@ -3067,7 +3210,8 @@
       "Brazilian",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-iron-maiden",
@@ -3088,7 +3232,8 @@
       "British",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-slayer",
@@ -3109,7 +3254,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-megadeth",
@@ -3130,7 +3276,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-pantera",
@@ -3151,7 +3298,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-tool",
@@ -3172,7 +3320,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-opeth",
@@ -3193,7 +3342,8 @@
       "Swedish",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-judas-priest",
@@ -3214,7 +3364,8 @@
       "British",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-system-of-a-down",
@@ -3235,7 +3386,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-willie-nelson",
@@ -3256,7 +3408,8 @@
       "American",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-hank-williams",
@@ -3277,7 +3430,8 @@
       "American",
       "1940s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-patsy-cline",
@@ -3298,7 +3452,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-loretta-lynn",
@@ -3318,7 +3473,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-merle-haggard",
@@ -3339,7 +3495,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-kacey-musgraves",
@@ -3359,7 +3516,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bb-king",
@@ -3380,7 +3538,8 @@
       "American",
       "1950s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-howlin-wolf",
@@ -3401,7 +3560,8 @@
       "American",
       "1950s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-john-lee-hooker",
@@ -3422,7 +3582,8 @@
       "American",
       "1940s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-etta-james",
@@ -3443,7 +3604,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-buddy-guy",
@@ -3464,7 +3626,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mozart",
@@ -3485,7 +3648,8 @@
       "Austrian",
       "1780s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chopin",
@@ -3506,7 +3670,8 @@
       "Polish",
       "1830s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-debussy",
@@ -3527,7 +3692,8 @@
       "French",
       "1890s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-stravinsky",
@@ -3548,7 +3714,8 @@
       "Russian",
       "1910s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-philip-glass",
@@ -3569,7 +3736,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-olivia-rodrigo",
@@ -3590,7 +3758,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-charli-xcx",
@@ -3612,7 +3781,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rosalia",
@@ -3634,7 +3804,8 @@
       "Spanish",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bad-bunny",
@@ -3655,7 +3826,8 @@
       "Puerto Rican",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chappell-roan",
@@ -3676,7 +3848,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-led-zeppelin",
@@ -3697,7 +3870,8 @@
       "British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-queen",
@@ -3718,7 +3892,8 @@
       "British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rolling-stones",
@@ -3739,7 +3914,8 @@
       "British",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-who",
@@ -3760,7 +3936,8 @@
       "British",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jimi-hendrix",
@@ -3781,7 +3958,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fleetwood-mac",
@@ -3802,7 +3980,8 @@
       "American-British",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-doors",
@@ -3823,7 +4002,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ccr",
@@ -3844,7 +4024,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-eagles",
@@ -3865,7 +4046,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ac-dc",
@@ -3886,7 +4068,8 @@
       "Australian",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-van-halen",
@@ -3907,7 +4090,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-guns-n-roses",
@@ -3928,7 +4112,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-red-hot-chili-peppers",
@@ -3949,7 +4134,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-pearl-jam",
@@ -3970,7 +4156,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-rem",
@@ -3991,7 +4178,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-u2",
@@ -4012,7 +4200,8 @@
       "Irish",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ramones",
@@ -4032,7 +4221,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-the-clash",
@@ -4053,7 +4243,8 @@
       "British",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sex-pistols",
@@ -4073,7 +4264,8 @@
       "British",
       "1970s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-iggy-pop",
@@ -4094,7 +4286,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-joy-division",
@@ -4114,7 +4307,8 @@
       "British",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-new-order",
@@ -4135,7 +4329,8 @@
       "British",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-the-cure",
@@ -4156,7 +4351,8 @@
       "British",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-the-smiths",
@@ -4177,7 +4373,8 @@
       "British",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-the-velvet-underground",
@@ -4198,7 +4395,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-pixies",
@@ -4218,7 +4416,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-michael-jackson",
@@ -4239,7 +4438,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-madonna",
@@ -4260,7 +4460,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-whitney-houston",
@@ -4281,7 +4482,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-taylor-swift",
@@ -4302,7 +4504,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-adele",
@@ -4323,7 +4526,8 @@
       "British",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-rihanna",
@@ -4344,7 +4548,8 @@
       "Barbadian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-lady-gaga",
@@ -4365,7 +4570,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ariana-grande",
@@ -4386,7 +4592,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-dua-lipa",
@@ -4407,7 +4614,8 @@
       "British",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-elton-john",
@@ -4428,7 +4636,8 @@
       "British",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bruce-springsteen",
@@ -4449,7 +4658,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-abba",
@@ -4470,7 +4680,8 @@
       "Swedish",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-james-brown",
@@ -4491,7 +4702,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sly-and-the-family-stone",
@@ -4512,7 +4724,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-parliament-funkadelic",
@@ -4533,7 +4746,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-earth-wind-fire",
@@ -4554,7 +4768,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-curtis-mayfield",
@@ -4575,7 +4790,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-al-green",
@@ -4596,7 +4812,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-otis-redding",
@@ -4617,7 +4834,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ray-charles",
@@ -4638,7 +4856,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-wayne",
@@ -4659,7 +4878,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-nicki-minaj",
@@ -4680,7 +4900,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cardi-b",
@@ -4701,7 +4922,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-50-cent",
@@ -4722,7 +4944,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ice-cube",
@@ -4743,7 +4966,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-krs-one",
@@ -4764,7 +4988,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mobb-deep",
@@ -4785,7 +5010,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-dmx",
@@ -4806,7 +5032,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-megan-thee-stallion",
@@ -4827,7 +5054,8 @@
       "American",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-run-the-jewels",
@@ -4848,7 +5076,8 @@
       "American",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mac-miller",
@@ -4869,7 +5098,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-lauryn-hill",
@@ -4891,7 +5121,8 @@
       "American",
       "1990s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-erykah-badu",
@@ -4912,7 +5143,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-dangelo",
@@ -4933,7 +5165,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sza",
@@ -4954,7 +5187,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-anderson-paak",
@@ -4976,7 +5210,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-the-weeknd",
@@ -4997,7 +5232,8 @@
       "Canadian",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-usher",
@@ -5018,7 +5254,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sade",
@@ -5039,7 +5276,8 @@
       "British",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-joni-mitchell",
@@ -5060,7 +5298,8 @@
       "Canadian",
       "1970s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-leonard-cohen",
@@ -5081,7 +5320,8 @@
       "Canadian",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nick-drake",
@@ -5102,7 +5342,8 @@
       "British",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cat-stevens",
@@ -5123,7 +5364,8 @@
       "British",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-james-taylor",
@@ -5144,7 +5386,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-simon-and-garfunkel",
@@ -5165,7 +5408,8 @@
       "American",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-tracy-chapman",
@@ -5186,7 +5430,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-john-prine",
@@ -5207,7 +5452,8 @@
       "American",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-my-bloody-valentine",
@@ -5228,7 +5474,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-slowdive",
@@ -5249,7 +5496,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cocteau-twins",
@@ -5270,7 +5518,8 @@
       "British",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cigarettes-after-sex",
@@ -5291,7 +5540,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-japanese-breakfast",
@@ -5312,7 +5562,8 @@
       "American",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-gojira",
@@ -5333,7 +5584,8 @@
       "French",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-meshuggah",
@@ -5354,7 +5606,8 @@
       "Swedish",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mastodon",
@@ -5375,7 +5628,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-deftones",
@@ -5396,7 +5650,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-slipknot",
@@ -5417,7 +5672,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-nine-inch-nails",
@@ -5438,7 +5694,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-garth-brooks",
@@ -5458,7 +5715,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-shania-twain",
@@ -5479,7 +5737,8 @@
       "Canadian",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-george-strait",
@@ -5499,7 +5758,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-chris-stapleton",
@@ -5520,7 +5780,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-tyler-childers",
@@ -5541,7 +5802,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-toots-and-the-maytals",
@@ -5562,7 +5824,8 @@
       "Jamaican",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-jimmy-cliff",
@@ -5583,7 +5846,8 @@
       "Jamaican",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-koffee",
@@ -5604,7 +5868,8 @@
       "Jamaican",
       "2020s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-burna-boy",
@@ -5625,7 +5890,8 @@
       "Nigerian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-wizkid",
@@ -5646,7 +5912,8 @@
       "Nigerian",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-skrillex",
@@ -5667,7 +5934,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-deadmau5",
@@ -5688,7 +5956,8 @@
       "Canadian",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-calvin-harris",
@@ -5709,7 +5978,8 @@
       "British",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-avicii",
@@ -5730,7 +6000,8 @@
       "Swedish",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-disclosure",
@@ -5752,7 +6023,8 @@
       "British",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-jamie-xx",
@@ -5774,7 +6046,8 @@
       "British",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-fred-again",
@@ -5795,7 +6068,8 @@
       "British",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-j-dilla",
@@ -5817,7 +6091,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sonny-rollins",
@@ -5838,7 +6113,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-art-blakey",
@@ -5859,7 +6135,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-dave-brubeck",
@@ -5880,7 +6157,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-joao-gilberto",
@@ -5900,7 +6178,8 @@
       "Brazilian",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-antonio-carlos-jobim",
@@ -5920,7 +6199,8 @@
       "Brazilian",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-kamasi-washington",
@@ -5941,7 +6221,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-celia-cruz",
@@ -5962,7 +6243,8 @@
       "Cuban",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-carlos-santana",
@@ -5982,7 +6264,8 @@
       "Mexican",
       "1970s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-shakira",
@@ -6002,7 +6285,8 @@
       "Colombian",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-vicente-fernandez",
@@ -6023,7 +6307,8 @@
       "Mexican",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cafe-tacvba",
@@ -6043,7 +6328,8 @@
       "Mexican",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-nusrat-fateh-ali-khan",
@@ -6064,7 +6350,8 @@
       "Pakistani",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-tinariwen",
@@ -6085,7 +6372,8 @@
       "Malian",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-king-sunny-ade",
@@ -6105,7 +6393,8 @@
       "Nigerian",
       "1980s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-angelique-kidjo",
@@ -6126,7 +6415,8 @@
       "Beninese",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-miriam-makeba",
@@ -6147,7 +6437,8 @@
       "South African",
       "1960s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sister-rosetta-tharpe",
@@ -6169,7 +6460,8 @@
       "American",
       "1950s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-lead-belly",
@@ -6190,7 +6482,8 @@
       "American",
       "1940s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-stevie-ray-vaughan",
@@ -6211,7 +6504,8 @@
       "American",
       "1980s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-gary-clark-jr",
@@ -6232,7 +6526,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-tchaikovsky",
@@ -6253,7 +6548,8 @@
       "Russian",
       "1870s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-vivaldi",
@@ -6274,7 +6570,8 @@
       "Italian",
       "1700s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-erik-satie",
@@ -6295,7 +6592,8 @@
       "French",
       "1880s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-steve-reich",
@@ -6316,7 +6614,8 @@
       "American",
       "1970s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-hans-zimmer",
@@ -6337,7 +6636,8 @@
       "German",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-john-williams",
@@ -6358,7 +6658,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bts",
@@ -6378,7 +6679,8 @@
       "Korean",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-blackpink",
@@ -6398,7 +6700,8 @@
       "Korean",
       "2020s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-psy",
@@ -6418,7 +6721,8 @@
       "Korean",
       "2010s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-the-1975",
@@ -6439,7 +6743,8 @@
       "British",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sabrina-carpenter",
@@ -6459,7 +6764,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-harry-styles",
@@ -6479,7 +6785,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-doja-cat",
@@ -6500,7 +6807,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-nas-x",
@@ -6521,7 +6829,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tate-mcrae",
@@ -6541,7 +6850,8 @@
       "Canadian",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gracie-abrams",
@@ -6562,7 +6872,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-noah-kahan",
@@ -6583,7 +6894,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-zach-bryan",
@@ -6604,7 +6916,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-teddy-swims",
@@ -6625,7 +6938,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-benson-boone",
@@ -6646,7 +6960,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sleep-token",
@@ -6667,7 +6982,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-hozier",
@@ -6688,7 +7004,8 @@
       "Irish",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lana-del-rey",
@@ -6709,7 +7026,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-travis-scott",
@@ -6730,7 +7048,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-future",
@@ -6751,7 +7070,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-21-savage",
@@ -6772,7 +7092,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-playboi-carti",
@@ -6793,7 +7114,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-uzi-vert",
@@ -6814,7 +7136,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-young-thug",
@@ -6835,7 +7158,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-denzel-curry",
@@ -6856,7 +7180,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jpegmafia",
@@ -6877,7 +7202,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jid",
@@ -6898,7 +7224,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-little-simz",
@@ -6919,7 +7246,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kali-uchis",
@@ -6940,7 +7268,8 @@
       "Colombian",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rauw-alejandro",
@@ -6961,7 +7290,8 @@
       "Puerto Rican",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-feid",
@@ -6982,7 +7312,8 @@
       "Colombian",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-peso-pluma",
@@ -7003,7 +7334,8 @@
       "Mexican",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ice-spice",
@@ -7024,7 +7356,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tems",
@@ -7045,7 +7378,8 @@
       "Nigerian",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ayra-starr",
@@ -7066,7 +7400,8 @@
       "Nigerian",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-raye",
@@ -7087,7 +7422,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fka-twigs",
@@ -7108,7 +7444,8 @@
       "British",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-caroline-polachek",
@@ -7129,7 +7466,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-beabadoobee",
@@ -7150,7 +7488,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-girl-in-red",
@@ -7171,7 +7510,8 @@
       "Norwegian",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-conan-gray",
@@ -7192,7 +7532,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-steve-lacy",
@@ -7213,7 +7554,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-glass-animals",
@@ -7234,7 +7576,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wednesday",
@@ -7255,7 +7598,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-indigo-de-souza",
@@ -7276,7 +7620,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-big-thief",
@@ -7297,7 +7642,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-arca",
@@ -7318,7 +7664,8 @@
       "Venezuelan",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-danny-brown",
@@ -7339,7 +7686,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-earl-sweatshirt",
@@ -7360,7 +7708,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-killer-mike",
@@ -7381,7 +7730,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-asap-rocky",
@@ -7402,7 +7752,8 @@
       "American",
       "2010s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gunna",
@@ -7423,7 +7774,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bicep",
@@ -7444,7 +7796,8 @@
       "British",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-porter-robinson",
@@ -7465,7 +7818,8 @@
       "American",
       "2020s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-taj-mahal",
@@ -7485,7 +7839,8 @@
       "American",
       "1960s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-jimmie-rodgers",
@@ -7505,7 +7860,8 @@
       "1920s",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-carter-family",
@@ -7525,7 +7881,8 @@
       "1920s",
       "Folk"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-doc-watson",
@@ -7545,7 +7902,8 @@
       "Bluegrass",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-earl-scruggs",
@@ -7565,7 +7923,8 @@
       "Banjo",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bill-monroe",
@@ -7585,7 +7944,8 @@
       "Mandolin",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ralph-stanley",
@@ -7605,7 +7965,8 @@
       "Appalachian",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-george-jones",
@@ -7625,7 +7986,8 @@
       "American",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-waylon-jennings",
@@ -7645,7 +8007,8 @@
       "Outlaw",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kris-kristofferson",
@@ -7665,7 +8028,8 @@
       "Songwriter",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-tammy-wynette",
@@ -7685,7 +8049,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-hank-williams-jr",
@@ -7705,7 +8070,8 @@
       "Southern Rock",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-alan-jackson",
@@ -7725,7 +8091,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-reba-mcentire",
@@ -7745,7 +8112,8 @@
       "American",
       "1990s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-dixie-chicks",
@@ -7765,7 +8133,8 @@
       "American",
       "2000s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-emmylou-harris",
@@ -7785,7 +8154,8 @@
       "Folk",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-gillian-welch",
@@ -7805,7 +8175,8 @@
       "Americana",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sturgill-simpson",
@@ -7825,7 +8196,8 @@
       "Outlaw",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-colter-wall",
@@ -7845,7 +8217,8 @@
       "Folk",
       "Canadian"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-charley-patton",
@@ -7865,7 +8238,8 @@
       "Delta",
       "1920s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-son-house",
@@ -7885,7 +8259,8 @@
       "Delta",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mississippi-john-hurt",
@@ -7905,7 +8280,8 @@
       "Fingerpicking",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-elmore-james",
@@ -7925,14 +8301,15 @@
       "Slide Guitar",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-albert-king",
     "categoryId": "ARTISTS",
     "subtype": "Artist",
     "name": "Albert King",
-    "teaser": "The left-handed, upside-down-guitar giant whose fat, string-bending style directly shaped Eric Clapton, Stevie Ray Vaughan, and Jimi Hendrix.",
+    "teaser": "The left-handed, upside-down-guitar king of Memphis blues whose fat string-bending style directly shaped Eric Clapton, Stevie Ray Vaughan, and Jimi Hendrix. His 1967 album Born Under a Bad Sign — with its title track — defined the sound of modern electric blues.",
     "imageUrl": "",
     "exploreAction": {
       "verb": "Listen",
@@ -7945,7 +8322,8 @@
       "Electric",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-freddie-king",
@@ -7965,7 +8343,8 @@
       "Electric",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-koko-taylor",
@@ -7985,7 +8364,8 @@
       "Chicago",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-mahalia-jackson",
@@ -8005,7 +8385,8 @@
       "American",
       "Soul"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sam-cooke",
@@ -8025,7 +8406,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wilson-pickett",
@@ -8045,7 +8427,8 @@
       "American",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sly-family-stone",
@@ -8065,7 +8448,8 @@
       "Psychedelic",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-george-clinton",
@@ -8085,7 +8469,8 @@
       "Psychedelic",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bootsy-collins",
@@ -8105,7 +8490,8 @@
       "Bass",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-chaka-khan",
@@ -8125,7 +8511,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rick-james",
@@ -8145,7 +8532,8 @@
       "Punk-Funk",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-teena-marie",
@@ -8165,7 +8553,8 @@
       "Funk",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-count-basie",
@@ -8185,7 +8574,8 @@
       "Swing",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-benny-goodman",
@@ -8205,7 +8595,8 @@
       "Swing",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-glenn-miller",
@@ -8225,7 +8616,8 @@
       "Swing",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-sarah-vaughan",
@@ -8245,7 +8637,8 @@
       "Vocal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dinah-washington",
@@ -8265,7 +8658,8 @@
       "Jazz",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-nancy-wilson",
@@ -8285,7 +8679,8 @@
       "Vocal",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-wayne-shorter",
@@ -8305,7 +8700,8 @@
       "Saxophone",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-weather-report",
@@ -8325,7 +8721,8 @@
       "Fusion",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-return-to-forever",
@@ -8345,7 +8742,8 @@
       "Fusion",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-chick-corea",
@@ -8365,7 +8763,8 @@
       "Piano",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-john-mclaughlin",
@@ -8385,7 +8784,8 @@
       "Fusion",
       "Guitar"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-al-di-meola",
@@ -8405,7 +8805,8 @@
       "Fusion",
       "Guitar"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-pat-metheny",
@@ -8425,7 +8826,8 @@
       "Guitar",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bill-frisell",
@@ -8445,7 +8847,8 @@
       "Guitar",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-john-zorn",
@@ -8465,7 +8868,8 @@
       "Jazz",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-ornette-coleman",
@@ -8485,7 +8889,8 @@
       "Avant-garde",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-cecil-taylor",
@@ -8505,7 +8910,8 @@
       "Avant-garde",
       "Piano"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-sun-ra",
@@ -8525,7 +8931,8 @@
       "Avant-garde",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-alice-coltrane",
@@ -8545,7 +8952,8 @@
       "Spiritual",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-pharoah-sanders",
@@ -8565,7 +8973,8 @@
       "Spiritual",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-archie-shepp",
@@ -8585,7 +8994,8 @@
       "Avant-garde",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-eric-dolphy",
@@ -8605,7 +9015,8 @@
       "Avant-garde",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-rashaan-roland-kirk",
@@ -8625,7 +9036,8 @@
       "Saxophone",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-xxx-tentacion",
@@ -8645,7 +9057,8 @@
       "Emo Rap",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-juice-wrld",
@@ -8665,7 +9078,8 @@
       "Emo Rap",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-pop-smoke",
@@ -8685,7 +9099,8 @@
       "Drill",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-chance-the-rapper",
@@ -8705,7 +9120,8 @@
       "Chicago",
       "Gospel"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-kid-cudi",
@@ -8725,7 +9141,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-big-boi",
@@ -8745,7 +9162,8 @@
       "Atlanta",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-missy-elliott",
@@ -8765,7 +9183,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jack-harlow",
@@ -8785,7 +9204,8 @@
       "American",
       "2020s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-solange",
@@ -8805,7 +9225,8 @@
       "Neo-Soul",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-summer-walker",
@@ -8825,7 +9246,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-giveon",
@@ -8845,7 +9267,8 @@
       "American",
       "2020s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-h-e-r",
@@ -8865,7 +9288,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-daniel-caesar",
@@ -8885,7 +9309,8 @@
       "Canadian",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-jhene-aiko",
@@ -8905,7 +9330,8 @@
       "American",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-pete-rock",
@@ -8925,7 +9351,8 @@
       "Producer",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-the-roots",
@@ -8945,7 +9372,8 @@
       "Live Band",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-common",
@@ -8965,7 +9393,8 @@
       "Chicago",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mos-def",
@@ -8985,7 +9414,8 @@
       "Brooklyn",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-talib-kweli",
@@ -9005,7 +9435,8 @@
       "Underground",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-gang-starr",
@@ -9025,7 +9456,8 @@
       "Jazz Rap",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-method-man",
@@ -9045,7 +9477,8 @@
       "Wu-Tang",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ghostface-killah",
@@ -9065,7 +9498,8 @@
       "Wu-Tang",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-raekwon",
@@ -9085,7 +9519,8 @@
       "Wu-Tang",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-rakim",
@@ -9105,7 +9540,8 @@
       "Golden Age",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pusha-t",
@@ -9125,7 +9561,8 @@
       "Virginia",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-ll-cool-j",
@@ -9145,7 +9582,8 @@
       "Old School",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-beastie-boys",
@@ -9165,7 +9603,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-de-la-soul",
@@ -9185,7 +9624,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-jungle-brothers",
@@ -9205,7 +9645,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-madvillain",
@@ -9225,7 +9666,8 @@
       "Underground",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-danger-mouse",
@@ -9245,7 +9687,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-madlib",
@@ -9265,7 +9708,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-nujabes",
@@ -9285,7 +9729,8 @@
       "Lo-Fi",
       "Japanese"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-knxwledge",
@@ -9305,7 +9750,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-kaytranada",
@@ -9325,7 +9771,8 @@
       "Funk",
       "Canadian"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-floating-points",
@@ -9345,7 +9792,8 @@
       "Jazz",
       "British"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bonobo",
@@ -9365,7 +9813,8 @@
       "Downtempo",
       "British"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-maribou-state",
@@ -9385,7 +9834,8 @@
       "Downtempo",
       "British"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-tycho",
@@ -9405,7 +9855,8 @@
       "Ambient",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-emancipator",
@@ -9425,7 +9876,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-rufus-du-sol",
@@ -9445,7 +9897,8 @@
       "House",
       "Australian"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-flume",
@@ -9465,7 +9918,8 @@
       "Future Bass",
       "Australian"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-madeon",
@@ -9485,7 +9939,8 @@
       "Pop",
       "French"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-autechre",
@@ -9505,7 +9960,8 @@
       "IDM",
       "British"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-squarepusher",
@@ -9525,7 +9981,8 @@
       "IDM",
       "British"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-oneohtrix-point-never",
@@ -9545,7 +10002,8 @@
       "Experimental",
       "American"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-sophie",
@@ -9565,7 +10023,8 @@
       "Experimental",
       "Scottish"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-bat-for-lashes",
@@ -9585,7 +10044,8 @@
       "British",
       "Indie"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "artist-nipsey-hussle",
@@ -9605,7 +10065,8 @@
       "Los Angeles",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "artist-conway-the-machine",
@@ -10570,7 +11031,8 @@
       "British",
       "1960s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-cream",
@@ -10591,7 +11053,8 @@
       "1960s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-eric-clapton",
@@ -10611,7 +11074,8 @@
       "Blues",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-deep-purple",
@@ -10632,7 +11096,8 @@
       "1970s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-aerosmith",
@@ -10652,7 +11117,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-journey",
@@ -10672,7 +11138,8 @@
       "1980s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-boston",
@@ -10692,7 +11159,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-cars",
@@ -10713,7 +11181,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-heart",
@@ -10733,7 +11202,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-cheap-trick",
@@ -10754,7 +11224,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kiss",
@@ -10774,7 +11245,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-stooges",
@@ -10795,7 +11267,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-david-gilmour",
@@ -10815,7 +11288,8 @@
       "British",
       "Progressive"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-neil-young",
@@ -10836,7 +11310,8 @@
       "1970s",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-billy-joel",
@@ -10857,7 +11332,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rush",
@@ -10877,7 +11353,8 @@
       "Progressive",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-genesis",
@@ -10897,7 +11374,8 @@
       "Progressive",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-yes",
@@ -10917,7 +11395,8 @@
       "Progressive",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-king-crimson",
@@ -10937,7 +11416,8 @@
       "Progressive",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-police",
@@ -10957,7 +11437,8 @@
       "New Wave",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tears-for-fears",
@@ -10978,7 +11459,8 @@
       "1980s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pet-shop-boys",
@@ -10999,7 +11481,8 @@
       "1980s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-morrissey",
@@ -11019,7 +11502,8 @@
       "British",
       "1980s"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-jam",
@@ -11039,7 +11523,8 @@
       "Mod",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-specials",
@@ -11059,7 +11544,8 @@
       "Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ub40",
@@ -11078,7 +11564,8 @@
       "Reggae",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-a-ha",
@@ -11099,7 +11586,8 @@
       "1980s",
       "Norwegian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-roxette",
@@ -11119,7 +11607,8 @@
       "1990s",
       "Swedish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bon-jovi",
@@ -11139,7 +11628,8 @@
       "1980s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-def-leppard",
@@ -11159,7 +11649,8 @@
       "1980s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-elvis-presley",
@@ -11180,7 +11671,8 @@
       "1950s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chuck-berry",
@@ -11200,7 +11692,8 @@
       "1950s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-little-richard",
@@ -11220,7 +11713,8 @@
       "1950s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-roy-orbison",
@@ -11241,7 +11735,8 @@
       "1960s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-buddy-holly",
@@ -11261,7 +11756,8 @@
       "1950s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jerry-lee-lewis",
@@ -11281,7 +11777,8 @@
       "Rockabilly",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-everly-brothers",
@@ -11302,7 +11799,8 @@
       "1950s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-carl-perkins",
@@ -11322,7 +11820,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-bee-gees",
@@ -11343,7 +11842,8 @@
       "1970s",
       "British-Australian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lynyrd-skynyrd",
@@ -11364,7 +11864,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-zz-top",
@@ -11384,7 +11885,8 @@
       "Blues",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-alice-cooper",
@@ -11405,7 +11907,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-supertramp",
@@ -11426,7 +11929,8 @@
       "1970s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-elo",
@@ -11447,7 +11951,8 @@
       "1970s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-10cc",
@@ -11468,7 +11973,8 @@
       "1970s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-doobie-brothers",
@@ -11489,7 +11995,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-pretenders",
@@ -11509,7 +12016,8 @@
       "New Wave",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-blondie",
@@ -11529,7 +12037,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-cyndi-lauper",
@@ -11550,7 +12059,8 @@
       "1980s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rod-stewart",
@@ -11570,7 +12080,8 @@
       "Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-phil-collins",
@@ -11591,7 +12102,8 @@
       "1980s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-peter-gabriel",
@@ -11611,7 +12123,8 @@
       "Art Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dire-straits",
@@ -11630,7 +12143,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-isaac-hayes",
@@ -11651,7 +12165,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-barry-white",
@@ -11672,7 +12187,8 @@
       "1970s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lionel-richie",
@@ -11693,7 +12209,8 @@
       "1980s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-smokey-robinson",
@@ -11714,7 +12231,8 @@
       "1960s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-temptations",
@@ -11735,7 +12253,8 @@
       "1960s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-supremes",
@@ -11756,7 +12275,8 @@
       "1960s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-george-michael",
@@ -11777,7 +12297,8 @@
       "1980s",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-depeche-mode",
@@ -11797,7 +12318,8 @@
       "Synth-Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-duran-duran",
@@ -11817,7 +12339,8 @@
       "Synth-Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-erasure",
@@ -11837,7 +12360,8 @@
       "Electronic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-simple-minds",
@@ -11857,7 +12381,8 @@
       "New Wave",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-siouxsie-and-the-banshees",
@@ -11877,7 +12402,8 @@
       "Goth",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-scorpions",
@@ -11897,7 +12423,8 @@
       "Metal",
       "German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-whitesnake",
@@ -11917,7 +12444,8 @@
       "Metal",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-motley-crue",
@@ -11938,7 +12466,8 @@
       "1980s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-poison",
@@ -11959,7 +12488,8 @@
       "1980s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-steve-vai",
@@ -11979,7 +12509,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-joe-satriani",
@@ -11999,7 +12530,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-eddie-van-halen",
@@ -12019,7 +12551,8 @@
       "Guitar",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-yngwie-malmsteen",
@@ -12039,7 +12572,8 @@
       "Instrumental",
       "Swedish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-buzzcocks",
@@ -12058,7 +12592,8 @@
       "Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-damned",
@@ -12077,7 +12612,8 @@
       "Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wire",
@@ -12097,7 +12633,8 @@
       "Post-Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gang-of-four",
@@ -12116,7 +12653,8 @@
       "Post-Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-slits",
@@ -12136,7 +12674,8 @@
       "Post-Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-undertones",
@@ -12156,7 +12695,8 @@
       "Pop",
       "Irish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dead-kennedys",
@@ -12175,7 +12715,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-black-flag",
@@ -12195,7 +12736,8 @@
       "Hardcore",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bad-brains",
@@ -12216,7 +12758,8 @@
       "Reggae",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-minor-threat",
@@ -12236,7 +12779,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fugazi",
@@ -12256,7 +12800,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-green-day",
@@ -12276,7 +12821,8 @@
       "Pop-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-blink-182",
@@ -12295,7 +12841,8 @@
       "Pop-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sum-41",
@@ -12315,7 +12862,8 @@
       "Punk",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fall-out-boy",
@@ -12335,7 +12883,8 @@
       "Pop-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-my-chemical-romance",
@@ -12355,7 +12904,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-paramore",
@@ -12375,7 +12925,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jimmy-eat-world",
@@ -12395,7 +12946,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dashboard-confessional",
@@ -12415,7 +12967,8 @@
       "Acoustic",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-wonder-years",
@@ -12434,7 +12987,8 @@
       "Pop-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-modern-baseball",
@@ -12454,7 +13008,8 @@
       "DIY",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-turnstile",
@@ -12474,7 +13029,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rza",
@@ -12493,7 +13049,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gza",
@@ -12512,7 +13069,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ol-dirty-bastard",
@@ -12531,7 +13089,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-redman",
@@ -12550,7 +13109,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-busta-rhymes",
@@ -12569,7 +13129,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-big-pun",
@@ -12589,7 +13150,8 @@
       "Latin",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-camron",
@@ -12608,7 +13170,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jeezy",
@@ -12628,7 +13191,8 @@
       "Trap",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ti",
@@ -12648,7 +13212,8 @@
       "Trap",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rick-ross",
@@ -12667,7 +13232,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-meek-mill",
@@ -12686,7 +13252,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-2-chainz",
@@ -12705,7 +13272,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-aaliyah",
@@ -12725,7 +13293,8 @@
       "1990s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jill-scott",
@@ -12745,7 +13314,8 @@
       "Neo-Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-india-arie",
@@ -12765,7 +13335,8 @@
       "Neo-Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jazmine-sullivan",
@@ -12784,7 +13355,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-boyz-ii-men",
@@ -12804,7 +13376,8 @@
       "1990s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tlc",
@@ -12824,7 +13397,8 @@
       "1990s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-richard-wagner",
@@ -12844,7 +13418,8 @@
       "Opera",
       "German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-johannes-brahms",
@@ -12864,7 +13439,8 @@
       "Romantic",
       "German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-franz-schubert",
@@ -12884,7 +13460,8 @@
       "Romantic",
       "Austrian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-george-frideric-handel",
@@ -12904,7 +13481,8 @@
       "Baroque",
       "British-German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-joseph-haydn",
@@ -12924,7 +13502,8 @@
       "Classical Era",
       "Austrian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-franz-liszt",
@@ -12944,7 +13523,8 @@
       "Romantic",
       "Hungarian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-giuseppe-verdi",
@@ -12964,7 +13544,8 @@
       "Opera",
       "Italian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-giacomo-puccini",
@@ -12984,7 +13565,8 @@
       "Opera",
       "Italian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gustav-mahler",
@@ -13004,7 +13586,8 @@
       "Late Romantic",
       "Austrian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sergei-rachmaninoff",
@@ -13024,7 +13607,8 @@
       "Romantic",
       "Russian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dmitri-shostakovich",
@@ -13044,7 +13628,8 @@
       "Modern",
       "Russian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-george-gershwin",
@@ -13064,7 +13649,8 @@
       "Classical",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-leonard-bernstein",
@@ -13084,7 +13670,8 @@
       "Broadway",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-arvo-part",
@@ -13104,7 +13691,8 @@
       "Minimalism",
       "Estonian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-max-richter",
@@ -13124,7 +13712,8 @@
       "Ambient",
       "British-German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nils-frahm",
@@ -13144,7 +13733,8 @@
       "Modern Classical",
       "German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-olafur-arnalds",
@@ -13164,7 +13754,8 @@
       "Electronic",
       "Icelandic"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ludovico-einaudi",
@@ -13184,7 +13775,8 @@
       "Minimalism",
       "Italian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ennio-morricone",
@@ -13204,7 +13796,8 @@
       "Classical",
       "Italian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-danny-elfman",
@@ -13223,7 +13816,8 @@
       "Film Score",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-howard-shore",
@@ -13242,7 +13836,8 @@
       "Film Score",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ramin-djawadi",
@@ -13261,7 +13856,8 @@
       "Film Score",
       "German-Iranian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-vangelis",
@@ -13281,7 +13877,8 @@
       "Film Score",
       "Greek"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jean-michel-jarre",
@@ -13300,7 +13897,8 @@
       "Electronic",
       "French"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mike-oldfield",
@@ -13320,7 +13918,8 @@
       "Instrumental",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ryuichi-sakamoto",
@@ -13340,7 +13939,8 @@
       "Film Score",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-joe-hisaishi",
@@ -13360,7 +13960,8 @@
       "Classical",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-david-guetta",
@@ -13379,7 +13980,8 @@
       "EDM",
       "French"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tiesto",
@@ -13399,7 +14001,8 @@
       "EDM",
       "Dutch"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-armin-van-buuren",
@@ -13419,7 +14022,8 @@
       "EDM",
       "Dutch"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-eric-prydz",
@@ -13439,7 +14043,8 @@
       "EDM",
       "Swedish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-carl-cox",
@@ -13459,7 +14064,8 @@
       "House",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-richie-hawtin",
@@ -13479,7 +14085,8 @@
       "Minimal",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-diplo",
@@ -13499,7 +14106,8 @@
       "Dancehall",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-buena-vista-social-club",
@@ -13519,7 +14127,8 @@
       "Cuban",
       "World"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gilberto-gil",
@@ -13539,7 +14148,8 @@
       "Tropicalia",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-caetano-veloso",
@@ -13559,7 +14169,8 @@
       "Tropicalia",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-astor-piazzolla",
@@ -13579,7 +14190,8 @@
       "Classical",
       "Argentine"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mercedes-sosa",
@@ -13599,7 +14211,8 @@
       "Latin",
       "Argentine"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-silvio-rodriguez",
@@ -13619,7 +14232,8 @@
       "Folk",
       "Cuban"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-paco-de-lucia",
@@ -13638,7 +14252,8 @@
       "Flamenco",
       "Spanish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mdou-moctar",
@@ -13658,7 +14273,8 @@
       "Rock",
       "Nigerien"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bombino",
@@ -13677,7 +14293,8 @@
       "Desert Blues",
       "Nigerien"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-salif-keita",
@@ -13696,7 +14313,8 @@
       "Afro-pop",
       "Malian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-baaba-maal",
@@ -13715,7 +14333,8 @@
       "Afro-pop",
       "Senegalese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-amadou-and-mariam",
@@ -13734,7 +14353,8 @@
       "Afro-pop",
       "Malian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-hugh-masekela",
@@ -13754,7 +14374,8 @@
       "Afrobeat",
       "South African"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-abdullah-ibrahim",
@@ -13773,7 +14394,8 @@
       "Jazz",
       "South African"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ruben-blades",
@@ -13793,7 +14415,8 @@
       "Latin",
       "Panamanian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-luis-miguel",
@@ -13813,7 +14436,8 @@
       "Bolero",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-juan-gabriel",
@@ -13833,7 +14457,8 @@
       "Latin Pop",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-selena",
@@ -13853,7 +14478,8 @@
       "Latin Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gloria-estefan",
@@ -13873,7 +14499,8 @@
       "Dance",
       "Cuban-American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ricky-martin",
@@ -13892,7 +14519,8 @@
       "Latin Pop",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-julieta-venegas",
@@ -13912,7 +14540,8 @@
       "Latin",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-natalia-lafourcade",
@@ -13932,7 +14561,8 @@
       "Latin",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mon-laferte",
@@ -13951,7 +14581,8 @@
       "Latin Pop",
       "Chilean"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-twice",
@@ -13970,7 +14601,8 @@
       "K-Pop",
       "South Korean"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-exo",
@@ -13989,7 +14621,8 @@
       "K-Pop",
       "South Korean"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-seventeen",
@@ -14008,7 +14641,8 @@
       "K-Pop",
       "South Korean"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-stray-kids",
@@ -14027,7 +14661,8 @@
       "K-Pop",
       "South Korean"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-newjeans",
@@ -14047,7 +14682,8 @@
       "R&B",
       "South Korean"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-utada-hikaru",
@@ -14067,7 +14703,8 @@
       "R&B",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ayumi-hamasaki",
@@ -14086,7 +14723,8 @@
       "J-Pop",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-babymetal",
@@ -14106,7 +14744,8 @@
       "J-Pop",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kenshi-yonezu",
@@ -14126,7 +14765,8 @@
       "Rock",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-yoasobi",
@@ -14145,7 +14785,8 @@
       "J-Pop",
       "Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-band",
@@ -14165,7 +14806,8 @@
       "Rock",
       "American-Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-csny",
@@ -14185,7 +14827,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tom-petty",
@@ -14205,7 +14848,8 @@
       "Heartland",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-john-mellencamp",
@@ -14225,7 +14869,8 @@
       "Heartland",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bruce-cockburn",
@@ -14245,7 +14890,8 @@
       "Rock",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gordon-lightfoot",
@@ -14264,7 +14910,8 @@
       "Folk",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-carole-king",
@@ -14284,7 +14931,8 @@
       "Soft Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-carly-simon",
@@ -14304,7 +14952,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-paul-simon",
@@ -14324,7 +14973,8 @@
       "World",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-suzanne-vega",
@@ -14344,7 +14994,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ani-difranco",
@@ -14364,7 +15015,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-regina-spektor",
@@ -14384,7 +15036,8 @@
       "Art Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-feist",
@@ -14404,7 +15057,8 @@
       "Folk",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-iron-and-wine",
@@ -14424,7 +15078,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-andrew-bird",
@@ -14444,7 +15099,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jose-gonzalez",
@@ -14464,7 +15120,8 @@
       "Folk",
       "Swedish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nick-cave",
@@ -14484,7 +15141,8 @@
       "Gothic",
       "Australian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-war-on-drugs",
@@ -14504,7 +15162,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-miranda-lambert",
@@ -14523,7 +15182,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-luke-combs",
@@ -14542,7 +15202,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-morgan-wallen",
@@ -14561,7 +15222,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-brad-paisley",
@@ -14580,7 +15242,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kenny-chesney",
@@ -14599,7 +15262,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-trisha-yearwood",
@@ -14618,7 +15282,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-randy-travis",
@@ -14637,7 +15302,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-foreigner",
@@ -14656,7 +15322,8 @@
       "Rock",
       "American-British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-reo-speedwagon",
@@ -14675,7 +15342,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-styx",
@@ -14695,7 +15363,8 @@
       "Progressive",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chicago",
@@ -14715,7 +15384,8 @@
       "Jazz-Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-three-dog-night",
@@ -14735,7 +15405,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-grand-funk-railroad",
@@ -14754,7 +15425,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-blue-oyster-cult",
@@ -14774,7 +15446,8 @@
       "Metal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kansas",
@@ -14794,7 +15467,8 @@
       "Progressive",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mountain",
@@ -14814,7 +15488,8 @@
       "Blues",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-guess-who",
@@ -14833,7 +15508,8 @@
       "Rock",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bto",
@@ -14852,7 +15528,8 @@
       "Rock",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kool-and-the-gang",
@@ -14872,7 +15549,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-commodores",
@@ -14892,7 +15570,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-o-jays",
@@ -14912,7 +15591,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gladys-knight-and-the-pips",
@@ -14932,7 +15612,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-four-tops",
@@ -14952,7 +15633,8 @@
       "Motown",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-diana-ross",
@@ -14972,7 +15654,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-patti-labelle",
@@ -14992,7 +15675,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-teddy-pendergrass",
@@ -15012,7 +15696,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-luther-vandross",
@@ -15032,7 +15717,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-anita-baker",
@@ -15052,7 +15738,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-brandy",
@@ -15072,7 +15759,8 @@
       "1990s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-monica",
@@ -15092,7 +15780,8 @@
       "1990s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-toni-braxton",
@@ -15112,7 +15801,8 @@
       "1990s",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-britney-spears",
@@ -15131,7 +15821,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-backstreet-boys",
@@ -15151,7 +15842,8 @@
       "Boy Band",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nsync",
@@ -15171,7 +15863,8 @@
       "Boy Band",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-spice-girls",
@@ -15190,7 +15883,8 @@
       "Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-katy-perry",
@@ -15209,7 +15903,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pink",
@@ -15229,7 +15924,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-justin-bieber",
@@ -15248,7 +15944,8 @@
       "Pop",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ed-sheeran",
@@ -15267,7 +15964,8 @@
       "Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sam-smith",
@@ -15287,7 +15985,8 @@
       "Soul",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bruno-mars",
@@ -15307,7 +16006,8 @@
       "Funk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-justin-timberlake",
@@ -15327,7 +16027,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-christina-aguilera",
@@ -15346,7 +16047,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-art-tatum",
@@ -15366,7 +16068,8 @@
       "Piano",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-oscar-peterson",
@@ -15386,7 +16089,8 @@
       "Piano",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mccoy-tyner",
@@ -15406,7 +16110,8 @@
       "Piano",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ahmad-jamal",
@@ -15426,7 +16131,8 @@
       "Piano",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-horace-silver",
@@ -15446,7 +16152,8 @@
       "Hard Bop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-max-roach",
@@ -15465,7 +16172,8 @@
       "Jazz",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-elvin-jones",
@@ -15485,7 +16193,8 @@
       "Drums",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tony-williams",
@@ -15505,7 +16214,8 @@
       "Fusion",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-johnny-hartman",
@@ -15525,7 +16235,8 @@
       "Vocal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-betty-carter",
@@ -15545,7 +16256,8 @@
       "Vocal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dexter-gordon",
@@ -15565,7 +16277,8 @@
       "Saxophone",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-coleman-hawkins",
@@ -15585,7 +16298,8 @@
       "Saxophone",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lester-young",
@@ -15605,7 +16319,8 @@
       "Saxophone",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dizzy-gillespie",
@@ -15625,7 +16340,8 @@
       "Bebop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-clifford-brown",
@@ -15645,7 +16361,8 @@
       "Trumpet",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-weezer",
@@ -15665,7 +16382,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-smashing-pumpkins",
@@ -15685,7 +16403,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sonic-youth",
@@ -15705,7 +16424,8 @@
       "Noise",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-beck",
@@ -15724,7 +16444,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tori-amos",
@@ -15744,7 +16465,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pj-harvey",
@@ -15764,7 +16486,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-alanis-morissette",
@@ -15784,7 +16507,8 @@
       "Rock",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-garbage",
@@ -15804,7 +16528,8 @@
       "Electronic",
       "American-British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-hole",
@@ -15824,7 +16549,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-liz-phair",
@@ -15844,7 +16570,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gorillaz",
@@ -15864,7 +16591,8 @@
       "Hip-Hop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-killers",
@@ -15884,7 +16612,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-white-stripes",
@@ -15904,7 +16633,8 @@
       "Blues",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-black-keys",
@@ -15924,7 +16654,8 @@
       "Blues",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-flaming-lips",
@@ -15944,7 +16675,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sleater-kinney",
@@ -15964,7 +16696,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-spoon",
@@ -15984,7 +16717,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-linkin-park",
@@ -16004,7 +16738,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-korn",
@@ -16023,7 +16758,8 @@
       "Nu-Metal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-limp-bizkit",
@@ -16043,7 +16779,8 @@
       "Rap Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-evanescence",
@@ -16063,7 +16800,8 @@
       "Gothic",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-avenged-sevenfold",
@@ -16083,7 +16821,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bring-me-the-horizon",
@@ -16103,7 +16842,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dream-theater",
@@ -16122,7 +16862,8 @@
       "Progressive Metal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-animals-as-leaders",
@@ -16142,7 +16883,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-polyphia",
@@ -16162,7 +16904,8 @@
       "Progressive Metal",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-miley-cyrus",
@@ -16181,7 +16924,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-selena-gomez",
@@ -16200,7 +16944,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kylie-minogue",
@@ -16220,7 +16965,8 @@
       "Dance",
       "Australian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-cher",
@@ -16240,7 +16986,8 @@
       "Dance",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tina-turner",
@@ -16260,7 +17007,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-donna-summer",
@@ -16280,7 +17028,8 @@
       "Dance",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mariah-carey",
@@ -16300,7 +17049,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-janet-jackson",
@@ -16320,7 +17070,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-celine-dion",
@@ -16340,7 +17091,8 @@
       "Ballads",
       "Canadian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-blake-shelton",
@@ -16359,7 +17111,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-luke-bryan",
@@ -16378,7 +17131,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jason-aldean",
@@ -16397,7 +17151,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kane-brown",
@@ -16416,7 +17171,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-martina-mcbride",
@@ -16435,7 +17191,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dierks-bentley",
@@ -16454,7 +17211,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-van-morrison",
@@ -16474,7 +17232,8 @@
       "Celtic Soul",
       "Irish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lou-reed",
@@ -16494,7 +17253,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-roxy-music",
@@ -16514,7 +17274,8 @@
       "New Wave",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-t-rex",
@@ -16534,7 +17295,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-woody-guthrie",
@@ -16553,7 +17315,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-joan-baez",
@@ -16572,7 +17335,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pete-seeger",
@@ -16591,7 +17355,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jackson-browne",
@@ -16611,7 +17376,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-warren-zevon",
@@ -16631,7 +17397,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-harry-nilsson",
@@ -16651,7 +17418,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-randy-newman",
@@ -16670,7 +17438,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-todd-rundgren",
@@ -16690,7 +17459,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-don-mclean",
@@ -16710,7 +17480,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ice-t",
@@ -16729,7 +17500,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-salt-n-pepa",
@@ -16748,7 +17520,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fats-waller",
@@ -16768,7 +17541,8 @@
       "Stride",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jelly-roll-morton",
@@ -16788,7 +17562,8 @@
       "New Orleans",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sidney-bechet",
@@ -16808,7 +17583,8 @@
       "New Orleans",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-buddy-rich",
@@ -16828,7 +17604,8 @@
       "Big Band",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ben-webster",
@@ -16848,7 +17625,8 @@
       "Saxophone",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-philly-joe-jones",
@@ -16868,7 +17646,8 @@
       "Drums",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-roy-haynes",
@@ -16888,7 +17667,8 @@
       "Drums",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-brian-blade",
@@ -16908,7 +17688,8 @@
       "Drums",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chris-dave",
@@ -16929,7 +17710,8 @@
       "Drums",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-daddy-yankee",
@@ -16949,7 +17731,8 @@
       "Latin",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-j-balvin",
@@ -16969,7 +17752,8 @@
       "Latin",
       "Colombian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-karol-g",
@@ -16989,7 +17773,8 @@
       "Latin Pop",
       "Colombian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-maluma",
@@ -17009,7 +17794,8 @@
       "Latin Pop",
       "Colombian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ozuna",
@@ -17029,7 +17815,8 @@
       "Latin Trap",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-romeo-santos",
@@ -17049,7 +17836,8 @@
       "Latin",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-marc-anthony",
@@ -17069,7 +17857,8 @@
       "Latin",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-hector-lavoe",
@@ -17089,7 +17878,8 @@
       "Latin",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tito-puente",
@@ -17109,7 +17899,8 @@
       "Mambo",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-willie-colon",
@@ -17129,7 +17920,8 @@
       "Latin",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chico-buarque",
@@ -17148,7 +17940,8 @@
       "MPB",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-gal-costa",
@@ -17168,7 +17961,8 @@
       "Tropicalia",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-maria-bethania",
@@ -17187,7 +17981,8 @@
       "MPB",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-seu-jorge",
@@ -17207,7 +18002,8 @@
       "MPB",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tim-maia",
@@ -17227,7 +18023,8 @@
       "MPB",
       "Brazilian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-m83",
@@ -17247,7 +18044,8 @@
       "Shoegaze",
       "French"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chvrches",
@@ -17267,7 +18065,8 @@
       "Indie",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-alt-j",
@@ -17287,7 +18086,8 @@
       "Art Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-two-door-cinema-club",
@@ -17307,7 +18107,8 @@
       "Dance-Punk",
       "Irish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jungle",
@@ -17327,7 +18128,8 @@
       "Electronic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-parcels",
@@ -17347,7 +18149,8 @@
       "Funk",
       "Australian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-odesza",
@@ -17367,7 +18170,8 @@
       "Chillwave",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ben-bohmer",
@@ -17386,7 +18190,8 @@
       "Melodic House",
       "German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lane-8",
@@ -17405,7 +18210,8 @@
       "Melodic House",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jefferson-airplane",
@@ -17425,7 +18231,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-grateful-dead",
@@ -17445,7 +18252,8 @@
       "Jam Band",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-janis-joplin",
@@ -17465,7 +18273,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-byrds",
@@ -17484,7 +18293,8 @@
       "Folk Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mamas-and-the-papas",
@@ -17504,7 +18314,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-zombies",
@@ -17524,7 +18335,8 @@
       "Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-moody-blues",
@@ -17543,7 +18355,8 @@
       "Symphonic Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-procol-harum",
@@ -17562,7 +18375,8 @@
       "Progressive",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-free",
@@ -17582,7 +18396,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bad-company",
@@ -17602,7 +18417,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-allman-brothers",
@@ -17622,7 +18438,8 @@
       "Blues",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-steppenwolf",
@@ -17641,7 +18458,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-canned-heat",
@@ -17661,7 +18479,8 @@
       "Boogie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-animals",
@@ -17681,7 +18500,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-yardbirds",
@@ -17701,7 +18521,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-small-faces",
@@ -17721,7 +18542,8 @@
       "Psychedelic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-humble-pie",
@@ -17741,7 +18563,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ten-years-after",
@@ -17761,7 +18584,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bill-withers",
@@ -17780,7 +18604,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-donny-hathaway",
@@ -17799,7 +18624,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-roberta-flack",
@@ -17819,7 +18645,8 @@
       "Jazz",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chic",
@@ -17839,7 +18666,8 @@
       "Funk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nile-rodgers",
@@ -17859,7 +18687,8 @@
       "Disco",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-george-benson",
@@ -17879,7 +18708,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bobby-womack",
@@ -17898,7 +18728,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-alison-krauss",
@@ -17918,7 +18749,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dwight-yoakam",
@@ -17938,7 +18770,8 @@
       "Honky-Tonk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-steve-earle",
@@ -17958,7 +18791,8 @@
       "Americana",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-townes-van-zandt",
@@ -17978,7 +18812,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-guy-clark",
@@ -17998,7 +18833,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lucinda-williams",
@@ -18018,7 +18854,8 @@
       "Country",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-billy-strings",
@@ -18037,7 +18874,8 @@
       "Bluegrass",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sierra-ferrell",
@@ -18057,7 +18895,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rhiannon-giddens",
@@ -18077,7 +18916,8 @@
       "Americana",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-john-legend",
@@ -18097,7 +18937,8 @@
       "Soul",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ne-yo",
@@ -18116,7 +18957,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-chris-brown",
@@ -18136,7 +18978,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-dream",
@@ -18155,7 +18998,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-khalid",
@@ -18175,7 +19019,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-leon-bridges",
@@ -18195,7 +19040,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-brent-faiyaz",
@@ -18214,7 +19060,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lucky-daye",
@@ -18233,7 +19080,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-snoh-aalegra",
@@ -18253,7 +19101,8 @@
       "Soul",
       "Swedish-American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-omar-apollo",
@@ -18273,7 +19122,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-trey-songz",
@@ -18292,7 +19142,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mario",
@@ -18311,7 +19162,8 @@
       "R&B",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-roddy-ricch",
@@ -18331,7 +19183,8 @@
       "Trap",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-baby",
@@ -18351,7 +19204,8 @@
       "Trap",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-durk",
@@ -18371,7 +19225,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dababy",
@@ -18390,7 +19245,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-patti-smith",
@@ -18410,7 +19266,8 @@
       "Art Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-television",
@@ -18429,7 +19286,8 @@
       "Post-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-new-york-dolls",
@@ -18449,7 +19307,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-big-star",
@@ -18468,7 +19327,8 @@
       "Power Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-replacements",
@@ -18488,7 +19348,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-husker-du",
@@ -18508,7 +19369,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dinosaur-jr",
@@ -18528,7 +19390,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pavement",
@@ -18547,7 +19410,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-guided-by-voices",
@@ -18567,7 +19431,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-yo-la-tengo",
@@ -18586,7 +19451,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-built-to-spill",
@@ -18606,7 +19472,8 @@
       "Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-breeders",
@@ -18625,7 +19492,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-xx",
@@ -18645,7 +19513,8 @@
       "Dream Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-foals",
@@ -18665,7 +19534,8 @@
       "Dance-Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-america",
@@ -18685,7 +19555,8 @@
       "Folk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bread",
@@ -18704,7 +19575,8 @@
       "Soft Rock",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-oasis",
@@ -18724,7 +19596,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-suede",
@@ -18744,7 +19617,8 @@
       "Alternative",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pulp",
@@ -18764,7 +19638,8 @@
       "Art Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-primal-scream",
@@ -18784,7 +19659,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-stone-roses",
@@ -18804,7 +19680,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ride",
@@ -18823,7 +19700,8 @@
       "Shoegaze",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-elastica",
@@ -18843,7 +19721,8 @@
       "Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-supergrass",
@@ -18863,7 +19742,8 @@
       "Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-manic-street-preachers",
@@ -18883,7 +19763,8 @@
       "Rock",
       "Welsh"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-libertines",
@@ -18903,7 +19784,8 @@
       "Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-franz-ferdinand",
@@ -18923,7 +19805,8 @@
       "Dance-Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bloc-party",
@@ -18943,7 +19826,8 @@
       "Indie",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wolf-alice",
@@ -18963,7 +19847,8 @@
       "Rock",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sam-fender",
@@ -18983,7 +19868,8 @@
       "Indie",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-big-sean",
@@ -19002,7 +19888,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wale",
@@ -19021,7 +19908,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-logic",
@@ -19040,7 +19928,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-joyner-lucas",
@@ -19059,7 +19948,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-g-eazy",
@@ -19078,7 +19968,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-polo-g",
@@ -19098,7 +19989,8 @@
       "Drill",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-tjay",
@@ -19118,7 +20010,8 @@
       "Drill",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-a-boogie",
@@ -19137,7 +20030,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-glorilla",
@@ -19156,7 +20050,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-latto",
@@ -19175,7 +20070,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-saweetie",
@@ -19194,7 +20090,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-coi-leray",
@@ -19213,7 +20110,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-sexyy-red",
@@ -19232,7 +20130,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nle-choppa",
@@ -19252,7 +20151,8 @@
       "Drill",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-los-tigres-del-norte",
@@ -19272,7 +20172,8 @@
       "Corrido",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-christian-nodal",
@@ -19292,7 +20193,8 @@
       "Ranchera",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-jose-jose",
@@ -19312,7 +20214,8 @@
       "Latin Pop",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-marco-antonio-solis",
@@ -19332,7 +20235,8 @@
       "Ballads",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-femi-kuti",
@@ -19351,7 +20255,8 @@
       "Afrobeat",
       "Nigerian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-seun-kuti",
@@ -19370,7 +20275,8 @@
       "Afrobeat",
       "Nigerian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-orchestra-baobab",
@@ -19389,7 +20295,8 @@
       "Afro-Cuban",
       "Senegalese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-toumani-diabate",
@@ -19408,7 +20315,8 @@
       "Kora",
       "Malian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rokia-traore",
@@ -19427,7 +20335,8 @@
       "Afro-pop",
       "Malian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-vieux-farka-toure",
@@ -19446,7 +20355,8 @@
       "Desert Blues",
       "Malian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bassekou-kouyate",
@@ -19465,7 +20375,8 @@
       "World",
       "Malian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-offspring",
@@ -19485,7 +20396,8 @@
       "Pop-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bad-religion",
@@ -19504,7 +20416,8 @@
       "Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nofx",
@@ -19524,7 +20437,8 @@
       "Skate Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rancid",
@@ -19544,7 +20458,8 @@
       "Ska",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-stone-temple-pilots",
@@ -19564,7 +20479,8 @@
       "Alternative",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-goo-goo-dolls",
@@ -19584,7 +20500,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-third-eye-blind",
@@ -19604,7 +20521,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-matchbox-twenty",
@@ -19624,7 +20542,8 @@
       "Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-bush",
@@ -19644,7 +20563,8 @@
       "Alternative",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-silverchair",
@@ -19664,7 +20584,8 @@
       "Alternative",
       "Australian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-dj-shadow",
@@ -19684,7 +20605,8 @@
       "Instrumental",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-orbital",
@@ -19704,7 +20626,8 @@
       "Electronic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-underworld",
@@ -19724,7 +20647,8 @@
       "House",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-faithless",
@@ -19744,7 +20668,8 @@
       "House",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-goldfrapp",
@@ -19764,7 +20689,8 @@
       "Art Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-unkle",
@@ -19784,7 +20710,8 @@
       "Electronic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-mura-masa",
@@ -19804,7 +20731,8 @@
       "Pop",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-troye-sivan",
@@ -19823,7 +20751,8 @@
       "Pop",
       "Australian"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-kim-petras",
@@ -19843,7 +20772,8 @@
       "Hyperpop",
       "German"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-rina-sawayama",
@@ -19863,7 +20793,8 @@
       "Art Pop",
       "British-Japanese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-ellie-goulding",
@@ -19883,7 +20814,8 @@
       "Electronic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wiz-khalifa",
@@ -19902,7 +20834,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-machine-gun-kelly",
@@ -19922,7 +20855,8 @@
       "Rap",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-french-montana",
@@ -19941,7 +20875,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-tyga",
@@ -19960,7 +20895,8 @@
       "Hip-Hop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lil-tecca",
@@ -19980,7 +20916,8 @@
       "Trap",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-julien-baker",
@@ -20000,7 +20937,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-lucy-dacus",
@@ -20020,7 +20958,8 @@
       "Singer-Songwriter",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-diiv",
@@ -20040,7 +20979,8 @@
       "Indie",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-the-story-so-far",
@@ -20059,7 +20999,8 @@
       "Pop-Punk",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-neck-deep",
@@ -20078,7 +21019,8 @@
       "Pop-Punk",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-turnover",
@@ -20098,7 +21040,8 @@
       "Dream Pop",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-movements",
@@ -20118,7 +21061,8 @@
       "Emo",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-don-omar",
@@ -20137,7 +21081,8 @@
       "Reggaeton",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-nicky-jam",
@@ -20156,7 +21101,8 @@
       "Reggaeton",
       "American"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-wisin-and-yandel",
@@ -20175,7 +21121,8 @@
       "Reggaeton",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-anuel-aa",
@@ -20194,7 +21141,8 @@
       "Latin Trap",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-natanael-cano",
@@ -20213,7 +21161,8 @@
       "Corridos Tumbados",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-fuerza-regida",
@@ -20233,7 +21182,8 @@
       "Corridos",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-eslabon-armado",
@@ -20252,7 +21202,8 @@
       "Sierreño",
       "Regional Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-grupo-frontera",
@@ -20272,7 +21223,8 @@
       "Cumbia",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-calibre-50",
@@ -20291,7 +21243,8 @@
       "Banda",
       "Regional Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-los-dos-carnales",
@@ -20310,7 +21263,8 @@
       "Corrido",
       "Regional Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-pepe-aguilar",
@@ -20330,7 +21284,8 @@
       "Ranchera",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-alejandro-fernandez",
@@ -20350,7 +21305,8 @@
       "Latin Pop",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-luis-fonsi",
@@ -20370,7 +21326,8 @@
       "Reggaeton",
       "Puerto Rican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-enrique-iglesias",
@@ -20389,7 +21346,8 @@
       "Latin Pop",
       "Spanish"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "artist-danna-paola",
@@ -20408,6 +21366,7 @@
       "Latin Pop",
       "Mexican"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   }
 ]

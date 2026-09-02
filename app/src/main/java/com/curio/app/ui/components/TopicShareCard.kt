@@ -5811,7 +5811,7 @@ fun TopicShareSheet(
                         }
                     }
                     // Row 3: Done + Reset icon chips
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth(), horizontalPadding = PaddingValues(horizontal = 0.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                         // Reset — icon chip
                         Surface(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; move = ShareCardMove() }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
                             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -5849,7 +5849,7 @@ fun TopicShareSheet(
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.weight(1f).height(44.dp)
                 ) {
-                    Row(Modifier.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(Modifier.padding(horizontal = 10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         CurioIcon(name = CurioIcons.Download, tint = MaterialTheme.colorScheme.onSecondaryContainer, size = 16.dp)
                         Text("Save", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
                     }

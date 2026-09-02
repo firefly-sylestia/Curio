@@ -139,7 +139,9 @@ object TopicRepository {
                                 pageCount = cursor.getNullableInt("pageCount"),
                                 episodeCount = cursor.getNullableInt("episodeCount"),
                                 altPageLabel = cursor.getString(cursor.getColumnIndexOrThrow("altPageLabel")),
-                                altPageCount = cursor.getNullableInt("altPageCount")
+                                altPageCount = cursor.getNullableInt("altPageCount"),
+                                synopsis = try { cursor.getString(cursor.getColumnIndexOrThrow("synopsis")) } catch (_: Exception) { "" },
+                                chapters = try { cursor.getString(cursor.getColumnIndexOrThrow("chapters")) } catch (_: Exception) { "" }
                             )
                         }
                         require(imported.isNotEmpty()) { "Bundled topics.db contains no topics" }

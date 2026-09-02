@@ -42,7 +42,11 @@ data class TopicEntity(
     @ColumnInfo(defaultValue = "")
     val altPageLabel: String = "",
     @ColumnInfo(defaultValue = "0")
-    val altPageCount: Int? = null
+    val altPageCount: Int? = null,
+    @ColumnInfo(defaultValue = "")
+    val synopsis: String = "",
+    @ColumnInfo(defaultValue = "")
+    val chapters: String = "" // JSON array stored as string
 ) {
     /** Convert to [CurioTopic] for backward compatibility. */
     fun toCurioTopic(): CurioTopic {
@@ -69,7 +73,12 @@ data class TopicEntity(
             pageCount = pageCount,
             episodeCount = episodeCount,
             altPageCount = altPageCount,
-            altPageLabel = altPageLabel
+            altPageLabel = altPageLabel,
+            synopsis = synopsis.takeIf { it.isNotBlank() },
+            chapters = try {
+                if (chapters.isBlank()) null
+                else Gson().fromJson(chapters, object : com.google.gson.reflect.TypeToken<List<BookChapter>>() {}.type)
+            } catch (_: Exception) { null }
         )
     }
 
@@ -93,7 +102,9 @@ data class TopicEntity(
                 pageCount = topic.pageCount,
                 episodeCount = topic.episodeCount,
                 altPageLabel = topic.altPageLabel,
-                altPageCount = topic.altPageCount
+                altPageCount = topic.altPageCount,
+                synopsis = topic.synopsis ?: "",
+                chapters = try { Gson().toJson(topic.chapters) } catch (_: Exception) { "[]" }
             )
         }
     }

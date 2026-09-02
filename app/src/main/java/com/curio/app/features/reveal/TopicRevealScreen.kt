@@ -41,6 +41,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -71,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -91,6 +94,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
@@ -794,6 +799,20 @@ fun TopicRevealScreen(
                             cat = cat,
                             resolved = resolved,
                             modifier = Modifier.padding(top = progressFloatGap)
+                        )
+                    }
+                }
+
+                // ── 2.55 Book info section (books only) ──────────────────
+                // Shows book poster, synopsis, and chapter chips for BOOKS topics.
+                val bookTopic = resolved
+                if (bookTopic != null && bookTopic.categoryId == CategoryId.BOOKS &&
+                    (bookTopic.synopsis != null || !bookTopic.chapters.isNullOrEmpty())) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        BookInfoSection(
+                            cat = cat,
+                            topic = bookTopic,
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
                         )
                     }
                 }
@@ -2047,6 +2066,267 @@ private fun HeroCard(
         } // BoxWithConstraints
     } // HeroCard Surface
     } // HeroCard floating Box
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Book info section — synopsis overlay + chapter chips (books only)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Book info section shown below the hero for BOOKS topics. Displays:
+ * - Book poster image (fetched from imageUrl via Coil)
+ * - Synopsis text in a scrollable overlay
+ * - Chapter chips for browsing chapter summaries
+ */
+@Composable
+private fun BookInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    modifier: Modifier = Modifier
+) {
+    val synopsis = topic.synopsis
+    val chapters = topic.chapters
+    val imageUrl = topic.imageUrl
+    
+    if (synopsis == null && chapters == null) return
+    
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Book poster + synopsis row
+        if (synopsis != null) {
+            BookSynopsisCard(
+                cat = cat,
+                synopsis = synopsis,
+                imageUrl = imageUrl,
+                pageCount = topic.pageCount
+            )}
+        
+        // Chapter chips
+        if (!chapters.isNullOrEmpty()) {
+            BookChapterChips(
+                cat = cat,
+                chapters = chapters
+            )
+        }
+    }
+}
+
+/**
+ * Synopsis card with book poster on the left and scrollable synopsis text.
+ */
+@Composable
+private fun BookSynopsisCard(
+    cat: com.curio.app.data.CurioCategory,
+    synopsis: String,
+    imageUrl: String,
+    pageCount: Int?,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header row with icon
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.MenuBook,
+                        contentDescription = null,
+                        tint = cat.categoryInk(),
+                        size = 16.dp,
+                        modifier = Modifier.padding(7.dp)
+                    )
+                }
+                Text(
+                    text = "SYNOPSIS".uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = cat.categoryInk()
+                )
+                if (pageCount != null) {
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "$pageCount pages",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            Spacer(Modifier.height(12.dp))
+            
+            // Poster + synopsis layout
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Book poster
+                if (imageUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Book cover",
+                        modifier = Modifier
+                            .size(width = 80.dp, height = 120.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shadow(4.dp, RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                
+                // Synopsis text (scrollable)
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(120.dp)
+                        .verticalScroll(scrollState)
+                ) {
+                    Text(
+                        text = synopsis,
+                        style = RevealEditorialBody,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Horizontal chapter chips showing chapter titles and page ranges.
+ */
+@Composable
+private fun BookChapterChips(
+    cat: com.curio.app.data.CurioCategory,
+    chapters: List<com.curio.app.data.BookChapter>,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Section header
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.AutoAwesome,
+                    contentDescription = null,
+                    tint = cat.categoryInk(),
+                    size = 16.dp,
+                    modifier = Modifier.padding(7.dp)
+                )
+            }
+            Text(
+                text = "CHAPTERS".uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.2.sp
+                ),
+                color = cat.categoryInk()
+            )
+            Text(
+                text = "${chapters.size}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        // Chapter chips row (scrollable)
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            itemsIndexed(chapters) { index, chapter ->
+                BookChapterChip(
+                    cat = cat,
+                    chapter = chapter,
+                    index = index
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Individual chapter chip with title, page range, and summary preview.
+ */
+@Composable
+private fun BookChapterChip(
+    cat: com.curio.app.data.CurioCategory,
+    chapter: com.curio.app.data.BookChapter,
+    index: Int,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        shadowElevation = 2.dp,
+        modifier = modifier.width(160.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            // Chapter number
+            Text(
+                text = "Ch. ${chapter.number}",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = cat.categoryInk()
+            )
+            
+            // Chapter title
+            Text(
+                text = chapter.title,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            
+            // Page range
+            if (chapter.pageStart > 0 && chapter.pageEnd > 0) {
+                Text(
+                    text = "pp. ${chapter.pageStart}–${chapter.pageEnd}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // Summary preview (2 lines)
+            if (chapter.summary.isNotBlank()) {
+                Text(
+                    text = chapter.summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -541,6 +541,22 @@ object TopicJsonLoader {
         // edition's count + label (extra pill on the detail page).
         val altPageCount = if (obj.has("altPageCount")) obj.optInt("altPageCount", 0).takeIf { it > 0 } else null
         val altPageLabel = obj.optString("altPageLabel", "")
+        // Books only: narrative synopsis for the detail overlay.
+        val synopsis = obj.optString("synopsis", "").takeIf { it.isNotBlank() }
+        // Books only: chapter-by-chapter breakdown.
+        val chaptersArr = obj.optJSONArray("chapters")
+        val chapters: List<BookChapter>? = if (chaptersArr != null && chaptersArr.length() > 0) {
+            List(chaptersArr.length()) { i ->
+                val ch = chaptersArr.getJSONObject(i)
+                BookChapter(
+                    number = ch.optInt("number", i + 1),
+                    title = ch.optString("title", "Chapter ${i + 1}"),
+                    pageStart = ch.optInt("pageStart", 0),
+                    pageEnd = ch.optInt("pageEnd", 0),
+                    summary = ch.optString("summary", "")
+                )
+            }
+        } else null
         return CurioTopic(
             id            = id,
             categoryId    = categoryId,
@@ -555,7 +571,9 @@ object TopicJsonLoader {
             pageCount     = pageCount,
             episodeCount  = episodeCount,
             altPageCount  = altPageCount,
-            altPageLabel  = altPageLabel
+            altPageLabel  = altPageLabel,
+            synopsis      = synopsis,
+            chapters      = chapters
         )
     }
 }

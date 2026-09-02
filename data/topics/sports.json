@@ -1,1673 +1,2871 @@
 [
- {
-  "id": "sport-the-miracle-on-ice",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Miracle on Ice (1980)",
-  "teaser": "Amateur American college kids beat the unbeatable Soviet machine at the Lake Placid Olympics — the 'Do you believe in miracles?' call is the most famous in sports broadcasting.",
-  "imageUrl": "",
-  "byline": "USA Hockey",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Miracle on Ice (1980) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the last minute and notice the crowd — the 'USA! USA!' chant starts before the win. The miracle's genius is that the 'amateurs' were the story."
-  },
-  "tags": [
-   "Olympics",
-   "Ice Hockey",
-   "Upset",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-flu-game",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Flu Game (1997)",
-  "teaser": "Jordan scored 38 points in Game 5 of the NBA Finals while sick — the 'flu game' (actually food poisoning from a pizza) became the defining myth of his will.",
-  "imageUrl": "",
-  "byline": "Michael Jordan",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Flu Game (1997) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the game highlights and notice the fourth-quarter collapse — he nearly couldn't finish. The legend's genius is that the 'sickness' IS the performance."
-  },
-  "tags": [
-   "Basketball",
-   "NBA Finals",
-   "Legend",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-hand-of-god",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Hand of God (1986)",
-  "teaser": "Maradona punched the ball into the net and called it 'a little with the head of Maradona and a little with the hand of God' — four minutes later he scored the 'Goal of the Century'.",
-  "imageUrl": "",
-  "byline": "Diego Maradona",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Hand of God (1986) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the two goals back to back — the cheat and the genius in four minutes. The moment's genius is that the 'hand of God' is the honesty."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Legend",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-rumble-in-the-jungle",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Rumble in the Jungle (1974)",
-  "teaser": "Ali, 32 and written off, beat the unbeatable George Foreman in Kinshasa with the 'rope-a-dope' — letting Foreman punch himself out for eight rounds. The fight changed boxing strategy forever.",
-  "imageUrl": "",
-  "byline": "Muhammad Ali",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Rumble in the Jungle (1974) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the eighth round and notice the timing — the 'dope' is the patience. The fight's genius is that the strategy was the spectacle."
-  },
-  "tags": [
-   "Boxing",
-   "Heavyweight",
-   "Legend",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2008-wimbledon-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2008 Wimbledon Final (2008)",
-  "teaser": "Widely called the greatest tennis match ever — nearly five hours, interrupted by rain, ending in near-darkness with Nadal winning 9-7 in the fifth. Federer cried; Nadal couldn't lift the trophy.",
-  "imageUrl": "",
-  "byline": "Roger Federer vs Rafael Nadal",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2008 Wimbledon Final (2008) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final set and notice the light — the match ends in twilight. The classic's genius is that the 'greatest' is the exhaustion."
-  },
-  "tags": [
-   "Tennis",
-   "Grand Slam",
-   "Classic",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1999-champions-league-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1999 Champions League Final (1999)",
-  "teaser": "Trailing 1-0 with the clock past 90 minutes, Manchester United scored twice in injury time — the 'Manchester United are immortal' call became the most replayed in football.",
-  "imageUrl": "",
-  "byline": "Manchester United",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1999 Champions League Final (1999) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final three minutes and notice the two corners — both goals came from set pieces. The comeback's genius is that the 'impossible' was 120 seconds."
-  },
-  "tags": [
-   "Football",
-   "Champions League",
-   "Comeback",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-immaculate-reception",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Immaculate Reception (1972)",
-  "teaser": "The most famous play in NFL history — a deflected pass that Harris caught at his shoelaces and ran for a touchdown, winning the game with seconds left. The play is still debated.",
-  "imageUrl": "",
-  "byline": "Franco Harris",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Immaculate Reception (1972) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the play in slow motion and notice the deflection — the ball hit a defender's helmet. The miracle's genius is that the 'immaculate' was the chaos."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Miracle",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-babe-ruth-s-called-shot",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Babe Ruth's Called Shot (1932)",
-  "teaser": "In the World Series, Ruth allegedly pointed at the center-field fence before hitting a home run there — the 'called shot' is the most debated gesture in baseball, and the film footage is inconclusive.",
-  "imageUrl": "",
-  "byline": "Babe Ruth",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Babe Ruth's Called Shot (1932) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the surviving film and notice the gesture — the 'point' is ambiguous. The legend's genius is that the ambiguity IS the myth."
-  },
-  "tags": [
-   "Baseball",
-   "World Series",
-   "Legend",
-   "1930s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-jackie-robinson-s-debut",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Jackie Robinson's Debut (1947)",
-  "teaser": "The first Black player in modern MLB — his debut broke the color barrier, and Robinson endured abuse for two seasons before his talent silenced the league. Every team now retires his number 42.",
-  "imageUrl": "",
-  "byline": "Jackie Robinson",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Jackie Robinson's Debut (1947) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 1947 season footage and notice the restraint — Robinson agreed not to fight back. The debut's genius is that the 'talent' was the politics."
-  },
-  "tags": [
-   "Baseball",
-   "History",
-   "Integration",
-   "1940s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-jesse-owens-at-berlin-1936",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Jesse Owens at Berlin 1936 (1936)",
-  "teaser": "The American sprinter won four golds in Hitler's Berlin, publicly humiliating the Nazi racial theories — Owens later said Hitler didn't snub him; FDR did.",
-  "imageUrl": "",
-  "byline": "Jesse Owens",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Jesse Owens at Berlin 1936 (1936) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the long jump final and notice the German rival — Luz Long helped Owens qualify. The moment's genius is that the 'rivalry' was the friendship."
-  },
-  "tags": [
-   "Olympics",
-   "Track",
-   "History",
-   "1930s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-usain-bolt-s-9-58",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Usain Bolt's 9.58 (2009)",
-  "teaser": "The fastest 100m ever run — Bolt celebrated 80 meters in, still breaking the record, and his top speed of 27.8 mph is the fastest a human has ever run.",
-  "imageUrl": "",
-  "byline": "Usain Bolt",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Usain Bolt's 9.58 (2009) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 9.58 and notice the celebration — the world record with showboating. The record's genius is that the 'flaw' (the celebration) was the speed."
-  },
-  "tags": [
-   "Track",
-   "Sprint",
-   "Record",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-phelps-eight-golds",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Phelps' Eight Golds (2008)",
-  "teaser": "Eight gold medals in one Olympics — the most ever — including the 100m butterfly won by 0.01 seconds, the narrowest margin in Olympic swimming history.",
-  "imageUrl": "",
-  "byline": "Michael Phelps",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Phelps' Eight Golds (2008) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 100m butterfly and notice the touch — 0.01 seconds. The record's genius is that the 'eighth' was the margin."
-  },
-  "tags": [
-   "Olympics",
-   "Swimming",
-   "Record",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-simone-biles-twisties",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Simone Biles' Twisties (2021)",
-  "teaser": "The greatest gymnast in history withdrew from Tokyo 2021 mid-competition with 'the twisties' — a dangerous loss of spatial awareness — and turned a scandal into a global conversation about mental health.",
-  "imageUrl": "",
-  "byline": "Simone Biles",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Simone Biles' Twisties (2021) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 2021 vault and notice the twist — the dismount was under-rotated. The withdrawal's genius is that the 'failure' was the strength."
-  },
-  "tags": [
-   "Gymnastics",
-   "Olympics",
-   "Mental Health",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-leicester-city-s-title",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Leicester City's Title (2016)",
-  "teaser": "5000-to-1 outsiders won the Premier League — a team that nearly got relegated the year before beat the richest clubs in the world with a budget smaller than some players' wages.",
-  "imageUrl": "",
-  "byline": "Leicester City",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Leicester City's Title (2016) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the title-clinching weekend and notice the players' reactions — the disbelief is the story. The miracle's genius is that the 'impossible' was the system."
-  },
-  "tags": [
-   "Football",
-   "Premier League",
-   "Underdog",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-invincibles",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Invincibles (2004)",
-  "teaser": "Arsenal went an entire Premier League season unbeaten — 26 wins, 12 draws, 38 games — the only team to do it in the modern era, and the '49 unbeaten' run is the league's benchmark.",
-  "imageUrl": "",
-  "byline": "Arsenal",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Invincibles (2004) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final game of the run and notice the celebration — the 'invincible' season ends with a trophy. The record's genius is that the 'unbeaten' is the perfection."
-  },
-  "tags": [
-   "Football",
-   "Premier League",
-   "Undefeated",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-barcelona-6-1-psg",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Barcelona 6-1 PSG (2017)",
-  "teaser": "Trailing 4-0 from the first leg, Barcelona won 6-1 with a stoppage-time goal — the 'Remontada' is the greatest comeback in Champions League history, and the last-minute winner was a goalmouth scramble.",
-  "imageUrl": "",
-  "byline": "Barcelona",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Barcelona 6-1 PSG (2017) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 95th-minute goal and notice the chaos — the winner was a scramble. The comeback's genius is that the 'impossible' was one touch."
-  },
-  "tags": [
-   "Football",
-   "Champions League",
-   "Comeback",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-liverpool-s-istanbul-miracle",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Liverpool's Istanbul Miracle (2005)",
-  "teaser": "Trailing 3-0 at halftime in the Champions League final, Liverpool scored three in six minutes and won on penalties — the 'Miracle of Istanbul' is the greatest final comeback ever.",
-  "imageUrl": "",
-  "byline": "Liverpool",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Liverpool's Istanbul Miracle (2005) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the second half and notice the six minutes — three goals, three different scorers. The miracle's genius is that the 'halftime team talk' is the legend."
-  },
-  "tags": [
-   "Football",
-   "Champions League",
-   "Comeback",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-zidane-s-volley",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Zidane's Volley (2002)",
-  "teaser": "The winning goal in the Champions League final — a left-footed volley struck perfectly from a floated cross, scored with his 'weak' foot. The goal is the most beautiful in final history.",
-  "imageUrl": "",
-  "byline": "Zinedine Zidane",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Zidane's Volley (2002) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the volley in slow motion — the technique is the art. The goal's genius is that the 'weak foot' produced the masterpiece."
-  },
-  "tags": [
-   "Football",
-   "Champions League",
-   "Legend",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-thrilla-in-manila",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Thrilla in Manila (1975)",
-  "teaser": "The third Ali-Frazier fight — 'the closest thing to dying' per both men — was fought in 100° heat, and Frazier's trainer stopped it after 14 rounds. Neither man was the same after.",
-  "imageUrl": "",
-  "byline": "Ali vs Frazier",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Thrilla in Manila (1975) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 14th round and notice the exhaustion — the 'death' is the metaphor. The fight's genius is that the 'greatest' is the damage."
-  },
-  "tags": [
-   "Boxing",
-   "Heavyweight",
-   "Epic",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-super-bowl-xxv-wide-right",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Super Bowl XXV Wide Right (1991)",
-  "teaser": "The Bills' kicker missed a 47-yard field goal wide right with seconds left, losing the Super Bowl by one point — 'wide right' became the most painful phrase in Buffalo sports history.",
-  "imageUrl": "",
-  "byline": "Scott Norwood",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Super Bowl XXV Wide Right (1991) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the kick and notice the angle — the miss was by feet. The heartbreak's genius is that the 'wide right' is the geography."
-  },
-  "tags": [
-   "American Football",
-   "Super Bowl",
-   "Heartbreak",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-ice-bowl",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Ice Bowl (1967)",
-  "teaser": "The coldest game in NFL history — minus-13°F with a wind chill of minus-48 — and the Packers won on Bart Starr's quarterback sneak with 16 seconds left, the players' breath freezing mid-air.",
-  "imageUrl": "",
-  "byline": "Green Bay Packers",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Ice Bowl (1967) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final drive and notice the frost — the field was frozen solid. The legend's genius is that the 'cold' was the opponent."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Legend",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-drive",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Drive (1987)",
-  "teaser": "Down 20-13 with 5:32 left and 98 yards from the end zone, John Elway drove the Broncos the length of the field to tie, then win in overtime — 'The Drive' is the most famous march in NFL history.",
-  "imageUrl": "",
-  "byline": "John Elway",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Drive (1987) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 98-yard drive and notice the third downs — Elway converted multiple. The drive's genius is that the 'yards' were the drama."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Comeback",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-music-city-miracle",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Music City Miracle (2000)",
-  "teaser": "A lateral on a kickoff return went 75 yards for a touchdown with 3 seconds left — the 'Music City Miracle' is the most controversial lateral in NFL history.",
-  "imageUrl": "",
-  "byline": "Tennessee Titans",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Music City Miracle (2000) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the lateral and notice the angle — the pass was backward (legal). The miracle's genius is that the 'controversy' is the debate."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Miracle",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-shot",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Shot (1989)",
-  "teaser": "Jordan's game-winner over Craig Ehlo in the final second of Game 5 — the 'Shot' is his first iconic playoff moment, and the celebration (fist pump) became the image of his career.",
-  "imageUrl": "",
-  "byline": "Michael Jordan",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Shot (1989) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final possession and notice the free-throw-line jump — the hang time is the myth. The shot's genius is that the 'leap' is the gravity."
-  },
-  "tags": [
-   "Basketball",
-   "NBA Playoffs",
-   "Legend",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-kobe-s-81",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Kobe's 81 (2006)",
-  "teaser": "Kobe scored 81 points against Toronto — the second-highest total in NBA history behind Wilt's 100 — and the Lakers needed all of them, trailing by 18 at halftime.",
-  "imageUrl": "",
-  "byline": "Kobe Bryant",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Kobe's 81 (2006) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the second half and notice the volume — 55 points after halftime. The scoring feat's genius is that the 'need' was the fuel."
-  },
-  "tags": [
-   "Basketball",
-   "NBA",
-   "Scoring",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-wilt-s-100",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Wilt's 100 (1962)",
-  "teaser": "The only 100-point game in NBA history — Wilt scored 100 against the Knicks, and the game had no three-point line and no shot clock violations, played in the fastest era of basketball.",
-  "imageUrl": "",
-  "byline": "Wilt Chamberlain",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Wilt's 100 (1962) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the surviving footage and notice the free throws — he shot 28 of 32. The record's genius is that the '100' was the era."
-  },
-  "tags": [
-   "Basketball",
-   "NBA",
-   "Record",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-messi-s-91-goals",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Messi's 91 Goals (2012)",
-  "teaser": "The most goals in a calendar year ever — 91 for club and country, breaking Gerd Müller's 40-year record. The Argentine scored in 34 of the 69 matches.",
-  "imageUrl": "",
-  "byline": "Lionel Messi",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Messi's 91 Goals (2012) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 91st goal and notice the routine — the 'record' was a season of habits. The record's genius is that the 'impossible' was the consistency."
-  },
-  "tags": [
-   "Football",
-   "Calendar Year",
-   "Record",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-snow-bowl",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Snow Bowl (2001)",
-  "teaser": "A playoff game in a blizzard decided by a 'tuck rule' call that the Raiders disputed for decades — the Patriots won in overtime and began the dynasty.",
-  "imageUrl": "",
-  "byline": "New England Patriots",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Snow Bowl (2001) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the tuck rule play and notice the snow — the ball slipped. The game's genius is that the 'rule' was the dynasty's origin."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Playoff",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-minneapolis-miracle",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The Minneapolis Miracle (2018)",
-  "teaser": "A 61-yard touchdown as time expired — the 'Minneapolis Miracle' was the most dramatic play of that playoff, and the sideline call ('there are no flags') became a meme.",
-  "imageUrl": "",
-  "byline": "Stefon Diggs",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Minneapolis Miracle (2018) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final play and notice the route — the defensive breakdown is the miracle. The play's genius is that the 'miracle' was the mistake."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Miracle",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-ronaldo-s-bicycle-kick",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Ronaldo's Bicycle Kick (2018)",
-  "teaser": "A 33-year-old Ronaldo scored an overhead bicycle kick from 1.7m off the ground in the Champions League quarterfinal — Juventus fans applauded the goal against their own team.",
-  "imageUrl": "",
-  "byline": "Cristiano Ronaldo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Ronaldo's Bicycle Kick (2018) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the overhead kick in slow motion — the height is the physics. The goal's genius is that the 'applause' was the rival's tribute."
-  },
-  "tags": [
-   "Football",
-   "Champions League",
-   "Goal",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-ronaldinho-s-free-kick",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Ronaldinho's Free Kick (2002)",
-  "teaser": "The 40-yard free kick that floated over David Seaman's head in the World Cup quarterfinal — Ronaldinho later claimed it was intentional, and England's goalkeeper took years to recover.",
-  "imageUrl": "",
-  "byline": "Ronaldinho",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Ronaldinho's Free Kick (2002) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the free kick and notice the 'cross' that wasn't — the ball bent in. The goal's genius is that the 'luck' was the skill."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Goal",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-federer-s-20th",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Federer's 20th (2018)",
-  "teaser": "Federer won his 20th Grand Slam at 36 — the oldest Australian Open champion in 46 years — completing a comeback from knee surgery the year before.",
-  "imageUrl": "",
-  "byline": "Roger Federer",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Federer's 20th (2018) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final set and notice the elegance — the '20th' at 36. The legend's genius is that the 'aging' was the narrative."
-  },
-  "tags": [
-   "Tennis",
-   "Grand Slam",
-   "Legend",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-tiger-s-1997-masters",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Tiger's 1997 Masters (1997)",
-  "teaser": "Tiger won the Masters by 12 strokes at 21 — the largest margin ever — and the win made golf a mainstream sport and a Black golfer a global icon.",
-  "imageUrl": "",
-  "byline": "Tiger Woods",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Tiger's 1997 Masters (1997) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final round and notice the distance — the 'power' was the new game. The record's genius is that the '12 strokes' was the era shift."
-  },
-  "tags": [
-   "Golf",
-   "Masters",
-   "Record",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-serena-s-23rd",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Serena's 23rd (2017)",
-  "teaser": "Serena won her 23rd Grand Slam while pregnant — the most in the Open Era — and the Australian Open final was her last match before giving birth that September.",
-  "imageUrl": "",
-  "byline": "Serena Williams",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Serena's 23rd (2017) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final and notice the serve — the power was the pregnancy. The record's genius is that the '23rd' was the will."
-  },
-  "tags": [
-   "Tennis",
-   "Grand Slam",
-   "Record",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-do-you-believe-in-miracles-game",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Do You Believe in Miracles' Game (1980)",
-  "teaser": "Eruzione's third-period goal gave the US the lead over the Soviets — the 'Do you believe in miracles?' call by Al Michaels is the most famous in sports history.",
-  "imageUrl": "",
-  "byline": "Mike Eruzione",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Do You Believe in Miracles' Game (1980) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the third period and notice the crowd — the arena became the team. The moment's genius is that the 'miracle' was the call."
-  },
-  "tags": [
-   "Olympics",
-   "Ice Hockey",
-   "Upset",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1958-world-cup-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1958 World Cup Final (1958)",
-  "teaser": "A 17-year-old Pelé scored twice in the World Cup final — the youngest scorer in a final ever — and his 'hat trick' semifinal made him a global name overnight.",
-  "imageUrl": "",
-  "byline": "Pelé",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1958 World Cup Final (1958) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final goals and notice the age — the teenager's brilliance. The legend's genius is that the '17' was the shock."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Legend",
-   "1950s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1970-world-cup-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1970 World Cup Final (1970)",
-  "teaser": "The 'beautiful game' — Brazil's 4-1 win over Italy is considered the greatest team performance ever, and Pelé's dummy pass for the fourth goal is football's most replayed moment.",
-  "imageUrl": "",
-  "byline": "Brazil",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1970 World Cup Final (1970) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the fourth goal and notice the dummy — Pelé didn't touch it. The final's genius is that the 'beautiful' was the team."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Legend",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1990-world-cup-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1990 World Cup Final (1990)",
-  "teaser": "The most ill-tempered final in history — two sendings-off, a penalty decided it, and the match is remembered as the low point of the 'anti-football' era.",
-  "imageUrl": "",
-  "byline": "West Germany",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1990 World Cup Final (1990) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the second half and notice the cards — the game's 'tactics' were the fouling. The final's genius is that the 'boring' was the controversy."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Drama",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2006-world-cup-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2006 World Cup Final (2006)",
-  "teaser": "Zidane's headbutt — the greatest player of his generation was sent off in his final match, and Italy won on penalties. The 'headbutt' is the most discussed moment in final history.",
-  "imageUrl": "",
-  "byline": "Italy",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2006 World Cup Final (2006) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 110th minute and notice the provocation — the insult was the trigger. The final's genius is that the 'genius' was the fall."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Drama",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2014-world-cup-semifinal",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2014 World Cup Semifinal (2014)",
-  "teaser": "Germany beat Brazil 7-1 in Belo Horizonte — the most shocking result in World Cup history, and the host nation's dream ended in the first 30 minutes.",
-  "imageUrl": "",
-  "byline": "Germany",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2014 World Cup Semifinal (2014) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the first 30 minutes and notice the goals — five in 18 minutes. The result's genius is that the '7-1' was the collapse."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Record",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-handshake-ali-frazier-i",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Handshake' (Ali-Frazier I) (1971)",
-  "teaser": "The 'Fight of the Century' — undefeated champions, a split decision, and the only loss of Ali's prime. The fight's real drama was political: the world was watching a protest.",
-  "imageUrl": "",
-  "byline": "Ali vs Frazier",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Handshake' (Ali-Frazier I) (1971) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 15th round and notice the exhaustion — both men were done. The fight's genius is that the 'politics' was the ring."
-  },
-  "tags": [
-   "Boxing",
-   "Heavyweight",
-   "Epic",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-one-more-round-ali-frazier-iii",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'One More Round' (Ali-Frazier III) (1975)",
-  "teaser": "The third Ali-Frazier fight was called 'the closest thing to dying' — Ali later said it was the closest he came to death, and the 'Thrilla in Manila' is the sport's greatest fight.",
-  "imageUrl": "",
-  "byline": "Ali vs Frazier",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'One More Round' (Ali-Frazier III) (1975) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 14th round and notice Frazier's eyes — the swelling was the damage. The fight's genius is that the 'greatest' was the pain."
-  },
-  "tags": [
-   "Boxing",
-   "Heavyweight",
-   "Epic",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1988-olympic-100m",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1988 Olympic 100m (1988)",
-  "teaser": "Ben Johnson won the 100m in world-record time, then failed a drug test — the 'dirtiest race' in history was run by Carl Lewis, and the scandal changed Olympic testing forever.",
-  "imageUrl": "",
-  "byline": "Ben Johnson",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1988 Olympic 100m (1988) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the race and notice the times — the 'record' was the doping. The scandal's genius is that the 'fastest' was the lie."
-  },
-  "tags": [
-   "Olympics",
-   "Track",
-   "Scandal",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1966-world-cup-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1966 World Cup Final (1966)",
-  "teaser": "England's only World Cup — the 'goal that never crossed the line' (Geoff Hurst's second) is the most debated in football, and the final ended 4-2 after extra time.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1966 World Cup Final (1966) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the disputed goal and notice the angle — the ball may not have crossed. The final's genius is that the 'line' was the controversy."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "History",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2000-sydney-torch",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2000 Sydney Torch (2000)",
-  "teaser": "The Aboriginal sprinter lit the cauldron at the Sydney Games — the moment of reconciliation became the symbol of the Olympics, and Freeman won gold in the 400m nine days later.",
-  "imageUrl": "",
-  "byline": "Cathy Freeman",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2000 Sydney Torch (2000) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the lighting ceremony and notice the water — the flame rose from the water. The moment's genius is that the 'reconciliation' was the symbol."
-  },
-  "tags": [
-   "Olympics",
-   "History",
-   "Symbol",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2012-london-super-saturday",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2012 London 'Super Saturday' (2012)",
-  "teaser": "Three British golds in 46 minutes — Mo Farah's 10,000m, Jessica Ennis's heptathlon, and Greg Rutherford's long jump — the greatest night in British athletics history.",
-  "imageUrl": "",
-  "byline": "Team GB",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2012 London 'Super Saturday' (2012) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the three finals and notice the 46 minutes — the golds were a cascade. The night's genius is that the 'Super' was the simultaneity."
-  },
-  "tags": [
-   "Olympics",
-   "Track",
-   "History",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2016-leicester-parade",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2016 Leicester Parade (2016)",
-  "teaser": "The 5000-to-1 champions' victory parade drew 240,000 people — the city's entire population — and the 'impossible' title became the template for every underdog story since.",
-  "imageUrl": "",
-  "byline": "Leicester City",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2016 Leicester Parade (2016) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the parade and notice the crowd — the city was the team. The celebration's genius is that the 'miracle' was the community."
-  },
-  "tags": [
-   "Football",
-   "Celebration",
-   "Underdog",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-2022-world-cup-final",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 2022 World Cup Final (2022)",
-  "teaser": "Messi won the World Cup at 35 in the greatest final ever — 3-3, a penalty shootout, and France's Mbappé scored a hat trick in a losing cause.",
-  "imageUrl": "",
-  "byline": "Argentina",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 2022 World Cup Final (2022) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the second half and notice Mbappé's hat trick — the rival's brilliance. The final's genius is that the 'epic' was the both."
-  },
-  "tags": [
-   "Football",
-   "World Cup",
-   "Epic",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-shot-heard-round-the-world",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Shot Heard Round the World' (1951)",
-  "teaser": "Thomson's walk-off home run capped the Giants' 16-game comeback to tie the Dodgers — 'the shot heard round the world' is the most famous call in baseball.",
-  "imageUrl": "",
-  "byline": "Bobby Thomson",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Shot Heard Round the World' (1951) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the home run and notice the call — Russ Hodges repeated himself. The moment's genius is that the 'heard round the world' was the radio."
-  },
-  "tags": [
-   "Baseball",
-   "Playoffs",
-   "Miracle",
-   "1950s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-pine-tar-game",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Pine Tar Game' (1983)",
-  "teaser": "Brett's game-winning home run was voided because of too much pine tar on his bat — the resulting meltdown became the most famous umpire call in baseball, and the rule was later changed.",
-  "imageUrl": "",
-  "byline": "George Brett",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Pine Tar Game' (1983) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the ejection and notice the bat — the pine tar was the controversy. The game's genius is that the 'rule' was the spectacle."
-  },
-  "tags": [
-   "Baseball",
-   "Controversy",
-   "Classic",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-band-of-brothers-super-bowl",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Band of Brothers' Super Bowl (2017)",
-  "teaser": "The Patriots came back from 28-3 down to win Super Bowl LI in overtime — the greatest comeback in Super Bowl history, and the Falcons' collapse became the cautionary tale.",
-  "imageUrl": "",
-  "byline": "New England Patriots",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Band of Brothers' Super Bowl (2017) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the fourth quarter and notice the '28-3' — the comeback started at 2:12 left in the third. The miracle's genius is that the 'impossible' was the clock."
-  },
-  "tags": [
-   "American Football",
-   "Super Bowl",
-   "Comeback",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-broad-street-bullies",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Broad Street Bullies' (1975)",
-  "teaser": "The 'Broad Street Bullies' won back-to-back Stanley Cups with a goon style that changed hockey — the NHL added new rules in response, and the 'bullies' are the sport's great villains.",
-  "imageUrl": "",
-  "byline": "Philadelphia Flyers",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Broad Street Bullies' (1975) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 1975 final and notice the physicality — the 'goon' was the strategy. The dynasty's genius is that the 'violence' was the system."
-  },
-  "tags": [
-   "Ice Hockey",
-   "Stanley Cup",
-   "Legend",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1986-mets",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1986 Mets (1986)",
-  "teaser": "The 'worst-to-first' Mets won the World Series on Mookie Wilson's ground ball through Bill Buckner's legs — the error is the most replayed in baseball history.",
-  "imageUrl": "",
-  "byline": "New York Mets",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1986 Mets (1986) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the 10th inning and notice the ground ball — the ball through the legs. The miracle's genius is that the 'error' was the redemption."
-  },
-  "tags": [
-   "Baseball",
-   "World Series",
-   "Comeback",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-miracle-mets",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Miracle Mets' (1969)",
-  "teaser": "The 'Amazin' Mets' — a team that lost 120 games seven years earlier — beat the Orioles in the World Series, and the 'Miracle Mets' are the original lovable losers.",
-  "imageUrl": "",
-  "byline": "New York Mets",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Miracle Mets' (1969) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the final out and notice the celebration — the 'miracle' was the franchise. The story's genius is that the 'worst' became the 'best'."
-  },
-  "tags": [
-   "Baseball",
-   "World Series",
-   "Underdog",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1954-greatest-game-ever-played",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1954 'Greatest Game Ever Played' (1954)",
-  "teaser": "The Browns vs Colts title game is called the greatest ever played — it went to sudden-death overtime, the first in NFL history, and the game is a turning point in football's rise.",
-  "imageUrl": "",
-  "byline": "Jim Brown",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1954 'Greatest Game Ever Played' (1954) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the overtime and notice the format — the 'sudden death' was new. The game's genius is that the 'greatest' was the overtime."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Legend",
-   "1950s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-immaculate-reception-anniversary",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Immaculate Reception' Anniversary (2022)",
-  "teaser": "Harris died at 72 — the anniversary of his miracle catch became a memorial, and the 'immaculate' play's 50th anniversary is a reminder that the myth outlives the man.",
-  "imageUrl": "",
-  "byline": "Franco Harris",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Immaculate Reception' Anniversary (2022) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the memorial tributes and notice the 'reception' — the myth was the memory. The legacy's genius is that the 'play' became the man."
-  },
-  "tags": [
-   "American Football",
-   "NFL",
-   "Legacy",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1950-matthews-vs-lewis",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1950 'Matthews vs Lewis' (1950)",
-  "teaser": "A forgotten classic — the 'Matthews vs Lewis' fight is a reminder that boxing's golden age was full of fights that never made the record books' top lists.",
-  "imageUrl": "",
-  "byline": "Matthews",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1950 'Matthews vs Lewis' (1950) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the fight footage and notice the technique — the 'forgotten' was the era. The classic's genius is that the 'history' is the record book's choice."
-  },
-  "tags": [
-   "Boxing",
-   "Heavyweight",
-   "Classic",
-   "1950s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-four-horsemen",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 'Four Horsemen' (1924)",
-  "teaser": "The Notre Dame backfield that changed college football — the 'Four Horsemen' nickname came from a sportswriter's Biblical allusion, and the backfield's speed was the new game.",
-  "imageUrl": "",
-  "byline": "Notre Dame",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 'Four Horsemen' (1924) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the surviving film and notice the speed — the 'horsemen' were the shift. The legend's genius is that the 'nickname' was the marketing."
-  },
-  "tags": [
-   "American Football",
-   "College",
-   "Legend",
-   "1920s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-the-1927-yankees",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "The 1927 Yankees (1927)",
-  "teaser": "The 'Murderers' Row' Yankees — 110 wins, a .637 winning percentage, and Babe Ruth's 60 home runs — the greatest team in baseball history by any measure.",
-  "imageUrl": "",
-  "byline": "New York Yankees",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The 1927 Yankees (1927) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Watch the '27 footage and notice the lineup — every spot was a threat. The dynasty's genius is that the 'murder' was the offense."
-  },
-  "tags": [
-   "Baseball",
-   "Legend",
-   "Murderers' Row",
-   "1920s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-cricket-1877",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Cricket (1877)",
-  "teaser": "The first international cricket match was Australia vs England in Melbourne — the game lasted 4 days and Australia won by 45 runs, but the real story is that both teams wore top hats.",
-  "imageUrl": "",
-  "byline": "Melbourne Cricket Ground",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Cricket: The Ashes rivalry documentary",
-   "durationMinutes": 45,
-   "instruction": "Watch a short Ashes documentary to understand why cricket is basically baseballs eccentric British cousin — the rules are deliberately complicated to keep outsiders out."
-  },
-  "tags": [
-   "Cricket",
-   "1870s",
-   "British"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-judo-1964",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Judo (1964 Olympics)",
-  "teaser": "Judo became an Olympic sport in Tokyo 1964 — the Japanese team won 3 of 4 gold medals, and the only non-Japanese winner was a Dutchman who beat a Japanese Judoka for the first time ever.",
-  "imageUrl": "",
-  "byline": "International Judo Federation",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Anton Geesinks 1964 Olympic final",
-   "durationMinutes": 10,
-   "instruction": "Watch Anton Geesinks gold medal match — a 6 foot 8 Dutchman defeating a Japanese champion in a sport Japan invented. The crowd went silent."
-  },
-  "tags": [
-   "Judo",
-   "Olympics",
-   "1960s",
-   "Japanese"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-surfing-ancient",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Surfing (Ancient Hawaii)",
-  "teaser": "Surfing was invented by ancient Hawaiians — kings surfed on boards up to 16 feet long, and commoners were banned from the best waves. Captain Cook watched them in 1778 and called it the noblest exercise.",
-  "imageUrl": "",
-  "byline": "Hawaiian surfing tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Ancient Hawaiian surfing history",
-   "durationMinutes": 20,
-   "instruction": "Watch a history of Hawaiian surfing to see how royalty rode 16-foot boards while commoners watched from the beach — surfing was class warfare on water."
-  },
-  "tags": [
-   "Surfing",
-   "Hawaii",
-   "Ancient",
-   "Polynesian"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-fencing-renaissance",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Fencing (Renaissance Italy)",
-  "teaser": "Fencing masters in Renaissance Italy killed each other to protect their secrets — the first fencing manual (1536) was written by a Venetian who had survived 12 duels.",
-  "imageUrl": "",
-  "byline": "Venetian fencing tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The history of fencing from duels to Olympics",
-   "durationMinutes": 25,
-   "instruction": "Watch how fencing went from life-or-death duels in Italian back alleys to a sport where people poke each other with thin metal sticks for points."
-  },
-  "tags": [
-   "Fencing",
-   "Renaissance",
-   "Italian",
-   "1500s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-rock-climbing-el-cap",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Free Solo Climbing (El Capitan)",
-  "teaser": "Alex Honnold climbed El Capitan (3,000 ft) without ropes in 2017 — the climb took 3 hours 56 minutes, and he had to rehearse every handhold for months. One slip equals death.",
-  "imageUrl": "",
-  "byline": "Alex Honnold",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Free Solo documentary excerpt",
-   "durationMinutes": 15,
-   "instruction": "Watch the crux move of Free Solo — when Honnolds foot slips and he catches himself with one finger on a 3,000-foot wall. Your palms will sweat."
-  },
-  "tags": [
-   "Climbing",
-   "Free Solo",
-   "Documentary",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-sumo-ancient",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Sumo Wrestling (Ancient Japan)",
-  "teaser": "Sumo has been performed for 1,500 years as a Shinto ritual — the ring (dohyo) is considered sacred ground, and the salt thrown before matches is for purification, not showmanship.",
-  "imageUrl": "",
-  "byline": "Japan Sumo Association",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Sumo tournament opening ceremony",
-   "durationMinutes": 10,
-   "instruction": "Watch the opening ceremony of a sumo tournament — the salt tossing, the roof raising, the stomping — it is a Shinto ritual that happens to involve 400-pound men."
-  },
-  "tags": [
-   "Sumo",
-   "Japan",
-   "Shinto",
-   "Ancient"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-polo-ancient-persia",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Polo (Ancient Persia)",
-  "teaser": "Polo was invented in Persia 2,500 years ago — it was so dangerous that Persian emperors used it as battle training, and one king died falling off his horse during a match.",
-  "imageUrl": "",
-  "byline": "Persian polo tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Polos ancient Persian origins",
-   "durationMinutes": 15,
-   "instruction": "Watch a documentary on polos Persian origins to see how a battle-training exercise became a sport for the ultra-rich — the horses are worth more than most houses."
-  },
-  "tags": [
-   "Polo",
-   "Persia",
-   "Ancient",
-   "Equestrian"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-marathon-ancient-greece",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Marathon (Ancient Greece)",
-  "teaser": "The marathon was invented because a soldier ran 26 miles from Marathon to Athens to announce a victory — then died. The modern distance (26.2 miles) was not standardized until 1921.",
-  "imageUrl": "",
-  "byline": "Ancient Greek tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The real story of the marathon",
-   "durationMinutes": 20,
-   "instruction": "Watch how the marathon went from a soldiers death run to a global sport — the original distance was 25 miles, then 26.2, then back to 26, then 26.2 again."
-  },
-  "tags": [
-   "Marathon",
-   "Greece",
-   "Ancient",
-   "Running"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-skateboarding-1950s",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Skateboarding (1950s California)",
-  "teaser": "Skateboarding was invented by surfers who wanted to surf on land when the waves were flat — the first boards were roller skate wheels nailed to planks.",
-  "imageUrl": "",
-  "byline": "California surf culture",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Skateboarding history: from surf planks to Olympics",
-   "durationMinutes": 25,
-   "instruction": "Watch how surfers in 1950s California nailed roller skate wheels to planks and accidentally invented a sport that would become an Olympic event 70 years later."
-  },
-  "tags": [
-   "Skateboarding",
-   "California",
-   "1950s",
-   "Surfing"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-capoeira-brazil",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Capoeira (Brazilian Martial Art)",
-  "teaser": "Capoeira was invented by enslaved Africans in Brazil — it looks like dancing but is actually fighting, and masters disguised it as entertainment to avoid punishment.",
-  "imageUrl": "",
-  "byline": "Afro-Brazilian tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Capoeira: the dance that hides a fight",
-   "durationMinutes": 20,
-   "instruction": "Watch a capoeira roda (circle) to see how enslaved Africans turned fighting into dancing to survive — every kick is a strike, every flip is an escape."
-  },
-  "tags": [
-   "Capoeira",
-   "Brazil",
-   "Martial Arts",
-   "Afro-Brazilian"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-kabaddi-india",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Kabaddi (Ancient India)",
-  "teaser": "Kabaddi is a contact sport where one player raids the opposing team while holding their breath — they must tag opponents and return without breathing. It has been played in India for 4,000 years.",
-  "imageUrl": "",
-  "byline": "Indian kabaddi tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Pro Kabaddi League highlight reel",
-   "durationMinutes": 10,
-   "instruction": "Watch a Pro Kabaddi raid — one player crosses into enemy territory, tags opponents, and races back while holding their breath. It is like tag meets rugby meets breath-holding."
-  },
-  "tags": [
-   "Kabaddi",
-   "India",
-   "Ancient",
-   "Contact Sport"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-bobsled-1890s",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Bobsled (1890s Switzerland)",
-  "teaser": "Bobsled was invented by wealthy English tourists in St. Moritz — they got bored of sleigh rides and decided to race each other down frozen roads in modified sleds.",
-  "imageUrl": "",
-  "byline": "Swiss bobsled tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Bobsled: from tourist toy to Olympic sport",
-   "durationMinutes": 15,
-   "instruction": "Watch a bobsled run from the drivers perspective — 150 km/h in a fiberglass tube on ice, with G-forces that make your vision go grey."
-  },
-  "tags": [
-   "Bobsled",
-   "Switzerland",
-   "Winter Sports",
-   "1890s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-archery-mongolia",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Mongolian Archery",
-  "teaser": "Mongolian archers can shoot accurately from horseback at full gallop — Genghis Khans army conquered Asia with this skill, and modern Mongolians still compete in the Naadam festival.",
-  "imageUrl": "",
-  "byline": "Mongolian archery tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Naadam festival archery competition",
-   "durationMinutes": 15,
-   "instruction": "Watch Naadam archers shoot from horseback at full gallop — this is the same skill that built the largest land empire in history."
-  },
-  "tags": [
-   "Archery",
-   "Mongolia",
-   "Naadam",
-   "Horseback"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-sepak-takraw",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Sepak Takraw (Southeast Asia)",
-  "teaser": "Sepak Takraw is volleyball played with feet — players perform bicycle kicks and scorpion spikes over a net, and the acrobatics make gymnastics look tame.",
-  "imageUrl": "",
-  "byline": "Southeast Asian sepak takraw",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Sepak Takraw trick shots compilation",
-   "durationMinutes": 8,
-   "instruction": "Watch sepak Takraw highlights — it is like volleyball but everyone is a martial artist, and the bicycle kicks defy physics."
-  },
-  "tags": [
-   "Sepak Takraw",
-   "Southeast Asia",
-   "Volleyball",
-   "Acrobatic"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-curling-scotland",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Curling (15th Century Scotland)",
-  "teaser": "Curling was invented when Scottish monks skipped stones across frozen ponds — the sport name comes from the curling sound the stone makes on ice, and it has been called chess on ice.",
-  "imageUrl": "",
-  "byline": "Scottish curling tradition",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Curling: the Olympic sport nobody understands",
-   "durationMinutes": 15,
-   "instruction": "Watch a curling match to see why people sweep ice in front of a stone — the physics of curling are surprisingly complex and the strategy is genuinely deep."
-  },
-  "tags": [
-   "Curling",
-   "Scotland",
-   "Winter Sports",
-   "1500s"
-  ],
-  "tier": 1
- },
- {
-  "id": "sport-extreme-ironing",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Extreme Ironing",
-  "teaser": "Extreme Ironing is a sport where people iron clothes in dangerous locations — on mountains, underwater, while skydiving. It started in 1997 as a joke and now has a world championship.",
-  "imageUrl": "",
-  "byline": "Extreme Ironing Bureau",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Extreme Ironing world championship highlights",
-   "durationMinutes": 10,
-   "instruction": "Watch someone iron a shirt while skydiving — it is the most ridiculous sport ever invented, and somehow it has a world championship."
-  },
-  "tags": [
-   "Extreme Sports",
-   "Novelty",
-   "1990s",
-   "British"
-  ],
-  "tier": 2
- },
- {
-  "id": "sport-cheese-rolling",
-  "categoryId": "SPORTS",
-  "subtype": "Sport",
-  "name": "Cheese Rolling (Coopers Hill)",
-  "teaser": "Every year in Gloucestershire, people chase a 9-pound wheel of Double Gloucester cheese down a steep hill at 70 mph — broken bones are common, and the cheese usually wins.",
-  "imageUrl": "",
-  "byline": "Coopers Hill Cheese-Rolling",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Coopers Hill Cheese Rolling highlight reel",
-   "durationMinutes": 8,
-   "instruction": "Watch people tumble down a 1:1 hill chasing cheese at 70 mph — it has been going on for 200 years and nobody knows why."
-  },
-  "tags": [
-   "Cheese Rolling",
-   "Gloucestershire",
-   "Novelty",
-   "British"
-  ],
-  "tier": 2
- }
+  {
+    "id": "sport-the-miracle-on-ice",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Miracle on Ice (1980)",
+    "teaser": "Amateur American college kids beat the unbeatable Soviet machine at the Lake Placid Olympics — the 'Do you believe in miracles?' call is the most famous in sports broadcasting.",
+    "imageUrl": "",
+    "byline": "USA Hockey",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Miracle on Ice (1980) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the last minute and notice the crowd — the 'USA! USA!' chant starts before the win. The miracle's genius is that the 'amateurs' were the story."
+    },
+    "tags": [
+      "Olympics",
+      "Ice Hockey",
+      "Upset",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-flu-game",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Flu Game (1997)",
+    "teaser": "Jordan scored 38 points in Game 5 of the NBA Finals while sick — the 'flu game' (actually food poisoning from a pizza) became the defining myth of his will.",
+    "imageUrl": "",
+    "byline": "Michael Jordan",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Flu Game (1997) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the game highlights and notice the fourth-quarter collapse — he nearly couldn't finish. The legend's genius is that the 'sickness' IS the performance."
+    },
+    "tags": [
+      "Basketball",
+      "NBA Finals",
+      "Legend",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-hand-of-god",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Hand of God (1986)",
+    "teaser": "Maradona punched the ball into the net and called it 'a little with the head of Maradona and a little with the hand of God' — four minutes later he scored the 'Goal of the Century'.",
+    "imageUrl": "",
+    "byline": "Diego Maradona",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Hand of God (1986) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the two goals back to back — the cheat and the genius in four minutes. The moment's genius is that the 'hand of God' is the honesty."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Legend",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-rumble-in-the-jungle",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Rumble in the Jungle (1974)",
+    "teaser": "Ali, 32 and written off, beat the unbeatable George Foreman in Kinshasa with the 'rope-a-dope' — letting Foreman punch himself out for eight rounds. The fight changed boxing strategy forever.",
+    "imageUrl": "",
+    "byline": "Muhammad Ali",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Rumble in the Jungle (1974) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the eighth round and notice the timing — the 'dope' is the patience. The fight's genius is that the strategy was the spectacle."
+    },
+    "tags": [
+      "Boxing",
+      "Heavyweight",
+      "Legend",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2008-wimbledon-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2008 Wimbledon Final (2008)",
+    "teaser": "Widely called the greatest tennis match ever — nearly five hours, interrupted by rain, ending in near-darkness with Nadal winning 9-7 in the fifth. Federer cried; Nadal couldn't lift the trophy.",
+    "imageUrl": "",
+    "byline": "Roger Federer vs Rafael Nadal",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2008 Wimbledon Final (2008) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final set and notice the light — the match ends in twilight. The classic's genius is that the 'greatest' is the exhaustion."
+    },
+    "tags": [
+      "Tennis",
+      "Grand Slam",
+      "Classic",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1999-champions-league-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1999 Champions League Final (1999)",
+    "teaser": "Trailing 1-0 with the clock past 90 minutes, Manchester United scored twice in injury time — the 'Manchester United are immortal' call became the most replayed in football.",
+    "imageUrl": "",
+    "byline": "Manchester United",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1999 Champions League Final (1999) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final three minutes and notice the two corners — both goals came from set pieces. The comeback's genius is that the 'impossible' was 120 seconds."
+    },
+    "tags": [
+      "Football",
+      "Champions League",
+      "Comeback",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-immaculate-reception",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Immaculate Reception (1972)",
+    "teaser": "The most famous play in NFL history — a deflected pass that Harris caught at his shoelaces and ran for a touchdown, winning the game with seconds left. The play is still debated.",
+    "imageUrl": "",
+    "byline": "Franco Harris",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Immaculate Reception (1972) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the play in slow motion and notice the deflection — the ball hit a defender's helmet. The miracle's genius is that the 'immaculate' was the chaos."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Miracle",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-babe-ruth-s-called-shot",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Babe Ruth's Called Shot (1932)",
+    "teaser": "In the World Series, Ruth allegedly pointed at the center-field fence before hitting a home run there — the 'called shot' is the most debated gesture in baseball, and the film footage is inconclusive.",
+    "imageUrl": "",
+    "byline": "Babe Ruth",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Babe Ruth's Called Shot (1932) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the surviving film and notice the gesture — the 'point' is ambiguous. The legend's genius is that the ambiguity IS the myth."
+    },
+    "tags": [
+      "Baseball",
+      "World Series",
+      "Legend",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-jackie-robinson-s-debut",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Jackie Robinson's Debut (1947)",
+    "teaser": "The first Black player in modern MLB — his debut broke the color barrier, and Robinson endured abuse for two seasons before his talent silenced the league. Every team now retires his number 42.",
+    "imageUrl": "",
+    "byline": "Jackie Robinson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Jackie Robinson's Debut (1947) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 1947 season footage and notice the restraint — Robinson agreed not to fight back. The debut's genius is that the 'talent' was the politics."
+    },
+    "tags": [
+      "Baseball",
+      "History",
+      "Integration",
+      "1940s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-jesse-owens-at-berlin-1936",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Jesse Owens at Berlin 1936 (1936)",
+    "teaser": "The American sprinter won four golds in Hitler's Berlin, publicly humiliating the Nazi racial theories — Owens later said Hitler didn't snub him; FDR did.",
+    "imageUrl": "",
+    "byline": "Jesse Owens",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Jesse Owens at Berlin 1936 (1936) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the long jump final and notice the German rival — Luz Long helped Owens qualify. The moment's genius is that the 'rivalry' was the friendship."
+    },
+    "tags": [
+      "Olympics",
+      "Track",
+      "History",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-usain-bolt-s-9-58",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Usain Bolt's 9.58 (2009)",
+    "teaser": "The fastest 100m ever run — Bolt celebrated 80 meters in, still breaking the record, and his top speed of 27.8 mph is the fastest a human has ever run.",
+    "imageUrl": "",
+    "byline": "Usain Bolt",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Usain Bolt's 9.58 (2009) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 9.58 and notice the celebration — the world record with showboating. The record's genius is that the 'flaw' (the celebration) was the speed."
+    },
+    "tags": [
+      "Track",
+      "Sprint",
+      "Record",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-phelps-eight-golds",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Phelps' Eight Golds (2008)",
+    "teaser": "Eight gold medals in one Olympics — the most ever — including the 100m butterfly won by 0.01 seconds, the narrowest margin in Olympic swimming history.",
+    "imageUrl": "",
+    "byline": "Michael Phelps",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Phelps' Eight Golds (2008) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 100m butterfly and notice the touch — 0.01 seconds. The record's genius is that the 'eighth' was the margin."
+    },
+    "tags": [
+      "Olympics",
+      "Swimming",
+      "Record",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-simone-biles-twisties",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Simone Biles' Twisties (2021)",
+    "teaser": "The greatest gymnast in history withdrew from Tokyo 2021 mid-competition with 'the twisties' — a dangerous loss of spatial awareness — and turned a scandal into a global conversation about mental health.",
+    "imageUrl": "",
+    "byline": "Simone Biles",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Simone Biles' Twisties (2021) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 2021 vault and notice the twist — the dismount was under-rotated. The withdrawal's genius is that the 'failure' was the strength."
+    },
+    "tags": [
+      "Gymnastics",
+      "Olympics",
+      "Mental Health",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-leicester-city-s-title",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Leicester City's Title (2016)",
+    "teaser": "5000-to-1 outsiders won the Premier League — a team that nearly got relegated the year before beat the richest clubs in the world with a budget smaller than some players' wages.",
+    "imageUrl": "",
+    "byline": "Leicester City",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Leicester City's Title (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the title-clinching weekend and notice the players' reactions — the disbelief is the story. The miracle's genius is that the 'impossible' was the system."
+    },
+    "tags": [
+      "Football",
+      "Premier League",
+      "Underdog",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-invincibles",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Invincibles (2004)",
+    "teaser": "Arsenal went an entire Premier League season unbeaten — 26 wins, 12 draws, 38 games — the only team to do it in the modern era, and the '49 unbeaten' run is the league's benchmark.",
+    "imageUrl": "",
+    "byline": "Arsenal",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Invincibles (2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final game of the run and notice the celebration — the 'invincible' season ends with a trophy. The record's genius is that the 'unbeaten' is the perfection."
+    },
+    "tags": [
+      "Football",
+      "Premier League",
+      "Undefeated",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-barcelona-6-1-psg",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Barcelona 6-1 PSG (2017)",
+    "teaser": "Trailing 4-0 from the first leg, Barcelona won 6-1 with a stoppage-time goal — the 'Remontada' is the greatest comeback in Champions League history, and the last-minute winner was a goalmouth scramble.",
+    "imageUrl": "",
+    "byline": "Barcelona",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Barcelona 6-1 PSG (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 95th-minute goal and notice the chaos — the winner was a scramble. The comeback's genius is that the 'impossible' was one touch."
+    },
+    "tags": [
+      "Football",
+      "Champions League",
+      "Comeback",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-liverpool-s-istanbul-miracle",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Liverpool's Istanbul Miracle (2005)",
+    "teaser": "Trailing 3-0 at halftime in the Champions League final, Liverpool scored three in six minutes and won on penalties — the 'Miracle of Istanbul' is the greatest final comeback ever.",
+    "imageUrl": "",
+    "byline": "Liverpool",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Liverpool's Istanbul Miracle (2005) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the second half and notice the six minutes — three goals, three different scorers. The miracle's genius is that the 'halftime team talk' is the legend."
+    },
+    "tags": [
+      "Football",
+      "Champions League",
+      "Comeback",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-zidane-s-volley",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Zidane's Volley (2002)",
+    "teaser": "The winning goal in the Champions League final — a left-footed volley struck perfectly from a floated cross, scored with his 'weak' foot. The goal is the most beautiful in final history.",
+    "imageUrl": "",
+    "byline": "Zinedine Zidane",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Zidane's Volley (2002) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the volley in slow motion — the technique is the art. The goal's genius is that the 'weak foot' produced the masterpiece."
+    },
+    "tags": [
+      "Football",
+      "Champions League",
+      "Legend",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-thrilla-in-manila",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Thrilla in Manila (1975)",
+    "teaser": "The third Ali-Frazier fight — 'the closest thing to dying' per both men — was fought in 100° heat, and Frazier's trainer stopped it after 14 rounds. Neither man was the same after.",
+    "imageUrl": "",
+    "byline": "Ali vs Frazier",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Thrilla in Manila (1975) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 14th round and notice the exhaustion — the 'death' is the metaphor. The fight's genius is that the 'greatest' is the damage."
+    },
+    "tags": [
+      "Boxing",
+      "Heavyweight",
+      "Epic",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-super-bowl-xxv-wide-right",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Super Bowl XXV Wide Right (1991)",
+    "teaser": "The Bills' kicker missed a 47-yard field goal wide right with seconds left, losing the Super Bowl by one point — 'wide right' became the most painful phrase in Buffalo sports history.",
+    "imageUrl": "",
+    "byline": "Scott Norwood",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Super Bowl XXV Wide Right (1991) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the kick and notice the angle — the miss was by feet. The heartbreak's genius is that the 'wide right' is the geography."
+    },
+    "tags": [
+      "American Football",
+      "Super Bowl",
+      "Heartbreak",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-ice-bowl",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Ice Bowl (1967)",
+    "teaser": "The coldest game in NFL history — minus-13°F with a wind chill of minus-48 — and the Packers won on Bart Starr's quarterback sneak with 16 seconds left, the players' breath freezing mid-air.",
+    "imageUrl": "",
+    "byline": "Green Bay Packers",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Ice Bowl (1967) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final drive and notice the frost — the field was frozen solid. The legend's genius is that the 'cold' was the opponent."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Legend",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-drive",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Drive (1987)",
+    "teaser": "Down 20-13 with 5:32 left and 98 yards from the end zone, John Elway drove the Broncos the length of the field to tie, then win in overtime — 'The Drive' is the most famous march in NFL history.",
+    "imageUrl": "",
+    "byline": "John Elway",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Drive (1987) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 98-yard drive and notice the third downs — Elway converted multiple. The drive's genius is that the 'yards' were the drama."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Comeback",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-music-city-miracle",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Music City Miracle (2000)",
+    "teaser": "A lateral on a kickoff return went 75 yards for a touchdown with 3 seconds left — the 'Music City Miracle' is the most controversial lateral in NFL history.",
+    "imageUrl": "",
+    "byline": "Tennessee Titans",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Music City Miracle (2000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the lateral and notice the angle — the pass was backward (legal). The miracle's genius is that the 'controversy' is the debate."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Miracle",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-shot",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Shot (1989)",
+    "teaser": "Jordan's game-winner over Craig Ehlo in the final second of Game 5 — the 'Shot' is his first iconic playoff moment, and the celebration (fist pump) became the image of his career.",
+    "imageUrl": "",
+    "byline": "Michael Jordan",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Shot (1989) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final possession and notice the free-throw-line jump — the hang time is the myth. The shot's genius is that the 'leap' is the gravity."
+    },
+    "tags": [
+      "Basketball",
+      "NBA Playoffs",
+      "Legend",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-kobe-s-81",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Kobe's 81 (2006)",
+    "teaser": "Kobe scored 81 points against Toronto — the second-highest total in NBA history behind Wilt's 100 — and the Lakers needed all of them, trailing by 18 at halftime.",
+    "imageUrl": "",
+    "byline": "Kobe Bryant",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kobe's 81 (2006) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the second half and notice the volume — 55 points after halftime. The scoring feat's genius is that the 'need' was the fuel."
+    },
+    "tags": [
+      "Basketball",
+      "NBA",
+      "Scoring",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-wilt-s-100",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Wilt's 100 (1962)",
+    "teaser": "The only 100-point game in NBA history — Wilt scored 100 against the Knicks, and the game had no three-point line and no shot clock violations, played in the fastest era of basketball.",
+    "imageUrl": "",
+    "byline": "Wilt Chamberlain",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wilt's 100 (1962) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the surviving footage and notice the free throws — he shot 28 of 32. The record's genius is that the '100' was the era."
+    },
+    "tags": [
+      "Basketball",
+      "NBA",
+      "Record",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-messi-s-91-goals",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Messi's 91 Goals (2012)",
+    "teaser": "The most goals in a calendar year ever — 91 for club and country, breaking Gerd Müller's 40-year record. The Argentine scored in 34 of the 69 matches.",
+    "imageUrl": "",
+    "byline": "Lionel Messi",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Messi's 91 Goals (2012) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 91st goal and notice the routine — the 'record' was a season of habits. The record's genius is that the 'impossible' was the consistency."
+    },
+    "tags": [
+      "Football",
+      "Calendar Year",
+      "Record",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-snow-bowl",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Snow Bowl (2001)",
+    "teaser": "A playoff game in a blizzard decided by a 'tuck rule' call that the Raiders disputed for decades — the Patriots won in overtime and began the dynasty.",
+    "imageUrl": "",
+    "byline": "New England Patriots",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Snow Bowl (2001) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the tuck rule play and notice the snow — the ball slipped. The game's genius is that the 'rule' was the dynasty's origin."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Playoff",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-minneapolis-miracle",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The Minneapolis Miracle (2018)",
+    "teaser": "A 61-yard touchdown as time expired — the 'Minneapolis Miracle' was the most dramatic play of that playoff, and the sideline call ('there are no flags') became a meme.",
+    "imageUrl": "",
+    "byline": "Stefon Diggs",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Minneapolis Miracle (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final play and notice the route — the defensive breakdown is the miracle. The play's genius is that the 'miracle' was the mistake."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Miracle",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-ronaldo-s-bicycle-kick",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Ronaldo's Bicycle Kick (2018)",
+    "teaser": "A 33-year-old Ronaldo scored an overhead bicycle kick from 1.7m off the ground in the Champions League quarterfinal — Juventus fans applauded the goal against their own team.",
+    "imageUrl": "",
+    "byline": "Cristiano Ronaldo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ronaldo's Bicycle Kick (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the overhead kick in slow motion — the height is the physics. The goal's genius is that the 'applause' was the rival's tribute."
+    },
+    "tags": [
+      "Football",
+      "Champions League",
+      "Goal",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-ronaldinho-s-free-kick",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Ronaldinho's Free Kick (2002)",
+    "teaser": "The 40-yard free kick that floated over David Seaman's head in the World Cup quarterfinal — Ronaldinho later claimed it was intentional, and England's goalkeeper took years to recover.",
+    "imageUrl": "",
+    "byline": "Ronaldinho",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ronaldinho's Free Kick (2002) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the free kick and notice the 'cross' that wasn't — the ball bent in. The goal's genius is that the 'luck' was the skill."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Goal",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-federer-s-20th",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Federer's 20th (2018)",
+    "teaser": "Federer won his 20th Grand Slam at 36 — the oldest Australian Open champion in 46 years — completing a comeback from knee surgery the year before.",
+    "imageUrl": "",
+    "byline": "Roger Federer",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Federer's 20th (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final set and notice the elegance — the '20th' at 36. The legend's genius is that the 'aging' was the narrative."
+    },
+    "tags": [
+      "Tennis",
+      "Grand Slam",
+      "Legend",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-tiger-s-1997-masters",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Tiger's 1997 Masters (1997)",
+    "teaser": "Tiger won the Masters by 12 strokes at 21 — the largest margin ever — and the win made golf a mainstream sport and a Black golfer a global icon.",
+    "imageUrl": "",
+    "byline": "Tiger Woods",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tiger's 1997 Masters (1997) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final round and notice the distance — the 'power' was the new game. The record's genius is that the '12 strokes' was the era shift."
+    },
+    "tags": [
+      "Golf",
+      "Masters",
+      "Record",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-serena-s-23rd",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Serena's 23rd (2017)",
+    "teaser": "Serena won her 23rd Grand Slam while pregnant — the most in the Open Era — and the Australian Open final was her last match before giving birth that September.",
+    "imageUrl": "",
+    "byline": "Serena Williams",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Serena's 23rd (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final and notice the serve — the power was the pregnancy. The record's genius is that the '23rd' was the will."
+    },
+    "tags": [
+      "Tennis",
+      "Grand Slam",
+      "Record",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-do-you-believe-in-miracles-game",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Do You Believe in Miracles' Game (1980)",
+    "teaser": "Eruzione's third-period goal gave the US the lead over the Soviets — the 'Do you believe in miracles?' call by Al Michaels is the most famous in sports history.",
+    "imageUrl": "",
+    "byline": "Mike Eruzione",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Do You Believe in Miracles' Game (1980) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the third period and notice the crowd — the arena became the team. The moment's genius is that the 'miracle' was the call."
+    },
+    "tags": [
+      "Olympics",
+      "Ice Hockey",
+      "Upset",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1958-world-cup-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1958 World Cup Final (1958)",
+    "teaser": "A 17-year-old Pelé scored twice in the World Cup final — the youngest scorer in a final ever — and his 'hat trick' semifinal made him a global name overnight.",
+    "imageUrl": "",
+    "byline": "Pelé",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1958 World Cup Final (1958) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final goals and notice the age — the teenager's brilliance. The legend's genius is that the '17' was the shock."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Legend",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1970-world-cup-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1970 World Cup Final (1970)",
+    "teaser": "The 'beautiful game' — Brazil's 4-1 win over Italy is considered the greatest team performance ever, and Pelé's dummy pass for the fourth goal is football's most replayed moment.",
+    "imageUrl": "",
+    "byline": "Brazil",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1970 World Cup Final (1970) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the fourth goal and notice the dummy — Pelé didn't touch it. The final's genius is that the 'beautiful' was the team."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Legend",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1990-world-cup-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1990 World Cup Final (1990)",
+    "teaser": "The most ill-tempered final in history — two sendings-off, a penalty decided it, and the match is remembered as the low point of the 'anti-football' era.",
+    "imageUrl": "",
+    "byline": "West Germany",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1990 World Cup Final (1990) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the second half and notice the cards — the game's 'tactics' were the fouling. The final's genius is that the 'boring' was the controversy."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Drama",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2006-world-cup-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2006 World Cup Final (2006)",
+    "teaser": "Zidane's headbutt — the greatest player of his generation was sent off in his final match, and Italy won on penalties. The 'headbutt' is the most discussed moment in final history.",
+    "imageUrl": "",
+    "byline": "Italy",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2006 World Cup Final (2006) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 110th minute and notice the provocation — the insult was the trigger. The final's genius is that the 'genius' was the fall."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Drama",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2014-world-cup-semifinal",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2014 World Cup Semifinal (2014)",
+    "teaser": "Germany beat Brazil 7-1 in Belo Horizonte — the most shocking result in World Cup history, and the host nation's dream ended in the first 30 minutes.",
+    "imageUrl": "",
+    "byline": "Germany",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2014 World Cup Semifinal (2014) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the first 30 minutes and notice the goals — five in 18 minutes. The result's genius is that the '7-1' was the collapse."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Record",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-handshake-ali-frazier-i",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Handshake' (Ali-Frazier I) (1971)",
+    "teaser": "The 'Fight of the Century' — undefeated champions, a split decision, and the only loss of Ali's prime. The fight's real drama was political: the world was watching a protest.",
+    "imageUrl": "",
+    "byline": "Ali vs Frazier",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Handshake' (Ali-Frazier I) (1971) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 15th round and notice the exhaustion — both men were done. The fight's genius is that the 'politics' was the ring."
+    },
+    "tags": [
+      "Boxing",
+      "Heavyweight",
+      "Epic",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-one-more-round-ali-frazier-iii",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'One More Round' (Ali-Frazier III) (1975)",
+    "teaser": "The third Ali-Frazier fight was called 'the closest thing to dying' — Ali later said it was the closest he came to death, and the 'Thrilla in Manila' is the sport's greatest fight.",
+    "imageUrl": "",
+    "byline": "Ali vs Frazier",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'One More Round' (Ali-Frazier III) (1975) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 14th round and notice Frazier's eyes — the swelling was the damage. The fight's genius is that the 'greatest' was the pain."
+    },
+    "tags": [
+      "Boxing",
+      "Heavyweight",
+      "Epic",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1988-olympic-100m",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1988 Olympic 100m (1988)",
+    "teaser": "Ben Johnson won the 100m in world-record time, then failed a drug test — the 'dirtiest race' in history was run by Carl Lewis, and the scandal changed Olympic testing forever.",
+    "imageUrl": "",
+    "byline": "Ben Johnson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1988 Olympic 100m (1988) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the race and notice the times — the 'record' was the doping. The scandal's genius is that the 'fastest' was the lie."
+    },
+    "tags": [
+      "Olympics",
+      "Track",
+      "Scandal",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1966-world-cup-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1966 World Cup Final (1966)",
+    "teaser": "England's only World Cup — the 'goal that never crossed the line' (Geoff Hurst's second) is the most debated in football, and the final ended 4-2 after extra time.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1966 World Cup Final (1966) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the disputed goal and notice the angle — the ball may not have crossed. The final's genius is that the 'line' was the controversy."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "History",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2000-sydney-torch",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2000 Sydney Torch (2000)",
+    "teaser": "The Aboriginal sprinter lit the cauldron at the Sydney Games — the moment of reconciliation became the symbol of the Olympics, and Freeman won gold in the 400m nine days later.",
+    "imageUrl": "",
+    "byline": "Cathy Freeman",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2000 Sydney Torch (2000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the lighting ceremony and notice the water — the flame rose from the water. The moment's genius is that the 'reconciliation' was the symbol."
+    },
+    "tags": [
+      "Olympics",
+      "History",
+      "Symbol",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2012-london-super-saturday",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2012 London 'Super Saturday' (2012)",
+    "teaser": "Three British golds in 46 minutes — Mo Farah's 10,000m, Jessica Ennis's heptathlon, and Greg Rutherford's long jump — the greatest night in British athletics history.",
+    "imageUrl": "",
+    "byline": "Team GB",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2012 London 'Super Saturday' (2012) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the three finals and notice the 46 minutes — the golds were a cascade. The night's genius is that the 'Super' was the simultaneity."
+    },
+    "tags": [
+      "Olympics",
+      "Track",
+      "History",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2016-leicester-parade",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2016 Leicester Parade (2016)",
+    "teaser": "The 5000-to-1 champions' victory parade drew 240,000 people — the city's entire population — and the 'impossible' title became the template for every underdog story since.",
+    "imageUrl": "",
+    "byline": "Leicester City",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2016 Leicester Parade (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the parade and notice the crowd — the city was the team. The celebration's genius is that the 'miracle' was the community."
+    },
+    "tags": [
+      "Football",
+      "Celebration",
+      "Underdog",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-2022-world-cup-final",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 2022 World Cup Final (2022)",
+    "teaser": "Messi won the World Cup at 35 in the greatest final ever — 3-3, a penalty shootout, and France's Mbappé scored a hat trick in a losing cause.",
+    "imageUrl": "",
+    "byline": "Argentina",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2022 World Cup Final (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the second half and notice Mbappé's hat trick — the rival's brilliance. The final's genius is that the 'epic' was the both."
+    },
+    "tags": [
+      "Football",
+      "World Cup",
+      "Epic",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-shot-heard-round-the-world",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Shot Heard Round the World' (1951)",
+    "teaser": "Thomson's walk-off home run capped the Giants' 16-game comeback to tie the Dodgers — 'the shot heard round the world' is the most famous call in baseball.",
+    "imageUrl": "",
+    "byline": "Bobby Thomson",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Shot Heard Round the World' (1951) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the home run and notice the call — Russ Hodges repeated himself. The moment's genius is that the 'heard round the world' was the radio."
+    },
+    "tags": [
+      "Baseball",
+      "Playoffs",
+      "Miracle",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-pine-tar-game",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Pine Tar Game' (1983)",
+    "teaser": "Brett's game-winning home run was voided because of too much pine tar on his bat — the resulting meltdown became the most famous umpire call in baseball, and the rule was later changed.",
+    "imageUrl": "",
+    "byline": "George Brett",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Pine Tar Game' (1983) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the ejection and notice the bat — the pine tar was the controversy. The game's genius is that the 'rule' was the spectacle."
+    },
+    "tags": [
+      "Baseball",
+      "Controversy",
+      "Classic",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-band-of-brothers-super-bowl",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Band of Brothers' Super Bowl (2017)",
+    "teaser": "The Patriots came back from 28-3 down to win Super Bowl LI in overtime — the greatest comeback in Super Bowl history, and the Falcons' collapse became the cautionary tale.",
+    "imageUrl": "",
+    "byline": "New England Patriots",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Band of Brothers' Super Bowl (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the fourth quarter and notice the '28-3' — the comeback started at 2:12 left in the third. The miracle's genius is that the 'impossible' was the clock."
+    },
+    "tags": [
+      "American Football",
+      "Super Bowl",
+      "Comeback",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-broad-street-bullies",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Broad Street Bullies' (1975)",
+    "teaser": "The 'Broad Street Bullies' won back-to-back Stanley Cups with a goon style that changed hockey — the NHL added new rules in response, and the 'bullies' are the sport's great villains.",
+    "imageUrl": "",
+    "byline": "Philadelphia Flyers",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Broad Street Bullies' (1975) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 1975 final and notice the physicality — the 'goon' was the strategy. The dynasty's genius is that the 'violence' was the system."
+    },
+    "tags": [
+      "Ice Hockey",
+      "Stanley Cup",
+      "Legend",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1986-mets",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1986 Mets (1986)",
+    "teaser": "The 'worst-to-first' Mets won the World Series on Mookie Wilson's ground ball through Bill Buckner's legs — the error is the most replayed in baseball history.",
+    "imageUrl": "",
+    "byline": "New York Mets",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1986 Mets (1986) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the 10th inning and notice the ground ball — the ball through the legs. The miracle's genius is that the 'error' was the redemption."
+    },
+    "tags": [
+      "Baseball",
+      "World Series",
+      "Comeback",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-miracle-mets",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Miracle Mets' (1969)",
+    "teaser": "The 'Amazin' Mets' — a team that lost 120 games seven years earlier — beat the Orioles in the World Series, and the 'Miracle Mets' are the original lovable losers.",
+    "imageUrl": "",
+    "byline": "New York Mets",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Miracle Mets' (1969) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the final out and notice the celebration — the 'miracle' was the franchise. The story's genius is that the 'worst' became the 'best'."
+    },
+    "tags": [
+      "Baseball",
+      "World Series",
+      "Underdog",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1954-greatest-game-ever-played",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1954 'Greatest Game Ever Played' (1954)",
+    "teaser": "The Browns vs Colts title game is called the greatest ever played — it went to sudden-death overtime, the first in NFL history, and the game is a turning point in football's rise.",
+    "imageUrl": "",
+    "byline": "Jim Brown",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1954 'Greatest Game Ever Played' (1954) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the overtime and notice the format — the 'sudden death' was new. The game's genius is that the 'greatest' was the overtime."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Legend",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-immaculate-reception-anniversary",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Immaculate Reception' Anniversary (2022)",
+    "teaser": "Harris died at 72 — the anniversary of his miracle catch became a memorial, and the 'immaculate' play's 50th anniversary is a reminder that the myth outlives the man.",
+    "imageUrl": "",
+    "byline": "Franco Harris",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Immaculate Reception' Anniversary (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the memorial tributes and notice the 'reception' — the myth was the memory. The legacy's genius is that the 'play' became the man."
+    },
+    "tags": [
+      "American Football",
+      "NFL",
+      "Legacy",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1950-matthews-vs-lewis",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1950 'Matthews vs Lewis' (1950)",
+    "teaser": "A forgotten classic — the 'Matthews vs Lewis' fight is a reminder that boxing's golden age was full of fights that never made the record books' top lists.",
+    "imageUrl": "",
+    "byline": "Matthews",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1950 'Matthews vs Lewis' (1950) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the fight footage and notice the technique — the 'forgotten' was the era. The classic's genius is that the 'history' is the record book's choice."
+    },
+    "tags": [
+      "Boxing",
+      "Heavyweight",
+      "Classic",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-four-horsemen",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 'Four Horsemen' (1924)",
+    "teaser": "The Notre Dame backfield that changed college football — the 'Four Horsemen' nickname came from a sportswriter's Biblical allusion, and the backfield's speed was the new game.",
+    "imageUrl": "",
+    "byline": "Notre Dame",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 'Four Horsemen' (1924) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the surviving film and notice the speed — the 'horsemen' were the shift. The legend's genius is that the 'nickname' was the marketing."
+    },
+    "tags": [
+      "American Football",
+      "College",
+      "Legend",
+      "1920s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-the-1927-yankees",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "The 1927 Yankees (1927)",
+    "teaser": "The 'Murderers' Row' Yankees — 110 wins, a .637 winning percentage, and Babe Ruth's 60 home runs — the greatest team in baseball history by any measure.",
+    "imageUrl": "",
+    "byline": "New York Yankees",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1927 Yankees (1927) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Watch the '27 footage and notice the lineup — every spot was a threat. The dynasty's genius is that the 'murder' was the offense."
+    },
+    "tags": [
+      "Baseball",
+      "Legend",
+      "Murderers' Row",
+      "1920s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-cricket-1877",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Cricket (1877)",
+    "teaser": "The first international cricket match was Australia vs England in Melbourne — the game lasted 4 days and Australia won by 45 runs, but the real story is that both teams wore top hats.",
+    "imageUrl": "",
+    "byline": "Melbourne Cricket Ground",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cricket: The Ashes rivalry documentary",
+      "durationMinutes": 45,
+      "instruction": "Watch a short Ashes documentary to understand why cricket is basically baseballs eccentric British cousin — the rules are deliberately complicated to keep outsiders out."
+    },
+    "tags": [
+      "Cricket",
+      "1870s",
+      "British"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-judo-1964",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Judo (1964 Olympics)",
+    "teaser": "Judo became an Olympic sport in Tokyo 1964 — the Japanese team won 3 of 4 gold medals, and the only non-Japanese winner was a Dutchman who beat a Japanese Judoka for the first time ever.",
+    "imageUrl": "",
+    "byline": "International Judo Federation",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Anton Geesinks 1964 Olympic final",
+      "durationMinutes": 10,
+      "instruction": "Watch Anton Geesinks gold medal match — a 6 foot 8 Dutchman defeating a Japanese champion in a sport Japan invented. The crowd went silent."
+    },
+    "tags": [
+      "Judo",
+      "Olympics",
+      "1960s",
+      "Japanese"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-surfing-ancient",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Surfing (Ancient Hawaii)",
+    "teaser": "Surfing was invented by ancient Hawaiians — kings surfed on boards up to 16 feet long, and commoners were banned from the best waves. Captain Cook watched them in 1778 and called it the noblest exercise.",
+    "imageUrl": "",
+    "byline": "Hawaiian surfing tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ancient Hawaiian surfing history",
+      "durationMinutes": 20,
+      "instruction": "Watch a history of Hawaiian surfing to see how royalty rode 16-foot boards while commoners watched from the beach — surfing was class warfare on water."
+    },
+    "tags": [
+      "Surfing",
+      "Hawaii",
+      "Ancient",
+      "Polynesian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-fencing-renaissance",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Fencing (Renaissance Italy)",
+    "teaser": "Fencing masters in Renaissance Italy killed each other to protect their secrets — the first fencing manual (1536) was written by a Venetian who had survived 12 duels.",
+    "imageUrl": "",
+    "byline": "Venetian fencing tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The history of fencing from duels to Olympics",
+      "durationMinutes": 25,
+      "instruction": "Watch how fencing went from life-or-death duels in Italian back alleys to a sport where people poke each other with thin metal sticks for points."
+    },
+    "tags": [
+      "Fencing",
+      "Renaissance",
+      "Italian",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-rock-climbing-el-cap",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Free Solo Climbing (El Capitan)",
+    "teaser": "Alex Honnold climbed El Capitan (3,000 ft) without ropes in 2017 — the climb took 3 hours 56 minutes, and he had to rehearse every handhold for months. One slip equals death.",
+    "imageUrl": "",
+    "byline": "Alex Honnold",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Free Solo documentary excerpt",
+      "durationMinutes": 15,
+      "instruction": "Watch the crux move of Free Solo — when Honnolds foot slips and he catches himself with one finger on a 3,000-foot wall. Your palms will sweat."
+    },
+    "tags": [
+      "Climbing",
+      "Free Solo",
+      "Documentary",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-sumo-ancient",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Sumo Wrestling (Ancient Japan)",
+    "teaser": "Sumo has been performed for 1,500 years as a Shinto ritual — the ring (dohyo) is considered sacred ground, and the salt thrown before matches is for purification, not showmanship.",
+    "imageUrl": "",
+    "byline": "Japan Sumo Association",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sumo tournament opening ceremony",
+      "durationMinutes": 10,
+      "instruction": "Watch the opening ceremony of a sumo tournament — the salt tossing, the roof raising, the stomping — it is a Shinto ritual that happens to involve 400-pound men."
+    },
+    "tags": [
+      "Sumo",
+      "Japan",
+      "Shinto",
+      "Ancient"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-polo-ancient-persia",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Polo (Ancient Persia)",
+    "teaser": "Polo was invented in Persia 2,500 years ago — it was so dangerous that Persian emperors used it as battle training, and one king died falling off his horse during a match.",
+    "imageUrl": "",
+    "byline": "Persian polo tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Polos ancient Persian origins",
+      "durationMinutes": 15,
+      "instruction": "Watch a documentary on polos Persian origins to see how a battle-training exercise became a sport for the ultra-rich — the horses are worth more than most houses."
+    },
+    "tags": [
+      "Polo",
+      "Persia",
+      "Ancient",
+      "Equestrian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-marathon-ancient-greece",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Marathon (Ancient Greece)",
+    "teaser": "The marathon was invented because a soldier ran 26 miles from Marathon to Athens to announce a victory — then died. The modern distance (26.2 miles) was not standardized until 1921.",
+    "imageUrl": "",
+    "byline": "Ancient Greek tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The real story of the marathon",
+      "durationMinutes": 20,
+      "instruction": "Watch how the marathon went from a soldiers death run to a global sport — the original distance was 25 miles, then 26.2, then back to 26, then 26.2 again."
+    },
+    "tags": [
+      "Marathon",
+      "Greece",
+      "Ancient",
+      "Running"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-skateboarding-1950s",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Skateboarding (1950s California)",
+    "teaser": "Skateboarding was invented by surfers who wanted to surf on land when the waves were flat — the first boards were roller skate wheels nailed to planks.",
+    "imageUrl": "",
+    "byline": "California surf culture",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Skateboarding history: from surf planks to Olympics",
+      "durationMinutes": 25,
+      "instruction": "Watch how surfers in 1950s California nailed roller skate wheels to planks and accidentally invented a sport that would become an Olympic event 70 years later."
+    },
+    "tags": [
+      "Skateboarding",
+      "California",
+      "1950s",
+      "Surfing"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-capoeira-brazil",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Capoeira (Brazilian Martial Art)",
+    "teaser": "Capoeira was invented by enslaved Africans in Brazil — it looks like dancing but is actually fighting, and masters disguised it as entertainment to avoid punishment.",
+    "imageUrl": "",
+    "byline": "Afro-Brazilian tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Capoeira: the dance that hides a fight",
+      "durationMinutes": 20,
+      "instruction": "Watch a capoeira roda (circle) to see how enslaved Africans turned fighting into dancing to survive — every kick is a strike, every flip is an escape."
+    },
+    "tags": [
+      "Capoeira",
+      "Brazil",
+      "Martial Arts",
+      "Afro-Brazilian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-kabaddi-india",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Kabaddi (Ancient India)",
+    "teaser": "Kabaddi is a contact sport where one player raids the opposing team while holding their breath — they must tag opponents and return without breathing. It has been played in India for 4,000 years.",
+    "imageUrl": "",
+    "byline": "Indian kabaddi tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pro Kabaddi League highlight reel",
+      "durationMinutes": 10,
+      "instruction": "Watch a Pro Kabaddi raid — one player crosses into enemy territory, tags opponents, and races back while holding their breath. It is like tag meets rugby meets breath-holding."
+    },
+    "tags": [
+      "Kabaddi",
+      "India",
+      "Ancient",
+      "Contact Sport"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-bobsled-1890s",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Bobsled (1890s Switzerland)",
+    "teaser": "Bobsled was invented by wealthy English tourists in St. Moritz — they got bored of sleigh rides and decided to race each other down frozen roads in modified sleds.",
+    "imageUrl": "",
+    "byline": "Swiss bobsled tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bobsled: from tourist toy to Olympic sport",
+      "durationMinutes": 15,
+      "instruction": "Watch a bobsled run from the drivers perspective — 150 km/h in a fiberglass tube on ice, with G-forces that make your vision go grey."
+    },
+    "tags": [
+      "Bobsled",
+      "Switzerland",
+      "Winter Sports",
+      "1890s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-archery-mongolia",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Mongolian Archery",
+    "teaser": "Mongolian archers can shoot accurately from horseback at full gallop — Genghis Khans army conquered Asia with this skill, and modern Mongolians still compete in the Naadam festival.",
+    "imageUrl": "",
+    "byline": "Mongolian archery tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Naadam festival archery competition",
+      "durationMinutes": 15,
+      "instruction": "Watch Naadam archers shoot from horseback at full gallop — this is the same skill that built the largest land empire in history."
+    },
+    "tags": [
+      "Archery",
+      "Mongolia",
+      "Naadam",
+      "Horseback"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-sepak-takraw",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Sepak Takraw (Southeast Asia)",
+    "teaser": "Sepak Takraw is volleyball played with feet — players perform bicycle kicks and scorpion spikes over a net, and the acrobatics make gymnastics look tame.",
+    "imageUrl": "",
+    "byline": "Southeast Asian sepak takraw",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sepak Takraw trick shots compilation",
+      "durationMinutes": 8,
+      "instruction": "Watch sepak Takraw highlights — it is like volleyball but everyone is a martial artist, and the bicycle kicks defy physics."
+    },
+    "tags": [
+      "Sepak Takraw",
+      "Southeast Asia",
+      "Volleyball",
+      "Acrobatic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-curling-scotland",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Curling (15th Century Scotland)",
+    "teaser": "Curling was invented when Scottish monks skipped stones across frozen ponds — the sport name comes from the curling sound the stone makes on ice, and it has been called chess on ice.",
+    "imageUrl": "",
+    "byline": "Scottish curling tradition",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Curling: the Olympic sport nobody understands",
+      "durationMinutes": 15,
+      "instruction": "Watch a curling match to see why people sweep ice in front of a stone — the physics of curling are surprisingly complex and the strategy is genuinely deep."
+    },
+    "tags": [
+      "Curling",
+      "Scotland",
+      "Winter Sports",
+      "1500s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "sport-extreme-ironing",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Extreme Ironing",
+    "teaser": "Extreme Ironing is a sport where people iron clothes in dangerous locations — on mountains, underwater, while skydiving. It started in 1997 as a joke and now has a world championship.",
+    "imageUrl": "",
+    "byline": "Extreme Ironing Bureau",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Extreme Ironing world championship highlights",
+      "durationMinutes": 10,
+      "instruction": "Watch someone iron a shirt while skydiving — it is the most ridiculous sport ever invented, and somehow it has a world championship."
+    },
+    "tags": [
+      "Extreme Sports",
+      "Novelty",
+      "1990s",
+      "British"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "sport-cheese-rolling",
+    "categoryId": "SPORTS",
+    "subtype": "Sport",
+    "name": "Cheese Rolling (Coopers Hill)",
+    "teaser": "Every year in Gloucestershire, people chase a 9-pound wheel of Double Gloucester cheese down a steep hill at 70 mph — broken bones are common, and the cheese usually wins.",
+    "imageUrl": "",
+    "byline": "Coopers Hill Cheese-Rolling",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Coopers Hill Cheese Rolling highlight reel",
+      "durationMinutes": 8,
+      "instruction": "Watch people tumble down a 1:1 hill chasing cheese at 70 mph — it has been going on for 200 years and nobody knows why."
+    },
+    "tags": [
+      "Cheese Rolling",
+      "Gloucestershire",
+      "Novelty",
+      "British"
+    ],
+    "tier": 2
+  },
+  {
+    "name": "The 1950 World Cup Final",
+    "teaser": "Uruguay stunned Brazil 2-1 in the Maracana before 200,000 shocked fans. The Maracanazo remains the greatest upset in football history. Brazil was so devastated that the stadium announcer did not speak the goal scorers names for 30 minutes.",
+    "categoryId": "SPORTS",
+    "subtype": "football",
+    "tags": [
+      "football",
+      "world-cup",
+      "upset"
+    ],
+    "id": "sport-the-1950-world-cup-final",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1950 World Cup Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 1950 World Cup Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Istanbul Final (2005)",
+    "teaser": "Liverpool came back from 3-0 down at halftime against AC Milan in the Champions League final. Steven Gerrards header, Hamanns substitution, and Dudeks saves created the greatest comeback in Champions League history.",
+    "categoryId": "SPORTS",
+    "subtype": "football",
+    "tags": [
+      "football",
+      "champions-league",
+      "comeback"
+    ],
+    "id": "sport-the-istanbul-final-2005",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Istanbul Final (2005) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Istanbul Final (2005) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The 2022 World Cup Final",
+    "teaser": "Argentina beat France in the greatest World Cup final ever. Messi and Mbappe traded goals in a 3-3 thriller that went to penalties. Mbappes hat trick, Messis redemption, and Argentinas celebration lasted until dawn.",
+    "categoryId": "SPORTS",
+    "subtype": "football",
+    "tags": [
+      "football",
+      "world-cup",
+      "argentina"
+    ],
+    "id": "sport-the-2022-world-cup-final-1",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2022 World Cup Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 2022 World Cup Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Wilt Chamberlains 100-Point Game (1962)",
+    "teaser": "The most unbreakable record in basketball. 100 points in a single game. Chamberlains Philadelphia Warriors beat the New York Knicks 169-147, and the final minutes became a deliberate feed-the-big-man display.",
+    "categoryId": "SPORTS",
+    "subtype": "basketball",
+    "tags": [
+      "basketball",
+      "nba",
+      "records"
+    ],
+    "id": "sport-wilt-chamberlains-100-point-game-1962",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wilt Chamberlains 100-Point Game (1962) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wilt Chamberlains 100-Point Game (1962) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "LeBrons Block (2016)",
+    "teaser": "LeBron James chase-down block on Andre Iguodala in Game 7 of the 2016 NBA Finals with 1:50 left and the score tied saved the game and completed Clevelands comeback from 3-1 down. It is the most important defensive play in NBA history.",
+    "categoryId": "SPORTS",
+    "subtype": "basketball",
+    "tags": [
+      "basketball",
+      "nba",
+      "finals"
+    ],
+    "id": "sport-lebrons-block-2016",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "LeBrons Block (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of LeBrons Block (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Dream Team (1992)",
+    "teaser": "The first US Olympic basketball team with active NBA players including Jordan, Magic, Bird, Barkley, and Ewing. They won by an average of 44 points and turned the Olympics into a global basketball showcase.",
+    "categoryId": "SPORTS",
+    "subtype": "basketball",
+    "tags": [
+      "basketball",
+      "olympics",
+      "dream-team"
+    ],
+    "id": "sport-the-dream-team-1992",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Dream Team (1992) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dream Team (1992) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Federer vs Nadal 2008 Wimbledon Final",
+    "teaser": "The greatest tennis match ever played. 5 sets over nearly 5 hours, with Nadal winning 9-7 in the fifth. It rained twice, the light faded, and both players transcended their sport.",
+    "categoryId": "SPORTS",
+    "subtype": "tennis",
+    "tags": [
+      "tennis",
+      "wimbledon",
+      "rivalry"
+    ],
+    "id": "sport-federer-vs-nadal-2008-wimbledon-final",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Federer vs Nadal 2008 Wimbledon Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Federer vs Nadal 2008 Wimbledon Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Serena Williams 23 Grand Slams",
+    "teaser": "The most dominant tennis career in the Open Era with 23 singles Grand Slam titles spanning 18 years. Serenas power game changed women tennis forever, and her comebacks after pregnancy proved her GOAT status.",
+    "categoryId": "SPORTS",
+    "subtype": "tennis",
+    "tags": [
+      "tennis",
+      "records",
+      "women"
+    ],
+    "id": "sport-serena-williams-23-grand-slams",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Serena Williams 23 Grand Slams end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Serena Williams 23 Grand Slams — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Nadals 14 French Open Titles",
+    "teaser": "Rafael Nadal won the French Open 14 times, a record that may never be broken. His topspin forehand and physical intensity on clay created the most dominant single-surface dominance in tennis history.",
+    "categoryId": "SPORTS",
+    "subtype": "tennis",
+    "tags": [
+      "tennis",
+      "french-open",
+      "records"
+    ],
+    "id": "sport-nadals-14-french-open-titles",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nadals 14 French Open Titles end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nadals 14 French Open Titles — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Ben Stokes Headingley Ashes (2019)",
+    "teaser": "Stokes scored an unbeaten 135 to chase 359, the greatest Test innings ever. With England 286-9 chasing 359, Stokes hit sixes at will and won by one wicket. It was the second Headingley miracle after Botham in 1981.",
+    "categoryId": "SPORTS",
+    "subtype": "cricket",
+    "tags": [
+      "cricket",
+      "ashes",
+      "miracle"
+    ],
+    "id": "sport-ben-stokes-headingley-ashes-2019",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ben Stokes Headingley Ashes (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ben Stokes Headingley Ashes (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Brian Lara 400 Not Out (2004)",
+    "teaser": "The highest individual score in Test cricket. 400 not out against England in Antigua. Lara batted for nearly 12 hours, hitting 43 fours and 4 sixes. He broke his own record of 375.",
+    "categoryId": "SPORTS",
+    "subtype": "cricket",
+    "tags": [
+      "cricket",
+      "records",
+      "batting"
+    ],
+    "id": "sport-brian-lara-400-not-out-2004",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Brian Lara 400 Not Out (2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Brian Lara 400 Not Out (2004) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Senna vs Prost (1989-93)",
+    "teaser": "The greatest rivalry in F1. Ayrton Sennas spiritual intensity against Alain Prosts clinical precision. Their collisions at Suzuka in 1989 and 1990 decided world championships and defined an era.",
+    "categoryId": "SPORTS",
+    "subtype": "motorsport",
+    "tags": [
+      "motorsport",
+      "f1",
+      "rivalry"
+    ],
+    "id": "sport-senna-vs-prost-1989-93",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Senna vs Prost (1989-93) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Senna vs Prost (1989-93) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The 2021 Abu Dhabi Controversy",
+    "teaser": "Race director Michael Masis decision to restart the race with one lap left after a safety car handed Verstappen the championship over Hamilton. The FIA later admitted Masi made errors, but the result stood.",
+    "categoryId": "SPORTS",
+    "subtype": "motorsport",
+    "tags": [
+      "motorsport",
+      "f1",
+      "controversy"
+    ],
+    "id": "sport-the-2021-abu-dhabi-controversy",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2021 Abu Dhabi Controversy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 2021 Abu Dhabi Controversy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Rally Group B (1982-86)",
+    "teaser": "The most dangerous era in motorsport. 500+ HP monsters with no driver aids, racing through forests and mountains. Audi Quattro, Peugeot 205, and Lancia Delta became legends. Spectators stood on the road.",
+    "categoryId": "SPORTS",
+    "subtype": "motorsport",
+    "tags": [
+      "motorsport",
+      "rally",
+      "dangerous"
+    ],
+    "id": "sport-rally-group-b-1982-86",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Rally Group B (1982-86) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Rally Group B (1982-86) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Isle of Man TT (1907-)",
+    "teaser": "The most dangerous race on Earth. Motorcyclists averaging 135 mph over 37.73 miles of public roads. 262 riders have died since 1907. Each June, the island becomes the worlds fastest and deadliest motorsport venue.",
+    "categoryId": "SPORTS",
+    "subtype": "motorsport",
+    "tags": [
+      "motorsport",
+      "motorcycle",
+      "dangerous"
+    ],
+    "id": "sport-the-isle-of-man-tt-1907-",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Isle of Man TT (1907-) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Isle of Man TT (1907-) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Cheese Rolling (England)",
+    "teaser": "Coopers Hill hosts an annual cheese-rolling race. A 9-pound Double Gloucester is rolled downhill and competitors chase it at 70 mph. Broken bones are common. The tradition dates back 600+ years.",
+    "categoryId": "SPORTS",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "england",
+      "traditional"
+    ],
+    "id": "sport-cheese-rolling-england",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cheese Rolling (England) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cheese Rolling (England) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Finnish Wife Carrying (Finland)",
+    "teaser": "Men carry their wives through an obstacle course of 253.5 meters of sand, grass, and water obstacles. The winners prize is the wifes weight in beer. The world record is 62.1 seconds.",
+    "categoryId": "SPORTS",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "finland",
+      "unusual"
+    ],
+    "id": "sport-finnish-wife-carrying-finland",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Finnish Wife Carrying (Finland) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Finnish Wife Carrying (Finland) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Chess Boxing (Germany)",
+    "teaser": "Alternate rounds of chess and boxing. Checkmate or knockout wins. Berlins Chessboxing Club invented it in 2003. The concept seems absurd, but the mental-physical combo creates a legitimate competitive sport.",
+    "categoryId": "SPORTS",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "chess",
+      "boxing"
+    ],
+    "id": "sport-chess-boxing-germany",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Chess Boxing (Germany) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Chess Boxing (Germany) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Buzkashi (Central Asia)",
+    "teaser": "Afghanistans national sport. Horseback riders fight over a headless goat carcass, trying to drag it to a goal. The game can last days, and wealthy patrons sponsor teams of 400 riders.",
+    "categoryId": "SPORTS",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "afghanistan",
+      "equestrian"
+    ],
+    "id": "sport-buzkashi-central-asia",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Buzkashi (Central Asia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Buzkashi (Central Asia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Quidditch (Muggle)",
+    "teaser": "The real-world version of Harry Potters sport. Players run with brooms between their legs, throw balls at hoops, and have a snitch runner. Officially called quadball now, it is played in 30+ countries.",
+    "categoryId": "SPORTS",
+    "subtype": "niche",
+    "tags": [
+      "niche",
+      "invented",
+      "fantasy"
+    ],
+    "id": "sport-quidditch-muggle",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Quidditch (Muggle) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Quidditch (Muggle) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Ali vs Foreman Rumble in the Jungle (1974)",
+    "teaser": "Alis rope-a-dope strategy of leaning on the ropes to tire Foreman worked perfectly in Zaire. Foreman punched himself out, and Ali knocked him out in round 8. It is the most famous fight in boxing history.",
+    "categoryId": "SPORTS",
+    "subtype": "boxing",
+    "tags": [
+      "boxing",
+      "heavyweight",
+      "legendary"
+    ],
+    "id": "sport-ali-vs-foreman-rumble-in-the-jungle-1974",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ali vs Foreman Rumble in the Jungle (1974) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ali vs Foreman Rumble in the Jungle (1974) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tysons 91-Second Knockout (1988)",
+    "teaser": "Mike Tyson knocked out Michael Spinks in 91 seconds, the shortest heavyweight title fight. Tysons peak from 1985 to 1988 was the most terrifying display of power in boxing history with 19 knockouts in 20 fights.",
+    "categoryId": "SPORTS",
+    "subtype": "boxing",
+    "tags": [
+      "boxing",
+      "heavyweight",
+      "knockout"
+    ],
+    "id": "sport-tysons-91-second-knockout-1988",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tysons 91-Second Knockout (1988) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tysons 91-Second Knockout (1988) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Mayweathers 50-0 (2017)",
+    "teaser": "Retired undefeated after 50 fights as the best defensive boxer ever. His hit-and-dont-get-hit style made him boxings highest earner with 1.2 billion in career earnings, but critics called him boring.",
+    "categoryId": "SPORTS",
+    "subtype": "boxing",
+    "tags": [
+      "boxing",
+      "records",
+      "undefeated"
+    ],
+    "id": "sport-mayweathers-50-0-2017",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mayweathers 50-0 (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mayweathers 50-0 (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Pacquiaos Eight Weight Classes",
+    "teaser": "The only boxer to win world titles in eight different weight divisions from flyweight to super welterweight. Pacquiaos rise from Filipino poverty to global superstar is one of sports greatest stories.",
+    "categoryId": "SPORTS",
+    "subtype": "boxing",
+    "tags": [
+      "boxing",
+      "records",
+      "philippines"
+    ],
+    "id": "sport-pacquiaos-eight-weight-classes",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pacquiaos Eight Weight Classes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pacquiaos Eight Weight Classes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tom Bradys 28-3 Comeback (2017)",
+    "teaser": "Down 28-3 in the third quarter of Super Bowl LI, Tom Brady orchestrated the greatest comeback in Super Bowl history, winning 34-28 in overtime. It cemented Bradys GOAT status.",
+    "categoryId": "SPORTS",
+    "subtype": "american-football",
+    "tags": [
+      "football",
+      "super-bowl",
+      "comeback"
+    ],
+    "id": "sport-tom-bradys-28-3-comeback-2017",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tom Bradys 28-3 Comeback (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tom Bradys 28-3 Comeback (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The 2016 Cubs World Series",
+    "teaser": "After 108 years without a championship, the longest drought in North American sports, the Cubs beat Cleveland in Game 7. The extra-innings thriller ended baseballs most famous curse.",
+    "categoryId": "SPORTS",
+    "subtype": "baseball",
+    "tags": [
+      "baseball",
+      "world-series",
+      "curse"
+    ],
+    "id": "sport-the-2016-cubs-world-series",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2016 Cubs World Series end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 2016 Cubs World Series — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Hillarys Everest Summit (1953)",
+    "teaser": "Edmund Hillary and Tenzing Norgay reached the 8,849m summit on May 29, 1953, the first confirmed humans to stand on the roof of the world. When asked if he conquered Everest, Hillary replied: We knocked the bastard off.",
+    "categoryId": "SPORTS",
+    "subtype": "adventure",
+    "tags": [
+      "adventure",
+      "climbing",
+      "records"
+    ],
+    "id": "sport-hillarys-everest-summit-1953",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hillarys Everest Summit (1953) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hillarys Everest Summit (1953) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Iditarod (1973-)",
+    "teaser": "Alaskas 1,600km dog sled race from Anchorage to Nome, the Last Great Race on Earth. Teams of 16 dogs pull mushers through blizzards, frozen rivers, and wilderness. The winner gets $50,000.",
+    "categoryId": "SPORTS",
+    "subtype": "endurance",
+    "tags": [
+      "endurance",
+      "alaska",
+      "dogsled"
+    ],
+    "id": "sport-the-iditarod-1973-",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Iditarod (1973-) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Iditarod (1973-) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Marathon des Sables",
+    "teaser": "The worlds toughest footrace. 250 km across the Sahara Desert in 6 days. Competitors carry everything they need on their backs. Temperature hits 50C, and sandstorms reduce visibility to zero.",
+    "categoryId": "SPORTS",
+    "subtype": "endurance",
+    "tags": [
+      "endurance",
+      "desert",
+      "ultramarathon"
+    ],
+    "id": "sport-marathon-des-sables",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Marathon des Sables end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Marathon des Sables — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Armstrongs Downfall (2012)",
+    "teaser": "Stripped of 7 Tour de France titles after the USADA investigation proved systematic doping. Armstrongs fall from cancer survivor to disgraced cheater remains sports greatest redemption-to-ruin story.",
+    "categoryId": "SPORTS",
+    "subtype": "cycling",
+    "tags": [
+      "cycling",
+      "doping",
+      "disgrace"
+    ],
+    "id": "sport-armstrongs-downfall-2012",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Armstrongs Downfall (2012) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Armstrongs Downfall (2012) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Gretzkys 2,857 Points",
+    "teaser": "The most unbreakable record in sports. 2,857 career points with 894 goals and 1,963 assists. Gretzky has more assists than any other player has total points. He was traded from Edmonton to LA, and hockey moved south.",
+    "categoryId": "SPORTS",
+    "subtype": "hockey",
+    "tags": [
+      "hockey",
+      "nhl",
+      "records"
+    ],
+    "id": "sport-gretzkys-2857-points",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Gretzkys 2,857 Points end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gretzkys 2,857 Points — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The 1972 Summit Series",
+    "teaser": "Canada vs USSR in the first best-on-best hockey series. Paul Hendersons goal with 34 seconds left in Game 8 gave Canada the series. It is the most-watched hockey game in history.",
+    "categoryId": "SPORTS",
+    "subtype": "hockey",
+    "tags": [
+      "hockey",
+      "international",
+      "history"
+    ],
+    "id": "sport-the-1972-summit-series",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1972 Summit Series end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 1972 Summit Series — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Orrs Flying Goal (1970)",
+    "teaser": "Bobby Orrs overtime goal in Game 4 of the Stanley Cup Final, scored while flying through the air after being tripped, is the most photographed moment in hockey history. The Bruins won their first Cup since 1941.",
+    "categoryId": "SPORTS",
+    "subtype": "hockey",
+    "tags": [
+      "hockey",
+      "nhl",
+      "goal"
+    ],
+    "id": "sport-orrs-flying-goal-1970",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Orrs Flying Goal (1970) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Orrs Flying Goal (1970) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Tigers Tiger Slam (2000-01)",
+    "teaser": "Woods held all four major championships simultaneously, winning the 2000 US Open, Open Championship, and PGA Championship, then the 2001 Masters. No golfer had ever held all four at once.",
+    "categoryId": "SPORTS",
+    "subtype": "golf",
+    "tags": [
+      "golf",
+      "masters",
+      "records"
+    ],
+    "id": "sport-tigers-tiger-slam-2000-01",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tigers Tiger Slam (2000-01) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tigers Tiger Slam (2000-01) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Nicklaus 18 Majors",
+    "teaser": "The Golden Bears 18 major championships including 6 Masters, 4 US Opens, 3 Open Championships, and 5 PGA Championships is golfs most enduring record. Woods is second with 15.",
+    "categoryId": "SPORTS",
+    "subtype": "golf",
+    "tags": [
+      "golf",
+      "majors",
+      "records"
+    ],
+    "id": "sport-nicklaus-18-majors",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nicklaus 18 Majors end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nicklaus 18 Majors — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The 1995 Rugby World Cup Final",
+    "teaser": "South Africas first Rugby World Cup victory and Nelson Mandela wearing a Springbok jersey to present the trophy. It unified a post-apartheid nation and made Francois Pienaar a legend.",
+    "categoryId": "SPORTS",
+    "subtype": "rugby",
+    "tags": [
+      "rugby",
+      "world-cup",
+      "south-africa"
+    ],
+    "id": "sport-the-1995-rugby-world-cup-final",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1995 Rugby World Cup Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 1995 Rugby World Cup Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "The Haka (New Zealand)",
+    "teaser": "The All Blacks pre-match war dance Ka Mate, written by warrior chief Te Rauparaha in 1820. It is not just intimidation but cultural expression. Performing the Haka incorrectly can bring national outrage.",
+    "categoryId": "SPORTS",
+    "subtype": "rugby",
+    "tags": [
+      "rugby",
+      "new-zealand",
+      "culture"
+    ],
+    "id": "sport-the-haka-new-zealand",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Haka (New Zealand) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Haka (New Zealand) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "name": "Kelly Slaters 11 World Titles (1992-2011)",
+    "teaser": "The GOAT of surfing with 11 World Surf League titles spanning 20 years. Slater won at age 17 and 39, surfed a man-made wave pool, and remains competitive at 50+. He changed surfing from beach culture to global sport.",
+    "categoryId": "SPORTS",
+    "subtype": "surfing",
+    "tags": [
+      "surfing",
+      "records",
+      "world-title"
+    ],
+    "id": "sport-kelly-slaters-11-world-titles-1992-2011",
+    "imageUrl": "",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kelly Slaters 11 World Titles (1992-2011) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kelly Slaters 11 World Titles (1992-2011) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
+  },
+  {
+    "id": "sports-fighting-sports",
+    "name": "Fighting Sports",
+    "teaser": "Combat disciplines ranging from boxing to MMA, judo to taekwondo. The UFC, founded in 1993, grew MMA from a niche spectacle into a $1.5 billion industry. Bruce Lee's philosophy of 'no way as way' influenced modern mixed martial arts training.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fighting Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fighting Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-water-sports",
+    "name": "Water Sports",
+    "teaser": "Activities on or in water from swimming to surfing to rowing. Surfing was Polynesian royalty's exclusive sport for centuries before becoming mainstream. The 2020 Olympics added surfing, skateboarding, and sport climbing to attract younger viewers.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Water Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Water Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-mind-sports",
+    "name": "Mind Sports",
+    "teaser": "Competitive activities emphasizing mental skill — chess, Go, bridge, esports. Garry Kasparov's 1997 loss to Deep Blue was a landmark for AI. Chess viewership surged 300% during Netflix's 'The Queen's Gambit' in 2020.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mind Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mind Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-extreme-sports",
+    "name": "Extreme Sports",
+    "teaser": "High-risk activities like BASE jumping, wingsuit flying, and big wave surfing. Kelly Slater's 20-foot wave in 2022 pushed surfing's limits. Felix Baumgartner's 2012 space jump from 39km reached Mach 1.25 in freefall.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Extreme Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Extreme Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-fantasy-sports",
+    "name": "Fantasy Sports",
+    "teaser": "Virtual competitions where participants build teams from real players and score points based on statistics. Fantasy football alone generates $14 billion annually in entry fees. Over 45 million Americans play fantasy sports.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fantasy Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fantasy Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-olympic-history",
+    "name": "Olympic History",
+    "teaser": "The ancient Games ran from 776 BCE to 393 CE in Olympia, Greece. The modern Olympics, revived by Pierre de Coubertin in 1896, now feature 10,500 athletes across 33 sports. The 2024 Paris Games will be the first to achieve gender parity.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Olympic History end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Olympic History — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-sports-medicine",
+    "name": "Sports Medicine",
+    "teaser": "The field treating and preventing sports injuries. ACL reconstruction surgery has a 90% success rate. Cryotherapy, compression therapy, and progressive loading protocols have reduced athlete recovery times by 40% over the past two decades.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sports Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sports Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-records-and-milestones",
+    "name": "Records and Milestones",
+    "teaser": "Unbreakable or nearly unbreakable sports records. Usain Bolt's 9.58-second 100m may stand for decades. Wilt Chamberlain's 100-point basketball game in 1962 remains the highest single-game scoring record in NBA history.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Records and Milestones end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Records and Milestones — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-team-sports-dynamics",
+    "name": "Team Sports Dynamics",
+    "teaser": "How teams form, perform, and evolve. The 'hot hand' fallacy — that streaks in basketball are real — was long debunked but a 2015 study found slight evidence for it. Team chemistry is difficult to quantify but consistently predicts success.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Team Sports Dynamics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Team Sports Dynamics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-motor-sports",
+    "name": "Motor Sports",
+    "teaser": "Racing disciplines from Formula 1 to NASCAR to rally. F1 cars generate 1,500 horsepower and reach 370km/h. The Monaco Grand Prix has been run since 1929. Ayrton Senna's 1984 Monaco lap in the rain is considered the greatest single lap in racing history.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Motor Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Motor Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-historical-athletes",
+    "name": "Historical Athletes",
+    "teaser": "Athletes who transcended their sport. Jesse Owens won four gold medals at the 1936 Berlin Olympics, defying Hitler's Aryan supremacy ideology. Muhammad Ali's refusal to serve in Vietnam in 1967 cost him his title but cemented his legacy beyond boxing.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Historical Athletes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Historical Athletes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-ball-sports",
+    "name": "Ball Sports",
+    "teaser": "Any sport involving a ball — soccer, basketball, cricket, tennis, golf. Soccer's FIFA World Cup 2022 final between Argentina and France was watched by 1.5 billion people. The Cricket World Cup 2023 final drew 1.2 billion viewers in India alone.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ball Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ball Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-combat-sports-training",
+    "name": "Combat Sports Training",
+    "teaser": "The methodology behind fighting disciplines. Muay Thai fighters in Thailand begin training at age 7. Boxing's 'heavy bag' training develops power while 'speed bag' work builds hand-eye coordination. MMA fighters typically cross-train in 3-4 disciplines.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Combat Sports Training end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Combat Sports Training — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-winter-sports",
+    "name": "Winter Sports",
+    "teaser": "Activities on snow and ice from skiing to curling. Skiing originated 8,000 years ago in Scandinavia. Bobsled was invented in the Swiss Alps in the 1860s. The Winter Olympics have been held since 1924 and now feature 15 sports.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Winter Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Winter Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-racket-sports",
+    "name": "Racket Sports",
+    "teaser": "Tennis, badminton, squash, table tennis, and pickleball. Badminton's shuttlecock can reach 493km/h — the fastest racket sport speed. Pickleball grew 85% in 2022, becoming America's fastest-growing sport. Wimbledon's grass court is perennial rye.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Racket Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Racket Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-track-and-field",
+    "name": "Track and Field",
+    "teaser": "Athletics events from sprinting to throwing to jumping. The decathlon combines 10 events over two days. Usain Bolt's 9.58 100m record at the 2009 Berlin World Championships is considered one of sport's most untouchable records.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Track and Field end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Track and Field — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-sports-governance",
+    "name": "Sports Governance",
+    "teaser": "Organizations that regulate and manage sports. FIFA, founded in 1904, has 211 member nations — more than the UN. The IOC's Olympic Charter defines Olympism's philosophy. Doping scandals have tested sports governance repeatedly since Ben Johnson's 1988 disqualification.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sports Governance end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sports Governance — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-youth-development",
+    "name": "Youth Development",
+    "teaser": "Systems for identifying and nurturing young athletes. La Masia, Barcelona's academy, produced Messi, Xavi, and Iniesta. The US college sports system feeds professional leagues. Early sport specialization vs multi-sport participation is actively debated.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Youth Development end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Youth Development — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-referee-and-officiating",
+    "name": "Referee and Officiating",
+    "teaser": "The evolving role of officials in sports. VAR (Video Assistant Referee) in soccer was introduced at the 2018 World Cup. Hawk-Eye line-calling in tennis uses seven cameras to track ball position within 3.6mm. Officiating errors remain a source of controversy.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Referee and Officiating end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Referee and Officiating — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-training-science",
+    "name": "Training Science",
+    "teaser": "Evidence-based approaches to athletic performance. Periodization — cycling training intensity — was developed by Soviet scientists in the 1960s. High-altitude training increases red blood cell count. VO2 max testing measures aerobic fitness ceiling.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Training Science end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Training Science — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-esports-competitive",
+    "name": "Esports Competitive",
+    "teaser": "Organized competitive video gaming. League of Legends World Championship 2023 drew 6.4 million concurrent viewers. The average pro gamer practices 10-12 hours daily. Esports scholarships are offered by 200+ US colleges.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Esports Competitive end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Esports Competitive — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-sports-technology",
+    "name": "Sports Technology",
+    "teaser": "Innovations improving performance and officiating. Carbon fiber running shoes with embedded plates improved marathon times by 4% — World Athletics regulated them in 2020. Hawkeye, instant replay, and GPS tracking have transformed how sports are played and officied.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sports Technology end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sports Technology — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-cycling-endurance",
+    "name": "Cycling Endurance",
+    "teaser": "Road cycling races like the Tour de France cover 3,500km over 23 stages. Lance Armstrong's seven titles were stripped for doping. Eddy Merckx holds the record with five Tour victories. The sport averages 40km/h over three weeks of racing.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cycling Endurance end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cycling Endurance — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-professional-wrestling",
+    "name": "Professional Wrestling",
+    "teaser": "Scripted athletic entertainment combining acrobatics, storytelling, and improvisation. WWE, the largest promotion, runs 500+ events annually. The Undertaker's WrestleMania streak of 21-0 lasted from 1991 to 2014. Japanese puroresu emphasizes stiff, realistic strikes.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Professional Wrestling end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Professional Wrestling — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  },
+  {
+    "id": "sports-traditional-sports",
+    "name": "Traditional Sports",
+    "teaser": "Indigenous and cultural games worldwide. Kabaddi, popular in South Asia, requires a 'raider' to tag opponents while holding their breath. Mesoamerican ballgame, played since 1400 BCE, sometimes ended in human sacrifice. Capoeira blends martial arts with dance.",
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Traditional Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Traditional Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
+  }
 ]
