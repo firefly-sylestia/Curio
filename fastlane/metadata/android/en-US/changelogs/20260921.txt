@@ -1,3 +1,10 @@
+ADD: Share card editor — the category badge/pill is now movable via a B handle in edit mode (every card style).
+ADD: Share card editor — Width and Height sliders replace the edge-drag handles for title/fact box sizing.
+ADD: Share card editor — Fact size is now a dropdown (alongside the title dropdown) in edit mode.
+IMPROVE: Share card editor — edit hint shortened to "Hold to edit"; long description text removed.
+IMPROVE: Share card editor — Done and Reset are now icon chips (✓ / 🔄) instead of text buttons.
+IMPROVE: Share card editor — Save, Share and Share-as-text are now three compact buttons in one row.
+ADD: Share card edits now persist per topic — save or share once and your customisations (move, size, text) restore automatically next time.
 ADD: Topic Browser — the selected category now FILTERS search results (searching inside a category shows only that category's matches instead of every category's).
 ADD: Topic Browser — dynamic category chips: while searching each chip shows its live match count and categories with no matches hide.
 ADD: Topic Browser — searching inside a category shows "Also in" pills for other categories that match; tap a pill to jump the filter there (the search stays).

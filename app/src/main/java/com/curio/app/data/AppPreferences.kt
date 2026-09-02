@@ -201,6 +201,10 @@ object AppPreferences {
     private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
     // v9.3 — custom flower bed design (32×18 pixel rows).
     private const val KEY_BED_DESIGN = "bed_design_rows"
+    // Share card edit persistence — per-topic card customisations saved
+    // on share/save so they restore next time the same topic is shared.
+    private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
+    private const val KEY_SHARED_CARDS = "shared_cards"            // JSON array of shared card records
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -2473,6 +2477,77 @@ object AppPreferences {
     fun setAutoBackupLastAtMillis(context: Context, millis: Long) {
         prefs(context).edit().putLong(KEY_AUTO_BACKUP_LAST_AT, millis).apply()
     }
+
+    // ── Share card edit persistence ─────────────────────────────────
+    /** Save per-topic card customisations (move + text edits) so they
+     *  restore when the same topic is shared again. [topicName] is the
+     *  key; the value is a JSON object with move fields + editedTitle +
+     *  editedFact + bodyScale. */
+    fun saveShareCardEdits(context: Context, topicName: String,
+        titleDx: Float, titleDy: Float, factDx: Float, factDy: Float,
+        metaDx: Float, metaDy: Float, badgeDx: Float, badgeDy: Float,
+        titleWidthFrac: Float, titleHeightFrac: Float, factWidthFrac: Float, factHeightFrac: Float,
+        titleScale: Float, bodyScale: Float, editedTitle: String?, editedFact: String?) {
+        val json = try {
+            val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
+                ?.let { JSONObject(it) } ?: JSONObject()
+            val edit = JSONObject().apply {
+                put("titleDx", titleDx); put("titleDy", titleDy)
+                put("factDx", factDx); put("factDy", factDy)
+                put("metaDx", metaDx); put("metaDy", metaDy)
+                put("badgeDx", badgeDx); put("badgeDy", badgeDy)
+                put("titleWidthFrac", titleWidthFrac); put("titleHeightFrac", titleHeightFrac)
+                put("factWidthFrac", factWidthFrac); put("factHeightFrac", factHeightFrac)
+                put("titleScale", titleScale); put("bodyScale", bodyScale)
+                if (editedTitle != null) put("editedTitle", editedTitle)
+                if (editedFact != null) put("editedFact", editedFact)
+            }
+            raw.put(topicName, edit)
+            raw.toString()
+        } catch (_: Exception) { return }
+        prefs(context).edit().putString(KEY_SHARE_CARD_EDITS, json).apply()
+    }
+
+    /** Load saved card edits for [topicName], or null if none. */
+    fun loadShareCardEdits(context: Context, topicName: String): JSONObject? = try {
+        val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
+            ?.let { JSONObject(it) } ?: return null
+        raw.optJSONObject(topicName)
+    } catch (_: Exception) { null }
+
+    /** Record a shared card for the Share Hub gallery. */
+    fun recordSharedCard(context: Context, topicName: String, categoryName: String,
+        style: String, aspect: String) {
+        val json = try {
+            val arr = prefs(context).getString(KEY_SHARED_CARDS, null)
+                ?.let { JSONArray(it) } ?: JSONArray()
+            // Dedupe by topic + style
+            val existing = (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+            val deduped = JSONArray()
+            val seen = mutableSetOf<String>()
+            existing.forEach { obj ->
+                val key = "${obj.optString("topic")}:${obj.optString("style")}"
+                if (seen.add(key)) deduped.put(obj)
+            }
+            deduped.put(JSONObject().apply {
+                put("topic", topicName); put("category", categoryName)
+                put("style", style); put("aspect", aspect)
+                put("at", System.currentTimeMillis())
+            })
+            // Keep last 50
+            while (deduped.length() > 50) deduped.remove(0)
+            deduped.toString()
+        } catch (_: Exception) { return }
+        prefs(context).edit().putString(KEY_SHARED_CARDS, json).apply()
+    }
+
+    /** Load recent shared cards for the Share Hub. */
+    fun loadSharedCards(context: Context): List<JSONObject> = try {
+        val arr = prefs(context).getString(KEY_SHARED_CARDS, null)
+            ?.let { JSONArray(it) } ?: return emptyList()
+        (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+            .sortedByDescending { it.optLong("at", 0) }
+    } catch (_: Exception) { emptyList() }
 
     // ── Internal ─────────────────────────────────────────────────────
     private fun prefs(context: Context) =
