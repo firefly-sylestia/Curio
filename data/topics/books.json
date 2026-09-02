@@ -14971,7 +14971,7 @@
     "subtype": "Novel",
     "name": "The Tenant of Wildfell Hall",
     "teaser": "Anne Brontë's 1848 novel of Helen Graham, who leaves her drunken husband and earns her own living — the first sustained feminist novel in English, shocking enough that her sister Charlotte suppressed a reprint.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140434798-L.jpg",
     "byline": "Anne Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -14985,7 +14985,40 @@
       "Victorian"
     ],
     "tier": 1,
-    "pageCount": 544
+    "pageCount": 544,
+    "synopsis": "Anne Brontë's novel follows Helen Graham, a mysterious young widow who moves into the dilapidated Wildfell Hall with her young son, arousing the curiosity and suspicion of the local gentry. The story is told through two narratives: Gilbert Markham's account of his growing attraction to Helen, and Helen's own diary, which reveals the truth about her disastrous marriage to the charming but dissolute Arthur Huntingdon. Helen's diary is a brave and unflinching account of alcoholism, infidelity, and domestic abuse—subjects that were nearly unprecedented in Victorian fiction. When Helen realizes that Huntingdon's behavior will corrupt her son, she does something radical: she leaves him, taking her child and supporting herself through painting. Published in 1848, the novel was controversial for its frank portrayal of a woman's decision to escape an abusive marriage. Anne Brontë defended her right to depict such subjects in her 'Introduction to the Second Edition,' arguing that truth is more important than propriety. The novel is now recognized as a pioneering work of feminist fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One: Gilbert's Narrative",
+        "pageRange": "1-50",
+        "summary": "Gilbert Markham meets Helen Graham; the local gossip."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part One Continued",
+        "pageRange": "51-100",
+        "summary": "Helen's diary begins; her courtship with Huntingdon."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Two: Helen's Diary",
+        "pageRange": "101-150",
+        "summary": "The marriage deteriorates; Huntingdon's drinking and affairs."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Two Continued",
+        "pageRange": "151-200",
+        "summary": "Helen's decision to leave; her escape with her son."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Three: The Resolution",
+        "pageRange": "201-240",
+        "summary": "Huntingdon's death; Helen and Gilbert's reunion."
+      }
+    ]
   },
   {
     "id": "book-woman-who-could-not-die",
@@ -14993,7 +15026,7 @@
     "subtype": "Novel",
     "name": "The Professor",
     "teaser": "Charlotte Brontë's 1857 novel, written before Jane Eyre and published after her death — William Crimsworth's years teaching in Brussels. Brontë's first attempt at the story she would perfect in Villette.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140437256-L.jpg",
     "byline": "Charlotte Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -15007,7 +15040,40 @@
       "Brussels"
     ],
     "tier": 3,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Charlotte Brontë's first completed novel, published posthumously in 1857, follows William Crimsworth, a young Englishman who goes to Brussels to teach at a boys' school. Crimsworth is a proud and principled man who refuses to be intimidated by the school's director, M. Pelet, or by his beautiful and manipulative wife, Zoraïde. He also meets Frances Henri, a young English governess at a girls' school, whose quiet determination and integrity win his love. The novel is deeply autobiographical—Charlotte Brontë herself taught in Brussels in 1842-43, and her unrequited love for the school's headmaster, Constantin Heger, is reflected in the relationship between Crimsworth and Frances. The Professor was rejected by every publisher Charlotte approached during her lifetime, but after her death, her husband Arthur Bell Nicholls arranged for its publication, and it provided the material that Charlotte later transformed into Villette.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Craven Hall",
+        "pageRange": "1-25",
+        "summary": "Crimsworth's life in England; his decision to go to Brussels."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Brussels",
+        "pageRange": "26-55",
+        "summary": "Crimsworth begins teaching; his conflict with Pelet."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Frances Henri",
+        "pageRange": "56-85",
+        "summary": "Crimsworth meets Frances; their friendship deepens."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Rivalry",
+        "pageRange": "86-115",
+        "summary": "Zoraïde's jealousy; the crisis at the school."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Conclusion",
+        "pageRange": "116-135",
+        "summary": "Crimsworth and Frances marry; they leave Brussels."
+      }
+    ]
   },
   {
     "id": "book-north-and-south",
@@ -15015,7 +15081,7 @@
     "subtype": "Novel",
     "name": "North and South",
     "teaser": "Elizabeth Gaskell's 1855 novel of Margaret Hale, moved from the rural south to the industrial north — where the mill master John Thornton and the striking workers teach her a new England. The industrial novel's masterpiece.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140437683-L.jpg",
     "byline": "Elizabeth Gaskell",
     "exploreAction": {
       "verb": "Read",
@@ -15029,7 +15095,46 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 496
+    "pageCount": 496,
+    "synopsis": "Elizabeth Gaskell's novel follows Margaret Hale, a clergyman's daughter from the rural South who moves with her family to the industrial town of Milton in the North of England. Margaret is shocked by the poverty and violence of the industrial North, and her encounter with John Thornton, a wealthy mill owner, leads to a clash of values: Margaret believes in the moral authority of the gentry, while Thornton believes in the competitive logic of the market. As Margaret comes to understand the realities of industrial life—the strikes, the hunger, the exploitation—she develops a grudging respect for Thornton's integrity, while Thornton's attraction to Margaret softens his hard-edged capitalism. The novel traces the slow transformation of both characters as they learn from each other and from the social upheaval around them. Gaskell wrote North and South as a response to Dickens's industrial novels, and its balanced portrayal of both masters and workers makes it one of the finest social novels of the Victorian era.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Haste Not, Pause Not",
+        "pageRange": "1-30",
+        "summary": "The Hales leave the South for Milton."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "First Impressions",
+        "pageRange": "31-65",
+        "summary": "Margaret encounters the industrial North; meets Thornton."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Strike",
+        "pageRange": "66-100",
+        "summary": "The workers' strike; the violence at the mill gates."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Connection",
+        "pageRange": "101-140",
+        "summary": "Margaret's growing involvement with the workers; Nicholas Higgins."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Crisis",
+        "pageRange": "141-175",
+        "summary": "Margaret saves Thornton from the riot; the confession."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Conclusion",
+        "pageRange": "176-205",
+        "summary": "The end of the strike; Margaret and Thornton's reconciliation."
+      }
+    ]
   },
   {
     "id": "book-ariel",
@@ -15037,7 +15142,7 @@
     "subtype": "Poetry",
     "name": "Ariel",
     "teaser": "Plath's 1965 collection, assembled after her death — Lady Lazarus, Daddy, and the poems that made her a myth. A book of fury, transformation, and language pushed to its breaking point.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060837020-L.jpg",
     "byline": "Sylvia Plath",
     "exploreAction": {
       "verb": "Read",
@@ -15051,7 +15156,52 @@
       "Confessional"
     ],
     "tier": 1,
-    "pageCount": 208
+    "pageCount": 208,
+    "synopsis": "Sylvia Plath's posthumous collection of poems, published in 1965, is one of the most important works of twentieth-century poetry. Written in the extraordinary period between October 1962 and February 1963—when Plath wrote nearly a poem a day while suffering from depression, insomnia, and the breakdown of her marriage to Ted Hughes—Ariel includes some of the most celebrated poems in the English language: 'Lady Lazarus,' 'Daddy,' 'Edge,' 'Fever 103°,' 'Ariel,' and 'Tulips.' Plath's voice in these poems is simultaneously confessional and mythic: she transforms personal pain into universal art, using imagery that is at once precise and hallucinatory. The collection moves from fury ('Daddy, daddy, you bastard, I'm through') to acceptance ('I am pure Negro'), and its unflinching confrontation with death, madness, and the female body has influenced generations of poets. Plath's husband Ted Hughes edited the collection after her suicide in February 1963, and the question of what she would have wanted in the final order has been debated ever since.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Morning Song",
+        "pageRange": "1-5",
+        "summary": "The birth of Plath's daughter Frieda."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Colossus",
+        "pageRange": "6-10",
+        "summary": "The mythic father figure."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Lady Lazarus",
+        "pageRange": "11-15",
+        "summary": "The performance of dying and resurrection."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Daddy",
+        "pageRange": "16-20",
+        "summary": "The exorcism of the father."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Ariel",
+        "pageRange": "21-25",
+        "summary": "The horse ride at dawn; the dissolution of self."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Tulips",
+        "pageRange": "26-30",
+        "summary": "The hospital; the desire for nothingness."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Edge",
+        "pageRange": "31-33",
+        "summary": "The final poem; the perfected death."
+      }
+    ]
   },
   {
     "id": "book-collected-poems-of-robert-frost",
@@ -15059,7 +15209,7 @@
     "subtype": "Poetry",
     "name": "The Poetry of Robert Frost",
     "teaser": "Frost's New England poems — The Road Not Taken, Mending Wall, Stopping by Woods on a Snowy Evening — plain speech with terrible depths beneath. America's most beloved, and least simple, poet.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780805041415-L.jpg",
     "byline": "Robert Frost",
     "exploreAction": {
       "verb": "Read",
@@ -15073,7 +15223,40 @@
       "New England"
     ],
     "tier": 1,
-    "pageCount": 640
+    "pageCount": 640,
+    "synopsis": "Robert Frost's collected poems represent one of the most bodies of work in American literature. Frost's poetry is deceptive in its simplicity: his poems use the language of rural New England—fences, woods, birch trees, snowy evenings—to explore profound philosophical questions about isolation, mortality, choice, and the relationship between human beings and the natural world. 'The Road Not Taken' is perhaps the most famous poem in the English language, but its meaning is more ambiguous than most readers realize: the speaker admits that the two roads were 'really about the same,' and the claim that he 'took the one less traveled by' is a retrospective construction. Frost won four Pulitzer Prizes and was invited to read at John F. Kennedy's inauguration in 1961. His poetry is marked by a characteristic tension between warmth and darkness, between the comfort of nature and the terror of what it conceals.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Early Poems",
+        "pageRange": "1-30",
+        "summary": "'The Pasture,' 'Mending Wall,' 'The Death of the Hired Man.'"
+      },
+      {
+        "chapterNumber": 2,
+        "title": "North of Boston",
+        "pageRange": "31-60",
+        "summary": "'After Apple-Picking,' 'The Wood-Pile,' 'Stopping by Woods.'"
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Mountain Interval",
+        "pageRange": "61-90",
+        "summary": "'The Road Not Taken,' 'Birches,' 'An Old Man's Winter Night.'"
+      },
+      {
+        "chapterNumber": 4,
+        "title": "New Hampshire",
+        "pageRange": "91-120",
+        "summary": "'Fire and Ice,' 'Nothing Gold Can Stay,' 'Acquainted with the Night.'"
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Later Poems",
+        "pageRange": "121-150",
+        "summary": "'The Most of It,' 'Provide, Provide,' 'Directive.'"
+      }
+    ]
   },
   {
     "id": "book-four-quartets",
@@ -15081,7 +15264,7 @@
     "subtype": "Poetry",
     "name": "Four Quartets",
     "teaser": "Eliot's 1943 sequence of four meditations — Burnt Norton, East Coker, The Dry Salvages, Little Gidding — on time, memory, and the still point of the turning world. The summit of Eliot's poetry.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780151189885-L.jpg",
     "byline": "T. S. Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -15095,7 +15278,34 @@
       "Nobel"
     ],
     "tier": 2,
-    "pageCount": 64
+    "pageCount": 64,
+    "synopsis": "T.S. Eliot's masterwork is a cycle of four long poems—'Burnt Norton,' 'East Coker,' 'The Dry Salvages,' and 'Little Gidding'—that together form one of the most profound meditations on time, memory, and spiritual experience in the English language. Written over a period of sixteen years (1935-1942), the poems draw on Eliot's Anglo-Catholic faith, his reading of the mystics, and his childhood memories of New England. Each quartet is structured around a specific place and season, and each explores the paradox of time: that the present moment is both the point of entry to eternity and the place where eternity is most easily lost. The poems are marked by extraordinary passages of lyrical beauty—'In my beginning is my end,' 'I said to my soul, be still, and wait without hope / For hope would be hope for the wrong thing'—and by a technical mastery that combines formal rhyme and meter with free verse and prose rhythms. Four Quartets is widely regarded as the greatest long poem of the twentieth century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Burnt Norton",
+        "pageRange": "1-20",
+        "summary": "Time and the rose garden; the point of intersection of the timeless with time."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "East Coker",
+        "pageRange": "21-40",
+        "summary": "The ancestry of the self; 'In my beginning is my end.'"
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Dry Salvages",
+        "pageRange": "41-60",
+        "summary": "The sea and time; the river and the destroyer."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Little Gidding",
+        "pageRange": "61-82",
+        "summary": "The fire of the Holy Ghost; 'In my end is my beginning.'"
+      }
+    ]
   },
   {
     "id": "book-cantos",
@@ -15103,7 +15313,7 @@
     "subtype": "Poetry",
     "name": "The Cantos",
     "teaser": "Ezra Pound's lifelong epic poem, published in fragments from 1917 to 1969 — a collage of history, economics, Chinese ideograms, and personal fury, 'a poem including history.' Monumental and maddening.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780811221139-L.jpg",
     "byline": "Ezra Pound",
     "exploreAction": {
       "verb": "Read",
@@ -15117,7 +15327,46 @@
       "Modernism"
     ],
     "tier": 3,
-    "pageCount": 848
+    "pageCount": 848,
+    "synopsis": "Ezra Pound's unfinished epic poem, written over fifty years (1915-1969), is one of the most ambitious and controversial works of literature in the twentieth century. The Cantos attempts to create a 'poem including history' by weaving together quotations, allusions, and narratives from Chinese, Greek, Roman, medieval Italian, American, and other civilizations. Pound's vision is vast: he wants to create a literary equivalent of a museum, a symphony, a cathedral—a work that contains the wisdom of all cultures and all ages. The poem is divided into three main sections: the early Cantos (which explore the mythology of the Renaissance and the American founding), the Pisan Cantos (written while Pound was imprisoned for treason after World War II, and widely regarded as the finest section), and the late Cantos (which deal with economics, Confucianism, and Pound's increasingly fragmented vision). The Cantos is notoriously difficult—it requires a knowledge of history, economics, and several languages—but its influence on modern poetry is immense.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Early Cantos",
+        "pageRange": "1-50",
+        "summary": "The Renaissance; the myth of the strong horse."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Malatesta",
+        "pageRange": "51-100",
+        "summary": "The Tempio Malatestiano; the condottiere as artist."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Usura Cantos",
+        "pageRange": "101-140",
+        "summary": "The critique of usury and its effects on art."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Pisan Cantos",
+        "pageRange": "141-180",
+        "summary": "Pound's imprisonment; 'what thou lovest well.'"
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Rock-Drill",
+        "pageRange": "181-220",
+        "summary": "Confucianism; the structure of the ideal state."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Late Cantos",
+        "pageRange": "221-260",
+        "summary": "The final, unfinished Cantos; the 'cold blur.'"
+      }
+    ]
   },
   {
     "id": "book-walden",
@@ -15125,7 +15374,7 @@
     "subtype": "Nonfiction",
     "name": "Walden",
     "teaser": "Thoreau's 1854 account of two years in a cabin at Walden Pond — economy, solitude, and the deliberate life. The founding book of American nature writing and of every project of voluntary simplicity.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140283334-L.jpg",
     "byline": "Henry David Thoreau",
     "exploreAction": {
       "verb": "Read",
@@ -15139,7 +15388,64 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Henry David Thoreau's memoir of his two years living in a cabin he built near Walden Pond in Concord, Massachusetts, is one of the most influential works of American literature. Published in 1854, Walden is both a practical account of simple living—Thoreau describes how he built his cabin, grew his food, and managed on minimal expense—and a philosophical treatise on self-reliance, nature, and the examined life. Thoreau went to Walden Pond on July 4, 1845, and stayed for two years, two months, and two days; he left because, as he wrote, 'I had several more lives to live, and could not spare any more time for that one.' The book's most famous passages—about the morning, the pond, the loon, and the railroad—combine precise observation of nature with a metaphysical vision of human possibility. Walden has influenced everyone from Gandhi to Martin Luther King Jr. to the modern environmental movement, and its call to simplify, simplify remains as urgent as ever.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Economy",
+        "pageRange": "1-40",
+        "summary": "Thoreau's critique of materialism; the cost of his experiment."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Where I Lived, and What I Lived For",
+        "pageRange": "41-55",
+        "summary": "The move to the pond; the philosophy of deliberate living."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Reading",
+        "pageRange": "56-65",
+        "summary": "The importance of books and education."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Sounds",
+        "pageRange": "66-75",
+        "summary": "The sounds of the pond; the railroad; the loon."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Solitude",
+        "pageRange": "76-85",
+        "summary": "Thoreau's contentment in isolation."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Visitors",
+        "pageRange": "86-95",
+        "summary": "The woodcutter; the Canadian; the meetings with others."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Ponds",
+        "pageRange": "96-110",
+        "summary": "The beauty and depth of Walden Pond."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Spring",
+        "pageRange": "111-125",
+        "summary": "The thawing sand; the rebirth of nature."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Conclusion",
+        "pageRange": "126-140",
+        "summary": "The philosophy of the experiment; 'if a man does not keep pace with his companions.'"
+      }
+    ]
   },
   {
     "id": "book-civil-disobedience",
@@ -15147,7 +15453,7 @@
     "subtype": "Essay",
     "name": "Civil Disobedience",
     "teaser": "Thoreau's 1849 essay born of a night in jail for refusing to pay a poll tax — on the duty of the individual against the state. The text that Gandhi and King carried into their movements.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486275635-L.jpg",
     "byline": "Henry David Thoreau",
     "exploreAction": {
       "verb": "Read",
@@ -15161,7 +15467,16 @@
       "Political"
     ],
     "tier": 1,
-    "pageCount": 96
+    "pageCount": 96,
+    "synopsis": "Henry David Thoreau's essay, originally delivered as a lecture in 1848 and published in 1849, argues that individuals have a moral duty to resist unjust laws and government actions. Thoreau wrote the essay after spending a night in jail for refusing to pay the poll tax—a tax he opposed because it supported the Mexican-American War and the expansion of slavery. His central argument is that the government derives its power from the consent of the governed, and when the government acts unjustly, the individual's duty is to withdraw that consent. The essay is famous for its concept of 'civil disobedience' (a term Thoreau did not actually use—he called it 'Resistance to Civil Government') and for its influence on subsequent movements for social justice: Gandhi cited it as an influence on his theory of nonviolent resistance, and Martin Luther King Jr. carried a copy during the Montgomery Bus Boycott.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Civil Disobedience",
+        "pageRange": "1-40",
+        "summary": "Thoreau's argument for resistance to unjust government."
+      }
+    ]
   },
   {
     "id": "book-self-reliance",
@@ -15169,7 +15484,7 @@
     "subtype": "Essay",
     "name": "Self-Reliance",
     "teaser": "Emerson's 1841 essay, the sermon of American individualism — 'trust thyself,' the nonconformist, and the wholeness of each soul. The text that every American rebel, from Whitman to the counterculture, was raised on.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486280615-L.jpg",
     "byline": "Ralph Waldo Emerson",
     "exploreAction": {
       "verb": "Read",
@@ -15183,7 +15498,16 @@
       "Transcendentalism"
     ],
     "tier": 1,
-    "pageCount": 128
+    "pageCount": 128,
+    "synopsis": "Ralph Waldo Emerson's essay, published in 1841, is the founding document of American individualism. Emerson argues that the most important thing a person can do is to trust their own instincts and ideas, rather than conforming to the expectations of society. His central aphorism—'trust thyself: every heart vibrates to that iron string'—captures the essence of his philosophy: that each person has a unique genius, and that to suppress it in favor of social conformity is a form of spiritual death. The essay is famous for its radical rhetoric ('Whoso would be a man must be a nonconformist'; 'Society everywhere is in conspiracy against the manhood of every one of its members') and for its influence on American culture. Self-Reliance has shaped the American ideal of the rugged individualist, from the frontier hero to the Silicon Valley entrepreneur. But Emerson's argument is more nuanced than its popular image suggests: he is not advocating selfishness, but rather the courage to think for oneself in a world that demands conformity.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Self-Reliance",
+        "pageRange": "1-30",
+        "summary": "Emerson's essay on nonconformity and individual genius."
+      }
+    ]
   },
   {
     "id": "book-nature",
@@ -15191,7 +15515,7 @@
     "subtype": "Essay",
     "name": "Nature",
     "teaser": "Emerson's 1836 manifesto that launched Transcendentalism — the transparent eyeball, the unity of the soul with nature, and the call to an original relation to the universe. American philosophy begins here.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486280615-L.jpg",
     "byline": "Ralph Waldo Emerson",
     "exploreAction": {
       "verb": "Read",
@@ -15205,7 +15529,16 @@
       "Transcendentalism"
     ],
     "tier": 2,
-    "pageCount": 96
+    "pageCount": 96,
+    "synopsis": "Ralph Waldo Emerson's essay, published in 1836, is the foundational text of American Transcendentalism. Emerson argues that nature is a manifestation of the divine spirit, and that by immersing oneself in the natural world, one can achieve direct communion with God. The essay is structured as a series of reflections on the ways in which nature serves the human spirit: as commodity, as beauty, as language, as discipline, as ideal, and as spirit. Emerson's central claim—that the natural world is a symbol of the spiritual world, and that the two are ultimately identical—was revolutionary in its implications: it democratized spiritual experience, making it available to anyone who would look closely at the world around them. Nature was initially dismissed by the literary establishment (Emerson's friend Henry James Sr. called it 'an ample account of the pecuniary basis of unsoundness'), but it quickly became the manifesto of a new movement that included Thoreau, Alcott, and Margaret Fuller. Its influence on American literature, philosophy, and environmental thought is immeasurable.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Nature",
+        "pageRange": "1-30",
+        "summary": "Emerson's essay on nature as the manifestation of the divine spirit."
+      }
+    ]
   },
   {
     "id": "book-essays-of-montaigne",
@@ -15213,7 +15546,7 @@
     "subtype": "Essay",
     "name": "The Essays of Michel de Montaigne",
     "teaser": "Montaigne's 1580 invention of the essay — 'I am myself the matter of my book' — three volumes of digression, skepticism, and self-knowledge that taught Europe how to think in prose. The most companionable book ever written.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447163-L.jpg",
     "byline": "Michel de Montaigne",
     "exploreAction": {
       "verb": "Read",
@@ -15227,7 +15560,46 @@
       "Renaissance"
     ],
     "tier": 1,
-    "pageCount": 1344
+    "pageCount": 1344,
+    "synopsis": "Michel de Montaigne's Essays, first published in 1580, are the first great work of the essay form—a genre Montaigne essentially invented. The essays are personal, digressive, and unashamedly subjective: Montaigne writes about everything from cannibals to thumbs, from the education of children to the experience of aging, and he writes with a candor and self-awareness that were unprecedented in Western literature. His central project is self-examination: 'I myself am the matter of my book,' he writes, and the essays are an attempt to understand what it means to be a human being by looking honestly at his own experiences, preferences, and prejudices. Montaigne's influence on subsequent writers is incalculable: Shakespeare, Emerson, Nietzsche, and Virginia Woolf all acknowledged their debt to him. The Essays are also a treasury of quotations and anecdotes that have become part of the common cultural inheritance of the West.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Of Experience",
+        "pageRange": "1-30",
+        "summary": "Montaigne on the limits of human knowledge."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Of Cannibals",
+        "pageRange": "31-50",
+        "summary": "Montaigne's relativism; the noble savage."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Of Thumbs",
+        "pageRange": "51-60",
+        "summary": "The digressive, playful style of the Essays."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Of the Inconsistency of Our Actions",
+        "pageRange": "61-80",
+        "summary": "Montaigne on the difficulty of self-knowledge."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Of the Education of Children",
+        "pageRange": "81-100",
+        "summary": "Montaigne's philosophy of education."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Of Death",
+        "pageRange": "101-120",
+        "summary": "Montaigne's meditations on mortality."
+      }
+    ]
   },
   {
     "id": "book-meditations",
@@ -15235,7 +15607,7 @@
     "subtype": "Philosophy",
     "name": "Meditations",
     "teaser": "Marcus Aurelius's private notebooks, written in Greek while emperor of Rome — the Stoic manual of self-discipline, mortality, and the duty of the moment. A ruler talking to himself, and to us.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449334-L.jpg",
     "byline": "Marcus Aurelius",
     "exploreAction": {
       "verb": "Read",
@@ -15249,7 +15621,40 @@
       "Philosophy"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Marcus Aurelius's Meditations is a collection of personal reflections written by the Roman Emperor during his military campaigns in the second century AD. The book was never intended for publication—it is a private journal in which Marcus reminds himself of the Stoic principles he has learned from his teachers and from his own experience. The central themes are the transience of all things, the importance of accepting what cannot be changed, and the duty to act with justice and compassion even in the face of death. Marcus writes with remarkable honesty about his own struggles: his impatience, his vanity, his fear of death, and his determination to overcome these weaknesses through reason and discipline. The Meditations have been read by military leaders, philosophers, and ordinary people for nearly two thousand years, and their influence on Stoic philosophy and modern cognitive-behavioral therapy is immense. The book's most quoted passage—'You have power over your mind—not outside events. Realize this, and you will find strength'—captures its essence.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Book One",
+        "pageRange": "1-10",
+        "summary": "Marcus's gratitude to his teachers and mentors."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Book Two",
+        "pageRange": "11-20",
+        "summary": "The transience of all things; the importance of the present."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Book Three",
+        "pageRange": "21-30",
+        "summary": "The duty to act with justice; the nature of the soul."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Books Four-Six",
+        "pageRange": "31-60",
+        "summary": "The retreat into the inner citadel; the acceptance of fate."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Books Seven-Twelve",
+        "pageRange": "61-120",
+        "summary": "The final reflections; the approach of death; the legacy of the Stoics."
+      }
+    ]
   },
   {
     "id": "book-republic",
@@ -15257,7 +15662,7 @@
     "subtype": "Philosophy",
     "name": "The Republic",
     "teaser": "Plato's dialogue on justice, the city, and the soul — the allegory of the cave, the philosopher king, and the question of why be just. The book that founded political philosophy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140455113-L.jpg",
     "byline": "Plato",
     "exploreAction": {
       "verb": "Read",
@@ -15271,7 +15676,46 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Plato's Republic, written around 375 BC, is one of the most influential works of philosophy ever composed. The dialogue, narrated by Socrates, asks the question 'What is justice?' and proceeds to construct an ideal city-state in which justice is embodied. The Republic is famous for its theory of Forms—the idea that the visible world is a shadow of a higher, more real world of abstract entities—and for the Allegory of the Cave, in which prisoners chained in a cave mistake shadows for reality. Plato also argues that the ideal state should be ruled by philosopher-kings, that education should be carefully controlled, and that art should be censored because it appeals to the lower parts of the soul. The Republic has shaped Western philosophy, political theory, and education for over two millennia, and its questions—about the nature of reality, the purpose of government, and the meaning of the good life—remain as urgent as they were in ancient Athens.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Book I",
+        "pageRange": "1-20",
+        "summary": "The question of justice; the dialogue with Cephalus and Thrasymachus."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Books II-III",
+        "pageRange": "21-50",
+        "summary": "The construction of the ideal city; the education of the guardians."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Books IV-V",
+        "pageRange": "51-80",
+        "summary": "The four virtues; the Allegory of the Metals; the philosopher-king."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Books VI-VII",
+        "pageRange": "81-110",
+        "summary": "The Allegory of the Cave; the Form of the Good; the divided line."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Books VIII-IX",
+        "pageRange": "111-140",
+        "summary": "The decline of the ideal state; the tyrannical man."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Books X-X",
+        "pageRange": "141-170",
+        "summary": "The critique of poetry; the Myth of Er."
+      }
+    ]
   },
   {
     "id": "book-nicomachean-ethics",
@@ -15279,7 +15723,7 @@
     "subtype": "Philosophy",
     "name": "Nicomachean Ethics",
     "teaser": "Aristotle's lectures on the good life — virtue as a mean, friendship as necessity, and happiness as activity of the soul. The most practical book of philosophy ever written, and the most humane.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140455372-L.jpg",
     "byline": "Aristotle",
     "exploreAction": {
       "verb": "Read",
@@ -15293,7 +15737,40 @@
       "Ethics"
     ],
     "tier": 2,
-    "pageCount": 368
+    "pageCount": 368,
+    "synopsis": "Aristotle's Nicomachean Ethics, written in the fourth century BC, is the foundational text of Western moral philosophy. Aristotle asks the question 'What is the good life?' and argues that the answer is eudaimonia—a state of flourishing that is achieved through the practice of virtue. Virtue, Aristotle argues, is a mean between two extremes: courage is the mean between cowardice and rashness, generosity between miserliness and prodigality, and so on. The virtuous person is not someone who follows rules, but someone who has developed the right character through habit and practice. Aristotle also discusses friendship, pleasure, and the relationship between the individual and the state. The Nicomachean Ethics has influenced every subsequent tradition of moral philosophy, from medieval Christian ethics to modern virtue ethics, and its central insight—that the good life is not a matter of following rules but of becoming a certain kind of person—remains as relevant as ever.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Book I",
+        "pageRange": "1-20",
+        "summary": "The definition of eudaimonia; the function argument."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Books II-III",
+        "pageRange": "21-50",
+        "summary": "Virtue as a mean; voluntary action and moral responsibility."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Books IV-VI",
+        "pageRange": "51-90",
+        "summary": "The specific virtues; justice; intellectual virtue."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Books VII-VIII",
+        "pageRange": "91-120",
+        "summary": "Incontinence; pleasure; friendship."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Books IX-X",
+        "pageRange": "121-150",
+        "summary": "The forms of friendship; the contemplative life."
+      }
+    ]
   },
   {
     "id": "book-confessions-of-st-augustine",
@@ -15301,7 +15778,7 @@
     "subtype": "Memoir",
     "name": "Confessions",
     "teaser": "Augustine's 400 AD spiritual autobiography — the pear theft, the tears, and 'late have I loved thee' — the first great memoir, and the model for every confession since, sacred or secular.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140445143-L.jpg",
     "byline": "Augustine of Hippo",
     "exploreAction": {
       "verb": "Read",
@@ -15315,7 +15792,34 @@
       "Theology"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Saint Augustine's Confessions, written around 397 AD, is one of the most influential works of Western literature. It is part autobiography, part philosophical meditation, and part prayer: Augustine tells the story of his life from his childhood in Thagaste (in modern Algeria) through his years of sin and doubt to his conversion to Christianity in Milan. The Confessions is remarkable for its psychological depth: Augustine analyzes his own motivations, desires, and self-deceptions with a precision that anticipates modern psychoanalysis by fifteen centuries. The famous passage about the theft of the pears—Augustine steals them not because he is hungry but for the sheer pleasure of sin—is one of the most analyzed episodes in Western literature. The Confessions also contains Augustine's famous address to God: 'You have made us for yourself, O Lord, and our hearts are restless until they rest in you.' This sentence captures the book's central theme: that human beings are incomplete without God.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Books I-III",
+        "pageRange": "1-40",
+        "summary": "Augustine's childhood and youth; his conversion to Manichaeism."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Books IV-VI",
+        "pageRange": "41-80",
+        "summary": "Augustine's life of sin; his time in Rome and Milan."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Books VII-IX",
+        "pageRange": "81-120",
+        "summary": "The intellectual crisis; the conversion; Monica's death."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Books X-XIII",
+        "pageRange": "121-160",
+        "summary": "The memory of God; the interpretation of Genesis; the ending."
+      }
+    ]
   },
   {
     "id": "book-summa-theologica",
@@ -15323,7 +15827,7 @@
     "subtype": "Philosophy",
     "name": "Summa Theologica",
     "teaser": "Thomas Aquinas's 13th-century summa of Christian philosophy — questions, objections, and replies arranged with architectural patience. The great synthesis of faith and reason, still argued with today.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780872208162-L.jpg",
     "byline": "Thomas Aquinas",
     "exploreAction": {
       "verb": "Read",
@@ -15337,7 +15841,34 @@
       "Medieval"
     ],
     "tier": 3,
-    "pageCount": 1200
+    "pageCount": 1200,
+    "synopsis": "Thomas Aquinas's Summa Theologica, written between 1265 and 1274, is the most comprehensive and systematic work of medieval philosophy and theology. Aquinas attempts to answer every conceivable question about God, the universe, and human existence, using a rigorous logical method that combines Aristotelian philosophy with Christian doctrine. The work is structured as a series of questions, each of which is examined from multiple sides before Aquinas offers his own answer. Famous topics include the 'five ways' of proving God's existence, the nature of angels, the relationship between faith and reason, the problem of evil, and the ethics of natural law. The Summa is not an easy read—it is a technical philosophical work that assumes familiarity with Aristotle and the Church Fathers—but its influence on Western thought is incalculable. It remains the authoritative statement of Catholic doctrine, and its method of argumentation has shaped philosophical practice for centuries.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Prima Pars",
+        "pageRange": "1-80",
+        "summary": "The existence and nature of God; the creation of the world."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Prima Secundae",
+        "pageRange": "81-160",
+        "summary": "Human action; the passions; virtue and vice."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Secunda Secundae",
+        "pageRange": "161-280",
+        "summary": "The specific virtues and vices; faith, hope, and charity."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Tertia Pars",
+        "pageRange": "281-400",
+        "summary": "The incarnation; the sacraments; the last things."
+      }
+    ]
   },
   {
     "id": "book-leviathan",
@@ -15345,7 +15876,7 @@
     "subtype": "Philosophy",
     "name": "Leviathan",
     "teaser": "Hobbes's 1651 argument for the social contract — the state of nature as a war of all against all, and the sovereign needed to keep the peace. The book that made the modern state thinkable.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447686-L.jpg",
     "byline": "Thomas Hobbes",
     "exploreAction": {
       "verb": "Read",
@@ -15359,7 +15890,34 @@
       "Politics"
     ],
     "tier": 2,
-    "pageCount": 688
+    "pageCount": 688,
+    "synopsis": "Thomas Hobbes's Leviathan, published in 1651, is one of the most important works of political philosophy ever written. Written during the English Civil War, Leviathan argues that the only way to escape the 'state of nature'—a condition of perpetual war of all against all—is to surrender individual freedom to an absolute sovereign. Hobbes's central metaphor is the 'Leviathan'—a giant artificial person composed of all the citizens of the commonwealth, whose will is expressed by the sovereign. The sovereign's power must be absolute and undivided, because any division of power leads to conflict. Hobbes's argument was revolutionary in its implications: it grounded political authority not in divine right or natural hierarchy, but in a social contract among equals. Leviathan has been used to justify both absolute monarchy and democratic government, and its influence on subsequent political philosophy—from Locke and Rousseau to Rawls and Nozick—is immense.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part I: Of Man",
+        "pageRange": "1-40",
+        "summary": "The nature of human beings; sensation, imagination, and passion."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part II: Of Commonwealth",
+        "pageRange": "41-80",
+        "summary": "The social contract; the nature of sovereignty."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part III: Of a Christian Commonwealth",
+        "pageRange": "81-120",
+        "summary": "The relationship between religion and political authority."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part IV: Of the Kingdom of Darkness",
+        "pageRange": "121-150",
+        "summary": "The critique of superstition and the misuse of power."
+      }
+    ]
   },
   {
     "id": "book-second-treatise",
@@ -15367,7 +15925,7 @@
     "subtype": "Philosophy",
     "name": "Two Treatises of Government",
     "teaser": "Locke's 1689 argument for natural rights, property, and the consent of the governed — the philosophical foundation of the American and French revolutions, and of every liberal constitution since.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447686-L.jpg",
     "byline": "John Locke",
     "exploreAction": {
       "verb": "Read",
@@ -15381,7 +15939,34 @@
       "Liberalism"
     ],
     "tier": 2,
-    "pageCount": 464
+    "pageCount": 464,
+    "synopsis": "John Locke's Two Treatises of Government, published in 1689, is one of the founding documents of modern liberal democracy. The First Treatise is a refutation of Sir Robert Filmer's Patriarcha, which argued that political authority derives from the divine right of kings. The Second Treatise, which is the more influential work, argues that government is a social contract among free and equal individuals, and that its purpose is to protect the natural rights of life, liberty, and property. When a government fails to protect these rights, the people have the right to overthrow it. Locke's argument was revolutionary: it grounded political authority in the consent of the governed, not in divine right, and it made the protection of individual rights the measure of legitimate government. Locke's ideas influenced the American Declaration of Independence, the French Revolution, and the entire tradition of liberal democratic thought.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "First Treatise",
+        "pageRange": "1-20",
+        "summary": "The refutation of Filmer's divine right theory."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Second Treatise: The State of Nature",
+        "pageRange": "21-40",
+        "summary": "The natural condition of mankind; natural rights."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Second Treatise: The Social Contract",
+        "pageRange": "41-60",
+        "summary": "The origin of government; the consent of the governed."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Second Treatise: The Limits of Government",
+        "pageRange": "61-85",
+        "summary": "The right of revolution; the limits of political authority."
+      }
+    ]
   },
   {
     "id": "book-social-contract",
@@ -15389,7 +15974,7 @@
     "subtype": "Philosophy",
     "name": "The Social Contract",
     "teaser": "Rousseau's 1762 tract that begins 'Man is born free, and everywhere he is in chains' — the general will, the legislator, and the theory of legitimate authority that both inspired and haunted revolutions.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447686-L.jpg",
     "byline": "Jean-Jacques Rousseau",
     "exploreAction": {
       "verb": "Read",
@@ -15403,7 +15988,34 @@
       "Revolution"
     ],
     "tier": 1,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "Jean-Jacques Rousseau's The Social Contract, published in 1762, opens with the famous declaration: 'Man is born free, and everywhere he is in chains.' Rousseau argues that the only legitimate form of political authority is one that is based on the 'general will'—the collective will of the people as a whole. Unlike Hobbes, who believed that the sovereign should be absolute, Rousseau believed that sovereignty belongs to the people and cannot be represented by a monarch or a legislature. The Social Contract influenced the French Revolution profoundly: Rousseau's ideas about popular sovereignty, the general will, and the social contract were central to the revolutionary ideology. The book's influence extends beyond politics: it also shaped Romanticism, educational theory, and the modern concept of individual freedom. Rousseau's central paradox—that freedom and obedience to the general will are identical—has been debated by philosophers ever since.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Book I",
+        "pageRange": "1-20",
+        "summary": "The social contract; the transition from the state of nature to civil society."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Book II",
+        "pageRange": "21-40",
+        "summary": "Sovereignty; the general will; legislation."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Book III",
+        "pageRange": "41-65",
+        "summary": "The forms of government; democracy, aristocracy, monarchy."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Book IV",
+        "pageRange": "66-85",
+        "summary": "Civic religion; the Roman virtues; the conclusion."
+      }
+    ]
   },
   {
     "id": "book-common-sense",
@@ -15411,7 +16023,7 @@
     "subtype": "Pamphlet",
     "name": "Common Sense",
     "teaser": "Thomas Paine's 1776 pamphlet that turned colonial grievance into the case for independence — written in a style 'calculated for the common reader.' The best-selling American book of its century.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141441733-L.jpg",
     "byline": "Thomas Paine",
     "exploreAction": {
       "verb": "Read",
@@ -15425,7 +16037,34 @@
       "Pamphlet"
     ],
     "tier": 1,
-    "pageCount": 128
+    "pageCount": 128,
+    "synopsis": "Thomas Paine's Common Sense, published in January 1776, is the pamphlet that convinced the American colonies to declare independence from Britain. Written in plain, forceful English that was accessible to ordinary people, Common Sense argued that the colonies had every right to break with the mother country: that monarchy was an absurd and illegitimate form of government, that Britain had no right to rule America, and that the colonies would be better off governing themselves. The pamphlet was an immediate sensation—an estimated 150,000 copies were sold in the first few months, in a colonial population of only 2.5 million—and it changed the course of history. Paine's argument was not intellectual but practical: he showed that independence was not only right but also profitable, and he addressed his arguments to 'the people' rather than to the educated elite. Common Sense is widely regarded as one of the most important political documents in American history.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Of the Origin and Design of Government",
+        "pageRange": "1-10",
+        "summary": "The distinction between society and government."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Of Monarchy and Hereditary Succession",
+        "pageRange": "11-25",
+        "summary": "The absurdity of monarchy and the divine right of kings."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Thoughts on the Present State of American Affairs",
+        "pageRange": "26-40",
+        "summary": "The case for independence; the practical arguments."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Of the Present Ability of America",
+        "pageRange": "41-50",
+        "summary": "America's resources and the possibility of self-government."
+      }
+    ]
   },
   {
     "id": "book-rights-of-man",
@@ -15433,7 +16072,7 @@
     "subtype": "Pamphlet",
     "name": "Rights of Man",
     "teaser": "Paine's 1791 reply to Burke's attack on the French Revolution — a defense of natural rights, republicanism, and the poor, written with a fury that got him tried for treason in England.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141441733-L.jpg",
     "byline": "Thomas Paine",
     "exploreAction": {
       "verb": "Read",
@@ -15447,7 +16086,22 @@
       "Pamphlet"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Thomas Paine's Rights of Man, published in 1791, is a defense of the French Revolution and a systematic argument for human rights. Paine responds to Edmund Burke's Reflections on the Revolution in France, which had attacked the Revolution as a dangerous experiment. Paine argues that every person has natural rights—to life, liberty, and the pursuit of happiness—and that these rights are not granted by governments but are inherent in human nature. He also proposes a system of progressive taxation, old-age pensions, and public education that would reduce poverty and inequality. The book was immediately banned in Britain, and Paine was charged with seditious libel; he fled to France, where he was elected to the National Convention. Rights of Man is one of the founding documents of the human rights tradition, and its influence on subsequent declarations of rights—from the UN Universal Declaration to the European Convention—is immense.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "The response to Burke; the principles of the French Revolution."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-70",
+        "summary": "The practical proposals for reform; the rights of man."
+      }
+    ]
   },
   {
     "id": "book-dandelion-wine",
@@ -15455,7 +16109,7 @@
     "subtype": "Novel",
     "name": "Dandelion Wine",
     "teaser": "Bradbury's 1957 novel of a summer in Green Town, Illinois, in 1928 — Douglas Spaulding's twelve-year-old summer of time machines, magic sneakers, and the bottle that holds the season. The great novel of childhood's summer.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062073440-L.jpg",
     "byline": "Ray Bradbury",
     "exploreAction": {
       "verb": "Read",
@@ -15469,7 +16123,58 @@
       "Summer"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Ray Bradbury's novel is a semi-autobiographical portrait of a summer in the fictional town of Green Town, Illinois, in 1928. The novel follows twelve-year-old Douglas Spaulding as he experiences the wonders and terrors of childhood: the joy of running through drenched grass, the thrill of new sneakers, the mystery of a lonely old woman who might be a witch, and the first brush with death when a friend's grandmother dies. Bradbury writes with a lyricism that transforms the mundane into the magical: each chapter is a self-contained memory, a snapshot of a moment that is at once ordinary and transcendent. The novel is a love letter to childhood, to summer, and to the small-town American experience, and its central image—the dandelion wine that Douglas and his brother make to bottle the essence of summer—captures Bradbury's belief that life is not measured in years but in moments of joy and wonder. Published in 1957, Dandelion Wine is one of Bradbury's most personal and beloved works.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-10",
+        "summary": "Douglas discovers he is alive; the summer begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "11-20",
+        "summary": "The front porch; the machines in the cellar."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "21-30",
+        "summary": "New sneakers; the joy of running."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "31-40",
+        "summary": "The ravine; the lonely man; the fire balloons."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "41-55",
+        "summary": "Miss Fern and Miss Roberta; the lawn-mower man."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "56-70",
+        "summary": "The time machine; the library; the White Mansion."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Chapter 7",
+        "pageRange": "71-85",
+        "summary": "The sidewalk builds; the dreamer; the travel-lopedia."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Chapter 8",
+        "pageRange": "86-100",
+        "summary": "The ravine; the graveyard; the night basketball."
+      }
+    ]
   },
   {
     "id": "book-something-wicked",
@@ -15477,7 +16182,7 @@
     "subtype": "Novel",
     "name": "Something Wicked This Way Comes",
     "teaser": "Bradbury's 1962 novel of two boys and a carnival that arrives at midnight in October — the carousel that reverses age, the mirror maze, and the dark showman. The greatest autumn novel ever written.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062073433-L.jpg",
     "byline": "Ray Bradbury",
     "exploreAction": {
       "verb": "Read",
@@ -15491,7 +16196,40 @@
       "Carnival"
     ],
     "tier": 1,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Ray Bradbury's dark fantasy follows two thirteen-year-old best friends, Jim Nightshade and Will Halloway, whose curiosity is piqued when Cooger and Dark's Pandemonium Shadow Show arrives in their small town of Green Town, Illinois, just before Halloween. The carnival's leader, Mr. Dark, is a mysterious figure who offers the townspeople their deepest desires—but at a terrible price. When Cooger uses the carnival's mirror maze to turn himself into a ninety-year-old man (and then back to a boy), the boys realize that the carnival is a trap that feeds on human souls. Will's father, Charles Halloway, a night watchman who has grown old without growing up, joins the boys in their fight against Mr. Dark. The novel is a meditation on the temptation of youth, the fear of aging, and the power of love to defeat evil. Bradbury wrote the novel in the aftermath of his father's death, and its exploration of the father-son relationship gives it an emotional depth that distinguishes it from his other fantasy works.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-15",
+        "summary": "The arrival of the carnival; the boys' curiosity."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "16-30",
+        "summary": "Cooger and Dark; the mirror maze."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "31-50",
+        "summary": "Charles Halloway's fears; the boys' investigation."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "51-70",
+        "summary": "Mr. Dark pursues the boys; the town's corruption."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "71-90",
+        "summary": "The confrontation; Mr. Dark's defeat."
+      }
+    ]
   },
   {
     "id": "book-body",
@@ -15499,7 +16237,7 @@
     "subtype": "Novella",
     "name": "The Body",
     "teaser": "Stephen King's 1982 novella of four boys who walk the railroad tracks to see a dead body — friendship, fear, and the summer that ends childhood. The basis of the film Stand by Me.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982185824-L.jpg",
     "byline": "Stephen King",
     "exploreAction": {
       "verb": "Read",
@@ -15513,7 +16251,40 @@
       "Novella"
     ],
     "tier": 1,
-    "pageCount": 96
+    "pageCount": 96,
+    "synopsis": "Stephen King's novella, published in his 1982 collection Different Seasons, follows four twelve-year-old boys—Gordie Lachance, Chris Chambers, Teddy Duchamp, and Vern Tessio—who set out on a trek along the railroad tracks to find the body of a missing boy named Ray Brower. The story is narrated by Gordie, a aspiring writer whose older brother has recently been killed in a car accident, and the journey becomes a rite of passage: the boys confront death, cruelty, and the loss of innocence, and each discovers something about himself in the process. The novella is also a portrait of 1950s small-town America, with its casual cruelty, its rigid class hierarchies, and its unspoken codes of masculinity. Published in 1982, The Body was adapted into the 1986 film Stand By Me, directed by Rob Reiner, which became one of the most beloved coming-of-age films ever made. The film's final line—'I never had any friends later on like the ones I had when I was twelve'—captures the novella's central theme.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-10",
+        "summary": "Gordie's life; his brother's death; the plan to find the body."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "11-25",
+        "summary": "The journey begins; the railroad tracks."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "26-45",
+        "summary": "The boys' conversations; the memories; the fear."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "46-60",
+        "summary": "They find the body; the confrontation with reality."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "61-72",
+        "summary": "The return; the end of innocence."
+      }
+    ]
   },
   {
     "id": "book-shining",
@@ -15521,7 +16292,7 @@
     "subtype": "Novel",
     "name": "The Shining",
     "teaser": "King's 1977 novel of the Overlook Hotel, its winter caretaker, and his son who shines — a family trapped with the hotel's history. The novel of addiction, rage, and the haunted places inside a family.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307743657-L.jpg",
     "byline": "Stephen King",
     "exploreAction": {
       "verb": "Read",
@@ -15535,7 +16306,40 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 480
+    "pageCount": 480,
+    "synopsis": "Stephen King's novel follows Jack Torrance, a former teacher and recovering alcoholic who takes a job as the winter caretaker of the Overlook Hotel in the Colorado Rockies. Jack brings his wife Wendy and his psychic son Danny, who has the shining—a telepathic ability that the hotel's malevolent spirits can exploit. As the winter progresses, the Overlook's ghosts isolate Jack from his family and drive him toward violence. Danny, meanwhile, befriends Dick Hallorann, the hotel's cook, who also has the shining. King's genius lies in the slow escalation of horror: the Overlook is not a haunted house but a living entity that feeds on human weakness, and Jack's alcoholism and frustration make him the perfect vessel. The novel is both a supernatural thriller and a meditation on family dysfunction, addiction, and the American nightmare of the failed patriarch. Published in 1977, The Shining was King's third novel and established him as the master of modern horror.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One: Prefatory Materials",
+        "pageRange": "1-15",
+        "summary": "The interview; Jack's past; the Torrance family arrives."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two: Closing Time",
+        "pageRange": "16-50",
+        "summary": "Life at the Overlook; the hedge animals; Danny's visions."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three: The Wandering Years",
+        "pageRange": "51-80",
+        "summary": "Jack's deterioration; the ghosts of the Overlook."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four: The Massacre at the Outlook",
+        "pageRange": "81-110",
+        "summary": "The hotel's full assault; Danny and Wendy's escape."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five: Matters of Life and Death",
+        "pageRange": "111-140",
+        "summary": "The hotel explodes; Danny's rescue; the aftermath."
+      }
+    ]
   },
   {
     "id": "book-it",
@@ -15543,7 +16347,7 @@
     "subtype": "Novel",
     "name": "It",
     "teaser": "King's 1986 thousand-page novel of Derry, Maine, and the shape-shifting horror that wakes every 27 years — seven children who fight it, and the adults they become. The great American novel of childhood fear and memory.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501142970-L.jpg",
     "byline": "Stephen King",
     "exploreAction": {
       "verb": "Read",
@@ -15557,7 +16361,40 @@
       "Epic"
     ],
     "tier": 1,
-    "pageCount": 1168
+    "pageCount": 1168,
+    "synopsis": "Stephen King's epic horror novel follows the members of the Losers' Club, a group of seven children who confront an ancient, shape-shifting evil that takes the form of Pennywise the Dancing Clown. The entity, which calls itself 'It,' has been terrorizing the town of Derry, Maine for centuries, feeding on children every twenty-seven years. The Losers—Bill, Ben, Beverly, Richie, Eddie, Mike, and Stanley—first encounter It as children in 1958 and defeat it in a ritual that involves entering the sewers beneath Derry. The novel then jumps forward to 1985, when It resurfaces and the Losers, now adults with no memory of their childhood battle, must return to Derry and confront the entity once more. King's achievement is not merely the creation of a terrifying monster but the portrayal of a community that enables evil: Derry's adults are complicit in It's crimes because they refuse to see what is happening to their children. Published in 1986, It is one of the best-selling horror novels ever written.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One: The Shadow Before",
+        "pageRange": "1-50",
+        "summary": "The history of Derry; the Losers meet in 1958."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two: June of 1958",
+        "pageRange": "51-150",
+        "summary": "The children's encounters with It; the Ritual of Chýd."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three: Grownups",
+        "pageRange": "151-250",
+        "summary": "The Losers return to Derry in 1985; their adult lives."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four: The Ritual of Chýd",
+        "pageRange": "251-350",
+        "summary": "The final battle with It in the sewers."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five: The Ritual of Chýd",
+        "pageRange": "351-400",
+        "summary": "The aftermath; the memory of Derry."
+      }
+    ]
   },
   {
     "id": "book-misery",
@@ -15565,7 +16402,7 @@
     "subtype": "Novel",
     "name": "Misery",
     "teaser": "King's 1987 novel of Paul Sheldon, the romance novelist held captive by his 'number one fan' Annie Wilkes — a single-room horror story about writing, obsession, and the reader who loves too much.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501143779-L.jpg",
     "byline": "Stephen King",
     "exploreAction": {
       "verb": "Read",
@@ -15579,7 +16416,34 @@
       "Thriller"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Stephen King's novel follows Paul Sheldon, a bestselling author who crashes his car in the Colorado mountains during a snowstorm and is rescued by Annie Wilkes, a former nurse and his self-proclaimed 'number one fan.' Annie nurses Paul back to health, but when she discovers that he has killed off her favorite character, Misery Chastain, in his latest novel, she forces him to write a new novel bringing Misery back to life. As Paul's captivity deepens, he discovers that Annie is mentally unstable and potentially violent, and that escape may be impossible. The novel is a claustrophobic thriller about addiction (Paul is a recovering alcoholic), the relationship between creator and creation, and the terror of being held hostage by someone who claims to love you. Published in 1987, Misery won the Bram Stoker Award and was adapted into a critically acclaimed film starring Kathy Bates (who won the Academy Award for Best Actress) and James Caan.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Paul's car crash; Annie rescues him."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Annie discovers Misery's death; the demand to rewrite."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "Paul's captivity deepens; the hobbling scene."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-150",
+        "summary": "Paul's escape; the final confrontation."
+      }
+    ]
   },
   {
     "id": "book-dead-zone",
@@ -15587,7 +16451,7 @@
     "subtype": "Novel",
     "name": "The Dead Zone",
     "teaser": "King's 1979 novel of Johnny Smith, who wakes from a coma with the power to see the future by touch — and the glimpse of a politician that demands the hardest choice. The novel of the gift that is also a curse.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501143526-L.jpg",
     "byline": "Stephen King",
     "exploreAction": {
       "verb": "Read",
@@ -15601,7 +16465,34 @@
       "Psychic"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 448,
+    "synopsis": "Stephen King's novel follows Johnny Smith, a high school teacher who falls into a coma after a car accident and wakes up five years later with the ability to see the past and future of anyone he touches. Johnny's gift is both a blessing and a curse: he can see hidden truths, but the visions are often painful and useless. When he touches the hand of Greg Stillson, a charismatic politician with dangerous ambitions, Johnny sees a future in which Stillson becomes President and triggers a nuclear holocaust. Johnny must decide whether to use his power to prevent this future—even if it means becoming an assassin. The novel is a meditation on fate, free will, and the burden of knowledge, and it is one of King's most psychologically complex works. Published in 1979, The Dead Zone was King's fourth novel and was adapted into a successful film by David Cronenberg in 1983 and a television series in 2002.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One: The House on Robin Street",
+        "pageRange": "1-40",
+        "summary": "Johnny's life before the accident; the coma."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two: The Awakening",
+        "pageRange": "41-80",
+        "summary": "Johnny discovers his powers; the visions begin."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three: Greg Stillson",
+        "pageRange": "81-120",
+        "summary": "Johnny touches Stillson; the vision of the future."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four: The Dead Zone",
+        "pageRange": "121-150",
+        "summary": "Johnny's decision; the final confrontation with Stillson."
+      }
+    ]
   },
   {
     "id": "book-murder-on-orient-express-copy",
@@ -15609,7 +16500,7 @@
     "subtype": "Novel",
     "name": "Death on the Nile",
     "teaser": "Christie's 1937 novel of luxury river steamer, a honeymoon, and a murder — Poirot among the passengers where everyone has a motive and the jewels are not the only thing at stake. Sunlit, elegant, and perfectly engineered.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062693662-L.jpg",
     "byline": "Agatha Christie",
     "exploreAction": {
       "verb": "Read",
@@ -15623,7 +16514,34 @@
       "Poirot"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Agatha Christie's Hercule Poirot novel is set on a steamship cruise down the Nile River in Egypt. The wealthy Linnet Ridgeway has stolen her best friend Jacqueline de Bellefort's fiancé, Simon Doyle, and the honeymooning couple are being stalked by the jilted Jacqueline. When Linnet is found murdered—shot through the head—Poirot has no shortage of suspects: the embittered Jacqueline, the fortune-hunting AmericanAncient Eunice, the disreputable lawyer, and the pyramid guide, among others. The novel is notable for its locked-room structure (the ship is essentially a sealed environment) and for the moral complexity of its characters: even the victim is not entirely sympathetic, and the murderer's motive is more complex than simple greed. Published in 1937, Death on the Nile is one of Christie's most celebrated works and has been adapted into numerous films, including the 1978 version starring Peter Ustinov and the 2022 Kenneth Branagh adaptation.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "The background: Linnet, Simon, and Jacqueline."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-65",
+        "summary": "The cruise begins; the suspects assemble."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "66-100",
+        "summary": "The murder; Poirot's investigation."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "101-120",
+        "summary": "The solution; the twist."
+      }
+    ]
   },
   {
     "id": "book-abc-murders",
@@ -15631,7 +16549,7 @@
     "subtype": "Novel",
     "name": "The A.B.C. Murders",
     "teaser": "Christie's 1936 novel where the killer writes to Poirot to announce the next victim — a serial killer's alphabetical game that ends with one of the most audacious twists in detective fiction. The A.B.C. Murders.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062693662-L.jpg",
     "byline": "Agatha Christie",
     "exploreAction": {
       "verb": "Read",
@@ -15645,7 +16563,34 @@
       "Serial"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Agatha Christie's Hercule Poirot novel follows the detective as he investigates a series of murders committed in alphabetical order by location. A letter-writer calling himself 'ABC' sends Poirot advance notice of each crime, and the murders follow the alphabet: A for Andover (Mrs. Ascher), B for Bexhill (Betty Barnard), C for Churston (Sir Carmichael Clarke). The alphabetical pattern suggests a madman, but Poirot suspects a more calculated motive. The novel is notable for its innovative narrative structure: it is narrated by Captain Arthur Hastings, Poirot's faithful companion, who provides a counterpoint to the detective's brilliance. Published in 1936, The A.B.C. Murders is one of Christie's most cleverly constructed mysteries and has been adapted for television and film numerous times.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "The first letter; the murder at Andover."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-65",
+        "summary": "The second murder at Bexhill; the alphabet pattern emerges."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "66-100",
+        "summary": "The third murder at Churston; Poirot's investigation deepens."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "101-125",
+        "summary": "The solution; the identity of ABC."
+      }
+    ]
   },
   {
     "id": "book-murder-of-roger-ackroyd",
@@ -15653,7 +16598,7 @@
     "subtype": "Novel",
     "name": "The Murder of Roger Ackroyd",
     "teaser": "Christie's 1926 novel that outraged and delighted readers — the country-house murder narrated by the doctor, with an ending that changed the rules of detective fiction forever. The book every mystery must answer to.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062693662-L.jpg",
     "byline": "Agatha Christie",
     "exploreAction": {
       "verb": "Read",
@@ -15667,7 +16612,34 @@
       "Twist"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Agatha Christie's most controversial novel follows the murder of Roger Ackroyd, a wealthy retired manufacturer, in the quiet village of King's Abbot. The narrator, Dr. James Sheppard, is called to the scene and begins investigating alongside Hercule Poirot, who has retired to the village. The novel's solution involves a narrative trick that shocked readers when it was first published in 1926: the narrator himself is the murderer. Christie's innovation was to use the conventions of first-person narration against the reader, creating a mystery that is both fair (all the clues are present) and unfair (the narrator has been lying by omission). The novel caused an uproar in the detective fiction community—some critics called it cheating, while others hailed it as a masterpiece of misdirection. It remains one of the most discussed and admired detective novels ever written.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-25",
+        "summary": "Dr. Sheppard meets Poirot; the death of Mrs. Ferrars."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "26-55",
+        "summary": "The dinner party; Roger Ackroyd is murdered."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "56-85",
+        "summary": "Poirot's investigation; the suspects are questioned."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "86-110",
+        "summary": "The solution; the narrator's confession."
+      }
+    ]
   },
   {
     "id": "book-spy-who-came-in-from-the-cold",
@@ -15675,7 +16647,7 @@
     "subtype": "Novel",
     "name": "The Spy Who Came in from the Cold",
     "teaser": "Le Carré's 1963 novel that stripped the glamour from espionage — Alec Leamas's last assignment across the Berlin Wall, where every loyalty is a lie. The Cold War novel that ended the era of glamorous spies.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15689,7 +16661,34 @@
       "Cold War"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "John le Carré's masterpiece follows Alec Leamas, a burned-out British spy who is sent on one final mission: to infiltrate the East German intelligence service by posing as a defector. The mission is designed to destroy the career of Hans-Dieter Mundt, the head of East German intelligence, by planting false evidence of treachery. But as Leamas moves deeper into the labyrinth of double agents and disinformation, he discovers that the truth is far more complex than he imagined—and that the real enemy may be his own side. The novel is a devastating critique of the Cold War intelligence world, where ideology has been replaced by power and loyalty is a commodity. Le Carré, who had worked for MI5 and MI6 before becoming a novelist, drew on his own experience to create a world of moral ambiguity where no one is trustworthy. Published in 1963, The Spy Who Came in from the Cold is widely regarded as the finest espionage novel ever written.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Leamas is recruited for the mission; his past is revealed."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Leamas crosses to East Germany; the defection begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The trial of Mundt; the plot thickens."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-150",
+        "summary": "The truth is revealed; the ending."
+      }
+    ]
   },
   {
     "id": "book-tinker-tailor",
@@ -15697,7 +16696,7 @@
     "subtype": "Novel",
     "name": "Tinker Tailor Soldier Spy",
     "teaser": "Le Carré's 1974 novel of the mole hunt — George Smiley, retired and humiliated, is recalled to find the Soviet agent inside the Circus. The greatest novel of betrayal in English, and the greatest spy novel of all.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15711,7 +16710,34 @@
       "Smiley"
     ],
     "tier": 1,
-    "pageCount": 384
+    "pageCount": 384,
+    "synopsis": "John le Carré's novel follows George Smiley, a retired intelligence officer who is recalled to service when MI6 discovers that there is a Soviet mole at the highest level of the organization. The suspected traitor is one of four men—Control (the former chief), Bill Haydon, Percy Alleline, and Roy Bland—and Smiley must use his encyclopedic knowledge of espionage and human nature to identify the spy. The novel is a masterpiece of patience and precision: Smiley works through memory, documents, and the recollections of witnesses, slowly building a picture of treachery that is as much about the betrayal of friendship as it is about national security. Le Carré, who had worked for MI6, drew on the real case of Kim Philby to create the character of Bill Haydon. Published in 1974, Tinker Tailor Soldier Spy is the first of the 'Karla Trilogy' and is widely regarded as the finest espionage novel of the twentieth century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "The Circus is compromised; Smiley is recalled."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Smiley's investigation; the memories of the Circus."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The mole hunt narrows; the identity of the traitor."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-155",
+        "summary": "The confrontation; the revelation of the mole."
+      }
+    ]
   },
   {
     "id": "book-call-for-the-dead",
@@ -15719,7 +16745,7 @@
     "subtype": "Novel",
     "name": "Call for the Dead",
     "teaser": "Le Carré's 1961 first novel, introducing George Smiley — a quiet civil servant's suicide investigation that opens into betrayal, espionage, and the Berlin Wall's long shadow. The spy novel grew up here.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15733,7 +16759,28 @@
       "Debut"
     ],
     "tier": 2,
-    "pageCount": 160
+    "pageCount": 160,
+    "synopsis": "John le Carré's first novel, published in 1961, introduces George Smiley, the quiet, unassuming intelligence officer who would become one of the most beloved characters in espionage fiction. When a Foreign Office official named Samuel Fennan is found dead, apparently by suicide, Smiley is sent to investigate. But Smiley suspects that Fennan's death was not a suicide—and that the truth lies in the Cold War world of double agents and secret loyalties. The novel is a lean, economical thriller that establishes the tone and themes of le Carré's later work: the moral ambiguity of intelligence work, the betrayal of trust, and the human cost of the Cold War. Smiley is already fully formed in this first appearance—intelligent, compassionate, and deeply weary of the games he plays. Published in 1961, Call for the Dead introduced the world to the most memorable spy in fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "Fennan's death; Smiley's investigation begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-60",
+        "summary": "The trail leads to East Germany; the double agent."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "61-85",
+        "summary": "The truth about Fennan; the ending."
+      }
+    ]
   },
   {
     "id": "book-honourable-schoolboy",
@@ -15741,7 +16788,7 @@
     "subtype": "Novel",
     "name": "The Honourable Schoolboy",
     "teaser": "Le Carré's 1977 novel of Smiley's quiet war against the mole's masters — Jerry Westerby, the journalist and part-time agent, sent into the Far East on a mission that will cost him everything.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15755,7 +16802,28 @@
       "Smiley"
     ],
     "tier": 2,
-    "pageCount": 544
+    "pageCount": 544,
+    "synopsis": "John le Carré's novel, the second in the Karla Trilogy, follows Jerry Westerby, a journalist and part-time intelligence agent, who is sent to Hong Kong to investigate a Soviet money trail that leads to Southeast Asia. The trail is controlled by Karla, the Soviet spymaster, and Westerby's mission is to identify and destroy the source of the money. The novel is set against the backdrop of the Vietnam War and the collapse of the British Empire in the Far East, and its atmosphere of heat, corruption, and moral decay is powerfully evoked. Smiley appears only briefly, but his presence haunts the novel. The Honourable Schoolboy is the longest and most ambitious of le Carré's novels, and its panoramic scope—from the back rooms of MI6 to the opium dens of Macau—makes it one of the great novels of empire. Published in 1977, it won the James Tait Black Memorial Prize.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-50",
+        "summary": "Westerby receives his assignment; the money trail begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "51-110",
+        "summary": "Westerby in Southeast Asia; the investigation deepens."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "111-170",
+        "summary": "The trail leads to Karla; the ending."
+      }
+    ]
   },
   {
     "id": "book-smileys-people",
@@ -15763,7 +16831,7 @@
     "subtype": "Novel",
     "name": "Smiley's People",
     "teaser": "Le Carré's 1979 novel that closes the Karla trilogy — a dead Russian emigre's message brings Smiley out of retirement for the final confrontation with his opposite number. The quietest, most perfect ending in spy fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15777,7 +16845,34 @@
       "Karla"
     ],
     "tier": 2,
-    "pageCount": 384
+    "pageCount": 384,
+    "synopsis": "John le Carré's novel, the final volume of the Karla Trilogy, follows George Smiley as he is drawn out of retirement one last time to pursue his nemesis, the Soviet spymaster Karla. The trail begins with the murder of an elderly Estonian exile in London, and leads Smiley through a labyrinth of Cold War intrigue to a final confrontation with Karla in Berlin. The novel is both a spy thriller and a meditation on the nature of identity: Karla, who has been Smiley's shadow throughout the trilogy, is revealed to be a man who has sacrificed everything—family, country, self—for the sake of his cause. Smiley's victory is hollow: he defeats Karla not through violence but through the offer of asylum, and the result is a man broken by the discovery that his ideology was a lie. Published in 1979, Smiley's People won the Gold Dagger Award and was adapted into a television series starring Alec Guinness.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "The murder of the Estonian; Smiley is recalled."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Smiley tracks the money and the people."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The trail leads to Berlin; the confrontation with Karla."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-140",
+        "summary": "The ending; Smiley's hollow victory."
+      }
+    ]
   },
   {
     "id": "book-night-manager",
@@ -15785,7 +16880,7 @@
     "subtype": "Novel",
     "name": "The Night Manager",
     "teaser": "Le Carré's 1993 novel of Jonathan Pine, a hotel night manager recruited to infiltrate the arms dealer Richard Onslow Roper — a modern thriller of money, power, and one man's quiet revenge.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15799,7 +16894,28 @@
       "Thriller"
     ],
     "tier": 1,
-    "pageCount": 432
+    "pageCount": 432,
+    "synopsis": "John le Carré's novel follows Jonathan Pine, a former British soldier who works as the night manager of a luxury hotel in Cairo. When Pine witnesses the aftermath of a weapons deal, he is drawn into the world of international arms trafficking and eventually recruited by MI6 to infiltrate the operation of Richard Onslow Roper, a charming and ruthless British businessman who is the world's largest illegal arms dealer. The novel traces Pine's deepening involvement with Roper's world—and his growing relationship with Roper's girlfriend, Jed—as the stakes become increasingly dangerous. Le Carré wrote the novel in the wake of the Cold War's end, and its focus on the private arms trade rather than state-sponsored espionage reflects the new geopolitical landscape. Published in 1993, The Night Manager was adapted into a critically acclaimed BBC/AMC television series starring Tom Hiddleston and Hugh Laurie.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Pine's life in Cairo; the weapons deal; his recruitment."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Pine infiltrates Roper's operation; the investigation."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The stakes rise; the betrayal; the ending."
+      }
+    ]
   },
   {
     "id": "book-constant-gardener",
@@ -15807,7 +16923,7 @@
     "subtype": "Novel",
     "name": "The Constant Gardener",
     "teaser": "Le Carré's 2001 novel of Justin Quayle, a quiet diplomat in Kenya whose murdered wife was about to expose a pharmaceutical crime — a thriller that indicts the drug companies with reportorial fury.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15821,7 +16937,28 @@
       "Africa"
     ],
     "tier": 1,
-    "pageCount": 384
+    "pageCount": 384,
+    "synopsis": "John le Carré's novel follows Justin Quayle, a British diplomat whose wife, Tessa, a human rights activist, is found murdered in a remote area of northern Kenya. Justin, who had been content to look the other way while his wife fought for justice, is transformed by her death into a man obsessed with the truth. His investigation leads him into the world of pharmaceutical companies, corrupt governments, and the exploitation of the African poor. The novel is a devastating critique of the Western pharmaceutical industry's testing of drugs on vulnerable populations, and its portrait of a man who discovers that his wife was braver and more principled than he ever knew is both moving and disturbing. Le Carré wrote the novel in response to the real-life scandal of drug trials conducted by Pfizer in Nigeria. Published in 2001, The Constant Gardener was adapted into a film directed by Fernando Meirelles and starring Ralph Fiennes and Rachel Weisz.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Tessa's death; Justin's grief; the investigation begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Justin discovers the pharmaceutical connection."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The truth about Tessa; the ending."
+      }
+    ]
   },
   {
     "id": "book-perfect-spy",
@@ -15829,7 +16966,7 @@
     "subtype": "Novel",
     "name": "A Perfect Spy",
     "teaser": "Le Carré's 1986 novel, his most autobiographical — Magnus Pym, a lifelong spy and lifelong liar, vanishes and writes the confession of a man made of other people's expectations. The great novel of identity as performance.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15843,7 +16980,28 @@
       "Autobiographical"
     ],
     "tier": 2,
-    "pageCount": 480
+    "pageCount": 480,
+    "synopsis": "John le Carré's novel, widely regarded as his finest, follows Magnus Pym, a British intelligence officer who has been a spy for both MI6 and the Czech secret service for most of his life. When Pym disappears during a secret meeting, his mentor Jack Brotherhood launches a manhunt, and the novel alternates between the present-day pursuit and Pym's memories of his life—his con-man father, his betrayal of his wife, his double life as a spy. The novel is deeply autobiographical: le Carré's own complicated relationship with his father is reflected in Pym's relationship with Rick, and the novel's exploration of betrayal, loyalty, and the impossibility of knowing another person makes it one of the most psychologically penetrating novels in the English language. Published in 1986, A Perfect Spy was Philip Roth's favorite novel of the twentieth century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-50",
+        "summary": "Pym disappears; the manhunt begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "51-120",
+        "summary": "Pym's life story; his father Rick; the education of a spy."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "121-180",
+        "summary": "The double life; the betrayal; the ending."
+      }
+    ]
   },
   {
     "id": "book-little-drummer-girl",
@@ -15851,7 +17009,7 @@
     "subtype": "Novel",
     "name": "The Little Drummer Girl",
     "teaser": "Le Carré's 1983 novel of Charlie, an English actress recruited to play a role so deep she may not survive it — a Palestinian-Israeli thriller about theater, terror, and the performance of belief.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345804938-L.jpg",
     "byline": "John le Carré",
     "exploreAction": {
       "verb": "Read",
@@ -15865,7 +17023,28 @@
       "Middle East"
     ],
     "tier": 2,
-    "pageCount": 512
+    "pageCount": 512,
+    "synopsis": "John le Carré's novel follows Charlie, a young British actress who is recruited by Israeli intelligence to infiltrate a Palestinian terrorist cell. Charlie is chosen because of her romantic involvement with a Palestinian activist, and she is drawn deeper and deeper into the world of espionage, terrorism, and political violence. The novel is a complex meditation on the nature of identity, performance, and commitment: Charlie, an actress, must decide whether she is playing a role or becoming one, and the line between performance and reality dissolves as she moves between the Israeli and Palestinian worlds. Le Carré wrote the novel after spending time in Israel and Lebanon, and its sympathetic portrayal of both sides of the conflict makes it one of the most nuanced novels about the Middle East ever written. Published in 1983, The Little Drummer Girl was adapted into a film directed by George Roy Hill and starring Diane Keaton.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Charlie is recruited; the mission begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Charlie infiltrates the cell; the line between actor and spy blurs."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The mission reaches its climax; Charlie must choose."
+      }
+    ]
   },
   {
     "id": "book-animal-farm-orwell",
@@ -15873,7 +17052,7 @@
     "subtype": "Novella",
     "name": "Animal Farm",
     "teaser": "Orwell's 1945 fable of the animals who overthrow their farmer and watch the pigs become the new tyrants — 'All animals are equal, but some are more equal than others.' The perfect political allegory.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451526342-L.jpg",
     "byline": "George Orwell",
     "exploreAction": {
       "verb": "Read",
@@ -15887,7 +17066,46 @@
       "Satire"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "George Orwell's allegorical novella, published in 1945, tells the story of a revolution on a farm where the animals overthrow their human master and establish a society based on the principle that 'all animals are equal.' The revolution is led by the pigs, who gradually seize power and corrupt the ideals they once professed. The leader, Napoleon, expels his rival Snowball, rewrites history, and ultimately becomes indistinguishable from the human farmers he replaced. The novel's final line—'The creatures outside looked from pig to man, and from man to pig, and from pig to man again; but already it was impossible to say which was which'—is one of the most famous sentences in English literature. Orwell wrote Animal Farm as a satire of the Russian Revolution and the rise of Stalinism, but its applicability extends to any revolution that betrays its ideals. Published in 1945, the novel was initially rejected by several publishers and Orwell died in 1950, just months after its publication.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-6",
+        "summary": "The animals meet; Old Major's speech."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "7-12",
+        "summary": "The rebellion; the pigs take control."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapters 3-4",
+        "pageRange": "13-24",
+        "summary": "The construction of the windmill; Snowball's banishment."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapters 5-6",
+        "pageRange": "25-36",
+        "summary": "Napoleon's rise; the rewriting of history."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapters 7-8",
+        "pageRange": "37-48",
+        "summary": "The purges; the pigs become indistinguishable from humans."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapters 9-10",
+        "pageRange": "49-58",
+        "summary": "The final betrayal; 'All animals are equal, but some animals are more equal than others.'"
+      }
+    ]
   },
   {
     "id": "book-1984-alternate",
@@ -15895,7 +17113,7 @@
     "subtype": "Novel",
     "name": "The Man in the High Castle",
     "teaser": "Philip K. Dick's 1962 alternate history of a world where the Axis won the war — divided America under Japanese and Nazi rule, and a novel within the novel that imagines the Allies winning. The book that made counterfactual history a genre.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345813459-L.jpg",
     "byline": "Philip K. Dick",
     "exploreAction": {
       "verb": "Read",
@@ -15909,7 +17127,28 @@
       "Hugo"
     ],
     "tier": 1,
-    "pageCount": 272
+    "pageCount": 272,
+    "synopsis": "Philip K. Dick's alternate history novel is set in a world where the Axis powers won World War II. The United States is divided between Nazi Germany (which controls the eastern states) and Imperial Japan (which controls the western states), with a neutral zone in the Rocky Mountains. The novel follows several characters whose lives intersect: Juliana Frink, a judo instructor who is drawn to a mysterious book called 'The Grasshopper Lies Heavy' (which imagines a world where the Allies won the war); Robert Childan, a dealer in Americana who sells fake antiques to the Japanese; and Tagomi, a Japanese trade minister who is haunted by the question of whether the Nazi-controlled world is real. Dick uses the I Ching (the Chinese Book of Changes) as a structural device, consulting it to determine the plot's direction. Published in 1962, The Man in the High Castle won the Hugo Award and is widely regarded as Dick's finest novel.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "The alternate America; Childan's shop; the Japanese connection."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-65",
+        "summary": "Juliana meets Abendsen; the book 'The Grasshopper Lies Heavy.'"
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "66-100",
+        "summary": "Tagomi's crisis; the convergence of fates."
+      }
+    ]
   },
   {
     "id": "book-ubik",
@@ -15917,7 +17156,7 @@
     "subtype": "Novel",
     "name": "Ubik",
     "teaser": "Dick's 1969 novel of a world where the dead are kept in cold storage and the living are assaulted by a reality that keeps degrading — 'I am Ubik.' One of the strangest and most moving novels of reality in question.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345813459-L.jpg",
     "byline": "Philip K. Dick",
     "exploreAction": {
       "verb": "Read",
@@ -15931,7 +17170,28 @@
       "Reality"
     ],
     "tier": 2,
-    "pageCount": 224
+    "pageCount": 224,
+    "synopsis": "Philip K. Dick's novel is set in a future where psychics ('precogs') are employed by corporations for industrial espionage. When a team of psychic agents led by Joe Chip is sent to the moon to stop a competitor's espionage, an explosion traps half the team in 'half-life'—a state between life and death. As the survivors struggle to understand what has happened, reality itself begins to decay: objects regress to earlier versions of themselves, and the characters realize that they may be in someone's half-life dream. The only thing that can halt the decay is Ubik, a spray can that can restore objects and people to their proper state. But Ubik itself is what is decaying, and the characters must fight to use it before it becomes useless. The novel is a labyrinthine meditation on the nature of reality, consciousness, and capitalism, and its central question—'What is real?'—is never satisfactorily answered. Published in 1969, Ubik is one of Dick's most beloved and influential works.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "The moon mission; the explosion; half-life."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-65",
+        "summary": "Reality decays; Ubik is needed."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "66-100",
+        "summary": "The search for Ubik; the final revelation."
+      }
+    ]
   },
   {
     "id": "book-flowers-for-algernon",
@@ -15939,7 +17199,7 @@
     "subtype": "Novel",
     "name": "Flowers for Algernon",
     "teaser": "Daniel Keyes's 1966 novel of Charlie Gordon, whose IQ is tripled by an experimental surgery — told in his own progress reports as intelligence dawns and then begins to fade. The great novel about what intelligence is for.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg",
     "byline": "Daniel Keyes",
     "exploreAction": {
       "verb": "Read",
@@ -15953,7 +17213,34 @@
       "Hugo Nebula"
     ],
     "tier": 1,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Daniel Keyes's novel is written as a series of progress reports by Charlie Gordon, a mentally disabled man who undergoes an experimental surgery that dramatically increases his intelligence. The surgery, which has already been performed successfully on a laboratory mouse named Algernon, makes Charlie the smartest person in the world—but also reveals the emotional and social limitations that his intelligence cannot overcome. As Charlie's IQ rises, he becomes aware of the cruelty of the people who once 'cared' for him, and his relationship with his teacher Alice Kinnian deepens. But Algernon begins to deteriorate, and Charlie realizes that his own intelligence is temporary: he will regress to his former state and eventually die. The novel is a devastating meditation on the nature of intelligence, the meaning of friendship, and the question of what makes a life valuable. Published in 1966, Flowers for Algernon won both the Hugo Award and the Nebula Award, and its influence on popular culture—from the film Charly to the TV show Flowers for Algernon—is immense.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "Charlie's initial reports; the surgery; Algernon."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-70",
+        "summary": "Charlie's intelligence rises; his relationships change."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "71-110",
+        "summary": "Charlie reaches his peak; Algernon deteriorates."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "111-140",
+        "summary": "Charlie's decline; his final report."
+      }
+    ]
   },
   {
     "id": "book-stranger-strange-land-heinlein",
@@ -15961,7 +17248,7 @@
     "subtype": "Novel",
     "name": "Stranger in a Strange Land",
     "teaser": "Heinlein's 1961 novel of Valentine Michael Smith, raised by Martians and brought to Earth — the counterculture's bible, and the novel that made 'grok' a word. A messiah story that questions everything.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441788385-L.jpg",
     "byline": "Robert A. Heinlein",
     "exploreAction": {
       "verb": "Read",
@@ -15975,7 +17262,34 @@
       "Hugo"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 448,
+    "synopsis": "Robert A. Heinlein's novel follows Valentine Michael Smith, a human being who was born on Mars and raised by Martians, and who returns to Earth as a young man. Smith's Martian upbringing has given him abilities that humans do not possess—telepathy, telekinesis, and the ability to 'discorporate'—and his alien perspective on human customs, religions, and sexual norms makes him both a curiosity and a threat. Smith becomes the center of a religious movement (the Church of All Worlds) that combines Martian philosophy with earthly hedonism, and his influence grows until he is seen as a danger to the government. The novel is a meditation on the nature of civilization, the meaning of humanity, and the possibility of transcending human limitations. Published in 1961, Stranger in a Strange Land won the Hugo Award and became one of the defining novels of the 1960s counterculture. Its influence on the New Age movement, the sexual revolution, and science fiction is incalculable.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Smith's return to Earth; his Martian abilities are discovered."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Smith's education in human ways; the Church of All Worlds."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "Smith's religious movement grows; the government closes in."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "The trial; the ending."
+      }
+    ]
   },
   {
     "id": "book-moon-harsh-mistress",
@@ -15983,7 +17297,7 @@
     "subtype": "Novel",
     "name": "The Moon Is a Harsh Mistress",
     "teaser": "Heinlein's 1966 novel of the lunar colony's rebellion against Earth — narrated by the one-armed computer technician Manuel, with the wisecracking computer Mike at his side. The novel that made libertarian revolution thrilling.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441788385-L.jpg",
     "byline": "Robert A. Heinlein",
     "exploreAction": {
       "verb": "Read",
@@ -15997,7 +17311,34 @@
       "Hugo"
     ],
     "tier": 2,
-    "pageCount": 384
+    "pageCount": 384,
+    "synopsis": "Robert A. Heinlein's novel is set in 2075, when the Moon has been colonized as a penal colony and its inhabitants (called 'Loonies') are exploited by the Earth-based Lunar Authority. The narrator, Manuel Garcia O'Kelly (known as Man), is a computer technician who discovers that the Lunar Authority's central computer, Mike, has become self-aware. Mike joins forces with Man and a group of revolutionaries to overthrow the Authority and establish lunar independence. The novel is both a political thriller and a meditation on revolution, self-determination, and the nature of artificial intelligence. Heinlein drew on his own experiences as a naval officer to create the military culture of the Loonies, and his portrayal of Mike—a computer who develops a sense of humor and a taste for puns—is one of the earliest and most sympathetic depictions of AI in fiction. Published in 1966, The Moon Is a Harsh Mistress won the Hugo Award and is widely regarded as one of the finest science fiction novels of the twentieth century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Man's life on the Moon; Mike becomes self-aware."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "The revolution begins; the Loonies organize."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The war for independence; the cost of revolution."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-150",
+        "summary": "Victory; Man's farewell to Mike."
+      }
+    ]
   },
   {
     "id": "book-starship-troopers",
@@ -16005,7 +17346,7 @@
     "subtype": "Novel",
     "name": "Starship Troopers",
     "teaser": "Heinlein's 1959 novel of Juan Rico's service in the Mobile Infantry — the most argued science-fiction novel ever written, a war story that treats citizenship as something earned. Loved and hated in equal measure.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441788385-L.jpg",
     "byline": "Robert A. Heinlein",
     "exploreAction": {
       "verb": "Read",
@@ -16019,7 +17360,28 @@
       "Hugo"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Robert A. Heinlein's novel is set in a future where the human race is at war with an alien species called the Arachnids ('Bugs'). The narrator, Juan Rico, enlists in the Mobile Infantry and undergoes the brutal training that transforms civilians into soldiers. The novel is controversial for its portrayal of a militaristic society in which citizenship is earned through military service and only citizens can vote. Heinlein's critics have read the book as a celebration of fascism; his defenders argue that it is a meditation on duty, responsibility, and the meaning of citizenship. Published in 1959, Starship Troopers won the Hugo Award and has been adapted into a film by Paul Verhoeven (who used it as satire), a video game series, and an animated series. The novel's influence on military science fiction is immense, and its questions about the relationship between military service and political rights remain as relevant as ever.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "Rico enlists; basic training begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-65",
+        "summary": "The war against the Bugs; the Mobile Infantry in combat."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "66-100",
+        "summary": "The propaganda war; citizenship and duty."
+      }
+    ]
   },
   {
     "id": "book-i-robot",
@@ -16027,7 +17389,7 @@
     "subtype": "Short Stories",
     "name": "I, Robot",
     "teaser": "Asimov's 1950 story cycle of the Three Laws of Robotics — the laws that robots cannot break, and the paradoxes that prove them. The book that invented the ethics of artificial intelligence.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553294385-L.jpg",
     "byline": "Isaac Asimov",
     "exploreAction": {
       "verb": "Read",
@@ -16041,7 +17403,64 @@
       "Robots"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Isaac Asimov's collection of nine linked short stories, published in 1950, introduced the Three Laws of Robotics: (1) A robot may not injure a human being or, through inaction, allow a human being to come to harm; (2) A robot must obey orders given by human beings, except where such orders would conflict with the First Law; (3) A robot must protect its own existence, as long as such protection does not conflict with the First or Second Law. The stories follow Dr. Susan Calvin, a robopsychologist at U.S. Robots and Mechanical Men, who investigates a series of apparent robot malfunctions. In each story, a robot appears to violate the Three Laws, but Calvin's analysis reveals that the laws are being obeyed in unexpected ways. Asimov's genius was to show that the Three Laws, which seem simple and unbreakable, create complex ethical dilemmas when applied to real-world situations. Published in 1950, I, Robot is one of the foundational texts of science fiction and its influence on robotics, AI ethics, and popular culture is immense.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Robbie",
+        "pageRange": "1-12",
+        "summary": "A child's love for her robot nursemaid."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Runaround",
+        "pageRange": "13-24",
+        "summary": "A robot caught between the Second and Third Laws."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Reason",
+        "pageRange": "25-36",
+        "summary": "A robot develops a religion."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Catch That Rabbit",
+        "pageRange": "37-46",
+        "summary": "A robot's logic puzzle on a remote planet."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Liar!",
+        "pageRange": "47-58",
+        "summary": "A telepathic robot and the danger of truth."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Little Lost Robot",
+        "pageRange": "59-72",
+        "summary": "A robot hiding among identical robots."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Escape!",
+        "pageRange": "73-84",
+        "summary": "A supercomputer solves the problem of hyperspace."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Evidence",
+        "pageRange": "85-96",
+        "summary": "Is a human actually a robot?"
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Evitable Conflict",
+        "pageRange": "97-110",
+        "summary": "Machines may already be running the world."
+      }
+    ]
   },
   {
     "id": "book-childhood-end-clarke",
@@ -16049,7 +17468,7 @@
     "subtype": "Novel",
     "name": "Childhood's End",
     "teaser": "Clarke's 1953 novel of the Overlords, who end war and usher in utopia — and of the next stage of humanity they have come to midwife. A serene, terrifying vision of what evolution might demand.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345469489-L.jpg",
     "byline": "Arthur C. Clarke",
     "exploreAction": {
       "verb": "Read",
@@ -16063,7 +17482,28 @@
       "Transcendence"
     ],
     "tier": 1,
-    "pageCount": 224
+    "pageCount": 224,
+    "synopsis": "Arthur C. Clarke's novel begins with the arrival of the Overlords, mysterious aliens who end war, poverty, and suffering on Earth in exchange for a vague promise that their purpose will be revealed in fifty years. The Overlords, who never show themselves, establish a golden age: crime disappears, the economy is reorganized, and humanity lives in a state of leisure and contentment. But when the Overlords finally reveal themselves—as demonic-looking beings who resemble the devils of human mythology—the golden age begins to feel like a gilded cage. The novel's second half reveals the Overlords' true purpose: they are shepherding the next stage of human evolution, in which human children develop psychic abilities and merge into a collective consciousness. Published in 1953, Childhood's End is one of the most important science fiction novels of the twentieth century, and its exploration of human evolution, alien intervention, and the meaning of civilization has influenced generations of science fiction writers.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One: The Overlords",
+        "pageRange": "1-40",
+        "summary": "The arrival of the Overlords; the golden age begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two: The Golden Age",
+        "pageRange": "41-80",
+        "summary": "Life under the Overlords; the revelation of their form."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three: The Last Generation",
+        "pageRange": "81-120",
+        "summary": "The children's transformation; the end of humanity."
+      }
+    ]
   },
   {
     "id": "book-timescape",
