@@ -246,9 +246,33 @@ object TopicRepository {
     /** Resolve a topic within its category so duplicate names cannot cross lanes. */
     suspend fun findTopic(context: Context, categoryId: CategoryId, name: String): CurioTopic? {
         val dao = CurioDatabase.getInstance(context).topicDao()
-        return dao.getByCategory(categoryId.name)
+        val entity = dao.getByCategory(categoryId.name)
             .firstOrNull { it.name == name || it.name.equals(name, ignoreCase = true) }
-            ?.toCurioTopic()
+            ?: return null
+
+        // A bundled topics.db can contain the catalog shell while newer
+        // authored fields live in the JSON assets. Hydrate the visible topic
+        // on demand, persist it, and return the hydrated row immediately.
+        if (entity.teaser.isBlank() || entity.synopsis.isBlank() && categoryId == CategoryId.BOOKS) {
+            runCatching {
+                TopicJsonLoader.install(context)
+                val fresh = TopicJsonLoader.reloadFromAssets(categoryId)
+                    .firstOrNull { it.id == entity.id || it.name.equals(entity.name, ignoreCase = true) }
+                if (fresh != null) {
+                    val freshEntity = TopicEntity.fromCurioTopic(fresh)
+                    dao.updateContent(
+                        id = freshEntity.id,
+                        teaser = freshEntity.teaser,
+                        imageUrl = freshEntity.imageUrl,
+                        byline = freshEntity.byline,
+                        tags = freshEntity.tags,
+                        synopsis = freshEntity.synopsis,
+                        chapters = freshEntity.chapters
+                    )
+                }
+            }
+        }
+        return dao.findById(entity.id)?.toCurioTopic() ?: entity.toCurioTopic()
     }
 
     /** Get a random topic for a category. */

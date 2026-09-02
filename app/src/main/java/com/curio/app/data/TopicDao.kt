@@ -73,6 +73,22 @@ interface TopicDao {
     """)
     suspend fun backfillContent(id: String, synopsis: String, chapters: String)
 
+    /** Update the authored fields for a topic hydrated on the reveal screen. */
+    @Query("""
+        UPDATE topics SET teaser = :teaser, imageUrl = :imageUrl, byline = :byline,
+            tags = :tags, synopsis = :synopsis, chapters = :chapters
+        WHERE id = :id
+    """)
+    suspend fun updateContent(
+        id: String,
+        teaser: String,
+        imageUrl: String,
+        byline: String,
+        tags: String,
+        synopsis: String,
+        chapters: String
+    )
+
     /** Get topic count for a category. */
     @Query("SELECT COUNT(*) FROM topics WHERE categoryId = :categoryId")
     suspend fun getCount(categoryId: String): Int

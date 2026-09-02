@@ -492,10 +492,11 @@ object TopicJsonLoader {
      * double-hyphens or leading/trailing whitespace.
      */
     private fun cleanText(raw: String): String =
-        raw.replace('\u2014', '-')   // em dash → hyphen
-           .replace('\u2013', '-')   // en dash → hyphen
-           .replace(Regex("-{2,}"), "-")
-           .trim()
+        raw.replace(Regex("\\s*[\\u2014\\u2013]\\s*"), ", ")
+           .replace(Regex("\\s{2,}"), " ")
+           .replace(Regex(",\\s*,+"), ",")
+           .replace(Regex("\\s+([,.!?;:])"), "$1")
+           .trim(' ', ',', ';', ':')
 
     private fun parseAsset(path: String, id: CategoryId): List<CurioTopic> {
         val am = assets
